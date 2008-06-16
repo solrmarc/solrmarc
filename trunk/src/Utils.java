@@ -236,7 +236,7 @@ public final class Utils {
         while(iter.hasNext())
         {
             result += iter.next();
-            if (iter.hasNext())  result += "; ";
+            if (iter.hasNext())  result += sep;
         }
         return(result);
     }

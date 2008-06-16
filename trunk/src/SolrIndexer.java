@@ -131,16 +131,20 @@ public class SolrIndexer
                     }
                     else
                     {
-                        String values2[] = values[1].trim().split("[, ]+", -2);
+                        String values2[] = values[1].trim().split("[ ]*,[ ]*", 2);
                         fieldDef[0] = property;
                         fieldDef[1] = "all";
                         if (values2[0].equals("first") || (values2.length > 1 && values2[1].equals("first")))
                         {
                             fieldDef[1] = "first";
                         }
-                        if (values2[0].equals("join") ||  (values2.length > 1 && values2[1].equals("join")))
+                        if (values2[0].startsWith("join"))
                         {
-                            fieldDef[1] = "join";
+                            fieldDef[1] = values2[0];
+                        }
+                        if ((values2.length > 1 && values2[1].startsWith("join")))
+                        {
+                            fieldDef[1] = values2[1];
                         }
                         if (values2[0].equalsIgnoreCase("DeleteRecordIfFieldEmpty")||
                             (values2.length > 1 && values2[1].equalsIgnoreCase("DeleteRecordIfFieldEmpty")))
@@ -149,13 +153,13 @@ public class SolrIndexer
                         }
                         fieldDef[2] = values[0];
                         fieldDef[3] = null;
-                           if (!values2[0].equals("all") && !values2[0].equals("first") &&
-                               !values2[0].equals("join") && 
-                               !values2[0].equalsIgnoreCase("DeleteRecordIfFieldEmpty"))
-                           {
-                               // assume its a translation map definition
-                               fieldDef[3] = values2[0].trim();
-                        }
+                        if (!values2[0].equals("all") && !values2[0].equals("first") &&
+	                        !values2[0].startsWith("join") && 
+	                        !values2[0].equalsIgnoreCase("DeleteRecordIfFieldEmpty"))
+	                    {
+	                           // assume its a translation map definition
+	                        fieldDef[3] = values2[0].trim();
+	                    }
                     }
                     if (fieldDef[3] != null)
                     {
@@ -288,6 +292,7 @@ public class SolrIndexer
                 String mapKey = property.substring(mapKeyPrefix.length());
                 if (mapKey.startsWith(".")) mapKey = mapKey.substring(1);
                 String value = props.getProperty(property);
+                value = value.trim();
                 if (value.equals("null"))  value = null;
                 
                 Map<String, String> subMap;
@@ -348,9 +353,14 @@ public class SolrIndexer
                 	return(indexMap);
                 }
             }
-            else if (indexType.equals("join"))
+            else if (indexType.startsWith("join"))
             {
-                addField(indexMap, indexField, getFieldVals(record, indexParm, " "));
+                String joinChar = " ";
+                if (indexType.contains("(") && indexType.endsWith(")"))
+                {
+                	joinChar = indexType.replace("join(", "").replace(")", "");
+                }
+                addField(indexMap, indexField, getFieldVals(record, indexParm, joinChar));
             }
             else if (indexType.equals("std"))
             {
@@ -726,7 +736,17 @@ public class SolrIndexer
         writer.write(record);
         writer.close();
         
-        return out.toString();
+        String result = null;
+        try 
+        {
+        	result = out.toString("UTF-8");
+		} 
+        catch (UnsupportedEncodingException e) 
+        {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        return(result);
     }
 
     /**

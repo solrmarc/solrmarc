@@ -179,7 +179,7 @@ public class IndexerCheck {
         // effort to translate records, which may then be filtered out and discarded.
 //        reader1 = new MarcTranslatedReader(reader1);
 //      reader2 = new MarcTranslatedReader(reader2);
-        reader3 = new MarcTranslatedReader(reader3);
+        reader3 = new MarcTranslatedReader(reader3, false);
 
         return;
     }

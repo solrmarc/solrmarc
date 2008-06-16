@@ -38,7 +38,8 @@ public class VuFindIndexer extends SolrIndexer
     public String getFormat(Record record)
     {
         String leaderChar = getFirstFieldVal(record, "000[7]").toUpperCase();
-        String t007Char = getFirstFieldVal(record, "007[0]").toUpperCase();
+        String t007Char = getFirstFieldVal(record, "007[0]"); 
+        if (t007Char != null)  t007Char = t007Char.toUpperCase();
         Set<String> titleH = new LinkedHashSet<String>();
         addSubfieldDataToSet(record, titleH, "245", "h");       
                 
@@ -49,6 +50,7 @@ public class VuFindIndexer extends SolrIndexer
         if (Utils.setItemContains(titleH, "electronic resource"))
                                         {   return "Electronic";  }        
         // check the 007
+        if(t007Char == null)        	{   return null;  }           
         if(t007Char.equals("A"))        {   return "Map";  }           
         if(t007Char.equals("G"))        {   return "Slide";  }        
         if(t007Char.equals("H"))        {   return "Microfilm";  }        
