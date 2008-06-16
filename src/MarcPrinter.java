@@ -22,6 +22,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.text.ParseException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -78,20 +81,48 @@ public class MarcPrinter
             reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing);
         }
         boolean to_utf_8 = Boolean.parseBoolean(System.getProperty("marc.to_utf_8"));
+        boolean unicodeNormalize = Boolean.parseBoolean(System.getProperty("marc.unicode_normalize"));
         if (reader != null && to_utf_8)
         {
-            reader = new MarcTranslatedReader(reader);
+            reader = new MarcTranslatedReader(reader, unicodeNormalize);
         }
         
-        BlacklightIndexer indexer = null;
+        SolrIndexer indexer = null;
+        String indexerName = System.getProperty("solr.indexer");
+        String indexerProps = System.getProperty("solr.indexer.properties");
+        
         try
         {
-            indexer = new BlacklightIndexer("blacklight.properties");
+            Class indexerClass = Class.forName(indexerName);
+            Constructor constructor = indexerClass.getConstructor(new Class[]{String.class});
+            Object instance = constructor.newInstance(indexerProps);
+            if (instance instanceof SolrIndexer)
+            {
+                indexer = (SolrIndexer)instance;
+            }
+            else
+            {
+                System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
+                System.exit(1);
+            }
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            if (e instanceof ParseException)
+            {
+                System.err.println("Error configuring Indexer from properties file.  Exiting...");
+                System.exit(1);
+            }            
+            System.err.println("Unable to find Custom indexer: "+ indexerName);
+            System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
+            try {
+                indexer = new SolrIndexer(indexerProps);
+            }
+            catch (Exception e1)
+            {
+                System.err.println("Error configuring Indexer from properties file.  Exiting...");
+                System.exit(1);
+            }
         }
    //     reader.parse(in);
         int recnum = 0;
@@ -163,6 +194,7 @@ public class MarcPrinter
 //                    Leader ldr = rec.getLeader();
 //                    if (ldr.getBaseAddressOfData() != 0) continue;
                     String recStr = rec.toString();
+                    
                     if (verbose) System.out.println(recStr);
                 }
                 catch (MarcException me)
@@ -203,7 +235,41 @@ public class MarcPrinter
                 }
             }
         }
-
+        else if (mode.equals("index"))
+        {
+            while (reader.hasNext()) 
+            {
+            	Record record = reader.next();
+                String recStr = record.toString();
+                
+                if (verbose) System.out.println(recStr);
+            	Map<String,Object> indexMap = indexer.map(record);
+            	Iterator<String> keys = indexMap.keySet().iterator();
+            	String key = "id";
+            	Object value = indexMap.get(key);
+            	System.out.println("\nIndexID= "+ key + "  Value = "+ value);
+                while (keys.hasNext())
+                {
+                	key = keys.next();
+                	value = indexMap.get(key);
+                	if (key.equals("id")) continue;
+                	if (value instanceof String)
+                	{
+                		System.out.println("IndexID= "+ key + "  Value = "+ value);
+                	}
+                	else if (value instanceof Collection)
+                	{
+                		Iterator<String> valIter = ((Collection)value).iterator();
+                		while (valIter.hasNext())
+                		{
+                			String collVal = valIter.next();
+                    		System.out.println("IndexID= "+ key + "  Value = "+ collVal);
+                		}
+                	}
+                }
+            	
+            }        	
+        }
         else if (mode.equals("map"))
         {
   //      Set<String> deletedRecords = getDeletedRecordIDs();

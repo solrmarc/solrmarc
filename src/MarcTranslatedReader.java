@@ -31,6 +31,8 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
+import com.ibm.icu.text.Normalizer;
+
 /**
  * 
  * @author Robert Haschart
@@ -42,18 +44,22 @@ public class MarcTranslatedReader implements MarcReader
     MarcReader reader;
     CharConverter convert;
     MarcWriter errorWriter;
+    boolean unicodeNormalize = false;
     
-    public MarcTranslatedReader(MarcReader r)
+    public MarcTranslatedReader(MarcReader r, boolean unicodeNormalize)
     {
         reader = r;
         convert = new AnselToUnicode();
+        this.unicodeNormalize = unicodeNormalize;
         errorWriter = null;
     }
     
-    public MarcTranslatedReader(MarcReader r, String filenameForRecordsWithError)
+    public MarcTranslatedReader(MarcReader r, boolean unicodeNormalize, 
+    		                    String filenameForRecordsWithError)
     {
         reader = r;
         convert = new AnselToUnicode();
+        this.unicodeNormalize = unicodeNormalize;
         try
         {
             errorWriter = new MarcStreamWriter(new FileOutputStream(filenameForRecordsWithError));
@@ -88,7 +94,9 @@ public class MarcTranslatedReader implements MarcReader
     {
         Record rec = reader.next();
         Leader l = rec.getLeader();
-        if (l.getCharCodingScheme() == 'a') return(rec);
+        boolean is_utf_8 = false;
+        if (l.getCharCodingScheme() == 'a') is_utf_8 = true;
+        if (is_utf_8 && !unicodeNormalize) return(rec);
         List fields = rec.getVariableFields();
         Iterator f_iter = fields.iterator();
         while (f_iter.hasNext())
@@ -103,7 +111,9 @@ public class MarcTranslatedReader implements MarcReader
                 Subfield sf = (Subfield)s_iter.next();
                 String oldData = sf.getData();
                 try {
-                    String newData = convert.convert(oldData);
+                    String newData = oldData;
+                    if (!is_utf_8) newData = convert.convert(newData);
+                    if (unicodeNormalize) newData = Normalizer.compose(newData, false);
                     if (!oldData.equals(newData))
                     {
                         sf.setData(newData);

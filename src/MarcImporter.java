@@ -68,6 +68,7 @@ public class MarcImporter {
     private boolean shuttingDown = false;
     private boolean isShutDown = false;
     private boolean to_utf_8 = false;
+    private boolean unicodeNormalize = false;
     
     private String SolrHostURL;
 	/**
@@ -152,6 +153,7 @@ public class MarcImporter {
         boolean permissiveReader = Boolean.parseBoolean(System.getProperty("marc.permissive"));        
         verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
         to_utf_8 = Boolean.parseBoolean(getProperty(props, "marc.to_utf_8"));
+        unicodeNormalize = Boolean.parseBoolean(getProperty(props, "marc.unicode_normalize"));
         deleteRecordListFilename = getProperty(props, "marc.ids_to_delete");
         String source = getProperty(props, "marc.source").trim();
         optimizeAtEnd = Boolean.parseBoolean(getProperty(props, "solr.optimize_at_end"));
@@ -183,7 +185,7 @@ public class MarcImporter {
         // effort to translate records, which may then be filtered out and discarded.
         if (reader != null && to_utf_8)
         {
-            reader = new MarcTranslatedReader(reader);
+            reader = new MarcTranslatedReader(reader, unicodeNormalize);
         }
         return;
     }
