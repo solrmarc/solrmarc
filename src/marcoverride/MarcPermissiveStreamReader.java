@@ -356,7 +356,7 @@ public class MarcPermissiveStreamReader implements MarcReader {
                 e.printStackTrace();
             }
         }
-        if (permissive && encoding != "UTF-8")
+        if (permissive && encoding != "UTF8")
         {
             try
             {
