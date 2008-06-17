@@ -1,0 +1,32 @@
+#summary How to get started with solrmarc and Vufind
+
+= Introduction =
+
+Solrmarc makes creating your index for Vufind extremely simple. First, you need to get the latest version of either the Subversion repository, or latest binary. If you're not comfortable with building source code, don't worry, the binary will work on all platforms with Java 1.5 or higher. 
+
+
+= Editing the code =
+Solrmarc uses a series of Java properties files for its configuration. To get started, we need to edit the import.properties file that is used in the indexing script. Your code will look something like
+
+{{{
+ # Path to your solr instance
+
+ solr.path = /usr/local/vufind/solr
+ solr.indexer = VufindIndexer
+ solr.indexer.properties = vufind.properties
+
+ #optional URL of running solr search engine to cause updates to be recognized.
+
+ solr.hosturl = http://localhost:8080/solr/update
+ solr.optimize_at_end = true
+
+ # Path to your marc file
+ # marc source =  FILE or Z3950 or DIR
+
+ marc.source = FILE  
+ marc.path = /home/wsgrah/vufind/import/catalog.mrc
+ marc.override = marcoverride.UVAMarcFactoryImpl 
+ marc.to_utf_8 = true
+
+ marc.ids_to_delete =
+}}} 
