@@ -1,0 +1,13 @@
+#summary These pages will guide you through indexing your records using solrmarc in both Vufind and Blacklight.
+#labels Phase-Implementation
+
+= Introduction =
+
+SolrMarc aims to make your life a lot easier by implementing standardized ways in which to create a modern index of your marc records. Our aim is to be robust, configurable, and easy-to-use. By taking care of the back-end indexing using several open-source projects, developers are able to commit more of their time to creating innovative front-end interfaces to their library holdings, without having to learn an entirely new set of tools.
+
+
+= Details =
+
+Currently, solrmarc is configured to work with:
+  * Blacklight
+  * Vufind
