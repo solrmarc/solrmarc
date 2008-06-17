@@ -10,4 +10,4 @@ SolrMarc aims to make your life a lot easier by implementing standardized ways i
 
 Currently, solrmarc is configured to work with:
   * Blacklight
-  * Vufind
+  * [VufindHowTo Vufind]
