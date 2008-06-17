@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -25,7 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * General untility functions for solrmarc
+ * General utility functions for solrmarc
  * 
  * @author Wayne Graham
  * @version $Id$
@@ -103,28 +102,6 @@ public final class Utils {
         return(newData);       
     }
 
-	/**
-	 * Cleans trailing characters from a String
-	 * @param title String to parse
-	 * @return Indexable String
-	 */
-//	public static String cleanTitle(final String title)
-//    {
-//		final int titleLength = title.length();		
-//		final String lastCharacter = title.substring(titleLength - 1);
-//		
-//		String cleanTitle;
-//		
-//		if("/".equals(lastCharacter) || ":".equals(lastCharacter))
-//        {
-//			cleanTitle = title.substring(0, titleLength - 1);
-//		} else {
-//			cleanTitle = title;
-//		}
-//
-//		return cleanTitle.trim();
-//		
-//	}
 	
 	/**
 	 * Calculate time from milliseconds
@@ -193,7 +170,12 @@ public final class Utils {
                     String parts[] = patternStr.split("=>");
                     if (containsMatch(val, parts[0]))
                     {
-                        result.add(parts[1]);
+                    	String newVal = parts[1];
+                    	if (parts[1].contains("$"))
+                    	{
+                    		newVal = val.replaceAll(parts[0], parts[1]);
+                    	}
+                    	result.add(newVal);                    	
                     }
                 }
             }
