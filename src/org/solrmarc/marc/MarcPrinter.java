@@ -1,3 +1,4 @@
+package org.solrmarc.marc;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,6 +16,7 @@
  * limitations under the License.
  */
 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,8 +33,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import marcoverride.MarcDirStreamReader;
-import marcoverride.MarcPermissiveStreamReader;
 
 import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
@@ -40,6 +40,10 @@ import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.Record;
+import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.marcoverride.MarcDirStreamReader;
+import org.solrmarc.marcoverride.MarcPermissiveStreamReader;
+import org.solrmarc.tools.Utils;
 
 /**
  * 

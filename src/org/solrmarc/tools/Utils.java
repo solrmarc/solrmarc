@@ -1,3 +1,4 @@
+package org.solrmarc.tools;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -211,7 +212,7 @@ public final class Utils {
         return false;
     }  
 
-    static String join(Set<String> s, String sep)
+    public static String join(Set<String> s, String sep)
     {
         Iterator<String> iter = s.iterator();
         String result = "";

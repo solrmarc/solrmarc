@@ -1,3 +1,4 @@
+package org.solrmarc.marc;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,9 +17,13 @@
  */
 
 
+
 import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
+import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.tools.Utils;
+
 import java.util.Set;
 
 /**

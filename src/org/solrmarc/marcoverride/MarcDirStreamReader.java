@@ -1,4 +1,4 @@
-package marcoverride;
+package org.solrmarc.marcoverride;
 
 import java.io.File;
 import java.io.FileInputStream;

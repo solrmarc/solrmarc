@@ -1,3 +1,4 @@
+package org.solrmarc.index;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.marc4j.marc.Record;
+import org.solrmarc.tools.Utils;
 
 /**
  * 

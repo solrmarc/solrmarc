@@ -1,3 +1,4 @@
+package org.solrmarc.index;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,6 +36,9 @@ import org.marc4j.MarcWriter;
 import org.marc4j.MarcXmlWriter;
 import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
+import org.solrmarc.marc.MarcFilteredReader;
+import org.solrmarc.marc.MarcTranslatedReader;
+import org.solrmarc.tools.Utils;
 
 /**
  * @author Robert Haschart
