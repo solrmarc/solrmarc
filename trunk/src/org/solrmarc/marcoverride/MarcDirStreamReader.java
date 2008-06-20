@@ -6,10 +6,14 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 
 import org.marc4j.MarcReader;
-import org.marc4j.MarcStreamReader;
 import org.marc4j.marc.Record;
 
-
+/**
+ * 
+ * @author Robert Haschart
+ * @version $Id$
+ *
+ */
 public class MarcDirStreamReader implements MarcReader
 {
     File list[];
