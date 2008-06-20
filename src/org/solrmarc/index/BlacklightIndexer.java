@@ -26,6 +26,12 @@ import java.util.Set;
 import org.marc4j.marc.Record;
 import org.solrmarc.tools.Utils;
 
+/**
+ * Custom functions for indexing marc files for the Blacklight project
+ * @author Robert Haschart
+ * @version $Id$
+ *
+ */
 public class BlacklightIndexer extends SolrIndexer
 {
 
