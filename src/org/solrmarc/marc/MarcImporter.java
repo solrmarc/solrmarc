@@ -54,6 +54,7 @@ import org.solrmarc.tools.Utils;
 
 /**
  * @author Wayne Graham (wsgrah@wm.edu)
+ * @version $Id$
  *
  */
 public class MarcImporter {

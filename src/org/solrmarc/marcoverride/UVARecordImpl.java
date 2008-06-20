@@ -6,18 +6,30 @@ import org.marc4j.marc.VariableField;
 import org.marc4j.marc.impl.RecordImpl;
 import org.marc4j.marc.impl.Verifier;
 
+/**
+ * 
+ * @author Robert Haschart
+ * @version $Id$
+ *
+ */
 public class UVARecordImpl extends RecordImpl
 {
 
-    public UVARecordImpl()
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6261234132097657666L;
+
+	public UVARecordImpl()
     {
         super();
     }
     
-    public void addVariableField(VariableField field) 
+    public void addVariableField(final VariableField field) 
     {
-        if (!(field instanceof VariableField))
+        if (!(field instanceof VariableField)){
             throw new IllegalAddException("Expected VariableField instance");
+        }
 
         String tag = field.getTag();
         if (Verifier.isControlNumberField(tag)) 
