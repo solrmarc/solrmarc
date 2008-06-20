@@ -46,8 +46,8 @@ import org.solrmarc.tools.Utils;
  */
 public class IndexerCheck {
     
-    private String solrCoreDir;
-    private String solrDataDir;
+    private transient String solrCoreDir;
+    private transient String solrDataDir;
     private String deleteRecordListFilename;
     private SolrIndexer indexer;
     private MarcReader reader1;

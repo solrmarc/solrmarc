@@ -46,8 +46,6 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.solrmarc.tools.Utils;
 
-import org.solrmarc.tools.*;
-
 /**
  * 
  * @author Robert Haschart
@@ -81,7 +79,8 @@ public class SolrIndexer
     protected boolean fillMapFromProperties(Properties props)
     {
         boolean valid = true;
-        Enumeration en = props.propertyNames();
+        Enumeration<?> en = props.propertyNames();
+        
         while (en.hasMoreElements())
         {
             String property = (String) en.nextElement();
@@ -205,13 +204,13 @@ public class SolrIndexer
         // Now verify that the data read to configure the indexer is not
         // invalid.
 
-        int size = fieldMap.size();
+       // int size = fieldMap.size(); // never read locally
         Iterator<String> keys = fieldMap.keySet().iterator();
         while (keys.hasNext())
         {
             String key = keys.next();
             String fieldVal[] = fieldMap.get(key);
-            String indexField = fieldVal[0];
+            //String indexField = fieldVal[0]; // never read locally
             String indexType = fieldVal[1];
             String indexParm = fieldVal[2];
             String mapName = fieldVal[3];
@@ -228,7 +227,7 @@ public class SolrIndexer
                     Method method =
                             getClass().getMethod(indexParm,
                                                  new Class[] { Record.class });
-                    Class retval = method.getReturnType();
+                    Class<?> retval = method.getReturnType();
                     // if (!method.isAccessible())
                     // {
                     // System.err.println("Error: Unable to invoke custom
@@ -309,8 +308,8 @@ public class SolrIndexer
 
     private void loadTranslationMapValues(Properties props, String mapKeyPrefix, String mapName)
     {
-        boolean valid = true;
-        Enumeration en = props.propertyNames();
+       // boolean valid = true; // never read locally
+        Enumeration<?> en = props.propertyNames();
         while (en.hasMoreElements())
         {
             String property = (String) en.nextElement();
@@ -341,7 +340,7 @@ public class SolrIndexer
     public Map<String, Object> map(Record record)
     {
         Map<String, Object> indexMap = new HashMap<String, Object>();
-        int size = fieldMap.size();
+        //int size = fieldMap.size(); //never read locally 
         Iterator<String> keys = fieldMap.keySet().iterator();
         while (keys.hasNext())
         {
@@ -698,15 +697,15 @@ public class SolrIndexer
             set.add(val);
             return;
         }
-        List fields = record.getVariableFields(field);
-        Iterator fldIter = fields.iterator();
+        List<?> fields = record.getVariableFields(field);
+        Iterator<?> fldIter = fields.iterator();
         while (fldIter.hasNext())
         {
             if (subfield != null)
             {
                 DataField dfield = (DataField) fldIter.next();
-                List sub = dfield.getSubfields(subfield.charAt(0));
-                Iterator iter = sub.iterator();
+                List<?> sub = dfield.getSubfields(subfield.charAt(0));
+                Iterator<?> iter = sub.iterator();
                 while (iter.hasNext())
                 {
                     Subfield s = (Subfield) (iter.next());
@@ -732,8 +731,8 @@ public class SolrIndexer
             set.add(val);
             return;
         }
-        List fields = record.getVariableFields(field);
-        Iterator fldIter = fields.iterator();
+        List<?> fields = record.getVariableFields(field);
+        Iterator<?> fldIter = fields.iterator();
         while (fldIter.hasNext())
         {
             if (subfield != null)

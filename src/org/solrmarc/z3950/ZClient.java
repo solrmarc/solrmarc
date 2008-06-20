@@ -46,7 +46,7 @@ import com.k_int.IR.Syntaxes.marc.iso2709;
 /**
 * ZClient : A Simple Z3950 command line client to test the toolkit
 *
-* @version:    $Id: ZClient.java,v 1.53 2004/08/13 10:45:41 ianibbo Exp $
+* @version:    $Id$
 * @author:     Ian Ibbotson (ian.ibbotson@k-int.com)
 *
 */

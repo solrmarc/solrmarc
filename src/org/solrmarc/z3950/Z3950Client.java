@@ -1,6 +1,6 @@
 package org.solrmarc.z3950;
 // Title:       TestClient
-// @version:    $Id: TestClient.java,v 1.39 2003/05/09 12:54:43 rob_tice Exp $
+// @version:    $Id$
 // Copyright:   Copyright (C) 1999,2000 Knowledge Integration Ltd.
 // @author:     Ian Ibbotson (ibbo@k-int.com)
 // Company:     KI

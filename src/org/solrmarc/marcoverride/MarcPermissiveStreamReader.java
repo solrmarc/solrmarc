@@ -1,4 +1,4 @@
-// $Id: MarcStreamReader.java,v 1.10 2006/12/04 18:45:44 bpeters Exp $
+// $Id$
 /**
  * Copyright (C) 2004 Bas Peters
  *

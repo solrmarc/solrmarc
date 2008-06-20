@@ -29,9 +29,19 @@ import org.solrmarc.tools.Utils;
 public class BlacklightIndexer extends SolrIndexer
 {
 
-    public BlacklightIndexer(String propertiesMapFile) throws Exception
+	/**
+	 * Default constructor
+	 * @param propertiesMapFile
+	 * @throws ParseException 
+	 * @throws IOException 
+	 * @throws FileNotFoundException 
+	 * @throws Exception
+	 */
+    public BlacklightIndexer(final String propertiesMapFile) throws FileNotFoundException, IOException, ParseException 
     {
-        super(propertiesMapFile);
+        
+        	super(propertiesMapFile);
+       
     }
     
     /**
@@ -70,19 +80,24 @@ public class BlacklightIndexer extends SolrIndexer
 //    }
 
 
-    public Set<String> getRecordingAndScore(Record record)
+    /**
+     * Return a collection of recordings and scores from a record
+     * @param record
+     * @return A collection of recordings and/or scores
+     */
+    public Set<String> getRecordingAndScore(final Record record)
     {
         Set<String> result = new LinkedHashSet<String>();
         String leader = record.getLeader().toString();
         String leaderChar = leader.substring(6, 7).toUpperCase();
                 
-        if(leaderChar.equals("C") || leaderChar.equals("D"))
+        if("C".equals(leaderChar) || "D".equals(leaderChar))
         {
             result.add("Scores");
             result.add("Recordings and/or Scores");
         }
         
-        if(leaderChar.equals("J"))
+        if("J".equals(leaderChar))
         {
             result.add("Recordings");
             result.add("Recordings and/or Scores");
@@ -91,8 +106,12 @@ public class BlacklightIndexer extends SolrIndexer
         return result;
     }
  
-    
-    public Set<String> getRecordingFormat(Record record)
+    /**
+     * Return a collection of recording formats from a record
+     * @param record
+     * @return Collection of recording formats
+     */
+    public Set<String> getRecordingFormat(final Record record)
     {
         Set<String> result = new LinkedHashSet<String>();
         String leader = record.getLeader().toString();
@@ -100,7 +119,7 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> titleH = new LinkedHashSet<String>();
         addSubfieldDataToSet(record, titleH, "245", "h");       
                 
-        if(leaderChar.equals("J") || leaderChar.equals("I") || 
+        if("J".equals(leaderChar) || "I".equals(leaderChar) || 
                 (Utils.setItemContains(titleH, "videorecording")))
         {
             Set<String> form = new LinkedHashSet<String>();
@@ -111,28 +130,58 @@ public class BlacklightIndexer extends SolrIndexer
         return(result);
     }
 
-    public String getCallNumberPrefix(Record record)
+    /**
+     * Extract call number prefix from a record
+     * @param record
+     * @return Call number prefix
+     */
+    public String getCallNumberPrefix(final Record record)
     {
         String val = getFirstFieldVal(record, "999a:090a:050a");
-        if (val == null || val.length() == 0) return(null);
+        
+        if (val == null || val.length() == 0) { 
+        	return(null);
+        	}
+        
         String vals[] = val.split("[^A-Za-z]+", 2);
-        if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) return(null);
+        
+        if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
+        	return(null);
+        }
+        
         return(vals[0]);
     }
 
-    public String getCallNumberCleaned(Record record)
+    /**
+     * Extract a cleaned call number from a record
+     * @param record
+     * @return Clean call number
+     */
+    public String getCallNumberCleaned(final Record record)
     {
         String val = getFirstFieldVal(record, "999a:090a:050a");
-        if (val == null || val.length() == 0) return(null);
+        if (val == null || val.length() == 0) {
+        	return(null);
+        }
         val = val.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".").toLowerCase();
         return(val);
     }
     
-    public String getOclcNum(Record record)
+    /**
+     * Extract the OCLC number from a record
+     * @param record
+     * @return OCLC number
+     */
+    public String getOclcNum(final Record record)
     {
         Set<String> set = getFieldList(record, "035a");
-        if (set.isEmpty())  return(null);
-        Iterator iter = set.iterator();
+        
+        if (set.isEmpty())  {
+        	return(null);
+        }
+        
+        Iterator<String> iter = set.iterator();
+        
         while (iter.hasNext())
         {
             String value = (String)iter.next();
