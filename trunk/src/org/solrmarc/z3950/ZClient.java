@@ -1,3 +1,4 @@
+package org.solrmarc.z3950;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -14,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
@@ -34,6 +36,7 @@ import org.jzkit.a2j.gen.AsnUseful.EXTERNAL_type;
 import org.marc4j.MarcStreamReader;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.impl.ControlFieldImpl;
+import org.solrmarc.marc.MarcTranslatedReader;
 
 import com.k_int.IR.SearchException;
 import com.k_int.IR.InvalidQueryException;

@@ -1,3 +1,4 @@
+package org.solrmarc.z3950;
 // Title:       TestClient
 // @version:    $Id: TestClient.java,v 1.39 2003/05/09 12:54:43 rob_tice Exp $
 // Copyright:   Copyright (C) 1999,2000 Knowledge Integration Ltd.
@@ -24,25 +25,20 @@
 // 330, Boston, MA  02111-1307, USA.
 // 
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.Properties;
 
 import org.jzkit.a2j.codec.util.OIDRegister;
 
-// import com.k_int.codec.runtime.*;
-// import com.k_int.gen.Z39_50_APDU_1995.*;
-// import org.jzkit.a2j.gen.AsnUseful.*;
-
-// import com.k_int.z3950.util.*;
-
-// Used to represent query structures
-// import com.k_int.util.RPNQueryRep.*;
-// import com.k_int.util.PrefixLang.*;
-
-// for OID Register
+import com.k_int.IR.IREvent;
+import com.k_int.IR.IRQuery;
+import com.k_int.IR.InformationFragment;
+import com.k_int.IR.SearchException;
+import com.k_int.IR.SearchTask;
+import com.k_int.IR.Searchable;
 import com.k_int.z3950.IRClient.Z3950Origin;
-
-// Information Retrieval Interfaces
-import com.k_int.IR.*;
 
 public class Z3950Client
 {

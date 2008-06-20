@@ -1,3 +1,4 @@
+package org.solrmarc.index;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,6 +44,9 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import org.solrmarc.tools.Utils;
+
+import org.solrmarc.tools.*;
 
 /**
  * 
@@ -616,7 +620,7 @@ public class SolrIndexer
     public String getFieldVals(Record record, String tagStr, String seperator)
     {
         Set<String> result = getFieldList(record, tagStr);
-        return (Utils.join(result, seperator));
+        return (org.solrmarc.tools.Utils.join(result, seperator));
     }
 
     public static String getFirstFieldVal(Record record, String tagStr)

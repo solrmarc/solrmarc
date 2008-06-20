@@ -1,4 +1,4 @@
-package marcoverride;
+package org.solrmarc.marcoverride;
 
 import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;

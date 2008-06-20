@@ -1,3 +1,4 @@
+package org.solrmarc.z3950;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,12 +17,15 @@
  */
 
 
+
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Date;
 
 import org.marc4j.marc.Record;
+import org.solrmarc.marc.MarcImporter;
+import org.solrmarc.tools.Utils;
 
 /**
  * Test Z39.50 importer

@@ -1,3 +1,4 @@
+package org.solrmarc.marc;
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,8 +37,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import marcoverride.MarcDirStreamReader;
-import marcoverride.MarcPermissiveStreamReader;
 
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
@@ -48,6 +47,10 @@ import org.apache.solr.update.DocumentBuilder;
 import org.apache.solr.update.UpdateHandler;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
+import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.marcoverride.MarcDirStreamReader;
+import org.solrmarc.marcoverride.MarcPermissiveStreamReader;
+import org.solrmarc.tools.Utils;
 
 /**
  * @author Wayne Graham (wsgrah@wm.edu)
@@ -76,7 +79,7 @@ public class MarcImporter {
 	 * @param properties
 	 * @throws IOException 
 	 */
-	MarcImporter(String properties) throws IOException
+	public MarcImporter(String properties) throws IOException
     {
 		loadProperties(properties);
         // Set up Solr core

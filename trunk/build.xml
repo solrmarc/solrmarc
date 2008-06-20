@@ -59,7 +59,7 @@
     			<fileset dir="."
     					 includes="*.properties"/>		
     			<manifest>
-    				<attribute name="Main-Class" value="MarcImporter"/>
+    				<attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter"/>
     				<attribute name="Class-Path" 
 value="lib/a2jruntime-1_2_3.jar
  lib/apache-solr-nightly.jar
