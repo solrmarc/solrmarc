@@ -41,8 +41,10 @@ import org.marc4j.MarcWriter;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
-import org.solrmarc.marcoverride.MarcDirStreamReader;
-import org.solrmarc.marcoverride.MarcPermissiveStreamReader;
+import org.solrmarc.marc.MarcDirStreamReader;
+import org.solrmarc.marc.MarcFilteredReader;
+import org.solrmarc.marc.MarcPermissiveStreamReader;
+import org.solrmarc.marc.MarcTranslatedReader;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -97,7 +99,17 @@ public class MarcPrinter
         
         try
         {
-            Class indexerClass = Class.forName(indexerName);
+            Class indexerClass;
+            try {
+                indexerClass = Class.forName(indexerName);
+            }
+            catch (ClassNotFoundException e)
+            {
+                Class baseIndexerClass = SolrIndexer.class;
+                String baseName = baseIndexerClass.getPackage().getName();
+                String fullName = baseName + "." + indexerName;
+                indexerClass = Class.forName(fullName);
+            }
             Constructor constructor = indexerClass.getConstructor(new Class[]{String.class});
             Object instance = constructor.newInstance(indexerProps);
             if (instance instanceof SolrIndexer)
