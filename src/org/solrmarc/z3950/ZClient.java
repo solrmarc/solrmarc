@@ -102,15 +102,15 @@ public class ZClient extends SynchronousOriginBean
         boolean respVal = false;
         try
         {
-            System.err.println("Attempting connection to "+ hostname + " : " + portnum);
+            if (verbose) System.err.println("Attempting connection to "+ hostname + " : " + portnum);
             InitializeResponse_type resp = connect(hostname, portnum,
                     auth_type, principal, group, credentials);
     
-            System.err.println("Received response from connect");
+            if (verbose) System.err.println("Received response from connect");
             respVal = resp.result.booleanValue();
             if (respVal != true)
             {
-                System.err.println("  Failed to establish association");
+                if (verbose) System.err.println("  Failed to establish association");
             }
         }
         catch (Exception e)
@@ -143,7 +143,7 @@ public class ZClient extends SynchronousOriginBean
         catch (SearchException se)
         {
             cat.warn("Problem processing query", se);
-            System.err.println(se.toString());
+            if (verbose) System.err.println(se.toString());
 
             // If possible, the search response information will be passed along
             // with
@@ -156,23 +156,23 @@ public class ZClient extends SynchronousOriginBean
         catch (InvalidQueryException iqe)
         {
             cat.warn("Problem parsing query", iqe);
-            System.out.println(iqe);
+            if (verbose) System.out.println(iqe);
         }
         catch (Exception e)
         {
             cat.warn("Problem processing query", e);
-            System.err.println(e.toString());
+            if (verbose) System.err.println(e.toString());
         }
 
         if (resp != null)
         {
             numResults = resp.resultCount.intValue();
-            System.out.println("NumResults = " + numResults);
+            if (verbose) System.out.println("NumResults = " + numResults);
 
             if ((resp.records != null)
                     && (resp.numberOfRecordsReturned.intValue() > 0))
             {
-                System.err.println("  Search has piggyback records");
+                if (verbose) System.err.println("  Search has piggyback records");
             }
         }
         return(numResults);
@@ -182,12 +182,12 @@ public class ZClient extends SynchronousOriginBean
     public Record getRecordByIDNum(int idnum)
     {
         cmdFind("@attrset bib-1 @attr 1=1016 \"^C"+idnum+"\"");
-        System.out.println("requesting record by ID:" + idnum);
+        if (verbose) System.out.println("requesting record by ID:" + idnum);
         Record rec = getRecord(1);
-        System.out.println("getting record by ID:" + idnum);
+        if (verbose) System.out.println("getting record by ID:" + idnum);
         if (rec != null)
         {
-            System.out.println("adding ID to record:" + idnum);
+            if (verbose) System.out.println("adding ID to record:" + idnum);
             rec.addVariableField(new ControlFieldImpl("001", ""+idnum));
         }
         return(rec);
@@ -258,38 +258,38 @@ public class ZClient extends SynchronousOriginBean
         catch (Exception e)
         {
             e.printStackTrace();
-            System.err.println("Exception processing show command " + e);
+            if (verbose) System.err.println("Exception processing show command " + e);
         }
         return(null);
     }
     
     public String getStringByIDNum(int idnum)
     {
-        System.out.println("Calling getStringByIDNum id="+ idnum);
+        if (verbose) System.out.println("Calling getStringByIDNum id="+ idnum);
     	cmdFind("@attrset bib-1 @attr 1=1016 \"^C"+idnum+"\"");
-        System.out.println("Calling getString id="+ idnum);
+    	if (verbose) System.out.println("Calling getString id="+ idnum);
         byte[] rec = getBytes(1);
-        System.out.println("bytes count="+ rec.length);
+        if (verbose) System.out.println("bytes count="+ rec.length);
         ByteArrayInputStream bs = new ByteArrayInputStream(rec);
-        System.out.println("made ByteArrayInputStream");
+        if (verbose) System.out.println("made ByteArrayInputStream");
         MarcStreamReader m1 = new MarcStreamReader(bs);
-        System.out.println("made MarcStreamReader");
+        if (verbose) System.out.println("made MarcStreamReader");
         MarcTranslatedReader mr = new MarcTranslatedReader(m1, true);
         System.out.println("made MarcTranslatedReader");
         String result = null;
-        System.out.println("checking for next");
+        if (verbose) System.out.println("checking for next");
         if (mr.hasNext())
         {
-            System.out.println("Getting next");
+            if (verbose) System.out.println("Getting next");
         	try {
         		Record marc = mr.next();
-                System.out.println("got Record: "+ marc.toString());
+        		if (verbose) System.out.println("got Record: "+ marc.toString());
                 result = marc.toString();
-                System.out.println("String len="+ result.length());
+                if (verbose) System.out.println("String len="+ result.length());
         	}
         	catch (Throwable e)
         	{
-        		System.out.println("Exception: "+ e.getMessage());
+        	    if (verbose) System.out.println("Exception: "+ e.getMessage());
         		e.printStackTrace();
         	}
         }
