@@ -20,11 +20,16 @@ package org.solrmarc.index;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.Subfield;
+import org.marc4j.marc.VariableField;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -96,6 +101,33 @@ public class VuFindIndexer extends SolrIndexer
         }
         
         return(vals[0]);
+    }
+    
+    /**
+     * 
+     * @param record
+     * @return
+     */
+    public Set<String> getFullTopic(final Record record){
+    	 Set<String> result = new LinkedHashSet<String>();
+    	 
+    	 DataField subjectField = (DataField) record.getVariableField("600");
+    	 //StringBuffer fullTopic = new StringBuffer();
+    	 
+    	 if(subjectField != null){
+    		 List subfields = subjectField.getSubfields();
+    		 Iterator iter = subfields.iterator();
+    		 
+    		 Subfield subfield;
+    		 
+    		 while(iter.hasNext()){
+    			 subfield = (Subfield) iter.next();
+    			 result.add(subfield.getData());
+    		 }
+    	 }
+    	 
+    	 
+    	 return result;
     }
 
 }
