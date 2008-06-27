@@ -64,7 +64,14 @@ public class SolrIndexer
         fieldMap = new HashMap<String, String[]>();
         indexDate = new Date();
     }
-
+    
+	/**
+	 * Constructor
+	 * @param propertiesMapFile
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws ParseException
+	 */
     public SolrIndexer(String propertiesMapFile) throws FileNotFoundException, IOException, ParseException
     {
         this();
@@ -76,6 +83,11 @@ public class SolrIndexer
         }
     }
 
+    /**
+     * 
+     * @param props
+     * @return
+     */
     protected boolean fillMapFromProperties(Properties props)
     {
         boolean valid = true;
@@ -84,6 +96,7 @@ public class SolrIndexer
         while (en.hasMoreElements())
         {
             String property = (String) en.nextElement();
+            
             if (!property.startsWith("map") &&
                 !property.startsWith("pattern_map"))
             {
@@ -337,6 +350,11 @@ public class SolrIndexer
         }
     }
 
+    /**
+     * 
+     * @param record
+     * @return
+     */
     public Map<String, Object> map(Record record)
     {
         Map<String, Object> indexMap = new HashMap<String, Object>();
@@ -469,6 +487,11 @@ public class SolrIndexer
         return null;
     }
 
+    /**
+     * 
+     * @param record
+     * @return
+     */
     public static Set<String> getEra(Record record)
     {
         Set<String> result = new LinkedHashSet<String>();
@@ -517,6 +540,15 @@ public class SolrIndexer
         return (result);
     }
 
+    /**
+     * 
+     * @param result
+     * @param eraStart1
+     * @param eraStart2
+     * @param eraEnd1
+     * @param eraEnd2
+     * @return
+     */
     public static Set<String> getEra(Set<String> result, char eraStart1, char eraStart2, char eraEnd1, char eraEnd2)
     {
         if (eraStart1 >= 'a' && eraStart1 <= 'y' && eraEnd1 >= 'a' &&
@@ -539,6 +571,13 @@ public class SolrIndexer
         return (result);
     }
 
+    /**
+     * 
+     * @param indexMap
+     * @param indexField
+     * @param mapName
+     * @param fieldVal
+     */
     protected void addField(Map<String, Object> indexMap, String indexField, String mapName, String fieldVal)
     {
         if (mapName != null && findMap(mapName) != null)
@@ -551,11 +590,24 @@ public class SolrIndexer
         }
     }
 
+    /**
+     * 
+     * @param indexMap
+     * @param indexField
+     * @param fieldVal
+     */
     protected void addField(Map<String, Object> indexMap, String indexField, String fieldVal)
     {
         addField(indexMap, indexField, null, fieldVal);
     }
 
+    /**
+     * 
+     * @param indexMap
+     * @param indexField
+     * @param mapName
+     * @param fields
+     */
     protected void addFields(Map<String, Object> indexMap, String indexField, String mapName, Set<String> fields)
     {
         if (mapName != null && findMap(mapName) != null)
@@ -583,6 +635,12 @@ public class SolrIndexer
 //        }
     }
 
+    /**
+     * 
+     * @param record
+     * @param tagStr
+     * @return
+     */
     public static Set<String> getFieldList(Record record, String tagStr)
     {
         String[] tags = tagStr.split(":");
@@ -616,12 +674,25 @@ public class SolrIndexer
         return (result);
     }
 
+    /**
+     * 
+     * @param record
+     * @param tagStr
+     * @param seperator
+     * @return
+     */
     public String getFieldVals(Record record, String tagStr, String seperator)
     {
         Set<String> result = getFieldList(record, tagStr);
         return (org.solrmarc.tools.Utils.join(result, seperator));
     }
 
+    /**
+     * 
+     * @param record
+     * @param tagStr
+     * @return
+     */
     public static String getFirstFieldVal(Record record, String tagStr)
     {
         Set<String> result = getFieldList(record, tagStr);
@@ -630,6 +701,13 @@ public class SolrIndexer
         return (null);
     }
 
+    /**
+     * 
+     * @param record
+     * @param mapName
+     * @param tagStr
+     * @return
+     */
     public String getFirstFieldVal(Record record, String mapName, String tagStr)
     {
         Set<String> result = getFieldList(record, tagStr);
@@ -642,6 +720,11 @@ public class SolrIndexer
         return (null);
     }
 
+    /**
+     * Get the title from a record
+     * @param record
+     * @return Recrod's title (245a and 245b)
+     */
     public String getTitle(Record record)
     {
         DataField titleField = (DataField) record.getVariableField("245");
@@ -661,6 +744,11 @@ public class SolrIndexer
         return (thisTitle);
     }
 
+    /**
+     * Get the date from a record
+     * @param record
+     * @return 
+     */
     public String getDate(Record record)
     {
         String date = getFieldVals(record, "260c", ", ");
@@ -668,6 +756,10 @@ public class SolrIndexer
         return (date);
     }
 
+    /**
+     * Return the current date
+     * @return
+     */
     public String getCurrentDate()
     {
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
@@ -675,6 +767,11 @@ public class SolrIndexer
         return (val);
     }
 
+    /**
+     * 
+     * @param mapName
+     * @return
+     */
     protected Map<String, String> findMap(String mapName)
     {
         if (mapName.startsWith("pattern_map:"))
@@ -688,6 +785,13 @@ public class SolrIndexer
         return null;
     }
 
+    /**
+     * 
+     * @param record
+     * @param set
+     * @param field
+     * @param subfield
+     */
     protected static void addSubfieldDataToSet(Record record, Set<String> set, String field, String subfield)
     {
         if (field.equals("000"))
@@ -722,6 +826,15 @@ public class SolrIndexer
         }
     }
 
+    /**
+     * 
+     * @param record
+     * @param set
+     * @param field
+     * @param subfield
+     * @param substringStart
+     * @param substringEnd
+     */
     protected static void addSubfieldDataToSet(Record record, Set<String> set, String field, String subfield, int substringStart, int substringEnd)
     {
         if (field.equals("000"))
@@ -754,6 +867,11 @@ public class SolrIndexer
         }
     }
 
+    /**
+     * Write a marc record as a binary string
+     * @param record record to write
+     * @return Binary marc output
+     */
     protected String writeRaw(Record record)
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -776,7 +894,8 @@ public class SolrIndexer
 
     /**
      * Write a MarcXML formated file to index
-     * @param record
+     * @param record record to output as XML
+     * @return String of MarcXML
      */
     protected String writeXml(Record record)
     {
@@ -797,7 +916,7 @@ public class SolrIndexer
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return (tmp);
+        return tmp;
     }
 
 }

@@ -29,7 +29,6 @@ import java.util.Set;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
-import org.marc4j.marc.VariableField;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -68,7 +67,7 @@ public class VuFindIndexer extends SolrIndexer
         Set<String> titleH = new LinkedHashSet<String>();
         addSubfieldDataToSet(record, titleH, "245", "h");       
                 
-        // check with folks to see if leader is more likely
+         //check with folks to see if leader is more likely
         if("M".equals(leaderChar))      {   return "Book";   }        
         if("S".equals(leaderChar))      {   return "Journal";  }        
         // check the h subfield of the 245 field
@@ -96,15 +95,17 @@ public class VuFindIndexer extends SolrIndexer
         String val = getFirstFieldVal(record, "090a:050a");
         String vals[] = val.split("[^A-Za-z]+", 2);
         
+        //TODO: handle null point exceptions...
+        
         if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
-        	return(null);
+        	return null;
         }
         
-        return(vals[0]);
+        return vals[0];
     }
     
     /**
-     * 
+     * Extract all topics from a record
      * @param record
      * @return
      */
@@ -115,13 +116,13 @@ public class VuFindIndexer extends SolrIndexer
     	 //StringBuffer fullTopic = new StringBuffer();
     	 
     	 if(subjectField != null){
-    		 List subfields = subjectField.getSubfields();
-    		 Iterator iter = subfields.iterator();
+    		 List<Subfield> subfields = subjectField.getSubfields();
+    		 Iterator<Subfield> iter = subfields.iterator();
     		 
     		 Subfield subfield;
     		 
     		 while(iter.hasNext()){
-    			 subfield = (Subfield) iter.next();
+    			 subfield = iter.next();
     			 result.add(subfield.getData());
     		 }
     	 }
