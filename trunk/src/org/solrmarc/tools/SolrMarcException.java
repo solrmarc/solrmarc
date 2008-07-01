@@ -57,6 +57,14 @@ public class SolrMarcException extends Exception {
 	}
 	
 	/**
+	 * Print a message 
+	 * @param message Message to print
+	 */
+	public void printMessage(final String message){
+		System.err.println(message);
+	}
+	
+	/**
 	 * Print stack trace for the current exception
 	 */
 	public void printStackTrace(){
