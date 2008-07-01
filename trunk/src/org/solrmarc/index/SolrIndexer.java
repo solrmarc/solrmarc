@@ -729,6 +729,7 @@ public class SolrIndexer
     {
         DataField titleField = (DataField) record.getVariableField("245");
         String thisTitle = "";
+        
         if (titleField != null && titleField.getSubfield('a') != null)
         {
 
