@@ -64,33 +64,29 @@
     			<manifest>
     				<attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter"/>
     				<attribute name="Class-Path" 
-value="lib/a2jruntime-1_2_3.jar
- lib/apache-solr-nightly.jar
- lib/apache-solr-common-nightly.jar
- lib/commons-codec-1.3.jar
- lib/commons-csv-0.1-SNAPSHOT.jar
- lib/commons-fileupload-1.2.jar
- lib/commons-io-1.2.jar
- lib/commons-logging-api.jar
- lib/commons-logging.jar
- lib/easymock.jar
- lib/ki-jzkit-hss-1_2_3.jar
- lib/ki-jzkit-iface-1_2_3.jar
- lib/ki-jzkit-z3950-1_2_3.jar
- lib/ki-util.jar
- lib/log4j-1.2.5.jar
- lib/lucene-analyzers-2.3.1.jar
- lib/lucene-core-2.3.1.jar
- lib/lucene-highlighter-2.3.1.jar
- lib/lucene-snowball-2.3.1.jar
- lib/lucene-spellchecker-2.3.1.jar
- lib/marc4j.jar
- lib/normalizer.jar
- lib/servlet-api-2.4.jar
- lib/stax-1.2.0-dev.jar
- lib/stax-api-1.0.jar
- lib/stax-utils.jar    					
- lib/xpp3-1.1.3.4.O.jar"/>
+						value="lib/apache-solr-nightly.jar
+						 lib/apache-solr-common-nightly.jar
+						 lib/commons-codec-1.3.jar
+						 lib/commons-csv-0.1-SNAPSHOT.jar
+						 lib/commons-fileupload-1.2.jar
+						 lib/commons-io-1.2.jar
+    					 lib/commons-logging.jar
+    					 lib/commons-logging-api.jar
+						 lib/easymock.jar
+    					 lib/jzkit_client.jar
+						 lib/log4j-1.2.5.jar
+						 lib/lucene-analyzers-2.3.1.jar
+						 lib/lucene-core-2.3.1.jar
+						 lib/lucene-highlighter-2.3.1.jar
+						 lib/lucene-snowball-2.3.1.jar
+						 lib/lucene-spellchecker-2.3.1.jar
+						 lib/marc4j.jar
+						 lib/normalizer.jar
+						 lib/servlet-api-2.4.jar
+						 lib/stax-1.2.0-dev.jar
+						 lib/stax-api-1.0.jar
+						 lib/stax-utils.jar    					
+						 lib/xpp3-1.1.3.4.O.jar"/>
     			</manifest>
     		</jar>
 		
