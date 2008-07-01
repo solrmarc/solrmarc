@@ -82,15 +82,15 @@ public final class Utils {
                     newData = newData.substring(0, newData.length()-1);
                 }
             }
-            if (newData.startsWith("[") && newData.endsWith("]"))
+            if (newData.charAt(0) == '[' && newData.endsWith("]"))
             {
                 newData = newData.substring(1, newData.length()-1);
             }
-            else if (newData.startsWith("[") && newData.indexOf("]") == -1)
+            else if (newData.charAt(0) == '[' && newData.indexOf(']') == -1)
             {
                 newData = newData.substring(1);                
             }
-            else if (newData.endsWith("]") && newData.indexOf("[") == -1)
+            else if (newData.endsWith("]") && newData.indexOf('[') == -1)
             {
                 newData = newData.substring(0, newData.length()-1);                
             }
@@ -100,7 +100,7 @@ public final class Utils {
 //            System.out.println(data + " -> "+ newData); 
 //            oldData = newData;
 //        }
-        return(newData);       
+        return newData ;       
     }
 
 	
@@ -111,10 +111,7 @@ public final class Utils {
 	 */
 	public static String calcTime(final long totalTime)
     {
-		final long minutes = totalTime / 60000;
-		final long seconds = ( totalTime % 60000 ) / 1000;
-		
-		return minutes + ":" + timeFormat.format(seconds);
+		return totalTime / 60000 + ":" + timeFormat.format((totalTime % 60000 ) / 1000);
 	}
 	
 	/**
@@ -139,25 +136,44 @@ public final class Utils {
 		return isNumber;		
 	}
 
+	/**
+	 * Remap a field
+	 * @param fieldVal
+	 * @param map
+	 * @param copyEntryIfNotInMap
+	 * @return
+	 */
     public static String remap(String fieldVal, Map<String, String> map, boolean copyEntryIfNotInMap)
     {
-        String result = null;
+        //String result = null;
+    	StringBuffer result = new StringBuffer("");
+        
         if (map.containsKey(fieldVal))
         {
-            result = map.get(fieldVal);
+            //result = map.get(fieldVal);
+        	result.append(map.get(fieldVal));
         }
+        
         else if (copyEntryIfNotInMap)
         {
-            result = fieldVal;
+            //result = fieldVal;
+        	result.append(fieldVal);
  //           System.out.println("Missing Value: "+ result);
         }                      
-        return result;
+        return result.toString();
     }
 
-    public static Set<String> remap(Set<String> s, Map<String, String> map, boolean copyEntryIfNotInMap)
+    /**
+     * 
+     * @param set
+     * @param map
+     * @param copyEntryIfNotInMap
+     * @return
+     */
+    public static Set<String> remap(Set<String> set, Map<String, String> map, boolean copyEntryIfNotInMap)
     {
-        if (map == null)  return(s);
-        Iterator<String> iter = s.iterator();
+        if (map == null)  return(set);
+        Iterator<String> iter = set.iterator();
         Set<String> result = new LinkedHashSet<String>();
         
         while(iter.hasNext())
@@ -189,40 +205,69 @@ public final class Utils {
                 }
             }
         }
-        return(result);
+        return result;
     }
 
     private static boolean containsMatch(String val, String pattern)
     {
         String rep = val.replaceFirst(pattern, "###match###");
-        if (!rep.equals(val)) return(true);
-        return(false);
+        
+        if (!rep.equals(val)) {
+        	return true;
+        }
+        
+        return false;
     }
     
-    public static boolean setItemContains(Set set, String pattern)
+    /**
+     * Test if a set contains a specified pattern
+     * @param set Set of marc fields to test
+     * @param pattern Regex String pattern to match
+     * @return If the set contains the pattern, return true, else false
+     */
+    public static boolean setItemContains(Set<String> set, String pattern)
     {
-        if (set.isEmpty())  return(false);
-        Iterator iter = set.iterator();        
+        if (set.isEmpty()) {
+        	return(false);
+        }
+        
+        Iterator<String> iter = set.iterator();        
+       
         while (iter.hasNext())
         {
             String value = (String)iter.next();
-            if (containsMatch(value, pattern)) 
-                return(true);
+            
+            if (containsMatch(value, pattern)) {
+            	return true;
+            }
+                
         }
         return false;
     }  
 
-    public static String join(Set<String> s, String sep)
+    /**
+     * Join two fields together with seperator
+     * @param set Set of marc fields to join
+     * @param separator Separation character to put between 
+     * @return Joined fields
+     */
+    public static String join(Set<String> set, String separator)
     {
-        Iterator<String> iter = s.iterator();
-        String result = "";
+        Iterator<String> iter = set.iterator();
+        //String result = "";
+        StringBuffer result = new StringBuffer("");
+       
         while(iter.hasNext())
         {
-            result += iter.next();
-            if (iter.hasNext())  result += sep;
+            //result += iter.next();
+        	result.append(iter.next());
+            if (iter.hasNext())  {
+            	//result += separator;
+            	result.append(separator);
+            }
         }
-        return(result);
+        
+        return result.toString();
     }
-
 
 }
