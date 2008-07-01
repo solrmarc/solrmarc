@@ -22,6 +22,7 @@ import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.tools.SolrMarcException;
 import org.solrmarc.tools.Utils;
 
 import java.util.Set;
@@ -32,7 +33,7 @@ import java.util.Set;
  * @version $Id$
  *
  */
-public class MarcFilteredReader  implements MarcReader
+public class MarcFilteredReader implements MarcReader
 {
     String includeRecordIfFieldPresent = null;
     String includeRecordIfFieldContains = null;
@@ -40,7 +41,14 @@ public class MarcFilteredReader  implements MarcReader
     String includeRecordIfFieldDoesntContain = null;
     Record currentRecord = null;
     MarcReader reader;
+    SolrMarcException exception;
     
+    /**
+     * 
+     * @param r
+     * @param ifFieldPresent
+     * @param ifFieldMissing
+     */
     public MarcFilteredReader(MarcReader r, String ifFieldPresent, String ifFieldMissing)
     {
         if (ifFieldPresent != null)
@@ -64,6 +72,10 @@ public class MarcFilteredReader  implements MarcReader
         reader = r;
     }
 
+    /**
+     * Implemented through interface
+     * @return Returns true if the iteration has more records, false otherwise
+     */
     public boolean hasNext()
     {
         if (currentRecord == null) 
@@ -72,26 +84,36 @@ public class MarcFilteredReader  implements MarcReader
         }
         return(currentRecord != null);
     }
-
+    
+    /**
+     * Returns the next marc file in the iteration
+     */
     public Record next()
     {
-        if (currentRecord != null) 
+        
+    	if (currentRecord != null) 
         { 
             Record tmp = currentRecord; 
             currentRecord = null; 
             return(tmp);
         }
+        
         while (currentRecord == null)
         {
             if (!reader.hasNext()) return(null);
             Record rec = null;
+            
             try {
                 rec = reader.next();
             }
             catch (MarcException me)
             {
-                System.err.println("Error reading Marc Record: "+ me.getMessage());               
+                //System.err.println("Error reading Marc Record: "+ me.getMessage());  
+            	exception = new SolrMarcException(me.getMessage(), me.getCause());
+            	exception.printMessage("Error reading Marc record:");
+            	exception.printStackTrace();
             }
+            
             if (rec != null && includeRecordIfFieldPresent != null)
             {
                 Set<String> fields = SolrIndexer.getFieldList(rec, includeRecordIfFieldPresent);
@@ -103,6 +125,7 @@ public class MarcFilteredReader  implements MarcReader
                     }
                 }
             }
+           
             if (rec != null && includeRecordIfFieldMissing != null)
             {
                 Set<String> fields = SolrIndexer.getFieldList(rec, includeRecordIfFieldMissing);
@@ -113,7 +136,7 @@ public class MarcFilteredReader  implements MarcReader
                 }
             }
         }
-        return(currentRecord);
+        return currentRecord ;
     }
 
 }
