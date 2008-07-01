@@ -384,7 +384,7 @@ public class MarcImporter {
     
    
    /**
-     * If there is a running Solr server instance loking at the same index
+     * If there is a running Solr server instance looking at the same index
      * that is being updated by this process, this function can be used to signal 
      * that server that the indexes have changed, so that it will find the new data
      * with out having to be restarted.
