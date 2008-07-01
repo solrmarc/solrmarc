@@ -58,6 +58,8 @@ public class ZClient extends SynchronousOriginBean
     private static final String PREFIX_QUERY_TYPE = "PREFIX";
     private static final String CCL_QUERY_TYPE = "CCL";
     
+    boolean verbose = false;
+    
     private int auth_type = 0; // 0=none, 1=anonymous, 2=open, 3=idpass
     private String principal = null;
     private String group = null;
@@ -100,6 +102,7 @@ public class ZClient extends SynchronousOriginBean
     public boolean openConnection(String hostname, String portnum)
     {    
         boolean respVal = false;
+        
         try
         {
             if (verbose) System.err.println("Attempting connection to "+ hostname + " : " + portnum);

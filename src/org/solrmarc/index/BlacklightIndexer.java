@@ -45,9 +45,7 @@ public class BlacklightIndexer extends SolrIndexer
 	 */
     public BlacklightIndexer(final String propertiesMapFile) throws FileNotFoundException, IOException, ParseException 
     {
-        
         	super(propertiesMapFile);
-       
     }
     
     /**
