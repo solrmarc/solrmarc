@@ -196,11 +196,14 @@ public class SolrReIndexer
                 }
                 Record record = getRecordFromDocument(s, docNo);
                 
-                Map<String, Object> map = indexer.map(record); 
-
-                if (doUpdate && map.size() != 0)
+                if (record != null)
                 {
-                    update(map);
+                    Map<String, Object> map = indexer.map(record); 
+
+                    if (doUpdate && map.size() != 0)
+                    {
+                        update(map);
+                    }
                 }
             }
         }
@@ -276,6 +279,7 @@ public class SolrReIndexer
                     if (verbose)
                     {
                         System.out.println(record.toString());
+                        System.out.flush();
                     }
                     handled = true;
                     return(record);
@@ -292,6 +296,7 @@ public class SolrReIndexer
                 {
                     handled = true;
                     me.printStackTrace();
+                    System.out.println("The bad record is: "+ marcRecordStr);
                 }
             }
             catch (UnsupportedEncodingException e)
@@ -502,6 +507,9 @@ public class SolrReIndexer
             System.exit(1);
         }
         
+        Record r = reader.lookup("u2654227");
+        System.out.println(r.toString());
+        reader.indexer.map(r);
         reader.readAllMatchingDocs();
         
         reader.finish();

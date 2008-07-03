@@ -75,6 +75,7 @@ public final class Utils {
             oldData = newData;
             newData = newData.trim();
             newData = newData.replaceAll(" *([,/;:])$", "");
+            if (newData.length() == 0) return(newData);
             if (newData.endsWith("."))
             {
                 if (newData.matches(".*\\w\\w\\w\\.$"))
@@ -82,11 +83,11 @@ public final class Utils {
                     newData = newData.substring(0, newData.length()-1);
                 }
             }
-            if (newData.charAt(0) == '[' && newData.endsWith("]"))
+            if (newData.length() > 0 && newData.charAt(0) == '[' && newData.endsWith("]"))
             {
                 newData = newData.substring(1, newData.length()-1);
             }
-            else if (newData.charAt(0) == '[' && newData.indexOf(']') == -1)
+            else if (newData.length() > 0 && newData.charAt(0) == '[' && newData.indexOf(']') == -1)
             {
                 newData = newData.substring(1);                
             }
