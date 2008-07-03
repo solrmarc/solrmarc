@@ -173,16 +173,24 @@ public class SolrReIndexer
         if (queryparts.length != 2) 
         {
             System.err.println("Error query must be of the form    field:term");
+            return;
         }
         Query query = new TermQuery(new Term(queryparts[0], queryparts[1]));
         DocSet ds;
         try
         {
             ds = s.getDocSet(query);
+            int totalSize = ds.size();
+            int count = 0;
             DocIterator iter = ds.iterator();
             while (iter.hasNext())
             {
                 int docNo = iter.nextDoc();
+                count ++;
+                if (count == 100 || count == 1000 || count == 10000 || count % 10000 == 0)
+                {
+                    System. out.println("Done handling "+ count +" record out of "+ totalSize);
+                }
                 Record record = getRecordFromDocument(s, docNo);
                 
                 Map<String, Object> map = indexer.map(record); 
@@ -191,7 +199,6 @@ public class SolrReIndexer
                 {
                     update(map);
                 }
-                
             }
         }
         catch (IOException e)
