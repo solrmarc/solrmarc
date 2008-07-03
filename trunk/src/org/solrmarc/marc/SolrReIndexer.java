@@ -62,6 +62,7 @@ public class SolrReIndexer
     private SolrIndexer indexer;
     private String queryForRecordsToUpdate;
     private String solrFieldContainingEncodedMarcRecord;
+    private boolean doUpdate = true;
     
     public SolrReIndexer(String properties, String[] args) throws IOException
     {
@@ -75,6 +76,8 @@ public class SolrReIndexer
         solrDataDir = getProperty(props, "solr.data.dir");
         solrFieldContainingEncodedMarcRecord = getProperty(props, "solr.fieldname");
         queryForRecordsToUpdate = getProperty(props, "solr.query");
+        String up = getProperty(props, "solr.do_update");
+        doUpdate = (up == null) ? true : Boolean.parseBoolean(up);
         if (queryForRecordsToUpdate == null && args.length > 0)
         {
             queryForRecordsToUpdate = args[0];
