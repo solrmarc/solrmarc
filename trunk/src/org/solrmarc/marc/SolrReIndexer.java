@@ -198,7 +198,7 @@ public class SolrReIndexer
                 
                 Map<String, Object> map = indexer.map(record); 
 
-                if (map.size() != 0)
+                if (doUpdate && map.size() != 0)
                 {
                     update(map);
                 }
