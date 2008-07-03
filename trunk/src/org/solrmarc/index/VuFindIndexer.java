@@ -1,4 +1,5 @@
 package org.solrmarc.index;
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -15,7 +16,6 @@ package org.solrmarc.index;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,100 +35,128 @@ import org.solrmarc.tools.Utils;
  * 
  * @author Robert Haschart
  * @version $Id$
- *
+ * 
  */
-public class VuFindIndexer extends SolrIndexer
-{
+public class VuFindIndexer extends SolrIndexer {
 
 	/**
 	 * Default constructor
+	 * 
 	 * @param propertiesMapFile
 	 * @throws Exception
 	 */
-    public VuFindIndexer(final String propertiesMapFile) throws FileNotFoundException, IOException, ParseException 
-    {
-        super(propertiesMapFile);
-    }
-    
-    /**
-     * Returns the format from a record
-     * @param record
-     * @return Record format
-     */
-    public String getFormat(final Record record)
-    {
-        String leaderChar = getFirstFieldVal(record, "000[7]").toUpperCase();
-        String t007Char = getFirstFieldVal(record, "007[0]"); 
-        
-        if (t007Char != null)  {
-        	t007Char = t007Char.toUpperCase(Locale.US);
-        }
-        
-        Set<String> titleH = new LinkedHashSet<String>();
-        addSubfieldDataToSet(record, titleH, "245", "h");       
-                
-         //check with folks to see if leader is more likely
-        if("M".equals(leaderChar))      {   return "Book";   }        
-        if("S".equals(leaderChar))      {   return "Journal";  }        
-        // check the h subfield of the 245 field
-        if (Utils.setItemContains(titleH, "electronic resource"))
-                                        {   return "Electronic";  }        
-        // check the 007
-        if(t007Char == null)        	{   return null;  }           
-        if("A".equals(t007Char))        {   return "Map";  }           
-        if("G".equals(t007Char))        {   return "Slide";  }        
-        if("H".equals(t007Char))        {   return "Microfilm";  }        
-        if("K".equals(t007Char))        {   return "Photo";  }        
-        if("S".equals(t007Char))        {   return "Audio";  }        
-        if("V".equals(t007Char) || 
-           "M".equals(t007Char))        {   return "Video";  }                           
-        return "";
-    }
-    
-    /**
-     * Extract the call number label from a record
-     * @param record
-     * @return Call number label
-     */
-    public String getCallNumberLabel(final Record record)
-    {
-        String val = getFirstFieldVal(record, "090a:050a");
-        String vals[] = val.split("[^A-Za-z]+", 2);
-        
-        //TODO: handle null point exceptions...
-        
-        if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
-        	return null;
-        }
-        
-        return vals[0];
-    }
-    
-    /**
-     * Extract all topics from a record
-     * @param record
-     * @return
-     */
-    public Set<String> getFullTopic(final Record record){
-    	 Set<String> result = new LinkedHashSet<String>();
-    	 
-    	 DataField subjectField = (DataField) record.getVariableField("600");
-    	 //StringBuffer fullTopic = new StringBuffer();
-    	 
-    	 if(subjectField != null){
-    		 List<Subfield> subfields = subjectField.getSubfields();
-    		 Iterator<Subfield> iter = subfields.iterator();
-    		 
-    		 Subfield subfield;
-    		 
-    		 while(iter.hasNext()){
-    			 subfield = iter.next();
-    			 result.add(subfield.getData());
-    		 }
-    	 }
-    	 
-    	 
-    	 return result;
-    }
+	public VuFindIndexer(final String propertiesMapFile)
+			throws FileNotFoundException, IOException, ParseException {
+		super(propertiesMapFile);
+	}
+
+	/**
+	 * Returns the format from a record
+	 * 
+	 * @param record
+	 * @return Record format
+	 */
+	public String getFormat(final Record record) {
+		String leaderChar = getFirstFieldVal(record, "000[7]").toUpperCase();
+		String t007Char = getFirstFieldVal(record, "007[0]");
+
+		if (t007Char != null) {
+			t007Char = t007Char.toUpperCase(Locale.US);
+		}
+
+		Set<String> titleH = new LinkedHashSet<String>();
+		addSubfieldDataToSet(record, titleH, "245", "h");
+
+		// check with folks to see if leader is more likely
+		if ("M".equals(leaderChar)) {
+			return "Book";
+		}
+		if ("S".equals(leaderChar)) {
+			return "Journal";
+		}
+		// check the h subfield of the 245 field
+		if (Utils.setItemContains(titleH, "electronic resource")) {
+			return "Electronic";
+		}
+		// check the 007
+		if (t007Char == null) {
+			return null;
+		}
+		if ("A".equals(t007Char)) {
+			return "Map";
+		}
+		if ("G".equals(t007Char)) {
+			return "Slide";
+		}
+		if ("H".equals(t007Char)) {
+			return "Microfilm";
+		}
+		if ("K".equals(t007Char)) {
+			return "Photo";
+		}
+		if ("S".equals(t007Char)) {
+			return "Audio";
+		}
+		if ("V".equals(t007Char) || "M".equals(t007Char)) {
+			return "Video";
+		}
+		return "";
+	}
+
+	/**
+	 * Extract the call number label from a record
+	 * 
+	 * Can return null
+	 * 
+	 * @param record
+	 * @return Call number label
+	 */
+	public String getCallNumberLabel(final Record record) {
+		
+		String val = getFirstFieldVal(record, "090a:050a");
+		
+		if (val != null) {
+			return splitCallNumbers(val);
+		} else {
+			return val;
+		}
+	}
+
+	private String splitCallNumbers(final String val) {
+		String vals[] = val.split("[^A-Za-z]+", 2);
+
+		if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
+			return null;
+		}
+
+		return vals[0];
+	}
+
+	/**
+	 * Extract all topics from a record
+	 * 
+	 * @param record
+	 * @return
+	 */
+	public Set<String> getFullTopic(final Record record) {
+		Set<String> result = new LinkedHashSet<String>();
+
+		DataField subjectField = (DataField) record.getVariableField("600");
+		// StringBuffer fullTopic = new StringBuffer();
+
+		if (subjectField != null) {
+			List<Subfield> subfields = subjectField.getSubfields();
+			Iterator<Subfield> iter = subfields.iterator();
+
+			Subfield subfield;
+
+			while (iter.hasNext()) {
+				subfield = iter.next();
+				result.add(subfield.getData());
+			}
+		}
+
+		return result;
+	}
 
 }
