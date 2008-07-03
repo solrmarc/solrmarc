@@ -711,8 +711,14 @@ public class MarcPermissiveStreamReader implements MarcReader {
                 data = new byte[size];
                 bais.read(data);
                 subfield = factory.newSubfield();
+                String dataAsString = getDataAsString(data);
+                if (code == Constants.US)
+                {
+                    code = data[0];
+                    dataAsString = dataAsString.substring(1);
+                }
                 subfield.setCode((char) code);
-                subfield.setData(getDataAsString(data));
+                subfield.setData(dataAsString);
                 dataField.addSubfield(subfield);
                 break;
             case Constants.FT:
