@@ -73,8 +73,16 @@ public class SolrReIndexer
         
         solrCoreDir = getProperty(props, "solr.path");
         solrDataDir = getProperty(props, "solr.data.dir");
-        solrFieldContainingEncodedMarcRecord = getProperty(props, "solr.fieldName");
+        solrFieldContainingEncodedMarcRecord = getProperty(props, "solr.fieldname");
         queryForRecordsToUpdate = getProperty(props, "solr.query");
+        if (queryForRecordsToUpdate == null && args.length > 0)
+        {
+            queryForRecordsToUpdate = args[0];
+        }
+        if (solrFieldContainingEncodedMarcRecord == null && args.length > 1)
+        {
+            solrFieldContainingEncodedMarcRecord = args[1];
+        }
         if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
         // Set up Solr core
         try{
@@ -463,9 +471,12 @@ public class SolrReIndexer
     public static void main(String[] args)
     {
         String properties = "import.properties";
-        if(args.length > 0)
+        if(args.length > 0 && args[0].endsWith(".properties"))
         {
             properties = args[0];
+            String newArgs[] = new String[args.length-1];
+            System.arraycopy(args, 1, newArgs, 0, args.length-1);
+            args = newArgs;
         }
         System.out.println("Loading properties from " + properties);
         
