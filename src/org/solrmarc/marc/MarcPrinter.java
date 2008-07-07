@@ -205,7 +205,7 @@ public class MarcPrinter
         else if (mode.equals("to_xml"))
         {
             to_utf_8 = true;
-            writer = new MarcXmlWriter(System.out, "UTF-8");
+            writer = new MarcXmlWriter(System.out, "UTF-8", true);
             while (reader.hasNext()) 
             {
                 try {
