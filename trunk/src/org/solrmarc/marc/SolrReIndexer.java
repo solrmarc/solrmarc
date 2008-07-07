@@ -507,9 +507,6 @@ public class SolrReIndexer
             System.exit(1);
         }
         
-        Record r = reader.lookup("u2654227");
-        System.out.println(r.toString());
-        reader.indexer.map(r);
         reader.readAllMatchingDocs();
         
         reader.finish();
