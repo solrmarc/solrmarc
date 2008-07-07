@@ -38,6 +38,7 @@ import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
+import org.marc4j.MarcXmlWriter;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
@@ -187,6 +188,24 @@ public class MarcPrinter
         {
             to_utf_8 = true;
             writer = new MarcStreamWriter(System.out, "UTF-8");
+            while (reader.hasNext()) 
+            {
+                try {
+                    Record rec = reader.next();
+                    writer.write(rec);
+                }
+                catch (MarcException me)
+                {
+                    System.err.println("Error reading Record "+ me.getMessage());
+                }
+
+            }
+            writer.close();
+        }
+        else if (mode.equals("to_xml"))
+        {
+            to_utf_8 = true;
+            writer = new MarcXmlWriter(System.out, "UTF-8");
             while (reader.hasNext()) 
             {
                 try {
