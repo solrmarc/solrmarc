@@ -53,6 +53,8 @@ public class SolrReIndexer
     private String queryForRecordsToUpdate;
     protected String solrFieldContainingEncodedMarcRecord;
     private boolean doUpdate = true;
+    private RefCounted<SolrIndexSearcher> refedSolrSearcher;
+    private SolrIndexSearcher solrSearcher;
     
     public SolrReIndexer(String properties, String[] args) throws IOException
     {
@@ -82,6 +84,8 @@ public class SolrReIndexer
             System.setProperty("solr.data.dir", solrDataDir);
             solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
             solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
+            refedSolrSearcher = solrCore.getSearcher();
+            solrSearcher = refedSolrSearcher.get();
         }
         catch (Exception e)
         {
@@ -175,9 +179,7 @@ public class SolrReIndexer
         {
             Query query = new TermQuery(new Term(field, term));
             DocSet ds;
-            RefCounted<SolrIndexSearcher> rs = solrCore.getSearcher();
-            SolrIndexSearcher s = rs.get();
-            ds = s.getDocSet(query);
+            ds = solrSearcher.getDocSet(query);
             int totalSize = ds.size();
             int count = 0;
             DocIterator iter = ds.iterator();
@@ -190,7 +192,7 @@ public class SolrReIndexer
                     System. out.println("Done handling "+ count +" record out of "+ totalSize);
                 }
                 
-                Document doc = getDocument(s, docNo);
+                Document doc = getDocument(solrSearcher, docNo);
                 Record record = getRecordFromDocument(doc);
                 
                 if (record != null)
