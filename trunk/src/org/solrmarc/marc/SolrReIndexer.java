@@ -372,7 +372,7 @@ public class SolrReIndexer
                 while (valIter.hasNext())
                 {
                     String collVal = valIter.next();
-                    if (collVal == value) addit = false;
+                    if (collVal.equals(value)) addit = false;
                 }
                 if (addit) 
                 {
