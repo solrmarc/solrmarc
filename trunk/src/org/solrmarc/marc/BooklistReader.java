@@ -30,6 +30,7 @@ public class BooklistReader extends SolrReIndexer
                 valuesToAdd.put("fund_code_facet", fields[11]);
                 valuesToAdd.put("date_received_facet", fields[0]);
                 readAndUpdate("id", "u"+fields[9], valuesToAdd);
+                commit(false);
             }
         }
         catch (FileNotFoundException e)
