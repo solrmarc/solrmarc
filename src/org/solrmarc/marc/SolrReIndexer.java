@@ -224,7 +224,7 @@ public class SolrReIndexer
         {
             String keyVal = keyIter.next();
             String fieldVals[] = doc.getValues(keyVal);
-            if (fieldVals.length > 0)
+            if (fieldVals != null && fieldVals.length > 0)
             {
                 for (int i = 0; i < fieldVals.length; i++)
                 {
