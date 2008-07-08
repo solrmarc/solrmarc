@@ -228,9 +228,9 @@ public class SolrReIndexer
             {
                 String fieldVal = field.stringValue();
                 addToMap(map, keyVal, fieldVal);
-                String addnlFieldVal = valuesToAdd.get(keyVal);
-                addToMap(map, keyVal, addnlFieldVal); 
             }           
+            String addnlFieldVal = valuesToAdd.get(keyVal);
+            addToMap(map, keyVal, addnlFieldVal); 
         }        
     }
 
