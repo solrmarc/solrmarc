@@ -1,27 +1,20 @@
 package org.solrmarc.marc;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeMap;
 
 import javax.xml.xpath.*;
 
@@ -41,15 +34,12 @@ import org.apache.solr.update.DocumentBuilder;
 import org.apache.solr.update.UpdateHandler;
 import org.apache.solr.util.RefCounted;
 import org.marc4j.MarcException;
-import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamReader;
 import org.marc4j.MarcXmlReader;
-import org.marc4j.converter.impl.AnselToUnicode;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
 import org.xml.sax.InputSource;
 
-import com.ibm.icu.text.Normalizer;
 
 public class SolrReIndexer
 {
@@ -168,20 +158,25 @@ public class SolrReIndexer
         return null;
     }
     
-    public void readAllMatchingDocs()
+    public void readAllMatchingDocs(String queryForRecordsToUpdate)
     {
-        RefCounted<SolrIndexSearcher> rs = solrCore.getSearcher();
-        SolrIndexSearcher s = rs.get();
         String queryparts[] = queryForRecordsToUpdate.split(":");
         if (queryparts.length != 2) 
         {
             System.err.println("Error query must be of the form    field:term");
             return;
         }
-        Query query = new TermQuery(new Term(queryparts[0], queryparts[1]));
-        DocSet ds;
+        readAndUpdate(queryparts[0], queryparts[1], null);        
+    }
+    
+    public void readAndUpdate(String field, String term, Map<String, String> valuesToAdd)
+    {
         try
         {
+            Query query = new TermQuery(new Term(field, term));
+            DocSet ds;
+            RefCounted<SolrIndexSearcher> rs = solrCore.getSearcher();
+            SolrIndexSearcher s = rs.get();
             ds = s.getDocSet(query);
             int totalSize = ds.size();
             int count = 0;
@@ -194,12 +189,19 @@ public class SolrReIndexer
                 {
                     System. out.println("Done handling "+ count +" record out of "+ totalSize);
                 }
-                Record record = getRecordFromDocument(s, docNo);
+                
+                Document doc = getDocument(s, docNo);
+                Record record = getRecordFromDocument(doc);
                 
                 if (record != null)
                 {
                     Map<String, Object> map = indexer.map(record); 
 
+                    if (valuesToAdd != null && valuesToAdd.size() != 0)
+                    {
+                        addNewDataToRecord(doc, valuesToAdd, map);
+                    }
+                    
                     if (doUpdate && map.size() != 0)
                     {
                         update(map);
@@ -215,9 +217,31 @@ public class SolrReIndexer
 
     }
     
-    public Record getRecordFromDocument(SolrIndexSearcher s, int SolrDocumentNum) throws IOException
+    private void addNewDataToRecord(Document doc, Map<String, String> valuesToAdd, Map<String, Object> map)
+    {
+        Iterator<String> keyIter = valuesToAdd.keySet().iterator();
+        while (keyIter.hasNext())
+        {
+            String keyVal = keyIter.next();
+            Field field = doc.getField(keyVal);
+            if (field != null)
+            {
+                String fieldVal = field.stringValue();
+                addToMap(map, keyVal, fieldVal);
+                String addnlFieldVal = valuesToAdd.get(keyVal);
+                addToMap(map, keyVal, addnlFieldVal); 
+            }           
+        }        
+    }
+
+    public Document getDocument(SolrIndexSearcher s, int SolrDocumentNum) throws IOException
     {
         Document doc = s.doc(SolrDocumentNum);
+        return(doc);
+    }
+    
+    public Record getRecordFromDocument(Document doc) throws IOException
+    {
         Field field = doc.getField(solrFieldContainingEncodedMarcRecord);
         if (field == null)
         {
@@ -237,9 +261,10 @@ public class SolrReIndexer
     private Record getRecordFromRawMarc(String marcRecordStr)
     {
         MarcStreamReader reader;
-        boolean handled = false;
+        boolean tryAgain = false;
         do {
             try {
+                tryAgain = false;
                 reader = new MarcStreamReader(new ByteArrayInputStream(marcRecordStr.getBytes("UTF8")));
                 if (reader.hasNext())
                 {
@@ -248,30 +273,28 @@ public class SolrReIndexer
                     {
                         System.out.println(record.toString());
                     }
-                    handled = true;
                     return(record);
                 }
             }
             catch( MarcException me)
             {
-                handled = true;
                 me.printStackTrace();
             }
             catch (UnsupportedEncodingException e)
             {
-                handled = true;
                 e.printStackTrace();
             }
-        } while (!handled);
+        } while (tryAgain);
         return(null);
     }
 
     public Record getRecordFromXMLString(String marcRecordStr)
     {
         MarcXmlReader reader;
-        boolean handled = false;
+        boolean tryAgain = false;
         do {
             try {
+                tryAgain = false;
                 reader = new MarcXmlReader(new ByteArrayInputStream(marcRecordStr.getBytes("UTF8")));
                 if (reader.hasNext())
                 {
@@ -281,7 +304,6 @@ public class SolrReIndexer
                         System.out.println(record.toString());
                         System.out.flush();
                     }
-                    handled = true;
                     return(record);
                 }
             }
@@ -290,11 +312,17 @@ public class SolrReIndexer
                 if (marcRecordStr.contains("<subfield code=\"&#31;\">"))
                 {
                     // rewrite input string and try again.
-                    marcRecordStr = marcRecordStr.replaceAll("<subfield code=\"&#31;\">(.)", "<subfield code=\"$1\">");                       
+                    marcRecordStr = marcRecordStr.replaceAll("<subfield code=\"&#31;\">(.)", "<subfield code=\"$1\">");
+                    tryAgain = true;
+                }
+                else if (marcRecordStr.contains("<subfield code=\"&#31;\">"))
+                {
+                    // rewrite input string and try again.
+                    marcRecordStr = marcRecordStr.replaceAll("<subfield code=\"&#31;\">(.)", "<subfield code=\"$1\">");
+                    tryAgain = true;
                 }
                 else
                 {
-                    handled = true;
                     me.printStackTrace();
                     System.out.println("The bad record is: "+ marcRecordStr);
                 }
@@ -304,7 +332,7 @@ public class SolrReIndexer
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        } while (!handled);
+        } while (tryAgain);
         return(null);
 
     }
@@ -368,7 +396,8 @@ public class SolrReIndexer
             docNo = s.getFirstMatch(t);
             if (docNo > 0)
             {
-                rec = getRecordFromDocument(s, docNo);
+                Document doc = getDocument(s, docNo);
+                rec = getRecordFromDocument(doc);
             }
             else
             {
@@ -507,7 +536,7 @@ public class SolrReIndexer
             System.exit(1);
         }
         
-        reader.readAllMatchingDocs();
+        reader.readAllMatchingDocs(reader.queryForRecordsToUpdate);
         
         reader.finish();
 
