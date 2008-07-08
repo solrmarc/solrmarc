@@ -223,11 +223,14 @@ public class SolrReIndexer
         while (keyIter.hasNext())
         {
             String keyVal = keyIter.next();
-            Field field = doc.getField(keyVal);
-            if (field != null)
+            String fieldVals[] = doc.getValues(keyVal);
+            if (fieldVals.length > 0)
             {
-                String fieldVal = field.stringValue();
-                addToMap(map, keyVal, fieldVal);
+                for (int i = 0; i < fieldVals.length; i++)
+                {
+                    String fieldVal = fieldVals[i];
+                    addToMap(map, keyVal, fieldVal);
+                }
             }           
             String addnlFieldVal = valuesToAdd.get(keyVal);
             addToMap(map, keyVal, addnlFieldVal); 
