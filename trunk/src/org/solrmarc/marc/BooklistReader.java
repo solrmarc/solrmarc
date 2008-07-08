@@ -14,99 +14,11 @@ public class BooklistReader extends SolrReIndexer
     public BooklistReader(String properties, String[] args) throws IOException
     {
         super(properties, args);
-//        Properties props = new Properties();
-//        InputStream in = new FileInputStream(properties);
-//        // load the properties
-//        props.load(in);
-//        in.close();
-//        
-//        solrCoreDir = getProperty(props, "solr.path");
-//        solrDataDir = getProperty(props, "solr.data.dir");
-//        if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
-//        // Set up Solr core
-//        try{
-//            System.setProperty("solr.data.dir", solrDataDir);
-//            solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
-//            solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
-//        }
-//        catch (Exception e)
-//        {
-//            System.err.println("Couldn't set the instance directory");
-//            e.printStackTrace();
-//            System.exit(1);
-//        }
-//        verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
-//        
-//        updateHandler = solrCore.getUpdateHandler();
-//        String indexerName = getProperty(props, "solr.indexer");
-//        String indexerProps = getProperty(props, "solr.indexer.properties");
-//        
-//        try
-//        {
-//            Class indexerClass;
-//            try {
-//                indexerClass = Class.forName(indexerName);
-//            }
-//            catch (ClassNotFoundException e)
-//            {
-//                Class baseIndexerClass = SolrIndexer.class;
-//                String baseName = baseIndexerClass.getPackage().getName();
-//                String fullName = baseName + "." + indexerName;
-//                indexerClass = Class.forName(fullName);
-//            }
-//            Constructor constructor = indexerClass.getConstructor(new Class[]{String.class});
-//            Object instance = constructor.newInstance(indexerProps);
-//            if (instance instanceof SolrIndexer)
-//            {
-//                indexer = (SolrIndexer)instance;
-//            }
-//            else
-//            {
-//                System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
-//                System.exit(1);
-//            }
-//        }
-//        catch (Exception e)
-//        {
-//            if (e instanceof ParseException)
-//            {
-//                System.err.println("Error configuring Indexer from properties file.  Exiting...");
-//                System.exit(1);
-//            }            
-//            System.err.println("Unable to find Custom indexer: "+ indexerName);
-//            System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
-//            try {
-//                indexer = new SolrIndexer(indexerProps);
-//            }
-//            catch (Exception e1)
-//            {
-//                System.err.println("Error configuring Indexer from properties file.  Exiting...");
-//                System.exit(1);
-//            }
-//        }
-//        
+        if (solrFieldContainingEncodedMarcRecord == null) solrFieldContainingEncodedMarcRecord = "marc_display";
     }
-
-//    // Check first for a particular property in the System Properties, so that the -Dprop="value" command line arg 
-//    // mechanism can be used to override values defined in the passed in property file.  This is especially useful
-//    // for defining the marc.source property to define which file to operate on, in a shell script loop.
-//    private String getProperty(Properties props, String propname)
-//    {
-//        String prop;
-//        if ((prop = System.getProperty(propname)) != null)
-//        {
-//            return(prop);
-//        }
-//        if ((prop = props.getProperty(propname)) != null)
-//        {
-//            return(prop);
-//        }
-//        return null;
-//    }
     
     public void readBooklist(String filename)
     {
-//        AnselToUnicode conv = new AnselToUnicode();
         try
         {
             BufferedReader reader = new BufferedReader(new FileReader(new File(filename)));
@@ -114,7 +26,6 @@ public class BooklistReader extends SolrReIndexer
             while ((line = reader.readLine()) != null)
             {
                 String fields[] = line.split("\\|");
- //               map.put(fields[fields.length-2], fields.clone());
                 Map<String, String> valuesToAdd = new LinkedHashMap<String, String>();
                 valuesToAdd.put("fund_code_facet", fields[11]);
                 valuesToAdd.put("date_received_facet", fields[0]);
@@ -192,81 +103,6 @@ public class BooklistReader extends SolrReIndexer
 //        return(null);
 //    }
 
-//    public void update(Map<String, Object> map)
-//    { 
-//        AddUpdateCommand addcmd = new AddUpdateCommand();
-//        DocumentBuilder builder = new DocumentBuilder(solrCore.getSchema());
-//        builder.startDoc();
-//        Iterator<String> keys = map.keySet().iterator();
-//        while (keys.hasNext())
-//        {
-//            String key = keys.next();
-//            Object value = map.get(key);
-//            if (value instanceof String)
-//            {
-//                builder.addField(key, (String)value);
-//            }
-//            else if (value instanceof Collection)
-//            {
-//                Iterator<String> valIter = ((Collection)value).iterator();
-//                while (valIter.hasNext())
-//                {
-//                    String collVal = valIter.next();
-//                    builder.addField(key, collVal);
-//                }
-//            }
-//        }
-//        builder.endDoc();
-//        
-//        // finish up
-//        addcmd.doc = builder.getDoc();
-//        
-//        if (verbose)
-//        {
-////            System.out.println(record.toString());
-//            String doc = addcmd.doc.toString().replaceAll("> ", "> \n");
-//            System.out.println(doc);
-//        }
-//        addcmd.allowDups = false;
-//        addcmd.overwriteCommitted = true;
-//        addcmd.overwritePending = true;
-//       
-//        try {
-//            updateHandler.addDoc(addcmd);
-//        } 
-//        catch (IOException e) 
-//        {
-//            System.err.println("Couldn't add document");
-//            e.printStackTrace();
-//        }                
-//    }
-//    
-//    public void finish()
-//    {
-//        try {
-//            System.out.println("Calling commit");
-//            commit(false);
-//        } 
-//        catch (IOException e) {
-//            System.err.println("Final commit and optmization failed");
-//            e.printStackTrace();
-//        }
-//        
-//        System.out.println("Done with commit, closing Solr");       
-//        solrCore.close();
-//    }
-//
-//
-//    /**
-//     * Commit the document to the repository and optimize the index
-//     * @param optimize
-//     * @throws IOException
-//     */
-//    public void commit(boolean optimize) throws IOException 
-//    {
-//        CommitUpdateCommand commitcmd = new CommitUpdateCommand(optimize);
-//        updateHandler.commit(commitcmd);
-//    }
     /**
      * @param args
      */

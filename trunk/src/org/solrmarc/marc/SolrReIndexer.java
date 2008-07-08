@@ -51,7 +51,7 @@ public class SolrReIndexer
     private boolean verbose = false;
     private SolrIndexer indexer;
     private String queryForRecordsToUpdate;
-    private String solrFieldContainingEncodedMarcRecord;
+    protected String solrFieldContainingEncodedMarcRecord;
     private boolean doUpdate = true;
     
     public SolrReIndexer(String properties, String[] args) throws IOException
@@ -315,7 +315,7 @@ public class SolrReIndexer
                     marcRecordStr = marcRecordStr.replaceAll("<subfield code=\"&#31;\">(.)", "<subfield code=\"$1\">");
                     tryAgain = true;
                 }
-                else if (marcRecordStr.contains("<subfield code=\"&#31;\">"))
+                else if (marcRecordStr.contains("<leader>[^<>&]*&#[0-9]+;[^<>&]*</leader>"))
                 {
                     // rewrite input string and try again.
                     marcRecordStr = marcRecordStr.replaceAll("<subfield code=\"&#31;\">(.)", "<subfield code=\"$1\">");
