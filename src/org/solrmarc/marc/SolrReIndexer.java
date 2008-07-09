@@ -52,7 +52,7 @@ public class SolrReIndexer
     private SolrIndexer indexer;
     private String queryForRecordsToUpdate;
     protected String solrFieldContainingEncodedMarcRecord;
-    private boolean doUpdate = true;
+    protected boolean doUpdate = true;
     private RefCounted<SolrIndexSearcher> refedSolrSearcher;
     private SolrIndexSearcher solrSearcher;
     
@@ -170,10 +170,14 @@ public class SolrReIndexer
             System.err.println("Error query must be of the form    field:term");
             return;
         }
-        readAndUpdate(queryparts[0], queryparts[1], null);        
+        Map<String, Object> docMap = readAndIndexDoc(queryparts[0], queryparts[1]);  
+        if (doUpdate && docMap != null && docMap.size() != 0)
+        {
+            update(docMap);
+        }
     }
     
-    public void readAndUpdate(String field, String term, Map<String, String> valuesToAdd)
+    public Map<String, Object> readAndIndexDoc(String field, String term)
     {
         try
         {
@@ -197,17 +201,9 @@ public class SolrReIndexer
                 
                 if (record != null)
                 {
-                    Map<String, Object> map = indexer.map(record); 
-
-                    if (valuesToAdd != null && valuesToAdd.size() != 0)
-                    {
-                        addNewDataToRecord(doc, valuesToAdd, map);
-                    }
-                    
-                    if (doUpdate && map.size() != 0)
-                    {
-                        update(map);
-                    }
+                    Map<String, Object> map = indexer.map(record);
+                    addExtraInfoFromDocToMap(doc, map);
+                    return(map);
                 }
             }
         }
@@ -216,27 +212,12 @@ public class SolrReIndexer
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
+        return(null);
     }
     
-    private void addNewDataToRecord(Document doc, Map<String, String> valuesToAdd, Map<String, Object> map)
+    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> map)
     {
-        Iterator<String> keyIter = valuesToAdd.keySet().iterator();
-        while (keyIter.hasNext())
-        {
-            String keyVal = keyIter.next();
-            String fieldVals[] = doc.getValues(keyVal);
-            if (fieldVals != null && fieldVals.length > 0)
-            {
-                for (int i = 0; i < fieldVals.length; i++)
-                {
-                    String fieldVal = fieldVals[i];
-                    addToMap(map, keyVal, fieldVal);
-                }
-            }           
-            String addnlFieldVal = valuesToAdd.get(keyVal);
-            addToMap(map, keyVal, addnlFieldVal); 
-        }        
+        // does nothing here, overridden in subclass
     }
 
     public Document getDocument(SolrIndexSearcher s, int SolrDocumentNum) throws IOException
@@ -352,7 +333,7 @@ public class SolrReIndexer
 //        }
 //    }
     
-    private void addToMap(Map<String, Object> map, String key, String value)
+    protected void addToMap(Map<String, Object> map, String key, String value)
     {
         if (map.containsKey(key))
         {
