@@ -1,14 +1,21 @@
 package org.solrmarc.marc;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -273,7 +280,9 @@ public class SolrReIndexer
         } while (tryAgain);
         return(null);
     }
-
+    
+    static BufferedWriter errOut = null;
+    
     public Record getRecordFromXMLString(String marcRecordStr)
     {
         MarcXmlReader reader;
@@ -295,16 +304,51 @@ public class SolrReIndexer
             }
             catch( MarcException me)
             {
+                if (doUpdate == false && errOut == null)
+                {
+                    try
+                    {
+                        errOut = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File("badRecs.xml"))));
+                        errOut.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><collection xmlns=\"http://www.loc.gov/MARC21/slim\">");
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    catch (IOException e)
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                if (doUpdate == false && errOut != null)
+                {
+                    String trimmed = marcRecordStr.substring(marcRecordStr.indexOf("<record>"));
+                    trimmed = trimmed.replaceFirst("</collection>", "");
+                    trimmed = trimmed.replaceAll("><", ">\n<");
+                    try
+                    {
+                        errOut.write(trimmed);
+                    }
+                    catch (IOException e)
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
                 if (marcRecordStr.contains("<subfield code=\"&#31;\">"))
                 {
                     // rewrite input string and try again.
                     marcRecordStr = marcRecordStr.replaceAll("<subfield code=\"&#31;\">(.)", "<subfield code=\"$1\">");
                     tryAgain = true;
                 }
-                else if (marcRecordStr.contains("<leader>[^<>&]*&#[0-9]+;[^<>&]*</leader>"))
+                else if (extractLeader(marcRecordStr).contains("&#")) //.("<leader>[^<>&]*&#[0-9]+;[^<>&]*</leader>"))
                 {
                     // rewrite input string and try again.
-                    marcRecordStr = marcRecordStr.replaceAll("<subfield code=\"&#31;\">(.)", "<subfield code=\"$1\">");
+                    // 07585nam a2200301 a 4500
+                    String leader = extractLeader(marcRecordStr).replaceAll("&#[0-9]+;", "0");
+                    marcRecordStr = marcRecordStr.replaceAll("<leader>[^<]*</leader>", leader);
                     tryAgain = true;
                 }
                 else
@@ -323,7 +367,20 @@ public class SolrReIndexer
 
     }
         
-        
+ 
+    private String extractLeader(String marcRecordStr)
+    {
+        final String leadertag1 = "<leader>";
+        final String leadertag2 = "</leader>";
+        String leader = null;
+        try {
+            leader = marcRecordStr.substring(marcRecordStr.indexOf(leadertag1), marcRecordStr.indexOf(leadertag2)+leadertag2.length() );
+        }
+        catch (IndexOutOfBoundsException e)
+        {}
+        return leader;
+    }
+
 //    private void lookupAndUpdate(String doc_id, String[] fields)
 //    {
 //        Record record = lookup(doc_id);
@@ -525,6 +582,20 @@ public class SolrReIndexer
         reader.readAllMatchingDocs(reader.queryForRecordsToUpdate);
         
         reader.finish();
+        if (errOut != null)
+        {
+            try
+            {
+                errOut.write("\n</collection>");
+                errOut.flush();
+
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
 
     }
 
