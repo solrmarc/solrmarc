@@ -354,7 +354,7 @@ public class SolrReIndexer
                 else
                 {
                     me.printStackTrace();
-                    System.out.println("The bad record is: "+ marcRecordStr);
+                    if (verbose) System.out.println("The bad record is: "+ marcRecordStr);
                 }
             }
             catch (UnsupportedEncodingException e)
