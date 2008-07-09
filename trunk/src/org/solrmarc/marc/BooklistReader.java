@@ -15,9 +15,9 @@ public class BooklistReader extends SolrReIndexer
 {
     Map<String, Map<String, Object>> documentCache = null;
     
-    public BooklistReader(String properties, String[] args) throws IOException
+    public BooklistReader(String properties) throws IOException
     {
-        super(properties, args);
+        super(properties, new String[0]);
         if (solrFieldContainingEncodedMarcRecord == null) solrFieldContainingEncodedMarcRecord = "marc_display";
         documentCache = new LinkedHashMap<String, Map<String, Object>>();
     }
@@ -180,7 +180,7 @@ public class BooklistReader extends SolrReIndexer
         BooklistReader reader = null;
         try
         {
-            reader = new BooklistReader(properties, args);
+            reader = new BooklistReader(properties);
         }
         catch (IOException e)
         {
@@ -188,7 +188,7 @@ public class BooklistReader extends SolrReIndexer
             e.printStackTrace();
             System.exit(1);
         }
-        reader.readBooklist("booklists.txt");
+        reader.readBooklist(args.length > 0 ? args[0] : "booklists.txt");
         
         reader.finish();
 
