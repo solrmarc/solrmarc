@@ -5,16 +5,21 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.lucene.document.Document;
+
 public class BooklistReader extends SolrReIndexer
 {
-
+    Map<String, Map<String, Object>> documentCache = null;
+    
     public BooklistReader(String properties, String[] args) throws IOException
     {
         super(properties, args);
         if (solrFieldContainingEncodedMarcRecord == null) solrFieldContainingEncodedMarcRecord = "marc_display";
+        documentCache = new LinkedHashMap<String, Map<String, Object>>();
     }
     
     public void readBooklist(String filename)
@@ -29,7 +34,17 @@ public class BooklistReader extends SolrReIndexer
                 Map<String, String> valuesToAdd = new LinkedHashMap<String, String>();
                 valuesToAdd.put("fund_code_facet", fields[11]);
                 valuesToAdd.put("date_received_facet", fields[0]);
-                readAndUpdate("id", "u"+fields[9], valuesToAdd);
+                String docID = "u"+fields[9];
+                Map<String, Object> docMap = getDocumentMap(docID);
+                if (docMap != null)
+                {
+                    addNewDataToRecord( docMap, valuesToAdd );
+                    documentCache.put(docID, docMap);
+                    if (doUpdate && docMap != null && docMap.size() != 0)
+                    {
+                        update(docMap);
+                    }
+                }
             }
         }
         catch (FileNotFoundException e)
@@ -43,6 +58,50 @@ public class BooklistReader extends SolrReIndexer
             e.printStackTrace();
         }
 
+    }
+    
+    private Map<String, Object> getDocumentMap(String docID)
+    {
+        Map<String, Object> docMap = null;
+        if (documentCache.containsKey(docID))
+        {
+            docMap = documentCache.get(docID);
+        }
+        else
+        {
+            docMap = readAndIndexDoc("id", docID);
+        }
+        return(docMap);
+    }
+
+    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> docMap)
+    {
+        addExtraInfoFromDocToMap(doc, docMap, "fund_code_facet");
+        addExtraInfoFromDocToMap(doc, docMap, "date_received_facet");   
+    }
+    
+    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> map, String keyVal)
+    {
+        String fieldVals[] = doc.getValues(keyVal);
+        if (fieldVals != null && fieldVals.length > 0)
+        {
+            for (int i = 0; i < fieldVals.length; i++)
+            {
+                String fieldVal = fieldVals[i];
+                addToMap(map, keyVal, fieldVal);
+            }
+        }           
+    }
+
+    private void addNewDataToRecord(Map<String, Object> docMap, Map<String, String> valuesToAdd )
+    {
+        Iterator<String> keyIter = valuesToAdd.keySet().iterator();
+        while (keyIter.hasNext())
+        {
+            String keyVal = keyIter.next();
+            String addnlFieldVal = valuesToAdd.get(keyVal);
+            addToMap(docMap, keyVal, addnlFieldVal); 
+        }        
     }
     
 //    private Record lookup(String doc_id)
