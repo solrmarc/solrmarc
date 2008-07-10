@@ -69,7 +69,7 @@ public class BooklistReader extends SolrReIndexer
         }
         else
         {
-            docMap = readAndIndexDoc("id", docID);
+            docMap = readAndIndexDoc("id", docID, false);
         }
         return(docMap);
     }
