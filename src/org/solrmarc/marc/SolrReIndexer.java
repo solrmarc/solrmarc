@@ -177,14 +177,10 @@ public class SolrReIndexer
             System.err.println("Error query must be of the form    field:term");
             return;
         }
-        Map<String, Object> docMap = readAndIndexDoc(queryparts[0], queryparts[1]);  
-        if (doUpdate && docMap != null && docMap.size() != 0)
-        {
-            update(docMap);
-        }
+        Map<String, Object> docMap = readAndIndexDoc(queryparts[0], queryparts[1], doUpdate);  
     }
     
-    public Map<String, Object> readAndIndexDoc(String field, String term)
+    public Map<String, Object> readAndIndexDoc(String field, String term, boolean update)
     {
         try
         {
@@ -208,9 +204,13 @@ public class SolrReIndexer
                 
                 if (record != null)
                 {
-                    Map<String, Object> map = indexer.map(record);
-                    addExtraInfoFromDocToMap(doc, map);
-                    return(map);
+                    Map<String, Object> docMap = indexer.map(record);
+                    addExtraInfoFromDocToMap(doc, docMap);
+                    if (update && docMap != null && docMap.size() != 0)
+                    {
+                        update(docMap);
+                    }
+                    return(docMap);
                 }
             }
         }
