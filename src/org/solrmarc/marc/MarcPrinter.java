@@ -83,6 +83,8 @@ public class MarcPrinter
         String marcIncludeIfPresent = System.getProperty("marc.include_if_present");
         String marcIncludeIfMissing = System.getProperty("marc.include_if_missing");
         boolean verbose = Boolean.parseBoolean(System.getProperty("marc.verbose"));
+        boolean showCleanedFiles = Boolean.parseBoolean(System.getProperty("marc.show_cleaned"));
+        MarcPermissiveStreamReader.setShowCleaned(showCleanedFiles);
         if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null))
         {
             reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing);

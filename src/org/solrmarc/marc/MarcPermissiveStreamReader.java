@@ -107,6 +107,9 @@ public class MarcPermissiveStreamReader implements MarcReader {
     private String conversionCheck3 = null;
 
     private static HashMap<String, String> langMap = null;
+    
+    private boolean cleaned = false;
+    public static boolean showCleaned = false;
 
     /**
      * Constructs an instance with the specified input stream.
@@ -135,7 +138,12 @@ public class MarcPermissiveStreamReader implements MarcReader {
             override = true;
         }
     }
-
+    
+    public static void setShowCleaned(boolean show)
+    {
+        showCleaned = show;
+    }
+    
     /**
      * Returns true if the iteration has more records, false otherwise.
      */
@@ -159,7 +167,7 @@ public class MarcPermissiveStreamReader implements MarcReader {
         record = factory.newRecord();
 
         try {
-
+            cleaned = false;
             byte[] byteArray = new byte[24];
             input.readFully(byteArray);
 
@@ -171,6 +179,7 @@ public class MarcPermissiveStreamReader implements MarcReader {
                 input.readFully(recordBuf);
                 if (recordBuf[recordBuf.length-1] != Constants.RT)
                 {
+                    cleaned = true;
                     recordBuf = rereadPermissively(input, recordBuf, recordLength);
                     recordLength = recordBuf.length + 24;
                 }
@@ -181,6 +190,12 @@ public class MarcPermissiveStreamReader implements MarcReader {
             }
             String tmp = new String(recordBuf);
             parseRecord(record, byteArray, recordBuf, recordLength);
+            if (showCleaned && cleaned) 
+            {
+                System.out.write(byteArray);
+                System.out.write(recordBuf);
+            }
+
             return(record);
         }
         catch (EOFException e) {
@@ -680,8 +695,12 @@ public class MarcPermissiveStreamReader implements MarcReader {
         return(count);
     }
 
-    private DataField parseDataField(String tag, byte[] field)
-            throws IOException {
+    private DataField parseDataField(String tag, byte[] field)  throws IOException 
+    {
+        if (permissive)
+        {
+            cleanupBadFieldSeperators(field);
+        }
         ByteArrayInputStream bais = new ByteArrayInputStream(field);
         char ind1 = (char) bais.read();
         char ind2 = (char) bais.read();
@@ -728,6 +747,26 @@ public class MarcPermissiveStreamReader implements MarcReader {
         return dataField;
     }
     
+    private void cleanupBadFieldSeperators(byte[] field)
+    {
+        boolean hasEsc = false;
+        for (int i = 0 ; i < field.length-1; i++)
+        {
+            if (field[i] == 0x1b) hasEsc = true;
+            if (hasEsc && field[i] == Constants.US && !((field[i+1] >= 'a' && field[i+1] <= 'z') || (field[i+1] >= '0' && field[i+1] <= '9')))
+            {
+                field[i] = 0x7C;
+                cleaned = true;
+            }
+            if (field[i] == Constants.US && field[i+1] == Constants.US && field[i+2] == Constants.US )
+            {
+                field[i] = 0x7C;
+                field[i+1] = 0x7C;
+                cleaned = true;
+            }
+        }
+    }
+
     private int getFieldLength(DataInputStream bais) throws IOException 
     {
         bais.mark(9999);
@@ -755,8 +794,10 @@ public class MarcPermissiveStreamReader implements MarcReader {
         int bytesRead = 0;
         while (true) {
             switch (bais.read()) {
-            case Constants.US:
             case Constants.FT:
+                bais.reset();
+                return bytesRead;
+            case Constants.US:
                 bais.reset();
                 return bytesRead;
             case -1:
