@@ -758,6 +758,12 @@ public class MarcPermissiveStreamReader implements MarcReader {
                 field[i] = 0x7C;
                 cleaned = true;
             }
+            if (hasEsc && field[i] == Constants.US && (field[i+1] == '0' ))
+            {
+                field[i] = 0x7C;
+                field[i+1] = 0x21;
+                cleaned = true;
+            }
             if (field[i] == Constants.US && field[i+1] == Constants.US && field[i+2] == Constants.US )
             {
                 field[i] = 0x7C;
