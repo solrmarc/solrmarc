@@ -33,6 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 
 import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
@@ -57,6 +58,9 @@ import org.solrmarc.tools.Utils;
 public class MarcPrinter
 {
 
+	 // Initialize logging category
+    static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
+	
     /**
      * @param args
      * @throws FileNotFoundException 
@@ -121,7 +125,8 @@ public class MarcPrinter
             }
             else
             {
-                System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
+                //System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
+            	logger.fatal("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
                 System.exit(1);
             }
         }
@@ -129,17 +134,22 @@ public class MarcPrinter
         {
             if (e instanceof ParseException)
             {
-                System.err.println("Error configuring Indexer from properties file.  Exiting...");
+                //System.err.println();
+            	logger.fatal("Error configuring Indexer from properties file.  Exiting...");
                 System.exit(1);
-            }            
-            System.err.println("Unable to find Custom indexer: "+ indexerName);
-            System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
+            }    
+            
+//            System.err.println("Unable to find Custom indexer: "+ indexerName);
+//            System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
+            logger.error("Unable to find Custom indexer: "+ indexerName);
+            logger.error("Using default SolrIndexer with properties file: " + indexerProps);
             try {
                 indexer = new SolrIndexer(indexerProps);
             }
             catch (Exception e1)
             {
-                System.err.println("Error configuring Indexer from properties file.  Exiting...");
+                //System.err.println("Error configuring Indexer from properties file.  Exiting...");
+            	logger.fatal("Error configuring Indexer from properties file.  Exiting...");
                 System.exit(1);
             }
         }
@@ -181,10 +191,12 @@ public class MarcPrinter
                 }
                 catch (MarcException me)
                 {
-                    System.err.println("Error reading Record "+ me.getMessage());
+                    //System.err.println("Error reading Record "+ me.getMessage());
+                	logger.error("Error reading Record "+ me.getMessage());
                 }
             }
-            System.out.println("Total records= "+ count);
+           // System.out.println("Total records= "+ count);
+            logger.info("Total records= "+ count);
         }
         else if (mode.equals("translate"))
         {
@@ -198,7 +210,8 @@ public class MarcPrinter
                 }
                 catch (MarcException me)
                 {
-                    System.err.println("Error reading Record "+ me.getMessage());
+                    //System.err.println("Error reading Record "+ me.getMessage());
+                	logger.error("Error reading Record "+ me.getMessage());
                 }
 
             }
@@ -216,7 +229,8 @@ public class MarcPrinter
                 }
                 catch (MarcException me)
                 {
-                    System.err.println("Error reading Record "+ me.getMessage());
+                    //System.err.println("Error reading Record "+ me.getMessage());
+                	logger.error("Error reading Record "+ me.getMessage());
                 }
 
             }
@@ -236,7 +250,8 @@ public class MarcPrinter
                 }
                 catch (MarcException me)
                 {
-                    System.err.println("Error reading Marc Record: "+ me.getMessage());                                   
+                    //System.err.println("Error reading Marc Record: "+ me.getMessage());                                   
+                	logger.error("Error reading Marc Record: "+ me.getMessage());
                 }
             }
         }
@@ -262,11 +277,13 @@ public class MarcPrinter
                         String valMap = Utils.remap(val, map, false);
                         if (valMap != null)
                         {
-                            System.out.println("value: "+ val + " maps to: "+ valMap);       
+                            //System.out.println("value: "+ val + " maps to: "+ valMap);
+                        	logger.info("value: "+ val + " maps to: "+ valMap);
                         }
                         else
                         {
-                            System.out.println("value: "+ val + " maps to: nothing");       
+                            //System.out.println("value: "+ val + " maps to: nothing");       
+                        	logger.warn("value: "+ val + " maps to: nothing");
                         }
                     }
                 }
@@ -292,7 +309,8 @@ public class MarcPrinter
                 	if (key.equals("id")) continue;
                 	if (value instanceof String)
                 	{
-                		System.out.println("IndexID= "+ key + "  Value = "+ value);
+                		//System.out.println("IndexID= "+ key + "  Value = "+ value);
+                		logger.info("IndexID= "+ key + "  Value = "+ value);
                 	}
                 	else if (value instanceof Collection)
                 	{
@@ -300,7 +318,8 @@ public class MarcPrinter
                 		while (valIter.hasNext())
                 		{
                 			String collVal = valIter.next();
-                    		System.out.println("IndexID= "+ key + "  Value = "+ collVal);
+                    		//System.out.println("IndexID= "+ key + "  Value = "+ collVal);
+                			logger.info("IndexID= "+ key + "  Value = "+ collVal);
                 		}
                 	}
                 }
@@ -349,7 +368,8 @@ public class MarcPrinter
                          else
                          {
                              usecount.put(val, -1);
-                             System.out.println("Map missing value: "+ val);
+                             //System.out.println("Map missing value: "+ val);
+                             logger.error("Map missing value: "+ val);
                          }
     
                      }
@@ -361,7 +381,8 @@ public class MarcPrinter
                  }
                  if (showRec && verbose)
                  {
-                     System.out.println(record.toString());                 
+                     //System.out.println(record.toString());
+                	 logger.info(record.toString());
     
                  }
                  
@@ -397,12 +418,18 @@ public class MarcPrinter
             {
                 String key = iter1.next();
                 Integer count = usecount.get(key);
-                System.out.println((count >= 0 ? "Existing key ": "Missing key ")+ key + " occurs "+ Math.abs(count) + " times");
+                //System.out.println((count >= 0 ? "Existing key ": "Missing key ")+ key + " occurs "+ Math.abs(count) + " times");
+                logger.info((count >= 0 ? "Existing key ": "Missing key ")+ key + " occurs "+ Math.abs(count) + " times");
             }
         }
 //        System.out.println("Number matches = "+matchCount);
 
     }
+    
+    /**
+     * Retrieve a set of records that were deleted from the index
+     * @return
+     */
     public static Set<String> getDeletedRecordIDs()
     {
         File delFile = new File("select_ids.txt");
@@ -421,13 +448,15 @@ public class MarcPrinter
         }
         catch (FileNotFoundException e)
         {
-            System.err.println("Error: unable to find and open delete-record-id-list: "+ delFile);
+            //System.err.println("Error: unable to find and open delete-record-id-list: "+ delFile);
+        	logger.error("Error: unable to find and open delete-record-id-list: "+ delFile);
         }
         catch (IOException e)
         {
-            System.err.println("Error: reading from delete-record-id-list: "+ delFile);
+            //System.err.println("Error: reading from delete-record-id-list: "+ delFile);
+        	logger.error("Error: reading from delete-record-id-list: "+ delFile);
         }
-        return(result);
+        return result;
     }
 
 }

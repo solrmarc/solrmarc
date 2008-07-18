@@ -32,6 +32,8 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
+import org.apache.log4j.Logger;
+
 import com.ibm.icu.text.Normalizer;
 
 /**
@@ -46,6 +48,9 @@ public class MarcTranslatedReader implements MarcReader
     CharConverter convert;
     MarcWriter errorWriter;
     boolean unicodeNormalize = false;
+    
+    // Initialize logging category
+    static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
     
     public MarcTranslatedReader(MarcReader r, boolean unicodeNormalize)
     {

@@ -16,8 +16,6 @@ package org.solrmarc.marc;
  * limitations under the License.
  */
 
-
-
 import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
@@ -26,6 +24,8 @@ import org.solrmarc.tools.SolrMarcException;
 import org.solrmarc.tools.Utils;
 
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 /**
  * 
@@ -42,6 +42,9 @@ public class MarcFilteredReader implements MarcReader
     Record currentRecord = null;
     MarcReader reader;
     SolrMarcException exception;
+    
+    // Initialize logging category
+    static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
     
     /**
      * 
@@ -109,9 +112,11 @@ public class MarcFilteredReader implements MarcReader
             catch (MarcException me)
             {
                 //System.err.println("Error reading Marc Record: "+ me.getMessage());  
-            	exception = new SolrMarcException(me.getMessage(), me.getCause());
-            	exception.printMessage("Error reading Marc record:");
-            	exception.printStackTrace();
+//            	exception = new SolrMarcException(me.getMessage(), me.getCause());
+//            	exception.printMessage("Error reading Marc record:");
+//            	exception.printStackTrace();
+            	logger.error("Error reading Marc Record.");
+            	logger.error(me.getMessage());
             }
             
             if (rec != null && includeRecordIfFieldPresent != null)

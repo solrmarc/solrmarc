@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 
+import org.apache.log4j.Logger;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.tools.SolrMarcException;
@@ -43,6 +44,9 @@ public class MarcDirStreamReader implements MarcReader
     boolean permissive;
     SolrMarcException exception = new SolrMarcException();
     
+ // Initialize logging category
+    static Logger logger = Logger.getLogger(MarcImporter.class.getName());
+    
     /**
      * Constructor
      * @param dirName Path to the directory containing the marc files
@@ -63,7 +67,7 @@ public class MarcDirStreamReader implements MarcReader
     }
 
     /**
-     * 
+     * Read a directory of marc files to index
      * @param dirName Path to the directory to be indexed
      * @param permissive If the permissive reader should be used.
      */
@@ -74,7 +78,7 @@ public class MarcDirStreamReader implements MarcReader
     }
     
     /**
-     * 
+     * Read a directory of marc files to index using permissive reader
      * @param dir File to be indexed
      * @param permissive If the permissive reader should be used.
      */
@@ -129,8 +133,9 @@ public class MarcDirStreamReader implements MarcReader
             try
             {
                 //System.err.println("Switching to input file: "+ list[curFileNum]);
+            	logger.info("Switching to input file: "+ list[curFileNum]);
             	
-            	exception.printMessage("Switching to input file: "+ list[curFileNum]);
+            	//exception.printMessage("Switching to input file: "+ list[curFileNum]);
                 curFileReader = new MarcPermissiveStreamReader(new FileInputStream(list[curFileNum++]), permissive);
             }
             catch (FileNotFoundException e)
