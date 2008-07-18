@@ -8,22 +8,22 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.xml.xpath.*;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -47,6 +47,7 @@ import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
 import org.xml.sax.InputSource;
 
+import org.apache.log4j.Logger;
 
 public class SolrReIndexer
 {
@@ -63,6 +64,15 @@ public class SolrReIndexer
     private RefCounted<SolrIndexSearcher> refedSolrSearcher;
     private SolrIndexSearcher solrSearcher;
     
+    // Initialize logging category
+    static Logger logger = Logger.getLogger(SolrReIndexer.class.getName());
+    
+    /**
+     * Constructor
+     * @param properties path to properties files
+     * @param args additional arguments
+     * @throws IOException
+     */
     public SolrReIndexer(String properties, String[] args) throws IOException
     {
         Properties props = new Properties();
@@ -96,8 +106,10 @@ public class SolrReIndexer
         }
         catch (Exception e)
         {
-            System.err.println("Couldn't set the instance directory");
-            e.printStackTrace();
+            logger.error("Couldn't set the instance directory");
+            logger.error(e.getMessage());
+        	//System.err.println("Couldn't set the instance directory");
+            //e.printStackTrace();
             System.exit(1);
         }
         verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
@@ -127,7 +139,8 @@ public class SolrReIndexer
             }
             else
             {
-                System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
+                //System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
+            	logger.error("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
                 System.exit(1);
             }
         }
@@ -135,26 +148,34 @@ public class SolrReIndexer
         {
             if (e instanceof ParseException)
             {
-                System.err.println("Error configuring Indexer from properties file.  Exiting...");
+                //System.err.println("Error configuring Indexer from properties file.  Exiting...");
+            	logger.error("Error configuring Indexer from properties file.  Exiting...");
                 System.exit(1);
             }            
-            System.err.println("Unable to find Custom indexer: "+ indexerName);
-            System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
+            
+//            System.err.println("Unable to find Custom indexer: "+ indexerName);
+//            System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
+            logger.error("Unable to find Custom indexer: "+ indexerName);
+            logger.error("Using default SolrIndexer with properties file: " + indexerProps);
+            
             try {
                 indexer = new SolrIndexer(indexerProps);
             }
             catch (Exception e1)
             {
-                System.err.println("Error configuring Indexer from properties file.  Exiting...");
+                //System.err.println("Error configuring Indexer from properties file.  Exiting...");
+            	logger.error("Error configuring Indexer from properties file.  Exiting...");
                 System.exit(1);
             }
         }
         
     }
 
-    // Check first for a particular property in the System Properties, so that the -Dprop="value" command line arg 
-    // mechanism can be used to override values defined in the passed in property file.  This is especially useful
-    // for defining the marc.source property to define which file to operate on, in a shell script loop.
+     /*
+      * Check first for a particular property in the System Properties, so that the -Dprop="value" command line arg 
+      * mechanism can be used to override values defined in the passed in property file.  This is especially useful
+      * for defining the marc.source property to define which file to operate on, in a shell script loop.
+      */
     private String getProperty(Properties props, String propname)
     {
         String prop;
@@ -169,17 +190,29 @@ public class SolrReIndexer
         return null;
     }
     
+    /**
+     * Read matching records from the index
+     * @param queryForRecordsToUpdate
+     */
     public void readAllMatchingDocs(String queryForRecordsToUpdate)
     {
         String queryparts[] = queryForRecordsToUpdate.split(":");
         if (queryparts.length != 2) 
         {
-            System.err.println("Error query must be of the form    field:term");
+            //System.err.println("Error query must be of the form    field:term");
+        	logger.warn("Error query must be of the form    field:term");
             return;
         }
         Map<String, Object> docMap = readAndIndexDoc(queryparts[0], queryparts[1], doUpdate);  
     }
     
+    /**
+     * Read and index a Solr document
+     * @param field Solr field
+     * @param term Term string to index
+     * @param update flag to update the record 
+     * @return Map of the fields
+     */
     public Map<String, Object> readAndIndexDoc(String field, String term, boolean update)
     {
         try
@@ -216,29 +249,49 @@ public class SolrReIndexer
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error(e.getMessage());
+            //e.printStackTrace();
         }
         return(null);
     }
     
+    /**
+     * Add information from a document to a map.
+     * Overriden in subclass
+     * @param doc
+     * @param map
+     */
     protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> map)
     {
         // does nothing here, overridden in subclass
     }
 
+    /**
+     * Return a Solr document from the index
+     * @param s SolrIndexSearcher to search
+     * @param SolrDocumentNum Number of documents to return
+     * @return SolrDocument 
+     * @throws IOException
+     */
     public Document getDocument(SolrIndexSearcher s, int SolrDocumentNum) throws IOException
     {
         Document doc = s.doc(SolrDocumentNum);
         return(doc);
     }
     
+    /**
+     * Retrieve the marc information from the Solr document
+     * @param doc SolrDocument from the index
+     * @return marc4j Record
+     * @throws IOException
+     */
     public Record getRecordFromDocument(Document doc) throws IOException
     {
         Field field = doc.getField(solrFieldContainingEncodedMarcRecord);
         if (field == null)
         {
-            System.err.println("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
+            //System.err.println("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
+        	logger.warn("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
         }
         String marcRecordStr = field.stringValue();
         if (marcRecordStr.startsWith("<?xml version"))
@@ -251,6 +304,11 @@ public class SolrReIndexer
         }
     }
         
+    /**
+     * Extract the marc record from binary marc
+     * @param marcRecordStr
+     * @return
+     */
     private Record getRecordFromRawMarc(String marcRecordStr)
     {
         MarcStreamReader reader;
@@ -281,8 +339,14 @@ public class SolrReIndexer
         return(null);
     }
     
+    // error output
     static BufferedWriter errOut = null;
     
+    /**
+     * Extract marc record from MarcXML
+     * @param marcRecordStr MarcXML string
+     * @return marc4j Record
+     */
     public Record getRecordFromXMLString(String marcRecordStr)
     {
         MarcXmlReader reader;
@@ -313,13 +377,13 @@ public class SolrReIndexer
                     }
                     catch (FileNotFoundException e)
                     {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        // e.printStackTrace();
+                    	logger.error(e.getMessage());
                     }
                     catch (IOException e)
                     {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        // e.printStackTrace();
+                    	logger.error(e.getMessage());
                     }
                 }
                 if (doUpdate == false && errOut != null)
@@ -333,8 +397,8 @@ public class SolrReIndexer
                     }
                     catch (IOException e)
                     {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        // e.printStackTrace();
+                    	logger.error(e.getMessage());
                     }
                 }
                 if (marcRecordStr.contains("<subfield code=\"&#31;\">"))
@@ -354,13 +418,17 @@ public class SolrReIndexer
                 else
                 {
                     me.printStackTrace();
-                    if (verbose) System.out.println("The bad record is: "+ marcRecordStr);
+                    if (verbose) {
+                    	//System.out.println("The bad record is: "+ marcRecordStr);
+                    	logger.info("The bad record is: "+ marcRecordStr);
+                    	logger.error("The bad record is: "+ marcRecordStr);
+                    }
                 }
             }
             catch (UnsupportedEncodingException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // e.printStackTrace();
+            	logger.error(e.getMessage());
             }
         } while (tryAgain);
         return(null);
@@ -368,6 +436,11 @@ public class SolrReIndexer
     }
         
  
+    /**
+     * Extract the leader from the marc record string
+     * @param marcRecordStr marc record as a String
+     * @return Leader leader string for the marc record
+     */
     private String extractLeader(String marcRecordStr)
     {
         final String leadertag1 = "<leader>";
@@ -390,6 +463,9 @@ public class SolrReIndexer
 //        }
 //    }
     
+    /**
+     * Add a key value pair to a map
+     */
     protected void addToMap(Map<String, Object> map, String key, String value)
     {
         if (map.containsKey(key))
@@ -427,6 +503,11 @@ public class SolrReIndexer
         }
     }
 
+    /**
+     * find a specific marc record (using its id) in the solr index
+     * @param doc_id ID of the marc record to find
+     * @return if the item is in the index
+     */
     private Record lookup(String doc_id)
     {
         RefCounted<SolrIndexSearcher> rs = solrCore.getSearcher();
@@ -444,6 +525,7 @@ public class SolrReIndexer
             }
             else
             {
+            	//TODO: construct this from the properties
                 URL url = new URL("http://solrpowr.lib.virginia.edu:8080/solr/select/?q=id%3A"+doc_id+"&start=0&rows=1");
                 InputStream stream = url.openStream();
                 //The evaluate methods in the XPath and XPathExpression interfaces are used to parse an XML document with XPath expressions. The XPathFactory class is used to create an XPath object. Create an XPathFactory object with the static newInstance method of the XPathFactory class.
@@ -466,17 +548,21 @@ public class SolrReIndexer
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // e.printStackTrace();
+        	logger.error(e.getMessage());
         }
         catch (XPathExpressionException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // e.printStackTrace();
+        	logger.error(e.getMessage());
         }
         return(rec);
     }
 
+    /**
+     * Update a document in the Solr index
+     * @param map Values of the "new" marc record
+     */
     public void update(Map<String, Object> map)
     { 
         AddUpdateCommand addcmd = new AddUpdateCommand();
@@ -510,7 +596,8 @@ public class SolrReIndexer
         {
 //            System.out.println(record.toString());
             String doc = addcmd.doc.toString().replaceAll("> ", "> \n");
-            System.out.println(doc);
+            //System.out.println(doc);
+            logger.info(doc);
         }
         addcmd.allowDups = false;
         addcmd.overwriteCommitted = true;
@@ -521,23 +608,32 @@ public class SolrReIndexer
         } 
         catch (IOException e) 
         {
-            System.err.println("Couldn't add document");
-            e.printStackTrace();
+            //System.err.println("Couldn't add document");
+            //e.printStackTrace();
+        	logger.error("Couldn't add marc file.");
+        	logger.error(e.getMessage());
         }                
     }
     
+    /**
+     * finish reindexing
+     */
     public void finish()
     {
         try {
-            System.out.println("Calling commit");
+            //System.out.println("Calling commit");
+        	logger.debug("Callling commit");
             commit(false);
         } 
         catch (IOException e) {
-            System.err.println("Final commit and optmization failed");
-            e.printStackTrace();
+//            System.err.println("Final commit and optmization failed");
+//            e.printStackTrace();
+        	logger.error("Final commit and optimization failed");
+        	logger.error(e.getMessage());
         }
         
-        System.out.println("Done with commit, closing Solr");       
+       // System.out.println("Done with commit, closing Solr");
+        logger.info("Done with commit, closing Solr");
         solrCore.close();
     }
 
@@ -565,7 +661,8 @@ public class SolrReIndexer
             System.arraycopy(args, 1, newArgs, 0, args.length-1);
             args = newArgs;
         }
-        System.out.println("Loading properties from " + properties);
+       // System.out.println("Loading properties from " + properties);
+        logger.info("Loading properties from " + properties);
         
         SolrReIndexer reader = null;
         try
@@ -574,8 +671,8 @@ public class SolrReIndexer
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            //  e.printStackTrace();
+        	logger.error(e.getMessage());
             System.exit(1);
         }
         
@@ -592,8 +689,8 @@ public class SolrReIndexer
             }
             catch (IOException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // e.printStackTrace();
+            	logger.error(e.getMessage());
             }
         }
 
