@@ -73,7 +73,6 @@ public class MarcImporter {
     private boolean unicodeNormalize = false;
     
     // Initialize logging category
-    //static Category logger = Category.getInstance(MarcImporter.class.getName());
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
     
     private String SolrHostURL;

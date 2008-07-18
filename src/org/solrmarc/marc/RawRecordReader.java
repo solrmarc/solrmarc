@@ -10,10 +10,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.log4j.Logger;
 
+/**
+ * Read a binary marc file
+ * @author Robert Haschart
+ * @version $Id$
+ *
+ */
 public class RawRecordReader
 {
 
+	 // Initialize logging category
+    static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
+	
     private static int parseRecordLength(byte[] leaderData) throws IOException {
         InputStreamReader isr = new InputStreamReader(new ByteArrayInputStream(
                 leaderData));
@@ -27,7 +37,11 @@ public class RawRecordReader
         }
         return(length);
     }
-
+    
+	/**
+	 * 
+	 * @param args
+	 */
     public static void main(String[] args)
     {
     //    try {
@@ -49,8 +63,8 @@ public class RawRecordReader
                     }
                     catch (UnsupportedEncodingException e)
                     {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        // e.printStackTrace();
+                    	logger.error(e.getMessage());
                     }
                     if (recordStr.contains(args[1]))
                     { 
@@ -64,8 +78,8 @@ public class RawRecordReader
             }
             catch (IOException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                //  e.printStackTrace();
+            	logger.error(e.getMessage());
             }
 
     //    }

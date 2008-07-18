@@ -9,12 +9,27 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 
+/**
+ * 
+ * 
+ * @author Robert Haschart 
+ * @version $Id$
+ *
+ */
 public class BooklistReader extends SolrReIndexer
 {
     Map<String, Map<String, Object>> documentCache = null;
+    // Initialize logging category
+    static Logger logger = Logger.getLogger(BooklistReader.class.getName());
     
+    /**
+     * Constructor
+     * @param properties Path to properties files
+     * @throws IOException
+     */
     public BooklistReader(String properties) throws IOException
     {
         super(properties, new String[0]);
@@ -22,6 +37,10 @@ public class BooklistReader extends SolrReIndexer
         documentCache = new LinkedHashMap<String, Map<String, Object>>();
     }
     
+    /**
+     * Read a book list
+     * @param filename Path to the book list file
+     */
     public void readBooklist(String filename)
     {
         try
@@ -49,17 +68,24 @@ public class BooklistReader extends SolrReIndexer
         }
         catch (FileNotFoundException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // e.printStackTrace();
+        	logger.info(e.getMessage());
+        	logger.error(e.getCause());
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // e.printStackTrace();
+        	logger.info(e.getMessage());
+        	logger.error(e.getCause());
         }
 
     }
     
+    /**
+     * Get the documentMap for the the given marc id
+     * @param docID 
+     * @return The map of index fields
+     */
     private Map<String, Object> getDocumentMap(String docID)
     {
         Map<String, Object> docMap = null;
@@ -71,15 +97,24 @@ public class BooklistReader extends SolrReIndexer
         {
             docMap = readAndIndexDoc("id", docID, false);
         }
-        return(docMap);
+        return docMap;
     }
 
+    /**
+     * Add extra information from a SolrDocument to a map
+     */
     protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> docMap)
     {
         addExtraInfoFromDocToMap(doc, docMap, "fund_code_facet");
         addExtraInfoFromDocToMap(doc, docMap, "date_received_facet");   
     }
     
+    /**
+     * Add extra information from a Solr Document to a map
+     * @param doc Solr Document to pull information from
+     * @param map Map to add information to
+     * @param keyVal Value to add
+     */
     protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> map, String keyVal)
     {
         String fieldVals[] = doc.getValues(keyVal);
@@ -184,8 +219,9 @@ public class BooklistReader extends SolrReIndexer
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // e.printStackTrace();
+        	logger.info(e.getMessage());
+        	logger.error(e.getCause());
             System.exit(1);
         }
         reader.readBooklist(args.length > 0 ? args[0] : "booklists.txt");

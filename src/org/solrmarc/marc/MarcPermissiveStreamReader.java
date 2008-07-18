@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.marc4j.Constants;
 import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
@@ -110,6 +111,9 @@ public class MarcPermissiveStreamReader implements MarcReader {
     
     private boolean cleaned = false;
     public static boolean showCleaned = false;
+    
+    // Initialize logging category
+    static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
 
     /**
      * Constructs an instance with the specified input stream.
@@ -268,7 +272,8 @@ public class MarcPermissiveStreamReader implements MarcReader {
             {
                 if (recordBuf[recordBuf.length-1] == Constants.RT && recordBuf[recordBuf.length-2] == Constants.FT)
                 {
-                    System.err.println("Warning: Corrupt record encountered, attempting to read permissively");
+                    //System.err.println("Warning: Corrupt record encountered, attempting to read permissively");
+                	logger.warn("Corrupt marc record encountered, attempting to read permissively");
                     // make an attempt to recover record.
                     int offset = 0;
                     while (offset < recordBuf.length)
@@ -367,8 +372,8 @@ public class MarcPermissiveStreamReader implements MarcReader {
             }
             catch (UnsupportedEncodingException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // e.printStackTrace();
+            	logger.error(e.getMessage());
             }
         }
         if (permissive && encoding != "UTF8")
@@ -391,8 +396,8 @@ public class MarcPermissiveStreamReader implements MarcReader {
              }
             catch (UnsupportedEncodingException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                // e.printStackTrace();
+            	logger.error(e.getMessage());
             }
         }
         record.setLeader(ldr);
@@ -531,20 +536,23 @@ public class MarcPermissiveStreamReader implements MarcReader {
                     }
                     catch (UnsupportedEncodingException e)
                     {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        // e.printStackTrace();
+                    	logger.error(e.getMessage());
                     }
                     detect.setText(m8Bytes);
                     CharsetMatch match1 = langDetect(detect, record);
-                    System.err.println(match1 != null ? match1.getName() + " " + match1.getConfidence() + " " + match1.getLanguage() : "No Match");
+                    //System.err.println(match1 != null ? match1.getName() + " " + match1.getConfidence() + " " + match1.getLanguage() : "No Match");
+                    logger.error(match1 != null ? match1.getName() + " " + match1.getConfidence() + " " + match1.getLanguage() : "No Match");
                     
                     detect.setText(uniBytes);
                     CharsetMatch match2 = langDetect(detect, record);
-                    System.err.println(match2 != null ? match2.getName() + " " + match2.getConfidence() + " " + match2.getLanguage() : "No Match");
+                    //System.err.println(match2 != null ? match2.getName() + " " + match2.getConfidence() + " " + match2.getLanguage() : "No Match");
+                    logger.error(match2 != null ? match2.getName() + " " + match2.getConfidence() + " " + match2.getLanguage() : "No Match");
                     
                     detect.setText(isoBytes);
                     CharsetMatch match3 = langDetect(detect, record);
-                    System.err.println(match3 != null ? match3.getName() + " " + match3.getConfidence() + " " + match3.getLanguage() : "No Match");
+                    //System.err.println(match3 != null ? match3.getName() + " " + match3.getConfidence() + " " + match3.getLanguage() : "No Match");
+                    logger.error(match3 != null ? match3.getName() + " " + match3.getConfidence() + " " + match3.getLanguage() : "No Match");
                     
                     if (match1 == null && match2 == null && match3 == null)
                     {
