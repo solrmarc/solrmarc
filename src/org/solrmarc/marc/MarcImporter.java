@@ -37,7 +37,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Category;
+import org.apache.log4j.*;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.update.AddUpdateCommand;
@@ -73,7 +73,8 @@ public class MarcImporter {
     private boolean unicodeNormalize = false;
     
     // Initialize logging category
-    static Category cat = Category.getInstance(MarcImporter.class.getName());
+    //static Category logger = Category.getInstance(MarcImporter.class.getName());
+    static Logger logger = Logger.getLogger(MarcImporter.class.getName());
     
     private String SolrHostURL;
 	/**
@@ -93,7 +94,7 @@ public class MarcImporter {
         catch (Exception e)
         {
             //System.err.println("Couldn't set the instance directory");
-        	cat.error("Couldn't set the instance directory");
+        	logger.error("Couldn't set the instance directory");
             e.printStackTrace();
             System.exit(1);
         }
@@ -146,7 +147,7 @@ public class MarcImporter {
             else
             {
                 //System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
-            	cat.error("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
+            	logger.error("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
                 System.exit(1);
             }
         }
@@ -155,14 +156,14 @@ public class MarcImporter {
             if (e instanceof ParseException)
             {
                 //System.err.println("Error configuring Indexer from properties file.  Exiting...");
-            	cat.error("Error configuring Indexer from properties file.  Exiting...");
+            	logger.error("Error configuring Indexer from properties file.  Exiting...");
                 System.exit(1);
             }            
             //System.err.println("Unable to find Custom indexer: "+ indexerName);
             //System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
             
-            cat.warn("Unable to find Custom indexer: "+ indexerName);
-            cat.warn("Using default SolrIndexer with properties file: " + indexerProps);
+            logger.warn("Unable to find Custom indexer: "+ indexerName);
+            logger.warn("Using default SolrIndexer with properties file: " + indexerProps);
             
             try {
                 indexer = new SolrIndexer(indexerProps);
@@ -170,7 +171,7 @@ public class MarcImporter {
             catch (Exception e1)
             {
                 //System.err.println("Error configuring Indexer from properties file.  Exiting...");
-            	cat.error("Error configuring Indexer from properties file.  Exiting...");
+            	logger.error("Error configuring Indexer from properties file.  Exiting...");
                 System.exit(1);
             }
         }
@@ -199,7 +200,7 @@ public class MarcImporter {
         else if (source.equals("Z3950"))
         {
             //System.err.println("Error: not yet implemented");
-        	cat.warn("Error: Z3950 not yet implemented");
+        	logger.warn("Error: Z3950 not yet implemented");
             reader = null;
         }
         String marcIncludeIfPresent = getProperty(props, "marc.include_if_present");
@@ -271,12 +272,12 @@ public class MarcImporter {
         catch (FileNotFoundException e)
         {
             //System.err.println("Error: unable to find and open delete-record-id-list: "+ delFile);
-        	cat.error("Error: unable to find and open delete-record-id-list: "+ delFile);
+        	logger.error("Error: unable to find and open delete-record-id-list: "+ delFile);
         }
         catch (IOException e)
         {
             //System.err.println("Error: reading from delete-record-id-list: "+ delFile);
-        	cat.error("Error: reading from delete-record-id-list: "+ delFile);
+        	logger.error("Error: reading from delete-record-id-list: "+ delFile);
         }
         return(numDeleted);
     }
@@ -295,7 +296,7 @@ public class MarcImporter {
                 Record record = reader.next();
                 
                 //System.out.println("Adding record " + recordCounter + ": " + record.getControlNumber());
-                cat.info("Adding record " + recordCounter + ": " + record.getControlNumber());
+                logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
                 addToIndex(record);
             }
             catch (org.apache.solr.common.SolrException e)
@@ -303,12 +304,12 @@ public class MarcImporter {
                if (e.getMessage().contains("missing required fields"))
                {
                    //System.err.println("Warning : " + e.getMessage()+  "at record count = "+ recordCounter);
-            	   cat.warn(e.getMessage() +  "at record count = "+ recordCounter);
+            	   logger.warn(e.getMessage() +  "at record count = "+ recordCounter);
                }
                else
                {
                    //System.err.println("Error indexing");
-            	   cat.error("Error indexing: " + e.getMessage());
+            	   logger.error("Error indexing: " + e.getMessage());
                    e.printStackTrace();
                }
             }
@@ -316,7 +317,7 @@ public class MarcImporter {
             {
                 // keep going?
                 //System.err.println("Error indexing");
-            	cat.error("Error indexing: " + e.getMessage());
+            	logger.error("Error indexing: " + e.getMessage());
                 e.printStackTrace();
             }            
         }
@@ -365,8 +366,8 @@ public class MarcImporter {
             //System.out.println(record.toString());
             String doc = addcmd.doc.toString().replaceAll("> ", "> \n");
             //System.out.println(doc);
-            cat.info(record.toString());
-            cat.info(doc);
+            logger.info(record.toString());
+            logger.info(doc);
         }
         addcmd.allowDups = false;
         addcmd.overwriteCommitted = true;
@@ -378,7 +379,7 @@ public class MarcImporter {
         catch (IOException e) 
         {
             //System.err.println("Couldn't add document");
-        	cat.error("Couldn't add document: " + e.getMessage());
+        	logger.error("Couldn't add document: " + e.getMessage());
             e.printStackTrace();
         }                
     }
@@ -387,17 +388,17 @@ public class MarcImporter {
     {
         try {
             //System.out.println("Calling commit");
-        	cat.info("Calling commit");
+        	logger.info("Calling commit");
             commit(shuttingDown ? false : optimizeAtEnd);
         } 
         catch (IOException e) {
             //System.err.println("Final commit and optmization failed");
-        	cat.error("Final commit and optimization failed: " + e.getMessage());
+        	logger.error("Final commit and optimization failed: " + e.getMessage());
             e.printStackTrace();
         }
         
         //System.out.println("Done with commit, closing Solr");
-        cat.info("Done with the commit, closing Solr");
+        logger.info("Done with the commit, closing Solr");
         solrCore.close();
     }
 
@@ -479,12 +480,12 @@ public class MarcImporter {
         catch (MalformedURLException me)
         {
             //System.err.println("MalformedURLException: " + me);
-        	cat.error("MalformedURLException" + me);
+        	logger.error("MalformedURLException" + me);
         }
         catch (IOException ioe)
         {
             //System.err.println("IOException: " + ioe.getMessage());
-        	cat.error("IOException: " + ioe.getMessage());
+        	logger.error("IOException: " + ioe.getMessage());
         }
     }  
 
@@ -507,7 +508,7 @@ public class MarcImporter {
         public void run()
         {
             //System.err.println("Starting Shutdown hook");
-        	cat.info("Starting Shutdown hook");
+        	logger.info("Starting Shutdown hook");
             
         	if (!importer.isShutDown) 
             {
@@ -525,7 +526,7 @@ public class MarcImporter {
                     e.printStackTrace();
                 }
             }
-            cat.info("Finished Shutdown hook");
+            logger.info("Finished Shutdown hook");
            // System.err.println("Finished Shutdown hook");
         }
     }
@@ -537,7 +538,7 @@ public class MarcImporter {
      */
     public static void main(String[] args) 
     {
-        cat.info("Starting SolrMarc indexing.");
+        logger.info("Starting SolrMarc indexing.");
     	// default properties file
         String properties = "import.properties";
         
@@ -547,7 +548,7 @@ public class MarcImporter {
         }
         
        // System.out.println("Loading properties from " + properties);
-        cat.info("Loading properties from " + properties);
+        logger.info("Loading properties from " + properties);
         
         MarcImporter importer = null;
         try
@@ -557,12 +558,12 @@ public class MarcImporter {
         catch (IOException e)
         {
             // TODO Auto-generated catch block
-        	cat.error("Couldn't load properties file." + e);
+        	logger.error("Couldn't load properties file." + e);
             e.printStackTrace();
             System.exit(1);
         }
         
-        cat.debug("Shutdown hook for Solr");
+        logger.debug("Shutdown hook for Solr");
         Runtime.getRuntime().addShutdownHook(importer.new MyShutdownThread(importer));
         
         //System.out.println("Here we go...");
@@ -583,7 +584,7 @@ public class MarcImporter {
         
         long totalTime = end.getTime() - start.getTime();
         
-        cat.info("Finished indexing in " + Utils.calcTime(totalTime));
+        logger.info("Finished indexing in " + Utils.calcTime(totalTime));
         //System.out.println("Finished in " + Utils.calcTime(totalTime) );
         
         // calculate the time taken
@@ -592,8 +593,8 @@ public class MarcImporter {
         //System.out.println("Indexed " + numImported + " at a rate of about " + indexingRate + "per sec");
         //System.out.println("Deleted " + numDeleted + " records");
         
-        cat.info("Indexed " + numImported + " at a rate of about " + indexingRate + " per sec");
-        cat.info("Deleted " + numDeleted + " records");
+        logger.info("Indexed " + numImported + " at a rate of about " + indexingRate + " per sec");
+        logger.info("Deleted " + numDeleted + " records");
         
         System.exit(importer.shuttingDown ? 1 : 0);
     }
