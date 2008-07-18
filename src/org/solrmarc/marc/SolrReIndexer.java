@@ -49,6 +49,13 @@ import org.xml.sax.InputSource;
 
 import org.apache.log4j.Logger;
 
+
+/**
+ * Reindex marc records stored in an index
+ * @author Robert Haschart
+ * @version $Id$
+ *
+ */
 public class SolrReIndexer
 {
     private String solrCoreDir;
