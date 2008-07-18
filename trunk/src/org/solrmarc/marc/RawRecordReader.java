@@ -45,7 +45,7 @@ public class RawRecordReader
     public static void main(String[] args)
     {
     //    try {
-
+            String idLookedFor = args[1].trim();
             byte[] byteArray = new byte[24];
             try
             {
@@ -66,11 +66,20 @@ public class RawRecordReader
                         // e.printStackTrace();
                     	logger.error(e.getMessage());
                     }
-                    if (recordStr.contains(args[1]))
-                    { 
-                        System.out.write(byteArray);
-                        System.out.write(recordBuf);
+                    if (recordStr.startsWith("001"))
+                    {
+                        String leader = new String(byteArray);
+                        int offset = Integer.parseInt(leader.substring(12,17)) - 24;
+                        int length = Integer.parseInt(recordStr.substring(3,7));
+                        int offset2 = Integer.parseInt(recordStr.substring(7,12));
+                        String id = recordStr.substring(offset+offset2, offset+offset2+length-1);
+                        if (id.equals(idLookedFor))
+                        { 
+                            System.out.write(byteArray);
+                            System.out.write(recordBuf);
+                        }
                     }
+
                 }
             }
             catch (EOFException e)
