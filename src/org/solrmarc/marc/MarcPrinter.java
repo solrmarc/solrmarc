@@ -30,12 +30,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import org.marc4j.MarcDirStreamReader;
 import org.marc4j.MarcException;
+import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
@@ -43,10 +46,7 @@ import org.marc4j.MarcXmlWriter;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
-import org.solrmarc.marc.MarcDirStreamReader;
 import org.solrmarc.marc.MarcFilteredReader;
-import org.solrmarc.marc.MarcPermissiveStreamReader;
-import org.solrmarc.marc.MarcTranslatedReader;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -73,32 +73,31 @@ public class MarcPrinter
         File file = new File(fileStr);
         MarcReader reader;
         boolean permissiveReader = Boolean.parseBoolean(System.getProperty("marc.permissive"));
-        
+        boolean to_utf_8 = Boolean.parseBoolean(System.getProperty("marc.to_utf_8"));
+       
         if (file.isDirectory())
         {
-            reader = new MarcDirStreamReader(file, permissiveReader);            
+            reader = new MarcDirStreamReader(file, permissiveReader, to_utf_8);            
         }
         else
         {       
             InputStream in = new FileInputStream(file);
-            reader = new MarcPermissiveStreamReader(in, permissiveReader);
+            reader = new MarcPermissiveStreamReader(in, permissiveReader, to_utf_8);
         }
             
         String marcIncludeIfPresent = System.getProperty("marc.include_if_present");
         String marcIncludeIfMissing = System.getProperty("marc.include_if_missing");
         boolean verbose = Boolean.parseBoolean(System.getProperty("marc.verbose"));
-        boolean showCleanedFiles = Boolean.parseBoolean(System.getProperty("marc.show_cleaned"));
-        MarcPermissiveStreamReader.setShowCleaned(showCleanedFiles);
+
         if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null))
         {
             reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing);
         }
-        boolean to_utf_8 = Boolean.parseBoolean(System.getProperty("marc.to_utf_8"));
-        boolean unicodeNormalize = Boolean.parseBoolean(System.getProperty("marc.unicode_normalize"));
-        if (reader != null && to_utf_8)
-        {
-            reader = new MarcTranslatedReader(reader, unicodeNormalize);
-        }
+//        boolean unicodeNormalize = Boolean.parseBoolean(System.getProperty("marc.unicode_normalize"));
+//        if (reader != null && to_utf_8)
+//        {
+//            reader = new MarcTranslatedReader(reader, unicodeNormalize);
+//        }
         
         SolrIndexer indexer = null;
         String indexerName = System.getProperty("solr.indexer");
@@ -252,6 +251,38 @@ public class MarcPrinter
                 {
                     //System.err.println("Error reading Marc Record: "+ me.getMessage());                                   
                 	logger.error("Error reading Marc Record: "+ me.getMessage());
+                }
+            }
+        }
+
+        else if (mode.equals("lint"))
+        {
+            int recNo = 1;
+            while (reader.hasNext()) 
+            {
+                try {
+                    Record rec = reader.next();
+//                    Leader ldr = rec.getLeader();
+//                    if (ldr.getBaseAddressOfData() != 0) continue;
+                    String recStr = rec.toString();
+                    
+                    if (verbose) System.out.println(recStr);
+                    List<Object> errors = reader.getErrors();
+                    if (errors != null) 
+                    {
+                        Iterator<Object> iter = errors.iterator();
+                        while (iter.hasNext())
+                        {
+                            Object error = iter.next();
+                            System.out.println(error.toString());
+                        }
+                    }
+                    
+                    recNo ++;
+                }
+                catch (MarcException me)
+                {
+                    System.err.println("Error reading Marc Record: "+ me.getMessage());                                   
                 }
             }
         }

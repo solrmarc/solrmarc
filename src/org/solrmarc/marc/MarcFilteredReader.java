@@ -23,6 +23,7 @@ import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.tools.SolrMarcException;
 import org.solrmarc.tools.Utils;
 
+import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -142,6 +143,16 @@ public class MarcFilteredReader implements MarcReader
             }
         }
         return currentRecord ;
+    }
+    
+    public boolean hasErrors()
+    {
+        return(reader.hasErrors());
+    }
+
+    public List<Object> getErrors()
+    {
+        return(reader.getErrors());
     }
 
 }

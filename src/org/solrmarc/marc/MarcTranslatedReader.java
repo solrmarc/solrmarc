@@ -111,7 +111,7 @@ public class MarcTranslatedReader implements MarcReader
             if (!(f instanceof DataField)) continue;
             DataField field = (DataField)f;
             List subfields = field.getSubfields();
-            Iterator s_iter = subfields.iterator();
+            Iterator<Subfield> s_iter = subfields.iterator();
             while (s_iter.hasNext())
             {
                 Subfield sf = (Subfield)s_iter.next();
@@ -135,5 +135,15 @@ public class MarcTranslatedReader implements MarcReader
         l.setCharCodingScheme('a');
         rec.setLeader(l);
         return rec;
+    }
+    
+    public boolean hasErrors()
+    {
+        return(reader.hasErrors());
+    }
+
+    public List<Object> getErrors()
+    {
+        return(reader.getErrors());
     }
 }

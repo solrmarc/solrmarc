@@ -45,9 +45,12 @@ import org.apache.solr.update.CommitUpdateCommand;
 import org.apache.solr.update.DeleteUpdateCommand;
 import org.apache.solr.update.DocumentBuilder;
 import org.apache.solr.update.UpdateHandler;
+import org.marc4j.MarcDirStreamReader;
+import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.marc.MarcFilteredReader;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -196,11 +199,11 @@ public class MarcImporter {
         reader = null;
         if (source.equals("FILE"))
         {
-            reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), permissiveReader);
+            reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), permissiveReader, to_utf_8);
         }
         else if (source.equals("DIR"))
         {
-            reader = new MarcDirStreamReader(getProperty(props, "marc.path").trim(), permissiveReader);
+            reader = new MarcDirStreamReader(getProperty(props, "marc.path").trim(), permissiveReader, to_utf_8);
         }
         else if (source.equals("Z3950"))
         {
@@ -214,12 +217,12 @@ public class MarcImporter {
         {
             reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing);
         }
-        // Do translating last so that if we are Filtering as well as translating, we don't expend the 
-        // effort to translate records, which may then be filtered out and discarded.
-        if (reader != null && to_utf_8)
-        {
-            reader = new MarcTranslatedReader(reader, unicodeNormalize);
-        }
+//        // Do translating last so that if we are Filtering as well as translating, we don't expend the 
+//        // effort to translate records, which may then be filtered out and discarded.
+//        if (reader != null && to_utf_8)
+//        {
+//            reader = new MarcTranslatedReader(reader, unicodeNormalize);
+//        }
         return;
     }
     
