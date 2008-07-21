@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.MarcXmlWriter;
@@ -44,6 +45,7 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import org.solrmarc.marc.MarcImporter;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -57,7 +59,13 @@ public class SolrIndexer
     private Map<String, Map<String, String>> mapMap = null;
     private Map<String, String[]> fieldMap = null;
     private Date indexDate = null;
+    
+    // Initialize logging category
+    static Logger logger = Logger.getLogger(MarcImporter.class.getName());
 
+    /**
+     * private constructor
+     */
     private SolrIndexer()
     {
         mapMap = new HashMap<String, Map<String, String>>();
@@ -84,9 +92,9 @@ public class SolrIndexer
     }
 
     /**
-     * 
-     * @param props
-     * @return
+     * Parse the properties file and load parameters into Map
+     * @param props Properties to load
+     * @return 
      */
     protected boolean fillMapFromProperties(Properties props)
     {
@@ -193,14 +201,16 @@ public class SolrIndexer
                         }
                         catch (FileNotFoundException e)
                         {
-                            System.err.println("Error: Unable to find file containing specified translation map (" +
-                                               fieldDef[3] + ")");
+                            //System.err.println("Error: Unable to find file containing specified translation map (" +
+                              //                 fieldDef[3] + ")");
+                        	logger.error("Unable to find file containing specified translation map (" + fieldDef[3] + ")");
                             valid = false;
                         }
                         catch (IOException e)
                         {
-                            System.err.println("Error: Problems reading specified translation map (" +
-                                               fieldDef[3] + ")");
+//                            System.err.println("Error: Problems reading specified translation map (" +
+//                                               fieldDef[3] + ")");
+                        	logger.error("Error: Problems reading specified translation map (" + fieldDef[3] + ")");
                             valid = false;
                         }
                     }
@@ -229,8 +239,9 @@ public class SolrIndexer
             String mapName = fieldVal[3];
             if (mapName != null && findMap(mapName) == null)
             {
-                System.err.println("Error: Specified translation map (" +
-                                   mapName + ") not found in properties file");
+//                System.err.println("Error: Specified translation map (" +
+//                                   mapName + ") not found in properties file");
+            	logger.error("Sepcified translation map (" + mapName + ") not found in properties file");
                 valid = false;
             }
             if (indexType.equals("custom"))
@@ -249,28 +260,35 @@ public class SolrIndexer
                     // }
                     if (!(Set.class.isAssignableFrom(retval) || String.class.isAssignableFrom(retval)))
                     {
-                        System.err.println("Error: Return type of custom indexing function " +
-                                           indexParm +
-                                           " must be either String or Set<String>");
+//                        System.err.println("Error: Return type of custom indexing function " +
+//                                           indexParm +
+//                                           " must be either String or Set<String>");
+                        logger.error("Error: Return type of custom indexing function " + indexParm +" must be either String or Set<String>");
                         valid = false;
                     }
                 }
                 catch (SecurityException e)
                 {
-                    System.err.println("Error: Unable to invoke custom indexing function " +
-                                       indexParm);
+//                    System.err.println("Error: Unable to invoke custom indexing function " +
+//                                       indexParm);
+                	logger.error("Unable to invoke custom indexing function " + indexParm);
+                	logger.debug(e.getCause());
                     valid = false;
                 }
                 catch (NoSuchMethodException e)
                 {
-                    System.err.println("Error: Unable to find custom indexing function " +
-                                       indexParm);
+//                    System.err.println("Error: Unable to find custom indexing function " +
+//                                       indexParm);
+                	logger.error("Unable to find custom indexing function " + indexParm);
+                	logger.debug(e.getCause());
                     valid = false;
                 }
                 catch (IllegalArgumentException e)
                 {
-                    System.err.println("Error: Unable to find custom indexing function " +
-                                       indexParm);
+//                    System.err.println("Error: Unable to find custom indexing function " +
+//                                       indexParm);
+                	logger.error("Unable to find custom indexing function " + indexParm);
+                	logger.debug(e.getCause());
                     valid = false;
                 }
             }
@@ -442,23 +460,28 @@ public class SolrIndexer
         }
         catch (SecurityException e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
+        	logger.error(e.getCause());
         }
         catch (NoSuchMethodException e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
+        	logger.error(e.getCause());
         }
         catch (IllegalArgumentException e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
+        	logger.error(e.getCause());
         }
         catch (IllegalAccessException e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
+        	logger.error(e.getCause());
         }
         catch (InvocationTargetException e)
         {
-            e.printStackTrace();
+            //e.printStackTrace();
+        	logger.error(e.getCause());
         }
     }
 
@@ -887,8 +910,8 @@ public class SolrIndexer
         }
         catch (UnsupportedEncodingException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            //  e.printStackTrace();
+        	logger.error(e.getCause());
         }
         return (result);
     }
@@ -914,8 +937,8 @@ public class SolrIndexer
         }
         catch (UnsupportedEncodingException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // e.printStackTrace();
+        	logger.error(e.getCause());
         }
         return tmp;
     }
