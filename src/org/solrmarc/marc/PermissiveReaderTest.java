@@ -26,6 +26,13 @@ public class PermissiveReaderTest
     {
         System.setProperty("org.marc4j.marc.MarcFactory", "marcoverride.UVAMarcFactoryImpl");
         boolean verbose = Boolean.parseBoolean(System.getProperty("marc.verbose"));
+        if (args[0].equals("-v")) 
+        {
+            verbose = true;
+            String newArgs[] = new String[args.length-1];
+            System.arraycopy(args, 1, newArgs, 0, args.length-1);
+            args = newArgs;
+        }
         String fileStr = args[0];
         File file = new File(fileStr);
         MarcReader readerNormal = null;
