@@ -26,9 +26,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
+import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import org.solrmarc.marc.MarcImporter;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -38,6 +42,9 @@ import org.solrmarc.tools.Utils;
  * 
  */
 public class VuFindIndexer extends SolrIndexer {
+	
+	// Initialize logging category
+    static Logger logger = Logger.getLogger(VuFindIndexer.class.getName());
 
 	/**
 	 * Default constructor
@@ -45,62 +52,121 @@ public class VuFindIndexer extends SolrIndexer {
 	 * @param propertiesMapFile
 	 * @throws Exception
 	 */
-	public VuFindIndexer(final String propertiesMapFile)
+	public VuFindIndexer(final String propertiesMapFile, final String solrMarcDir)
 			throws FileNotFoundException, IOException, ParseException {
 		super(propertiesMapFile);
 	}
 
 	/**
-	 * Returns the format from a record
-	 * 
-	 * @param record
-	 * @return Record format
+	 * Determine Record Main Format
+	 *
+	 * @param  Record  record
+	 * @return String  Main format of record
 	 */
-	public String getFormat(final Record record) {
-		String leaderChar = getFirstFieldVal(record, "000[7]").toUpperCase();
-		String t007Char = getFirstFieldVal(record, "007[0]");
+	private String getFormat(final Record record)
+    {
+        String leader = record.getLeader().toString();
+        char leaderBit;
+        ControlField formatField = (ControlField) record.getVariableField("007");
+        ControlField fixedField = (ControlField) record.getVariableField("008");
+        DataField title = (DataField) record.getVariableField("245");
+        char formatCode = ' ';
 
-		if (t007Char != null) {
-			t007Char = t007Char.toUpperCase(Locale.US);
-		}
+        // check if there's an h in the 245
+        if (title != null) {
+            if (title.getSubfield('h') != null){
+                if (title.getSubfield('h').getData().toLowerCase().contains("[electronic resource]")) {
+            		return "Electronic";
+                }
+        	}
+        }
 
-		Set<String> titleH = new LinkedHashSet<String>();
-		addSubfieldDataToSet(record, titleH, "245", "h");
+        // check the 007
+        if(formatField != null){
+            formatCode = formatField.getData().toUpperCase().charAt(0);
+        	switch (formatCode) {
+                case 'A':
+                    return "Map";
+                /*
+                Removed for inaccuracies - turns journals with 856 to electronic
+                case 'C':
+                    return "Electronic";
+                */
+                case 'D':
+                    return "Globe";
+                case 'F':
+                    return "Braille";
+                case 'G':
+                    return "Slide";
+                case 'H':
+                    return "Microfilm";
+                case 'K':
+        			return "Photo";
+                case 'M':
+                case 'V':
+                    return "Video";
+                case 'O':
+                    return "Kit";
+                case 'Q':
+                    return "Musical Score";
+                case 'R':
+                    return "Sensor Image";
+                case 'S':
+                    return "Audio";
+        	}
+        }
 
-		// check with folks to see if leader is more likely
-		if ("M".equals(leaderChar)) {
-			return "Book";
-		}
-		if ("S".equals(leaderChar)) {
-			return "Journal";
-		}
-		// check the h subfield of the 245 field
-		if (Utils.setItemContains(titleH, "electronic resource")) {
-			return "Electronic";
-		}
-		// check the 007
-		if (t007Char == null) {
-			return null;
-		}
-		if ("A".equals(t007Char)) {
-			return "Map";
-		}
-		if ("G".equals(t007Char)) {
-			return "Slide";
-		}
-		if ("H".equals(t007Char)) {
-			return "Microfilm";
-		}
-		if ("K".equals(t007Char)) {
-			return "Photo";
-		}
-		if ("S".equals(t007Char)) {
-			return "Audio";
-		}
-		if ("V".equals(t007Char) || "M".equals(t007Char)) {
-			return "Video";
-		}
-		return "";
+        // check the Leader
+        leaderBit = leader.charAt(6);
+        switch (Character.toUpperCase(leaderBit)) {
+            case 'C':
+            case 'D':
+                return "Musical Score";
+            case 'E':
+            case 'F':
+                return "Map";
+            case 'G':
+                return "Slide";
+            case 'I':
+            case 'J':
+                return "Audio";
+            case 'K':
+                return "Photo";
+            case 'M':
+                return "Electronic";
+            case 'O':
+            case 'P':
+                return "Kit";
+            case 'R':
+                return "Physical Object";
+            case 'T':
+                return "Manuscript";
+        }
+
+        // check the Leader
+        leaderBit = leader.charAt(7);
+        switch (Character.toUpperCase(leaderBit)) {
+            // Monograph
+            case 'M':
+                if (formatCode == 'C') {
+                    return "eBook";
+                } else {
+                    return "Book";
+                }
+            // Serial
+            case 'S':
+                // Look in 008 to determine what type of Continuing Resource
+                formatCode = fixedField.getData().toUpperCase().charAt(21);
+                switch (formatCode) {
+                    case 'N':
+                        return "Newspaper";
+                    case 'P':
+                        return "Journal";
+                }
+                return "Serial";
+        }
+
+        return "Unknown";
 	}
 
 	/**
@@ -132,31 +198,127 @@ public class VuFindIndexer extends SolrIndexer {
 		return vals[0];
 	}
 
+    /**
+     * Extract the subject component of the call number
+     *
+     * Can return null
+     *
+     * @param record
+     * @return Call number label
+     */
+    public String getCallNumberSubject(final Record record) {
+
+        String val = getFirstFieldVal(record, "090a:050a");
+
+        if (val != null) {
+            String [] callNumberSubject = val.split("[^A-Z]+");
+        	return callNumberSubject[0];
+        } else {
+            return val;
+        }
+    }
+
+
+    /**
+     * Extract all topics from a record
+     *
+     * @param record
+     * @return
+     */
+    public Set<String> getFullTopic(final Record record) {
+        Set<String> result = new LinkedHashSet<String>();
+
+        result.addAll(getAllSubfields(record, "600"));
+        result.addAll(getAllSubfields(record, "610"));
+        result.addAll(getAllSubfields(record, "630"));
+        result.addAll(getAllSubfields(record, "650"));
+        return result;
+    }
+
+    /**
+     * Extract all subject geographic regions from a record
+     *
+     * @param record
+     * @return
+     */
+    public Set<String> getFullGeographic(final Record record) {
+    	Set<String> result = new LinkedHashSet<String>();
+
+    	result.addAll(getAllSubfields(record, "651"));
+    	return result;
+    }
+
+    /**
+     * Extract all genres from a record
+     *
+     * @param record
+     * @return
+     */
+    public Set<String> getFullGenre(final Record record) {
+    	Set<String> result = new LinkedHashSet<String>();
+
+    	result.addAll(getAllSubfields(record, "655"));
+    	return result;
+    }
+
+    /**
+     * extract all the subfields in a given marc field
+     * @param record
+     * @param marcFieldNum - the marc field number as a string (e.g. "245")
+     * @return
+     */
+    public Set<String> getAllSubfields(final Record record, String marcFieldNum)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+
+        DataField marcField = (DataField) record.getVariableField(marcFieldNum);
+        if (marcField != null) {
+            List<Subfield> subfields = marcField.getSubfields();
+            Iterator<Subfield> iter = subfields.iterator();
+
+            Subfield subfield;
+
+            while (iter.hasNext()) {
+               subfield = iter.next();
+               result.add(subfield.getData());
+            }
+        }
+
+        return result;
+    }
+	
 	/**
-	 * Extract all topics from a record
-	 * 
-	 * @param record
-	 * @return
+	 * Loops through all datafields and creates a field for "all fields"
+	 * searching
+	 *
+	 * @param record Marc record to extract data from
 	 */
-	public Set<String> getFullTopic(final Record record) {
-		Set<String> result = new LinkedHashSet<String>();
+	public String getAllFields(final Record record)
+    {
+        StringBuffer data = new StringBuffer("");
 
-		DataField subjectField = (DataField) record.getVariableField("600");
-		// StringBuffer fullTopic = new StringBuffer();
+		List<DataField> fields = record.getDataFields();
+		Iterator<DataField> fieldsIter = fields.iterator();
+		DataField field;
 
-		if (subjectField != null) {
-			List<Subfield> subfields = subjectField.getSubfields();
-			Iterator<Subfield> iter = subfields.iterator();
+		List<DataField> subfields;
+		Iterator<DataField> subfieldsIter;
+		Subfield subfield;
 
-			Subfield subfield;
+        // Loop through fields
+		while(fieldsIter.hasNext()){
+			field = (DataField) fieldsIter.next();
 
-			while (iter.hasNext()) {
-				subfield = iter.next();
-				result.add(subfield.getData());
-			}
+			// Loop through subfields
+            subfields = field.getSubfields();
+            subfieldsIter = subfields.iterator();
+            while (subfieldsIter.hasNext()) {
+                subfield = (Subfield) subfieldsIter.next();
+                data.append(" " + subfield.getData());
+            }
 		}
 
-		return result;
+		return data.toString();
 	}
 
 }
