@@ -110,6 +110,11 @@ public class MarcImporter {
     public void loadProperties(String properties) throws IOException
     {       
         Properties props = new Properties();
+        
+        //String path = getClass().getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
+        
+        //InputStream in = new FileInputStream (new File( path + "\\" + properties));
+        
         InputStream in = new FileInputStream(properties);
         // load the properties
         props.load(in);
@@ -134,6 +139,7 @@ public class MarcImporter {
                 String baseName = baseIndexerClass.getPackage().getName();
                 String fullName = baseName + "." + indexerName;
                 indexerClass = Class.forName(fullName);
+                logger.warn(e.getCause());
             }
             
             Constructor constructor = indexerClass.getConstructor(new Class[]{String.class});
@@ -162,7 +168,7 @@ public class MarcImporter {
             //System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
             
             logger.warn("Unable to find Custom indexer: "+ indexerName);
-            logger.warn("Using default SolrIndexer with properties file: " + indexerProps);
+            logger.warn("Using default SolrIndexer with properties file: " + indexerProps); 
             
             try {
                 indexer = new SolrIndexer(indexerProps);
