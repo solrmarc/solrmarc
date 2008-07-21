@@ -98,6 +98,10 @@ public class PermissiveReaderTest
                     showDiffs(strNorm, strPerm);
                     System.out.println("-------------------------------------------------------------------------------------");
                 }
+                if (patchedRecs != null)
+                {
+                    patchedRecs.write(recPerm);
+                }
             }
         }
     }
