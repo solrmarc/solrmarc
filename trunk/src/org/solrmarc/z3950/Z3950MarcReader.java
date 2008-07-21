@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
@@ -125,5 +126,16 @@ public class Z3950MarcReader implements MarcReader
             System.out.println(rec.toString());
         }
         System.exit(0);
-    }    
+    }      
+    
+    public boolean hasErrors()
+    {
+        return(false);
+    }
+
+    public List<Object> getErrors()
+    {
+        return(null);
+    }
+
 }
