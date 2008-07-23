@@ -856,9 +856,12 @@ public class SolrIndexer
                             while (iter.hasNext())
                             {
                                 Subfield s = (Subfield) (iter.next());
-                                String data = s.getData();
-                                data = Utils.cleanData(data);
-                                buffer.append(" " + data);
+                                String data = Utils.cleanData(s.getData());
+                                if (buffer.length() > 0) {
+                                    buffer.append(" " + data);
+                                } else {
+                                    buffer.append(data);
+                                }
                             }
                         }
                         set.add(buffer.toString());
