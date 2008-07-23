@@ -48,10 +48,16 @@ public class VuFindIndexer extends SolrIndexer
 	 * @param propertiesMapFile
 	 * @throws Exception
 	 */
+    /*
     public VuFindIndexer(final String propertiesMapFile) throws FileNotFoundException, IOException, ParseException 
     {
         super(propertiesMapFile);
     }
+    */
+	public VuFindIndexer(final String propertiesMapFile, final String solrMarcDir)
+			throws FileNotFoundException, IOException, ParseException {
+		super(propertiesMapFile, solrMarcDir);
+	}
     
     /**
 	 * Determine Record Main Format
@@ -211,6 +217,74 @@ public class VuFindIndexer extends SolrIndexer
 	}
     
     /**
+     * Extract all topics from a record
+     *
+     * @param record
+     * @return
+     */
+    public Set<String> getFullTopic(final Record record) {
+        Set<String> result = new LinkedHashSet<String>();
+
+        result.addAll(getAllSubfields(record, "600"));
+        result.addAll(getAllSubfields(record, "610"));
+        result.addAll(getAllSubfields(record, "630"));
+        result.addAll(getAllSubfields(record, "650"));
+        return result;
+    }
+
+    /**
+     * Extract all subject geographic regions from a record
+     *
+     * @param record
+     * @return
+     */
+    public Set<String> getFullGeographic(final Record record) {
+    	Set<String> result = new LinkedHashSet<String>();
+
+    	result.addAll(getAllSubfields(record, "651"));
+    	return result;
+    }
+
+    /**
+     * Extract all genres from a record
+     *
+     * @param record
+     * @return
+     */
+    public Set<String> getFullGenre(final Record record) {
+    	Set<String> result = new LinkedHashSet<String>();
+
+    	result.addAll(getAllSubfields(record, "655"));
+    	return result;
+    }
+
+    /**
+     * extract all the subfields in a given marc field
+     * @param record
+     * @param marcFieldNum - the marc field number as a string (e.g. "245")
+     * @return
+     */
+    public Set<String> getAllSubfields(final Record record, String marcFieldNum)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+
+        DataField marcField = (DataField) record.getVariableField(marcFieldNum);
+        if (marcField != null) {
+            List<Subfield> subfields = marcField.getSubfields();
+            Iterator<Subfield> iter = subfields.iterator();
+
+            Subfield subfield;
+
+            while (iter.hasNext()) {
+               subfield = iter.next();
+               result.add(subfield.getData());
+            }
+        }
+
+        return result;
+    }
+
+	/**
 	 * Loops through all datafields and creates a field for "all fields"
 	 * searching
 	 *
@@ -243,84 +317,6 @@ public class VuFindIndexer extends SolrIndexer
 
 		return data.toString();
 	}
-    
-    /**
-     * Extract all topics from a record
-     * @param record
-     * @return
-     */
-    public Set<String> getFullTopic(final Record record){
-    	 Set<String> result = new LinkedHashSet<String>();
-    	 
-    	 DataField subjectField = (DataField) record.getVariableField("600");
-    	 //StringBuffer fullTopic = new StringBuffer();
-    	 
-    	 if(subjectField != null){
-    		 List<Subfield> subfields = subjectField.getSubfields();
-    		 Iterator<Subfield> iter = subfields.iterator();
-    		 
-    		 Subfield subfield;
-    		 
-    		 while(iter.hasNext()){
-    			 subfield = iter.next();
-    			 result.add(subfield.getData());
-    		 }
-    	 }
-    	 
-    	 
-    	 return result;
-    }
-	
-	/**
-     * extract all the subfields in a given marc field
-     * @param record
-     * @param marcFieldNum - the marc field number as a string (e.g. "245")
-     * @return
-     */
-    public Set<String> getAllSubfields(final Record record, String marcFieldNum)
-    {
-        Set<String> result = new LinkedHashSet<String>();
 
-        DataField marcField = (DataField) record.getVariableField(marcFieldNum);
-        if (marcField != null) {
-            List<Subfield> subfields = marcField.getSubfields();
-            Iterator<Subfield> iter = subfields.iterator();
-
-            Subfield subfield;
-
-            while (iter.hasNext()) {
-               subfield = iter.next();
-               result.add(subfield.getData());
-            }
-        }
-
-        return result;
-    }
-    
-    /**
-     * Extract all genres from a record
-     *
-     * @param record
-     * @return
-     */
-    public Set<String> getFullGenre(final Record record) {
-    	Set<String> result = new LinkedHashSet<String>();
-
-    	result.addAll(getAllSubfields(record, "655"));
-    	return result;
-    }
-    
-    /**
-     * Extract all subject geographic regions from a record
-     *
-     * @param record
-     * @return
-     */
-    public Set<String> getFullGeographic(final Record record) {
-    	Set<String> result = new LinkedHashSet<String>();
-
-    	result.addAll(getAllSubfields(record, "651"));
-    	return result;
-    }
 
 }
