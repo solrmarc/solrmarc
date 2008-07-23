@@ -268,6 +268,8 @@ public class VuFindIndexer extends SolrIndexer
     {
         Set<String> result = new LinkedHashSet<String>();
 
+        StringBuffer buffer = new StringBuffer("");
+
         DataField marcField = (DataField) record.getVariableField(marcFieldNum);
         if (marcField != null) {
             List<Subfield> subfields = marcField.getSubfields();
@@ -277,8 +279,13 @@ public class VuFindIndexer extends SolrIndexer
 
             while (iter.hasNext()) {
                subfield = iter.next();
-               result.add(subfield.getData());
+                if (buffer.length() > 0) {
+                    buffer.append(" " + subfield.getData());
+                } else {
+                    buffer.append(subfield.getData());
+                }
             }
+            result.add(buffer.toString());
         }
 
         return result;
@@ -292,7 +299,7 @@ public class VuFindIndexer extends SolrIndexer
 	 */
 	public String getAllFields(final Record record)
     {
-        StringBuffer data = new StringBuffer("");
+        StringBuffer buffer = new StringBuffer("");
 
 		List<DataField> fields = record.getDataFields();
 		Iterator<DataField> fieldsIter = fields.iterator();
@@ -311,11 +318,15 @@ public class VuFindIndexer extends SolrIndexer
             subfieldsIter = subfields.iterator();
             while (subfieldsIter.hasNext()) {
                 subfield = (Subfield) subfieldsIter.next();
-                data.append(" " + subfield.getData());
+                if (buffer.length() > 0) {
+                    buffer.append(" " + subfield.getData());
+                } else {
+                    buffer.append(subfield.getData());
+                }
             }
 		}
 
-		return data.toString();
+		return buffer.toString();
 	}
 
 
