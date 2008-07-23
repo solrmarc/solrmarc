@@ -1,5 +1,4 @@
 package org.solrmarc.index;
-
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,67 +16,63 @@ package org.solrmarc.index;
  * limitations under the License.
  */
 
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
-import org.solrmarc.marc.MarcImporter;
-import org.solrmarc.tools.Utils;
 
 /**
  * 
  * @author Robert Haschart
  * @version $Id$
- * 
+ *
  */
-public class VuFindIndexer extends SolrIndexer {
-	
+public class VuFindIndexer extends SolrIndexer
+{
+
 	// Initialize logging category
     static Logger logger = Logger.getLogger(VuFindIndexer.class.getName());
-
+	
 	/**
 	 * Default constructor
-	 * 
 	 * @param propertiesMapFile
 	 * @throws Exception
 	 */
-	public VuFindIndexer(final String propertiesMapFile, final String solrMarcDir)
-			throws FileNotFoundException, IOException, ParseException {
-		super(propertiesMapFile);
-	}
-
-	/**
+    public VuFindIndexer(final String propertiesMapFile) throws FileNotFoundException, IOException, ParseException 
+    {
+        super(propertiesMapFile);
+    }
+    
+    /**
 	 * Determine Record Main Format
 	 *
 	 * @param  Record  record
 	 * @return String  Main format of record
 	 */
-	private String getFormat(final Record record)
-    {
-        String leader = record.getLeader().toString();
-        char leaderBit;
-        ControlField formatField = (ControlField) record.getVariableField("007");
-        ControlField fixedField = (ControlField) record.getVariableField("008");
-        DataField title = (DataField) record.getVariableField("245");
-        char formatCode = ' ';
+	public String getFormat(final Record record){
+		String leader = record.getLeader().toString();
+		char leaderBit;
+		ControlField formatField = (ControlField) record.getVariableField("007");
+		ControlField fixedField = (ControlField) record.getVariableField("008");
+		DataField title = (DataField) record.getVariableField("245");
+		char formatCode = ' ';
 
-        // check if there's an h in the 245
-        if (title != null) {
-            if (title.getSubfield('h') != null){
-                if (title.getSubfield('h').getData().toLowerCase().contains("[electronic resource]")) {
-            		return "Electronic";
-                }
+		// check if there's an h in the 245
+		if (title != null) {
+		    if (title.getSubfield('h') != null){
+		        if (title.getSubfield('h').getData().toLowerCase().contains("[electronic resource]")) {
+		    		return "Electronic";
+		        }
         	}
         }
 
@@ -168,16 +163,13 @@ public class VuFindIndexer extends SolrIndexer {
 
         return "Unknown";
 	}
-
-	/**
-	 * Extract the call number label from a record
-	 * 
-	 * Can return null
-	 * 
-	 * @param record
-	 * @return Call number label
-	 */
-	public String getCallNumberLabel(final Record record) {
+    
+    /**
+     * Extract the call number label from a record
+     * @param record
+     * @return Call number label
+     */
+    public String getCallNumberLabel(final Record record) {
 		
 		String val = getFirstFieldVal(record, "090a:050a");
 		
@@ -187,18 +179,8 @@ public class VuFindIndexer extends SolrIndexer {
 			return val;
 		}
 	}
-
-	private String splitCallNumbers(final String val) {
-		String vals[] = val.split("[^A-Za-z]+", 2);
-
-		if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
-			return null;
-		}
-
-		return vals[0];
-	}
-
-    /**
+	
+	/**
      * Extract the subject component of the call number
      *
      * Can return null
@@ -218,76 +200,17 @@ public class VuFindIndexer extends SolrIndexer {
         }
     }
 
+	private String splitCallNumbers(final String val) {
+		String vals[] = val.split("[^A-Za-z]+", 2);
 
+		if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
+			return null;
+		}
+
+		return vals[0];
+	}
+    
     /**
-     * Extract all topics from a record
-     *
-     * @param record
-     * @return
-     */
-    public Set<String> getFullTopic(final Record record) {
-        Set<String> result = new LinkedHashSet<String>();
-
-        result.addAll(getAllSubfields(record, "600"));
-        result.addAll(getAllSubfields(record, "610"));
-        result.addAll(getAllSubfields(record, "630"));
-        result.addAll(getAllSubfields(record, "650"));
-        return result;
-    }
-
-    /**
-     * Extract all subject geographic regions from a record
-     *
-     * @param record
-     * @return
-     */
-    public Set<String> getFullGeographic(final Record record) {
-    	Set<String> result = new LinkedHashSet<String>();
-
-    	result.addAll(getAllSubfields(record, "651"));
-    	return result;
-    }
-
-    /**
-     * Extract all genres from a record
-     *
-     * @param record
-     * @return
-     */
-    public Set<String> getFullGenre(final Record record) {
-    	Set<String> result = new LinkedHashSet<String>();
-
-    	result.addAll(getAllSubfields(record, "655"));
-    	return result;
-    }
-
-    /**
-     * extract all the subfields in a given marc field
-     * @param record
-     * @param marcFieldNum - the marc field number as a string (e.g. "245")
-     * @return
-     */
-    public Set<String> getAllSubfields(final Record record, String marcFieldNum)
-    {
-        Set<String> result = new LinkedHashSet<String>();
-
-        DataField marcField = (DataField) record.getVariableField(marcFieldNum);
-        if (marcField != null) {
-            List<Subfield> subfields = marcField.getSubfields();
-            Iterator<Subfield> iter = subfields.iterator();
-
-            Subfield subfield;
-
-            while (iter.hasNext()) {
-               subfield = iter.next();
-               result.add(subfield.getData());
-            }
-        }
-
-        return result;
-    }
-	
-	/**
 	 * Loops through all datafields and creates a field for "all fields"
 	 * searching
 	 *
@@ -320,5 +243,84 @@ public class VuFindIndexer extends SolrIndexer {
 
 		return data.toString();
 	}
+    
+    /**
+     * Extract all topics from a record
+     * @param record
+     * @return
+     */
+    public Set<String> getFullTopic(final Record record){
+    	 Set<String> result = new LinkedHashSet<String>();
+    	 
+    	 DataField subjectField = (DataField) record.getVariableField("600");
+    	 //StringBuffer fullTopic = new StringBuffer();
+    	 
+    	 if(subjectField != null){
+    		 List<Subfield> subfields = subjectField.getSubfields();
+    		 Iterator<Subfield> iter = subfields.iterator();
+    		 
+    		 Subfield subfield;
+    		 
+    		 while(iter.hasNext()){
+    			 subfield = iter.next();
+    			 result.add(subfield.getData());
+    		 }
+    	 }
+    	 
+    	 
+    	 return result;
+    }
+	
+	/**
+     * extract all the subfields in a given marc field
+     * @param record
+     * @param marcFieldNum - the marc field number as a string (e.g. "245")
+     * @return
+     */
+    public Set<String> getAllSubfields(final Record record, String marcFieldNum)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+
+        DataField marcField = (DataField) record.getVariableField(marcFieldNum);
+        if (marcField != null) {
+            List<Subfield> subfields = marcField.getSubfields();
+            Iterator<Subfield> iter = subfields.iterator();
+
+            Subfield subfield;
+
+            while (iter.hasNext()) {
+               subfield = iter.next();
+               result.add(subfield.getData());
+            }
+        }
+
+        return result;
+    }
+    
+    /**
+     * Extract all genres from a record
+     *
+     * @param record
+     * @return
+     */
+    public Set<String> getFullGenre(final Record record) {
+    	Set<String> result = new LinkedHashSet<String>();
+
+    	result.addAll(getAllSubfields(record, "655"));
+    	return result;
+    }
+    
+    /**
+     * Extract all subject geographic regions from a record
+     *
+     * @param record
+     * @return
+     */
+    public Set<String> getFullGeographic(final Record record) {
+    	Set<String> result = new LinkedHashSet<String>();
+
+    	result.addAll(getAllSubfields(record, "651"));
+    	return result;
+    }
 
 }
