@@ -60,6 +60,7 @@ import org.solrmarc.tools.Utils;
  */
 public class MarcImporter {
 	
+    private String solrMarcDir;
     private String solrCoreDir;
     private String solrDataDir;
     private String deleteRecordListFilename;
@@ -95,7 +96,6 @@ public class MarcImporter {
         }
         catch (Exception e)
         {
-            //System.err.println("Couldn't set the instance directory");
         	logger.error("Couldn't set the instance directory");
             e.printStackTrace();
             System.exit(1);
@@ -114,15 +114,13 @@ public class MarcImporter {
     {       
         Properties props = new Properties();
         
-        //String path = getClass().getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
-        
-        //InputStream in = new FileInputStream (new File( path + "\\" + properties));
-        
         InputStream in = new FileInputStream(properties);
+
         // load the properties
         props.load(in);
         in.close();
         
+        solrMarcDir = getProperty(props, "solrmarc.path");
         solrCoreDir = getProperty(props, "solr.path");
         solrDataDir = getProperty(props, "solr.data.dir");
         if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
@@ -138,6 +136,7 @@ public class MarcImporter {
             }
             catch (ClassNotFoundException e)
             {
+                logger.info("Cannot load class: " + indexerName);
                 Class baseIndexerClass = SolrIndexer.class;
                 String baseName = baseIndexerClass.getPackage().getName();
                 String fullName = baseName + "." + indexerName;
@@ -145,40 +144,37 @@ public class MarcImporter {
                 logger.warn(e.getCause());
             }
             
-            Constructor constructor = indexerClass.getConstructor(new Class[]{String.class});
-            Object instance = constructor.newInstance(indexerProps);
-            
+            Constructor constructor = indexerClass.getConstructor(new Class[]{String.class, String.class});
+            Object instance = constructor.newInstance(indexerProps, solrMarcDir);
+
             if (instance instanceof SolrIndexer)
             {
                 indexer = (SolrIndexer)instance;
             }
             else
             {
-                //System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
-            	logger.error("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
+            	logger.error("Error: Custom Indexer " + indexerName + " must be subclass of SolrIndexer .  Exiting...");
                 System.exit(1);
             }
         }
         catch (Exception e)
         {
+            e.printStackTrace();
+        
             if (e instanceof ParseException)
             {
-                //System.err.println("Error configuring Indexer from properties file.  Exiting...");
             	logger.error("Error configuring Indexer from properties file.  Exiting...");
                 System.exit(1);
             }            
-            //System.err.println("Unable to find Custom indexer: "+ indexerName);
-            //System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
             
-            logger.warn("Unable to find Custom indexer: "+ indexerName);
+            logger.warn("Unable to load Custom indexer: " + indexerName);
             logger.warn("Using default SolrIndexer with properties file: " + indexerProps); 
             
             try {
-                indexer = new SolrIndexer(indexerProps);
+                indexer = new SolrIndexer(indexerProps, solrMarcDir);
             }
             catch (Exception e1)
             {
-                //System.err.println("Error configuring Indexer from properties file.  Exiting...");
             	logger.error("Error configuring Indexer from properties file.  Exiting...");
                 System.exit(1);
             }
@@ -207,7 +203,6 @@ public class MarcImporter {
         }
         else if (source.equals("Z3950"))
         {
-            //System.err.println("Error: not yet implemented");
         	logger.warn("Error: Z3950 not yet implemented");
             reader = null;
         }
@@ -555,7 +550,7 @@ public class MarcImporter {
             properties = args[0];
         }
         
-       // System.out.println("Loading properties from " + properties);
+        // System.out.println("Loading properties from " + properties);
         logger.info("Loading properties from " + properties);
         
         MarcImporter importer = null;
