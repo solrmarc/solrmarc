@@ -143,7 +143,7 @@ public class MarcPrinter
             logger.error("Unable to find Custom indexer: "+ indexerName);
             logger.error("Using default SolrIndexer with properties file: " + indexerProps);
             try {
-                indexer = new SolrIndexer(indexerProps);
+                indexer = new SolrIndexer(indexerProps, "");
             }
             catch (Exception e1)
             {

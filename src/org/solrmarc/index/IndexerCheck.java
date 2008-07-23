@@ -46,6 +46,7 @@ import org.solrmarc.tools.Utils;
  */
 public class IndexerCheck {
     
+    private transient String solrMarcDir;
     private transient String solrCoreDir;
     private transient String solrDataDir;
     private String deleteRecordListFilename;
@@ -104,6 +105,7 @@ public class IndexerCheck {
         props.load(in);
         in.close();
         
+        solrMarcDir = getProperty(props, "solrmarc.path");
         solrCoreDir = getProperty(props, "solr.path");
         solrDataDir = getProperty(props, "solr.data.dir");
         if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
@@ -135,7 +137,7 @@ public class IndexerCheck {
             System.err.println("Unable to find Custom indexer: "+ indexerName);
             System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
             try {
-                indexer = new SolrIndexer(indexerProps);
+                indexer = new SolrIndexer(indexerProps, solrMarcDir);
             }
             catch (Exception e1)
             {

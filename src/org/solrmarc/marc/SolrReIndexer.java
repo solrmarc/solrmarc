@@ -58,6 +58,7 @@ import org.apache.log4j.Logger;
  */
 public class SolrReIndexer
 {
+    private String solrMarcDir;
     private String solrCoreDir;
     private String solrDataDir;
     private SolrCore solrCore;
@@ -88,6 +89,7 @@ public class SolrReIndexer
         props.load(in);
         in.close();
         
+        solrMarcDir = getProperty(props, "solrmarc.path");
         solrCoreDir = getProperty(props, "solr.path");
         solrDataDir = getProperty(props, "solr.data.dir");
         solrFieldContainingEncodedMarcRecord = getProperty(props, "solr.fieldname");
@@ -166,7 +168,7 @@ public class SolrReIndexer
             logger.error("Using default SolrIndexer with properties file: " + indexerProps);
             
             try {
-                indexer = new SolrIndexer(indexerProps);
+                indexer = new SolrIndexer(indexerProps, solrMarcDir);
             }
             catch (Exception e1)
             {
