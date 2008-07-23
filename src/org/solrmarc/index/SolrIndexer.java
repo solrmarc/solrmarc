@@ -59,6 +59,8 @@ public class SolrIndexer
     private Map<String, Map<String, String>> mapMap = null;
     private Map<String, String[]> fieldMap = null;
     private Date indexDate = null;
+
+    private String solrMarcDir;
     
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
@@ -76,15 +78,18 @@ public class SolrIndexer
 	/**
 	 * Constructor
 	 * @param propertiesMapFile
+	 * @param dir
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-    public SolrIndexer(String propertiesMapFile) throws FileNotFoundException, IOException, ParseException
+    public SolrIndexer(String propertiesMapFile, String dir)
+        throws FileNotFoundException, IOException, ParseException
     {
         this();
+        solrMarcDir = dir;
         Properties props = new Properties();
-        props.load(new FileInputStream(propertiesMapFile));
+        props.load(new FileInputStream(solrMarcDir + "/" + propertiesMapFile));
         if (!fillMapFromProperties(props))
         {
             throw new ParseException("Invalid data found in indexer properties file", 0);
@@ -97,6 +102,7 @@ public class SolrIndexer
      * @return 
      */
     protected boolean fillMapFromProperties(Properties props)
+        throws ParseException
     {
         boolean valid = true;
         Enumeration<?> en = props.propertyNames();
@@ -224,10 +230,9 @@ public class SolrIndexer
             }
         }
 
-        // Now verify that the data read to configure the indexer is not
-        // invalid.
+        // Now verify that the data read to configure the indexer is valid.
 
-       // int size = fieldMap.size(); // never read locally
+        // int size = fieldMap.size(); // never read locally
         Iterator<String> keys = fieldMap.keySet().iterator();
         while (keys.hasNext())
         {
@@ -237,6 +242,8 @@ public class SolrIndexer
             String indexType = fieldVal[1];
             String indexParm = fieldVal[2];
             String mapName = fieldVal[3];
+            
+            // Process Map Field
             if (mapName != null && findMap(mapName) == null)
             {
 //                System.err.println("Error: Specified translation map (" +
@@ -244,12 +251,13 @@ public class SolrIndexer
             	logger.error("Sepcified translation map (" + mapName + ") not found in properties file");
                 valid = false;
             }
+            
+            // Process Custom Field
             if (indexType.equals("custom"))
             {
                 try
                 {
-                    Method method =
-                            getClass().getMethod(indexParm,
+                    Method method = getClass().getMethod(indexParm,
                                                  new Class[] { Record.class });
                     Class<?> retval = method.getReturnType();
                     // if (!method.isAccessible())
@@ -293,7 +301,7 @@ public class SolrIndexer
                 }
             }
         }
-        return (valid);
+        return valid;
     }
 
     private String loadTranslationMap(Properties props, String translationMapSpec) throws FileNotFoundException, IOException
@@ -333,7 +341,8 @@ public class SolrIndexer
     private void loadTranslationMapValues(String propFilename, String mapKeyPrefix, String mapName) throws FileNotFoundException, IOException
     {
         Properties props = new Properties();
-        props.load(new FileInputStream(propFilename));
+        System.err.println("Loading Custom Map: " + solrMarcDir + "/" + propFilename);
+        props.load(new FileInputStream(solrMarcDir + "/" + propFilename));
         loadTranslationMapValues(props, mapKeyPrefix, mapName);
     }
 
@@ -670,27 +679,26 @@ public class SolrIndexer
         Set<String> result = new LinkedHashSet<String>();
         for (int i = 0; i < tags.length; i++)
         {
+            // Check to ensure tag length is atlease 3 characters
             if (tags[i].length() < 3)
             {
                 System.err.println("Invalid tag specified: " + tags[i]);
                 continue;
             }
+            
+            // Get Field Tag
             String tag = tags[i].substring(0, 3);
-            String subfield = null;
-            if (!(tags[i].length() == 3 || tags[i].charAt(3) == '['))
-            {
-                subfield = tags[i].substring(3);
-            }
+
+            // Process Subfields
+            String subfield = tags[i].substring(3);
             int bracket;
             if ((bracket = tags[i].indexOf('[')) != -1)
             {
                 String sub[] = tags[i].substring(bracket+1).split("[\\]\\[\\-, ]+");
                 int substart = Integer.parseInt(sub[0]);
                 int subend = (sub.length > 1 ) ? Integer.parseInt(sub[1])+1 : substart+1;
-                addSubfieldDataToSet(record, result, tag,  subfield, substart, subend);                
-            }   
-            else
-            {
+                addSubfieldDataToSet(record, result, tag, subfield, substart, subend);
+            } else {
                 addSubfieldDataToSet(record, result, tag, subfield);
             }
         }
@@ -818,6 +826,7 @@ public class SolrIndexer
      */
     protected static void addSubfieldDataToSet(Record record, Set<String> set, String field, String subfield)
     {
+        // Process Leader
         if (field.equals("000"))
         {
             Leader leader = record.getLeader();
@@ -825,25 +834,49 @@ public class SolrIndexer
             set.add(val);
             return;
         }
+        
+        // Loop through Data and Control Fields
         List<?> fields = record.getVariableFields(field);
         Iterator<?> fldIter = fields.iterator();
         while (fldIter.hasNext())
         {
-            if (subfield != null)
-            {
-                DataField dfield = (DataField) fldIter.next();
-                List<?> sub = dfield.getSubfields(subfield.charAt(0));
-                Iterator<?> iter = sub.iterator();
-                while (iter.hasNext())
-                {
-                    Subfield s = (Subfield) (iter.next());
-                    String data = s.getData();
-                    data = Utils.cleanData(data);
-                    set.add(data);
+            int iField = new Integer(field).intValue();
+            if (iField > 10) {
+                // This field is a DataField
+                if (subfield != null) {
+                    DataField dfield = (DataField) fldIter.next();
+
+                    if (subfield.length() > 1) {
+                        // Allow automatic concatination of grouped subfields
+                        StringBuffer buffer = new StringBuffer("");
+                        for (int i = 0; i < subfield.length(); i++)
+                        {
+                            List<?> sub = dfield.getSubfields(subfield.charAt(i));
+                            Iterator<?> iter = sub.iterator();
+                            while (iter.hasNext())
+                            {
+                                Subfield s = (Subfield) (iter.next());
+                                String data = s.getData();
+                                data = Utils.cleanData(data);
+                                buffer.append(" " + data);
+                            }
+                        }
+                        set.add(buffer.toString());
+                    } else {
+                        // Just get the singly defined subfield
+                        List<?> sub = dfield.getSubfields(subfield.charAt(0));
+                        Iterator<?> iter = sub.iterator();
+                        while (iter.hasNext())
+                        {
+                            Subfield s = (Subfield) (iter.next());
+                            String data = s.getData();
+                            data = Utils.cleanData(data);
+                            set.add(data);
+                        }
+                    }
                 }
-            }
-            else
-            {
+            } else {
+                // This field is a Control Field
                 ControlField cfield = (ControlField) fldIter.next();
                 set.add(cfield.getData());
             }
@@ -861,6 +894,7 @@ public class SolrIndexer
      */
     protected static void addSubfieldDataToSet(Record record, Set<String> set, String field, String subfield, int substringStart, int substringEnd)
     {
+        // Process Leader
         if (field.equals("000"))
         {
             Leader leader = record.getLeader();
@@ -868,23 +902,30 @@ public class SolrIndexer
             set.add(val);
             return;
         }
+        
+        // Loop through Data and Control Fields
         List<?> fields = record.getVariableFields(field);
         Iterator<?> fldIter = fields.iterator();
         while (fldIter.hasNext())
         {
-            if (subfield != null)
-            {
-                DataField dfield = (DataField) fldIter.next();
-                List sub = dfield.getSubfields(subfield.charAt(0));
-                Iterator iter = sub.iterator();
-                while (iter.hasNext())
-                {
-                    Subfield s = (Subfield) (iter.next());
-                    set.add(s.getData().substring(substringStart, substringEnd));
+            int iField = new Integer(field).intValue();
+            if (iField > 10) {
+                // This field is a DataField
+                if (subfield != null) {
+                    // This is a data field
+                    DataField dfield = (DataField) fldIter.next();
+                    List sub = dfield.getSubfields(subfield.charAt(0));
+                    Iterator iter = sub.iterator();
+                    while (iter.hasNext())
+                    {
+                        Subfield s = (Subfield) (iter.next());
+                        set.add(s.getData().substring(substringStart, substringEnd));
+                    }
                 }
             }
             else
             {
+                // This is a control field
                 ControlField cfield = (ControlField) fldIter.next();
                 set.add(cfield.getData().substring(substringStart, substringEnd));
             }
