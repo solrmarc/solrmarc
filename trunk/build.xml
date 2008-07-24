@@ -4,7 +4,17 @@
               Any modifications will be overwritten.
               Please edit build-user.xml instead.
 -->
-<project basedir="." default="build" name="MarcPrinter">
+<project basedir="." default="build" name="SolrMarc">
+	
+	<property file="build.properties" />
+	
+	<tstamp>
+		<format property="year" pattern="yyyy" />
+		<format property="DSTAMP" pattern="yyyy-MM-dd" />
+		<format property="TSTAMP" pattern="HH:mm:ss" />
+		<format property="dateversion" pattern="yyyy.MM.dd.HH.mm.ss" />
+	</tstamp>
+	
     <path id="project.classpath">
         <pathelement location="bin"/>
         
@@ -101,10 +111,39 @@
             <classpath refid="project.classpath"/>
         </java>
     </target>
-    <target name="Z3950Client">
+    
+	<target name="Z3950Client">
         <java classname="MarcImporter" failonerror="true" fork="yes">
             <classpath refid="project.classpath"/>
         </java>
     </target>
+	
+	<target name="usage" description="Prints usage instructions">
+		<echo message="Welcome to the Solrmarc indexing project" />
+		<echo message="Use 'ant' to build the latest code" />
+		<echo message="For devlopers" />
+		<echo message="Use 'ant clean' to clean the compiled source directory" />
+		<echo message="Use 'ant doc' to generate JavaDoc documentation" />
+		<echo message="Use 'ant tag' to build a gzipped tarball and checksum for distribution (be sure to svn export first)" />
+		<echo message="Use 'ant test' to run unit tests" />
+	</target>
+	
+	<target name="doc" description="Generate JavaDoc documenation">
+		<mkdir dir="${doc.dir}" />
+		
+		<javadoc destdir="${doc.dir}" author="true" version="true" overview="overview.html" use="true" windowtitle="SolrMarc" doctitle="Solrmarc Java Documentation" bottom="">
+			<packageset dir="${src.dir}" defaultexcludes="yes">
+				<exclude name="org/solrmarc/tests" />
+			</packageset>
+			
+			<link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="." />
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+			<link href="http://junit.sourceforge.net/javadoc/" />
+			<link href="http://lucene.apache.org/java/docs/api/" />
+			<link href="http://lucene.apache.org/solr/api/" />
+
+		</javadoc>
+	</target>
+	
 	<chmod dir="." perm="u+x" includes="*.sh" />
 </project>
