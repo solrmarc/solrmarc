@@ -23,7 +23,7 @@
 			<concat destfile="@{file}.${checksum.algorithm}" force="yes" append="false" fixlastline="yes">
 				<header trimleading="yes">${@{file}.sum} </header>
 				<!-- empty fileset to trick concat -->
-				<fileset dir="." exlcudes="**" />
+				<fileset dir="." excludes="**" />
 				<footer trimleading="yest">${@file}.base}</footer>
 			</concat>
 		</sequential>
