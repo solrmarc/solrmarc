@@ -255,37 +255,37 @@ public class MarcPrinter
             }
         }
 
-        else if (mode.equals("lint"))
-        {
-            int recNo = 1;
-            while (reader.hasNext()) 
-            {
-                try {
-                    Record rec = reader.next();
-//                    Leader ldr = rec.getLeader();
-//                    if (ldr.getBaseAddressOfData() != 0) continue;
-                    String recStr = rec.toString();
-                    
-                    if (verbose) System.out.println(recStr);
-                    List<Object> errors = reader.getErrors();
-                    if (errors != null) 
-                    {
-                        Iterator<Object> iter = errors.iterator();
-                        while (iter.hasNext())
-                        {
-                            Object error = iter.next();
-                            System.out.println(error.toString());
-                        }
-                    }
-                    
-                    recNo ++;
-                }
-                catch (MarcException me)
-                {
-                    System.err.println("Error reading Marc Record: "+ me.getMessage());                                   
-                }
-            }
-        }
+//        else if (mode.equals("lint"))
+//        {
+//            int recNo = 1;
+//            while (reader.hasNext()) 
+//            {
+//                try {
+//                    Record rec = reader.next();
+////                    Leader ldr = rec.getLeader();
+////                    if (ldr.getBaseAddressOfData() != 0) continue;
+//                    String recStr = rec.toString();
+//                    
+//                    if (verbose) System.out.println(recStr);
+//                    List<Object> errors = reader.getErrors();
+//                    if (errors != null) 
+//                    {
+//                        Iterator<Object> iter = errors.iterator();
+//                        while (iter.hasNext())
+//                        {
+//                            Object error = iter.next();
+//                            System.out.println(error.toString());
+//                        }
+//                    }
+//                    
+//                    recNo ++;
+//                }
+//                catch (MarcException me)
+//                {
+//                    System.err.println("Error reading Marc Record: "+ me.getMessage());                                   
+//                }
+//            }
+//        }
 
         else if (mode.equals("era"))
         {

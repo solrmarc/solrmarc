@@ -137,13 +137,4 @@ public class MarcTranslatedReader implements MarcReader
         return rec;
     }
     
-    public boolean hasErrors()
-    {
-        return(reader.hasErrors());
-    }
-
-    public List<Object> getErrors()
-    {
-        return(reader.getErrors());
-    }
 }

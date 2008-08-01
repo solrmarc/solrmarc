@@ -144,15 +144,4 @@ public class MarcFilteredReader implements MarcReader
         }
         return currentRecord ;
     }
-    
-    public boolean hasErrors()
-    {
-        return(reader.hasErrors());
-    }
-
-    public List<Object> getErrors()
-    {
-        return(reader.getErrors());
-    }
-
 }
