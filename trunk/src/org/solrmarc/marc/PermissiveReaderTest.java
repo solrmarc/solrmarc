@@ -6,10 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.marc4j.Errors;
+import org.marc4j.ErrorHandler;
+import org.marc4j.MarcException;
 import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamWriter;
@@ -25,6 +28,16 @@ public class PermissiveReaderTest
     public static void main(String[] args)
     {
         System.setProperty("org.marc4j.marc.MarcFactory", "marcoverride.UVAMarcFactoryImpl");
+        PrintStream out = null;
+        try
+        {
+            out = new PrintStream(System.out, true, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         boolean verbose = Boolean.parseBoolean(System.getProperty("marc.verbose"));
         if (args[0].equals("-v")) 
         {
@@ -43,12 +56,13 @@ public class PermissiveReaderTest
         InputStream inPerm;
         OutputStream patchedRecStream = null;
         MarcWriter patchedRecs = null;
+        ErrorHandler errorHandler = new ErrorHandler();
         try
         {
             inNorm = new FileInputStream(file);
             readerNormal = new MarcPermissiveStreamReader(inNorm, false, to_utf_8);
             inPerm = new FileInputStream(file);
-            readerPermissive = new MarcPermissiveStreamReader(inPerm, true, to_utf_8);
+            readerPermissive = new MarcPermissiveStreamReader(inPerm, errorHandler, to_utf_8);
         }
         catch (FileNotFoundException e)
         {
@@ -71,17 +85,32 @@ public class PermissiveReaderTest
         }
         while (readerNormal.hasNext() && readerPermissive.hasNext())
         {
-            Record recNorm = readerNormal.next();
-            Record recPerm = readerPermissive.next();
-            String strNorm = recNorm.toString();
+            Record recNorm;
+            Record recPerm;
+            recPerm = readerPermissive.next();
             String strPerm = recPerm.toString();
+            try {
+                recNorm = readerNormal.next();
+            }
+            catch (MarcException me)
+            {
+                if (verbose)
+                {
+                    out.println("Fatal Exception: "+ me.getMessage());
+                    dumpErrors(out, errorHandler);
+                    showDiffs(out, null, strPerm);
+                    out.println("-------------------------------------------------------------------------------------");
+                }
+                continue;
+            }
+            String strNorm = recNorm.toString();
             if (!strNorm.equals(strPerm))
             {
                 if (verbose)
                 {
-                    dumpErrors(readerPermissive);
-                    showDiffs(strNorm, strPerm);
-                    System.out.println("-------------------------------------------------------------------------------------");
+                    dumpErrors(out, errorHandler);
+                    showDiffs(out, strNorm, strPerm);
+                    out.println("-------------------------------------------------------------------------------------");
                     
                 }
                 if (patchedRecs != null)
@@ -89,14 +118,14 @@ public class PermissiveReaderTest
                     patchedRecs.write(recPerm);
                 }
             }
-            else if (readerPermissive.hasErrors())
+            else if (errorHandler.hasErrors())
             {
                 if (verbose)
                 {
-                    System.out.println("Results identical, but errors reported");
-                    dumpErrors(readerPermissive);
-                    showDiffs(strNorm, strPerm);
-                    System.out.println("-------------------------------------------------------------------------------------");
+                    out.println("Results identical, but errors reported");
+                    dumpErrors(out, errorHandler);
+                    showDiffs(out, strNorm, strPerm);
+                    out.println("-------------------------------------------------------------------------------------");
                 }
                 if (patchedRecs != null)
                 {
@@ -106,42 +135,53 @@ public class PermissiveReaderTest
         }
     }
 
-    public static void showDiffs(String strNorm, String strPerm)
+    public static void showDiffs(PrintStream out, String strNorm, String strPerm)
     {
-        String normLines[] = strNorm.split("\n");
-        String permLines[] = strPerm.split("\n");
-        if (normLines.length == permLines.length)
+        if (strNorm != null)
         {
-            for (int i = 0; i < normLines.length; i++)
+            String normLines[] = strNorm.split("\n");
+            String permLines[] = strPerm.split("\n");
+            if (normLines.length == permLines.length)
             {
-                if (normLines[i].equals(permLines[i]))
+                for (int i = 0; i < normLines.length; i++)
                 {
-                    System.out.println("   " + normLines[i]);
+                    if (normLines[i].equals(permLines[i]))
+                    {
+                        out.println("   " + normLines[i]);
+                    }
+                    else
+                    {
+                        out.println(" < " + normLines[i]);
+                        out.println(" > " + permLines[i]);                    
+                    }
                 }
-                else
-                {
-                    System.out.println(" < " + normLines[i]);
-                    System.out.println(" > " + permLines[i]);                    
-                }
+            }
+        }
+        else
+        {
+            String permLines[] = strPerm.split("\n");
+            for (int i = 0; i < permLines.length; i++)
+            {
+                out.println("   " + permLines[i]);
             }
         }
 
     }
     
-    public static void dumpErrors(MarcReader readerPermissive)
+    public static void dumpErrors(PrintStream out, ErrorHandler errorHandler)
     {
-        List<Object> errors = readerPermissive.getErrors();
+        List<Object> errors = errorHandler.getErrors();
         if (errors != null) 
         {
             Iterator<Object> iter = errors.iterator();
             while (iter.hasNext())
             {
                 Object error = iter.next();
-                if (((Errors.Error)(error)).getSeverity() >= Errors.MINOR_ERROR)
+                if (((ErrorHandler.Error)(error)).getSeverity() >= ErrorHandler.MINOR_ERROR)
                 {
                     int i = 10;
                 }
-                System.out.println(error.toString());
+                out.println(error.toString());
             }
         }
     }
