@@ -259,6 +259,16 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
+     * Create a string from the entire 245 field
+     *
+     * @param record
+     * @return
+     */
+    public Set<String> getFullTitle(final Record record) {
+    	return getAllSubfields(record, "245");
+    }
+
+    /**
      * extract all the subfields in a given marc field
      * @param record
      * @param marcFieldNum - the marc field number as a string (e.g. "245")
