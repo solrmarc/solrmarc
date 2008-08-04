@@ -29,6 +29,12 @@
 		</sequential>
 	</macrodef>
 	
+	<path id="classpath" description="Set's the classpath to use the lib folder">
+		<fileset dire="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	
     <path id="project.classpath">
         <pathelement location="bin"/>
         
@@ -124,6 +130,40 @@
 			</jar>
 		
     </target>
+	
+	<target name="compile" depends="init" description="Compile source code">
+		<javac destdir="${build.dir}" target="${java.compat.version}" source="${java.compat.version}" debug="on" encoding="utf-8">
+			<classpath refid="classpath" />
+			<src path="${src.dir}" />
+		</javac>
+	</target>
+	
+	<target name="jar" depends="compile">
+		<path id="library.project">
+			<fileset dir="${lib.dir}">
+				<include name="*.jar" />
+			</fileset>	
+		</path>
+		
+		<pathconvert property="lib.project.manifest.classpath" pathsep=" ">
+
+			<path refid="library.project" />
+			<chainedmapper>
+				<flattenmapper />
+				<globmapper from="*" to="lib/*" />
+			</chainedmapper>
+		</pathconvert>
+		
+		<jar jarfile="${ant.project.name}.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.vufind.marc.MarcImporter" />
+
+				<attribute name="Class-Path" value="${lib.project.manifest.classpath}" />
+			</manifest>
+			
+		</jar>
+
+	</target>
 	
     <target name="MarcPrinter">
         <java classname="MarcPrinter" failonerror="true" fork="yes">
