@@ -136,12 +136,12 @@ public class MarcImporter {
             }
             catch (ClassNotFoundException e)
             {
-                logger.info("Cannot load class: " + indexerName);
+                logger.error("Cannot load class: " + indexerName);
                 Class baseIndexerClass = SolrIndexer.class;
                 String baseName = baseIndexerClass.getPackage().getName();
                 String fullName = baseName + "." + indexerName;
                 indexerClass = Class.forName(fullName);
-                logger.warn(e.getCause());
+                logger.error(e.getCause());
             }
             
             Constructor constructor = indexerClass.getConstructor(new Class[]{String.class, String.class});
@@ -285,6 +285,10 @@ public class MarcImporter {
         return(numDeleted);
     }
 
+    /**
+     * 
+     * @return
+     */
     public int importRecords()
     {
         // keep track of record
@@ -307,13 +311,15 @@ public class MarcImporter {
                if (e.getMessage().contains("missing required fields"))
                {
                    //System.err.println("Warning : " + e.getMessage()+  "at record count = "+ recordCounter);
-            	   logger.warn(e.getMessage() +  "at record count = "+ recordCounter);
+            	   logger.error(e.getMessage() +  " at record count = "+ recordCounter);
+            	   logger.error("Control Number " + reader.next().getControlNumber().toString());
                }
                else
                {
                    //System.err.println("Error indexing");
             	   logger.error("Error indexing: " + e.getMessage());
-                   e.printStackTrace();
+                   //e.printStackTrace();
+            	   logger.error("Control Number " + reader.next().getControlNumber().toString());
                }
             }
             catch(Exception e)
@@ -321,7 +327,8 @@ public class MarcImporter {
                 // keep going?
                 //System.err.println("Error indexing");
             	logger.error("Error indexing: " + e.getMessage());
-                e.printStackTrace();
+                //e.printStackTrace();
+            	logger.error("Control Number " + reader.next().getControlNumber().toString());
             }            
         }
         
@@ -383,10 +390,14 @@ public class MarcImporter {
         {
             //System.err.println("Couldn't add document");
         	logger.error("Couldn't add document: " + e.getMessage());
-            e.printStackTrace();
+            //e.printStackTrace();
+        	logger.error("Control Number " + reader.next().getControlNumber().toString());
         }                
     }
 
+    /**
+     * 
+     */
     public void finish()
     {
         try {
@@ -397,7 +408,7 @@ public class MarcImporter {
         catch (IOException e) {
             //System.err.println("Final commit and optmization failed");
         	logger.error("Final commit and optimization failed: " + e.getMessage());
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         
         //System.out.println("Done with commit, closing Solr");
@@ -562,7 +573,7 @@ public class MarcImporter {
         {
             // TODO Auto-generated catch block
         	logger.error("Couldn't load properties file." + e);
-            e.printStackTrace();
+            //e.printStackTrace();
             System.exit(1);
         }
         
