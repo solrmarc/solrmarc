@@ -28,20 +28,29 @@ public class PermissiveReaderTest
     public static void main(String[] args)
     {
         System.setProperty("org.marc4j.marc.MarcFactory", "marcoverride.UVAMarcFactoryImpl");
-        PrintStream out = null;
-        try
-        {
-            out = new PrintStream(System.out, true, "UTF-8");
-        }
-        catch (UnsupportedEncodingException e1)
-        {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
+        PrintStream out = System.out;
+//        try
+//        {
+//            out = new PrintStream(System.out, true, "UTF-8");
+//        }
+//        catch (UnsupportedEncodingException e1)
+//        {
+//            // TODO Auto-generated catch block
+//            e1.printStackTrace();
+//        }
         boolean verbose = Boolean.parseBoolean(System.getProperty("marc.verbose"));
+        boolean veryverbose = Boolean.parseBoolean(System.getProperty("marc.verbose"));
         if (args[0].equals("-v")) 
         {
             verbose = true;
+            String newArgs[] = new String[args.length-1];
+            System.arraycopy(args, 1, newArgs, 0, args.length-1);
+            args = newArgs;
+        }
+        if (args[0].equals("-vv")) 
+        {
+            verbose = true;
+            veryverbose = true;
             String newArgs[] = new String[args.length-1];
             System.arraycopy(args, 1, newArgs, 0, args.length-1);
             args = newArgs;
@@ -62,7 +71,7 @@ public class PermissiveReaderTest
             inNorm = new FileInputStream(file);
             readerNormal = new MarcPermissiveStreamReader(inNorm, false, to_utf_8);
             inPerm = new FileInputStream(file);
-            readerPermissive = new MarcPermissiveStreamReader(inPerm, errorHandler, to_utf_8);
+            readerPermissive = new MarcPermissiveStreamReader(inPerm, errorHandler, to_utf_8, "BESTGUESS");
         }
         catch (FileNotFoundException e)
         {
@@ -132,6 +141,11 @@ public class PermissiveReaderTest
                     patchedRecs.write(recPerm);
                 }
             }
+            else if (veryverbose)
+            {
+                showDiffs(out, strNorm, strPerm);                
+            }
+                
         }
     }
 
