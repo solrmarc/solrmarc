@@ -2,176 +2,176 @@
 
 <project basedir="." default="build" name="SolrMarc">
 
-	<property file="build.properties" />
+        <property file="build.properties" />
 
-	<tstamp>
-		<format property="year" pattern="yyyy" />
-		<format property="DSTAMP" pattern="yyyy-MM-dd" />
-		<format property="TSTAMP" pattern="HH:mm:ss" />
-		<format property="dateversion" pattern="yyyy.MM.dd.HH.mm.ss" />
-	</tstamp>
+        <tstamp>
+                <format property="year" pattern="yyyy" />
+                <format property="DSTAMP" pattern="yyyy-MM-dd" />
+                <format property="TSTAMP" pattern="HH:mm:ss" />
+                <format property="dateversion" pattern="yyyy.MM.dd.HH.mm.ss" />
+        </tstamp>
 
-	<!-- Macro to build a checksum file
-		Only needed until the "format" option is supported
-		by ant's checksum task -->
-	<macrodef name="solrmarc-checksum">
-		<attribute name="file" />
+        <!-- Macro to build a checksum file
+                Only needed until the "format" option is supported
+                by ant's checksum task -->
+        <macrodef name="solrmarc-checksum">
+                <attribute name="file" />
 
-		<sequential>
-			<checksum file="@{file}" property="@{file}.sum" algorithm="${checksum.algorithm}" />
-			<basename file="@{file}" property="@{file}.base" />
-			<concat destfile="@{file}.${checksum.algorithm}" force="yes" append="false" fixlastline="yes">
-				<header trimleading="yes">${@{file}.sum} </header>
-				<!-- empty fileset to trick concat -->
-				<fileset dir="." excludes="**" />
-				<footer trimleading="yest">${@file}.base}</footer>
-			</concat>
-		</sequential>
-	</macrodef>
+                <sequential>
+                        <checksum file="@{file}" property="@{file}.sum" algorithm="${checksum.algorithm}" />
+                        <basename file="@{file}" property="@{file}.base" />
+                        <concat destfile="@{file}.${checksum.algorithm}" force="yes" append="false" fixlastline="yes">
+                                <header trimleading="yes">${@{file}.sum} </header>
+                                <!-- empty fileset to trick concat -->
+                                <fileset dir="." excludes="**" />
+                                <footer trimleading="yest">${@file}.base}</footer>
+                        </concat>
+                </sequential>
+        </macrodef>
 
-	<path id="classpath" description="Set's the classpath to use the lib folder">
-		<fileset dir="${lib.dir}">
-			<include name="**/*.jar" />
-		</fileset>
-	</path>
+        <path id="classpath" description="Set's the classpath to use the lib folder">
+                <fileset dir="${lib.dir}">
+                        <include name="**/*.jar" />
+                </fileset>
+        </path>
 
-	<target name="init">
-		<mkdir dir="${build.dir}" />
-		<mkdir dir="${dist.dir}" />
-	</target>
+        <target name="init">
+                <mkdir dir="${build.dir}" />
+                <mkdir dir="${dist.dir}" />
+        </target>
 
-	<target name="clean">
-		<delete dir="${build.dir}" />
-		<delete dir="${dist.dir}" />
-		<delete dir="${doc.dir}" />
-		<delete dir="${tag.dir}" />
-	</target>
+        <target name="clean">
+                <delete dir="${build.dir}" />
+                <delete dir="${dist.dir}" />
+                <delete dir="${doc.dir}" />
+                <delete dir="${tag.dir}" />
+        </target>
 
-	<target depends="init" name="build">
-		<echo message="${ant.project.name}: ${ant.file}" />
-		
-		<!-- list files in the lib directory -->
-		<path id="library.project">
-			<fileset dir="${lib.dir}">
-				<include name="*.jar" />
-			</fileset>
-		</path>
-		
-		<!-- use a chained mapper to seperate the file names -->
-		<pathconvert property="lib.project.manifist.classpath" pathsep=" ">
-			<path refid="library.project" />
-			<chainedmapper>
-				<flattenmapper />
-				<globmapper from="*" to="lib/*" />
-			</chainedmapper>
-		</pathconvert>
+        <target depends="init" name="build">
+                <echo message="${ant.project.name}: ${ant.file}" />
+                
+                <!-- list files in the lib directory -->
+                <path id="library.project">
+                        <fileset dir="${lib.dir}">
+                                <include name="*.jar" />
+                        </fileset>
+                </path>
+                
+                <!-- use a chained mapper to seperate the file names -->
+                <pathconvert property="lib.project.manifist.classpath" pathsep=" ">
+                        <path refid="library.project" />
+                        <chainedmapper>
+                                <flattenmapper />
+                                <globmapper from="*" to="lib/*" />
+                        </chainedmapper>
+                </pathconvert>
 
-		<javac destdir="${build.dir}" debug="true" target="${java.compat.version}" source="${java.compat.version}" encoding="utf-8">
-			<src path="${src.dir}" />
-			<classpath refid="classpath" />
-		</javac>
+                <javac destdir="${build.dir}" debug="true" target="${java.compat.version}" source="${java.compat.version}" encoding="utf-8">
+                        <src path="${src.dir}" />
+                        <classpath refid="classpath" />
+                </javac>
 
-		<copy todir="${build.dir}/lib">
-			<fileset dir="${lib.dir}" includes="*.jar" />
-		</copy>
+                <copy todir="${dist.dir}/lib">
+                        <fileset dir="${lib.dir}" includes="*.jar" />
+                </copy>
 
-		<jar destfile="${dist.dir}/MarcImporter.jar">
-			<fileset dir="bin" includes="**/*.class" />
-			<fileset dir="." includes="*.properties" />
-			<manifest>
-				<attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter" />
-				<attribute name="Class-Path" value="${lib.project.manifist.classpath}" />
-			</manifest>
-		</jar>
+                <jar destfile="${dist.dir}/MarcImporter.jar">
+                        <fileset dir="bin" includes="**/*.class" />
+                        <fileset dir="." includes="*.properties" />
+                        <manifest>
+                                <attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter" />
+                                <attribute name="Class-Path" value="${lib.project.manifist.classpath}" />
+                        </manifest>
+                </jar>
 
-		<jar destfile="zclient.jar">
-			<fileset dir="bin" includes="ZClient.class,MarcTranslatedReader.class" />
-		</jar>
+                <jar destfile="zclient.jar">
+                        <fileset dir="bin" includes="ZClient.class,MarcTranslatedReader.class" />
+                </jar>
 
-	</target>
+        </target>
 
-	<target name="compile" depends="init" description="Compile source code">
-		<javac destdir="${build.dir}" target="${java.compat.version}" source="${java.compat.version}" debug="on" encoding="utf-8">
-			<classpath refid="classpath" />
-			<src path="${src.dir}" />
-		</javac>
-	</target>
+        <target name="compile" depends="init" description="Compile source code">
+                <javac destdir="${build.dir}" target="${java.compat.version}" source="${java.compat.version}" debug="on" encoding="utf-8">
+                        <classpath refid="classpath" />
+                        <src path="${src.dir}" />
+                </javac>
+        </target>
 
-	<target name="jar" depends="compile">
-		<path id="library.project">
-			<fileset dir="${lib.dir}">
-				<include name="*.jar" />
-			</fileset>
-		</path>
+        <target name="jar" depends="compile">
+                <path id="library.project">
+                        <fileset dir="${lib.dir}">
+                                <include name="*.jar" />
+                        </fileset>
+                </path>
 
-		<pathconvert property="lib.project.manifest.classpath" pathsep=" ">
+                <pathconvert property="lib.project.manifest.classpath" pathsep=" ">
 
-			<path refid="library.project" />
-			<chainedmapper>
-				<flattenmapper />
-				<globmapper from="*" to="lib/*" />
-			</chainedmapper>
-		</pathconvert>
+                        <path refid="library.project" />
+                        <chainedmapper>
+                                <flattenmapper />
+                                <globmapper from="*" to="lib/*" />
+                        </chainedmapper>
+                </pathconvert>
 
-		<jar jarfile="${ant.project.name}.jar">
-			<manifest>
-				<attribute name="Main-Class" value="org.vufind.marc.MarcImporter" />
+                <jar jarfile="${ant.project.name}.jar">
+                        <manifest>
+                                <attribute name="Main-Class" value="org.vufind.marc.MarcImporter" />
 
-				<attribute name="Class-Path" value="${lib.project.manifest.classpath}" />
-			</manifest>
+                                <attribute name="Class-Path" value="${lib.project.manifest.classpath}" />
+                        </manifest>
 
-		</jar>
+                </jar>
 
-	</target>
+        </target>
 
-	<target name="MarcPrinter">
-		<java classname="MarcPrinter" failonerror="true" fork="yes">
-			<classpath refid="classpath" />
-		</java>
-	</target>
+        <target name="MarcPrinter">
+                <java classname="MarcPrinter" failonerror="true" fork="yes">
+                        <classpath refid="classpath" />
+                </java>
+        </target>
 
-	<target name="Z3950Client">
-		<java classname="MarcImporter" failonerror="true" fork="yes">
-			<classpath refid="classpath" />
-		</java>
-	</target>
+        <target name="Z3950Client">
+                <java classname="MarcImporter" failonerror="true" fork="yes">
+                        <classpath refid="classpath" />
+                </java>
+        </target>
 
-	<target name="usage" description="Prints usage instructions">
-		<echo message="Welcome to the Solrmarc indexing project" />
-		<echo message="Use 'ant' to build the latest code" />
-		<echo message="For devlopers" />
-		<echo message="Use 'ant clean' to clean the compiled source directory" />
-		<echo message="Use 'ant doc' to generate JavaDoc documentation" />
-		<echo message="Use 'ant gzip' to build a gzipped tarball and checksum for distribution (be sure to svn export first)" />
-		<echo message="Use 'ant test' to run unit tests" />
-	</target>
+        <target name="usage" description="Prints usage instructions">
+                <echo message="Welcome to the Solrmarc indexing project" />
+                <echo message="Use 'ant' to build the latest code" />
+                <echo message="For devlopers" />
+                <echo message="Use 'ant clean' to clean the compiled source directory" />
+                <echo message="Use 'ant doc' to generate JavaDoc documentation" />
+                <echo message="Use 'ant gzip' to build a gzipped tarball and checksum for distribution (be sure to svn export first)" />
+                <echo message="Use 'ant test' to run unit tests" />
+        </target>
 
-	<target name="gzip" description="Create a gzipped tarball and checksum file (in the tag directory)" depends="build">
-		<echo message="Make sure to export the project (svn export) before running this task" />
+        <target name="gzip" description="Create a gzipped tarball and checksum file (in the tag directory)" depends="build">
+                <echo message="Make sure to export the project (svn export) before running this task" />
 
-		<mkdir dir="${tag.dir}" />
+                <mkdir dir="${tag.dir}" />
 
-		<tar destfile="${tag.dir}/${ant.project.name}.tar.gz" compression="gzip" basedir="." excludes="bin/**,src/**,**/build.xml,**/**.mrc,**/.svn" />
+                <tar destfile="${tag.dir}/${ant.project.name}.tar.gz" compression="gzip" basedir="." excludes="bin/**,src/**,**/build.xml,**/**.mrc,**/.svn" />
 
-		<solrmarc-checksum file="${tag.dir}/${ant.project.name}.tar.gz" />
-	</target>
+                <solrmarc-checksum file="${tag.dir}/${ant.project.name}.tar.gz" />
+        </target>
 
-	<target name="doc" description="Generate JavaDoc documenation">
-		<mkdir dir="${doc.dir}" />
+        <target name="doc" description="Generate JavaDoc documenation">
+                <mkdir dir="${doc.dir}" />
 
-		<javadoc destdir="${doc.dir}" author="true" version="true" overview="overview.html" use="true" windowtitle="SolrMarc" doctitle="Solrmarc Java Documentation" bottom="">
-			<packageset dir="${src.dir}" defaultexcludes="yes">
-				<exclude name="org/solrmarc/tests" />
-			</packageset>
+                <javadoc destdir="${doc.dir}" author="true" version="true" overview="overview.html" use="true" windowtitle="SolrMarc" doctitle="Solrmarc Java Documentation" bottom="">
+                        <packageset dir="${src.dir}" defaultexcludes="yes">
+                                <exclude name="org/solrmarc/tests" />
+                        </packageset>
 
-			<link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="." />
-			<link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
-			<link href="http://junit.sourceforge.net/javadoc/" />
-			<link href="http://lucene.apache.org/java/docs/api/" />
-			<link href="http://lucene.apache.org/solr/api/" />
+                        <link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="." />
+                        <link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+                        <link href="http://junit.sourceforge.net/javadoc/" />
+                        <link href="http://lucene.apache.org/java/docs/api/" />
+                        <link href="http://lucene.apache.org/solr/api/" />
 
-		</javadoc>
-	</target>
+                </javadoc>
+        </target>
 
-	<chmod dir="." perm="u+x" includes="*.sh" />
+        <chmod dir="." perm="u+x" includes="*.sh" />
 </project>
