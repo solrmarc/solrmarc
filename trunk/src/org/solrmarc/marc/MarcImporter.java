@@ -61,6 +61,7 @@ import org.solrmarc.tools.Utils;
 public class MarcImporter {
 	
     private String solrMarcDir;
+    private String solrCoreName;
     private String solrCoreDir;
     private String solrDataDir;
     private String deleteRecordListFilename;
@@ -91,8 +92,9 @@ public class MarcImporter {
         // Set up Solr core
         try{
             System.setProperty("solr.data.dir", solrDataDir);
-            solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
-            solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
+            solrConfig = new SolrConfig(solrCoreDir + "/" + solrCoreName, "solrconfig.xml", null);
+            //solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
+            solrCore = new SolrCore(solrCoreName, solrDataDir, solrConfig, null, null);
         }
         catch (Exception e)
         {
@@ -122,6 +124,7 @@ public class MarcImporter {
         
         solrMarcDir = getProperty(props, "solrmarc.path");
         solrCoreDir = getProperty(props, "solr.path");
+        solrCoreName = getProperty(props, "solr.core.name");
         solrDataDir = getProperty(props, "solr.data.dir");
         if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
         String indexerName = getProperty(props, "solr.indexer");
