@@ -99,7 +99,7 @@ public class SolrIndexer
     /**
      * Parse the properties file and load parameters into Map
      * @param props Properties to load
-     * @return 
+     * @return If the properties are valid
      */
     protected boolean fillMapFromProperties(Properties props)
         throws ParseException
@@ -280,7 +280,7 @@ public class SolrIndexer
 //                    System.err.println("Error: Unable to invoke custom indexing function " +
 //                                       indexParm);
                 	logger.error("Unable to invoke custom indexing function " + indexParm);
-                	logger.debug(e.getCause());
+                	logger.debug(e.getCause(), e);
                     valid = false;
                 }
                 catch (NoSuchMethodException e)
@@ -841,7 +841,7 @@ public class SolrIndexer
         while (fldIter.hasNext())
         {
             int iField = new Integer(field).intValue();
-            if (iField > 10) {
+            if (iField > 9) {
                 // This field is a DataField
                 if (subfield != null) {
                     DataField dfield = (DataField) fldIter.next();
@@ -912,7 +912,7 @@ public class SolrIndexer
         while (fldIter.hasNext())
         {
             int iField = new Integer(field).intValue();
-            if (iField > 10) {
+            if (iField > 9) {
                 // This field is a DataField
                 if (subfield != null) {
                     // This is a data field
