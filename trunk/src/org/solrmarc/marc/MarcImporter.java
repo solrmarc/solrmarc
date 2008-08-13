@@ -138,7 +138,7 @@ public class MarcImporter {
         // The solr data diretory to use
         solrDataDir = getProperty(props, "solr.data.dir");
         if (solrDataDir == null) {
-            solrDataDir = solrCoreDir + "/" + solrCoreName + "/data";
+            solrDataDir = solrCoreDir + "/" + solrCoreName;
         }
 
         // The SolrMarc indexer
