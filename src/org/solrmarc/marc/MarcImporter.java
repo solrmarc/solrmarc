@@ -272,26 +272,24 @@ public class MarcImporter {
                 numDeleted++;
             }            
         }
-        catch (FileNotFoundException e)
+        catch (FileNotFoundException fnfe)
         {
-            //System.err.println("Error: unable to find and open delete-record-id-list: "+ delFile);
-        	logger.error("Error: unable to find and open delete-record-id-list: "+ delFile);
+        	logger.error("Error: unable to find and open delete-record-id-list: " + delFile, fnfe);
         }
-        catch (IOException e)
+        catch (IOException ioe)
         {
-            //System.err.println("Error: reading from delete-record-id-list: "+ delFile);
-        	logger.error("Error: reading from delete-record-id-list: "+ delFile);
+        	logger.error("Error: reading from delete-record-id-list: " + delFile);
         }
         return(numDeleted);
     }
 
     /**
-     * 
-     * @return
+     * Iterate over the marc records in the file and add them to the index
+     * @return Number of records indexed
      */
     public int importRecords()
     {
-        // keep track of record
+        // keep track of record count
         int recordCounter = 0;
         
         while(reader != null && reader.hasNext())
@@ -299,40 +297,35 @@ public class MarcImporter {
             if (shuttingDown) break;
             recordCounter++;
             
+            Record record = reader.next();
+            
             try {
-                Record record = reader.next();
-                
-                //System.out.println("Adding record " + recordCounter + ": " + record.getControlNumber());
-                logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
                 addToIndex(record);
+                logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
             }
-            catch (org.apache.solr.common.SolrException e)
+            catch (org.apache.solr.common.SolrException solrException)
             {
-               if (e.getMessage().contains("missing required fields"))
+               //check for missing fields
+            	if (solrException.getMessage().contains("missing required fields"))
                {
-                   //System.err.println("Warning : " + e.getMessage()+  "at record count = "+ recordCounter);
-            	   logger.error(e.getMessage() +  " at record count = "+ recordCounter);
-            	   logger.error("Control Number " + reader.next().getControlNumber().toString());
+            	   logger.error(solrException.getMessage() +  " at record count = " + recordCounter);
+            	   logger.error("Control Number " + record.getControlNumber(), solrException);
                }
                else
                {
-                   //System.err.println("Error indexing");
-            	   logger.error("Error indexing: " + e.getMessage());
-                   //e.printStackTrace();
-            	   logger.error("Control Number " + reader.next().getControlNumber().toString());
+            	   logger.error("Error indexing: " + solrException.getMessage());
+            	   logger.error("Control Number " + record.getControlNumber(), solrException);
                }
             }
             catch(Exception e)
             {
                 // keep going?
-                //System.err.println("Error indexing");
             	logger.error("Error indexing: " + e.getMessage());
-                //e.printStackTrace();
-            	logger.error("Control Number " + reader.next().getControlNumber().toString());
+            	logger.error("Control Number " + record.getControlNumber(), e);
             }            
         }
         
-        return (recordCounter);
+        return recordCounter;
     }
     
     /**
@@ -386,12 +379,12 @@ public class MarcImporter {
         try {
             updateHandler.addDoc(addcmd);
         } 
-        catch (IOException e) 
+        catch (IOException ioe) 
         {
             //System.err.println("Couldn't add document");
-        	logger.error("Couldn't add document: " + e.getMessage());
+        	logger.error("Couldn't add document: " + ioe.getMessage());
             //e.printStackTrace();
-        	logger.error("Control Number " + reader.next().getControlNumber().toString());
+        	logger.error("Control Number " + reader.next().getControlNumber(), ioe);
         }                
     }
 
@@ -405,9 +398,10 @@ public class MarcImporter {
         	logger.info("Calling commit");
             commit(shuttingDown ? false : optimizeAtEnd);
         } 
-        catch (IOException e) {
+        catch (IOException ioe) {
             //System.err.println("Final commit and optmization failed");
-        	logger.error("Final commit and optimization failed: " + e.getMessage());
+        	logger.error("Final commit and optimization failed: " + ioe.getMessage());
+        	logger.debug(ioe);
             //e.printStackTrace();
         }
         
