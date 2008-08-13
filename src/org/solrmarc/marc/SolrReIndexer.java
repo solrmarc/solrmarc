@@ -60,6 +60,7 @@ public class SolrReIndexer
 {
     private String solrMarcDir;
     private String solrCoreDir;
+    private String solrCoreName;
     private String solrDataDir;
     private SolrCore solrCore;
     private SolrConfig solrConfig;
@@ -91,6 +92,7 @@ public class SolrReIndexer
         
         solrMarcDir = getProperty(props, "solrmarc.path");
         solrCoreDir = getProperty(props, "solr.path");
+        solrCoreDir = getProperty(props, "solr.core.name");
         solrDataDir = getProperty(props, "solr.data.dir");
         solrFieldContainingEncodedMarcRecord = getProperty(props, "solr.fieldname");
         queryForRecordsToUpdate = getProperty(props, "solr.query");
@@ -108,8 +110,8 @@ public class SolrReIndexer
         // Set up Solr core
         try{
             System.setProperty("solr.data.dir", solrDataDir);
-            solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
-            solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
+            solrConfig = new SolrConfig(solrCoreDir + "/" + solrCoreName, "solrconfig.xml", null);
+            solrCore = new SolrCore(solrCoreName, solrDataDir, solrConfig, null, null);
             refedSolrSearcher = solrCore.getSearcher();
             solrSearcher = refedSolrSearcher.get();
         }
