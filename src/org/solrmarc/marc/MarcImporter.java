@@ -86,50 +86,70 @@ public class MarcImporter {
 	 * @param properties
 	 * @throws IOException 
 	 */
-	public MarcImporter(String properties) throws IOException
+    public MarcImporter(String properties) throws IOException
     {
-		loadProperties(properties);
+        // Process Properties
+        loadProperties(properties);
+
         // Set up Solr core
         try{
             System.setProperty("solr.data.dir", solrDataDir);
+            logger.info("Using the " + solrCoreName + " core");
+            logger.info("Using the solrconfig.xml from " + solrCoreDir + "/" + solrCoreName);
             solrConfig = new SolrConfig(solrCoreDir + "/" + solrCoreName, "solrconfig.xml", null);
-            //solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
             solrCore = new SolrCore(solrCoreName, solrDataDir, solrConfig, null, null);
         }
         catch (Exception e)
         {
-        	logger.error("Couldn't set the instance directory");
+            logger.error("Couldn't load the solr core directory");
             e.printStackTrace();
             System.exit(1);
         }
-        
+
+        // Setup UpdateHandler
         updateHandler = solrCore.getUpdateHandler();
-        
+
 	}
-    
+
     /**
      * Load the properties file
      * @param properties
      * @throws IOException
      */
     public void loadProperties(String properties) throws IOException
-    {       
+    {
         Properties props = new Properties();
-        
+
         InputStream in = new FileInputStream(properties);
 
         // load the properties
         props.load(in);
         in.close();
-        
+
+        // The location of where the .properties files are located
         solrMarcDir = getProperty(props, "solrmarc.path");
+
+        // The solr.home directory
         solrCoreDir = getProperty(props, "solr.path");
+
+        // The solr core to be used
         solrCoreName = getProperty(props, "solr.core.name");
+
+        // The solr data diretory to use
         solrDataDir = getProperty(props, "solr.data.dir");
-        if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
+        if (solrDataDir == null) {
+            solrDataDir = solrCoreDir + "/" + solrCoreName + "/data";
+        }
+
+        // The SolrMarc indexer
         String indexerName = getProperty(props, "solr.indexer");
+
+        // The SolrMarc indexer properties file
         String indexerProps = getProperty(props, "solr.indexer.properties");
-        
+
+
+
+        // Setup the SolrMarc Indexer
         try
         {
             Class indexerClass;
