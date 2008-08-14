@@ -182,8 +182,9 @@ public class VuFindIndexer extends SolrIndexer
 		if (val != null) {
             int dotPos = val.indexOf(".");
             if (dotPos > 0) {
-                return callNumber.substring(0, dotPos));
+                val = val.substring(0, dotPos);
             }
+            return val;
 		} else {
 			return val;
 		}
