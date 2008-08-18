@@ -320,32 +320,36 @@ public class MarcImporter {
             if (shuttingDown) break;
             recordCounter++;
             
-            Record record = reader.next();
-            
             try {
-                addToIndex(record);
-                logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
+                Record record = reader.next();
+                
+                try {
+                    addToIndex(record);
+                    logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
+                }
+                catch (org.apache.solr.common.SolrException solrException)
+                {
+                   //check for missing fields
+                	if (solrException.getMessage().contains("missing required fields"))
+                   {
+                	   logger.error(solrException.getMessage() +  " at record count = " + recordCounter);
+                	   logger.error("Control Number " + record.getControlNumber(), solrException);
+                   }
+                   else
+                   {
+                	   logger.error("Error indexing: " + solrException.getMessage());
+                	   logger.error("Control Number " + record.getControlNumber(), solrException);
+                   }
+                }
+                catch(Exception e)
+                {
+                    // keep going?
+                	logger.error("Error indexing: " + e.getMessage());
+                	logger.error("Control Number " + record.getControlNumber(), e);
+                }
+            } catch (Exception e) {
+                logger.error("Error reading record: " + e.getMessage());
             }
-            catch (org.apache.solr.common.SolrException solrException)
-            {
-               //check for missing fields
-            	if (solrException.getMessage().contains("missing required fields"))
-               {
-            	   logger.error(solrException.getMessage() +  " at record count = " + recordCounter);
-            	   logger.error("Control Number " + record.getControlNumber(), solrException);
-               }
-               else
-               {
-            	   logger.error("Error indexing: " + solrException.getMessage());
-            	   logger.error("Control Number " + record.getControlNumber(), solrException);
-               }
-            }
-            catch(Exception e)
-            {
-                // keep going?
-            	logger.error("Error indexing: " + e.getMessage());
-            	logger.error("Control Number " + record.getControlNumber(), e);
-            }            
         }
         
         return recordCounter;
