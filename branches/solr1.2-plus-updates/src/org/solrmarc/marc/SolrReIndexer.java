@@ -254,7 +254,6 @@ public class SolrReIndexer
                     {
                         update(docMap);
                     }
-                    return(docMap);
                 }
             }
         }
@@ -272,9 +271,29 @@ public class SolrReIndexer
      * @param doc
      * @param map
      */
-    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> map)
+    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> docMap)
     {
-        // does nothing here, overridden in subclass
+        addExtraInfoFromDocToMap(doc, docMap, "fund_code_facet");
+        addExtraInfoFromDocToMap(doc, docMap, "date_received_facet");   
+    }
+
+    /**
+     * Add extra information from a Solr Document to a map
+     * @param doc Solr Document to pull information from
+     * @param map Map to add information to
+     * @param keyVal Value to add
+     */
+    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> map, String keyVal)
+    {
+        String fieldVals[] = doc.getValues(keyVal);
+        if (fieldVals != null && fieldVals.length > 0)
+        {
+            for (int i = 0; i < fieldVals.length; i++)
+            {
+                String fieldVal = fieldVals[i];
+                addToMap(map, keyVal, fieldVal);
+            }
+        }           
     }
 
     /**
