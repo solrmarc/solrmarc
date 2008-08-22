@@ -21,9 +21,12 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.Subfield;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -35,18 +38,18 @@ import org.solrmarc.tools.Utils;
 public class BlacklightIndexer extends SolrIndexer
 {
 
-	/**
-	 * Default constructor
-	 * @param propertiesMapFile
-	 * @throws ParseException 
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
-	 * @throws Exception
-	 */
+    /**
+     * Default constructor
+     * @param propertiesMapFile
+     * @throws ParseException 
+     * @throws IOException 
+     * @throws FileNotFoundException 
+     * @throws Exception
+     */
     public BlacklightIndexer(final String propertiesMapFile, final String solrMarcDir)
         throws FileNotFoundException, IOException, ParseException
     {
-        	super(propertiesMapFile, solrMarcDir);
+            super(propertiesMapFile, solrMarcDir);
     }
     
     /**
@@ -145,13 +148,13 @@ public class BlacklightIndexer extends SolrIndexer
         String val = getFirstFieldVal(record, "999a:090a:050a");
         
         if (val == null || val.length() == 0) { 
-        	return(null);
-        	}
+            return(null);
+            }
         
         String vals[] = val.split("[^A-Za-z]+", 2);
         
         if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
-        	return(null);
+            return(null);
         }
         
         return(vals[0]);
@@ -166,7 +169,7 @@ public class BlacklightIndexer extends SolrIndexer
     {
         String val = getFirstFieldVal(record, "999a:090a:050a");
         if (val == null || val.length() == 0) {
-        	return(null);
+            return(null);
         }
         val = val.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".").toLowerCase();
         return(val);
@@ -182,7 +185,7 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> set = getFieldList(record, "035a");
         
         if (set.isEmpty())  {
-        	return(null);
+            return(null);
         }
         
         Iterator<String> iter = set.iterator();
@@ -197,6 +200,62 @@ public class BlacklightIndexer extends SolrIndexer
             }
         }
         return null;
+    }
+    
+    /**
+     * Extract the info from an 880 linked field from a record
+     * @param record
+     * @return OCLC number
+     */
+    public Set<String> getLinkedField(final Record record, String fieldSpec)
+    {
+        Set<String> set = getFieldList(record,"8806");
+        
+        if (set.isEmpty())  {
+            return(null);
+        }
+        
+        String[] tags = fieldSpec.split(":");
+        Set<String> result = new LinkedHashSet<String>();
+        for (int i = 0; i < tags.length; i++)
+        {
+            // Check to ensure tag length is at least 3 characters
+            if (tags[i].length() < 3)
+            {
+                System.err.println("Invalid tag specified: " + tags[i]);
+                continue;
+            }
+            
+            // Get Field Tag
+            String tag = tags[i].substring(0, 3);
+
+            // Process Subfields
+            String subfield = tags[i].substring(3);
+            List<?> fields = record.getVariableFields("880");
+            Iterator<?> fldIter = fields.iterator();
+            while (fldIter.hasNext())
+            {
+                DataField dfield = (DataField) fldIter.next();
+                Subfield link = dfield.getSubfield('6');
+                if (link.getData().startsWith(tag))
+                {
+                    List<?> subList = dfield.getSubfields();
+                    Iterator<?> subIter = subList.iterator();
+                    StringBuffer buf = new StringBuffer("");
+                    while(subIter.hasNext())
+                    {
+                        Subfield subF = (Subfield)subIter.next();
+                        if (subfield.indexOf(subF.getCode()) != -1)
+                        {
+                            if (buf.length() > 0) buf.append(" ");
+                            buf.append(subF.getData());
+                        }
+                    }
+                    result.add(Utils.cleanData(buf.toString()));
+                }
+            }
+        }
+        return result;
     }
 
 }
