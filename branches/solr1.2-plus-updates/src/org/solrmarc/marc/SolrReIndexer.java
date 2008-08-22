@@ -231,6 +231,7 @@ public class SolrReIndexer
             DocSet ds;
             ds = solrSearcher.getDocSet(query);
             int totalSize = ds.size();
+            System. out.println("Num found = " + totalSize);
             int count = 0;
             DocIterator iter = ds.iterator();
             while (iter.hasNext())
