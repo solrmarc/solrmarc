@@ -116,8 +116,8 @@ public class MarcPrinter
                 String fullName = baseName + "." + indexerName;
                 indexerClass = Class.forName(fullName);
             }
-            Constructor constructor = indexerClass.getConstructor(new Class[]{String.class, String.class});
-            Object instance = constructor.newInstance(indexerProps, ".");
+            Constructor constructor = indexerClass.getConstructor(new Class[]{String.class});
+            Object instance = constructor.newInstance(indexerProps);
             if (instance instanceof SolrIndexer)
             {
                 indexer = (SolrIndexer)instance;

@@ -180,11 +180,7 @@ public class VuFindIndexer extends SolrIndexer
 		String val = getFirstFieldVal(record, "090a:050a");
 		
 		if (val != null) {
-            int dotPos = val.indexOf(".");
-            if (dotPos > 0) {
-                val = val.substring(0, dotPos);
-            }
-            return val;
+			return splitCallNumbers(val);
 		} else {
 			return val;
 		}
@@ -210,6 +206,16 @@ public class VuFindIndexer extends SolrIndexer
         }
     }
 
+	private String splitCallNumbers(final String val) {
+		String vals[] = val.split("[^A-Za-z]+", 2);
+
+		if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
+			return null;
+		}
+
+		return vals[0];
+	}
+    
     /**
      * Extract all topics from a record
      *
@@ -301,42 +307,37 @@ public class VuFindIndexer extends SolrIndexer
 	 *
 	 * @param record Marc record to extract data from
 	 */
-    public String getAllFields(final Record record)
+	public String getAllFields(final Record record)
     {
         StringBuffer buffer = new StringBuffer("");
 
-        List<DataField> fields = record.getDataFields();
-        Iterator<DataField> fieldsIter = fields.iterator();
-        DataField field;
+		List<DataField> fields = record.getDataFields();
+		Iterator<DataField> fieldsIter = fields.iterator();
+		DataField field;
 
-        List<DataField> subfields;
-        Iterator<DataField> subfieldsIter;
-        Subfield subfield;
+		List<DataField> subfields;
+		Iterator<DataField> subfieldsIter;
+		Subfield subfield;
 
         // Loop through fields
-        while(fieldsIter.hasNext()) {
-            field = (DataField) fieldsIter.next();
+		while(fieldsIter.hasNext()){
+			field = (DataField) fieldsIter.next();
 
-            // Get all fields starting with the 100 and ending with the 839
-            // This will ignore any "code" fields and only use textual fields
-            int tag = Integer.parseInt(field.getTag());
-            if ((tag >= 100) && (tag < 840)) {
-                // Loop through subfields
-                subfields = field.getSubfields();
-                subfieldsIter = subfields.iterator();
-                while (subfieldsIter.hasNext()) {
-                    subfield = (Subfield) subfieldsIter.next();
-                    if (buffer.length() > 0) {
-                        buffer.append(" " + subfield.getData());
-                    } else {
-                        buffer.append(subfield.getData());
-                    }
+			// Loop through subfields
+            subfields = field.getSubfields();
+            subfieldsIter = subfields.iterator();
+            while (subfieldsIter.hasNext()) {
+                subfield = (Subfield) subfieldsIter.next();
+                if (buffer.length() > 0) {
+                    buffer.append(" " + subfield.getData());
+                } else {
+                    buffer.append(subfield.getData());
                 }
             }
-        }
+		}
 
-        return buffer.toString();
-    }
+		return buffer.toString();
+	}
 
 
 }
