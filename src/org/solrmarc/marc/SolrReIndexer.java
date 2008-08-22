@@ -227,6 +227,7 @@ public class SolrReIndexer
         try
         {
             Query query = new TermQuery(new Term(field, term));
+            System. out.println("Searching for :" + field +" : "+ "term");
             DocSet ds;
             ds = solrSearcher.getDocSet(query);
             int totalSize = ds.size();
