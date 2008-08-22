@@ -75,14 +75,14 @@ public class SolrIndexer
         indexDate = new Date();
     }
     
-	/**
-	 * Constructor
-	 * @param propertiesMapFile
-	 * @param dir
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws ParseException
-	 */
+    /**
+     * Constructor
+     * @param propertiesMapFile
+     * @param dir
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws ParseException
+     */
     public SolrIndexer(String propertiesMapFile, String dir)
         throws FileNotFoundException, IOException, ParseException
     {
@@ -209,14 +209,14 @@ public class SolrIndexer
                         {
                             //System.err.println("Error: Unable to find file containing specified translation map (" +
                               //                 fieldDef[3] + ")");
-                        	logger.error("Unable to find file containing specified translation map (" + fieldDef[3] + ")");
+                            logger.error("Unable to find file containing specified translation map (" + fieldDef[3] + ")");
                             valid = false;
                         }
                         catch (IOException e)
                         {
 //                            System.err.println("Error: Problems reading specified translation map (" +
 //                                               fieldDef[3] + ")");
-                        	logger.error("Error: Problems reading specified translation map (" + fieldDef[3] + ")");
+                            logger.error("Error: Problems reading specified translation map (" + fieldDef[3] + ")");
                             valid = false;
                         }
                     }
@@ -248,7 +248,7 @@ public class SolrIndexer
             {
 //                System.err.println("Error: Specified translation map (" +
 //                                   mapName + ") not found in properties file");
-            	logger.error("Sepcified translation map (" + mapName + ") not found in properties file");
+                logger.error("Specified translation map (" + mapName + ") not found in properties file");
                 valid = false;
             }
             
@@ -257,8 +257,20 @@ public class SolrIndexer
             {
                 try
                 {
-                    Method method = getClass().getMethod(indexParm,
-                                                 new Class[] { Record.class });
+                    Method method = null;
+                    if (indexParm.indexOf("(") != -1)
+                    {
+                        String parms[] = indexParm.trim().split("[(,)]");
+                        int numparms = parms[parms.length-1].length() == 0 ? parms.length - 1 : parms.length;
+                        Class<?> parmClasses[] = new Class<?>[numparms];
+                        parmClasses[0] = Record.class;
+                        for (int i = 1 ; i < numparms; i++)  { parmClasses[i] = String.class; }
+                        method = getClass().getMethod(parms[0], parmClasses);
+                    }
+                    else 
+                    {
+                        method = getClass().getMethod(indexParm, new Class[] { Record.class });
+                    }
                     Class<?> retval = method.getReturnType();
                     // if (!method.isAccessible())
                     // {
@@ -279,24 +291,24 @@ public class SolrIndexer
                 {
 //                    System.err.println("Error: Unable to invoke custom indexing function " +
 //                                       indexParm);
-                	logger.error("Unable to invoke custom indexing function " + indexParm);
-                	logger.debug(e.getCause(), e);
+                    logger.error("Unable to invoke custom indexing function " + indexParm);
+                    logger.debug(e.getCause(), e);
                     valid = false;
                 }
                 catch (NoSuchMethodException e)
                 {
 //                    System.err.println("Error: Unable to find custom indexing function " +
 //                                       indexParm);
-                	logger.error("Unable to find custom indexing function " + indexParm);
-                	logger.debug(e.getCause());
+                    logger.error("Unable to find custom indexing function " + indexParm);
+                    logger.debug(e.getCause());
                     valid = false;
                 }
                 catch (IllegalArgumentException e)
                 {
 //                    System.err.println("Error: Unable to find custom indexing function " +
 //                                       indexParm);
-                	logger.error("Unable to find custom indexing function " + indexParm);
-                	logger.debug(e.getCause());
+                    logger.error("Unable to find custom indexing function " + indexParm);
+                    logger.debug(e.getCause());
                     valid = false;
                 }
             }
@@ -456,8 +468,25 @@ public class SolrIndexer
     {
         try
         {
-            Method method = getClass().getMethod(indexParm, new Class[]{Record.class});
-            Object retval = method.invoke(this, new Object[]{record});
+            Method method;
+            Object retval;
+            if (indexParm.indexOf("(") != -1)
+            {
+                String parms[] = indexParm.trim().split("[(,)]");
+                int numparms = parms[parms.length-1].length() == 0 ? parms.length - 1 : parms.length;
+                Class parmClasses[] = new Class[numparms];
+                parmClasses[0] = Record.class;
+                Object objParms[] = new Object[numparms];
+                objParms[0] = record;                
+                for (int i = 1 ; i < numparms; i++)  { parmClasses[i] = String.class; objParms[i] = parms[i].trim(); }
+                method = getClass().getMethod(parms[0], parmClasses);
+                retval = method.invoke(this, objParms);
+            }
+            else 
+            {
+                method = getClass().getMethod(indexParm, new Class[]{Record.class});
+                retval = method.invoke(this, new Object[]{record});
+            }
             if (retval instanceof Set) 
             {
                 addFields(indexMap, indexField, mapName, (Set<String>) retval);
@@ -470,27 +499,27 @@ public class SolrIndexer
         catch (SecurityException e)
         {
             //e.printStackTrace();
-        	logger.error(e.getCause());
+            logger.error(e.getCause());
         }
         catch (NoSuchMethodException e)
         {
             //e.printStackTrace();
-        	logger.error(e.getCause());
+            logger.error(e.getCause());
         }
         catch (IllegalArgumentException e)
         {
             //e.printStackTrace();
-        	logger.error(e.getCause());
+            logger.error(e.getCause());
         }
         catch (IllegalAccessException e)
         {
             //e.printStackTrace();
-        	logger.error(e.getCause());
+            logger.error(e.getCause());
         }
         catch (InvocationTargetException e)
         {
             //e.printStackTrace();
-        	logger.error(e.getCause());
+            logger.error(e.getCause());
         }
     }
 
@@ -679,7 +708,7 @@ public class SolrIndexer
         Set<String> result = new LinkedHashSet<String>();
         for (int i = 0; i < tags.length; i++)
         {
-            // Check to ensure tag length is atlease 3 characters
+            // Check to ensure tag length is at least 3 characters
             if (tags[i].length() < 3)
             {
                 System.err.println("Invalid tag specified: " + tags[i]);
@@ -847,7 +876,7 @@ public class SolrIndexer
                     DataField dfield = (DataField) fldIter.next();
 
                     if (subfield.length() > 1) {
-                        // Allow automatic concatination of grouped subfields
+                        // Allow automatic concatenation of grouped subfields
                         StringBuffer buffer = new StringBuffer("");
                         for (int i = 0; i < subfield.length(); i++)
                         {
@@ -955,7 +984,7 @@ public class SolrIndexer
         catch (UnsupportedEncodingException e)
         {
             //  e.printStackTrace();
-        	logger.error(e.getCause());
+            logger.error(e.getCause());
         }
         return (result);
     }
@@ -982,7 +1011,7 @@ public class SolrIndexer
         catch (UnsupportedEncodingException e)
         {
             // e.printStackTrace();
-        	logger.error(e.getCause());
+            logger.error(e.getCause());
         }
         return tmp;
     }
