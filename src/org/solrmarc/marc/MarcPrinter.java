@@ -73,6 +73,8 @@ public class MarcPrinter
         String fileStr = args[1];
         File file = new File(fileStr);
         MarcReader reader;
+        String defaultEncoding = System.getProperty("marc.default_encoding");
+        if (defaultEncoding == null) defaultEncoding = "BESTGUESS";
         boolean permissiveReader = Boolean.parseBoolean(System.getProperty("marc.permissive"));
         boolean to_utf_8 = Boolean.parseBoolean(System.getProperty("marc.to_utf_8"));
        
@@ -83,7 +85,7 @@ public class MarcPrinter
         else
         {       
             InputStream in = new FileInputStream(file);
-            reader = new MarcPermissiveStreamReader(in, permissiveReader, to_utf_8);
+            reader = new MarcPermissiveStreamReader(in, permissiveReader, to_utf_8, defaultEncoding);
         }
             
         String marcIncludeIfPresent = System.getProperty("marc.include_if_present");
