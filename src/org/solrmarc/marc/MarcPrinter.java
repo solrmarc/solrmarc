@@ -73,8 +73,15 @@ public class MarcPrinter
         String fileStr = args[1];
         File file = new File(fileStr);
         MarcReader reader;
-        String defaultEncoding = System.getProperty("marc.default_encoding");
-        if (defaultEncoding == null) defaultEncoding = "BESTGUESS";
+        String defaultEncoding;
+        if (System.getProperty("marc.default_encoding") != null)
+        {
+            defaultEncoding = System.getProperty("marc.default_encoding").trim();    
+        }
+        else
+        {
+            defaultEncoding = "BESTGUESS";
+        }
         boolean permissiveReader = Boolean.parseBoolean(System.getProperty("marc.permissive"));
         boolean to_utf_8 = Boolean.parseBoolean(System.getProperty("marc.to_utf_8"));
        
@@ -127,7 +134,7 @@ public class MarcPrinter
             }
             else
             {
-                //System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
+                System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
                 logger.fatal("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
                 System.exit(1);
             }
@@ -141,8 +148,10 @@ public class MarcPrinter
             }
             if (cause instanceof ParseException)
             {
-                //System.err.println();
-                logger.fatal("Error configuring Indexer from properties file.  Exiting...");
+                System.err.println("Error configuring Indexer from properties file. ");
+                logger.fatal("Error configuring Indexer from properties file.  ");
+                System.err.println(cause.getMessage() + "   Exiting...");
+                logger.fatal(cause.getMessage() + "   Exiting...");
                 System.exit(1);
             }    
             
@@ -346,17 +355,20 @@ public class MarcPrinter
                     key = keys.next();
                     value = indexMap.get(key);
                     if (key.equals("id")) continue;
-                    if (value instanceof String)
+                    if (key.indexOf("call_number") != -1)
                     {
-                        System.out.println("IndexID= "+ key + "  Value = "+ value);
-                    }
-                    else if (value instanceof Collection)
-                    {
-                        Iterator<String> valIter = ((Collection)value).iterator();
-                        while (valIter.hasNext())
+                        if (value instanceof String)
                         {
-                            String collVal = valIter.next();
-                            System.out.println("IndexID= "+ key + "  Value = "+ collVal);
+                            System.out.println("IndexID= "+ key + "  Value = "+ value);
+                        }
+                        else if (value instanceof Collection)
+                        {
+                            Iterator<String> valIter = ((Collection)value).iterator();
+                            while (valIter.hasNext())
+                            {
+                                String collVal = valIter.next();
+                                System.out.println("IndexID= "+ key + "  Value = "+ collVal);
+                            }
                         }
                     }
                 }
