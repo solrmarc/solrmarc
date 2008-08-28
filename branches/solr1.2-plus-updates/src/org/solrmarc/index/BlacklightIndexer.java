@@ -119,8 +119,22 @@ public class BlacklightIndexer extends SolrIndexer
      * @param record
      * @return Collection of recording formats
      */
-    public Set<String> getRecordingFormat(final Record record)
+    public Set<String> getRecordingFormat(final Record record, String mapName)
     {
+        try
+        {
+            mapName = loadTranslationMap(null, mapName);
+        }
+        catch (FileNotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         Set<String> result = new LinkedHashSet<String>();
         String leader = record.getLeader().toString();
         String leaderChar = leader.substring(6, 7).toUpperCase();
@@ -143,21 +157,48 @@ public class BlacklightIndexer extends SolrIndexer
      * @param record
      * @return Call number prefix
      */
-    public String getCallNumberPrefix(final Record record)
+    public String getCallNumberPrefix(final Record record, String mapName, String part)
     {
+        try
+        {
+            mapName = loadTranslationMap(null, mapName);
+        }
+        catch (FileNotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         String val = getFirstFieldVal(record, "999a:090a:050a");
-        
+        String result = null;
         if (val == null || val.length() == 0) { 
             return(null);
             }
         
-        String vals[] = val.split("[^A-Za-z]+", 2);
+        String vals[] = val.split("[^A-Z]+", 2);
         
-        if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
+        if (vals.length == 0 || vals[0] == null || vals[0].length() == 0 ||  vals[0].length() > 3) 
+        {
             return(null);
         }
-        
-        return(vals[0]);
+        else
+        {
+            String prefix = vals[0];
+            while (result == null && prefix.length() > 0)
+            {
+                result = Utils.remap(prefix, findMap(mapName), false);
+                prefix = prefix.substring(0, prefix.length()-1);
+            }
+        }
+        int partNum = Utils.isNumber(part) ? Integer.parseInt(part) : 0;
+        if (result == null || partNum == 0) return(result);
+        String resultParts[] = result.split("[|]");
+        if (partNum-1 >= resultParts.length) return(null);
+        return(resultParts[partNum-1]);
     }
 
     /**

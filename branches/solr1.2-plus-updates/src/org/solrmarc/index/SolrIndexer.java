@@ -90,9 +90,10 @@ public class SolrIndexer
         solrMarcDir = dir;
         Properties props = new Properties();
         props.load(new FileInputStream(solrMarcDir + "/" + propertiesMapFile));
-        if (!fillMapFromProperties(props))
+        String errorMsg = fillMapFromProperties(props);
+        if (errorMsg != null)
         {
-            throw new ParseException("Invalid data found in indexer properties file", 0);
+            throw new ParseException(errorMsg, 0);
         }
     }
 
@@ -101,10 +102,10 @@ public class SolrIndexer
      * @param props Properties to load
      * @return If the properties are valid
      */
-    protected boolean fillMapFromProperties(Properties props)
+    protected String fillMapFromProperties(Properties props)
         throws ParseException
     {
-        boolean valid = true;
+        String errorMsg = null;
         Enumeration<?> en = props.propertyNames();
         
         while (en.hasMoreElements())
@@ -129,11 +130,10 @@ public class SolrIndexer
                     String values[] = value.split("[, ]+", 2);
                     if (values[0].equals("custom"))
                     {
-                        String values2[] = values[1].trim().split("[, ]+", 2);
                         fieldDef[0] = property;
                         fieldDef[1] = "custom";
-                        fieldDef[2] = values2[0];
-                        fieldDef[3] = values2.length > 1 ? values2[1] : null;
+                        fieldDef[2] = values[1].trim();
+                        fieldDef[3] = null;
                     }
                     else if (values[0].equals("xml") ||
                              values[0].equals("raw") ||
@@ -210,14 +210,14 @@ public class SolrIndexer
                             //System.err.println("Error: Unable to find file containing specified translation map (" +
                               //                 fieldDef[3] + ")");
                             logger.error("Unable to find file containing specified translation map (" + fieldDef[3] + ")");
-                            valid = false;
+                            errorMsg = "Unable to find file containing specified translation map (" + fieldDef[3] + ")";
                         }
                         catch (IOException e)
                         {
 //                            System.err.println("Error: Problems reading specified translation map (" +
 //                                               fieldDef[3] + ")");
                             logger.error("Error: Problems reading specified translation map (" + fieldDef[3] + ")");
-                            valid = false;
+                            errorMsg = "Error: Problems reading specified translation map (" + fieldDef[3] + ")";
                         }
                     }
                 }
@@ -249,7 +249,7 @@ public class SolrIndexer
 //                System.err.println("Error: Specified translation map (" +
 //                                   mapName + ") not found in properties file");
                 logger.error("Specified translation map (" + mapName + ") not found in properties file");
-                valid = false;
+                errorMsg = "Specified translation map (" + mapName + ") not found in properties file";
             }
             
             // Process Custom Field
@@ -260,12 +260,14 @@ public class SolrIndexer
                     Method method = null;
                     if (indexParm.indexOf("(") != -1)
                     {
-                        String parms[] = indexParm.trim().split("[(,)]");
-                        int numparms = parms[parms.length-1].length() == 0 ? parms.length - 1 : parms.length;
-                        Class<?> parmClasses[] = new Class<?>[numparms];
+                        String functionName = indexParm.substring(0, indexParm.indexOf('('));
+                        String parmStr = indexParm.substring(indexParm.indexOf('(')+1, indexParm.lastIndexOf(')'));
+                        String parms[] = parmStr.trim().split(",");
+                        int numparms = parms.length;
+                        Class<?> parmClasses[] = new Class<?>[numparms+1];
                         parmClasses[0] = Record.class;
-                        for (int i = 1 ; i < numparms; i++)  { parmClasses[i] = String.class; }
-                        method = getClass().getMethod(parms[0], parmClasses);
+                        for (int i = 0 ; i < numparms; i++)  { parmClasses[i+1] = String.class; }
+                        method = getClass().getMethod(functionName, parmClasses);
                     }
                     else 
                     {
@@ -284,7 +286,7 @@ public class SolrIndexer
 //                                           indexParm +
 //                                           " must be either String or Set<String>");
                         logger.error("Error: Return type of custom indexing function " + indexParm +" must be either String or Set<String>");
-                        valid = false;
+                        errorMsg = "Error: Return type of custom indexing function " + indexParm +" must be either String or Set<String>";
                     }
                 }
                 catch (SecurityException e)
@@ -293,7 +295,7 @@ public class SolrIndexer
 //                                       indexParm);
                     logger.error("Unable to invoke custom indexing function " + indexParm);
                     logger.debug(e.getCause(), e);
-                    valid = false;
+                    errorMsg = "Unable to invoke custom indexing function " + indexParm;
                 }
                 catch (NoSuchMethodException e)
                 {
@@ -301,7 +303,7 @@ public class SolrIndexer
 //                                       indexParm);
                     logger.error("Unable to find custom indexing function " + indexParm);
                     logger.debug(e.getCause());
-                    valid = false;
+                    errorMsg = "Unable to find custom indexing function " + indexParm;
                 }
                 catch (IllegalArgumentException e)
                 {
@@ -309,14 +311,14 @@ public class SolrIndexer
 //                                       indexParm);
                     logger.error("Unable to find custom indexing function " + indexParm);
                     logger.debug(e.getCause());
-                    valid = false;
+                    errorMsg = "Unable to find custom indexing function " + indexParm;
                 }
             }
         }
-        return valid;
+        return errorMsg;
     }
 
-    private String loadTranslationMap(Properties props, String translationMapSpec) throws FileNotFoundException, IOException
+    protected String loadTranslationMap(Properties props, String translationMapSpec) throws FileNotFoundException, IOException
     {
         String mapName = null;
         if (translationMapSpec.length() == 0)
@@ -338,14 +340,20 @@ public class SolrIndexer
             String propFilename = mapSpec[0];
             String mapKeyPrefix = mapSpec[1];
             mapName = mapSpec[1];
-            loadTranslationMapValues(propFilename, mapKeyPrefix, mapName);
+            if (findMap(mapName) == null)
+            {
+                loadTranslationMapValues(propFilename, mapKeyPrefix, mapName);
+            }
         }
         else
         {
             String propFilename = translationMapSpec;
             String mapKeyPrefix = "";
             mapName = translationMapSpec.replaceAll(".properties", "");
-            loadTranslationMapValues(propFilename, mapKeyPrefix, mapName);
+            if (findMap(mapName) == null)
+            {
+                loadTranslationMapValues(propFilename, mapKeyPrefix, mapName);
+            }
         }
         return (mapName);
     }
@@ -472,14 +480,16 @@ public class SolrIndexer
             Object retval;
             if (indexParm.indexOf("(") != -1)
             {
-                String parms[] = indexParm.trim().split("[(,)]");
-                int numparms = parms[parms.length-1].length() == 0 ? parms.length - 1 : parms.length;
-                Class parmClasses[] = new Class[numparms];
+                String functionName = indexParm.substring(0, indexParm.indexOf('('));
+                String parmStr = indexParm.substring(indexParm.indexOf('(')+1, indexParm.lastIndexOf(')'));
+                String parms[] = parmStr.trim().split(",");
+                int numparms = parms.length;
+                Class parmClasses[] = new Class[numparms+1];
                 parmClasses[0] = Record.class;
-                Object objParms[] = new Object[numparms];
+                Object objParms[] = new Object[numparms+1];
                 objParms[0] = record;                
-                for (int i = 1 ; i < numparms; i++)  { parmClasses[i] = String.class; objParms[i] = parms[i].trim(); }
-                method = getClass().getMethod(parms[0], parmClasses);
+                for (int i = 0 ; i < numparms; i++)  { parmClasses[i+1] = String.class; objParms[i+1] = parms[i].trim(); }
+                method = getClass().getMethod(functionName, parmClasses);
                 retval = method.invoke(this, objParms);
             }
             else 
@@ -951,7 +961,11 @@ public class SolrIndexer
                     while (iter.hasNext())
                     {
                         Subfield s = (Subfield) (iter.next());
-                        set.add(s.getData().substring(substringStart, substringEnd));
+                        String data = s.getData();
+                        if (data.length() > substringEnd && substringEnd > substringStart)
+                        {
+                            set.add(data.substring(substringStart, substringEnd));
+                        }
                     }
                 }
             }
