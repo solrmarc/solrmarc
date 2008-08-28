@@ -181,7 +181,16 @@ public class MarcImporter {
         }
         SolrHostURL = getProperty(props, "solr.hosturl");
 
-        boolean permissiveReader = Boolean.parseBoolean(System.getProperty("marc.permissive"));        
+        boolean permissiveReader = Boolean.parseBoolean(System.getProperty("marc.permissive"));
+        String defaultEncoding;
+        if (System.getProperty("marc.default_encoding") != null)
+        {
+            defaultEncoding = System.getProperty("marc.default_encoding").trim();    
+        }
+        else
+        {
+            defaultEncoding = "BESTGUESS";
+        }
         verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
         to_utf_8 = Boolean.parseBoolean(getProperty(props, "marc.to_utf_8"));
         unicodeNormalize = Boolean.parseBoolean(getProperty(props, "marc.unicode_normalize"));
@@ -195,7 +204,7 @@ public class MarcImporter {
         reader = null;
         if (source.equals("FILE"))
         {
-            reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), permissiveReader, to_utf_8);
+            reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), permissiveReader, to_utf_8, defaultEncoding);
         }
         else if (source.equals("DIR"))
         {
