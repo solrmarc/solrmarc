@@ -181,11 +181,11 @@ public class MarcImporter {
         }
         SolrHostURL = getProperty(props, "solr.hosturl");
 
-        boolean permissiveReader = Boolean.parseBoolean(System.getProperty("marc.permissive"));
+        boolean permissiveReader = Boolean.parseBoolean(getProperty(props, "marc.permissive"));
         String defaultEncoding;
-        if (System.getProperty("marc.default_encoding") != null)
+        if (getProperty(props, "marc.default_encoding") != null)
         {
-            defaultEncoding = System.getProperty("marc.default_encoding").trim();    
+            defaultEncoding = getProperty(props, "marc.default_encoding").trim();    
         }
         else
         {
@@ -306,16 +306,17 @@ public class MarcImporter {
             if (shuttingDown) break;
             recordCounter++;
             
-            Record record = reader.next();
+            Record record = null;
             
             try {
+                record = reader.next();
                 addToIndex(record);
                 logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
             }
             catch (org.apache.solr.common.SolrException solrException)
             {
                //check for missing fields
-            	if (solrException.getMessage().contains("missing required fields"))
+               if (solrException.getMessage().contains("missing required fields"))
                {
             	   logger.error(solrException.getMessage() +  " at record count = " + recordCounter);
             	   logger.error("Control Number " + record.getControlNumber(), solrException);
@@ -587,9 +588,19 @@ public class MarcImporter {
         
         Date start = new Date();
         
-        int numImported = importer.importRecords();
-
-        int numDeleted = importer.deleteRecords();
+        int numImported = 0;
+        int numDeleted = 0;
+        try
+        {        
+            numImported = importer.importRecords();
+            
+            numDeleted = importer.deleteRecords();
+        }
+        catch (Exception e)
+        {
+            logger.info("Exception occurred while Indexing: "+ e.getMessage());
+            
+        }
         
         importer.finish();
         
