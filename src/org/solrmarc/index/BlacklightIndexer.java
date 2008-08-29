@@ -174,7 +174,10 @@ public class BlacklightIndexer extends SolrIndexer
             e.printStackTrace();
         }
         String useRecord = getFirstFieldVal(record, "050a:090a");
-        if (useRecord == null)  return(null);
+        if (useRecord == null || useRecord.matches("[0-9].*"))  
+        {
+            return(null);
+        }
         
         String val = getFirstFieldVal(record, "999a");
         String result = null;
