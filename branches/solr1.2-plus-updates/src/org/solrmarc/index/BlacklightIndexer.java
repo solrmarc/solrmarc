@@ -173,32 +173,39 @@ public class BlacklightIndexer extends SolrIndexer
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        String val = getFirstFieldVal(record, "999a:090a:050a");
+        String useRecord = getFirstFieldVal(record, "050a:090a");
+        if (useRecord == null)  return(null);
+        
+        String val = getFirstFieldVal(record, "999a");
         String result = null;
         if (val == null || val.length() == 0) { 
             return(null);
             }
         
-        String vals[] = val.split("[^A-Z]+", 2);
+        String vals[] = val.split("[^A-Za-z]+", 2);
+        String prefix = vals[0];
         
-        if (vals.length == 0 || vals[0] == null || vals[0].length() == 0 ||  vals[0].length() > 3) 
+        if (vals.length == 0 || vals[0] == null || vals[0].length() == 0 ||  vals[0].length() > 3 || !vals[0].toUpperCase().equals(vals[0])) 
         {
             return(null);
         }
         else
         {
-            String prefix = vals[0];
             while (result == null && prefix.length() > 0)
             {
                 result = Utils.remap(prefix, findMap(mapName), false);
-                prefix = prefix.substring(0, prefix.length()-1);
+                if (result == null)
+                {
+                    prefix = prefix.substring(0, prefix.length()-1);
+                }
             }
         }
         int partNum = Utils.isNumber(part) ? Integer.parseInt(part) : 0;
-        if (result == null || partNum == 0) return(result);
+        if (result == null) return(result);
+        if (partNum == 0) return(prefix + " - " + result);
         String resultParts[] = result.split("[|]");
         if (partNum-1 >= resultParts.length) return(null);
-        return(resultParts[partNum-1]);
+        return(prefix.substring(0,1) + " - " + resultParts[partNum-1]);
     }
 
     /**
