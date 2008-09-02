@@ -254,6 +254,10 @@ public class SolrReIndexer
                     {
                         update(docMap);
                     }
+                    else
+                    {
+                        return(docMap);
+                    }
                 }
             }
         }
