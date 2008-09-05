@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.*;
+import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.update.AddUpdateCommand;
@@ -94,10 +95,16 @@ public class MarcImporter {
         // Set up Solr core
         try{
             System.setProperty("solr.data.dir", solrDataDir);
+            logger.info("Using the data directory of: " + solrDataDir);
+            
+            File configFile = new File(solrCoreDir + "/solr.xml");
+            logger.info("Using the multicore schema file at : " + configFile.getAbsolutePath());
             logger.info("Using the " + solrCoreName + " core");
-            logger.info("Using the solrconfig.xml from " + solrCoreDir + "/" + solrCoreName);
-            solrConfig = new SolrConfig(solrCoreDir + "/" + solrCoreName, "solrconfig.xml", null);
-            solrCore = new SolrCore(solrCoreName, solrDataDir, solrConfig, null, null);
+            
+            CoreContainer cc = new CoreContainer(solrCoreDir, configFile);
+            
+            solrCore = cc.getCore(solrCoreName);
+           
         }
         catch (Exception e)
         {
