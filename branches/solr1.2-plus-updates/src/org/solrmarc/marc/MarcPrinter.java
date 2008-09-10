@@ -355,8 +355,8 @@ public class MarcPrinter
                     key = keys.next();
                     value = indexMap.get(key);
                     if (key.equals("id")) continue;
-                    if (key.indexOf("call_number") != -1)
-                    {
+//                    if (key.indexOf("call_number") != -1)
+//                    {
                         if (value instanceof String)
                         {
                             System.out.println("IndexID= "+ key + "  Value = "+ value);
@@ -369,7 +369,7 @@ public class MarcPrinter
                                 String collVal = valIter.next();
                                 System.out.println("IndexID= "+ key + "  Value = "+ collVal);
                             }
-                        }
+//                        }
                     }
                 }
                 

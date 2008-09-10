@@ -256,9 +256,9 @@ public class BlacklightIndexer extends SolrIndexer
     /**
      * Extract the info from an 880 linked field from a record
      * @param record
-     * @return OCLC number
+     * @return linked field
      */
-    public Set<String> getLinkedField(final Record record, String fieldSpec)
+    public Set<String> getLinkedFieldDisplay(final Record record, String fieldSpec)
     {
         Set<String> set = getFieldList(record,"8806");
         
@@ -308,5 +308,76 @@ public class BlacklightIndexer extends SolrIndexer
         }
         return result;
     }
+    
+    /**
+     * Extract the info from an 880 linked field from a record
+     * @param record
+     * @return linked field
+     */
+    public Set<String> getLinkedFieldSearchable(final Record record, String fieldSpec)
+    {
+        Set<String> set = getFieldList(record,"8806");
+        
+        Set<String> result1 = getLinkedFieldDisplay(record, fieldSpec);
+        Set<String> result2 = getFieldList(record, fieldSpec);
+        
+        if (result1 != null) result2.addAll(result1);
+        return(result2);
+    }
+    
+    /**
+     * extract all the subfields in a given marc field
+     * @param record
+     * @param marcFieldNum - the marc field number as a string (e.g. "245")
+     * @return
+     */
+    public Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+
+        String[] tags = fieldSpec.split(":");
+        for (int i = 0; i < tags.length; i++)
+        {
+            // Check to ensure tag length is at least 3 characters
+            if (tags[i].length() < 3)
+            {
+                System.err.println("Invalid tag specified: " + tags[i]);
+                continue;
+            }
+            
+            // Get Field Tag
+            String tag = tags[i].substring(0, 3);
+
+//            // Process Subfields
+//            String subfieldtags = tags[i].substring(3);
+
+            List<?> marcFieldList =  record.getVariableFields(tag);
+            if (!marcFieldList.isEmpty()) 
+            {
+                Iterator<?> fieldIter = marcFieldList.iterator();
+                while (fieldIter.hasNext())
+                {
+                    DataField marcField = (DataField)fieldIter.next();
+                    StringBuffer buffer = new StringBuffer("");
+                
+                    List<Subfield> subfields = marcField.getSubfields();
+                    Iterator<Subfield> iter = subfields.iterator();
+        
+                    Subfield subfield;
+        
+                    while (iter.hasNext()) 
+                    {
+                        subfield = iter.next();
+                        if (buffer.length() > 0)  buffer.append(separator);
+                        buffer.append(subfield.getData());
+                    }
+                    result.add(buffer.toString());
+                }
+            }
+        }
+
+        return result;
+    }
+
 
 }
