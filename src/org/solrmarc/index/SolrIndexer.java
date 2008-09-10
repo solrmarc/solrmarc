@@ -488,7 +488,7 @@ public class SolrIndexer
                 parmClasses[0] = Record.class;
                 Object objParms[] = new Object[numparms+1];
                 objParms[0] = record;                
-                for (int i = 0 ; i < numparms; i++)  { parmClasses[i+1] = String.class; objParms[i+1] = parms[i].trim(); }
+                for (int i = 0 ; i < numparms; i++)  { parmClasses[i+1] = String.class; objParms[i+1] = dequote(parms[i].trim()); }
                 method = getClass().getMethod(functionName, parmClasses);
                 retval = method.invoke(this, objParms);
             }
@@ -531,6 +531,15 @@ public class SolrIndexer
             //e.printStackTrace();
             logger.error(e.getCause());
         }
+    }
+
+    private String dequote(String str)
+    {
+        if (str.length() > 2 && str.charAt(0) == '"' && str.charAt(str.length()-1) == '"')
+        {
+            return(str.substring(1, str.length()-1));
+        }
+        return(str);
     }
 
     private String getStd(Record record, String indexParm)
