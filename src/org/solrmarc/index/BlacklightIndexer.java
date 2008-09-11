@@ -23,6 +23,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
@@ -349,11 +351,12 @@ public class BlacklightIndexer extends SolrIndexer
             String tag = tags[i].substring(0, 3);
 
 //            // Process Subfields
-//            String subfieldtags = tags[i].substring(3);
+            String subfieldtags = tags[i].substring(3);
 
             List<?> marcFieldList =  record.getVariableFields(tag);
             if (!marcFieldList.isEmpty()) 
             {
+                Pattern subfieldPattern = Pattern.compile(subfieldtags.length() == 0 ? "." : subfieldtags);
                 Iterator<?> fieldIter = marcFieldList.iterator();
                 while (fieldIter.hasNext())
                 {
@@ -368,8 +371,12 @@ public class BlacklightIndexer extends SolrIndexer
                     while (iter.hasNext()) 
                     {
                         subfield = iter.next();
-                        if (buffer.length() > 0)  buffer.append(separator);
-                        buffer.append(subfield.getData());
+                        Matcher matcher = subfieldPattern.matcher(""+subfield.getCode());
+                        if (matcher.matches())
+                        {
+                            if (buffer.length() > 0)  buffer.append(separator);
+                            buffer.append(subfield.getData());
+                        }
                     }
                     result.add(buffer.toString());
                 }
