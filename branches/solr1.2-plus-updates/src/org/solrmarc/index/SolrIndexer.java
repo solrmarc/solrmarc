@@ -631,8 +631,7 @@ public class SolrIndexer
      */
     public static Set<String> getEra(Set<String> result, char eraStart1, char eraStart2, char eraEnd1, char eraEnd2)
     {
-        if (eraStart1 >= 'a' && eraStart1 <= 'y' && eraEnd1 >= 'a' &&
-            eraEnd1 <= 'y')
+        if (eraStart1 >= 'a' && eraStart1 <= 'y' && eraEnd1 >= 'a' && eraEnd1 <= 'y')
         {
             for (char eraVal = eraStart1; eraVal <= eraEnd1; eraVal++)
             {
@@ -746,7 +745,9 @@ public class SolrIndexer
                 int substart = Integer.parseInt(sub[0]);
                 int subend = (sub.length > 1 ) ? Integer.parseInt(sub[1])+1 : substart+1;
                 addSubfieldDataToSet(record, result, tag, subfield, substart, subend);
-            } else {
+            } 
+            else 
+            {
                 addSubfieldDataToSet(record, result, tag, subfield);
             }
         }
@@ -891,29 +892,30 @@ public class SolrIndexer
             int iField = new Integer(field).intValue();
             if (iField > 9) {
                 // This field is a DataField
-                if (subfield != null) {
+                if (subfield != null) 
+                {
                     DataField dfield = (DataField) fldIter.next();
 
-                    if (subfield.length() > 1) {
+                    if (subfield.length() > 1) 
+                    {
                         // Allow automatic concatenation of grouped subfields
                         StringBuffer buffer = new StringBuffer("");
-                        for (int i = 0; i < subfield.length(); i++)
+                        List<?> sub = dfield.getSubfields();
+                        Iterator<?> iter = sub.iterator();
+                        while (iter.hasNext())
                         {
-                            List<?> sub = dfield.getSubfields(subfield.charAt(i));
-                            Iterator<?> iter = sub.iterator();
-                            while (iter.hasNext())
+                            Subfield s = (Subfield) (iter.next());
+                            if (subfield.indexOf(s.getCode()) != -1)
                             {
-                                Subfield s = (Subfield) (iter.next());
                                 String data = Utils.cleanData(s.getData());
-                                if (buffer.length() > 0) {
-                                    buffer.append(" " + data);
-                                } else {
-                                    buffer.append(data);
-                                }
+                                if (buffer.length() > 0) buffer.append(" ");
+                                buffer.append(data);
                             }
-                        }
+                        }                        
                         set.add(buffer.toString());
-                    } else {
+                    } 
+                    else 
+                    {
                         // Just get the singly defined subfield
                         List<?> sub = dfield.getSubfields(subfield.charAt(0));
                         Iterator<?> iter = sub.iterator();
@@ -926,7 +928,9 @@ public class SolrIndexer
                         }
                     }
                 }
-            } else {
+            } 
+            else 
+            {
                 // This field is a Control Field
                 ControlField cfield = (ControlField) fldIter.next();
                 set.add(cfield.getData());
