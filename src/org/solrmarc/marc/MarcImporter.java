@@ -34,6 +34,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -45,6 +46,7 @@ import org.apache.solr.update.CommitUpdateCommand;
 import org.apache.solr.update.DeleteUpdateCommand;
 import org.apache.solr.update.DocumentBuilder;
 import org.apache.solr.update.UpdateHandler;
+import org.marc4j.ErrorHandler;
 import org.marc4j.MarcDirStreamReader;
 import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
@@ -75,7 +77,9 @@ public class MarcImporter {
     private boolean isShutDown = false;
     private boolean to_utf_8 = false;
     private boolean unicodeNormalize = false;
-    
+    private ErrorHandler errors = null;
+    private boolean includeErrors = false;
+   
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
     
@@ -192,6 +196,7 @@ public class MarcImporter {
             defaultEncoding = "BESTGUESS";
         }
         verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
+        includeErrors = Boolean.parseBoolean(getProperty(props, "marc.include_errors"));
         to_utf_8 = Boolean.parseBoolean(getProperty(props, "marc.to_utf_8"));
         unicodeNormalize = Boolean.parseBoolean(getProperty(props, "marc.unicode_normalize"));
         deleteRecordListFilename = getProperty(props, "marc.ids_to_delete");
@@ -204,7 +209,15 @@ public class MarcImporter {
         reader = null;
         if (source.equals("FILE"))
         {
-            reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), permissiveReader, to_utf_8, defaultEncoding);
+            if (permissiveReader)
+            {
+                errors = new ErrorHandler();
+                reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), errors, to_utf_8, defaultEncoding);
+            }
+            else
+            {
+                reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), false, to_utf_8, defaultEncoding);
+            }
         }
         else if (source.equals("DIR"))
         {
@@ -346,7 +359,13 @@ public class MarcImporter {
     {
         Map<String, Object> map = indexer.map(record); 
         if (map.size() == 0) return;
-
+        if (errors != null && includeErrors)
+        {
+            if (errors.hasErrors())
+            {
+                addErrorsToMap(map, errors);
+            }
+        }
         AddUpdateCommand addcmd = new AddUpdateCommand();
         DocumentBuilder builder = new DocumentBuilder(solrCore.getSchema());
         builder.startDoc();
@@ -361,10 +380,10 @@ public class MarcImporter {
         	}
         	else if (value instanceof Collection)
         	{
-        		Iterator<String> valIter = ((Collection)value).iterator();
+        		Iterator<?> valIter = ((Collection)value).iterator();
         		while (valIter.hasNext())
         		{
-        			String collVal = valIter.next();
+        			String collVal = valIter.next().toString();
             		builder.addField(key, collVal);
         		}
         	}
@@ -396,6 +415,11 @@ public class MarcImporter {
             //e.printStackTrace();
         	logger.error("Control Number " + reader.next().getControlNumber(), ioe);
         }                
+    }
+
+    private void addErrorsToMap(Map<String, Object> map, ErrorHandler errors2)
+    {
+        map.put("marc_error", errors.getErrors());
     }
 
     /**
