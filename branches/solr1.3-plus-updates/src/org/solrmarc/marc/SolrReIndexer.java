@@ -30,6 +30,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.search.DocIterator;
@@ -71,6 +72,7 @@ public class SolrReIndexer
     protected boolean doUpdate = true;
     private RefCounted<SolrIndexSearcher> refedSolrSearcher;
     private SolrIndexSearcher solrSearcher;
+    private String solrCoreName;
     
     // Initialize logging category
     static Logger logger = Logger.getLogger(SolrReIndexer.class.getName());
@@ -89,9 +91,20 @@ public class SolrReIndexer
         props.load(in);
         in.close();
         
+        // The location of where the .properties files are located
         solrMarcDir = getProperty(props, "solrmarc.path");
+
+        // The solr.home directory
         solrCoreDir = getProperty(props, "solr.path");
+
+        // The solr core to be used
+        solrCoreName = getProperty(props, "solr.core.name");
+
+        // The solr data diretory to use
         solrDataDir = getProperty(props, "solr.data.dir");
+        if (solrDataDir == null) {
+            solrDataDir = solrCoreDir + "/" + solrCoreName;
+        }
         solrFieldContainingEncodedMarcRecord = getProperty(props, "solr.fieldname");
         queryForRecordsToUpdate = getProperty(props, "solr.query");
         String up = getProperty(props, "solr.do_update");
@@ -108,8 +121,9 @@ public class SolrReIndexer
         // Set up Solr core
         try{
             System.setProperty("solr.data.dir", solrDataDir);
-            solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
-            solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
+            File configFile = new File(solrCoreDir + "/solr.xml");
+            CoreContainer cc = new CoreContainer(solrCoreDir, configFile);            
+            solrCore = cc.getCore(solrCoreName);
             refedSolrSearcher = solrCore.getSearcher();
             solrSearcher = refedSolrSearcher.get();
         }
