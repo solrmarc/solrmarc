@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -43,9 +47,20 @@ public class BooklistReader extends SolrReIndexer
      */
     public void readBooklist(String filename)
     {
+        Reader input = null;
         try
         {
-            BufferedReader reader = new BufferedReader(new FileReader(new File(filename)));
+            if (filename.startsWith("http:"))
+            {
+                URL url = new URL(filename);
+                URLConnection conn = url.openConnection();
+                input = new InputStreamReader(conn.getInputStream());
+            }
+            else        
+            {
+                input = new FileReader(new File(filename));
+            }
+            BufferedReader reader = new BufferedReader(input);
             String line;
             while ((line = reader.readLine()) != null)
             {

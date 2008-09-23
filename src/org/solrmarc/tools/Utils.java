@@ -146,22 +146,34 @@ public final class Utils {
 	 */
     public static String remap(String fieldVal, Map<String, String> map, boolean copyEntryIfNotInMap)
     {
-        //String result = null;
-    	StringBuffer result = new StringBuffer("");
+        String result = null;
         
+        if (map.keySet().contains("pattern_0"))
+        {
+            for (int i = 0; i < map.keySet().size(); i++)
+            {
+                String patternStr = map.get("pattern_"+i);
+                String parts[] = patternStr.split("=>");
+                if (containsMatch(fieldVal, parts[0]))
+                {
+                    String newVal = parts[1];
+                    if (parts[1].contains("$"))
+                    {
+                        newVal = fieldVal.replaceAll(parts[0], parts[1]);
+                    }
+                    result = newVal;             
+                }
+            }
+        }
         if (map.containsKey(fieldVal))
         {
-            //result = map.get(fieldVal);
-        	result.append(map.get(fieldVal));
+            result = map.get(fieldVal);
         }
-        
         else if (copyEntryIfNotInMap)
         {
-            //result = fieldVal;
-        	result.append(fieldVal);
- //           System.out.println("Missing Value: "+ result);
+            result = fieldVal;
         }                      
-        return result.toString();
+        return result;
     }
 
     /**

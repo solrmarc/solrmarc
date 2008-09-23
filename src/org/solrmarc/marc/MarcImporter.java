@@ -34,11 +34,11 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.*;
-import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.update.AddUpdateCommand;
@@ -46,6 +46,7 @@ import org.apache.solr.update.CommitUpdateCommand;
 import org.apache.solr.update.DeleteUpdateCommand;
 import org.apache.solr.update.DocumentBuilder;
 import org.apache.solr.update.UpdateHandler;
+import org.marc4j.ErrorHandler;
 import org.marc4j.MarcDirStreamReader;
 import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
@@ -62,7 +63,6 @@ import org.solrmarc.tools.Utils;
 public class MarcImporter {
 	
     private String solrMarcDir;
-    private String solrCoreName;
     private String solrCoreDir;
     private String solrDataDir;
     private String deleteRecordListFilename;
@@ -77,7 +77,9 @@ public class MarcImporter {
     private boolean isShutDown = false;
     private boolean to_utf_8 = false;
     private boolean unicodeNormalize = false;
-    
+    private ErrorHandler errors = null;
+    private boolean includeErrors = false;
+   
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
     
@@ -87,76 +89,48 @@ public class MarcImporter {
 	 * @param properties
 	 * @throws IOException 
 	 */
-    public MarcImporter(String properties) throws IOException
+	public MarcImporter(String properties) throws IOException
     {
-        // Process Properties
-        loadProperties(properties);
-
+		loadProperties(properties);
         // Set up Solr core
         try{
             System.setProperty("solr.data.dir", solrDataDir);
-            logger.info("Using the data directory of: " + solrDataDir);
-            
-            File configFile = new File(solrCoreDir + "/solr.xml");
-            logger.info("Using the multicore schema file at : " + configFile.getAbsolutePath());
-            logger.info("Using the " + solrCoreName + " core");
-            
-            CoreContainer cc = new CoreContainer(solrCoreDir, configFile);
-            
-            solrCore = cc.getCore(solrCoreName);
-           
+            solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
+            solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
         }
         catch (Exception e)
         {
-            logger.error("Couldn't load the solr core directory");
+        	logger.error("Couldn't set the instance directory");
             e.printStackTrace();
             System.exit(1);
         }
-
-        // Setup UpdateHandler
+        
         updateHandler = solrCore.getUpdateHandler();
-
+        
 	}
-
+    
     /**
      * Load the properties file
      * @param properties
      * @throws IOException
      */
     public void loadProperties(String properties) throws IOException
-    {
+    {       
         Properties props = new Properties();
-
+        
         InputStream in = new FileInputStream(properties);
 
         // load the properties
         props.load(in);
         in.close();
-
-        // The location of where the .properties files are located
+        
         solrMarcDir = getProperty(props, "solrmarc.path");
-
-        // The solr.home directory
         solrCoreDir = getProperty(props, "solr.path");
-
-        // The solr core to be used
-        solrCoreName = getProperty(props, "solr.core.name");
-
-        // The solr data diretory to use
         solrDataDir = getProperty(props, "solr.data.dir");
-        if (solrDataDir == null) {
-            solrDataDir = solrCoreDir + "/" + solrCoreName;
-        }
-
-        // The SolrMarc indexer
+        if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
         String indexerName = getProperty(props, "solr.indexer");
-
-        // The SolrMarc indexer properties file
         String indexerProps = getProperty(props, "solr.indexer.properties");
-
-
-
-        // Setup the SolrMarc Indexer
+        
         try
         {
             Class indexerClass;
@@ -211,8 +185,18 @@ public class MarcImporter {
         }
         SolrHostURL = getProperty(props, "solr.hosturl");
 
-        boolean permissiveReader = Boolean.parseBoolean(System.getProperty("marc.permissive"));        
+        boolean permissiveReader = Boolean.parseBoolean(getProperty(props, "marc.permissive"));
+        String defaultEncoding;
+        if (getProperty(props, "marc.default_encoding") != null)
+        {
+            defaultEncoding = getProperty(props, "marc.default_encoding").trim();    
+        }
+        else
+        {
+            defaultEncoding = "BESTGUESS";
+        }
         verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
+        includeErrors = Boolean.parseBoolean(getProperty(props, "marc.include_errors"));
         to_utf_8 = Boolean.parseBoolean(getProperty(props, "marc.to_utf_8"));
         unicodeNormalize = Boolean.parseBoolean(getProperty(props, "marc.unicode_normalize"));
         deleteRecordListFilename = getProperty(props, "marc.ids_to_delete");
@@ -225,7 +209,15 @@ public class MarcImporter {
         reader = null;
         if (source.equals("FILE"))
         {
-            reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), permissiveReader, to_utf_8);
+            if (permissiveReader)
+            {
+                errors = new ErrorHandler();
+                reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), errors, to_utf_8, defaultEncoding);
+            }
+            else
+            {
+                reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), false, to_utf_8, defaultEncoding);
+            }
         }
         else if (source.equals("DIR"))
         {
@@ -327,36 +319,33 @@ public class MarcImporter {
             if (shuttingDown) break;
             recordCounter++;
             
+            Record record = null;
+            
             try {
-                Record record = reader.next();
-                
-                try {
-                    addToIndex(record);
-                    logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
-                }
-                catch (org.apache.solr.common.SolrException solrException)
-                {
-                   //check for missing fields
-                	if (solrException.getMessage().contains("missing required fields"))
-                   {
-                	   logger.error(solrException.getMessage() +  " at record count = " + recordCounter);
-                	   logger.error("Control Number " + record.getControlNumber(), solrException);
-                   }
-                   else
-                   {
-                	   logger.error("Error indexing: " + solrException.getMessage());
-                	   logger.error("Control Number " + record.getControlNumber(), solrException);
-                   }
-                }
-                catch(Exception e)
-                {
-                    // keep going?
-                	logger.error("Error indexing: " + e.getMessage());
-                	logger.error("Control Number " + record.getControlNumber(), e);
-                }
-            } catch (Exception e) {
-                logger.error("Error reading record: " + e.getMessage());
+                record = reader.next();
+                addToIndex(record);
+                logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
             }
+            catch (org.apache.solr.common.SolrException solrException)
+            {
+               //check for missing fields
+               if (solrException.getMessage().contains("missing required fields"))
+               {
+            	   logger.error(solrException.getMessage() +  " at record count = " + recordCounter);
+            	   logger.error("Control Number " + record.getControlNumber(), solrException);
+               }
+               else
+               {
+            	   logger.error("Error indexing: " + solrException.getMessage());
+            	   logger.error("Control Number " + record.getControlNumber(), solrException);
+               }
+            }
+            catch(Exception e)
+            {
+                // keep going?
+            	logger.error("Error indexing: " + e.getMessage());
+            	logger.error("Control Number " + record.getControlNumber(), e);
+            }            
         }
         
         return recordCounter;
@@ -370,7 +359,13 @@ public class MarcImporter {
     {
         Map<String, Object> map = indexer.map(record); 
         if (map.size() == 0) return;
-
+        if (errors != null && includeErrors)
+        {
+            if (errors.hasErrors())
+            {
+                addErrorsToMap(map, errors);
+            }
+        }
         AddUpdateCommand addcmd = new AddUpdateCommand();
         DocumentBuilder builder = new DocumentBuilder(solrCore.getSchema());
         builder.startDoc();
@@ -385,10 +380,10 @@ public class MarcImporter {
         	}
         	else if (value instanceof Collection)
         	{
-        		Iterator<String> valIter = ((Collection)value).iterator();
+        		Iterator<?> valIter = ((Collection)value).iterator();
         		while (valIter.hasNext())
         		{
-        			String collVal = valIter.next();
+        			String collVal = valIter.next().toString();
             		builder.addField(key, collVal);
         		}
         	}
@@ -420,6 +415,11 @@ public class MarcImporter {
             //e.printStackTrace();
         	logger.error("Control Number " + reader.next().getControlNumber(), ioe);
         }                
+    }
+
+    private void addErrorsToMap(Map<String, Object> map, ErrorHandler errors2)
+    {
+        map.put("marc_error", errors.getErrors());
     }
 
     /**
@@ -612,9 +612,19 @@ public class MarcImporter {
         
         Date start = new Date();
         
-        int numImported = importer.importRecords();
-
-        int numDeleted = importer.deleteRecords();
+        int numImported = 0;
+        int numDeleted = 0;
+        try
+        {        
+            numImported = importer.importRecords();
+            
+            numDeleted = importer.deleteRecords();
+        }
+        catch (Exception e)
+        {
+            logger.info("Exception occurred while Indexing: "+ e.getMessage());
+            
+        }
         
         importer.finish();
         

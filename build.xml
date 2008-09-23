@@ -46,10 +46,6 @@
                 <delete dir="${doc.dir}" />
                 <delete dir="${tag.dir}" />
         </target>
-	
-		<target name="cbuild" depends="clean, build">
-			<echo message="Clean build" />
-		</target>
 
         <target depends="init" name="build">
                 <echo message="${ant.project.name}: ${ant.file}" />

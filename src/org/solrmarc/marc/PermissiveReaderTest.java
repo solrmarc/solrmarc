@@ -69,9 +69,9 @@ public class PermissiveReaderTest
         try
         {
             inNorm = new FileInputStream(file);
-            readerNormal = new MarcPermissiveStreamReader(inNorm, false, to_utf_8);
+            readerNormal = new MarcPermissiveStreamReader(inNorm, false, to_utf_8, "MARC8");
             inPerm = new FileInputStream(file);
-            readerPermissive = new MarcPermissiveStreamReader(inPerm, errorHandler, to_utf_8, "BESTGUESS");
+            readerPermissive = new MarcPermissiveStreamReader(inPerm, errorHandler, to_utf_8);
         }
         catch (FileNotFoundException e)
         {
@@ -84,7 +84,7 @@ public class PermissiveReaderTest
             try
             {
                 patchedRecStream = new FileOutputStream(new File(args[1]));
-                patchedRecs = new MarcStreamWriter(patchedRecStream);
+                patchedRecs = new MarcStreamWriter(patchedRecStream, "UTF8");
             }
             catch (FileNotFoundException e)
             {
@@ -109,6 +109,10 @@ public class PermissiveReaderTest
                     dumpErrors(out, errorHandler);
                     showDiffs(out, null, strPerm);
                     out.println("-------------------------------------------------------------------------------------");
+                }
+                if (patchedRecs != null)
+                {
+                    patchedRecs.write(recPerm);
                 }
                 continue;
             }
