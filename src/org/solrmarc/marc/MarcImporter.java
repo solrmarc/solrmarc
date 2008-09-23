@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.*;
+import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.update.AddUpdateCommand;
@@ -63,6 +64,7 @@ import org.solrmarc.tools.Utils;
 public class MarcImporter {
 	
     private String solrMarcDir;
+    private String solrCoreName;
     private String solrCoreDir;
     private String solrDataDir;
     private String deleteRecordListFilename;
@@ -89,48 +91,76 @@ public class MarcImporter {
 	 * @param properties
 	 * @throws IOException 
 	 */
-	public MarcImporter(String properties) throws IOException
+    public MarcImporter(String properties) throws IOException
     {
-		loadProperties(properties);
+        // Process Properties
+        loadProperties(properties);
+
         // Set up Solr core
         try{
             System.setProperty("solr.data.dir", solrDataDir);
-            solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
-            solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
+            logger.info("Using the data directory of: " + solrDataDir);
+            
+            File configFile = new File(solrCoreDir + "/solr.xml");
+            logger.info("Using the multicore schema file at : " + configFile.getAbsolutePath());
+            logger.info("Using the " + solrCoreName + " core");
+            
+            CoreContainer cc = new CoreContainer(solrCoreDir, configFile);
+            
+            solrCore = cc.getCore(solrCoreName);
+           
         }
         catch (Exception e)
         {
-        	logger.error("Couldn't set the instance directory");
+            logger.error("Couldn't load the solr core directory");
             e.printStackTrace();
             System.exit(1);
         }
-        
+
+        // Setup UpdateHandler
         updateHandler = solrCore.getUpdateHandler();
-        
+
 	}
-    
+
     /**
      * Load the properties file
      * @param properties
      * @throws IOException
      */
     public void loadProperties(String properties) throws IOException
-    {       
+    {
         Properties props = new Properties();
-        
+
         InputStream in = new FileInputStream(properties);
 
         // load the properties
         props.load(in);
         in.close();
-        
+
+        // The location of where the .properties files are located
         solrMarcDir = getProperty(props, "solrmarc.path");
+
+        // The solr.home directory
         solrCoreDir = getProperty(props, "solr.path");
+
+        // The solr core to be used
+        solrCoreName = getProperty(props, "solr.core.name");
+
+        // The solr data diretory to use
         solrDataDir = getProperty(props, "solr.data.dir");
-        if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
+        if (solrDataDir == null) {
+            solrDataDir = solrCoreDir + "/" + solrCoreName;
+        }
+
+        // The SolrMarc indexer
         String indexerName = getProperty(props, "solr.indexer");
+
+        // The SolrMarc indexer properties file
         String indexerProps = getProperty(props, "solr.indexer.properties");
-        
+
+
+
+        // Setup the SolrMarc Indexer
         try
         {
             Class indexerClass;
@@ -319,33 +349,36 @@ public class MarcImporter {
             if (shuttingDown) break;
             recordCounter++;
             
-            Record record = null;
-            
             try {
-                record = reader.next();
-                addToIndex(record);
-                logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
+                Record record = reader.next();
+                
+                try {
+                    addToIndex(record);
+                    logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
+                }
+                catch (org.apache.solr.common.SolrException solrException)
+                {
+                   //check for missing fields
+                	if (solrException.getMessage().contains("missing required fields"))
+                   {
+                	   logger.error(solrException.getMessage() +  " at record count = " + recordCounter);
+                	   logger.error("Control Number " + record.getControlNumber(), solrException);
+                   }
+                   else
+                   {
+                	   logger.error("Error indexing: " + solrException.getMessage());
+                	   logger.error("Control Number " + record.getControlNumber(), solrException);
+                   }
+                }
+                catch(Exception e)
+                {
+                    // keep going?
+                	logger.error("Error indexing: " + e.getMessage());
+                	logger.error("Control Number " + record.getControlNumber(), e);
+                }
+            } catch (Exception e) {
+                logger.error("Error reading record: " + e.getMessage());
             }
-            catch (org.apache.solr.common.SolrException solrException)
-            {
-               //check for missing fields
-               if (solrException.getMessage().contains("missing required fields"))
-               {
-            	   logger.error(solrException.getMessage() +  " at record count = " + recordCounter);
-            	   logger.error("Control Number " + record.getControlNumber(), solrException);
-               }
-               else
-               {
-            	   logger.error("Error indexing: " + solrException.getMessage());
-            	   logger.error("Control Number " + record.getControlNumber(), solrException);
-               }
-            }
-            catch(Exception e)
-            {
-                // keep going?
-            	logger.error("Error indexing: " + e.getMessage());
-            	logger.error("Control Number " + record.getControlNumber(), e);
-            }            
         }
         
         return recordCounter;

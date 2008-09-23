@@ -60,15 +60,15 @@ public class VuFindIndexer extends SolrIndexer
 	}
     
     /**
-	 * Determine Record Main Format
+	 * Determine Record Format(s)
 	 *
-	 * @param  Record  record
-	 * @return String  Main format of record
+	 * @param  Record          record
+	 * @return Set<String>     format of record
 	 */
-	public String getFormat(final Record record){
+	public Set<String> getFormat(final Record record){
+        Set<String> result = new LinkedHashSet<String>();
 		String leader = record.getLeader().toString();
 		char leaderBit;
-		ControlField formatField = (ControlField) record.getVariableField("007");
 		ControlField fixedField = (ControlField) record.getVariableField("008");
 		DataField title = (DataField) record.getVariableField("245");
 		char formatCode = ' ';
@@ -77,97 +77,257 @@ public class VuFindIndexer extends SolrIndexer
 		if (title != null) {
 		    if (title.getSubfield('h') != null){
 		        if (title.getSubfield('h').getData().toLowerCase().contains("[electronic resource]")) {
-		    		return "Electronic";
+		    		result.add("Electronic");
+		    		return result;
 		        }
         	}
         }
 
-        // check the 007
-        if(formatField != null){
-            formatCode = formatField.getData().toUpperCase().charAt(0);
-        	switch (formatCode) {
-                case 'A':
-                    return "Map";
-                /*
-                Removed for inaccuracies - turns journals with 856 to electronic
-                case 'C':
-                    return "Electronic";
-                */
-                case 'D':
-                    return "Globe";
-                case 'F':
-                    return "Braille";
-                case 'G':
-                    return "Slide";
-                case 'H':
-                    return "Microfilm";
-                case 'K':
-        			return "Photo";
-                case 'M':
-                case 'V':
-                    return "Video";
-                case 'O':
-                    return "Kit";
-                case 'Q':
-                    return "Musical Score";
-                case 'R':
-                    return "Sensor Image";
-                case 'S':
-                    return "Audio";
-        	}
+        // check the 007 - this is a repeating field
+        List<ControlField> fields = record.getVariableFields("007");
+        Iterator<ControlField> fieldsIter = fields.iterator();
+        if (fields != null) {
+            ControlField formatField;
+            while(fieldsIter.hasNext()) {
+                formatField = (ControlField) fieldsIter.next();
+                formatCode = formatField.getData().toUpperCase().charAt(0);
+        	    switch (formatCode) {
+                    case 'A':
+                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                            case 'D':
+                                result.add("Atlas");
+                                break;
+                            default:
+                                result.add("Map");
+                                break;
+                        }
+                        break;
+                    case 'C':
+                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                            case 'A':
+                                result.add("Tape Cartridge");
+                                break;
+                            case 'B':
+                                result.add("Chip Cartridge");
+                                break;
+                            case 'C':
+                                result.add("Disc Cartridge");
+                                break;
+                            case 'F':
+                                result.add("Tape Cassette");
+                                break;
+                            case 'H':
+                                result.add("Tape Reel");
+                                break;
+                            case 'J':
+                                result.add("Floppy Disk");
+                                break;
+                            case 'M':
+                            case 'O':
+                                result.add("CDROM");
+                                break;
+                            case 'R':
+                                // Do not return - this will cause anything with an
+                                // 856 field to be labeled as "Electronic"
+                                break;
+                            default:
+                                result.add("Software");
+                                break;
+                        }
+                        break;
+                    case 'D':
+                        result.add("Globe");
+                        break;
+                    case 'F':
+                        result.add("Braille");
+                        break;
+                    case 'G':
+                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                            case 'C':
+                            case 'D':
+                                result.add("Filmstrip");
+                                break;
+                            case 'T':
+                                result.add("Transparency");
+                                break;
+                            default:
+                                result.add("Slide");
+                                break;
+                        }
+                        break;
+                    case 'H':
+                        result.add("Microfilm");
+                        break;
+                    case 'K':
+                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                            case 'C':
+                                result.add("Collage");
+                                break;
+                            case 'D':
+                                result.add("Drawing");
+                                break;
+                            case 'E':
+                                result.add("Painting");
+                                break;
+                            case 'F':
+                                result.add("Print");
+                                break;
+                            case 'G':
+                                result.add("Photonegative");
+                                break;
+                            case 'J':
+                                result.add("Print");
+                                break;
+                            case 'L':
+                                result.add("Drawing");
+                                break;
+                            case 'O':
+                                result.add("Flash Card");
+                                break;
+                            case 'N':
+                                result.add("Chart");
+                                break;
+                            default:
+                                result.add("Photo");
+                                break;
+                        }
+                        break;
+                    case 'M':
+                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                            case 'F':
+                                result.add("Video Cassette");
+                                break;
+                            case 'R':
+                                result.add("Filmstrip");
+                                break;
+                            default:
+                                result.add("Motion Picture");
+                                break;
+                        }
+                        break;
+                    case 'O':
+                        result.add("Kit");
+                        break;
+                    case 'Q':
+                        result.add("Musical Score");
+                        break;
+                    case 'R':
+                        result.add("Sensor Image");
+                        break;
+                    case 'S':
+                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                            case 'D':
+                                result.add("Sound Disc");
+                                break;
+                            case 'S':
+                                result.add("Sound Cassette");
+                                break;
+                            default:
+                                result.add("Sound Recording");
+                                break;
+                        }
+                        break;
+                    case 'V':
+                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                            case 'C':
+                                result.add("Video Cartridge");
+                                break;
+                            case 'D':
+                                result.add("Video Disc");
+                                break;
+                            case 'F':
+                                result.add("Video Cassette");
+                                break;
+                            case 'R':
+                                result.add("Video Reel");
+                                break;
+                            default:
+                                result.add("Video");
+                                break;
+                        }
+                        break;
+            	}
+            }
+        	if (!result.isEmpty()) {
+                return result;
+            }
         }
 
-        // check the Leader
+        // check the Leader at position 6
         leaderBit = leader.charAt(6);
         switch (Character.toUpperCase(leaderBit)) {
             case 'C':
             case 'D':
-                return "Musical Score";
+                result.add("Musical Score");
+                break;
             case 'E':
             case 'F':
-                return "Map";
+                result.add("Map");
+                break;
             case 'G':
-                return "Slide";
+                result.add("Slide");
+                break;
             case 'I':
+                result.add("Sound Recording");
+                break;
             case 'J':
-                return "Audio";
+                result.add("Music Recording");
+                break;
             case 'K':
-                return "Photo";
+                result.add("Photo");
+                break;
             case 'M':
-                return "Electronic";
+                result.add("Electronic");
+                break;
             case 'O':
             case 'P':
-                return "Kit";
+                result.add("Kit");
+                break;
             case 'R':
-                return "Physical Object";
+                result.add("Physical Object");
+                break;
             case 'T':
-                return "Manuscript";
+                result.add("Manuscript");
+                break;
+        }
+    	if (!result.isEmpty()) {
+            return result;
         }
 
-        // check the Leader
+        // check the Leader at position 7
         leaderBit = leader.charAt(7);
         switch (Character.toUpperCase(leaderBit)) {
             // Monograph
             case 'M':
                 if (formatCode == 'C') {
-                    return "eBook";
+                    result.add("eBook");
                 } else {
-                    return "Book";
+                    result.add("Book");
                 }
+                break;
             // Serial
             case 'S':
                 // Look in 008 to determine what type of Continuing Resource
                 formatCode = fixedField.getData().toUpperCase().charAt(21);
                 switch (formatCode) {
                     case 'N':
-                        return "Newspaper";
+                        result.add("Newspaper");
+                        break;
                     case 'P':
-                        return "Journal";
+                        result.add("Journal");
+                        break;
+                    default:
+                        result.add("Serial");
+                        break;
                 }
-                return "Serial";
         }
 
-        return "Unknown";
+        // Nothing worked!
+    	if (result.isEmpty()) {
+            result.add("Unknown");
+        }
+        
+        return result;
 	}
     
     /**
@@ -180,7 +340,11 @@ public class VuFindIndexer extends SolrIndexer
 		String val = getFirstFieldVal(record, "090a:050a");
 		
 		if (val != null) {
-			return splitCallNumbers(val);
+            int dotPos = val.indexOf(".");
+            if (dotPos > 0) {
+                val = val.substring(0, dotPos);
+            }
+            return val;
 		} else {
 			return val;
 		}
@@ -206,16 +370,6 @@ public class VuFindIndexer extends SolrIndexer
         }
     }
 
-	private String splitCallNumbers(final String val) {
-		String vals[] = val.split("[^A-Za-z]+", 2);
-
-		if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
-			return null;
-		}
-
-		return vals[0];
-	}
-    
     /**
      * Extract all topics from a record
      *
@@ -269,26 +423,34 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * extract all the subfields in a given marc field
-     * @param record
-     * @param marcFieldNum - the marc field number as a string (e.g. "245")
+     * Creates individual strings for each iteration of the MARC field designated
+     * @param   Record  record          The Record object to pull the data from
+     * @param   String  marcFieldNum    The marc field number as a string (e.g. "245")
      * @return
      */
     public Set<String> getAllSubfields(final Record record, String marcFieldNum)
     {
         Set<String> result = new LinkedHashSet<String>();
+        
+        List<DataField> fields = record.getVariableFields(marcFieldNum);
+        Iterator<DataField> fieldsIter = fields.iterator();
+        DataField field;
 
-        StringBuffer buffer = new StringBuffer("");
+        List<DataField> subfields;
+        Iterator<DataField> subfieldsIter;
+        Subfield subfield;
 
-        DataField marcField = (DataField) record.getVariableField(marcFieldNum);
-        if (marcField != null) {
-            List<Subfield> subfields = marcField.getSubfields();
-            Iterator<Subfield> iter = subfields.iterator();
+        // Loop through fields
+        while(fieldsIter.hasNext()) {
+            field = (DataField) fieldsIter.next();
 
-            Subfield subfield;
+            StringBuffer buffer = new StringBuffer("");
 
-            while (iter.hasNext()) {
-               subfield = iter.next();
+            // Loop through subfields
+            subfields = field.getSubfields();
+            subfieldsIter = subfields.iterator();
+            while (subfieldsIter.hasNext()) {
+                subfield = (Subfield) subfieldsIter.next();
                 if (buffer.length() > 0) {
                     buffer.append(" " + subfield.getData());
                 } else {
@@ -307,37 +469,42 @@ public class VuFindIndexer extends SolrIndexer
 	 *
 	 * @param record Marc record to extract data from
 	 */
-	public String getAllFields(final Record record)
+    public String getAllFields(final Record record)
     {
         StringBuffer buffer = new StringBuffer("");
 
-		List<DataField> fields = record.getDataFields();
-		Iterator<DataField> fieldsIter = fields.iterator();
-		DataField field;
+        List<DataField> fields = record.getDataFields();
+        Iterator<DataField> fieldsIter = fields.iterator();
+        DataField field;
 
-		List<DataField> subfields;
-		Iterator<DataField> subfieldsIter;
-		Subfield subfield;
+        List<DataField> subfields;
+        Iterator<DataField> subfieldsIter;
+        Subfield subfield;
 
         // Loop through fields
-		while(fieldsIter.hasNext()){
-			field = (DataField) fieldsIter.next();
+        while(fieldsIter.hasNext()) {
+            field = (DataField) fieldsIter.next();
 
-			// Loop through subfields
-            subfields = field.getSubfields();
-            subfieldsIter = subfields.iterator();
-            while (subfieldsIter.hasNext()) {
-                subfield = (Subfield) subfieldsIter.next();
-                if (buffer.length() > 0) {
-                    buffer.append(" " + subfield.getData());
-                } else {
-                    buffer.append(subfield.getData());
+            // Get all fields starting with the 100 and ending with the 839
+            // This will ignore any "code" fields and only use textual fields
+            int tag = Integer.parseInt(field.getTag());
+            if ((tag >= 100) && (tag < 840)) {
+                // Loop through subfields
+                subfields = field.getSubfields();
+                subfieldsIter = subfields.iterator();
+                while (subfieldsIter.hasNext()) {
+                    subfield = (Subfield) subfieldsIter.next();
+                    if (buffer.length() > 0) {
+                        buffer.append(" " + subfield.getData());
+                    } else {
+                        buffer.append(subfield.getData());
+                    }
                 }
             }
-		}
+        }
 
-		return buffer.toString();
-	}
+        return buffer.toString();
+    }
 
 
 }
