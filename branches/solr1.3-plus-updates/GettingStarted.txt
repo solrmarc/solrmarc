@@ -1,0 +1,67 @@
+Getting Started with blacklight_importer
+
+The first step is to download the program source code, libraries and data.  If you are reading this you probably have already successfully done that.
+
+The next step is to build the MarcImporter program.  First make sure you have the a java development kit (JDK) newer than version 1.5 installed, and the program ant installed.
+
+type:     ant -version
+	  java -version
+
+They should report their version.
+
+Next build the importer program.
+
+type:     ant
+
+which will compile the source files, and create a jar file in a sub-directory named dist.
+
+
+
+Next edit the file importSamples.properties to correspond to your setup, the most important change you'll have to make it to change solr.path to point to the solr home. (Which should contain directories named bin, conf, and data)
+
+solr.path = <somepath>/trunk/rails/solr
+
+The rest of the settings should work as is.
+
+On Unix type:
+
+./index_file.sh sample_records/selected_recs.mrc importSamples.properties
+
+
+
+On a PC type:
+
+index_file sample_records\selected_recs.mrc importSamples.properties
+
+
+This will add about 8 records to your solr index.
+
+
+If you look in the batch file or shell file you will see the basic command to invoke the MARC importer program is as follows:
+
+
+java -jar dist/MarcImporter.jar
+
+
+If you want to use a different basic set of properties than import.properties, specify it at the end of the line, thusly:
+
+java -jar dist/MarcImporter.jar importSamples.properties
+
+
+If you need more memory add the argument -Xmx1024M to specify 1000 Megabytes of heap space.
+
+java -Xmx1024M -jar dist/MarcImporter.jar importSamples.properties
+
+
+If you want to use most of the settings in a given properties file, but want to override some of them do it like this:
+
+java -Xmx1024M -Dmarc.path="$file" -Dsolr.optimize_at_end="true" -jar dist/MarcImporter.jar $2
+
+
+If you want to change what fields are indexed or how the MARC fields are mapped, then read the document:  MarcImporter.doc
+
+Good Luck 
+  and Happy Indexing
+
+
+
