@@ -469,28 +469,23 @@ public class SolrIndexer
         }
         catch (SecurityException e)
         {
-            //e.printStackTrace();
-        	logger.error(e.getCause());
+        	logger.error("Error indexing field: " + indexField, e);
         }
         catch (NoSuchMethodException e)
         {
-            //e.printStackTrace();
-        	logger.error(e.getCause());
+        	logger.error("Error indexing field: " + indexField, e);
         }
         catch (IllegalArgumentException e)
         {
-            //e.printStackTrace();
-        	logger.error(e.getCause());
+        	logger.error("Error indexing field: " + indexField, e);
         }
         catch (IllegalAccessException e)
         {
-            //e.printStackTrace();
-        	logger.error(e.getCause());
+        	logger.error("Error indexing field: " + indexField, e);
         }
         catch (InvocationTargetException e)
         {
-            //e.printStackTrace();
-        	logger.error(e.getCause());
+        	logger.error("Error indexing field: " + indexField, e);
         }
     }
 
