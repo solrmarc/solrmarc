@@ -329,7 +329,23 @@ public class VuFindIndexer extends SolrIndexer
         
         return result;
 	}
-    
+
+    /**
+     * Extract the call number label from a record
+     * @param record
+     * @return Call number label
+     */
+    public String getFullCallNumber(final Record record) {
+
+		String val = getFirstFieldVal(record, "099ab:090ab:050ab");
+
+		if (val != null) {
+            return val.toUpperCase().replaceAll(" ", "");
+		} else {
+			return val;
+		}
+	}
+
     /**
      * Extract the call number label from a record
      * @param record
@@ -344,7 +360,7 @@ public class VuFindIndexer extends SolrIndexer
             if (dotPos > 0) {
                 val = val.substring(0, dotPos);
             }
-            return val;
+            return val.toUpperCase();
 		} else {
 			return val;
 		}
@@ -363,7 +379,7 @@ public class VuFindIndexer extends SolrIndexer
         String val = getFirstFieldVal(record, "090a:050a");
 
         if (val != null) {
-            String [] callNumberSubject = val.split("[^A-Z]+");
+            String [] callNumberSubject = val.toUpperCase().split("[^A-Z]+");
         	return callNumberSubject[0];
         } else {
             return val;
