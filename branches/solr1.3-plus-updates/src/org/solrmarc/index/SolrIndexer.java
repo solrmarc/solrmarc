@@ -907,7 +907,8 @@ public class SolrIndexer
                             Subfield s = (Subfield) (iter.next());
                             if (subfield.indexOf(s.getCode()) != -1)
                             {
-                                String data = Utils.cleanData(s.getData());
+//                                String data = Utils.cleanData(s.getData());
+                                String data = s.getData();
                                 if (buffer.length() > 0) buffer.append(" ");
                                 buffer.append(data);
                             }
