@@ -45,6 +45,7 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import org.marc4j.marc.VariableField;
 import org.solrmarc.marc.MarcImporter;
 import org.solrmarc.tools.Utils;
 
@@ -132,8 +133,10 @@ public class SolrIndexer
                     {
                         fieldDef[0] = property;
                         fieldDef[1] = "custom";
-                        fieldDef[2] = values[1].trim();
-                        fieldDef[3] = null;
+                        // allow for mapping of custom fields via _index.properties
+                        String lastValues[] = values[1].trim().split("\\)? *,+", 2);
+                        fieldDef[2] = lastValues[0].trim();
+                        fieldDef[3] = lastValues.length > 1 ? lastValues[1].trim() : null;
                     }
                     else if (values[0].equals("xml") ||
                              values[0].equals("raw") ||
@@ -144,8 +147,7 @@ public class SolrIndexer
                         fieldDef[0] = property;
                         fieldDef[1] = "std";
                         fieldDef[2] = values[0];
-                        fieldDef[3] =
-                                values.length > 1 ? values[1].trim() : null;
+                        fieldDef[3] = values.length > 1 ? values[1].trim() : null;
                     }
                     else if (values[0].equalsIgnoreCase("FullRecordAsXML") ||
                              values[0].equalsIgnoreCase("FullRecordAsMARC") ||
@@ -232,11 +234,8 @@ public class SolrIndexer
 
         // Now verify that the data read to configure the indexer is valid.
 
-        // int size = fieldMap.size(); // never read locally
-        Iterator<String> keys = fieldMap.keySet().iterator();
-        while (keys.hasNext())
+        for (String key : fieldMap.keySet())
         {
-            String key = keys.next();
             String fieldVal[] = fieldMap.get(key);
             //String indexField = fieldVal[0]; // never read locally
             String indexType = fieldVal[1];
@@ -406,10 +405,8 @@ public class SolrIndexer
     {
         Map<String, Object> indexMap = new HashMap<String, Object>();
         //int size = fieldMap.size(); //never read locally 
-        Iterator<String> keys = fieldMap.keySet().iterator();
-        while (keys.hasNext())
+        for (String key : fieldMap.keySet())
         {
-            String key = keys.next();
             String fieldVal[] = fieldMap.get(key);
             String indexField = fieldVal[0];
             String indexType = fieldVal[1];
@@ -705,13 +702,6 @@ public class SolrIndexer
                 indexMap.put(indexField, fields);
             }
         }
-//        Iterator<String> iter = fields.iterator();
-//        
-//        while(iter.hasNext())
-//        {
-//            String fieldVal = iter.next();
-//            addField(builder, indexField, null, fieldVal);            
-//        }
     }
 
     /**
@@ -723,7 +713,7 @@ public class SolrIndexer
     public static Set<String> getFieldList(Record record, String tagStr)
     {
         String[] tags = tagStr.split(":");
-        Set<String> result = new LinkedHashSet<String>();
+        Set<String> result = null;
         for (int i = 0; i < tags.length; i++)
         {
             // Check to ensure tag length is at least 3 characters
@@ -744,11 +734,11 @@ public class SolrIndexer
                 String sub[] = tags[i].substring(bracket+1).split("[\\]\\[\\-, ]+");
                 int substart = Integer.parseInt(sub[0]);
                 int subend = (sub.length > 1 ) ? Integer.parseInt(sub[1])+1 : substart+1;
-                addSubfieldDataToSet(record, result, tag, subfield, substart, subend);
+                result = getSubfieldDataAsSet(record, tag, subfield, substart, subend);
             } 
             else 
             {
-                addSubfieldDataToSet(record, result, tag, subfield);
+                result = getSubfieldDataAsSet(record, tag, subfield);
             }
         }
         return (result);
@@ -812,7 +802,6 @@ public class SolrIndexer
         
         if (titleField != null && titleField.getSubfield('a') != null)
         {
-
             thisTitle = Utils.cleanData(titleField.getSubfield('a').getData());
 
             // check for a subfield b
@@ -867,65 +856,59 @@ public class SolrIndexer
     }
 
     /**
-     * 
+     * Get the specified subfields from the specified MARC field, returned as
+     *  a set of strings to become lucene document field values
      * @param record
-     * @param set
-     * @param field
-     * @param subfield
+     * @param fldTag - the field name, e.g. 245
+     * @param subfldsStr - the string containing the desired subfields
+     * @returns the result set of strings 
      */
-    protected static void addSubfieldDataToSet(Record record, Set<String> set, String field, String subfield)
+    @SuppressWarnings("unchecked")
+    protected static Set<String> getSubfieldDataAsSet(Record record, String field, String subfield)
     {
         // Process Leader
+        Set<String> result = new LinkedHashSet<String>();
         if (field.equals("000"))
         {
             Leader leader = record.getLeader();
             String val = leader.toString();
-            set.add(val);
-            return;
+            result.add(val);
+            return result;
         }
         
         // Loop through Data and Control Fields
-        List<?> fields = record.getVariableFields(field);
-        Iterator<?> fldIter = fields.iterator();
-        while (fldIter.hasNext())
+        List<VariableField> varFlds = record.getVariableFields(field);
+        for (VariableField vf : varFlds)
         {
             int iField = new Integer(field).intValue();
             if (iField > 9) {
                 // This field is a DataField
                 if (subfield != null) 
                 {
-                    DataField dfield = (DataField) fldIter.next();
+                    DataField dfield = (DataField) vf;
 
                     if (subfield.length() > 1) 
                     {
                         // Allow automatic concatenation of grouped subfields
                         StringBuffer buffer = new StringBuffer("");
-                        List<?> sub = dfield.getSubfields();
-                        Iterator<?> iter = sub.iterator();
-                        while (iter.hasNext())
+                        List<Subfield> subFlds = dfield.getSubfields();
+                        for (Subfield sf : subFlds) 
                         {
-                            Subfield s = (Subfield) (iter.next());
-                            if (subfield.indexOf(s.getCode()) != -1)
+                            if (subfield.indexOf(sf.getCode()) != -1)
                             {
-//                                String data = Utils.cleanData(s.getData());
-                                String data = s.getData();
                                 if (buffer.length() > 0) buffer.append(" ");
-                                buffer.append(data);
+                                buffer.append(sf.getData().trim());
                             }
                         }                        
-                        set.add(buffer.toString());
+                        result.add(buffer.toString());
                     } 
                     else 
                     {
                         // Just get the singly defined subfield
-                        List<?> sub = dfield.getSubfields(subfield.charAt(0));
-                        Iterator<?> iter = sub.iterator();
-                        while (iter.hasNext())
+                        List<Subfield> subFlds = dfield.getSubfields(subfield.charAt(0));
+                        for (Subfield sf : subFlds)                         
                         {
-                            Subfield s = (Subfield) (iter.next());
-                            String data = s.getData();
-                            data = Utils.cleanData(data);
-                            set.add(data);
+                            result.add(sf.getData().trim());
                         }
                     }
                 }
@@ -933,52 +916,72 @@ public class SolrIndexer
             else 
             {
                 // This field is a Control Field
-                ControlField cfield = (ControlField) fldIter.next();
-                set.add(cfield.getData());
+                ControlField cfield = (ControlField) vf;
+                result.add(cfield.getData());
             }
         }
+        return(result);
     }
 
     /**
-     * 
+     * Get the specified substring of subfield values from the specified MARC field, returned as
+     *  a set of strings to become lucene document field values
      * @param record
-     * @param set
-     * @param field
-     * @param subfield
-     * @param substringStart
-     * @param substringEnd
+     * @param fldTag - the field name, e.g. 245
+     * @param subfldsStr - the string containing the desired subfields
+     * @param beginIdx - the beginning index of the substring of the subfield value
+     * @param endIdx - the ending index of the substring of the subfield value
+     * @return the result set of strings 
      */
-    protected static void addSubfieldDataToSet(Record record, Set<String> set, String field, String subfield, int substringStart, int substringEnd)
+    @SuppressWarnings("unchecked")
+    protected static Set<String> getSubfieldDataAsSet(Record record, String field, String subfield, int beginIdx, int endIdx)
     {
         // Process Leader
+        Set<String> result = new LinkedHashSet<String>();
         if (field.equals("000"))
         {
             Leader leader = record.getLeader();
-            String val = leader.toString().substring(substringStart, substringEnd);
-            set.add(val);
-            return;
+            String val = leader.toString().substring(beginIdx, endIdx);
+            result.add(val);
+            return result;
         }
         
         // Loop through Data and Control Fields
-        List<?> fields = record.getVariableFields(field);
-        Iterator<?> fldIter = fields.iterator();
-        while (fldIter.hasNext())
+        List<VariableField> varFlds = record.getVariableFields(field);
+        for (VariableField vf : varFlds) 
         {
             int iField = new Integer(field).intValue();
-            if (iField > 9) {
-                // This field is a DataField
-                if (subfield != null) {
-                    // This is a data field
-                    DataField dfield = (DataField) fldIter.next();
-                    List sub = dfield.getSubfields(subfield.charAt(0));
-                    Iterator iter = sub.iterator();
-                    while (iter.hasNext())
+            if (iField > 9 && subfield != null) 
+            {
+                // This is a data field
+                DataField dfield = (DataField) vf;
+                if (subfield.length() > 1) 
+                {
+                    // Allow automatic concatenation of grouped subfields
+                    StringBuffer buffer = new StringBuffer("");
+                    List<Subfield> subFlds = dfield.getSubfields();
+                    for (Subfield sf : subFlds) 
                     {
-                        Subfield s = (Subfield) (iter.next());
-                        String data = s.getData();
-                        if (data.length() > substringEnd && substringEnd > substringStart)
+                        if (subfield.indexOf(sf.getCode()) != -1)
                         {
-                            set.add(data.substring(substringStart, substringEnd));
+                            if (sf.getData().length() >= endIdx)
+                            {
+                                if (buffer.length() > 0) buffer.append(" ");
+                                buffer.append(sf.getData().substring(beginIdx, endIdx));
+                            }
+                        }
+                    }                        
+                    result.add(buffer.toString());
+                } 
+                else 
+                {
+                    // Just get the singly defined subfield
+                    List<Subfield> subFlds = dfield.getSubfields(subfield.charAt(0));
+                    for (Subfield sf : subFlds)                         
+                    {
+                        if (sf.getData().length() >= endIdx)
+                        {
+                            result.add(sf.getData().substring(beginIdx, endIdx));
                         }
                     }
                 }
@@ -986,10 +989,14 @@ public class SolrIndexer
             else
             {
                 // This is a control field
-                ControlField cfield = (ControlField) fldIter.next();
-                set.add(cfield.getData().substring(substringStart, substringEnd));
+                ControlField cfield = (ControlField) vf;
+                if (cfield.getData().length() >= endIdx)
+                {
+                    result.add(cfield.getData().substring(beginIdx, endIdx));
+                }
             }
         }
+        return(result);
     }
 
     /**

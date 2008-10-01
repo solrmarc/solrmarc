@@ -140,15 +140,12 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> result = new LinkedHashSet<String>();
         String leader = record.getLeader().toString();
         String leaderChar = leader.substring(6, 7).toUpperCase();
-        Set<String> titleH = new LinkedHashSet<String>();
-        addSubfieldDataToSet(record, titleH, "245", "h");       
+        Set<String> titleH = getSubfieldDataAsSet(record, "245", "h");
                 
         if("J".equals(leaderChar) || "I".equals(leaderChar) || 
                 (Utils.setItemContains(titleH, "videorecording")))
         {
-            Set<String> form = new LinkedHashSet<String>();
-            addSubfieldDataToSet(record, form, "999", "t");
-//            Set<String> labels = Utils.remap(form, findMap("recording_format_facet"));
+            Set<String> form = getSubfieldDataAsSet(record, "999", "t");
             return(form);
         }
         return(result);
