@@ -396,7 +396,8 @@ public class MarcImporter {
                 	logger.error("Error indexing: " + e.getMessage());
                 	logger.error("Control Number " + record.getControlNumber(), e);
                 }
-            } catch (Exception e) {
+            } 
+            catch (Exception e) {
                 logger.error("Error reading record: " + e.getMessage());
             }
         }
