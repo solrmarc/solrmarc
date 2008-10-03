@@ -69,7 +69,6 @@ public class MarcImporter {
     private SolrIndexer indexer;
     private MarcReader reader;
     private SolrCore solrCore;
-    private SolrConfig solrConfig;
     private UpdateHandler updateHandler;
     private boolean optimizeAtEnd = true;
     private boolean verbose = false;
@@ -89,22 +88,15 @@ public class MarcImporter {
 	 * @param properties
 	 * @throws IOException 
 	 */
-	public MarcImporter(String properties) throws IOException
+    public MarcImporter(String properties) throws IOException
     {
-		loadProperties(properties);
+        // Process Properties
+        loadProperties(properties);
+
         // Set up Solr core
-        try{
-            System.setProperty("solr.data.dir", solrDataDir);
-            solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
-            solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
-        }
-        catch (Exception e)
-        {
-        	logger.error("Couldn't set the instance directory");
-            e.printStackTrace();
-            System.exit(1);
-        }
-        
+        solrCore = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, null, logger);
+
+        // Setup UpdateHandler
         updateHandler = solrCore.getUpdateHandler();
 
 	}
@@ -123,14 +115,24 @@ public class MarcImporter {
         // load the properties
         props.load(in);
         in.close();
-        
+
+        // The location of where the .properties files are located
         solrMarcDir = getProperty(props, "solrmarc.path");
+
+        // The solr.home directory
         solrCoreDir = getProperty(props, "solr.path");
+
+        // The solr data diretory to use
         solrDataDir = getProperty(props, "solr.data.dir");
-        if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
+
+        // The SolrMarc indexer
         String indexerName = getProperty(props, "solr.indexer");
+
+        // The SolrMarc indexer properties file
         String indexerProps = getProperty(props, "solr.indexer.properties");
-        
+
+
+        // Setup the SolrMarc Indexer
         try
         {
             Class indexerClass;
