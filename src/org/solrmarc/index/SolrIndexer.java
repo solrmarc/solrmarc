@@ -134,7 +134,19 @@ public class SolrIndexer
                         fieldDef[0] = property;
                         fieldDef[1] = "custom";
                         // allow for mapping of custom fields via _index.properties
-                        String lastValues[] = values[1].trim().split("\\)? *,+", 2);
+                        String lastValues[];
+                        if (values[1].indexOf("()") != -1)
+                        {
+                            values[1] = values[1].replace("()", "");
+                        }
+                        if (values[1].indexOf(',') != -1 && values[1].indexOf('(') != -1 && values[1].indexOf('(') < values[1].indexOf(','))
+                        {
+                            lastValues = values[1].trim().split("\\) *,", 2);
+                        }
+                        else // no parens
+                        {
+                            lastValues = values[1].trim().split(" *,", 2);                         
+                        }
                         fieldDef[2] = lastValues[0].trim();
                         fieldDef[3] = lastValues.length > 1 ? lastValues[1].trim() : null;
                     }
