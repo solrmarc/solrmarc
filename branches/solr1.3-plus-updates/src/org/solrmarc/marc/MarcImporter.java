@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.CoreDescriptor;
 import org.apache.solr.core.SolrConfig;
@@ -73,7 +73,6 @@ public class MarcImporter {
     private SolrIndexer indexer;
     private MarcReader reader;
     private SolrCore solrCore;
-    private SolrConfig solrConfig;
     private UpdateHandler updateHandler;
     private boolean optimizeAtEnd = true;
     private boolean verbose = false;
@@ -99,46 +98,48 @@ public class MarcImporter {
         loadProperties(properties);
 
         // Set up Solr core
-        try{
-            
-            File multicoreConfigFile = new File(solrCoreDir + "/solr.xml");
-            
-            if (multicoreConfigFile.exists())
-            {
-                if (solrDataDir == null) 
-                {
-                    solrDataDir = solrCoreDir + "/" + solrCoreName;
-                }
-                System.setProperty("solr.data.dir", solrDataDir);
-                logger.info("Using the data directory of: " + solrDataDir);
+        solrCore = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, solrCoreName, logger);
 
-                logger.info("Using the multicore schema file at : " + multicoreConfigFile.getAbsolutePath());
-                logger.info("Using the " + solrCoreName + " core");
-                CoreContainer cc = new CoreContainer(solrCoreDir, multicoreConfigFile);
-                solrCore = cc.getCore(solrCoreName);
-            }
-            else
-            {
-                if (solrDataDir == null) 
-                {
-                    solrDataDir = solrCoreDir + "/" + "data";
-                }
-                System.setProperty("solr.data.dir", solrDataDir);
-                solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
-                FileInputStream schemaFile = new FileInputStream(solrCoreDir+"/conf/schema.xml");
-                CoreContainer cc = new CoreContainer();
-                CoreDescriptor desc = new CoreDescriptor(cc, "Solr", solrCoreDir+"/conf");
-                IndexSchema solrSchema = new IndexSchema(solrConfig, "Solr", schemaFile) ;
-                solrCore = new SolrCore(solrCoreName, solrDataDir, solrConfig, solrSchema, desc);                
-            }
-            
-        }
-        catch (Exception e)
-        {
-            logger.error("Couldn't load the solr core directory");
-            e.printStackTrace();
-            System.exit(1);
-        }
+//        try{
+//            
+//            File multicoreConfigFile = new File(solrCoreDir + "/solr.xml");
+//            
+//            if (multicoreConfigFile.exists())
+//            {
+//                if (solrDataDir == null) 
+//                {
+//                    solrDataDir = solrCoreDir + "/" + solrCoreName;
+//                }
+//                System.setProperty("solr.data.dir", solrDataDir);
+//                logger.info("Using the data directory of: " + solrDataDir);
+//
+//                logger.info("Using the multicore schema file at : " + multicoreConfigFile.getAbsolutePath());
+//                logger.info("Using the " + solrCoreName + " core");
+//                CoreContainer cc = new CoreContainer(solrCoreDir, multicoreConfigFile);
+//                solrCore = cc.getCore(solrCoreName);
+//            }
+//            else
+//            {
+//                if (solrDataDir == null) 
+//                {
+//                    solrDataDir = solrCoreDir + "/" + "data";
+//                }
+//                System.setProperty("solr.data.dir", solrDataDir);
+//                SolrConfig solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
+//                FileInputStream schemaFile = new FileInputStream(solrCoreDir+"/conf/schema.xml");
+//                CoreContainer cc = new CoreContainer();
+//                CoreDescriptor desc = new CoreDescriptor(cc, "Solr", solrCoreDir+"/conf");
+//                IndexSchema solrSchema = new IndexSchema(solrConfig, "Solr", schemaFile) ;
+//                solrCore = new SolrCore(solrCoreName, solrDataDir, solrConfig, solrSchema, desc);                
+//            }
+//            
+//        }
+//        catch (Exception e)
+//        {
+//            logger.error("Couldn't load the solr core directory");
+//            e.printStackTrace();
+//            System.exit(1);
+//        }
 
         // Setup UpdateHandler
         updateHandler = solrCore.getUpdateHandler();
@@ -177,7 +178,6 @@ public class MarcImporter {
 
         // The SolrMarc indexer properties file
         String indexerProps = getProperty(props, "solr.indexer.properties");
-
 
 
         // Setup the SolrMarc Indexer

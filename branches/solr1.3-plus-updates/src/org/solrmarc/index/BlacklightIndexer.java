@@ -121,22 +121,8 @@ public class BlacklightIndexer extends SolrIndexer
      * @param record
      * @return Collection of recording formats
      */
-    public Set<String> getRecordingFormat(final Record record, String mapName)
+    public Set<String> getRecordingFormat(final Record record)
     {
-        try
-        {
-            mapName = loadTranslationMap(null, mapName);
-        }
-        catch (FileNotFoundException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
         Set<String> result = new LinkedHashSet<String>();
         String leader = record.getLeader().toString();
         String leaderChar = leader.substring(6, 7).toUpperCase();
