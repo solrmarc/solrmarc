@@ -106,21 +106,9 @@ public class SolrReIndexer
         }
         if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
         // Set up Solr core
-        try{
-            System.setProperty("solr.data.dir", solrDataDir);
-            solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
-            solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
-            refedSolrSearcher = solrCore.getSearcher();
-            solrSearcher = refedSolrSearcher.get();
-        }
-        catch (Exception e)
-        {
-            logger.error("Couldn't set the instance directory");
-            logger.error(e.getMessage());
-        	//System.err.println("Couldn't set the instance directory");
-            //e.printStackTrace();
-            System.exit(1);
-        }
+        solrCore  = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, "", logger);  
+        refedSolrSearcher = solrCore.getSearcher();
+        solrSearcher = refedSolrSearcher.get();
         verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
         
         updateHandler = solrCore.getUpdateHandler();
