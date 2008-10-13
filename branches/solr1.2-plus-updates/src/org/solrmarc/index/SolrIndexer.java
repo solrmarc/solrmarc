@@ -820,15 +820,36 @@ public class SolrIndexer
         
         if (titleField != null && titleField.getSubfield('a') != null)
         {
-            thisTitle = Utils.cleanData(titleField.getSubfield('a').getData());
+            thisTitle = titleField.getSubfield('a').getData();
 
             // check for a subfield b
             if (titleField.getSubfield('b') != null)
             {
                 thisTitle += " " + titleField.getSubfield('b').getData();
-                thisTitle = Utils.cleanData(thisTitle);
             }
         }
+        thisTitle = Utils.cleanData(thisTitle);
+        return (thisTitle);
+    }
+    
+    /**
+     * Get the title from a record
+     * @param record
+     * @return Recrod's title (245a and 245b)
+     */
+    public String getSortableTitle(Record record)
+    {
+        DataField titleField = (DataField) record.getVariableField("245");
+        String thisTitle = getTitle(record);
+        
+        if (titleField != null)
+        {
+            if (titleField.getIndicator2() != '0')
+            {
+                thisTitle = thisTitle.substring(((int)(titleField.getIndicator2() - '0')));
+            }
+        }
+        thisTitle = thisTitle.toLowerCase();
         return (thisTitle);
     }
 
@@ -1079,5 +1100,4 @@ public class SolrIndexer
         }
         return(newResult);
     }
-
 }
