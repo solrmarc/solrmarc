@@ -34,6 +34,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
@@ -346,7 +347,9 @@ public class MarcPrinter
                 
                 if (verbose) System.out.println(recStr);
                 Map<String,Object> indexMap = indexer.map(record);
-                Iterator<String> keys = indexMap.keySet().iterator();
+                TreeSet<String> sortedKeys = new TreeSet<String>();
+                sortedKeys.addAll(indexMap.keySet());
+                Iterator<String> keys = sortedKeys.iterator();
                 String key = "id";
                 Object value = indexMap.get(key);
                 System.out.println("\nIndexID= "+ key + "  Value = "+ value);
