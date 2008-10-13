@@ -726,6 +726,7 @@ public class SolrIndexer
     {
         String[] tags = tagStr.split(":");
         Set<String> result = null;
+        Set<String> tmpResult = null;
         for (int i = 0; i < tags.length; i++)
         {
             // Check to ensure tag length is at least 3 characters
@@ -746,11 +747,16 @@ public class SolrIndexer
                 String sub[] = tags[i].substring(bracket+1).split("[\\]\\[\\-, ]+");
                 int substart = Integer.parseInt(sub[0]);
                 int subend = (sub.length > 1 ) ? Integer.parseInt(sub[1])+1 : substart+1;
-                result = getSubfieldDataAsSet(record, tag, subfield, substart, subend);
+                tmpResult = getSubfieldDataAsSet(record, tag, subfield, substart, subend);
             } 
             else 
             {
-                result = getSubfieldDataAsSet(record, tag, subfield);
+                tmpResult = getSubfieldDataAsSet(record, tag, subfield);
+            }
+            if (tmpResult != null)
+            {
+                if (result == null) result = tmpResult;
+                else result.addAll(tmpResult);
             }
         }
         return (result);
@@ -1061,6 +1067,17 @@ public class SolrIndexer
             logger.error(e.getCause());
         }
         return tmp;
+    }
+    
+    public Set<String> removeTrailingPunct(Record record, String fieldSpec)
+    {
+        Set<String> result = getFieldList(record, fieldSpec);
+        Set<String> newResult = new LinkedHashSet<String>();
+        for (String s : result)
+        {
+            newResult.add(Utils.cleanData(s));
+        }
+        return(newResult);
     }
 
 }
