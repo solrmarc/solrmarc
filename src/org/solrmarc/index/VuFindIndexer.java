@@ -105,22 +105,22 @@ public class VuFindIndexer extends SolrIndexer
                     case 'C':
                         switch(formatField.getData().toUpperCase().charAt(1)) {
                             case 'A':
-                                result.add("Tape Cartridge");
+                                result.add("TapeCartridge");
                                 break;
                             case 'B':
-                                result.add("Chip Cartridge");
+                                result.add("ChipCartridge");
                                 break;
                             case 'C':
-                                result.add("Disc Cartridge");
+                                result.add("DiscCartridge");
                                 break;
                             case 'F':
-                                result.add("Tape Cassette");
+                                result.add("TapeCassette");
                                 break;
                             case 'H':
-                                result.add("Tape Reel");
+                                result.add("TapeReel");
                                 break;
                             case 'J':
-                                result.add("Floppy Disk");
+                                result.add("FloppyDisk");
                                 break;
                             case 'M':
                             case 'O':
@@ -182,7 +182,7 @@ public class VuFindIndexer extends SolrIndexer
                                 result.add("Drawing");
                                 break;
                             case 'O':
-                                result.add("Flash Card");
+                                result.add("FlashCard");
                                 break;
                             case 'N':
                                 result.add("Chart");
@@ -195,13 +195,13 @@ public class VuFindIndexer extends SolrIndexer
                     case 'M':
                         switch(formatField.getData().toUpperCase().charAt(1)) {
                             case 'F':
-                                result.add("Video Cassette");
+                                result.add("VideoCassette");
                                 break;
                             case 'R':
                                 result.add("Filmstrip");
                                 break;
                             default:
-                                result.add("Motion Picture");
+                                result.add("MotionPicture");
                                 break;
                         }
                         break;
@@ -209,37 +209,37 @@ public class VuFindIndexer extends SolrIndexer
                         result.add("Kit");
                         break;
                     case 'Q':
-                        result.add("Musical Score");
+                        result.add("MusicalScore");
                         break;
                     case 'R':
-                        result.add("Sensor Image");
+                        result.add("SensorImage");
                         break;
                     case 'S':
                         switch(formatField.getData().toUpperCase().charAt(1)) {
                             case 'D':
-                                result.add("Sound Disc");
+                                result.add("SoundDisc");
                                 break;
                             case 'S':
-                                result.add("Sound Cassette");
+                                result.add("SoundCassette");
                                 break;
                             default:
-                                result.add("Sound Recording");
+                                result.add("SoundRecording");
                                 break;
                         }
                         break;
                     case 'V':
                         switch(formatField.getData().toUpperCase().charAt(1)) {
                             case 'C':
-                                result.add("Video Cartridge");
+                                result.add("VideoCartridge");
                                 break;
                             case 'D':
-                                result.add("Video Disc");
+                                result.add("VideoDisc");
                                 break;
                             case 'F':
-                                result.add("Video Cassette");
+                                result.add("VideoCassette");
                                 break;
                             case 'R':
-                                result.add("Video Reel");
+                                result.add("VideoReel");
                                 break;
                             default:
                                 result.add("Video");
@@ -258,7 +258,7 @@ public class VuFindIndexer extends SolrIndexer
         switch (Character.toUpperCase(leaderBit)) {
             case 'C':
             case 'D':
-                result.add("Musical Score");
+                result.add("MusicalScore");
                 break;
             case 'E':
             case 'F':
@@ -268,10 +268,10 @@ public class VuFindIndexer extends SolrIndexer
                 result.add("Slide");
                 break;
             case 'I':
-                result.add("Sound Recording");
+                result.add("SoundRecording");
                 break;
             case 'J':
-                result.add("Music Recording");
+                result.add("MusicRecording");
                 break;
             case 'K':
                 result.add("Photo");
@@ -284,7 +284,7 @@ public class VuFindIndexer extends SolrIndexer
                 result.add("Kit");
                 break;
             case 'R':
-                result.add("Physical Object");
+                result.add("PhysicalObject");
                 break;
             case 'T':
                 result.add("Manuscript");
