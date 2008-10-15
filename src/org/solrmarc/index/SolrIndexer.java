@@ -844,7 +844,7 @@ public class SolrIndexer
         
         if (titleField != null)
         {
-            if (titleField.getIndicator2() != '0')
+            if (titleField.getIndicator2() > '0' && titleField.getIndicator2() <= '9')
             {
                 thisTitle = thisTitle.substring(((int)(titleField.getIndicator2() - '0')));
             }
