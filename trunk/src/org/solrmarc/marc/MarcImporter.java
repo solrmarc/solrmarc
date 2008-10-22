@@ -275,26 +275,40 @@ public class MarcImporter {
     public int deleteRecords()
     {
         int numDeleted = 0;
+        
+        // Ensure the file of IDs exists
         if (deleteRecordListFilename == null || 
             deleteRecordListFilename.length() == 0) 
         {
             return(numDeleted);
         }
+        
+        // Open file of IDs
         File delFile = new File(deleteRecordListFilename);
         try
         {
             BufferedReader is = new BufferedReader(new FileReader(delFile));
             String line;
             DeleteUpdateCommand delCmd = new DeleteUpdateCommand();
+            
+            // Loop through line by line
             while ((line = is.readLine()) != null)
             {
+                // Stop if shutting down
                 if (shuttingDown) break;
+                
+                // Ignore any lines with a # symbol
                 line = line.trim();
                 if (line.startsWith("#")) continue;
+                
+                /*
                 if (!line.startsWith("u"))
                 {
                     line = "u" + line;
-                }                
+                }
+                */
+
+                // Delete id
                 delCmd.id = line;
                 delCmd.fromCommitted = true;
                 delCmd.fromPending = true;
