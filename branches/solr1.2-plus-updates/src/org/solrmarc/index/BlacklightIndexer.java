@@ -190,7 +190,7 @@ public class BlacklightIndexer extends SolrIndexer
         }
         int partNum = Utils.isNumber(part) ? Integer.parseInt(part) : 0;
         if (result == null) return(result);
-        if (partNum == 0) return(prefix + " - " + result);
+        if (partNum == 0) return(prefix + " - " + result.replaceAll("[|]", " - "));
         String resultParts[] = result.split("[|]");
         if (partNum-1 >= resultParts.length) return(null);
         return(prefix.substring(0,1) + " - " + resultParts[partNum-1]);
