@@ -83,7 +83,8 @@ public final class Utils {
                     newData = newData.substring(0, newData.length()-1);
                 }
             }
-            if (newData.length() > 0 && newData.charAt(0) == '[' && newData.endsWith("]"))
+            if (newData.length() > 0 && newData.charAt(0) == '[' && newData.endsWith("]") && 
+                    newData.indexOf('[', 1) == -1 && newData.lastIndexOf(']', newData.length()-2) == -1)
             {
                 newData = newData.substring(1, newData.length()-1);
             }
