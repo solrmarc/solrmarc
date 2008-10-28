@@ -195,10 +195,6 @@ public class PermissiveReaderTest
             while (iter.hasNext())
             {
                 Object error = iter.next();
-                if (((ErrorHandler.Error)(error)).getSeverity() >= ErrorHandler.MINOR_ERROR)
-                {
-                    int i = 10;
-                }
                 out.println(error.toString());
             }
         }
