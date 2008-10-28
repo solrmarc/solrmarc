@@ -361,7 +361,7 @@ public class BlacklightIndexer extends SolrIndexer
                             buffer.append(subfield.getData());
                         }
                     }
-                    result.add(buffer.toString());
+                    result.add(Utils.cleanData(buffer.toString()));
                 }
             }
         }
