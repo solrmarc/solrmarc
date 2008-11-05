@@ -504,7 +504,7 @@ public class VuFindIndexer extends SolrIndexer
             // Get all fields starting with the 100 and ending with the 839
             // This will ignore any "code" fields and only use textual fields
             int tag = Integer.parseInt(field.getTag());
-            if ((tag >= 100) && (tag < 840)) {
+            if ((tag >= 100) && (tag < 900)) {
                 // Loop through subfields
                 subfields = field.getSubfields();
                 subfieldsIter = subfields.iterator();
