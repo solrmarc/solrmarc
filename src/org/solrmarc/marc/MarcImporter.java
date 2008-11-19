@@ -467,7 +467,7 @@ public class MarcImporter {
             //System.err.println("Couldn't add document");
         	logger.error("Couldn't add document: " + ioe.getMessage());
             //e.printStackTrace();
-        	logger.error("Control Number " + reader.next().getControlNumber(), ioe);
+     	   	logger.error("Control Number " + record.getControlNumber(), ioe);
         }                
     }
 
