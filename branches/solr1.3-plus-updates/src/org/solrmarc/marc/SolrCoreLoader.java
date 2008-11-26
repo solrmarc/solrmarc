@@ -22,7 +22,13 @@ public class SolrCoreLoader
             try
             {
                 Class<?> areLibraries_1_3 = Class.forName("org.apache.solr.core.CoreContainer");
-                has_1_3_libs = true;
+		has_1_3_libs = true;
+/*
+                String className = "org.apache.solr.core.CoreContainer".replace('.', '/');
+                String classJar = areLibraries_1_3.getResource( "/" + className + ".class").toString();
+		System.out.println("className is " + className);
+		System.out.println("classJar is " + classJar);
+*/
             }
             catch (ClassNotFoundException e1)
             {
@@ -30,8 +36,14 @@ public class SolrCoreLoader
             }           
             try
             {
-                Class<?> areLibraries_1_3 = Class.forName("org.apache.solr.core.MultiCore");
+                Class<?> areLibraries_1_2 = Class.forName("org.apache.solr.core.MultiCore");
                 has_1_2_libs = true;
+/*
+                String className = "org.apache.solr.core.MultiCore".replace('.', '/');
+                String classJar = areLibraries_1_2.getResource( "/" + className + ".class").toString();
+		System.out.println("className is " + className);
+		System.out.println("classJar is " + classJar);
+*/
             }
             catch (ClassNotFoundException e1)
             {
@@ -110,8 +122,8 @@ public class SolrCoreLoader
         }
         catch (Exception e)
         {
-            System.err.println("Error: Program has access to both Solr 1.2 libraries and Solr 1.3 libraries");               
-            logger.error("Couldn't load the solr core directory");
+            System.err.println("Error: Problem instantiating SolrCore");               
+            logger.error("Error: Problem instantiating SolrCore");
             e.printStackTrace();
             System.exit(1);
         }
