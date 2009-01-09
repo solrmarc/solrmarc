@@ -1,0 +1,24 @@
+#!/bin/sh
+JAVA_HOME=/usr/java/latest
+export JAVA_HOME
+fpath=$1
+fpattern=$2
+
+for file in `find $fpath -name '*.mrc' -print | sort | egrep "$fpattern"`
+    do
+        f1=${file%.*}
+        f2=${f1##*/}
+        output=/usr/local/projects/marc/results/results_$f2
+        del="$f1".del
+        if [ -a "$del" ]
+            then f3=$del
+            else  del=""
+        fi
+        echo $file
+#        java -Xmx2048m -Xms1024M -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=1044 -Dmarc.path="$file" -Dsolr.optimize_at_end="false" -Dmarc.ids_to_delete="$del" -Dsolr.hosturl="" -jar dist/MarcImporter.jar import.properties > $output 2>&1
+        java -Xmx2048m -Xms1024M -Dmarc.path="$file" -Dsolr.optimize_at_end="false" -Dmarc.ids_to_delete="$del" -jar dist/MarcImporter.jar import.properties > $output 2>&1
+        if [ "$?" -eq 1 ]
+        then
+           break  # Skip entire rest of loop.
+        fi
+    done
