@@ -16,10 +16,17 @@ package org.solrmarc.tools;
  * limitations under the License.
  */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +51,66 @@ public final class Utils {
 	 */	
 	private Utils(){ }
 	
+    /**
+     * Check first for a particular property in the System Properties, so that the -Dprop="value" command line arg 
+     * mechanism can be used to override values defined in the passed in property file.  This is especially useful
+     * for defining the marc.source property to define which file to operate on, in a shell script loop.
+     * @param props - property set in which to look.
+     * @param propname - name of the property to lookup.
+     * @returns String - value stored for that property (or null if it doesn't exist) 
+     */
+    public static String getProperty(Properties props, String propname)
+    {
+        String prop;
+        if ((prop = System.getProperty(propname)) != null)
+        {
+            return(prop);
+        }
+        if ((prop = props.getProperty(propname)) != null)
+        {
+            return(prop);
+        }
+        return null;
+    }
+    
+    public static Properties loadProperties(String propertyPath, String propertyFileName)
+    {
+        Utils utilObj = new Utils();
+        String fullPropertyPath = propertyFileName;
+        if (propertyPath != null) fullPropertyPath = propertyPath + File.separator + propertyFileName;
+        InputStream in = null;
+        try {
+            in = new FileInputStream(fullPropertyPath);
+        }
+        catch (FileNotFoundException fnfe)
+        {
+            URL url = utilObj.getClass().getClassLoader().getResource(propertyFileName);
+            if (url == null) url = utilObj.getClass().getResource("/"+propertyFileName);
+            if (url == null) url = utilObj.getClass().getClassLoader().getResource(propertyPath+"/"+propertyFileName);
+            if (url == null) url = utilObj.getClass().getResource("/"+propertyPath+"/"+propertyFileName);
+            try
+            {
+                in = url.openStream();
+            }
+            catch (IOException e)
+            {
+            }           
+        }
+        // load the properties
+        Properties props = new Properties();
+        try
+        {
+            props.load(in);
+            in.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return(props);
+    }
+
 	/**
 	 * Cleans non-digits from a String
 	 * @param date String to parse
@@ -78,7 +145,15 @@ public final class Utils {
             if (newData.length() == 0) return(newData);
             if (newData.endsWith("."))
             {
-                if (newData.matches(".*\\w\\w\\w\\.$"))
+                if (newData.matches(".*\\w\\w\\.$"))
+                {
+                    newData = newData.substring(0, newData.length()-1);
+                }
+                else if (newData.matches(".*\\p{L}\\p{L}\\.$"))
+                {
+                    newData = newData.substring(0, newData.length()-1);
+                }
+                else if (newData.matches(".*\\w\\p{InCombiningDiacriticalMarks}?\\w\\p{InCombiningDiacriticalMarks}?\\.$"))
                 {
                     newData = newData.substring(0, newData.length()-1);
                 }
@@ -105,6 +180,22 @@ public final class Utils {
         return newData ;       
     }
 
+	/**
+	 * Call cleanData on an entire set of Strings has a side effect
+     * of deleting entries that are identical when they are cleaned.
+	 * @param values - the set to clean
+	 * @return Set<String> - the "same" set with all of its entries cleaned.
+	 */
+    private static Set<String> cleanData(Set<String> values)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        for (String entry : values)
+        {
+            String cleaned = cleanData(entry);
+            result.add(cleaned);
+        }
+        return(result);
+    }
 	
 	/**
 	 * Calculate time from milliseconds
@@ -283,5 +374,25 @@ public final class Utils {
         
         return result.toString();
     }
+
+    public static Set<String> trimNearDuplicates(Set<String> locations)
+    {
+        locations = cleanData(locations);
+        if (locations.size() <= 1) return(locations);
+        Object locArr[] = locations.toArray();
+        int size = locArr.length;
+        for (int i = 0; i < size; i++)
+        {
+            boolean copyStrI = true;
+            for (int j = 0; j < size; j++)
+            {
+                if (i == j) continue;
+                if (locArr[j].toString().contains(locArr[i].toString())) { copyStrI = false; break; }                       
+            }
+            if (copyStrI == false) locations.remove(locArr[i]);   
+        }
+        return locations;
+    }
+
 
 }
