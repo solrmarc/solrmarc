@@ -45,6 +45,7 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import org.marc4j.marc.VariableField;
 import org.solrmarc.marc.MarcImporter;
 import org.solrmarc.tools.Utils;
 
@@ -75,14 +76,14 @@ public class SolrIndexer
         indexDate = new Date();
     }
     
-	/**
-	 * Constructor
-	 * @param propertiesMapFile
-	 * @param dir
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws ParseException
-	 */
+    /**
+     * Constructor
+     * @param propertiesMapFile
+     * @param dir
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws ParseException
+     */
     public SolrIndexer(String propertiesMapFile, String dir)
         throws FileNotFoundException, IOException, ParseException
     {
@@ -90,9 +91,10 @@ public class SolrIndexer
         solrMarcDir = dir;
         Properties props = new Properties();
         props.load(new FileInputStream(solrMarcDir + "/" + propertiesMapFile));
-        if (!fillMapFromProperties(props))
+        String errorMsg = fillMapFromProperties(props);
+        if (errorMsg != null)
         {
-            throw new ParseException("Invalid data found in indexer properties file", 0);
+            throw new ParseException(errorMsg, 0);
         }
     }
 
@@ -101,10 +103,10 @@ public class SolrIndexer
      * @param props Properties to load
      * @return If the properties are valid
      */
-    protected boolean fillMapFromProperties(Properties props)
+    protected String fillMapFromProperties(Properties props)
         throws ParseException
     {
-        boolean valid = true;
+        String errorMsg = null;
         Enumeration<?> en = props.propertyNames();
         
         while (en.hasMoreElements())
@@ -129,11 +131,24 @@ public class SolrIndexer
                     String values[] = value.split("[, ]+", 2);
                     if (values[0].equals("custom"))
                     {
-                        String values2[] = values[1].trim().split("[, ]+", 2);
                         fieldDef[0] = property;
                         fieldDef[1] = "custom";
-                        fieldDef[2] = values2[0];
-                        fieldDef[3] = values2.length > 1 ? values2[1] : null;
+                        // allow for mapping of custom fields via _index.properties
+                        String lastValues[];
+                        if (values[1].indexOf("()") != -1)
+                        {
+                            values[1] = values[1].replace("()", "");
+                        }
+                        if (values[1].indexOf(',') != -1 && values[1].indexOf('(') != -1 && values[1].indexOf('(') < values[1].indexOf(','))
+                        {
+                            lastValues = values[1].trim().split("\\) *,", 2);
+                        }
+                        else // no parens
+                        {
+                            lastValues = values[1].trim().split(" *,", 2);                         
+                        }
+                        fieldDef[2] = lastValues[0].trim();
+                        fieldDef[3] = lastValues.length > 1 ? lastValues[1].trim() : null;
                     }
                     else if (values[0].equals("xml") ||
                              values[0].equals("raw") ||
@@ -144,8 +159,7 @@ public class SolrIndexer
                         fieldDef[0] = property;
                         fieldDef[1] = "std";
                         fieldDef[2] = values[0];
-                        fieldDef[3] =
-                                values.length > 1 ? values[1].trim() : null;
+                        fieldDef[3] = values.length > 1 ? values[1].trim() : null;
                     }
                     else if (values[0].equalsIgnoreCase("FullRecordAsXML") ||
                              values[0].equalsIgnoreCase("FullRecordAsMARC") ||
@@ -209,15 +223,15 @@ public class SolrIndexer
                         {
                             //System.err.println("Error: Unable to find file containing specified translation map (" +
                               //                 fieldDef[3] + ")");
-                        	logger.error("Unable to find file containing specified translation map (" + fieldDef[3] + ")");
-                            valid = false;
+                            logger.error("Unable to find file containing specified translation map (" + fieldDef[3] + ")");
+                            errorMsg = "Unable to find file containing specified translation map (" + fieldDef[3] + ")";
                         }
                         catch (IOException e)
                         {
 //                            System.err.println("Error: Problems reading specified translation map (" +
 //                                               fieldDef[3] + ")");
-                        	logger.error("Error: Problems reading specified translation map (" + fieldDef[3] + ")");
-                            valid = false;
+                            logger.error("Error: Problems reading specified translation map (" + fieldDef[3] + ")");
+                            errorMsg = "Error: Problems reading specified translation map (" + fieldDef[3] + ")";
                         }
                     }
                 }
@@ -232,11 +246,8 @@ public class SolrIndexer
 
         // Now verify that the data read to configure the indexer is valid.
 
-        // int size = fieldMap.size(); // never read locally
-        Iterator<String> keys = fieldMap.keySet().iterator();
-        while (keys.hasNext())
+        for (String key : fieldMap.keySet())
         {
-            String key = keys.next();
             String fieldVal[] = fieldMap.get(key);
             //String indexField = fieldVal[0]; // never read locally
             String indexType = fieldVal[1];
@@ -248,8 +259,8 @@ public class SolrIndexer
             {
 //                System.err.println("Error: Specified translation map (" +
 //                                   mapName + ") not found in properties file");
-            	logger.error("Sepcified translation map (" + mapName + ") not found in properties file");
-                valid = false;
+                logger.error("Specified translation map (" + mapName + ") not found in properties file");
+                errorMsg = "Specified translation map (" + mapName + ") not found in properties file";
             }
             
             // Process Custom Field
@@ -257,8 +268,22 @@ public class SolrIndexer
             {
                 try
                 {
-                    Method method = getClass().getMethod(indexParm,
-                                                 new Class[] { Record.class });
+                    Method method = null;
+                    if (indexParm.indexOf("(") != -1)
+                    {
+                        String functionName = indexParm.substring(0, indexParm.indexOf('('));
+                        String parmStr = indexParm.substring(indexParm.indexOf('(')+1, indexParm.lastIndexOf(')'));
+                        String parms[] = parmStr.trim().split(",");
+                        int numparms = parms.length;
+                        Class<?> parmClasses[] = new Class<?>[numparms+1];
+                        parmClasses[0] = Record.class;
+                        for (int i = 0 ; i < numparms; i++)  { parmClasses[i+1] = String.class; }
+                        method = getClass().getMethod(functionName, parmClasses);
+                    }
+                    else 
+                    {
+                        method = getClass().getMethod(indexParm, new Class[] { Record.class });
+                    }
                     Class<?> retval = method.getReturnType();
                     // if (!method.isAccessible())
                     // {
@@ -272,39 +297,39 @@ public class SolrIndexer
 //                                           indexParm +
 //                                           " must be either String or Set<String>");
                         logger.error("Error: Return type of custom indexing function " + indexParm +" must be either String or Set<String>");
-                        valid = false;
+                        errorMsg = "Error: Return type of custom indexing function " + indexParm +" must be either String or Set<String>";
                     }
                 }
                 catch (SecurityException e)
                 {
 //                    System.err.println("Error: Unable to invoke custom indexing function " +
 //                                       indexParm);
-                	logger.error("Unable to invoke custom indexing function " + indexParm);
-                	logger.debug(e.getCause(), e);
-                    valid = false;
+                    logger.error("Unable to invoke custom indexing function " + indexParm);
+                    logger.debug(e.getCause(), e);
+                    errorMsg = "Unable to invoke custom indexing function " + indexParm;
                 }
                 catch (NoSuchMethodException e)
                 {
 //                    System.err.println("Error: Unable to find custom indexing function " +
 //                                       indexParm);
-                	logger.error("Unable to find custom indexing function " + indexParm);
-                	logger.debug(e.getCause());
-                    valid = false;
+                    logger.error("Unable to find custom indexing function " + indexParm);
+                    logger.debug(e.getCause());
+                    errorMsg = "Unable to find custom indexing function " + indexParm;
                 }
                 catch (IllegalArgumentException e)
                 {
 //                    System.err.println("Error: Unable to find custom indexing function " +
 //                                       indexParm);
-                	logger.error("Unable to find custom indexing function " + indexParm);
-                	logger.debug(e.getCause());
-                    valid = false;
+                    logger.error("Unable to find custom indexing function " + indexParm);
+                    logger.debug(e.getCause());
+                    errorMsg = "Unable to find custom indexing function " + indexParm;
                 }
             }
         }
-        return valid;
+        return errorMsg;
     }
 
-    private String loadTranslationMap(Properties props, String translationMapSpec) throws FileNotFoundException, IOException
+    protected String loadTranslationMap(Properties props, String translationMapSpec) throws FileNotFoundException, IOException
     {
         String mapName = null;
         if (translationMapSpec.length() == 0)
@@ -326,14 +351,20 @@ public class SolrIndexer
             String propFilename = mapSpec[0];
             String mapKeyPrefix = mapSpec[1];
             mapName = mapSpec[1];
-            loadTranslationMapValues(propFilename, mapKeyPrefix, mapName);
+            if (findMap(mapName) == null)
+            {
+                loadTranslationMapValues(propFilename, mapKeyPrefix, mapName);
+            }
         }
         else
         {
             String propFilename = translationMapSpec;
             String mapKeyPrefix = "";
             mapName = translationMapSpec.replaceAll(".properties", "");
-            loadTranslationMapValues(propFilename, mapKeyPrefix, mapName);
+            if (findMap(mapName) == null)
+            {
+                loadTranslationMapValues(propFilename, mapKeyPrefix, mapName);
+            }
         }
         return (mapName);
     }
@@ -386,10 +417,8 @@ public class SolrIndexer
     {
         Map<String, Object> indexMap = new HashMap<String, Object>();
         //int size = fieldMap.size(); //never read locally 
-        Iterator<String> keys = fieldMap.keySet().iterator();
-        while (keys.hasNext())
+        for (String key : fieldMap.keySet())
         {
-            String key = keys.next();
             String fieldVal[] = fieldMap.get(key);
             String indexField = fieldVal[0];
             String indexType = fieldVal[1];
@@ -456,8 +485,27 @@ public class SolrIndexer
     {
         try
         {
-            Method method = getClass().getMethod(indexParm, new Class[]{Record.class});
-            Object retval = method.invoke(this, new Object[]{record});
+            Method method;
+            Object retval;
+            if (indexParm.indexOf("(") != -1)
+            {
+                String functionName = indexParm.substring(0, indexParm.indexOf('('));
+                String parmStr = indexParm.substring(indexParm.indexOf('(')+1, indexParm.lastIndexOf(')'));
+                String parms[] = parmStr.trim().split(",");
+                int numparms = parms.length;
+                Class parmClasses[] = new Class[numparms+1];
+                parmClasses[0] = Record.class;
+                Object objParms[] = new Object[numparms+1];
+                objParms[0] = record;                
+                for (int i = 0 ; i < numparms; i++)  { parmClasses[i+1] = String.class; objParms[i+1] = dequote(parms[i].trim()); }
+                method = getClass().getMethod(functionName, parmClasses);
+                retval = method.invoke(this, objParms);
+            }
+            else 
+            {
+                method = getClass().getMethod(indexParm, new Class[]{Record.class});
+                retval = method.invoke(this, new Object[]{record});
+            }
             if (retval instanceof Set) 
             {
                 addFields(indexMap, indexField, mapName, (Set<String>) retval);
@@ -469,24 +517,38 @@ public class SolrIndexer
         }
         catch (SecurityException e)
         {
-        	logger.error("Error indexing field: " + indexField, e);
+            //e.printStackTrace();
+            logger.error(e.getCause());
         }
         catch (NoSuchMethodException e)
         {
-        	logger.error("Error indexing field: " + indexField, e);
+            //e.printStackTrace();
+            logger.error(e.getCause());
         }
         catch (IllegalArgumentException e)
         {
-        	logger.error("Error indexing field: " + indexField, e);
+            //e.printStackTrace();
+            logger.error(e.getCause());
         }
         catch (IllegalAccessException e)
         {
-        	logger.error("Error indexing field: " + indexField, e);
+            //e.printStackTrace();
+            logger.error(e.getCause());
         }
         catch (InvocationTargetException e)
         {
-        	logger.error("Error indexing field: " + indexField, e);
+            //e.printStackTrace();
+            logger.error(e.getCause());
         }
+    }
+
+    private String dequote(String str)
+    {
+        if (str.length() > 2 && str.charAt(0) == '"' && str.charAt(str.length()-1) == '"')
+        {
+            return(str.substring(1, str.length()-1));
+        }
+        return(str);
     }
 
     private String getStd(Record record, String indexParm)
@@ -578,8 +640,7 @@ public class SolrIndexer
      */
     public static Set<String> getEra(Set<String> result, char eraStart1, char eraStart2, char eraEnd1, char eraEnd2)
     {
-        if (eraStart1 >= 'a' && eraStart1 <= 'y' && eraEnd1 >= 'a' &&
-            eraEnd1 <= 'y')
+        if (eraStart1 >= 'a' && eraStart1 <= 'y' && eraEnd1 >= 'a' && eraEnd1 <= 'y')
         {
             for (char eraVal = eraStart1; eraVal <= eraEnd1; eraVal++)
             {
@@ -653,13 +714,6 @@ public class SolrIndexer
                 indexMap.put(indexField, fields);
             }
         }
-//        Iterator<String> iter = fields.iterator();
-//        
-//        while(iter.hasNext())
-//        {
-//            String fieldVal = iter.next();
-//            addField(builder, indexField, null, fieldVal);            
-//        }
     }
 
     /**
@@ -671,10 +725,11 @@ public class SolrIndexer
     public static Set<String> getFieldList(Record record, String tagStr)
     {
         String[] tags = tagStr.split(":");
-        Set<String> result = new LinkedHashSet<String>();
+        Set<String> result = null;
+        Set<String> tmpResult = null;
         for (int i = 0; i < tags.length; i++)
         {
-            // Check to ensure tag length is atlease 3 characters
+            // Check to ensure tag length is at least 3 characters
             if (tags[i].length() < 3)
             {
                 System.err.println("Invalid tag specified: " + tags[i]);
@@ -692,9 +747,16 @@ public class SolrIndexer
                 String sub[] = tags[i].substring(bracket+1).split("[\\]\\[\\-, ]+");
                 int substart = Integer.parseInt(sub[0]);
                 int subend = (sub.length > 1 ) ? Integer.parseInt(sub[1])+1 : substart+1;
-                addSubfieldDataToSet(record, result, tag, subfield, substart, subend);
-            } else {
-                addSubfieldDataToSet(record, result, tag, subfield);
+                tmpResult = getSubfieldDataAsSet(record, tag, subfield, substart, subend);
+            } 
+            else 
+            {
+                tmpResult = getSubfieldDataAsSet(record, tag, subfield);
+            }
+            if (tmpResult != null)
+            {
+                if (result == null) result = tmpResult;
+                else result.addAll(tmpResult);
             }
         }
         return (result);
@@ -758,16 +820,36 @@ public class SolrIndexer
         
         if (titleField != null && titleField.getSubfield('a') != null)
         {
-
-            thisTitle = Utils.cleanData(titleField.getSubfield('a').getData());
+            thisTitle = titleField.getSubfield('a').getData();
 
             // check for a subfield b
             if (titleField.getSubfield('b') != null)
             {
                 thisTitle += " " + titleField.getSubfield('b').getData();
-                thisTitle = Utils.cleanData(thisTitle);
             }
         }
+        thisTitle = Utils.cleanData(thisTitle);
+        return (thisTitle);
+    }
+    
+    /**
+     * Get the title from a record
+     * @param record
+     * @return Recrod's title (245a and 245b)
+     */
+    public String getSortableTitle(Record record)
+    {
+        DataField titleField = (DataField) record.getVariableField("245");
+        String thisTitle = getTitle(record);
+        
+        if (titleField != null)
+        {
+            if (titleField.getIndicator2() > '0' && titleField.getIndicator2() <= '9')
+            {
+                thisTitle = thisTitle.substring(((int)(titleField.getIndicator2() - '0')));
+            }
+        }
+        thisTitle = thisTitle.toLowerCase();
         return (thisTitle);
     }
 
@@ -813,121 +895,147 @@ public class SolrIndexer
     }
 
     /**
-     * 
+     * Get the specified subfields from the specified MARC field, returned as
+     *  a set of strings to become lucene document field values
      * @param record
-     * @param set
-     * @param field
-     * @param subfield
+     * @param fldTag - the field name, e.g. 245
+     * @param subfldsStr - the string containing the desired subfields
+     * @returns the result set of strings 
      */
-    protected static void addSubfieldDataToSet(Record record, Set<String> set, String field, String subfield)
+    @SuppressWarnings("unchecked")
+    protected static Set<String> getSubfieldDataAsSet(Record record, String field, String subfield)
     {
         // Process Leader
+        Set<String> result = new LinkedHashSet<String>();
         if (field.equals("000"))
         {
             Leader leader = record.getLeader();
             String val = leader.toString();
-            set.add(val);
-            return;
+            result.add(val);
+            return result;
         }
         
         // Loop through Data and Control Fields
-        List<?> fields = record.getVariableFields(field);
-        Iterator<?> fldIter = fields.iterator();
-        while (fldIter.hasNext())
+        List<VariableField> varFlds = record.getVariableFields(field);
+        for (VariableField vf : varFlds)
         {
             int iField = new Integer(field).intValue();
             if (iField > 9) {
                 // This field is a DataField
-                if (subfield != null) {
-                    DataField dfield = (DataField) fldIter.next();
+                if (subfield != null) 
+                {
+                    DataField dfield = (DataField) vf;
 
-                    if (subfield.length() > 1) {
-                        // Allow automatic concatination of grouped subfields
+                    if (subfield.length() > 1) 
+                    {
+                        // Allow automatic concatenation of grouped subfields
                         StringBuffer buffer = new StringBuffer("");
-                        for (int i = 0; i < subfield.length(); i++)
+                        List<Subfield> subFlds = dfield.getSubfields();
+                        for (Subfield sf : subFlds) 
                         {
-                            List<?> sub = dfield.getSubfields(subfield.charAt(i));
-                            Iterator<?> iter = sub.iterator();
-                            while (iter.hasNext())
+                            if (subfield.indexOf(sf.getCode()) != -1)
                             {
-                                Subfield s = (Subfield) (iter.next());
-                                String data = Utils.cleanData(s.getData());
-                                if (buffer.length() > 0) {
-                                    buffer.append(" " + data);
-                                } else {
-                                    buffer.append(data);
-                                }
+                                if (buffer.length() > 0) buffer.append(" ");
+                                buffer.append(sf.getData().trim());
                             }
-                        }
-                        set.add(buffer.toString());
-                    } else {
+                        }                        
+                        result.add(buffer.toString());
+                    } 
+                    else 
+                    {
                         // Just get the singly defined subfield
-                        List<?> sub = dfield.getSubfields(subfield.charAt(0));
-                        Iterator<?> iter = sub.iterator();
-                        while (iter.hasNext())
+                        List<Subfield> subFlds = dfield.getSubfields(subfield.charAt(0));
+                        for (Subfield sf : subFlds)                         
                         {
-                            Subfield s = (Subfield) (iter.next());
-                            String data = s.getData();
-                            data = Utils.cleanData(data);
-                            set.add(data);
+                            result.add(sf.getData().trim());
                         }
                     }
                 }
-            } else {
+            } 
+            else 
+            {
                 // This field is a Control Field
-                ControlField cfield = (ControlField) fldIter.next();
-                set.add(cfield.getData());
+                ControlField cfield = (ControlField) vf;
+                result.add(cfield.getData());
             }
         }
+        return(result);
     }
 
     /**
-     * 
+     * Get the specified substring of subfield values from the specified MARC field, returned as
+     *  a set of strings to become lucene document field values
      * @param record
-     * @param set
-     * @param field
-     * @param subfield
-     * @param substringStart
-     * @param substringEnd
+     * @param fldTag - the field name, e.g. 245
+     * @param subfldsStr - the string containing the desired subfields
+     * @param beginIdx - the beginning index of the substring of the subfield value
+     * @param endIdx - the ending index of the substring of the subfield value
+     * @return the result set of strings 
      */
-    protected static void addSubfieldDataToSet(Record record, Set<String> set, String field, String subfield, int substringStart, int substringEnd)
+    @SuppressWarnings("unchecked")
+    protected static Set<String> getSubfieldDataAsSet(Record record, String field, String subfield, int beginIdx, int endIdx)
     {
         // Process Leader
+        Set<String> result = new LinkedHashSet<String>();
         if (field.equals("000"))
         {
             Leader leader = record.getLeader();
-            String val = leader.toString().substring(substringStart, substringEnd);
-            set.add(val);
-            return;
+            String val = leader.toString().substring(beginIdx, endIdx);
+            result.add(val);
+            return result;
         }
         
         // Loop through Data and Control Fields
-        List<?> fields = record.getVariableFields(field);
-        Iterator<?> fldIter = fields.iterator();
-        while (fldIter.hasNext())
+        List<VariableField> varFlds = record.getVariableFields(field);
+        for (VariableField vf : varFlds) 
         {
             int iField = new Integer(field).intValue();
-            if (iField > 9) {
-                // This field is a DataField
-                if (subfield != null) {
-                    // This is a data field
-                    DataField dfield = (DataField) fldIter.next();
-                    List sub = dfield.getSubfields(subfield.charAt(0));
-                    Iterator iter = sub.iterator();
-                    while (iter.hasNext())
+            if (iField > 9 && subfield != null) 
+            {
+                // This is a data field
+                DataField dfield = (DataField) vf;
+                if (subfield.length() > 1) 
+                {
+                    // Allow automatic concatenation of grouped subfields
+                    StringBuffer buffer = new StringBuffer("");
+                    List<Subfield> subFlds = dfield.getSubfields();
+                    for (Subfield sf : subFlds) 
                     {
-                        Subfield s = (Subfield) (iter.next());
-                        set.add(s.getData().substring(substringStart, substringEnd));
+                        if (subfield.indexOf(sf.getCode()) != -1)
+                        {
+                            if (sf.getData().length() >= endIdx)
+                            {
+                                if (buffer.length() > 0) buffer.append(" ");
+                                buffer.append(sf.getData().substring(beginIdx, endIdx));
+                            }
+                        }
+                    }                        
+                    result.add(buffer.toString());
+                } 
+                else 
+                {
+                    // Just get the singly defined subfield
+                    List<Subfield> subFlds = dfield.getSubfields(subfield.charAt(0));
+                    for (Subfield sf : subFlds)                         
+                    {
+                        if (sf.getData().length() >= endIdx)
+                        {
+                            result.add(sf.getData().substring(beginIdx, endIdx));
+                        }
                     }
                 }
             }
             else
             {
                 // This is a control field
-                ControlField cfield = (ControlField) fldIter.next();
-                set.add(cfield.getData().substring(substringStart, substringEnd));
+                ControlField cfield = (ControlField) vf;
+                if (cfield.getData().length() >= endIdx)
+                {
+                    result.add(cfield.getData().substring(beginIdx, endIdx));
+                }
             }
         }
+        return(result);
     }
 
     /**
@@ -950,7 +1058,7 @@ public class SolrIndexer
         catch (UnsupportedEncodingException e)
         {
             //  e.printStackTrace();
-        	logger.error(e.getCause());
+            logger.error(e.getCause());
         }
         return (result);
     }
@@ -977,9 +1085,19 @@ public class SolrIndexer
         catch (UnsupportedEncodingException e)
         {
             // e.printStackTrace();
-        	logger.error(e.getCause());
+            logger.error(e.getCause());
         }
         return tmp;
     }
-
+    
+    public Set<String> removeTrailingPunct(Record record, String fieldSpec)
+    {
+        Set<String> result = getFieldList(record, fieldSpec);
+        Set<String> newResult = new LinkedHashSet<String>();
+        for (String s : result)
+        {
+            newResult.add(Utils.cleanData(s));
+        }
+        return(newResult);
+    }
 }

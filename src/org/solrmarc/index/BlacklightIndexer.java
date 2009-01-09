@@ -21,9 +21,14 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.Subfield;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -35,18 +40,18 @@ import org.solrmarc.tools.Utils;
 public class BlacklightIndexer extends SolrIndexer
 {
 
-	/**
-	 * Default constructor
-	 * @param propertiesMapFile
-	 * @throws ParseException 
-	 * @throws IOException 
-	 * @throws FileNotFoundException 
-	 * @throws Exception
-	 */
+    /**
+     * Default constructor
+     * @param propertiesMapFile
+     * @throws ParseException 
+     * @throws IOException 
+     * @throws FileNotFoundException 
+     * @throws Exception
+     */
     public BlacklightIndexer(final String propertiesMapFile, final String solrMarcDir)
         throws FileNotFoundException, IOException, ParseException
     {
-        	super(propertiesMapFile, solrMarcDir);
+            super(propertiesMapFile, solrMarcDir);
     }
     
     /**
@@ -121,15 +126,12 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> result = new LinkedHashSet<String>();
         String leader = record.getLeader().toString();
         String leaderChar = leader.substring(6, 7).toUpperCase();
-        Set<String> titleH = new LinkedHashSet<String>();
-        addSubfieldDataToSet(record, titleH, "245", "h");       
+        Set<String> titleH = getSubfieldDataAsSet(record, "245", "h");
                 
         if("J".equals(leaderChar) || "I".equals(leaderChar) || 
                 (Utils.setItemContains(titleH, "videorecording")))
         {
-            Set<String> form = new LinkedHashSet<String>();
-            addSubfieldDataToSet(record, form, "999", "t");
-//            Set<String> labels = Utils.remap(form, findMap("recording_format_facet"));
+            Set<String> form = getSubfieldDataAsSet(record, "999", "t");
             return(form);
         }
         return(result);
@@ -140,21 +142,58 @@ public class BlacklightIndexer extends SolrIndexer
      * @param record
      * @return Call number prefix
      */
-    public String getCallNumberPrefix(final Record record)
+    public String getCallNumberPrefix(final Record record, String mapName, String part)
     {
-        String val = getFirstFieldVal(record, "999a:090a:050a");
-        
-        if (val == null || val.length() == 0) { 
-        	return(null);
-        	}
-        
-        String vals[] = val.split("[^A-Za-z]+", 2);
-        
-        if (vals.length == 0 || vals[0] == null || vals[0].length() == 0) {
-        	return(null);
+        try
+        {
+            mapName = loadTranslationMap(null, mapName);
+        }
+        catch (FileNotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        String useRecord = getFirstFieldVal(record, "050a:090a");
+        if (useRecord == null || useRecord.matches("[0-9].*"))  
+        {
+            return(null);
         }
         
-        return(vals[0]);
+        String val = getFirstFieldVal(record, "999a");
+        String result = null;
+        if (val == null || val.length() == 0) { 
+            return(null);
+            }
+        
+        String vals[] = val.split("[^A-Za-z]+", 2);
+        String prefix = vals[0];
+        
+        if (vals.length == 0 || vals[0] == null || vals[0].length() == 0 ||  vals[0].length() > 3 || !vals[0].toUpperCase().equals(vals[0])) 
+        {
+            return(null);
+        }
+        else
+        {
+            while (result == null && prefix.length() > 0)
+            {
+                result = Utils.remap(prefix, findMap(mapName), false);
+                if (result == null)
+                {
+                    prefix = prefix.substring(0, prefix.length()-1);
+                }
+            }
+        }
+        int partNum = Utils.isNumber(part) ? Integer.parseInt(part) : 0;
+        if (result == null) return(result);
+        if (partNum == 0) return(prefix + " - " + result.replaceAll("[|]", " - "));
+        String resultParts[] = result.split("[|]");
+        if (partNum-1 >= resultParts.length) return(null);
+        return(prefix.substring(0,1) + " - " + resultParts[partNum-1]);
     }
 
     /**
@@ -166,7 +205,7 @@ public class BlacklightIndexer extends SolrIndexer
     {
         String val = getFirstFieldVal(record, "999a:090a:050a");
         if (val == null || val.length() == 0) {
-        	return(null);
+            return(null);
         }
         val = val.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".").toLowerCase();
         return(val);
@@ -182,7 +221,7 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> set = getFieldList(record, "035a");
         
         if (set.isEmpty())  {
-        	return(null);
+            return(null);
         }
         
         Iterator<String> iter = set.iterator();
@@ -198,5 +237,137 @@ public class BlacklightIndexer extends SolrIndexer
         }
         return null;
     }
+    
+    /**
+     * Extract the info from an 880 linked field from a record
+     * @param record
+     * @return linked field
+     */
+    public Set<String> getLinkedFieldDisplay(final Record record, String fieldSpec)
+    {
+        Set<String> set = getFieldList(record,"8806");
+        
+        if (set.isEmpty())  {
+            return(null);
+        }
+        
+        String[] tags = fieldSpec.split(":");
+        Set<String> result = new LinkedHashSet<String>();
+        for (int i = 0; i < tags.length; i++)
+        {
+            // Check to ensure tag length is at least 3 characters
+            if (tags[i].length() < 3)
+            {
+                System.err.println("Invalid tag specified: " + tags[i]);
+                continue;
+            }
+            
+            // Get Field Tag
+            String tag = tags[i].substring(0, 3);
+
+            // Process Subfields
+            String subfield = tags[i].substring(3);
+            List<?> fields = record.getVariableFields("880");
+            Iterator<?> fldIter = fields.iterator();
+            while (fldIter.hasNext())
+            {
+                DataField dfield = (DataField) fldIter.next();
+                Subfield link = dfield.getSubfield('6');
+                if (link.getData().startsWith(tag))
+                {
+                    List<?> subList = dfield.getSubfields();
+                    Iterator<?> subIter = subList.iterator();
+                    StringBuffer buf = new StringBuffer("");
+                    while(subIter.hasNext())
+                    {
+                        Subfield subF = (Subfield)subIter.next();
+                        if (subfield.indexOf(subF.getCode()) != -1)
+                        {
+                            if (buf.length() > 0) buf.append(" ");
+                            buf.append(subF.getData());
+                        }
+                    }
+                    result.add(Utils.cleanData(buf.toString()));
+                }
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Extract the info from an 880 linked field from a record
+     * @param record
+     * @return linked field
+     */
+    public Set<String> getLinkedFieldSearchable(final Record record, String fieldSpec)
+    {
+        Set<String> set = getFieldList(record,"8806");
+        
+        Set<String> result1 = getLinkedFieldDisplay(record, fieldSpec);
+        Set<String> result2 = getFieldList(record, fieldSpec);
+        
+        if (result1 != null) result2.addAll(result1);
+        return(result2);
+    }
+    
+    /**
+     * extract all the subfields in a given marc field
+     * @param record
+     * @param marcFieldNum - the marc field number as a string (e.g. "245")
+     * @return
+     */
+    public Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+
+        String[] tags = fieldSpec.split(":");
+        for (int i = 0; i < tags.length; i++)
+        {
+            // Check to ensure tag length is at least 3 characters
+            if (tags[i].length() < 3)
+            {
+                System.err.println("Invalid tag specified: " + tags[i]);
+                continue;
+            }
+            
+            // Get Field Tag
+            String tag = tags[i].substring(0, 3);
+
+//            // Process Subfields
+            String subfieldtags = tags[i].substring(3);
+
+            List<?> marcFieldList =  record.getVariableFields(tag);
+            if (!marcFieldList.isEmpty()) 
+            {
+                Pattern subfieldPattern = Pattern.compile(subfieldtags.length() == 0 ? "." : subfieldtags);
+                Iterator<?> fieldIter = marcFieldList.iterator();
+                while (fieldIter.hasNext())
+                {
+                    DataField marcField = (DataField)fieldIter.next();
+                    StringBuffer buffer = new StringBuffer("");
+                
+                    List<Subfield> subfields = marcField.getSubfields();
+                    Iterator<Subfield> iter = subfields.iterator();
+        
+                    Subfield subfield;
+        
+                    while (iter.hasNext()) 
+                    {
+                        subfield = iter.next();
+                        Matcher matcher = subfieldPattern.matcher(""+subfield.getCode());
+                        if (matcher.matches())
+                        {
+                            if (buffer.length() > 0)  buffer.append(separator);
+                            buffer.append(subfield.getData());
+                        }
+                    }
+                    result.add(Utils.cleanData(buffer.toString()));
+                }
+            }
+        }
+
+        return result;
+    }
+
 
 }

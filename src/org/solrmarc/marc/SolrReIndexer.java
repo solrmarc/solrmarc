@@ -60,7 +60,6 @@ public class SolrReIndexer
 {
     private String solrMarcDir;
     private String solrCoreDir;
-    private String solrCoreName;
     private String solrDataDir;
     private SolrCore solrCore;
     private SolrConfig solrConfig;
@@ -92,7 +91,6 @@ public class SolrReIndexer
         
         solrMarcDir = getProperty(props, "solrmarc.path");
         solrCoreDir = getProperty(props, "solr.path");
-        solrCoreDir = getProperty(props, "solr.core.name");
         solrDataDir = getProperty(props, "solr.data.dir");
         solrFieldContainingEncodedMarcRecord = getProperty(props, "solr.fieldname");
         queryForRecordsToUpdate = getProperty(props, "solr.query");
@@ -108,21 +106,9 @@ public class SolrReIndexer
         }
         if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
         // Set up Solr core
-        try{
-            System.setProperty("solr.data.dir", solrDataDir);
-            solrConfig = new SolrConfig(solrCoreDir + "/" + solrCoreName, "solrconfig.xml", null);
-            solrCore = new SolrCore(solrCoreName, solrDataDir, solrConfig, null, null);
-            refedSolrSearcher = solrCore.getSearcher();
-            solrSearcher = refedSolrSearcher.get();
-        }
-        catch (Exception e)
-        {
-            logger.error("Couldn't set the instance directory");
-            logger.error(e.getMessage());
-        	//System.err.println("Couldn't set the instance directory");
-            //e.printStackTrace();
-            System.exit(1);
-        }
+        solrCore  = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, "", logger);  
+        refedSolrSearcher = solrCore.getSearcher();
+        solrSearcher = refedSolrSearcher.get();
         verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
         
         updateHandler = solrCore.getUpdateHandler();
@@ -142,8 +128,8 @@ public class SolrReIndexer
                 String fullName = baseName + "." + indexerName;
                 indexerClass = Class.forName(fullName);
             }
-            Constructor constructor = indexerClass.getConstructor(new Class[]{String.class});
-            Object instance = constructor.newInstance(indexerProps);
+            Constructor constructor = indexerClass.getConstructor(new Class[]{String.class, String.class});
+            Object instance = constructor.newInstance(indexerProps, solrMarcDir);
             if (instance instanceof SolrIndexer)
             {
                 indexer = (SolrIndexer)instance;
@@ -229,9 +215,11 @@ public class SolrReIndexer
         try
         {
             Query query = new TermQuery(new Term(field, term));
+            System. out.println("Searching for :" + field +" : "+ term);
             DocSet ds;
             ds = solrSearcher.getDocSet(query);
             int totalSize = ds.size();
+            System. out.println("Num found = " + totalSize);
             int count = 0;
             DocIterator iter = ds.iterator();
             while (iter.hasNext())
@@ -254,7 +242,10 @@ public class SolrReIndexer
                     {
                         update(docMap);
                     }
-                    return(docMap);
+                    else
+                    {
+                        return(docMap);
+                    }
                 }
             }
         }
@@ -272,9 +263,29 @@ public class SolrReIndexer
      * @param doc
      * @param map
      */
-    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> map)
+    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> docMap)
     {
-        // does nothing here, overridden in subclass
+        addExtraInfoFromDocToMap(doc, docMap, "fund_code_facet");
+        addExtraInfoFromDocToMap(doc, docMap, "date_received_facet");   
+    }
+
+    /**
+     * Add extra information from a Solr Document to a map
+     * @param doc Solr Document to pull information from
+     * @param map Map to add information to
+     * @param keyVal Value to add
+     */
+    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> map, String keyVal)
+    {
+        String fieldVals[] = doc.getValues(keyVal);
+        if (fieldVals != null && fieldVals.length > 0)
+        {
+            for (int i = 0; i < fieldVals.length; i++)
+            {
+                String fieldVal = fieldVals[i];
+                addToMap(map, keyVal, fieldVal);
+            }
+        }           
     }
 
     /**
