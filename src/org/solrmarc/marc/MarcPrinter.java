@@ -18,12 +18,16 @@ package org.solrmarc.marc;
 
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
@@ -45,8 +49,11 @@ import org.marc4j.MarcReader;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.MarcXmlWriter;
+import org.marc4j.converter.impl.UnicodeToAnsel;
 import org.marc4j.marc.ControlField;
+import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
+//import org.solrmarc.index.GeoReferenceLookup;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.marc.MarcFilteredReader;
 import org.solrmarc.tools.Utils;
@@ -109,6 +116,13 @@ public class MarcPrinter
 //        {
 //            reader = new MarcTranslatedReader(reader, unicodeNormalize);
 //        }
+        String marcIncludeIfPresent2 = System.getProperty("marc.include_if_present2");
+        String marcIncludeIfMissing2 = System.getProperty("marc.include_if_missing2");
+
+        if (reader != null && (marcIncludeIfPresent2 != null || marcIncludeIfMissing2 != null))
+        {
+            reader = new MarcFilteredReader(reader, marcIncludeIfPresent2, marcIncludeIfMissing2);
+        }
         
         SolrIndexer indexer = null;
         String indexerName = System.getProperty("solr.indexer");
@@ -218,11 +232,17 @@ public class MarcPrinter
         else if (mode.equals("translate"))
         {
             to_utf_8 = true;
-            writer = new MarcStreamWriter(System.out, "UTF-8");
+            OutputStream out = new FileOutputStream(new File(args[1]+"trans.mrc"));
+            writer = new MarcStreamWriter(out);
+            writer.setConverter(new UnicodeToAnsel());
             while (reader.hasNext()) 
             {
                 try {
                     Record rec = reader.next();
+                    Leader leader = rec.getLeader();
+                    leader.setCharCodingScheme(' ');
+                    rec.setLeader(leader);
+                    System.err.println(rec.toString());
                     writer.write(rec);
                 }
                 catch (MarcException me)
@@ -378,6 +398,58 @@ public class MarcPrinter
                 
             }           
         }
+//        else if (mode.equals("locationlookup"))
+//        {
+//            while (reader.hasNext()) 
+//            {
+//                Record record = reader.next();
+//                String recStr = record.toString();
+//                
+//           //     if (verbose) System.out.println(recStr);
+//                Set<String> locations = GeoReferenceLookup.getListOfLocations(record);
+//                Map<String, String> geoLocation = null;
+//                String lat = null;
+//                String lng = null; 
+//                String name = null;
+//                for (String location : locations)
+//                {
+//                    geoLocation = GeoReferenceLookup.locationLookupByName(location);
+//                    if (geoLocation != null) 
+//                    {
+//                        System.out.print("" + location + " -> " + geoLocation.get("normalized_name") + " -> " + geoLocation.get("normalized_name2") + " -> " );
+//                        System.out.print(geoLocation.get("resolved_name") + ", " + geoLocation.get("resolved_country") + " ("+ geoLocation.get("place_type") + ") : " );
+//                        System.out.println("(" + geoLocation.get("latitude") + ", " + geoLocation.get("longitude") + ")" );                       
+//                    }
+//                    else 
+//                    {
+//                        System.out.println("" + location + " -> Not Found" );
+// //                       geoLocation = GeoReferenceLookup.locationLookupByName(location);
+//                    }
+//                }                                
+//            }           
+//        }
+//        else if (mode.equals("locationlist"))
+//        {
+//            File locations_txt = new File("locations1.txt");
+//            FileOutputStream locOut = new FileOutputStream(locations_txt, false);
+//            PrintWriter pOut = new PrintWriter(locOut);
+//            while (reader.hasNext()) 
+//            {
+//                Record record = reader.next();
+//                String recStr = record.toString();
+//                
+//                Set<String> locations = GeoReferenceLookup.getListOfLocations(record);
+//                Set<String> location2 = SolrIndexer.getFieldList(record, "651a");
+//                for (String location : locations)
+//                {
+//                    String field = "650z";
+//                    if (location2.contains(location)) field = "651a";
+//                    if (record.getControlNumber().endsWith("000")) System.out.println(record.getControlNumber() + "\t" + field + "\t" + location);
+//                    pOut.println(record.getControlNumber() + "\t" + field + "\t" + location);
+//                }
+//            }    
+//            pOut.close();
+//        }
         else if (mode.equals("map"))
         {
   //      Set<String> deletedRecords = getDeletedRecordIDs();
