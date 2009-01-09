@@ -26,6 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,6 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.log4j.*;
 import org.apache.solr.core.SolrConfig;
@@ -46,6 +48,7 @@ import org.apache.solr.update.CommitUpdateCommand;
 import org.apache.solr.update.DeleteUpdateCommand;
 import org.apache.solr.update.DocumentBuilder;
 import org.apache.solr.update.UpdateHandler;
+import org.apache.solr.update.processor.UpdateRequestProcessor;
 import org.marc4j.ErrorHandler;
 import org.marc4j.MarcDirStreamReader;
 import org.marc4j.MarcPermissiveStreamReader;
@@ -54,6 +57,7 @@ import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.marc.MarcFilteredReader;
 import org.solrmarc.tools.Utils;
+
 
 /**
  * @author Wayne Graham (wsgrah@wm.edu)
@@ -78,7 +82,10 @@ public class MarcImporter {
     private boolean unicodeNormalize = false;
     private ErrorHandler errors = null;
     private boolean includeErrors = false;
-   
+    private String indexerName;
+    private String indexerProps;
+    private String deleteRecordIDMapper = null;
+    
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
     
@@ -93,50 +100,30 @@ public class MarcImporter {
         // Process Properties
         loadProperties(properties);
 
+        //  Load the custom Indexer (or the standard one)
+        //  note the values indexerName and indexerProps are initialized
+        //  by the above call to loadProperties
+        loadIndexer(indexerName, indexerProps);
+        
         // Set up Solr core
         solrCore = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, null, logger);
 
         // Setup UpdateHandler
         updateHandler = solrCore.getUpdateHandler();
-
 	}
 
     /**
-     * Load the properties file
+     * Load the Custom Indexer routine
      * @param properties
      * @throws IOException
      */
-    public void loadProperties(String properties) throws IOException
+    public void loadIndexer(String indexerName, String indexerProps)
     {
-        Properties props = new Properties();
-
-        InputStream in = new FileInputStream(properties);
-
-        // load the properties
-        props.load(in);
-        in.close();
-
-        // The location of where the .properties files are located
-        solrMarcDir = getProperty(props, "solrmarc.path");
-
-        // The solr.home directory
-        solrCoreDir = getProperty(props, "solr.path");
-
-        // The solr data diretory to use
-        solrDataDir = getProperty(props, "solr.data.dir");
-
-        // The SolrMarc indexer
-        String indexerName = getProperty(props, "solr.indexer");
-
-        // The SolrMarc indexer properties file
-        String indexerProps = getProperty(props, "solr.indexer.properties");
-
-
         // Setup the SolrMarc Indexer
         try
         {
             Class indexerClass;
-            
+
             try {
                 indexerClass = Class.forName(indexerName);
             }
@@ -149,7 +136,7 @@ public class MarcImporter {
                 indexerClass = Class.forName(fullName);
                 logger.error(e.getCause());
             }
-            
+
             Constructor constructor = indexerClass.getConstructor(new Class[]{String.class, String.class});
             Object instance = constructor.newInstance(indexerProps, solrMarcDir);
 
@@ -159,54 +146,110 @@ public class MarcImporter {
             }
             else
             {
-            	logger.error("Error: Custom Indexer " + indexerName + " must be subclass of SolrIndexer .  Exiting...");
+                logger.error("Error: Custom Indexer " + indexerName + " must be subclass of SolrIndexer .  Exiting...");
                 System.exit(1);
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
-        
+
             if (e instanceof ParseException)
             {
-            	logger.error("Error configuring Indexer from properties file.  Exiting...");
+                logger.error("Error configuring Indexer from properties file.  Exiting...");
                 System.exit(1);
             }            
-            
+
             logger.warn("Unable to load Custom indexer: " + indexerName);
             logger.warn("Using default SolrIndexer with properties file: " + indexerProps); 
-            
+
             try {
                 indexer = new SolrIndexer(indexerProps, solrMarcDir);
             }
             catch (Exception e1)
             {
-            	logger.error("Error configuring Indexer from properties file.  Exiting...");
+                logger.error("Error configuring Indexer from properties file.  Exiting...");
                 System.exit(1);
             }
         }
-        SolrHostURL = getProperty(props, "solr.hosturl");
 
-        boolean permissiveReader = Boolean.parseBoolean(getProperty(props, "marc.permissive"));
-        String defaultEncoding;
-        if (getProperty(props, "marc.default_encoding") != null)
+    }
+    /**
+     * Load the properties file
+     * @param properties
+     * @throws IOException
+     */
+    public void loadProperties(String properties) throws IOException
+    {
+        Properties props = Utils.loadProperties(null, properties);
+
+        // The location of where the .properties files are located
+        solrMarcDir = Utils.getProperty(props, "solrmarc.path");
+
+        // The solr.home directory
+        solrCoreDir = Utils.getProperty(props, "solr.path");
+
+        // The solr data diretory to use
+        solrDataDir = Utils.getProperty(props, "solr.data.dir");
+
+        // The SolrMarc indexer
+        indexerName = Utils.getProperty(props, "solr.indexer");
+
+        // The SolrMarc indexer properties file
+        indexerProps = Utils.getProperty(props, "solr.indexer.properties");
+
+        // Ths URL of the currently running Solr server
+        SolrHostURL = Utils.getProperty(props, "solr.hosturl");
+        
+        // Specification of how to modify the entries in the delete record file
+        // before passing the id onto Solr.   Based on syntax of String.replaceAll
+        //  To prepend a 'u' specify the following:  "(.*)->u$1"
+        deleteRecordIDMapper = Utils.getProperty(props, "marc.delete_record_id_mapper");
+        if (deleteRecordIDMapper != null)
         {
-            defaultEncoding = getProperty(props, "marc.default_encoding").trim();    
+            String parts[] = deleteRecordIDMapper.split("->");
+            if (parts.length == 2)
+            {
+                String mapPattern = parts[0];
+                String mapReplace = parts[1];
+                try {
+                    String testID = "12345";
+                    String tested = testID.replaceFirst(mapPattern, mapReplace);
+                    logger.info("Valid Regex pattern specified in property: marc.delete_record_id_mapper");
+                }
+                catch (PatternSyntaxException pse)                
+                {
+                    deleteRecordIDMapper = null;
+                    logger.warn("Invalid Regex pattern specified in property: marc.delete_record_id_mapper");
+                }
+            }
+            else
+            {
+                deleteRecordIDMapper = null;
+                logger.warn("Invalid Regex pattern specified in property: marc.delete_record_id_mapper");
+            }
+        }
+
+        boolean permissiveReader = Boolean.parseBoolean(Utils.getProperty(props, "marc.permissive"));
+        String defaultEncoding;
+        if (Utils.getProperty(props, "marc.default_encoding") != null)
+        {
+            defaultEncoding = Utils.getProperty(props, "marc.default_encoding").trim();    
         }
         else
         {
             defaultEncoding = "BESTGUESS";
         }
-        verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
-        includeErrors = Boolean.parseBoolean(getProperty(props, "marc.include_errors"));
-        to_utf_8 = Boolean.parseBoolean(getProperty(props, "marc.to_utf_8"));
-        unicodeNormalize = Boolean.parseBoolean(getProperty(props, "marc.unicode_normalize"));
-        deleteRecordListFilename = getProperty(props, "marc.ids_to_delete");
-        String source = getProperty(props, "marc.source").trim();
-        optimizeAtEnd = Boolean.parseBoolean(getProperty(props, "solr.optimize_at_end"));
-        if (getProperty(props, "marc.override")!= null)
+        verbose = Boolean.parseBoolean(Utils.getProperty(props, "marc.verbose"));
+        includeErrors = Boolean.parseBoolean(Utils.getProperty(props, "marc.include_errors"));
+        to_utf_8 = Boolean.parseBoolean(Utils.getProperty(props, "marc.to_utf_8"));
+        unicodeNormalize = Boolean.parseBoolean(Utils.getProperty(props, "marc.unicode_normalize"));
+        deleteRecordListFilename = Utils.getProperty(props, "marc.ids_to_delete");
+        String source = Utils.getProperty(props, "marc.source").trim();
+        optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(props, "solr.optimize_at_end"));
+        if (Utils.getProperty(props, "marc.override")!= null)
         {
-            System.setProperty("org.marc4j.marc.MarcFactory", getProperty(props, "marc.override").trim());
+            System.setProperty("org.marc4j.marc.MarcFactory", Utils.getProperty(props, "marc.override").trim());
         }
         reader = null;
         if (source.equals("FILE"))
@@ -214,24 +257,24 @@ public class MarcImporter {
             if (permissiveReader)
             {
                 errors = new ErrorHandler();
-                reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), errors, to_utf_8, defaultEncoding);
+                reader = new MarcPermissiveStreamReader(new FileInputStream(Utils.getProperty(props, "marc.path").trim()), errors, to_utf_8, defaultEncoding);
             }
             else
             {
-                reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), false, to_utf_8, defaultEncoding);
+                reader = new MarcPermissiveStreamReader(new FileInputStream(Utils.getProperty(props, "marc.path").trim()), false, to_utf_8, defaultEncoding);
             }
         }
         else if (source.equals("DIR"))
         {
-            reader = new MarcDirStreamReader(getProperty(props, "marc.path").trim(), permissiveReader, to_utf_8);
+            reader = new MarcDirStreamReader(Utils.getProperty(props, "marc.path").trim(), permissiveReader, to_utf_8);
         }
         else if (source.equals("Z3950"))
         {
         	logger.warn("Error: Z3950 not yet implemented");
             reader = null;
         }
-        String marcIncludeIfPresent = getProperty(props, "marc.include_if_present");
-        String marcIncludeIfMissing = getProperty(props, "marc.include_if_missing");
+        String marcIncludeIfPresent = Utils.getProperty(props, "marc.include_if_present");
+        String marcIncludeIfMissing = Utils.getProperty(props, "marc.include_if_missing");
         if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null))
         {
             reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing);
@@ -245,23 +288,6 @@ public class MarcImporter {
         return;
     }
     
-    // Check first for a particular property in the System Properties, so that the -Dprop="value" command line arg 
-    // mechanism can be used to override values defined in the passed in property file.  This is especially useful
-    // for defining the marc.source property to define which file to operate on, in a shell script loop.
-    private String getProperty(Properties props, String propname)
-    {
-        String prop;
-        if ((prop = System.getProperty(propname)) != null)
-        {
-            return(prop);
-        }
-        if ((prop = props.getProperty(propname)) != null)
-        {
-            return(prop);
-        }
-        return null;
-    }
-
     /**
      * Delete records from the index
      * @return Number of records deleted
@@ -274,6 +300,17 @@ public class MarcImporter {
         {
             return(numDeleted);
         }
+        String mapPattern = null;
+        String mapReplace = null;
+        if (deleteRecordIDMapper != null)
+        {
+            String parts[] = deleteRecordIDMapper.split("->");
+            if (parts.length == 2)
+            {
+                mapPattern = parts[0];
+                mapReplace = parts[1];
+            }
+        }
         File delFile = new File(deleteRecordListFilename);
         try
         {
@@ -285,9 +322,9 @@ public class MarcImporter {
                 if (shuttingDown) break;
                 line = line.trim();
                 if (line.startsWith("#")) continue;
-                if (!line.startsWith("u"))
+                if (deleteRecordIDMapper != null)
                 {
-                    line = "u" + line;
+                    line = line.replaceFirst(mapPattern, mapReplace);
                 }                
                 delCmd.id = line;
                 delCmd.fromCommitted = true;
@@ -581,38 +618,13 @@ public class MarcImporter {
     
     
     /**
-     * Main program instantiation for doing the indexing
+     * Main loop in the MarcImporter class the handles all of 
+     * importing and deleting of records.
      * @param args
      */
-    public static void main(String[] args) 
+    public int handleAll()
     {
-        logger.info("Starting SolrMarc indexing.");
-    	// default properties file
-        String properties = "import.properties";
-        
-        if(args.length > 0)
-        {
-            properties = args[0];
-        }
-        
-        // System.out.println("Loading properties from " + properties);
-        logger.info("Loading properties from " + properties);
-        
-        MarcImporter importer = null;
-        try
-        {
-            importer = new MarcImporter(properties);
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-        	logger.error("Couldn't load properties file." + e);
-            //e.printStackTrace();
-            System.exit(1);
-        }
-        
-        logger.debug("Shutdown hook for Solr");
-        Runtime.getRuntime().addShutdownHook(importer.new MyShutdownThread(importer));
+        Runtime.getRuntime().addShutdownHook(new MyShutdownThread(this));
         
         //System.out.println("Here we go...");
         
@@ -622,21 +634,19 @@ public class MarcImporter {
         int numDeleted = 0;
         try
         {        
-            numImported = importer.importRecords();
-            
-            numDeleted = importer.deleteRecords();
+            numImported = importRecords();           
+            numDeleted = deleteRecords();
         }
         catch (Exception e)
         {
-            logger.info("Exception occurred while Indexing: "+ e.getMessage());
-            
+            logger.info("Exception occurred while Indexing: "+ e.getMessage());           
         }
         
-        importer.finish();
+        finish();
         
-        importer.signalServer();
+        signalServer();
         
-        importer.isShutDown = true;
+        isShutDown = true;
         
         Date end = new Date();
         
@@ -654,7 +664,52 @@ public class MarcImporter {
         logger.info("Indexed " + numImported + " at a rate of about " + indexingRate + " per sec");
         logger.info("Deleted " + numDeleted + " records");
         
-        System.exit(importer.shuttingDown ? 1 : 0);
+        return(shuttingDown ? 1 : 0);
+    }
+    
+    /**
+     * Main program instantiation for doing the indexing
+     * @param args
+     */
+    public static void main(String[] args) 
+    {
+        logger.info("Starting SolrMarc indexing.");
+    	// default properties file
+        String properties = "import.properties";
+        
+        if(args.length > 0)
+        {
+            for (String arg : args)
+            {
+                if (arg.endsWith("properties"))
+                {
+                    properties = arg;
+                }
+                if (arg.endsWith("mrc"))
+                {
+                    System.setProperty("marc.path", arg);
+                }
+            }            
+        }
+ 
+        // System.out.println("Loading properties from " + properties);
+        logger.info("Loading properties from " + properties);
+        
+        MarcImporter importer = null;
+        try
+        {
+            importer = new MarcImporter(properties);
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+        	logger.error("Couldn't load properties file." + e);
+            //e.printStackTrace();
+            System.exit(1);
+        }
+        
+        int exitCode = importer.handleAll();
+        System.exit(exitCode);
     }
 
 
