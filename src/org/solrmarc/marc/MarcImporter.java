@@ -38,12 +38,6 @@ import java.util.Properties;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.log4j.*;
-import org.apache.solr.core.SolrCore;
-import org.apache.solr.update.AddUpdateCommand;
-import org.apache.solr.update.CommitUpdateCommand;
-import org.apache.solr.update.DeleteUpdateCommand;
-import org.apache.solr.update.DocumentBuilder;
-import org.apache.solr.update.UpdateHandler;
 import org.marc4j.ErrorHandler;
 import org.marc4j.MarcDirStreamReader;
 import org.marc4j.MarcPermissiveStreamReader;
@@ -51,6 +45,8 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.marc.MarcFilteredReader;
+import org.solrmarc.solr.SolrCoreProxy;
+import org.solrmarc.solr.SolrCoreLoader;
 import org.solrmarc.tools.Utils;
 
 
@@ -67,8 +63,7 @@ public class MarcImporter {
     private String deleteRecordListFilename;
     private SolrIndexer indexer;
     private MarcReader reader;
-    private SolrCore solrCore;
-    private UpdateHandler updateHandler;
+    private SolrCoreProxy solrCoreProxy;
     private boolean optimizeAtEnd = true;
     private boolean verbose = false;
     private boolean shuttingDown = false;
@@ -101,10 +96,7 @@ public class MarcImporter {
         loadIndexer(indexerName, indexerProps);
         
         // Set up Solr core
-        solrCore = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, null, logger);
-
-        // Setup UpdateHandler
-        updateHandler = solrCore.getUpdateHandler();
+        solrCoreProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, null, logger);
 	}
 
     /**
@@ -311,7 +303,8 @@ public class MarcImporter {
         {
             BufferedReader is = new BufferedReader(new FileReader(delFile));
             String line;
-            DeleteUpdateCommand delCmd = new DeleteUpdateCommand();
+            boolean fromCommitted = true;
+            boolean fromPending = true;
             while ((line = is.readLine()) != null)
             {
                 if (shuttingDown) break;
@@ -321,10 +314,8 @@ public class MarcImporter {
                 {
                     line = line.replaceFirst(mapPattern, mapReplace);
                 }                
-                delCmd.id = line;
-                delCmd.fromCommitted = true;
-                delCmd.fromPending = true;
-                updateHandler.delete(delCmd);
+                String id = line;
+                solrCoreProxy.delete(id, fromCommitted, fromPending);
                 numDeleted++;
             }            
         }
@@ -360,22 +351,22 @@ public class MarcImporter {
                     addToIndex(record);
                     logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
                 }
-                catch (org.apache.solr.common.SolrException solrException)
+                catch (Exception e)
                 {
-                   //check for missing fields
-                	if (solrException.getMessage().contains("missing required fields"))
-                   {
-                	   logger.error(solrException.getMessage() +  " at record count = " + recordCounter);
-                	   logger.error("Control Number " + record.getControlNumber(), solrException);
-                   }
-                   else
-                   {
-                	   logger.error("Error indexing: " + solrException.getMessage());
-                	   logger.error("Control Number " + record.getControlNumber(), solrException);
-                   }
-                }
-                catch(Exception e)
-                {
+                    if (solrCoreProxy.isSolrException(e))
+                    {
+                       //check for missing fields
+                    	if (e.getMessage().contains("missing required fields"))
+                    	{
+                    	   logger.error(e.getMessage() +  " at record count = " + recordCounter);
+                    	   logger.error("Control Number " + record.getControlNumber(), e);
+                        }
+                        else
+                        {
+                    	   logger.error("Error indexing: " + e.getMessage());
+                    	   logger.error("Control Number " + record.getControlNumber(), e);
+                        }
+                    }
                     // keep going?
                 	logger.error("Error indexing: " + e.getMessage());
                 	logger.error("Control Number " + record.getControlNumber(), e);
@@ -404,47 +395,15 @@ public class MarcImporter {
                 addErrorsToMap(map, errors);
             }
         }
-        AddUpdateCommand addcmd = new AddUpdateCommand();
-        DocumentBuilder builder = new DocumentBuilder(solrCore.getSchema());
-        builder.startDoc();
-    	Iterator<String> keys = map.keySet().iterator();
-        while (keys.hasNext())
-        {
-        	String key = keys.next();
-        	Object value = map.get(key);
-        	if (value instanceof String)
-        	{
-        		builder.addField(key, (String)value);
-        	}
-        	else if (value instanceof Collection)
-        	{
-        		Iterator<?> valIter = ((Collection)value).iterator();
-        		while (valIter.hasNext())
-        		{
-        			String collVal = valIter.next().toString();
-            		builder.addField(key, collVal);
-        		}
-        	}
-        }
-        builder.endDoc();
-        
-        // finish up
-        addcmd.doc = builder.getDoc();
-        
-        if (verbose)
-        {
-            //System.out.println(record.toString());
-            String doc = addcmd.doc.toString().replaceAll("> ", "> \n");
-            //System.out.println(doc);
-            logger.info(record.toString());
-            logger.info(doc);
-        }
-        addcmd.allowDups = false;
-        addcmd.overwriteCommitted = true;
-        addcmd.overwritePending = true;
-       
+      
         try {
-            updateHandler.addDoc(addcmd);
+            String docStr = solrCoreProxy.addDoc(map, verbose);
+            if (verbose)
+            {
+                logger.info(record.toString());
+                logger.info(docStr);
+            }
+
         } 
         catch (IOException ioe) 
         {
@@ -468,7 +427,7 @@ public class MarcImporter {
         try {
             //System.out.println("Calling commit");
         	logger.info("Calling commit");
-            commit(shuttingDown ? false : optimizeAtEnd);
+            solrCoreProxy.commit(shuttingDown ? false : optimizeAtEnd);
         } 
         catch (IOException ioe) {
             //System.err.println("Final commit and optmization failed");
@@ -479,20 +438,8 @@ public class MarcImporter {
         
         //System.out.println("Done with commit, closing Solr");
         logger.info("Done with the commit, closing Solr");
-        solrCore.close();
+        solrCoreProxy.close();
     }
-
-
-	/**
-	 * Commit the document to the repository and optimize the index
-	 * @param optimize
-	 * @throws IOException
-	 */
-	public void commit(boolean optimize) throws IOException 
-    {
-		CommitUpdateCommand commitcmd = new CommitUpdateCommand(optimize);
-		updateHandler.commit(commitcmd);
-	}
     
    
    /**

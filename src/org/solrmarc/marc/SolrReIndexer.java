@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Collection;
@@ -25,26 +26,29 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
-import org.apache.solr.core.SolrConfig;
-import org.apache.solr.core.SolrCore;
-import org.apache.solr.search.DocIterator;
-import org.apache.solr.search.DocSet;
-import org.apache.solr.search.SolrIndexSearcher;
-import org.apache.solr.update.AddUpdateCommand;
-import org.apache.solr.update.CommitUpdateCommand;
-import org.apache.solr.update.DocumentBuilder;
-import org.apache.solr.update.UpdateHandler;
-import org.apache.solr.util.RefCounted;
+//import org.apache.lucene.document.Document;
+//import org.apache.lucene.document.Field;
+//import org.apache.lucene.index.Term;
+//import org.apache.lucene.search.Query;
+//import org.apache.lucene.search.TermQuery;
+//import org.apache.solr.core.SolrConfig;
+//import org.apache.solr.core.SolrCore;
+//import org.apache.solr.search.DocIterator;
+//import org.apache.solr.search.DocSet;
+//import org.apache.solr.search.SolrIndexSearcher;
+//import org.apache.solr.update.AddUpdateCommand;
+//import org.apache.solr.update.CommitUpdateCommand;
+//import org.apache.solr.update.DocumentBuilder;
+//import org.apache.solr.update.UpdateHandler;
+//import org.apache.solr.util.RefCounted;
 import org.marc4j.MarcException;
 import org.marc4j.MarcStreamReader;
 import org.marc4j.MarcXmlReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.solr.SolrCoreProxy;
+import org.solrmarc.solr.SolrCoreLoader;
+import org.solrmarc.solr.SolrSearcherProxy;
 import org.xml.sax.InputSource;
 
 import org.apache.log4j.Logger;
@@ -61,16 +65,15 @@ public class SolrReIndexer
     private String solrMarcDir;
     private String solrCoreDir;
     private String solrDataDir;
-    private SolrCore solrCore;
-    private SolrConfig solrConfig;
-    private UpdateHandler updateHandler;
+    private SolrCoreProxy solrCoreProxy;   
+    private SolrSearcherProxy solrSearcherProxy;
     private boolean verbose = false;
     private SolrIndexer indexer;
     private String queryForRecordsToUpdate;
     protected String solrFieldContainingEncodedMarcRecord;
     protected boolean doUpdate = true;
-    private RefCounted<SolrIndexSearcher> refedSolrSearcher;
-    private SolrIndexSearcher solrSearcher;
+//    private RefCounted<SolrIndexSearcher> refedSolrSearcher;
+//    private SolrIndexSearcher solrSearcher;
     
     // Initialize logging category
     static Logger logger = Logger.getLogger(SolrReIndexer.class.getName());
@@ -106,12 +109,13 @@ public class SolrReIndexer
         }
         if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
         // Set up Solr core
-        solrCore  = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, "", logger);  
-        refedSolrSearcher = solrCore.getSearcher();
-        solrSearcher = refedSolrSearcher.get();
+        solrCoreProxy  = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, "", logger);  
+//        refedSolrSearcher = solrCore.getSearcher();
+//        solrSearcher = refedSolrSearcher.get();
+        solrSearcherProxy = new SolrSearcherProxy(solrCoreProxy);
         verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
         
-        updateHandler = solrCore.getUpdateHandler();
+//        updateHandler = solrCore.getUpdateHandler();
         String indexerName = getProperty(props, "solr.indexer");
         String indexerProps = getProperty(props, "solr.indexer.properties");
         
@@ -187,22 +191,22 @@ public class SolrReIndexer
         return null;
     }
     
-    /**
-     * Read matching records from the index
-     * @param queryForRecordsToUpdate
-     */
-    public void readAllMatchingDocs(String queryForRecordsToUpdate)
-    {
-        String queryparts[] = queryForRecordsToUpdate.split(":");
-        if (queryparts.length != 2) 
-        {
-            //System.err.println("Error query must be of the form    field:term");
-        	logger.warn("Error query must be of the form    field:term");
-            return;
-        }
-        Map<String, Object> docMap = readAndIndexDoc(queryparts[0], queryparts[1], doUpdate);  
-    }
-    
+//    /**
+//     * Read matching records from the index
+//     * @param queryForRecordsToUpdate
+//     */
+//    public void readAllMatchingDocs(String queryForRecordsToUpdate)
+//    {
+//        String queryparts[] = queryForRecordsToUpdate.split(":");
+//        if (queryparts.length != 2) 
+//        {
+//            //System.err.println("Error query must be of the form    field:term");
+//        	logger.warn("Error query must be of the form    field:term");
+//            return;
+//        }
+//        Map<String, Object> docMap = readAndIndexDoc(queryparts[0], queryparts[1], doUpdate);  
+//    }
+//    
     /**
      * Read and index a Solr document
      * @param field Solr field
@@ -212,28 +216,21 @@ public class SolrReIndexer
      */
     public Map<String, Object> readAndIndexDoc(String field, String term, boolean update)
     {
-        try
+        try 
         {
-            Query query = new TermQuery(new Term(field, term));
-            System. out.println("Searching for :" + field +" : "+ term);
-            DocSet ds;
-            ds = solrSearcher.getDocSet(query);
-            int totalSize = ds.size();
-            System. out.println("Num found = " + totalSize);
+            Object docSetIterator = solrSearcherProxy.getDocSetIterator(field, term);
             int count = 0;
-            DocIterator iter = ds.iterator();
-            while (iter.hasNext())
+            while (solrSearcherProxy.iteratorHasNext(docSetIterator))
             {
-                int docNo = iter.nextDoc();
-                count ++;
-                if (count == 100 || count == 1000 || count == 10000 || count % 10000 == 0)
-                {
-                    System. out.println("Done handling "+ count +" record out of "+ totalSize);
-                }
-                
-                Document doc = getDocument(solrSearcher, docNo);
+                Object doc = solrSearcherProxy.iteratorGetNext(docSetIterator);
+    //            count ++;
+    //            if (count == 100 || count == 1000 || count == 10000 || count % 10000 == 0)
+    //            {
+    //                System. out.println("Done handling "+ count +" record out of "+ totalSize);
+    //            }
+                    
                 Record record = getRecordFromDocument(doc);
-                
+                    
                 if (record != null)
                 {
                     Map<String, Object> docMap = indexer.map(record);
@@ -259,11 +256,10 @@ public class SolrReIndexer
     
     /**
      * Add information from a document to a map.
-     * Overriden in subclass
      * @param doc
      * @param map
      */
-    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> docMap)
+    protected void addExtraInfoFromDocToMap(Object doc, Map<String, Object> docMap)
     {
         addExtraInfoFromDocToMap(doc, docMap, "fund_code_facet");
         addExtraInfoFromDocToMap(doc, docMap, "date_received_facet");   
@@ -275,9 +271,18 @@ public class SolrReIndexer
      * @param map Map to add information to
      * @param keyVal Value to add
      */
-    protected void addExtraInfoFromDocToMap(Document doc, Map<String, Object> map, String keyVal)
+    protected void addExtraInfoFromDocToMap(Object doc, Map<String, Object> map, String keyVal)
     {
-        String fieldVals[] = doc.getValues(keyVal);
+        String fieldVals[] = null;
+        try
+        {
+            fieldVals = (String[])doc.getClass().getMethod("getValues", String.class).invoke(doc, keyVal);
+        }
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         if (fieldVals != null && fieldVals.length > 0)
         {
             for (int i = 0; i < fieldVals.length; i++)
@@ -288,18 +293,18 @@ public class SolrReIndexer
         }           
     }
 
-    /**
-     * Return a Solr document from the index
-     * @param s SolrIndexSearcher to search
-     * @param SolrDocumentNum Number of documents to return
-     * @return SolrDocument 
-     * @throws IOException
-     */
-    public Document getDocument(SolrIndexSearcher s, int SolrDocumentNum) throws IOException
-    {
-        Document doc = s.doc(SolrDocumentNum);
-        return(doc);
-    }
+//    /**
+//     * Return a Solr document from the index
+//     * @param s SolrIndexSearcher to search
+//     * @param SolrDocumentNum Number of documents to return
+//     * @return SolrDocument 
+//     * @throws IOException
+//     */
+//    public Document getDocument(SolrIndexSearcher s, int SolrDocumentNum) throws IOException
+//    {
+//        Document doc = s.doc(SolrDocumentNum);
+//        return(doc);
+//    }
     
     /**
      * Retrieve the marc information from the Solr document
@@ -307,15 +312,33 @@ public class SolrReIndexer
      * @return marc4j Record
      * @throws IOException
      */
-    public Record getRecordFromDocument(Document doc) throws IOException
+    public Record getRecordFromDocument(Object doc) throws IOException
     {
-        Field field = doc.getField(solrFieldContainingEncodedMarcRecord);
+        Object field = null;
+        try
+        {
+            field = doc.getClass().getMethod("getField", String.class).invoke(doc, solrFieldContainingEncodedMarcRecord);
+        }
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         if (field == null)
         {
             //System.err.println("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
         	logger.warn("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
         }
-        String marcRecordStr = field.stringValue();
+        String marcRecordStr = null;
+        try
+        {
+            if (field != null) marcRecordStr = (String)field.getClass().getMethod("stringValue").invoke(field);
+        }
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         if (marcRecordStr.startsWith("<?xml version"))
         {
             return (getRecordFromXMLString(marcRecordStr));            
@@ -525,61 +548,61 @@ public class SolrReIndexer
         }
     }
 
-    /**
-     * find a specific marc record (using its id) in the solr index
-     * @param doc_id ID of the marc record to find
-     * @return if the item is in the index
-     */
-    private Record lookup(String doc_id)
-    {
-        RefCounted<SolrIndexSearcher> rs = solrCore.getSearcher();
-        SolrIndexSearcher s = rs.get();
-        Term t = new Term("id", doc_id);
-        int docNo;
-        Record rec = null;
-        try
-        {
-            docNo = s.getFirstMatch(t);
-            if (docNo > 0)
-            {
-                Document doc = getDocument(s, docNo);
-                rec = getRecordFromDocument(doc);
-            }
-            else
-            {
-            	//TODO: construct this from the properties
-                URL url = new URL("http://solrpowr.lib.virginia.edu:8080/solr/select/?q=id%3A"+doc_id+"&start=0&rows=1");
-                InputStream stream = url.openStream();
-                //The evaluate methods in the XPath and XPathExpression interfaces are used to parse an XML document with XPath expressions. The XPathFactory class is used to create an XPath object. Create an XPathFactory object with the static newInstance method of the XPathFactory class.
-
-                XPathFactory  factory = XPathFactory.newInstance();
-
-                // Create an XPath object from the XPathFactory object with the newXPath method.
-
-                XPath xPath = factory.newXPath();
-
-                // Create and compile an XPath expression with the compile method of the XPath object. As an example, select the title of the article with its date attribute set to January-2004. An attribute in an XPath expression is specified with an @ symbol. For further reference on XPath expressions, see the XPath specification for examples on creating an XPath expression.
-
-                XPathExpression  xPathExpression=
-                    xPath.compile("/response/result/doc/arr[@name='marc_display']/str");
-                
-                InputSource inputSource = new InputSource(stream);
-                String marcRecordStr = xPathExpression.evaluate(inputSource);
-                rec = getRecordFromXMLString(marcRecordStr);
-            }           
-        }
-        catch (IOException e)
-        {
-            // e.printStackTrace();
-        	logger.error(e.getMessage());
-        }
-        catch (XPathExpressionException e)
-        {
-            // e.printStackTrace();
-        	logger.error(e.getMessage());
-        }
-        return(rec);
-    }
+//    /**
+//     * find a specific marc record (using its id) in the solr index
+//     * @param doc_id ID of the marc record to find
+//     * @return if the item is in the index
+//     */
+//    private Record lookup(String doc_id)
+//    {
+//        RefCounted<SolrIndexSearcher> rs = solrCore.getSearcher();
+//        SolrIndexSearcher s = rs.get();
+//        Term t = new Term("id", doc_id);
+//        int docNo;
+//        Record rec = null;
+//        try
+//        {
+//            docNo = s.getFirstMatch(t);
+//            if (docNo > 0)
+//            {
+//                Document doc = getDocument(s, docNo);
+//                rec = getRecordFromDocument(doc);
+//            }
+//            else
+//            {
+//            	//TODO: construct this from the properties
+//                URL url = new URL("http://solrpowr.lib.virginia.edu:8080/solr/select/?q=id%3A"+doc_id+"&start=0&rows=1");
+//                InputStream stream = url.openStream();
+//                //The evaluate methods in the XPath and XPathExpression interfaces are used to parse an XML document with XPath expressions. The XPathFactory class is used to create an XPath object. Create an XPathFactory object with the static newInstance method of the XPathFactory class.
+//
+//                XPathFactory  factory = XPathFactory.newInstance();
+//
+//                // Create an XPath object from the XPathFactory object with the newXPath method.
+//
+//                XPath xPath = factory.newXPath();
+//
+//                // Create and compile an XPath expression with the compile method of the XPath object. As an example, select the title of the article with its date attribute set to January-2004. An attribute in an XPath expression is specified with an @ symbol. For further reference on XPath expressions, see the XPath specification for examples on creating an XPath expression.
+//
+//                XPathExpression  xPathExpression=
+//                    xPath.compile("/response/result/doc/arr[@name='marc_display']/str");
+//                
+//                InputSource inputSource = new InputSource(stream);
+//                String marcRecordStr = xPathExpression.evaluate(inputSource);
+//                rec = getRecordFromXMLString(marcRecordStr);
+//            }           
+//        }
+//        catch (IOException e)
+//        {
+//            // e.printStackTrace();
+//        	logger.error(e.getMessage());
+//        }
+//        catch (XPathExpressionException e)
+//        {
+//            // e.printStackTrace();
+//        	logger.error(e.getMessage());
+//        }
+//        return(rec);
+//    }
 
     /**
      * Update a document in the Solr index
@@ -587,53 +610,21 @@ public class SolrReIndexer
      */
     public void update(Map<String, Object> map)
     { 
-        AddUpdateCommand addcmd = new AddUpdateCommand();
-        DocumentBuilder builder = new DocumentBuilder(solrCore.getSchema());
-        builder.startDoc();
-        Iterator<String> keys = map.keySet().iterator();
-        while (keys.hasNext())
-        {
-            String key = keys.next();
-            Object value = map.get(key);
-            if (value instanceof String)
-            {
-                builder.addField(key, (String)value);
-            }
-            else if (value instanceof Collection)
-            {
-                Iterator<String> valIter = ((Collection)value).iterator();
-                while (valIter.hasNext())
-                {
-                    String collVal = valIter.next();
-                    builder.addField(key, collVal);
-                }
-            }
-        }
-        builder.endDoc();
-        
-        // finish up
-        addcmd.doc = builder.getDoc();
-        
-        if (verbose)
-        {
-//            System.out.println(record.toString());
-            String doc = addcmd.doc.toString().replaceAll("> ", "> \n");
-            //System.out.println(doc);
-            logger.info(doc);
-        }
-        addcmd.allowDups = false;
-        addcmd.overwriteCommitted = true;
-        addcmd.overwritePending = true;
-       
         try {
-            updateHandler.addDoc(addcmd);
+            String docStr = solrCoreProxy.addDoc(map, verbose);
+            if (verbose)
+            {
+ //               logger.info(record.toString());
+                logger.info(docStr);
+            }
+
         } 
-        catch (IOException e) 
+        catch (IOException ioe) 
         {
             //System.err.println("Couldn't add document");
+            logger.error("Couldn't add document: " + ioe.getMessage());
             //e.printStackTrace();
-        	logger.error("Couldn't add marc file.");
-        	logger.error(e.getMessage());
+ //           logger.error("Control Number " + record.getControlNumber(), ioe);
         }                
     }
     
@@ -644,78 +635,67 @@ public class SolrReIndexer
     {
         try {
             //System.out.println("Calling commit");
-        	logger.debug("Callling commit");
-            commit(false);
+            logger.info("Calling commit");
+            solrCoreProxy.commit(false);
         } 
-        catch (IOException e) {
-//            System.err.println("Final commit and optmization failed");
-//            e.printStackTrace();
-        	logger.error("Final commit and optimization failed");
-        	logger.error(e.getMessage());
+        catch (IOException ioe) {
+            //System.err.println("Final commit and optmization failed");
+            logger.error("Final commit and optimization failed: " + ioe.getMessage());
+            logger.debug(ioe);
+            //e.printStackTrace();
         }
         
-       // System.out.println("Done with commit, closing Solr");
-        logger.info("Done with commit, closing Solr");
-        solrCore.close();
+        //System.out.println("Done with commit, closing Solr");
+        logger.info("Done with the commit, closing Solr");
+        solrCoreProxy.close();
     }
 
-
-    /**
-     * Commit the document to the repository and optimize the index
-     * @param optimize
-     * @throws IOException
-     */
-    public void commit(boolean optimize) throws IOException 
-    {
-        CommitUpdateCommand commitcmd = new CommitUpdateCommand(optimize);
-        updateHandler.commit(commitcmd);
-    }
-    /**
-     * @param args
-     */
-    public static void main(String[] args)
-    {
-        String properties = "import.properties";
-        if(args.length > 0 && args[0].endsWith(".properties"))
-        {
-            properties = args[0];
-            String newArgs[] = new String[args.length-1];
-            System.arraycopy(args, 1, newArgs, 0, args.length-1);
-            args = newArgs;
-        }
-       // System.out.println("Loading properties from " + properties);
-        logger.info("Loading properties from " + properties);
-        
-        SolrReIndexer reader = null;
-        try
-        {
-            reader = new SolrReIndexer(properties, args);
-        }
-        catch (IOException e)
-        {
-            //  e.printStackTrace();
-        	logger.error(e.getMessage());
-            System.exit(1);
-        }
-        
-        reader.readAllMatchingDocs(reader.queryForRecordsToUpdate);
-        
-        reader.finish();
-        if (errOut != null)
-        {
-            try
-            {
-                errOut.write("\n</collection>");
-                errOut.flush();
-
-            }
-            catch (IOException e)
-            {
-                // e.printStackTrace();
-            	logger.error(e.getMessage());
-            }
-        }
-
-    }
+//    /**
+//     * @param args
+//     */
+//    public static void main(String[] args)
+//    {
+//        String properties = "import.properties";
+//        if(args.length > 0 && args[0].endsWith(".properties"))
+//        {
+//            properties = args[0];
+//            String newArgs[] = new String[args.length-1];
+//            System.arraycopy(args, 1, newArgs, 0, args.length-1);
+//            args = newArgs;
+//        }
+//       // System.out.println("Loading properties from " + properties);
+//        logger.info("Loading properties from " + properties);
+//        
+//        SolrReIndexer reader = null;
+//        try
+//        {
+//            reader = new SolrReIndexer(properties, args);
+//        }
+//        catch (IOException e)
+//        {
+//            //  e.printStackTrace();
+//        	logger.error(e.getMessage());
+//            System.exit(1);
+//        }
+//        
+//        reader.readAllMatchingDocs(reader.queryForRecordsToUpdate);
+//        
+//        reader.finish();
+//        if (errOut != null)
+//        {
+//            try
+//            {
+//                errOut.write("\n</collection>");
+//                errOut.flush();
+//
+//            }
+//            catch (IOException e)
+//            {
+//                // e.printStackTrace();
+//            	logger.error(e.getMessage());
+//            }
+//        }
+//
+//    }
 
 }

@@ -1,20 +1,35 @@
-package org.solrmarc.marc;
+package org.solrmarc.solr;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import org.apache.log4j.Logger;
-import org.apache.solr.core.SolrConfig;
-import org.apache.solr.core.SolrCore;
-import org.apache.solr.schema.IndexSchema;
 
 public class SolrCoreLoader
 {
-    static SolrCore loadCore(String solrCoreDir, String solrDataDir, String solrCoreName, Logger logger)
+    
+//    public void initialize(String libDir) throws Exception {
+//        File dependencyDirectory = new File(libDir);
+//        File[] files = dependencyDirectory.listFiles();
+//        ArrayList<URL> urls = new ArrayList<URL>();
+//        for (int i = 0; i < files.length; i++) {
+//            if (files[i].getName().endsWith(".jar")) {
+//            urls.add(files[i].toURL());
+//            //urls.add(files[i].toURI().toURL());
+//            }
+//        }
+//        classLoader = new JarFileClassLoader("Scheduler CL" + System.currentTimeMillis(), 
+//            urls.toArray(new URL[urls.size()]), 
+//            GFClassLoader.class.getClassLoader());
+//        }
+    
+    public static SolrCoreProxy loadCore(String solrCoreDir, String solrDataDir, String solrCoreName, Logger logger)
     {
-        SolrCore solrCore = null;
+        Object solrCore = null;
+        SolrCoreProxy solrCoreProxy = null;
             
         try{
             boolean has_1_3_libs = false;
@@ -58,12 +73,15 @@ public class SolrCoreLoader
             if (has_1_2_libs)
             {
                 if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
-                System.setProperty("solr.data.dir", solrDataDir);
-                SolrConfig solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
+                System.setProperty("solr.data.dir", solrDataDir);                
+                Class<?> indexSchemaClass = Class.forName("org.apache.solr.schema.IndexSchema");
+                Class<?> solrConfigClass = Class.forName("org.apache.solr.core.SolrConfig");
+                Constructor<?> solrConfigConstructor = solrConfigClass.getConstructor(String.class, String.class, InputStream.class);
+                Object solrConfig = solrConfigConstructor.newInstance(solrCoreDir, "solrconfig.xml", null);
                 // solrCore = new SolrCore("Solr", solrDataDir, solrConfig, null);
                 Class<?> solrCoreClass = Class.forName("org.apache.solr.core.SolrCore");
-                Constructor<?> coreConstructor = solrCoreClass.getConstructor(String.class, String.class, SolrConfig.class, IndexSchema.class);
-                solrCore = (SolrCore)coreConstructor.newInstance("Solr", solrDataDir, solrConfig, null);
+                Constructor<?> coreConstructor = solrCoreClass.getConstructor(String.class, String.class, solrConfigClass, indexSchemaClass);
+                solrCore = coreConstructor.newInstance("Solr", solrDataDir, solrConfig, null);
             }
             else if (has_1_3_libs) 
             {   
@@ -89,7 +107,7 @@ public class SolrCoreLoader
                     
                     // cc.getCore(solrCoreName);
                     Method getCoreMethod = coreContainerClass.getMethod("getCore", String.class);
-                    solrCore = (SolrCore)getCoreMethod.invoke(genericCoreContainerObject, solrCoreName);
+                    solrCore = getCoreMethod.invoke(genericCoreContainerObject, solrCoreName);
                 }
                 else  // non-multicore Solr 1.3 installation 
                 {
@@ -98,7 +116,10 @@ public class SolrCoreLoader
                         solrDataDir = solrCoreDir + "/" + "data";
                     }
                     System.setProperty("solr.data.dir", solrDataDir);
-                    SolrConfig solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
+                    Class<?> solrConfigClass = Class.forName("org.apache.solr.core.SolrConfig");
+                    Constructor<?> solrConfigConstructor = solrConfigClass.getConstructor(String.class, String.class, InputStream.class);
+                    Object solrConfig = solrConfigConstructor.newInstance(solrCoreDir, "solrconfig.xml", null);
+                    //SolrConfig solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
                     FileInputStream schemaFile = new FileInputStream(solrCoreDir+"/conf/schema.xml");
                     
                     //cc = new CoreContainer();
@@ -111,12 +132,14 @@ public class SolrCoreLoader
                     Constructor<?> coreDescCtor = coreDescClass.getConstructor(coreContainerClass, String.class, String.class);
                     Object genericCoreDesc = coreDescCtor.newInstance(genericCoreContainerObject, "Solr", solrCoreDir+"/conf");
                     
-                    IndexSchema solrSchema = new IndexSchema(solrConfig, "Solr", schemaFile);
+                    Class<?> indexSchemaClass = Class.forName("org.apache.solr.schema.IndexSchema");
+                    Constructor<?> IndexSchemaConstructor = indexSchemaClass.getConstructor(solrConfigClass, String.class, InputStream.class);
+                    Object  solrSchema = IndexSchemaConstructor.newInstance(solrConfig, "Solr", schemaFile);
                     
                     // solrCore = new SolrCore(solrCoreName, solrDataDir, solrConfig, solrSchema, desc);  
                     Class<?> solrCoreClass = Class.forName("org.apache.solr.core.SolrCore");
-                    Constructor<?> coreConstructor = solrCoreClass.getConstructor(String.class, String.class, SolrConfig.class, IndexSchema.class, coreDescClass);
-                    solrCore = (SolrCore)coreConstructor.newInstance(solrCoreName, solrDataDir, solrConfig, solrSchema, genericCoreDesc);
+                    Constructor<?> coreConstructor = solrCoreClass.getConstructor(String.class, String.class, solrConfigClass, indexSchemaClass, coreDescClass);
+                    solrCore = coreConstructor.newInstance(solrCoreName, solrDataDir, solrConfig, solrSchema, genericCoreDesc);
                 }
             }   
         }
@@ -127,7 +150,8 @@ public class SolrCoreLoader
             e.printStackTrace();
             System.exit(1);
         }
-        return(solrCore);
+        solrCoreProxy = new SolrCoreProxy(solrCore);
+        return(solrCoreProxy);
     }
 
 }
