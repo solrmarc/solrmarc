@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+  <!-- title and titleStr: 245 no n or p -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a245NoNorP</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">245 no subfield n or p</subfield>
+      <subfield code="h">[electronic resource] /</subfield>
+      <subfield code="c">by John Sandford.</subfield>
+    </datafield>
+  </record>
+
+  <!-- title and titleStr: 245 n but no p -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a245nNotp</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">245 n but no p</subfield>
+      <subfield code="n">Part one.</subfield>
+    </datafield>
+  </record>
+
+  <!-- title and titleStr: 245 p but no n -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a245pNotn</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">245 p but no n.</subfield>
+      <subfield code="b">subfield b</subfield>
+      <subfield code="p">Student handbook.</subfield>
+    </datafield>
+  </record>
+
+  <!-- title and titleStr: 245 n and p -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a245nAndp</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">245 n and p:</subfield>
+      <subfield code="n">A,</subfield>
+      <subfield code="p">The humanities and social sciences.</subfield>
+    </datafield>
+  </record>
+
+  <!-- title and titleStr: 245 p then n -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a245pThenn</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">245 p then n</subfield>
+      <subfield code="p">Wöchentliches Verzeichnis.</subfield>
+      <subfield code="n">Reihe B,</subfield>
+    </datafield>
+  </record>
+
+  <!-- title and titleStr: 245 multiple p, n -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a245multpn</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">245 multiple p, n</subfield>
+      <subfield code="p">first p subfield</subfield>
+      <subfield code="n">first n subfield</subfield>
+      <subfield code="p">second p subfield</subfield>
+      <subfield code="n">second n subfield</subfield>
+    </datafield>
+  </record>
+
+  <!-- title2: 246 a but no 740 -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a246aNo740</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">246 a but no 740</subfield>
+    </datafield>
+    <datafield tag="246" ind1="3" ind2=" ">
+      <subfield code="a">field 246 subfield a</subfield>
+    </datafield>
+  </record>
+
+  <!-- title2: 246 a and 740 a -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a246aAnd740</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">246 a and 740 a</subfield>
+    </datafield>
+    <datafield tag="246" ind1="3" ind2=" ">
+      <subfield code="a">field 246 subfield a</subfield>
+    </datafield>
+    <datafield tag="740" ind1="0" ind2="2">
+      <subfield code="a">740 subfield a</subfield>
+    </datafield>
+  </record>
+
+  <!-- oldTitle: 780 a but no t -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a780aNott</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">780 a but no t</subfield>
+    </datafield>
+    <datafield tag="780" ind1="0" ind2="2">
+      <subfield code="a">780 subfield a only</subfield>
+    </datafield>
+  </record>
+
+  <!-- oldTitle: 780 t but no a -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a780tNota</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">780 t but no a</subfield>
+    </datafield>
+    <datafield tag="780" ind1="0" ind2="2">
+      <subfield code="t">780 subfield t only</subfield>
+    </datafield>
+  </record>
+
+  <!-- oldTitle: 780 a and t -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a780aAndt</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">780 a and t</subfield>
+    </datafield>
+    <datafield tag="780" ind1="0" ind2="2">
+      <subfield code="a">780 subfield a</subfield>
+      <subfield code="t">780 subfield t</subfield>
+    </datafield>
+  </record>
+
+  <!-- newTitle: 785 a but no t -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a785aNott</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">785 a but no t</subfield>
+    </datafield>
+    <datafield tag="785" ind1="0" ind2="2">
+      <subfield code="a">785 subfield a only</subfield>
+    </datafield>
+  </record>
+
+  <!-- newTitle: 785 t but no a -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a785tNota</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">785 t but no a</subfield>
+    </datafield>
+    <datafield tag="785" ind1="0" ind2="2">
+      <subfield code="t">785 subfield t only</subfield>
+    </datafield>
+  </record>
+
+  <!-- newTitle: 785 a and t -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a785aAndt</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">785 a and t</subfield>
+    </datafield>
+    <datafield tag="785" ind1="0" ind2="2">
+      <subfield code="a">785 subfield a</subfield>
+      <subfield code="t">785 subfield t</subfield>
+    </datafield>
+  </record>
+
+<!-- non-filing characters -->
+  <!-- 0 non-filing chars -->
+  <record>
+    <leader>00941nam a22002651  4500</leader>
+    <controlfield tag="001">a115472</controlfield>
+    <controlfield tag="008">740123s1966    ii a          000 0 eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">India and the European Economic Community.</subfield>
+    </datafield>
+   </record>
+
+  <!-- blank indicator 2 -->
+  <record>
+    <leader>00988nas a2200193z  4500</leader>
+    <controlfield tag="001">a7117119</controlfield>
+    <controlfield tag="008">071214uuuuuuuuuxx uu |ss    u|    |||| d</controlfield>
+    <datafield tag="245" ind1="1" ind2=" ">
+      <subfield code="a">HOUSING CARE AND SUPPORT PUTTING GOOD IDEAS INTO PRACTICE</subfield>
+    </datafield>
+  </record>
+  
+  <!-- 2 non-filing chars -->
+  <record>
+    <leader>01139cam a2200229 i 4500</leader>
+    <controlfield tag="001">a1962398</controlfield>
+    <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="2">
+      <subfield code="a">A guide to resources in United States libraries /</subfield>
+      <subfield code="c">compiled by David S. Zubatsky.</subfield>
+    </datafield>
+  </record>
+  
+  <!-- 3 non-filing chars -->
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a4428936</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="245" ind1="0" ind2="3">
+      <subfield code="a">Il cinema della transizione</subfield>
+    </datafield>
+  </record>
+  
+  <!-- 4 non-filing chars -->
+  <record>
+    <leader>01669nam a2200289ua 4500</leader>
+    <controlfield tag="001">a1261173</controlfield>
+    <controlfield tag="008">870715r19741700ctu     a     000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">The second part of the Confutation of the Ballancing letter</subfield>
+    </datafield>
+  </record>
+  
+  <!-- 240 and 245 -->
+  <record>
+    <leader>00651nam a22001575? 4500</leader>
+    <controlfield tag="001">a575946</controlfield>
+    <controlfield tag="008">910118s1990||||gw |||||||||||||||||ger|d</controlfield>
+    <datafield tag="240" ind1="1" ind2="0">
+      <subfield code="a">De incertitudine et vanitate scientiarum.</subfield>
+      <subfield code="l">German</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">Der Ruckzug der biblischen Prophetie von der neueren Geschichte.</subfield>
+    </datafield>
+  </record>
+  
+  <record>
+    <leader>00651nam a22001575? 4500</leader>
+    <controlfield tag="001">a666</controlfield>
+    <controlfield tag="008">910118s1990||||gw |||||||||||||||||ger|d</controlfield>
+    <datafield tag="240" ind1="1" ind2="0">
+      <subfield code="a">De incertitudine et vanitate scientiarum.</subfield>
+      <subfield code="l">German</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">ZZZZ</subfield>
+    </datafield>
+  </record>
+
+  <!-- 240 with non-filing chars -->
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a2400</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="240" ind1="0" ind2="0">
+      <subfield code="a">Wacky</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">240 0 non-filing</subfield>
+    </datafield>
+  </record>
+  
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a2402</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="240" ind1="0" ind2="2">
+      <subfield code="a">A Wacky</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">240 2 non-filing</subfield>
+    </datafield>
+  </record>
+  
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a2407</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="240" ind1="0" ind2="7">
+      <subfield code="a">A Wacky Tacky</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">240 7 non-filing</subfield>
+    </datafield>
+  </record>
+  
+  <!-- 130 field (uniform title main entry) -->
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a130</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="130" ind1="0" ind2="4">
+      <subfield code="a">The Snimm.</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">130 4 non-filing</subfield>
+    </datafield>
+  </record>
+  
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a130240</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="130" ind1="0" ind2=" ">
+      <subfield code="a">Hoos Foos</subfield>
+    </datafield>
+    <datafield tag="240" ind1="0" ind2="0">
+      <subfield code="a">Marvin O'Gravel Balloon Face</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">130 and 240</subfield>
+    </datafield>
+  </record>
+  
+  <!-- numeric subfields -->
+  
+  <!-- 130 field with initial numeric subfield -->
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a1306</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="130" ind1="0" ind2=" ">
+      <subfield code="6">880-01</subfield>
+      <subfield code="a">Sox on Fox</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">130 has sub 6</subfield>
+    </datafield>
+  </record>
+
+  <!-- 240 field with initial numeric subfield -->
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a0240</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="240" ind1="0" ind2="0">
+      <subfield code="0">(DE-101c)310008891</subfield>
+      <subfield code="a">sleep little fishies</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">240 has sub 0</subfield>
+    </datafield>
+  </record>
+  
+  <!-- 240 field with initial numeric subfield -->
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a24025</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="240" ind1="0" ind2="0">
+      <subfield code="2">ignore me</subfield>
+      <subfield code="a">la di dah</subfield>
+      <subfield code="5">NjP</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">240 has sub 2 and 5</subfield>
+    </datafield>
+  </record>
+
+  <!-- 245 field with initial numeric subfield -->
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a2458</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="8">1.5\a</subfield>
+      <subfield code="a">245 has sub 8</subfield>
+    </datafield>
+  </record>  
+
+<!-- punctuation -->
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a111</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">"ind 0 leading quotes"</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a222</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">**required field**</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a333</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">--ind 0 leading hyphens</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a444</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">...ind 0 leading elipsis</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a555</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">"...ind 0 leading quote elipsis</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a777</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="245" ind1="0" ind2="4">
+      <subfield code="a">"...ind 4 leading quote elipsis</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a888</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="130" ind1="0" ind2="5">
+      <subfield code="a">Boo! interspersed *(punctua@#$@#$tion</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="1">
+      <subfield code="a">"...here--</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01260cam a2200349 a 4500</leader>
+    <controlfield tag="001">a999</controlfield>
+    <controlfield tag="008">000828s2000    it       b    000 0 ita c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">every!&quot;#$%&amp;&apos;()*+,-./:;&lt;=&gt;?@[\]^_`{|}~thing</subfield>
+    </datafield>
+  </record>
+
+</collection>

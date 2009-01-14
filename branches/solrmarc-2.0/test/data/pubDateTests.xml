@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+  <!-- pubDate 2000: 008/7-10 2000 008/11-14 blank -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">afirstDateOnly008</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 2000: 008/7-10 2000 008/11-14 blank</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1964: 008/7-10 1964 008/11-14 1980 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">abothDates008</controlfield>
+    <controlfield tag="008">780930c19641980nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1964: 008/7-10 1964 008/11-14 1980</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate unknown: 008 dates blank -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">abothDatesBlank</controlfield>
+    <controlfield tag="008">780930b        nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate unknown:  008 dates blank</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="c">[150-100 B.C.]</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1984: Continuing resource currently published -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">acontRes</controlfield>
+    <controlfield tag="008">780930c19849999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1984: Continuing resource currently published</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">New York :</subfield>
+      <subfield code="b">Xerox Films,</subfield>
+      <subfield code="c">1984-</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 195x: 008/7-10 195u -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate195u</controlfield>
+    <controlfield tag="008">780930d195u1982nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 195x: 008/7-10 195u</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate unknown: 008/7-10 1uuu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate1uuu</controlfield>
+    <controlfield tag="008">780930c1uuu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate unknown: 008/7-10 1uuu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate unknown: 008/7-10 uuuu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDateuuuu</controlfield>
+    <controlfield tag="008">780930nuuuuuuuunyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate unknown: 008/7-10 uuuu</subfield>
+    </datafield>
+  </record>
+  <!-- century cases, which are tricky to get suffix right -->
+  <!-- pubDate 00xx: 008/7-10 00uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate00uu</controlfield>
+    <controlfield tag="008">780930c00uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 00xx: 008/7-10 00uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 01xx: 008/7-10 01uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate01uu</controlfield>
+    <controlfield tag="008">780930c01uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 01xx: 008/7-10 01uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 02xx: 008/7-10 02uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate02uu</controlfield>
+    <controlfield tag="008">780930c02uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 02xx: 008/7-10 02uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 03xx: 008/7-10 03uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate03uu</controlfield>
+    <controlfield tag="008">780930c03uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 03xx: 008/7-10 03uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 08xx: 008/7-10 08uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate08uu</controlfield>
+    <controlfield tag="008">780930c08uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 08xx: 008/7-10 08uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 09xx: 008/7-10 09uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate09uu</controlfield>
+    <controlfield tag="008">780930c09uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 09xx: 008/7-10 09uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 10xx: 008/7-10 10uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate10uu</controlfield>
+    <controlfield tag="008">780930c10uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 10xx: 008/7-10 10uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 11xx: 008/7-10 11uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate11uu</controlfield>
+    <controlfield tag="008">780930c11uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 11xx: 008/7-10 19uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 12xx: 008/7-10 12uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate12uu</controlfield>
+    <controlfield tag="008">780930c12uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 12xx: 008/7-10 12uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 13xx: 008/7-10 13uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate13uu</controlfield>
+    <controlfield tag="008">780930c13uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 13xx: 008/7-10 13uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 16xx: 008/7-10 16uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate16uu</controlfield>
+    <controlfield tag="008">780930c16uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 16xx: 008/7-10 16uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 19xx: 008/7-10 19uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate19uu</controlfield>
+    <controlfield tag="008">780930c19uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 19xx: 008/7-10 19uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 20xx: 008/7-10 20uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate20uu</controlfield>
+    <controlfield tag="008">780930c20uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 20xx: 008/7-10 20uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 21xx: 008/7-10 21uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate21uu</controlfield>
+    <controlfield tag="008">780930c21uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 21xx: 008/7-10 21uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 22xx: 008/7-10 22uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate22uu</controlfield>
+    <controlfield tag="008">780930c22uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 22xx: 008/7-10 22uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 23xx: 008/7-10 23uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate23uu</controlfield>
+    <controlfield tag="008">780930c23uu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 23xx: 008/7-10 23uu</subfield>
+    </datafield>
+  </record>
+</collection>
