@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project basedir="." default="build" name="BlacklightIndexer">
+
+	<property file="build.properties" />
+
+	<tstamp>
+		<format property="year" pattern="yyyy" />
+		<format property="DSTAMP" pattern="yyyy-MM-dd" />
+		<format property="TSTAMP" pattern="HH:mm:ss" />
+		<format property="dateversion" pattern="yyyy.MM.dd.HH.mm.ss" />
+	</tstamp>
+
+	<target name="init">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${dist.dir}" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+		<delete dir="${tag.dir}" />
+	</target>
+
+	<target name="build" depends="init" >
+		<echo message="${ant.project.name}: ${ant.file}" />
+
+		<javac destdir="${build.dir}" debug="source" target="${java.compat.version}" source="${java.compat.version}" encoding="utf-8">
+			<src path="${src.dir}" />
+		</javac>
+
+		<jar destfile="${dist.dir}/BlacklightIndexer.jar">
+			<fileset dir="bin" includes="**/*.class" />
+			<fileset dir="." includes="*.properties" excludes="build.properties"/>
+			<manifest>
+				<attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter" />
+			</manifest>
+		</jar>
+		
+	</target>
+
+
+	<target name="usage" description="Prints usage instructions">
+		<echo message="Welcome to the Solrmarc indexing project" />
+		<echo message="Use 'ant' to build the latest code" />
+		<echo message="Use 'ant -Dsolr.version=&quot;1.2&quot;' to build the latest code based on version 1.2 of Solr" />
+		<echo message="Use 'ant -Dsolr.version=&quot;1.3&quot;' to build the latest code based on version 1.3 of Solr" />
+		<echo message="For developers" />
+		<echo message="Use 'ant clean' to clean the compiled source directory" />
+		<echo message="Use 'ant doc' to generate JavaDoc documentation" />
+		<echo message="Use 'ant gzip' to build a gzipped tarball and checksum for distribution (be sure to svn export first)" />
+		<echo message="Use 'ant test' to run unit tests" />
+	</target>
+
+</project>
