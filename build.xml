@@ -45,12 +45,18 @@
 	</target>
 	
     <target name="checksolrjars" >
-    	<uptodate property="solr.external.uptodate" targetfile="${dist.dir}/solr_${solr.version}_lib.jar">
-    	    <srcfiles dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
-    	</uptodate>
+        <condition property="solr.external.uptodate" >
+        	<and>
+        		<available filepath="${dist.dir}" file="solr_${solr.version}_lib.jar" type="file"/>
+        		<uptodate targetfile="${dist.dir}/solr_${solr.version}_lib.jar">
+        		    <srcfiles dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
+        		</uptodate>
+        	</and>
+        </condition>
     </target>
 
-	<target name="solrjars" depends="solrversion,checksolrjars" if="solr.external.check" unless="solr.external.uptodate">
+	<target name="solrjars" depends="solrversion,checksolrjars,solrversioncheck" 
+		    if="solr.external.check" unless="solr.external.uptodate">
 	    <mkdir dir="${build.dir}/solrjar" />
 		<unjar dest="${build.dir}/solrjar" overwrite="true">
 			<fileset dir="${lib.dir}/solr_${solr.version}">
