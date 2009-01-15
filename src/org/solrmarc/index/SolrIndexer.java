@@ -1171,5 +1171,77 @@ public class SolrIndexer
 
         return result;
     }
+    
+    /**
+     * Extract the info from an 880 linked field from a record
+     * @param record
+     * @return linked field
+     */
+    public Set<String> getLinkedField(final Record record, String fieldSpec)
+    {
+        Set<String> set = getFieldList(record,"8806");
+        
+        if (set.isEmpty())  {
+            return(null);
+        }
+        
+        String[] tags = fieldSpec.split(":");
+        Set<String> result = new LinkedHashSet<String>();
+        for (int i = 0; i < tags.length; i++)
+        {
+            // Check to ensure tag length is at least 3 characters
+            if (tags[i].length() < 3)
+            {
+                System.err.println("Invalid tag specified: " + tags[i]);
+                continue;
+            }
+            
+            // Get Field Tag
+            String tag = tags[i].substring(0, 3);
+
+            // Process Subfields
+            String subfield = tags[i].substring(3);
+            List<?> fields = record.getVariableFields("880");
+            Iterator<?> fldIter = fields.iterator();
+            while (fldIter.hasNext())
+            {
+                DataField dfield = (DataField) fldIter.next();
+                Subfield link = dfield.getSubfield('6');
+                if (link.getData().startsWith(tag))
+                {
+                    List<?> subList = dfield.getSubfields();
+                    Iterator<?> subIter = subList.iterator();
+                    StringBuffer buf = new StringBuffer("");
+                    while(subIter.hasNext())
+                    {
+                        Subfield subF = (Subfield)subIter.next();
+                        if (subfield.indexOf(subF.getCode()) != -1)
+                        {
+                            if (buf.length() > 0) buf.append(" ");
+                            buf.append(subF.getData());
+                        }
+                    }
+                    result.add(Utils.cleanData(buf.toString()));
+                }
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Extract the info from an 880 linked field from a record
+     * @param record
+     * @return linked field
+     */
+    public Set<String> getLinkedFieldCombined(final Record record, String fieldSpec)
+    {
+        Set<String> set = getFieldList(record,"8806");
+        
+        Set<String> result1 = getLinkedField(record, fieldSpec);
+        Set<String> result2 = getFieldList(record, fieldSpec);
+        
+        if (result1 != null) result2.addAll(result1);
+        return(result2);
+    }
 
 }
