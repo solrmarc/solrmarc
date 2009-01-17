@@ -55,6 +55,20 @@ public final class Utils {
      */
     public static String getProperty(Properties props, String propname)
     {
+        return getProperty(props, propname, null);
+    }
+    
+    /**
+     * Check first for a particular property in the System Properties, so that the -Dprop="value" command line arg 
+     * mechanism can be used to override values defined in the passed in property file.  This is especially useful
+     * for defining the marc.source property to define which file to operate on, in a shell script loop.
+     * @param props - property set in which to look.
+     * @param propname - name of the property to lookup.
+     * @param defVal - the default value to use if property is not defined
+     * @returns String - value stored for that property (or the  if it doesn't exist) 
+     */
+    public static String getProperty(Properties props, String propname, String defVal)
+    {
         String prop;
         if ((prop = System.getProperty(propname)) != null)
         {
@@ -64,7 +78,7 @@ public final class Utils {
         {
             return(prop);
         }
-        return null;
+        return defVal;
     }
     
     public static Properties loadProperties(String propertyPath, String propertyFileName)

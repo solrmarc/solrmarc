@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
@@ -232,23 +233,32 @@ public class MarcImporter {
         to_utf_8 = Boolean.parseBoolean(Utils.getProperty(props, "marc.to_utf_8"));
         unicodeNormalize = Boolean.parseBoolean(Utils.getProperty(props, "marc.unicode_normalize"));
         deleteRecordListFilename = Utils.getProperty(props, "marc.ids_to_delete");
-        String source = Utils.getProperty(props, "marc.source").trim();
+        String source = Utils.getProperty(props, "marc.source", "STDIN").trim();
         optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(props, "solr.optimize_at_end"));
         if (Utils.getProperty(props, "marc.override")!= null)
         {
             System.setProperty("org.marc4j.marc.MarcFactory", Utils.getProperty(props, "marc.override").trim());
         }
         reader = null;
-        if (source.equals("FILE"))
+        if (source.equals("FILE") || source.equals("STDIN"))
         {
+        	InputStream is = null;
+        	if (source.equals("FILE")) 
+        	{
+        		is = new FileInputStream(Utils.getProperty(props, "marc.path").trim());
+        	}
+        	else
+        	{
+        		is = System.in;
+        	}
             if (permissiveReader)
             {
                 errors = new ErrorHandler();
-                reader = new MarcPermissiveStreamReader(new FileInputStream(Utils.getProperty(props, "marc.path").trim()), errors, to_utf_8, defaultEncoding);
+                reader = new MarcPermissiveStreamReader(is, errors, to_utf_8, defaultEncoding);
             }
             else
             {
-                reader = new MarcPermissiveStreamReader(new FileInputStream(Utils.getProperty(props, "marc.path").trim()), false, to_utf_8, defaultEncoding);
+                reader = new MarcPermissiveStreamReader(is, false, to_utf_8, defaultEncoding);
             }
         }
         else if (source.equals("DIR"))
@@ -618,18 +628,20 @@ public class MarcImporter {
         logger.info("Starting SolrMarc indexing.");
     	// default properties file
         String properties = "import.properties";
+        System.setProperty("marc.source", "STDIN");
         
         if(args.length > 0)
         {
             for (String arg : args)
             {
-                if (arg.endsWith("properties"))
+                if (arg.endsWith(".properties"))
                 {
                     properties = arg;
                 }
-                if (arg.endsWith("mrc"))
+                if (arg.endsWith(".mrc"))
                 {
                     System.setProperty("marc.path", arg);
+                    System.setProperty("marc.source", "FILE");
                 }
             }            
         }
