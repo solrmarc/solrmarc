@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project basedir="." default="build" name="SolrMarc">
+<project basedir="." default="exe" name="SolrMarc">
 
 	<property name="one-jar.dist.dir" value="buildtools" />
 	<import file="buildtools/one-jar-ant-task.xml"/>
