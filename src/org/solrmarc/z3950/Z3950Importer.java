@@ -80,16 +80,16 @@ public class Z3950Importer
 //        
 //        System.out.println("Found " + MARC_FILE);
 //        
-        MarcImporter importer = null;
-        try {
-            importer = new MarcImporter(properties);
-        }
-        catch (IOException ioe)
-        {
-            System.err.println("Marc file does not exist. Please provide the filename");
-            ioe.printStackTrace();
-            System.exit(1);
-        }
+//        MarcImporter importer = null;
+//        try {
+//            importer = new MarcImporter(properties);
+//        }
+//        catch (IOException ioe)
+//        {
+//            System.err.println("Marc file does not exist. Please provide the filename");
+//            ioe.printStackTrace();
+//            System.exit(1);
+//        }
         
 //        MarcReader reader = new MarcStreamReader(input);
         
@@ -140,7 +140,7 @@ public class Z3950Importer
                 {
                     //System.out.println("Adding record " + recordCounter + ": " + record.getControlNumber() + " (" + df.format( ( recordCounter/totalRecords) * 100 )  + "% complete)");
                     System.out.println("Adding record " + recordCounter + ": " + record.getControlNumber());
-                    importer.addToIndex(record);
+   //                 importer.addToIndex(record);
                 }
             }catch(Exception e){
                 // keep going?
