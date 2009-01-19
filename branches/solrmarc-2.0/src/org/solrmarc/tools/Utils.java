@@ -102,6 +102,7 @@ public final class Utils {
             }
             catch (IOException e)
             {
+            	throw new IllegalArgumentException("Fatal error: Unable to find specified properties file: " + propertyFileName);
             }           
         }
         // load the properties
@@ -113,8 +114,7 @@ public final class Utils {
         }
         catch (IOException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	throw new IllegalArgumentException("Fatal error: UUnable to read specified properties file: " + propertyFileName);
         }
         return(props);
     }
