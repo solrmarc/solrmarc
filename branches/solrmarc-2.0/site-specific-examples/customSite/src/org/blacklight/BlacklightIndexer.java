@@ -233,5 +233,32 @@ public class BlacklightIndexer extends SolrIndexer
         return null;
     }
     
+    public Set<String> getCombinedFormat(final Record record)
+    {    
+    	// part1_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first
+    	// part2_format_facet = 999t, format_maps.properties(format)
+    	String mapName1 = null;
+    	String mapName2 = null;
+    	try
+        {
+            mapName1 = loadTranslationMap(null, "format_maps.properties(broad_format)");
+            mapName2 = loadTranslationMap(null, "format_maps.properties(format)");
+        }
+        catch (FileNotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        Set<String> result = getFieldList(record, "999t");
+        result = Utils.remap(result, findMap(mapName2), false);
+        String broadFormat = getFirstFieldVal(record, mapName1, "000[6]:007[0]");
+        result.add(broadFormat);
+        return(result);
+    }
     
 }
