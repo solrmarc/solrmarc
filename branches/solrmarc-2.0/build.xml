@@ -108,12 +108,11 @@
 
 	<target name="clean" description="clean the generated directories">
 		<delete dir="${build.dir}" />
-		<delete dir="${dist.dir}" />
 		<delete dir="${doc.dir}" />
 		<delete dir="${tag.dir}" />
 	</target>
 
-	<target name="init" depends="clean" description="create (empty) generated directories">
+	<target name="init" description="create (empty) generated directories">
 		<mkdir dir="${build.dir}" />
 		<mkdir dir="${dist.dir}" />
 	</target>
