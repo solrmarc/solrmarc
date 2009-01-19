@@ -17,14 +17,9 @@ package org.solrmarc.index;
  */
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
@@ -83,21 +78,13 @@ public class SolrIndexer
      * Constructor
      * @param propertiesMapFile
      * @param dir
-     * @throws FileNotFoundException
-     * @throws IOException
-     * @throws ParseException
      */
     public SolrIndexer(String propertiesMapFile, String dir)
-        throws FileNotFoundException, IOException, ParseException
     {
         this();
         solrMarcDir = dir;
         Properties props = Utils.loadProperties(dir, propertiesMapFile);
-        String errorMsg = fillMapFromProperties(props);
-        if (errorMsg != null)
-        {
-            throw new ParseException(errorMsg, 0);
-        }
+        fillMapFromProperties(props);
     }
 
     /**
@@ -105,10 +92,8 @@ public class SolrIndexer
      * @param props Properties to load
      * @return If the properties are valid
      */
-    protected String fillMapFromProperties(Properties props)
-        throws ParseException
+    protected void fillMapFromProperties(Properties props)
     {
-        String errorMsg = null;
         Enumeration<?> en = props.propertyNames();
         
         while (en.hasMoreElements())
@@ -221,19 +206,10 @@ public class SolrIndexer
                         {
                             fieldDef[3] = loadTranslationMap(props, fieldDef[3]);
                         }
-                        catch (FileNotFoundException e)
+                        catch (IllegalArgumentException e)
                         {
-                            //System.err.println("Error: Unable to find file containing specified translation map (" +
-                              //                 fieldDef[3] + ")");
                             logger.error("Unable to find file containing specified translation map (" + fieldDef[3] + ")");
-                            errorMsg = "Unable to find file containing specified translation map (" + fieldDef[3] + ")";
-                        }
-                        catch (IOException e)
-                        {
-//                            System.err.println("Error: Problems reading specified translation map (" +
-//                                               fieldDef[3] + ")");
-                            logger.error("Error: Problems reading specified translation map (" + fieldDef[3] + ")");
-                            errorMsg = "Error: Problems reading specified translation map (" + fieldDef[3] + ")";
+                            throw new IllegalArgumentException("Error: Problems reading specified translation map (" + fieldDef[3] + ")");
                         }
                     }
                 }
@@ -262,7 +238,7 @@ public class SolrIndexer
 //                System.err.println("Error: Specified translation map (" +
 //                                   mapName + ") not found in properties file");
                 logger.error("Specified translation map (" + mapName + ") not found in properties file");
-                errorMsg = "Specified translation map (" + mapName + ") not found in properties file";
+                throw new IllegalArgumentException("Specified translation map (" + mapName + ") not found in properties file");
             }
             
             // Process Custom Field
@@ -300,7 +276,7 @@ public class SolrIndexer
 //                                           indexParm +
 //                                           " must be either String or Set<String>");
                         logger.error("Error: Return type of custom indexing function " + indexParm +" must be String or Set<String> or Map<String, String>");
-                        errorMsg = "Error: Return type of custom indexing function " + indexParm +" must be String or Set<String> or Map<String, String>";
+                        throw new IllegalArgumentException("Error: Return type of custom indexing function " + indexParm +" must be String or Set<String> or Map<String, String>");
                     }
                 }
                 catch (SecurityException e)
@@ -309,7 +285,7 @@ public class SolrIndexer
 //                                       indexParm);
                     logger.error("Unable to invoke custom indexing function " + indexParm);
                     logger.debug(e.getCause(), e);
-                    errorMsg = "Unable to invoke custom indexing function " + indexParm;
+                    throw new IllegalArgumentException("Unable to invoke custom indexing function " + indexParm);
                 }
                 catch (NoSuchMethodException e)
                 {
@@ -317,7 +293,7 @@ public class SolrIndexer
 //                                       indexParm);
                     logger.error("Unable to find custom indexing function " + indexParm);
                     logger.debug(e.getCause());
-                    errorMsg = "Unable to find custom indexing function " + indexParm;
+                    throw new IllegalArgumentException("Unable to find custom indexing function " + indexParm);
                 }
                 catch (IllegalArgumentException e)
                 {
@@ -325,14 +301,13 @@ public class SolrIndexer
 //                                       indexParm);
                     logger.error("Unable to find custom indexing function " + indexParm);
                     logger.debug(e.getCause());
-                    errorMsg = "Unable to find custom indexing function " + indexParm;
+                    throw new IllegalArgumentException("Unable to find custom indexing function " + indexParm);
                 }
             }
         }
-        return errorMsg;
     }
 
-    protected String loadTranslationMap(Properties props, String translationMapSpec) throws FileNotFoundException, IOException
+    protected String loadTranslationMap(Properties props, String translationMapSpec) 
     {
         String mapName = null;
         if (translationMapSpec.length() == 0)
@@ -372,7 +347,7 @@ public class SolrIndexer
         return (mapName);
     }
 
-    private void loadTranslationMapValues(String propFilename, String mapKeyPrefix, String mapName) throws FileNotFoundException, IOException
+    private void loadTranslationMapValues(String propFilename, String mapKeyPrefix, String mapName)
     {
         Properties props = Utils.loadProperties(solrMarcDir, propFilename);
         System.err.println("Loading Custom Map: " + solrMarcDir + "/" + propFilename);
