@@ -58,6 +58,10 @@ public abstract class MarcHandler {
                     System.setProperty("marc.path", arg);
                     System.setProperty("marc.source", "FILE");
                 }
+                else if (arg.endsWith(".del"))
+                {
+                    System.setProperty("marc.ids_to_delete", arg);
+                }
                 else
                 {
                 	addnlArgList.add(arg);
