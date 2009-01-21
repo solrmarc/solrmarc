@@ -36,7 +36,7 @@
             	<include name="*.jar" />
             </fileset>
         </path>
-
+		<property name="custom.jar.name" value="CustomSite" />
 	</target>
     
     <target name="solrversion" unless="${solr.version}">
@@ -104,7 +104,7 @@
 		</jar>
         <delete dir="${build.dir}/solrjar" />
 	</target>
-
+	
 	<target name="build" depends="init,dependencies,solrjars" >
 		<echo message="${ant.project.name}: ${ant.file}" />
 
@@ -113,12 +113,20 @@
 			<classpath refid="classpath" />
 		</javac>
 
-		<jar destfile="${dist.dir}/BlacklightIndexer.jar">
+		<jar destfile="${dist.dir}/${custom.jar.name}.jar">
 			<fileset dir="bin" includes="**/*.class" />
 			<fileset dir="." includes="*.properties" excludes="build.properties"/>
 		</jar>
 		<copy file="${lib.dir}/solrmarc_dist/SolrMarc.jar" todir="${dist.dir}" />
 		<copy file="${lib.dir}/solrmarc_dist/solr_${solr.version}_lib.jar" todir="${dist.dir}" />
+		<copy todir="${dist.dir}" >
+			<fileset dir="script_templates" includes="*" />
+			<filterset>
+                <filter token="LOCALJAR" value="${custom.jar.name}.jar"/>
+				<filter token="SOLRJAR" value="solr_${solr.version}_lib.jar" />
+			</filterset>
+		</copy>
+
 	</target>
 
 	<target name="usage" description="Prints usage instructions">
