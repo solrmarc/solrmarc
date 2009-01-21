@@ -143,12 +143,7 @@ public class BlacklightIndexer extends SolrIndexer
         {
             mapName = loadTranslationMap(null, mapName);
         }
-        catch (FileNotFoundException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IOException e)
+        catch (IllegalArgumentException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -244,12 +239,7 @@ public class BlacklightIndexer extends SolrIndexer
             mapName1 = loadTranslationMap(null, "format_maps.properties(broad_format)");
             mapName2 = loadTranslationMap(null, "format_maps.properties(format)");
         }
-        catch (FileNotFoundException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IOException e)
+        catch (IllegalArgumentException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
