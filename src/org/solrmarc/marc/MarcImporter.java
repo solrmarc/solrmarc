@@ -50,6 +50,10 @@ public class MarcImporter extends MarcHandler
     private boolean optimizeAtEnd = true;
     private boolean shuttingDown = false;
     private boolean isShutDown = false;
+    private int recsReadCounter = 0;
+    private int recsIndexedCounter = 0;
+    private int idsToDeleteCounter = 0;
+    private int recsDeletedCounter = 0;
     
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
@@ -124,11 +128,13 @@ public class MarcImporter extends MarcHandler
      */
     public int deleteRecords()
     {
-        int numDeleted = 0;
+    	idsToDeleteCounter = 0;
+    	recsDeletedCounter = 0;
+    	
         if (deleteRecordListFilename == null || 
             deleteRecordListFilename.length() == 0) 
         {
-            return(numDeleted);
+            return recsDeletedCounter;
         }
         String mapPattern = null;
         String mapReplace = null;
@@ -158,8 +164,9 @@ public class MarcImporter extends MarcHandler
                     line = line.replaceFirst(mapPattern, mapReplace);
                 }                
                 String id = line;
+                idsToDeleteCounter++;
                 solrCoreProxy.delete(id, fromCommitted, fromPending);
-                numDeleted++;
+                recsDeletedCounter++;
             }            
         }
         catch (FileNotFoundException fnfe)
@@ -168,9 +175,9 @@ public class MarcImporter extends MarcHandler
         }
         catch (IOException ioe)
         {
-        	logger.error("Error: reading from delete-record-id-list: " + delFile);
+        	logger.error("Error: reading from delete-record-id-list: " + delFile, ioe);
         }
-        return(numDeleted);
+        return recsDeletedCounter;
     }
 
     /**
@@ -179,55 +186,52 @@ public class MarcImporter extends MarcHandler
      */
     public int importRecords()
     {
-        // keep track of record count
-        int recordCounter = 0;
+        // keep track of record counts
+        recsReadCounter = 0;
+        recsIndexedCounter = 0;
         
         while(reader != null && reader.hasNext())
         {
             if (shuttingDown) break;
-            recordCounter++;
             
             try {
                 Record record = reader.next();
+                recsReadCounter++;
                 
                 try {
                     addToIndex(record);
-                    logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
+                    recsIndexedCounter++;
+                    logger.info("Added record " + recsReadCounter + " read from file: " + record.getControlNumber());
                 }
                 catch (Exception e)
                 {
-                    if (solrCoreProxy.isSolrException(e))
+                    // check for missing fields
+                    if (solrCoreProxy.isSolrException(e) &&
+                    		e.getMessage().contains("missing required fields"))
                     {
-                       //check for missing fields
-                    	if (e.getMessage().contains("missing required fields"))
-                    	{
-                    	   logger.error(e.getMessage() +  " at record count = " + recordCounter);
-                    	   logger.error("Control Number " + record.getControlNumber(), e);
-                        }
-                        else
-                        {
-                    	   logger.error("Error indexing: " + e.getMessage());
-                    	   logger.error("Control Number " + record.getControlNumber(), e);
-                        }
+                   	   logger.error(e.getMessage() +  " at record count = " + recsReadCounter);
+                   	   logger.error("Control Number " + record.getControlNumber(), e);
                     }
-                    // keep going?
-                	logger.error("Error indexing: " + e.getMessage());
-                	logger.error("Control Number " + record.getControlNumber(), e);
+                    else
+                    {
+                	    logger.error("Error indexing record: " + record.getControlNumber() + " -- " + e.getMessage(), e);
+                    }
                 }
             } 
             catch (Exception e) {
-                logger.error("Error reading record: " + e.getMessage());
+                logger.error("Error reading record: " + e.getMessage(), e);
             }
         }
         
-        return recordCounter;
+        return recsIndexedCounter;
     }
     
     /**
      * Add a record to the index
      * @param record marc record to add
      */
-    public void addToIndex(Record record)
+    private void addToIndex(Record record)
+    	throws IOException
     {
         Map<String, Object> map = indexer.map(record); 
         if (map.size() == 0) return;
@@ -238,23 +242,26 @@ public class MarcImporter extends MarcHandler
                 addErrorsToMap(map, errors);
             }
         }
-      
-        try {
+
+        // NOTE: exceptions are dealt with by calling class
+//        try {
             String docStr = solrCoreProxy.addDoc(map, verbose);
             if (verbose)
             {
                 logger.info(record.toString());
                 logger.info(docStr);
             }
-
+/*
+            
         } 
-        catch (IOException ioe) 
+        catch (Exception e) 
         {
             //System.err.println("Couldn't add document");
-        	logger.error("Couldn't add document: " + ioe.getMessage());
+        	logger.error("Couldn't add document: " + e.getMessage());
             //e.printStackTrace();
-        	logger.error("Control Number " + record.getControlNumber(), ioe);
+        	logger.error("Control Number " + record.getControlNumber(), e);
         }                
+*/
     }
 
     private void addErrorsToMap(Map<String, Object> map, ErrorHandler errors2)
@@ -270,6 +277,8 @@ public class MarcImporter extends MarcHandler
         try {
             //System.out.println("Calling commit");
         	logger.info("Calling commit");
+        	logger.info(" Adding " + recsIndexedCounter + " of " + recsReadCounter + " documents to index");
+        	logger.info(" Deleting " + recsDeletedCounter + " documents from index");
             solrCoreProxy.commit(shuttingDown ? false : optimizeAtEnd);
         } 
         catch (IOException ioe) {
