@@ -17,29 +17,15 @@ package org.solrmarc.marc;
  */
 
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.log4j.*;
 import org.marc4j.ErrorHandler;
-import org.marc4j.MarcDirStreamReader;
-import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.solr.SolrCoreProxy;
 import org.solrmarc.solr.SolrCoreLoader;
@@ -53,20 +39,23 @@ import org.solrmarc.tools.Utils;
  */
 public class MarcImporter extends MarcHandler 
 {	
-    String solrCoreDir;
-    String solrDataDir;
-    String deleteRecordListFilename;
-    private SolrCoreProxy solrCoreProxy;
-    boolean optimizeAtEnd = true;
+	/** needs to be visible to StanfordCallnumMarcImporter ... */
+    protected SolrCoreProxy solrCoreProxy;
+
+    private String solrCoreDir;
+    private String solrDataDir;
+    private String deleteRecordListFilename;
+    private String deleteRecordIDMapper = null;
+    private String SolrHostURL;
+    private boolean optimizeAtEnd = true;
     private boolean shuttingDown = false;
     private boolean isShutDown = false;
-    String deleteRecordIDMapper = null;
     
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
     
-    String SolrHostURL;
-	/**
+
+    /**
 	 * Constructs an instance with a properties file
 	 * @param properties
 	 * @throws IOException 
