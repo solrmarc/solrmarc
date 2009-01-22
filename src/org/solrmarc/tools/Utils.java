@@ -81,6 +81,12 @@ public final class Utils {
         return defVal;
     }
     
+    /**
+     * load a properties file into a Properties object
+     * @param propertyPath the directory containing the properties file
+     * @param propertyFileName name of the properties file
+     * @return Properties object 
+     */
     public static Properties loadProperties(String propertyPath, String propertyFileName)
     {
         Utils utilObj = new Utils();
@@ -114,7 +120,7 @@ public final class Utils {
         }
         catch (IOException e)
         {
-        	throw new IllegalArgumentException("Fatal error: UUnable to read specified properties file: " + propertyFileName);
+        	throw new IllegalArgumentException("Fatal error: Unable to read specified properties file: " + propertyFileName);
         }
         return(props);
     }
