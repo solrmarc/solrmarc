@@ -24,7 +24,8 @@ public class SolrCoreProxy
         this.solrCore = solrCore;
     }
     
-    Object getCore()
+    /** return the solrCore as an Object.  Public b/c it's used by test code */
+    public Object getCore()
     {
         return(solrCore);
     }
