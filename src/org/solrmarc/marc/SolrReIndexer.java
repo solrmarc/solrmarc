@@ -1,30 +1,11 @@
 package org.solrmarc.marc;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.text.ParseException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+//import javax.xml.xpath.*;
 
 //import org.apache.lucene.document.Document;
 //import org.apache.lucene.document.Field;
@@ -33,23 +14,13 @@ import javax.xml.xpath.XPathFactory;
 //import org.apache.lucene.search.TermQuery;
 //import org.apache.solr.core.SolrConfig;
 //import org.apache.solr.core.SolrCore;
-//import org.apache.solr.search.DocIterator;
-//import org.apache.solr.search.DocSet;
-//import org.apache.solr.search.SolrIndexSearcher;
-//import org.apache.solr.update.AddUpdateCommand;
-//import org.apache.solr.update.CommitUpdateCommand;
-//import org.apache.solr.update.DocumentBuilder;
-//import org.apache.solr.update.UpdateHandler;
+//import org.apache.solr.search.*;
+//import org.apache.solr.update.*;
 //import org.apache.solr.util.RefCounted;
-import org.marc4j.MarcException;
-import org.marc4j.MarcStreamReader;
-import org.marc4j.MarcXmlReader;
+import org.marc4j.*;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
-import org.solrmarc.solr.SolrCoreProxy;
-import org.solrmarc.solr.SolrCoreLoader;
-import org.solrmarc.solr.SolrSearcherProxy;
-import org.xml.sax.InputSource;
+import org.solrmarc.solr.*;
 
 import org.apache.log4j.Logger;
 
@@ -62,7 +33,8 @@ import org.apache.log4j.Logger;
  */
 public class SolrReIndexer
 {
-    private String solrMarcDir;
+	private String solrmarcPath;
+	private String siteSpecificPath;
     private String solrCoreDir;
     private String solrDataDir;
     private SolrCoreProxy solrCoreProxy;   
@@ -92,7 +64,8 @@ public class SolrReIndexer
         props.load(in);
         in.close();
         
-        solrMarcDir = getProperty(props, "solrmarc.path");
+        solrmarcPath = getProperty(props, "solrmarc.path");
+        siteSpecificPath = getProperty(props, "solrmarc.site.path");
         solrCoreDir = getProperty(props, "solr.path");
         solrDataDir = getProperty(props, "solr.data.dir");
         solrFieldContainingEncodedMarcRecord = getProperty(props, "solr.fieldname");
@@ -133,7 +106,7 @@ public class SolrReIndexer
                 indexerClass = Class.forName(fullName);
             }
             Constructor constructor = indexerClass.getConstructor(new Class[]{String.class, String.class});
-            Object instance = constructor.newInstance(indexerProps, solrMarcDir);
+            Object instance = constructor.newInstance(indexerProps, solrmarcPath, siteSpecificPath);
             if (instance instanceof SolrIndexer)
             {
                 indexer = (SolrIndexer)instance;
@@ -160,7 +133,7 @@ public class SolrReIndexer
             logger.error("Using default SolrIndexer with properties file: " + indexerProps);
             
             try {
-                indexer = new SolrIndexer(indexerProps, solrMarcDir);
+                indexer = new SolrIndexer(indexerProps, solrmarcPath, siteSpecificPath);
             }
             catch (Exception e1)
             {
