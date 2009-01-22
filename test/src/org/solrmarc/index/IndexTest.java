@@ -7,6 +7,7 @@ import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.*;
@@ -14,29 +15,36 @@ import org.apache.solr.core.*;
 import org.apache.solr.schema.*;
 import org.apache.solr.search.*;
 import org.solrmarc.marc.MarcImporter;
+import org.solrmarc.solr.SolrCoreLoader;
+import org.solrmarc.solr.SolrCoreProxy;
 import org.xml.sax.SAXException;
 
 public abstract class IndexTest {
 
 	// Note:  the hardcodings below are only used when the tests are
-	//  not invoked with the properties set
+	//  invoked without the properties set
 	//   the properties ARE set when the tests are invoke via ant.
-	private String ngdeDir = "/solrmarcProjectParentDir";
-	protected String solrMarcPath = System.getProperty("solrmarc.path");
+	
+	protected String solrmarcPath = System.getProperty("solrmarc.path");
 	{
-		if (solrMarcPath == null)
-			solrMarcPath = ngdeDir + "/solrmarcProjectDir"; 
+		if (solrmarcPath == null)
+			solrmarcPath = "solrmarcProjectDir"; 
 	}
-	// TODO: configPropFile is completely hardcoded for stanford ...
-	protected String configPropFile = solrMarcPath + File.separator + "your_config.properties";
+	protected String siteSpecificPath = System.getProperty("solrmarc.site.path");
+	{
+		if (siteSpecificPath == null)
+			siteSpecificPath = "yourSiteSpecificDir"; 
+	}
+	
+	protected String configPropFile = siteSpecificPath + File.separator +"your_config.properties";
 	
 	protected String solrPath = System.getProperty("solr.path");
 	{
 		if (solrPath == null)
-			solrPath = ngdeDir + "/yourSolrDir";
+			solrPath = "yourSolrDir";
 	}
 
-	protected String testDir = solrMarcPath + File.separator + "test";
+	protected String testDir = siteSpecificPath + File.separator + "test";
 	protected String testDataParentPath = testDir + File.separator + "data";
 	protected String testDataPath = testDataParentPath + File.separator + "allfieldsTests.mrc";
 	protected String solrDataDir = System.getProperty("solr.data.dir");
@@ -49,10 +57,12 @@ public abstract class IndexTest {
 
 	protected static String docIDfname = "id";
 
+    static Logger logger = Logger.getLogger(MarcImporter.class.getName());
+	
 	public void createIxInitVars(String testDataFname) 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		createNewTestIndex(testDataParentPath + File.separator + testDataFname, configPropFile, solrPath, solrDataDir, solrMarcPath);
+		createNewTestIndex(testDataParentPath + File.separator + testDataFname, configPropFile, solrPath, solrDataDir, solrmarcPath, siteSpecificPath);
 		solrCore = getSolrCore(solrPath, solrDataDir);
 		sis = getSolrIndexSearcher(solrCore);
 	}
@@ -63,7 +73,7 @@ public abstract class IndexTest {
 	 */
 	protected final void setupMultiValStrFldTests(String fldName, String datafile) 
 			throws IOException, ParserConfigurationException, SAXException {
-		createNewTestIndex(testDataParentPath + datafile, configPropFile, solrPath, solrDataDir, solrMarcPath);
+		createNewTestIndex(testDataParentPath + datafile, configPropFile, solrPath, solrDataDir, solrmarcPath, siteSpecificPath);
 		SolrCore solrCore = getSolrCore(solrPath, solrDataDir);
 		assertStringFieldProperties(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
@@ -96,17 +106,21 @@ public abstract class IndexTest {
 	 * @param confPropFilePath - path to a config.properties file
 	 * @param solrPath - the directory holding the solr instance (think conf files)
 	 * @param solrDataDir - the data directory to hold the index
+	 * @param solrmarcPath - solrmarc top level directory
+	 * @param siteSpecPath - site specific directory holding the _index.properties
 	 */
 	public static final void createNewTestIndex(String marc21FilePath, String confPropFilePath,
-			String solrPath, String solrDataDir, String solrMarcPath) throws IOException 
+			String solrPath, String solrDataDir, String solrmarcPath, String siteSpecPath) throws IOException 
 	{
 		// set system properties used by importer
-		setImportSystemProps(marc21FilePath, solrPath, solrDataDir, solrMarcPath);
+		setImportSystemProps(marc21FilePath, solrPath, solrDataDir, solrmarcPath, siteSpecPath);
 		// ensure we start with an empty index
 		String ixDir = System.getProperty("solr.data.dir") + File.separator + "index";
 		deleteDir(ixDir);
 
-	    MarcImporter importer = new MarcImporter(confPropFilePath);
+		String[] args = new String[1];
+		args[0] = confPropFilePath;
+	    MarcImporter importer = new MarcImporter(args);
 	    int numImported = importer.importRecords();
 	    int numDeleted = importer.deleteRecords();
 	    importer.finish();
@@ -119,14 +133,15 @@ public abstract class IndexTest {
 	 *  as system properties, then use the passed parameters.  (This allows 
 	 *  testing within eclipse as well as testing on linux boxes using ant)
 	 */
-	private static final void setImportSystemProps(String marc21FilePath, String solrPath,
-			String solrDataDir, String solrMarcPath) 
+	protected static final void setImportSystemProps(String marc21FilePath, String solrPath,
+			String solrDataDir, String solrmarcPath, String siteSpecificPath) 
 	{
 		// crucial to set solr.path and marc.path properties
 		System.setProperty("marc.path", marc21FilePath);
 		System.setProperty("solr.path", solrPath);
 		System.setProperty("solr.data.dir", solrDataDir);
-		System.setProperty("solrmarc.path", solrMarcPath);
+		System.setProperty("solrmarc.path", solrmarcPath);
+		System.setProperty("solrmarc.site.path", siteSpecificPath);
 		
 		System.setProperty("marc.to_utf_8", "true");
 		System.setProperty("marc.default_encoding", "MARC8");
@@ -453,9 +468,8 @@ public abstract class IndexTest {
 
 	public static final SolrCore getSolrCore(String solrPath, String solrDataDir)
 			throws ParserConfigurationException, IOException, SAXException {
-		SolrConfig solrConfig = new SolrConfig(solrPath, "solrconfig.xml", null);
-		IndexSchema ixSchema = new IndexSchema(solrConfig, "schema.xml");
-		return new SolrCore(solrDataDir, ixSchema);
+		SolrCoreProxy solrCoreProxy = SolrCoreLoader.loadCore(solrPath, solrDataDir, null, logger);
+		return (SolrCore) solrCoreProxy.getCore();
 	}
 
 	public static final IndexReader getIndexReader(String solrPath, String solrDataDir)
