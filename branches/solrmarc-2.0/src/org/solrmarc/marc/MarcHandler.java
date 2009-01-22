@@ -1,21 +1,11 @@
 package org.solrmarc.marc;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Constructor;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.regex.PatternSyntaxException;
+import java.util.*;
 
 import org.apache.log4j.Logger;
-import org.marc4j.ErrorHandler;
-import org.marc4j.MarcDirStreamReader;
-import org.marc4j.MarcPermissiveStreamReader;
-import org.marc4j.MarcReader;
+import org.marc4j.*;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.tools.Utils;
 
@@ -24,25 +14,27 @@ public abstract class MarcHandler {
 	abstract protected int handleAll();
 	abstract protected void loadLocalProperties(Properties props);
 
-	protected String solrMarcDir;
 	protected SolrIndexer indexer;
 	protected MarcReader reader;
 	protected boolean verbose = false;
-	protected boolean to_utf_8 = false;
-	protected boolean unicodeNormalize = false;
 	protected ErrorHandler errors = null;
 	protected boolean includeErrors = false;
+    /** The full class name of SolrIndexer or the subclass to be used */
 	protected String indexerName;
-	protected String indexerProps;
 	protected String addnlArgs[] = null;
+	
+	private String solrmarcPath;
+	private String siteSpecificPath;
+    /** The name of the _index.properties file */
+	private String indexerProps;
+
 	
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcHandler.class.getName());
 	
 	public MarcHandler(String args[])
 	{
-        String properties = "import.properties";
-        System.setProperty("marc.source", "STDIN");
+        String configProperties = "import.properties";
         
         if(args.length > 0)
         {
@@ -51,7 +43,7 @@ public abstract class MarcHandler {
             {
                 if (arg.endsWith(".properties"))
                 {
-                    properties = arg;
+                    configProperties = arg;
                 }
                 else if (arg.endsWith(".mrc"))
                 {
@@ -71,9 +63,9 @@ public abstract class MarcHandler {
         }
  
         // System.out.println("Loading properties from " + properties);
-        logger.info("Loading properties from " + properties);
+        logger.info("Loading config properties from " + configProperties);
         // Process Properties
-        loadProperties(properties);
+        loadProperties(configProperties);
 
         //  Load the custom Indexer (or the standard one)
         //  note the values indexerName and indexerProps are initialized
@@ -83,21 +75,21 @@ public abstract class MarcHandler {
 	}
 		
 	/**
-	 * Load the properties file
-	 * @param properties
-	 * @throws IOException
+	 * Load the properties file and initials class variables
+	 * @param configProperties _config.properties file
 	 */
-	public void loadProperties(String properties)
+	public void loadProperties(String configProperties)
 	{
-        Properties props = Utils.loadProperties(null, properties);
+        Properties props = Utils.loadProperties(null, configProperties);
 
-        // The location of where the .properties files are located
-        solrMarcDir = Utils.getProperty(props, "solrmarc.path");
+        solrmarcPath = Utils.getProperty(props, "solrmarc.path");
 
-        // The SolrMarc indexer
+        siteSpecificPath = Utils.getProperty(props, "solrmarc.site.path");
+
+        // class name of SolrIndexer or the subclass to be used
         indexerName = Utils.getProperty(props, "solr.indexer");
 
-        // The SolrMarc indexer properties file
+        // _index.properties file
         indexerProps = Utils.getProperty(props, "solr.indexer.properties");
 
 
@@ -113,8 +105,8 @@ public abstract class MarcHandler {
         }
         verbose = Boolean.parseBoolean(Utils.getProperty(props, "marc.verbose"));
         includeErrors = Boolean.parseBoolean(Utils.getProperty(props, "marc.include_errors"));
-        to_utf_8 = Boolean.parseBoolean(Utils.getProperty(props, "marc.to_utf_8"));
-        unicodeNormalize = Boolean.parseBoolean(Utils.getProperty(props, "marc.unicode_normalize"));
+        boolean to_utf_8 = Boolean.parseBoolean(Utils.getProperty(props, "marc.to_utf_8"));
+        boolean unicodeNormalize = Boolean.parseBoolean(Utils.getProperty(props, "marc.unicode_normalize"));
         String source = Utils.getProperty(props, "marc.source", "STDIN").trim();
         if (Utils.getProperty(props, "marc.override")!= null)
         {
@@ -201,8 +193,8 @@ public abstract class MarcHandler {
 	            logger.error(e.getCause());
 	        }
 	
-	        Constructor<?> constructor = indexerClass.getConstructor(new Class[]{String.class, String.class});
-	        Object instance = constructor.newInstance(indexerProps, solrMarcDir);
+	        Constructor<?> constructor = indexerClass.getConstructor(new Class[]{String.class, String.class, String.class});
+	        Object instance = constructor.newInstance(indexerProps, solrmarcPath, siteSpecificPath);
 	
 	        if (instance instanceof SolrIndexer)
 	        {
