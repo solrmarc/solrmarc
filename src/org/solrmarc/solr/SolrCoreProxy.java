@@ -87,8 +87,7 @@ public class SolrCoreProxy
         catch (Exception e)
         {
             System.err.println("Error: Problem creating AddUpdateCommand in SolrCoreProxy");               
-            e.printStackTrace();
-            System.exit(1);
+            throw new RuntimeException("Error: Problem creating AddUpdateCommand in SolrCoreProxy");
         }            
         
         
@@ -96,46 +95,81 @@ public class SolrCoreProxy
         try
         {
             documentBuilder.getClass().getMethod("startDoc").invoke(documentBuilder);
-            Iterator<String> keys = map.keySet().iterator();
-            while (keys.hasNext())
-            {
-                String key = keys.next();
-                Object value = map.get(key);
-                if (value instanceof String)
-                {
-                    documentBuilder.getClass().getMethod("addField", String.class, String.class).invoke(documentBuilder, key, (String)value);
-                }
-                else if (value instanceof Collection)
-                {
-                    Iterator<?> valIter = ((Collection)value).iterator();
-                    while (valIter.hasNext())
-                    {
-                        String collVal = valIter.next().toString();
-                        documentBuilder.getClass().getMethod("addField", String.class, String.class).invoke(documentBuilder, key, collVal);
-                    }
-                }
-            }
-            documentBuilder.getClass().getMethod("endDoc").invoke(documentBuilder);
-            
-            // finish up
-            Object doc = documentBuilder.getClass().getMethod("getDoc").invoke(documentBuilder);
-            setValue(addUpdateCommand, "doc", doc);
-            setValue(addUpdateCommand, "allowDups", false);
-            setValue(addUpdateCommand, "overwriteCommitted", true);
-            setValue(addUpdateCommand, "overwritePending", true);
-            
-            if (verbose)
-            {
-                //System.out.println(record.toString());
-                docStr = doc.toString().replaceAll("> ", "> \n");
-            }
         }
         catch (Exception e1)
         {
-            System.err.println("Error: Problem adding document via SolrCoreProxy");               
-//          logger.error("Error: Problem instantiating SolrCore");
-            e1.printStackTrace();
-            System.exit(1);
+            System.err.println("Error: Problem invoking startDoc in SolrCoreProxy");               
+            throw new RuntimeException("Error: Problem invoking startDoc in SolrCoreProxy");
+        }
+        Iterator<String> keys = map.keySet().iterator();
+        while (keys.hasNext())
+        {
+            String key = keys.next();
+            Object value = map.get(key);
+            if (value instanceof String)
+            {
+                try
+                {
+                    documentBuilder.getClass().getMethod("addField", String.class, String.class).invoke(documentBuilder, key, (String)value);
+                }
+                catch (Exception e)
+                {
+                    System.err.println("Error: Problem invoking addField in SolrCoreProxy");               
+                    throw new RuntimeException("Error: Problem invoking addField in SolrCoreProxy");
+                }
+            }
+            else if (value instanceof Collection)
+            {
+                Iterator<?> valIter = ((Collection)value).iterator();
+                while (valIter.hasNext())
+                {
+                    Object nextItem = valIter.next();
+                    if (nextItem != null)
+                    {
+                        String collVal = nextItem.toString();
+                        try
+                        {
+                            documentBuilder.getClass().getMethod("addField", String.class, String.class).invoke(documentBuilder, key, collVal);
+                        }
+                        catch (Exception e)
+                        {
+                            System.err.println("Error: Problem invoking addField in SolrCoreProxy");               
+                            throw new RuntimeException("Error: Problem invoking addField in SolrCoreProxy");
+                        }
+                    }
+                }
+            }
+        }
+        try 
+        { 
+            documentBuilder.getClass().getMethod("endDoc").invoke(documentBuilder);
+        }
+        catch (Exception e1)
+        {
+            System.err.println("Error: Problem invoking startDoc in SolrCoreProxy");               
+            throw new RuntimeException("Error: Problem invoking startDoc in SolrCoreProxy");
+        }
+        
+        // finish up
+        Object doc;
+        try
+        {
+            doc = documentBuilder.getClass().getMethod("getDoc").invoke(documentBuilder);
+        }
+        catch (Exception e1)
+        {
+            System.err.println("Error: Problem invoking getDoc in SolrCoreProxy");               
+            throw new RuntimeException("Error: Problem invoking getDoc in SolrCoreProxy");
+        }
+        setValue(addUpdateCommand, "doc", doc);
+        setValue(addUpdateCommand, "allowDups", false);
+        setValue(addUpdateCommand, "overwriteCommitted", true);
+        setValue(addUpdateCommand, "overwritePending", true);
+        
+        if (verbose)
+        {
+            //System.out.println(record.toString());
+            docStr = doc.toString().replaceAll("> ", "> \n");
         }
        
         Method addMethod;
@@ -144,17 +178,17 @@ public class SolrCoreProxy
             addMethod = updateHandler.getClass().getMethod("addDoc", addUpdateCommand.getClass());
             addMethod.invoke(updateHandler, addUpdateCommand);
         }
+        catch (InvocationTargetException e)
+        {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) throw (IOException)cause;                
+            System.err.println("Error: Problem adding document via SolrCoreProxy");               
+            throw new RuntimeException("Error: Problem adding document via SolrCoreProxy: can't call addDoc");
+        }
         catch (Exception e)
         {
-            if (e instanceof InvocationTargetException)
-            {
-                Throwable cause = e.getCause();
-                if (cause instanceof IOException) throw (IOException)cause;                
-            }
             System.err.println("Error: Problem adding document via SolrCoreProxy");               
-//          logger.error("Error: Problem instantiating SolrCore");
-            e.printStackTrace();
-            System.exit(1);
+            throw new RuntimeException("Error: Problem adding document via SolrCoreProxy: can't call addDoc");
         } 
         return(docStr);
     }
@@ -178,8 +212,7 @@ public class SolrCoreProxy
         catch (Exception e)
         {
             System.err.println("Error: Problem creating DeleteUpdateCommand in SolrCoreProxy");               
-            e.printStackTrace();
-            System.exit(1);
+            throw new RuntimeException("Error: Problem  creating DeleteUpdateCommand in SolrCoreProxy");
         }            
         
         setValue(deleteUpdateCommand, "id", id);
@@ -193,10 +226,8 @@ public class SolrCoreProxy
         }
         catch (Exception e)
         {
-            System.err.println("Error: Problem deleting document via SolrCoreProxy");               
-//          logger.error("Error: Problem instantiating SolrCore");
-            e.printStackTrace();
-            System.exit(1);
+            System.err.println("Error: Problem creating DeleteUpdateCommand in SolrCoreProxy");               
+            throw new RuntimeException("Error: Problem  creating DeleteUpdateCommand in SolrCoreProxy");
         }
     }
 
@@ -219,8 +250,7 @@ public class SolrCoreProxy
         catch (Exception e)
         {
             System.err.println("Error: Problem creating CommitUpdateCommand in SolrCoreProxy");               
-            e.printStackTrace();
-            System.exit(1);
+            throw new RuntimeException("Error: Problem  creating CommitUpdateCommand in SolrCoreProxy");
         }
 
         setValue(commitUpdateCommand, "optimize", optimize);
@@ -230,18 +260,19 @@ public class SolrCoreProxy
             commitMethod = updateHandler.getClass().getMethod("commit", commitUpdateCommand.getClass());
             commitMethod.invoke(updateHandler, commitUpdateCommand);
         }
+        catch (InvocationTargetException e)
+        {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) throw (IOException)cause;                
+            
+            System.err.println("Error: Problem invoking commit in SolrCoreProxy");               
+            throw new RuntimeException("Error:  Problem invoking commit in SolrCoreProxy");
+        }        
         catch (Exception e)
         {
-            if (e instanceof InvocationTargetException)
-            {
-                Throwable cause = e.getCause();
-                if (cause instanceof IOException) throw (IOException)cause;                
-            }
-            System.err.println("Error: Problem committing via SolrCoreProxy");               
-//          logger.error("Error: Problem instantiating SolrCore");
-            e.printStackTrace();
-            System.exit(1);
-        }        
+            System.err.println("Error:  Problem invoking commit in SolrCoreProxy");               
+            throw new RuntimeException("Error:  Problem invoking commit in SolrCoreProxy");
+        }            
     }
     
     public void close()
@@ -254,10 +285,8 @@ public class SolrCoreProxy
         }
         catch (Exception e)
         {
-            System.err.println("Error: Problem closing via SolrCoreProxy");               
-//          logger.error("Error: Problem instantiating SolrCore");
-            e.printStackTrace();
-            System.exit(1);
+            System.err.println("Error: Problem invoking close in SolrCoreProxy");               
+            throw new RuntimeException("Error: Problem invoking close  in SolrCoreProxy");
         }
     }
 
