@@ -394,9 +394,10 @@ public class SolrIndexer
     {
     	Properties props = null;
     	try {
-    		// first look in site specific directory
+    		// first look in site specific translation maps directory
+            String dir = sitePath + File.separator + TRANS_MAP_DIR;
             props = Utils.loadProperties(sitePath, transMapName);
-            System.out.println("Loading Custom Map: " + sitePath + File.separator + transMapName);
+            System.out.println("Loading Custom Map: " + dir + File.separator + transMapName);
     	}
     	catch (Exception e) {
     		// try in solrmarc translation maps directory
