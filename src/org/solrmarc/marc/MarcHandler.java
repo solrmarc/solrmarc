@@ -3,6 +3,10 @@ package org.solrmarc.marc;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
 
 import org.apache.log4j.Logger;
 import org.marc4j.*;
@@ -22,19 +26,40 @@ public abstract class MarcHandler {
     /** The full class name of SolrIndexer or the subclass to be used */
 	protected String indexerName;
 	protected String addnlArgs[] = null;
+	protected Properties configProps;
 	
 	private String solrmarcPath;
 	private String siteSpecificPath;
-    /** The name of the _index.properties file */
+    
+	/** The name of the _index.properties file */
 	private String indexerProps;
-
+    private final String TRANS_MAP_DIR = "translation_maps";
 	
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcHandler.class.getName());
 	
 	public MarcHandler(String args[])
 	{
-        String configProperties = "import.properties";
+        String configProperties = "config.properties";
+        
+        try {
+            Class<?> bootClass = Class.forName("com.simontuffs.onejar.Boot");
+            String jar = bootClass.getMethod("getMyJarPath").invoke(null).toString();
+            JarFile jarFile = new JarFile(jar);
+            Enumeration entries = jarFile.entries();
+            while (entries.hasMoreElements())
+            {
+                ZipEntry entry = (ZipEntry)entries.nextElement();
+                if (entry.getName().contains("config.properties"))
+                {
+                    configProperties = entry.getName();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            // no manifest property defining the config
+        }
         
         if(args.length > 0)
         {
@@ -61,7 +86,7 @@ public abstract class MarcHandler {
             }
             addnlArgs = addnlArgList.toArray(new String[0]);
         }
- 
+
         // System.out.println("Loading properties from " + properties);
         logger.info("Loading config properties from " + configProperties);
         // Process Properties
@@ -80,37 +105,37 @@ public abstract class MarcHandler {
 	 */
 	public void loadProperties(String configProperties)
 	{
-        Properties props = Utils.loadProperties(null, configProperties);
+	    configProps = Utils.loadProperties(null, configProperties);
 
-        solrmarcPath = Utils.getProperty(props, "solrmarc.path");
+        solrmarcPath = Utils.getProperty(configProps, "solrmarc.path");
 
-        siteSpecificPath = Utils.getProperty(props, "solrmarc.site.path");
+        siteSpecificPath = Utils.getProperty(configProps, "solrmarc.site.path");
 
         // class name of SolrIndexer or the subclass to be used
-        indexerName = Utils.getProperty(props, "solr.indexer");
+        indexerName = Utils.getProperty(configProps, "solr.indexer");
 
         // _index.properties file
-        indexerProps = Utils.getProperty(props, "solr.indexer.properties");
+        indexerProps = Utils.getProperty(configProps, "solr.indexer.properties");
 
 
-        boolean permissiveReader = Boolean.parseBoolean(Utils.getProperty(props, "marc.permissive"));
+        boolean permissiveReader = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.permissive"));
         String defaultEncoding;
-        if (Utils.getProperty(props, "marc.default_encoding") != null)
+        if (Utils.getProperty(configProps, "marc.default_encoding") != null)
         {
-            defaultEncoding = Utils.getProperty(props, "marc.default_encoding").trim();    
+            defaultEncoding = Utils.getProperty(configProps, "marc.default_encoding").trim();    
         }
         else
         {
             defaultEncoding = "BESTGUESS";
         }
-        verbose = Boolean.parseBoolean(Utils.getProperty(props, "marc.verbose"));
-        includeErrors = Boolean.parseBoolean(Utils.getProperty(props, "marc.include_errors"));
-        boolean to_utf_8 = Boolean.parseBoolean(Utils.getProperty(props, "marc.to_utf_8"));
-        boolean unicodeNormalize = Boolean.parseBoolean(Utils.getProperty(props, "marc.unicode_normalize"));
-        String source = Utils.getProperty(props, "marc.source", "STDIN").trim();
-        if (Utils.getProperty(props, "marc.override")!= null)
+        verbose = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.verbose"));
+        includeErrors = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.include_errors"));
+        boolean to_utf_8 = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.to_utf_8"));
+        boolean unicodeNormalize = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.unicode_normalize"));
+        String source = Utils.getProperty(configProps, "marc.source", "STDIN").trim();
+        if (Utils.getProperty(configProps, "marc.override")!= null)
         {
-            System.setProperty("org.marc4j.marc.MarcFactory", Utils.getProperty(props, "marc.override").trim());
+            System.setProperty("org.marc4j.marc.MarcFactory", Utils.getProperty(configProps, "marc.override").trim());
         }
         reader = null;
         if (source.equals("FILE") || source.equals("STDIN"))
@@ -118,7 +143,7 @@ public abstract class MarcHandler {
         	InputStream is = null;
         	if (source.equals("FILE")) 
         	{
-        		String fName = Utils.getProperty(props, "marc.path").trim();
+        		String fName = Utils.getProperty(configProps, "marc.path").trim();
         		try {
 					is = new FileInputStream(fName);
 				} 
@@ -144,15 +169,15 @@ public abstract class MarcHandler {
         }
         else if (source.equals("DIR"))
         {
-            reader = new MarcDirStreamReader(Utils.getProperty(props, "marc.path").trim(), permissiveReader, to_utf_8);
+            reader = new MarcDirStreamReader(Utils.getProperty(configProps, "marc.path").trim(), permissiveReader, to_utf_8);
         }
         else if (source.equals("Z3950"))
         {
         	logger.warn("Error: Z3950 not yet implemented");
             reader = null;
         }
-        String marcIncludeIfPresent = Utils.getProperty(props, "marc.include_if_present");
-        String marcIncludeIfMissing = Utils.getProperty(props, "marc.include_if_missing");
+        String marcIncludeIfPresent = Utils.getProperty(configProps, "marc.include_if_present");
+        String marcIncludeIfMissing = Utils.getProperty(configProps, "marc.include_if_missing");
         if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null))
         {
             reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing);
@@ -162,9 +187,7 @@ public abstract class MarcHandler {
 	//        if (reader != null && to_utf_8)
 	//        {
 	//            reader = new MarcTranslatedReader(reader, unicodeNormalize);
-	//        }
-	    loadLocalProperties(props);
-	    
+	//        }	    
         return;
 	}
 
@@ -193,8 +216,10 @@ public abstract class MarcHandler {
 	            logger.error(e.getCause());
 	        }
 	
-	        Constructor<?> constructor = indexerClass.getConstructor(new Class[]{String.class, String.class, String.class});
-	        Object instance = constructor.newInstance(indexerProps, solrmarcPath, siteSpecificPath);
+	        Constructor<?> constructor = indexerClass.getConstructor(new Class[]{String.class, String[].class});
+	        Object instance = constructor.newInstance(indexerProps, new String[]{solrmarcPath, siteSpecificPath,
+	                                                                             solrmarcPath + File.separator + TRANS_MAP_DIR,
+	                                                                             siteSpecificPath + File.separator + TRANS_MAP_DIR });
 	
 	        if (instance instanceof SolrIndexer)
 	        {
