@@ -82,7 +82,7 @@ public class SolrReIndexer
         }
         if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
         // Set up Solr core
-        solrCoreProxy  = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, "", logger);  
+  //      solrCoreProxy  = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, "", logger);  
 //        refedSolrSearcher = solrCore.getSearcher();
 //        solrSearcher = refedSolrSearcher.get();
         solrSearcherProxy = new SolrSearcherProxy(solrCoreProxy);
@@ -133,7 +133,7 @@ public class SolrReIndexer
             logger.error("Using default SolrIndexer with properties file: " + indexerProps);
             
             try {
-                indexer = new SolrIndexer(indexerProps, solrmarcPath, siteSpecificPath);
+ //               indexer = new SolrIndexer(indexerProps, solrmarcPath, siteSpecificPath);
             }
             catch (Exception e1)
             {
