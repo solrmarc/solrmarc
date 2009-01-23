@@ -70,6 +70,9 @@ public class SolrCoreProxy
                 Class<?> addUpdateCommandClass = Class.forName("org.apache.solr.update.AddUpdateCommand");            
                 addUpdateCommand = addUpdateCommandClass.getConstructor().newInstance();
             }
+            else
+                ((org.apache.solr.update.AddUpdateCommand) addUpdateCommand).clear();
+                
             if (documentBuilder == null)
             {
                 Class<?> indexSchemaClass = Class.forName("org.apache.solr.schema.IndexSchema");
@@ -168,10 +171,9 @@ public class SolrCoreProxy
         
         String docStr = doc.toString().replaceAll("> ", "> \n");
        
-        Method addMethod;
         try
         {
-            addMethod = updateHandler.getClass().getMethod("addDoc", addUpdateCommand.getClass());
+            Method addMethod = updateHandler.getClass().getMethod("addDoc", addUpdateCommand.getClass());
             addMethod.invoke(updateHandler, addUpdateCommand);
         }
         catch (InvocationTargetException e)
@@ -250,10 +252,9 @@ public class SolrCoreProxy
         }
 
         setValue(commitUpdateCommand, "optimize", optimize);
-        Method commitMethod;
         try
         {
-            commitMethod = updateHandler.getClass().getMethod("commit", commitUpdateCommand.getClass());
+            Method commitMethod = updateHandler.getClass().getMethod("commit", commitUpdateCommand.getClass());
             commitMethod.invoke(updateHandler, commitUpdateCommand);
         }
         catch (InvocationTargetException e)
