@@ -68,7 +68,8 @@ public class MarcImporter extends MarcHandler
     {
         // Process Properties in super class MarcHandler
     	super(args);
-        
+    	
+    	loadLocalProperties(configProps);
         // Set up Solr core
         solrCoreProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, null, logger);
 	}

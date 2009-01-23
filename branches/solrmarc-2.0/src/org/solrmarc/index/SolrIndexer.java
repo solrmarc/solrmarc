@@ -47,14 +47,10 @@ public class SolrIndexer
     /** current datestamp for indexed solr document */
     private Date indexDate = null;
 
-    /** top level of solrmarc */
-    private String solrmarcPath;
-    
-    /** top level of site specific directory 
-     * (contains _config, _index, site specific translation maps) */
-    private String sitePath;
-    
-    private final String TRANS_MAP_DIR = "translation_maps";
+    /** list of path to look for property files in */
+    private String propertyFilePaths[];
+        
+ //   private final String TRANS_MAP_DIR = "translation_maps";
     
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
@@ -77,12 +73,11 @@ public class SolrIndexer
      * @param solrmarcDir - top level solrmarc directory
      * @param siteDir - top level of site specific directory (contains _config, _index)
      */
-    public SolrIndexer(String indexingPropsFile, String solrmarcDir, String siteDir)
+    public SolrIndexer(String indexingPropsFile, String propertyDirs[])
     {
         this();
-        sitePath = siteDir;
-        solrmarcPath = solrmarcDir;
-        Properties indexingProps = Utils.loadProperties(siteDir, indexingPropsFile);
+        propertyFilePaths = propertyDirs;
+        Properties indexingProps = Utils.loadProperties(propertyFilePaths, indexingPropsFile);
         fillMapFromProperties(indexingProps);
     }
 
@@ -393,18 +388,8 @@ public class SolrIndexer
     private void loadTranslationMapValues(String transMapName, String mapName, String mapKeyPrefix)
     {
     	Properties props = null;
-    	try {
-    		// first look in site specific translation maps directory
-            String dir = sitePath + File.separator + TRANS_MAP_DIR;
-            props = Utils.loadProperties(sitePath, transMapName);
-            System.out.println("Loading Custom Map: " + dir + File.separator + transMapName);
-    	}
-    	catch (Exception e) {
-    		// try in solrmarc translation maps directory
-    		String dir = solrmarcPath + File.separator + TRANS_MAP_DIR;
-            props = Utils.loadProperties(dir, transMapName);
-            System.out.println("Loading Custom Map: " + dir + File.separator + transMapName);
-    	}
+        props = Utils.loadProperties(propertyFilePaths, transMapName);
+        System.out.println("Loading Custom Map: " + transMapName);
         loadTranslationMapValues(props, mapName, mapKeyPrefix);
     }
 
