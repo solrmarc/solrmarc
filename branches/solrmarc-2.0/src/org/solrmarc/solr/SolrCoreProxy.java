@@ -40,7 +40,6 @@ public class SolrCoreProxy
             }
             catch (ClassNotFoundException e1)
             {
-                // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
         }
@@ -56,7 +55,6 @@ public class SolrCoreProxy
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -71,7 +69,9 @@ public class SolrCoreProxy
                 addUpdateCommand = addUpdateCommandClass.getConstructor().newInstance();
             }
             else
-                ((org.apache.solr.update.AddUpdateCommand) addUpdateCommand).clear();
+            {
+                addUpdateCommand.getClass().getMethod("clear").invoke(addUpdateCommand);
+            }
                 
             if (documentBuilder == null)
             {
@@ -92,8 +92,7 @@ public class SolrCoreProxy
             System.err.println("Error: Problem creating AddUpdateCommand in SolrCoreProxy"); 
             throw new RuntimeException("Error: Problem creating AddUpdateCommand in SolrCoreProxy", e);
         }            
-        
-        
+                
         try
         {
             documentBuilder.getClass().getMethod("startDoc").invoke(documentBuilder);
@@ -211,7 +210,7 @@ public class SolrCoreProxy
         {
             System.err.println("Error: Problem creating DeleteUpdateCommand in SolrCoreProxy");               
             throw new RuntimeException("Error: Problem  creating DeleteUpdateCommand in SolrCoreProxy", e);
-        }            
+        }
         
         setValue(deleteUpdateCommand, "id", id);
         setValue(deleteUpdateCommand, "fromCommitted", fromCommitted);
@@ -243,14 +242,13 @@ public class SolrCoreProxy
                 Method updateHandlerMethod = solrCore.getClass().getMethod("getUpdateHandler");
                 updateHandler = updateHandlerMethod.invoke(solrCore);
             }
-
         }
         catch (Exception e)
         {
             System.err.println("Error: Problem creating CommitUpdateCommand in SolrCoreProxy");               
             throw new RuntimeException("Error: Problem  creating CommitUpdateCommand in SolrCoreProxy", e);
         }
-
+        
         setValue(commitUpdateCommand, "optimize", optimize);
         try
         {
