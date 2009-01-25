@@ -56,7 +56,7 @@ public class MarcImporter extends MarcHandler
     private int recsDeletedCounter = 0;
     
     // Initialize logging category
-    static Logger logger = Logger.getLogger(MarcImporter.class.getName());
+    protected static Logger logger = Logger.getLogger(MarcImporter.class.getName());
     
 
     /**
@@ -232,36 +232,41 @@ public class MarcImporter extends MarcHandler
     private void addToIndex(Record record)
     	throws IOException
     {
-        Map<String, Object> map = indexer.map(record); 
-        if (map.size() == 0) return;
+        Map<String, Object> fieldsMap = indexer.map(record); 
+        if (fieldsMap.size() == 0) 
+            return;
+        
+        String docStr = addToIndex(fieldsMap);
+
+        if (verbose)
+        {
+            logger.info(record.toString());
+            logger.info(docStr);
+        }
+    }
+    
+    /**
+     * Add a document to the index according to the fields map
+     * @param record marc record to add
+     * @return the document added, as a String
+     */
+    protected String addToIndex(Map<String, Object> fieldsMap)
+        throws IOException
+    {
+        if (fieldsMap.size() == 0) 
+            return null;
         if (errors != null && includeErrors)
         {
             if (errors.hasErrors())
             {
-                addErrorsToMap(map, errors);
+                addErrorsToMap(fieldsMap, errors);
             }
         }
 
         // NOTE: exceptions are dealt with by calling class
-//        try {
-            String docStr = solrCoreProxy.addDoc(map, verbose);
-            if (verbose)
-            {
-                logger.info(record.toString());
-                logger.info(docStr);
-            }
-/*
-            
-        } 
-        catch (Exception e) 
-        {
-            //System.err.println("Couldn't add document");
-        	logger.error("Couldn't add document: " + e.getMessage());
-            //e.printStackTrace();
-        	logger.error("Control Number " + record.getControlNumber(), e);
-        }                
-*/
+        return solrCoreProxy.addDoc(fieldsMap, verbose);
     }
+            
 
     private void addErrorsToMap(Map<String, Object> map, ErrorHandler errors2)
     {
@@ -420,8 +425,6 @@ public class MarcImporter extends MarcHandler
     {
         Runtime.getRuntime().addShutdownHook(new MyShutdownThread(this));
         
-        //System.out.println("Here we go...");
-        
         Date start = new Date();
         
         int numImported = 0;
@@ -468,7 +471,6 @@ public class MarcImporter extends MarcHandler
     public static void main(String[] args) 
     {
         logger.info("Starting SolrMarc indexing.");
-    	// default properties file
         
         MarcImporter importer = null;
         try

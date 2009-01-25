@@ -50,8 +50,6 @@ public class SolrIndexer
     /** list of path to look for property files in */
     private String propertyFilePaths[];
         
- //   private final String TRANS_MAP_DIR = "translation_maps";
-    
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
 

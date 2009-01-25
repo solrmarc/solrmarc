@@ -118,11 +118,8 @@ public abstract class IndexTest {
 		String ixDir = System.getProperty("solr.data.dir") + File.separator + "index";
 		deleteDir(ixDir);
 
-		String[] args = new String[3];
+		String[] args = new String[1];
 		args[0] = confPropFilePath;
-		String transMapSubDir = File.separator + "translation_maps";
-		args[1] = siteSpecPath + transMapSubDir;
-		args[2] = solrmarcPath + transMapSubDir;
 	    MarcImporter importer = new MarcImporter(args);
 	    int numImported = importer.importRecords();
 	    int numDeleted = importer.deleteRecords();

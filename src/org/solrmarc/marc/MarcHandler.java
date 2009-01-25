@@ -3,9 +3,7 @@ package org.solrmarc.marc;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.jar.Attributes;
 import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 import org.apache.log4j.Logger;
@@ -217,9 +215,11 @@ public abstract class MarcHandler {
 	        }
 	
 	        Constructor<?> constructor = indexerClass.getConstructor(new Class[]{String.class, String[].class});
-	        Object instance = constructor.newInstance(indexerProps, new String[]{solrmarcPath, siteSpecificPath,
-	                                                                             solrmarcPath + File.separator + TRANS_MAP_DIR,
-	                                                                             siteSpecificPath + File.separator + TRANS_MAP_DIR });
+	        Object instance = constructor.newInstance(indexerProps, 
+	                new String[] { siteSpecificPath,
+							siteSpecificPath + File.separator + TRANS_MAP_DIR,
+							solrmarcPath, 
+                            solrmarcPath + File.separator + TRANS_MAP_DIR });
 	
 	        if (instance instanceof SolrIndexer)
 	        {
