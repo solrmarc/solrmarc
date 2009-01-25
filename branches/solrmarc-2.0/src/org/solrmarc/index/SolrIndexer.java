@@ -70,8 +70,7 @@ public class SolrIndexer
      * Constructor
      * @param indexingPropsFile the x_index.properties file mapping solr
      *  field names to values in the marc records
-     * @param solrmarcDir - top level solrmarc directory
-     * @param siteDir - top level of site specific directory (contains _config, _index)
+     * @param propertyDirs - array of directories holding properties files     
      */
     public SolrIndexer(String indexingPropsFile, String propertyDirs[])
     {
