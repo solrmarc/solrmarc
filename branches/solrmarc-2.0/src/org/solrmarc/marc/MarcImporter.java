@@ -60,9 +60,7 @@ public class MarcImporter extends MarcHandler
     
 
     /**
-	 * Constructs an instance with a properties file
-	 * @param properties
-	 * @throws IOException 
+	 * Constructs an instance with properties files
 	 */
     public MarcImporter(String args[])
     {
