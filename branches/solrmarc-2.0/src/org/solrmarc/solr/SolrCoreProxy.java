@@ -1,12 +1,8 @@
 package org.solrmarc.solr;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.lang.reflect.*;
+import java.util.*;
 
 
 public class SolrCoreProxy
@@ -30,6 +26,9 @@ public class SolrCoreProxy
         return solrCore;
     }
     
+    /**
+     * return true if exception is a SolrException
+     */
     public boolean isSolrException(Exception e)
     {
         if (solrExceptionClass == null)
@@ -46,12 +45,117 @@ public class SolrCoreProxy
         return ( (solrExceptionClass != null) ? solrExceptionClass.isInstance(e): false);
     }
         
-    private void setValue(Object object, String fieldName, Object value)
+    
+    /**
+     * given a map of field names and values, create a Document and add it to 
+     *  the index
+     * @param fieldsMap - map of field names and values to add to the document
+     * @return a string representation of the document
+     */
+    public String addDoc(Map<String, Object> fieldsMap, boolean verbose) throws IOException
+    {
+        initializeAddDocObjects();            
+            
+        invokeDocBuilderMethodNoArgs("startDoc");
+
+        Iterator<String> keys = fieldsMap.keySet().iterator();
+        while (keys.hasNext())
+        {
+            String fldName = keys.next();
+            Object fldValObject = fieldsMap.get(fldName);
+            
+            // add field to doc, whether it be a single value or a Collection
+            if (fldValObject instanceof String)
+            {
+                invokeDocBuilderAddField(fldName, (String) fldValObject);
+            }
+            else if (fldValObject instanceof Collection)
+            {
+                Iterator<?> valIter = ((Collection) fldValObject).iterator();
+                while (valIter.hasNext())
+                {
+                    Object nextItem = valIter.next();
+                    if (nextItem != null)
+                    {
+                        invokeDocBuilderAddField(fldName, nextItem.toString());
+                    }
+                }
+            }
+        }
+        
+        invokeDocBuilderMethodNoArgs("endDoc");
+
+        Object doc = invokeDocBuilderMethodNoArgs("getDoc");
+        setObjFldVal(addUpdateCommand, "doc", doc);
+        setObjFldVal(addUpdateCommand, "allowDups", false);
+        setObjFldVal(addUpdateCommand, "overwriteCommitted", true);
+        setObjFldVal(addUpdateCommand, "overwritePending", true);
+        
+        invokeUpdateHandlerMethodNoArgs("addDoc", addUpdateCommand);
+
+        return doc.toString().replaceAll("> ", "> \n");
+    }
+
+    
+    /**
+     * delete doc from the index
+     * @param id the unique identifier of the document to be deleted
+     */
+    public void delete(String id, boolean fromCommitted, boolean fromPending)
+        throws IOException
+    {
+        initializeDeleteObjects();
+        
+        setObjFldVal(deleteUpdateCommand, "id", id);
+        setObjFldVal(deleteUpdateCommand, "fromCommitted", fromCommitted);
+        setObjFldVal(deleteUpdateCommand, "fromPending", fromPending);
+        
+        invokeUpdateHandlerMethodNoArgs("delete", deleteUpdateCommand);
+    }
+
+    
+    /**
+     * commit changes to the index
+     */
+    public void commit(boolean optimize) throws IOException
+    {
+        initializeCommitObjects();
+        setObjFldVal(commitUpdateCommand, "optimize", optimize);
+        invokeUpdateHandlerMethodNoArgs("commit", commitUpdateCommand);
+    }
+
+    
+    /**
+     * close the solrCore
+     */
+    public void close()
     {
         try
         {
-            Field field = object.getClass().getField(fieldName);
-            field.set(object, value);
+            Method closeMethod = solrCore.getClass().getMethod("close");
+            closeMethod.invoke(solrCore);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error: Problem invoking close in SolrCoreProxy");             
+            throw new RuntimeException("Error: Problem invoking close  in SolrCoreProxy", e);
+        }
+    }
+
+    
+    /**
+     * given an Object, a field name and a value for the field, set the object's
+     *  field to the value 
+     * @param object - the Object containing the field
+     * @param fldName - the name of the field in the object
+     * @param fldVal - the value to be assigned to the field
+     */
+    private void setObjFldVal(Object object, String fldName, Object fldVal)
+    {
+        try
+        {
+            Field field = object.getClass().getField(fldName);
+            field.set(object, fldVal);
         }
         catch (Exception e)
         {
@@ -59,7 +163,139 @@ public class SolrCoreProxy
         }
     }
 
-    public String addDoc(Map<String, Object> map, boolean verbose) throws IOException
+    
+    /**
+     * invoke a method with no arguments on the documentBuilder object
+     * @param methodName
+     */
+    private Object invokeDocBuilderMethodNoArgs(String methodName) 
+    {
+        Object result;
+        try 
+        { 
+            result = documentBuilder.getClass().getMethod(methodName).invoke(documentBuilder);
+        }
+        catch (Exception e)
+        {
+            String errmsg = "Error: Problem invoking " + methodName + " in SolrCoreProxy";
+            System.err.println(errmsg);               
+            throw new RuntimeException(errmsg, e);
+        }
+        return result;
+    }
+
+    /**
+     * add a field to the Document being created with documentBuilder
+     * @param fieldName the name of the field to add
+     * @param fieldVal the value of the field to add, as a String
+     */
+    private void invokeDocBuilderAddField(String fieldName, String fieldVal) 
+    {
+        try
+        {
+            documentBuilder.getClass().getMethod("addField", String.class, String.class).invoke(documentBuilder, fieldName, fieldVal);
+        }
+        catch (Exception e)
+        {
+            String errmsg = "Error: Problem invoking addField in SolrCoreProxy";
+            System.err.println(errmsg);  
+            e.printStackTrace();
+            throw new RuntimeException(errmsg, e);
+        }
+    }
+    
+    
+    /**
+     * invoke a method with no arguments on the updateHandler object
+     */
+    private void invokeUpdateHandlerMethodNoArgs(String methodName, Object commandObject)
+        throws IOException
+    {
+        String errmsg = "Error: Problem invoking " + methodName + " on updateHandler via SolrCoreProxy";
+        
+        try
+        {
+            Method method = updateHandler.getClass().getMethod(methodName, commandObject.getClass());
+            method.invoke(updateHandler, commandObject);
+        }
+        catch (InvocationTargetException e)
+        {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) 
+                throw (IOException) cause;
+            System.err.println(errmsg);               
+            throw new RuntimeException(errmsg, e);
+        }
+        catch (Exception e)
+        {
+            System.err.println(errmsg);               
+            throw new RuntimeException(errmsg, e);
+        } 
+    }
+
+
+    /**
+     * initialize the objects need to add documents to the index, if they aren't
+     *   already initialized
+     */
+    private void initializeAddDocObjects()
+    {
+        initializeUpdateHandler();
+        initializeAddUpdateCommand();
+        initializeDocBuilder();
+    }
+    
+    /**
+     * initialize the objects need to delete docs from the index, if they aren't
+     *   already initialized
+     */
+    private void initializeDeleteObjects()
+    {
+        initializeUpdateHandler();
+        try
+        {
+            if (deleteUpdateCommand == null)
+            {            
+                Class<?> deleteUpdateCommandClass = Class.forName("org.apache.solr.update.DeleteUpdateCommand");
+                deleteUpdateCommand = deleteUpdateCommandClass.getConstructor().newInstance();
+            }
+        }
+        catch (Exception e)
+        {
+            String errmsg = "Error: Problem creating DeleteUpdateCommand in SolrCoreProxy";
+            System.err.println(errmsg);               
+            throw new RuntimeException(errmsg, e);
+        }
+    }
+
+    /**
+     * initialize the objects need to commit changes to index, if they aren't
+     *   already initialized
+     */
+    private void initializeCommitObjects()
+    {
+        initializeUpdateHandler();
+        try
+        {
+            if (commitUpdateCommand == null)
+            {            
+                Class<?> commitUpdateCommandClass = Class.forName("org.apache.solr.update.CommitUpdateCommand");            
+                commitUpdateCommand = commitUpdateCommandClass.getConstructor(boolean.class).newInstance(false);
+            }
+        }
+        catch (Exception e)
+        {
+            String errmsg = "Error: Problem creating CommitUpdateCommand in SolrCoreProxy";
+            System.err.println(errmsg);               
+            throw new RuntimeException(errmsg, e);
+        }
+    }
+    
+    /**
+     * initialize addUpdateCommand object if it doesn't yet exist, or clear it
+     *  if it already exists
+     */
+    private void initializeAddUpdateCommand() 
     {
         try
         {
@@ -72,7 +308,44 @@ public class SolrCoreProxy
             {
                 addUpdateCommand.getClass().getMethod("clear").invoke(addUpdateCommand);
             }
-                
+        }
+        catch (Exception e)
+        {
+            String errmsg = "Error: Problem creating AddUpdateCommand in SolrCoreProxy";
+            System.err.println(errmsg); 
+            throw new RuntimeException(errmsg, e);
+        }
+    }
+    
+    /**
+     * initialize updateHandler object by getting it from solrCore, if it 
+     *  doesn't exist yet
+     */
+    private void initializeUpdateHandler()
+    {
+        try
+        {
+            if (updateHandler == null)
+            {
+                Method updateHandlerMethod = solrCore.getClass().getMethod("getUpdateHandler");
+                updateHandler = updateHandlerMethod.invoke(solrCore);
+            }
+        }
+        catch (Exception e)
+        {
+            String errmsg = "Error: Problem creating updateHandler in SolrCoreProxy";
+            System.err.println(errmsg);               
+            throw new RuntimeException(errmsg, e);
+        }
+    }
+    
+    /**
+     * initialize documentBuilder object if it doesn't yet exist
+     */
+    private void initializeDocBuilder()
+    {
+        try
+        {
             if (documentBuilder == null)
             {
                 Class<?> indexSchemaClass = Class.forName("org.apache.solr.schema.IndexSchema");
@@ -81,209 +354,13 @@ public class SolrCoreProxy
                 Class<?> documentBuilderClass = Class.forName("org.apache.solr.update.DocumentBuilder");            
                 documentBuilder = documentBuilderClass.getConstructor(indexSchemaClass).newInstance(indexSchema);
             }
-            if (updateHandler == null)
-            {
-                Method updateHandlerMethod = solrCore.getClass().getMethod("getUpdateHandler");
-                updateHandler = updateHandlerMethod.invoke(solrCore);
-            }
         }
         catch (Exception e)
         {
-            System.err.println("Error: Problem creating AddUpdateCommand in SolrCoreProxy"); 
-            throw new RuntimeException("Error: Problem creating AddUpdateCommand in SolrCoreProxy", e);
-        }            
-                
-        try
-        {
-            documentBuilder.getClass().getMethod("startDoc").invoke(documentBuilder);
+            String errmsg = "Error: Problem creating documentBuilder in SolrCoreProxy";
+            System.err.println(errmsg); 
+            throw new RuntimeException(errmsg, e);
         }
-        catch (Exception e1)
-        {
-            System.err.println("Error: Problem invoking startDoc in SolrCoreProxy");         
-            throw new RuntimeException("Error: Problem invoking startDoc in SolrCoreProxy", e1);
-        }
-        Iterator<String> keys = map.keySet().iterator();
-        while (keys.hasNext())
-        {
-            String key = keys.next();
-            Object value = map.get(key);
-            if (value instanceof String)
-            {
-                try
-                {
-                    documentBuilder.getClass().getMethod("addField", String.class, String.class).invoke(documentBuilder, key, (String)value);
-                }
-                catch (Exception e)
-                {
-                    System.err.println("Error: Problem invoking addField in SolrCoreProxy");  
-                    e.printStackTrace();
-                    throw new RuntimeException("Error: Problem invoking addField in SolrCoreProxy", e);
-                }
-            }
-            else if (value instanceof Collection)
-            {
-                Iterator<?> valIter = ((Collection)value).iterator();
-                while (valIter.hasNext())
-                {
-                    Object nextItem = valIter.next();
-                    if (nextItem != null)
-                    {
-                        String collVal = nextItem.toString();
-                        try
-                        {
-                            documentBuilder.getClass().getMethod("addField", String.class, String.class).invoke(documentBuilder, key, collVal);
-                        }
-                        catch (Exception e)
-                        {
-                            System.err.println("Error: Problem invoking addField in SolrCoreProxy");               
-                            throw new RuntimeException("Error: Problem invoking addField in SolrCoreProxy", e);
-                        }
-                    }
-                }
-            }
-        }
-        try 
-        { 
-            documentBuilder.getClass().getMethod("endDoc").invoke(documentBuilder);
-        }
-        catch (Exception e1)
-        {
-            System.err.println("Error: Problem invoking startDoc in SolrCoreProxy");               
-            throw new RuntimeException("Error: Problem invoking startDoc in SolrCoreProxy", e1);
-        }
-        
-        // finish up
-        Object doc;
-        try
-        {
-            doc = documentBuilder.getClass().getMethod("getDoc").invoke(documentBuilder);
-        }
-        catch (Exception e1)
-        {
-            System.err.println("Error: Problem invoking getDoc in SolrCoreProxy");               
-            throw new RuntimeException("Error: Problem invoking getDoc in SolrCoreProxy", e1);
-        }
-        setValue(addUpdateCommand, "doc", doc);
-        setValue(addUpdateCommand, "allowDups", false);
-        setValue(addUpdateCommand, "overwriteCommitted", true);
-        setValue(addUpdateCommand, "overwritePending", true);
-        
-        String docStr = doc.toString().replaceAll("> ", "> \n");
-       
-        try
-        {
-            Method addMethod = updateHandler.getClass().getMethod("addDoc", addUpdateCommand.getClass());
-            addMethod.invoke(updateHandler, addUpdateCommand);
-        }
-        catch (InvocationTargetException e)
-        {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) throw (IOException)cause;                
-            System.err.println("Error: Problem adding document via SolrCoreProxy");               
-            throw new RuntimeException("Error: Problem adding document via SolrCoreProxy: can't call addDoc", e);
-        }
-        catch (Exception e)
-        {
-            System.err.println("Error: Problem adding document via SolrCoreProxy");               
-            throw new RuntimeException("Error: Problem adding document via SolrCoreProxy: can't call addDoc", e);
-        } 
-        return docStr;
-    }
-
-    public void delete(String id, boolean fromCommitted, boolean fromPending)
-    {
-        try
-        {
-            if (deleteUpdateCommand == null)
-            {            
-                Class<?> deleteUpdateCommandClass = Class.forName("org.apache.solr.update.DeleteUpdateCommand");
-                deleteUpdateCommand = deleteUpdateCommandClass.getConstructor().newInstance();
-            }
-            if (updateHandler == null)
-            {
-                Method updateHandlerMethod = solrCore.getClass().getMethod("getUpdateHandler");
-                updateHandler = updateHandlerMethod.invoke(solrCore);
-            }
-
-        }
-        catch (Exception e)
-        {
-            System.err.println("Error: Problem creating DeleteUpdateCommand in SolrCoreProxy");               
-            throw new RuntimeException("Error: Problem  creating DeleteUpdateCommand in SolrCoreProxy", e);
-        }
-        
-        setValue(deleteUpdateCommand, "id", id);
-        setValue(deleteUpdateCommand, "fromCommitted", fromCommitted);
-        setValue(deleteUpdateCommand, "fromPending", fromPending);
-        Method deleteMethod;
-        try
-        {
-            deleteMethod = updateHandler.getClass().getMethod("delete", deleteUpdateCommand.getClass());
-            deleteMethod.invoke(updateHandler, deleteUpdateCommand);
-        }
-        catch (Exception e)
-        {
-            System.err.println("Error: Problem creating DeleteUpdateCommand in SolrCoreProxy");               
-            throw new RuntimeException("Error: Problem  creating DeleteUpdateCommand in SolrCoreProxy", e);
-        }
-    }
-
-    public void commit(boolean optimize) throws IOException
-    {
-        try
-        {
-            if (commitUpdateCommand == null)
-            {            
-                Class<?> commitUpdateCommandClass = Class.forName("org.apache.solr.update.CommitUpdateCommand");            
-                commitUpdateCommand = commitUpdateCommandClass.getConstructor(boolean.class).newInstance(false);
-            }
-            if (updateHandler == null)
-            {
-                Method updateHandlerMethod = solrCore.getClass().getMethod("getUpdateHandler");
-                updateHandler = updateHandlerMethod.invoke(solrCore);
-            }
-        }
-        catch (Exception e)
-        {
-            System.err.println("Error: Problem creating CommitUpdateCommand in SolrCoreProxy");               
-            throw new RuntimeException("Error: Problem  creating CommitUpdateCommand in SolrCoreProxy", e);
-        }
-        
-        setValue(commitUpdateCommand, "optimize", optimize);
-        try
-        {
-            Method commitMethod = updateHandler.getClass().getMethod("commit", commitUpdateCommand.getClass());
-            commitMethod.invoke(updateHandler, commitUpdateCommand);
-        }
-        catch (InvocationTargetException e)
-        {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) throw (IOException)cause;                
-            
-            System.err.println("Error: Problem invoking commit in SolrCoreProxy");               
-            throw new RuntimeException("Error:  Problem invoking commit in SolrCoreProxy", e);
-        }        
-        catch (Exception e)
-        {
-            System.err.println("Error:  Problem invoking commit in SolrCoreProxy");               
-            throw new RuntimeException("Error:  Problem invoking commit in SolrCoreProxy", e);
-        }            
     }
     
-    public void close()
-    {
-        Method closeMethod;
-        try
-        {
-            closeMethod = solrCore.getClass().getMethod("close");
-            closeMethod.invoke(solrCore);
-        }
-        catch (Exception e)
-        {
-            System.err.println("Error: Problem invoking close in SolrCoreProxy");             
-            throw new RuntimeException("Error: Problem invoking close  in SolrCoreProxy", e);
-        }
-    }
-
-
 }
