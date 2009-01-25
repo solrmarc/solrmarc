@@ -83,13 +83,13 @@ public final class Utils {
     
     /**
      * load a properties file into a Properties object
-     * @param propertyPath the directory containing the properties file
-     * @param propertyFileName name of the properties file
+     * @param propertyPaths the directories to search for the properties file
+     * @param propertyFileName name of the sought properties file
      * @return Properties object 
      */
     public static Properties loadProperties(String propertyPaths[], String propertyFileName)
     {
-        Utils utilObj = new Utils();
+        // look for properties file in paths
         File propertyFile = new File(propertyFileName);
         InputStream in = null;
         int pathCnt = 0;
@@ -106,33 +106,45 @@ public final class Utils {
                     // simply eat this exception since we should only try to open the file if we previously
                     // determined that the file exists and is readable. 
                 }
-                break;
+                break;   // we found it!
             }
             if (propertyPaths != null && pathCnt < propertyPaths.length)
             {
                 propertyFile = new File(propertyPaths[pathCnt++], propertyFileName);
             }
-        } while(propertyPaths != null && pathCnt < propertyPaths.length);
+        } while (propertyPaths != null && pathCnt < propertyPaths.length);
         
+        // if we didn't find it as a file, look for it as a URL
+        String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
         if (in == null)
         {
+            Utils utilObj = new Utils();
             URL url = utilObj.getClass().getClassLoader().getResource(propertyFileName);
-            if (url == null)  url = utilObj.getClass().getResource("/"+propertyFileName);
-//            if (url == null) url = utilObj.getClass().getClassLoader().getResource(propertyPath+"/"+propertyFileName);
-//            if (url == null) url = utilObj.getClass().getResource("/"+propertyPath+"/"+propertyFileName);
-            if (url == null)
+            if (url == null)  
+                url = utilObj.getClass().getResource("/" + propertyFileName);
+/*
+            if (url == null) 
+                url = utilObj.getClass().getClassLoader().getResource(propertyPath + "/" + propertyFileName);
+            if (url == null) 
+                url = utilObj.getClass().getResource("/" + propertyPath + "/" + propertyFileName);
+*/
+            if (url != null)
             {
-                throw new IllegalArgumentException("Fatal error: Unable to find specified properties file: " + propertyFileName);
+                try
+                {
+                    in = url.openStream();
+                }
+                catch (IOException e)
+                {
+                    throw new IllegalArgumentException(errmsg);
+                }
             }
-            try
+            else
             {
-                in = url.openStream();
-            }
-            catch (IOException e)
-            {
-                throw new IllegalArgumentException("Fatal error: Unable to find specified properties file: " + propertyFileName);
+                throw new IllegalArgumentException(errmsg);
             }
         }
+        
         // load the properties
         Properties props = new Properties();
         try
@@ -142,9 +154,9 @@ public final class Utils {
         }
         catch (IOException e)
         {
-        	throw new IllegalArgumentException("Fatal error: Unable to read specified properties file: " + propertyFileName);
+        	throw new IllegalArgumentException(errmsg);
         }
-        return(props);
+        return props;
     }
 
 	/**

@@ -23,7 +23,7 @@ public abstract class BibIndexTest extends IndexTest {
 		
 		solrmarcPath = System.getProperty("solrmarc.path");
 		if (solrmarcPath == null)
-			solrmarcPath = parentDir + File.separator + "solrmarc" + File.separator + "stanfordSolrmarc2.0";
+			solrmarcPath = parentDir + File.separator + "solrmarc" + File.separator + "stanfordSolrmarc";
 		
 		siteSpecificPath = System.getProperty("solrmarc.site.path");
 		if (siteSpecificPath == null)
@@ -51,7 +51,5 @@ public abstract class BibIndexTest extends IndexTest {
 		solrCore = getSolrCore(solrPath, solrDataDir);
 		sis = getSolrIndexSearcher(solrCore);
 	}
-
-	
 
 }
