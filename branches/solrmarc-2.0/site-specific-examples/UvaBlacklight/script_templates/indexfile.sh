@@ -4,15 +4,16 @@
 # $Id: indexfile.sh 
 
 E_BADARGS=65
-config=@DEFAULTCONFIG@
 
-if [ $# -ne 2 && $# -ne 3 ]
+if [ $# -ne 1 && $# -ne 2 && $# -ne 3 ]
 then
-  echo "    Usage: `basename $0` config.properties ./path/to/marc.mrc [./path/to/ids_to_delete.del]"
+  echo "    Usage: `basename $0` [config.properties] ./path/to/marc.mrc [./path/to/ids_to_delete.del]"
+  echo "      Note that if the config.properties file is not specified the Jarfile will be searched for"
+  echo "      a file whose name ends with \"config.properties\""
   exit $E_BADARGS
 fi
 
-java -Xmx1024m -Done-jar.class.path="@LOCALJAR@|@SOLRJAR@" -jar SolrMarc.jar $1 $2 $3
+java @MEM_ARGS@ -jar @CUSTOM_JAR_NAME@ $1 $2 $3
 
 exit 0
 

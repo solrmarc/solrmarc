@@ -43,10 +43,10 @@ public class BlacklightIndexer extends SolrIndexer
      * @throws FileNotFoundException 
      * @throws Exception
      */
-    public BlacklightIndexer(final String propertiesMapFile, final String solrMarcDir)
+    public BlacklightIndexer(final String propertiesMapFile, final String propertyPaths[])
         throws FileNotFoundException, IOException, ParseException
     {
-        super(propertiesMapFile, solrMarcDir);
+        super(propertiesMapFile, propertyPaths);
     }
     
     /**
@@ -247,7 +247,7 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> result = getFieldList(record, "999t");
         result = Utils.remap(result, findMap(mapName2), false);
         String broadFormat = getFirstFieldVal(record, mapName1, "000[6]:007[0]");
-        result.add(broadFormat);
+        if (broadFormat != null) result.add(broadFormat);
         return(result);
     }
     

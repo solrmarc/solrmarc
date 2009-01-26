@@ -24,7 +24,7 @@
 	</target>
 
 	<target name="dependencies" depends="solrversion" >
-		<unjar src="${lib.dir}/solrmarc_dist/SolrMarc.jar" dest="${lib.dir}" >
+		<unjar src="${lib.dir}/SolrMarc.jar" dest="${lib.dir}" >
 		    <patternset>
 		        <include name="lib/marc4j.jar"/>
 		        <include name="main/MarcImporter.jar"/>
@@ -66,7 +66,7 @@
 	    </propertyfile>
 	</target>
 
-	<target name="solrlibextract" depends="solrwarlocation" if="solr.version.war">
+	<target name="solrlibextract" depends="solrversion,solrwarlocation" if="solr.version.war">
 		<mkdir dir="${lib.dir}/solr_war" />
 		<unwar src="${solr.war.location}" dest="${lib.dir}/solr_war" overwrite="true">
 			<patternset>
@@ -78,34 +78,21 @@
 		</unwar>
 	</target>
 	
-    <target name="checksolrjars" if="solr.version.war" >
-        <condition property="solr.external.uptodate" >
-        	<and>
-        		<available filepath="${dist.dir}" file="solr_${solr.version}_lib.jar" type="file"/>
-        		<uptodate targetfile="${dist.dir}/solr_${solr.version}_lib.jar">
-        		    <srcfiles dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
-        		</uptodate>
-        	</and>
+	<target name="solrmarcexists" >
+		<condition property="solrmarc.in.parent">
+			<available file="../../build.xml" />
+		</condition>
+        <condition property="solrmarc.exists">
+            <available file="../../dist/SolrMarc.jar" />
         </condition>
-    </target>
-
-	<target name="solrjars" depends="solrversion,solrversioncheck,solrlibextract,checksolrjars" 
-		    if="solr.version.war" unless="solr.external.uptodate">
-	    <mkdir dir="${build.dir}/solrjar" />
-		<unjar dest="${build.dir}/solrjar" overwrite="true">
-			<fileset dir="${lib.dir}/solr_${solr.version}">
-			  	<include name="*.jar" />
-			</fileset>
-		</unjar>
-		<jar destfile="${lib.dir}/solrmarc_dist/solr_${solr.version}_lib.jar">
-			<fileset dir="${build.dir}/solrjar">
-				<exclude name="**/*.mf" />
-			</fileset>
-		</jar>
-        <delete dir="${build.dir}/solrjar" />
 	</target>
 	
-	<target name="build" depends="init,dependencies,solrjars" >
+	<target name="solrmarcjar" depends="solrmarcexists" if="solrmarc.in.parent" >
+		<ant antfile="build.xml" dir="../.." target="exe" />
+		<copy file="../../dist/SolrMarc.jar" todir="${lib.dir}" />
+	</target>
+	
+	<target name="build" depends="init,solrmarcjar,dependencies,solrlibextract" >
 		<echo message="${ant.project.name}: ${ant.file}" />
 
 		<javac destdir="${build.dir}" debug="source" target="${java.compat.version}" source="${java.compat.version}" encoding="utf-8">
@@ -113,20 +100,32 @@
 			<classpath refid="classpath" />
 		</javac>
 
-		<jar destfile="${dist.dir}/${custom.jar.name}.jar">
-			<fileset dir="bin" includes="**/*.class" />
-			<fileset dir="." includes="*.properties" excludes="build.properties"/>
+        <mkdir dir="${stage.dir}/lib" />
+        <jar destfile="${stage.dir}/lib/${custom.jar.name}.jar">
+			<fileset dir="bin" includes="**/*.class" excludes="add" />
 		</jar>
-		<copy file="${lib.dir}/solrmarc_dist/SolrMarc.jar" todir="${dist.dir}" />
-		<copy file="${lib.dir}/solrmarc_dist/solr_${solr.version}_lib.jar" todir="${dist.dir}" />
+				
+		<copy todir="${stage.dir}/lib" >
+            <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
+    	</copy>
+		
+        <unjar src="${lib.dir}/SolrMarc.jar" dest="${stage.dir}" />
+		
+		<jar destfile="${dist.dir}/${custom.jar.name}_SolrMarc.jar" manifest="${stage.dir}/META-INF/MANIFEST.MF">
+			<fileset dir="${stage.dir}" includes="**/*.*" />
+            <fileset dir="." includes="*.properties" excludes="build*.properties" />
+            <fileset dir="translation_maps" includes="*.properties" excludes="build*.properties" />
+		</jar>
+		
 		<copy todir="${dist.dir}" >
 			<fileset dir="script_templates" includes="*" />
 			<filterset>
-                <filter token="LOCALJAR" value="${custom.jar.name}.jar"/>
-				<filter token="SOLRJAR" value="solr_${solr.version}_lib.jar" />
+                <filter token="CUSTOM_JAR_NAME" value="${custom.jar.name}_SolrMarc.jar"/>
+                <filter token="MEM_ARGS" value="${exe.mem.args}"/>
 			</filterset>
 		</copy>
-
+		
+		<delete dir="${stage.dir}" />
 	</target>
 
 	<target name="usage" description="Prints usage instructions">
