@@ -1,6 +1,8 @@
 package org.solrmarc.index;
 
 import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.After;
 import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.*;
@@ -126,6 +128,27 @@ public abstract class IndexTest {
 	    importer.finish();
 	}
 
+	
+	@After
+	public void tearDown()
+	{
+	    if (sis != null) 
+	    {
+	        try {
+	            sis.close();
+	            sis = null;
+	        }
+	        catch (IOException e)
+	        {
+	        }
+	    }
+	    if (solrCore != null)
+	    {
+	        solrCore.close();
+	        solrCore = null;
+	    }
+	}
+	
 	/**
 	 * The import code expects to find these system properties populated.
 	 * 
