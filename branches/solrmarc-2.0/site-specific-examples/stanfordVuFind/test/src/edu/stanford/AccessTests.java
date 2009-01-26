@@ -76,7 +76,7 @@ public class AccessTests extends BibIndexTest {
 	public final void testAccessFromSfxURL() 
 			throws IOException, ParserConfigurationException, SAXException 
 	{
-		createIxInitVars("formatTests.mrc");
+        tearDown(); createIxInitVars("formatTests.mrc");
 	
     	String fldVal =  Access.ONLINE.toString();
 
@@ -118,6 +118,7 @@ public class AccessTests extends BibIndexTest {
 	public final void testAccessFrom999() 
 			throws ParserConfigurationException, IOException, SAXException
 	{
+		tearDown();
 		createIxInitVars("buildingTests.mrc");
 
 	 	// "Online"
