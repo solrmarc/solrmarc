@@ -176,9 +176,11 @@ public abstract class MarcHandler {
         }
         String marcIncludeIfPresent = Utils.getProperty(configProps, "marc.include_if_present");
         String marcIncludeIfMissing = Utils.getProperty(configProps, "marc.include_if_missing");
-        if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null))
+        String marcDeleteSubfields = Utils.getProperty(configProps, "marc.delete_subfields");
+        if (marcDeleteSubfields != null)  marcDeleteSubfields = marcDeleteSubfields.trim();
+        if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null || marcDeleteSubfields != null))
         {
-            reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing);
+            reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing, marcDeleteSubfields);
         }
 	//        // Do translating last so that if we are Filtering as well as translating, we don't expend the 
 	//        // effort to translate records, which may then be filtered out and discarded.

@@ -78,7 +78,7 @@ public class MarcPrinter extends MarcHandler
 
 		if (reader != null && (marcIncludeIfPresent2 != null || marcIncludeIfMissing2 != null)) 
 		{
-			reader = new MarcFilteredReader(reader, marcIncludeIfPresent2, marcIncludeIfMissing2);
+			reader = new MarcFilteredReader(reader, marcIncludeIfPresent2, marcIncludeIfMissing2, null);
 		}
 	}
 

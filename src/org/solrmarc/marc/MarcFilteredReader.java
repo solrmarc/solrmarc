@@ -18,7 +18,10 @@ package org.solrmarc.marc;
 
 import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
+import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.Subfield;
+import org.marc4j.marc.VariableField;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.tools.SolrMarcException;
 import org.solrmarc.tools.Utils;
@@ -40,6 +43,7 @@ public class MarcFilteredReader implements MarcReader
     String includeRecordIfFieldContains = null;
     String includeRecordIfFieldMissing = null;
     String includeRecordIfFieldDoesntContain = null;
+    String deleteSubfieldsSpec = null;
     Record currentRecord = null;
     MarcReader reader;
     SolrMarcException exception;
@@ -53,8 +57,9 @@ public class MarcFilteredReader implements MarcReader
      * @param ifFieldPresent
      * @param ifFieldMissing
      */
-    public MarcFilteredReader(MarcReader r, String ifFieldPresent, String ifFieldMissing)
+    public MarcFilteredReader(MarcReader r, String ifFieldPresent, String ifFieldMissing, String deleteSubfields)
     {
+        deleteSubfieldsSpec = deleteSubfields;
         if (ifFieldPresent != null)
         {
             String present[] = ifFieldPresent.split("/", 2);
@@ -119,7 +124,33 @@ public class MarcFilteredReader implements MarcReader
             	logger.error("Error reading Marc Record.");
             	logger.error(me.getMessage());
             }
-            
+            if (deleteSubfieldsSpec != null)
+            {
+                String fieldSpecs[] = deleteSubfieldsSpec.split(":");
+                for (String fieldSpec : fieldSpecs)
+                {
+                    String tag = fieldSpec.substring(0,3);
+                    String subfield = fieldSpec.substring(3);                    
+                    List<VariableField> list = (List<VariableField>)rec.getVariableFields(tag);
+                    for (VariableField field : list)
+                    {
+                        if (field instanceof DataField)
+                        {
+                            DataField df = ((DataField)field);
+                            List<Subfield> sfs = (List<Subfield>)df.getSubfields(subfield.charAt(0));
+                            if (sfs != null && sfs.size() != 0)
+                            {
+                                rec.removeVariableField(df);
+                                for (Subfield sf : sfs)
+                                {
+                                    df.removeSubfield(sf);
+                                }
+                                rec.addVariableField(df);
+                            }
+                        }
+                    }
+                }
+            }
             if (rec != null && includeRecordIfFieldPresent != null)
             {
                 Set<String> fields = SolrIndexer.getFieldList(rec, includeRecordIfFieldPresent);
@@ -140,6 +171,10 @@ public class MarcFilteredReader implements MarcReader
                 {
                     currentRecord = rec;
                 }
+            }
+            if (rec != null && includeRecordIfFieldPresent == null && includeRecordIfFieldMissing == null)
+            {
+                currentRecord = rec;
             }
         }
         return currentRecord ;
