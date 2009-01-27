@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project basedir="." default="build" name="stanfordSolrmarc">
+	
+  <property name="solrmarc.basedir" value="../.."/>
+
+  <!-- property files for site -->
+	<property file="stanfordBuild.properties" />
+	<property file="${solrmarc.basedir}/build_override.properties" />
+	<property file="${solrmarc.basedir}/build.properties" />
+
+  <import file="${solrmarc.basedir}/build.xml"/>
+
+  
+<!-- Site General Targets -->
+  
+	<target name="compile" depends="Solrmarc.init,Solrmarc.solrversion" description="Compile source code into the build directory">
+		<echo message="using solr version: ${solr.version}" />
+		<javac destdir="${solrmarc.basedir}/${build.dir}" 
+		       srcdir="${site.src.dir}:${solrmarc.basedir}/${src.dir}" 
+				   target="${java.compat.version}" source="${java.compat.version}" 
+		       debug="on" encoding="utf-8">
+	    <include name="**/*.java"/>
+			<classpath refid="classpath.jars" />
+		</javac>
+	</target>
+  
+	<target name="jar" depends="compile" description="create site specific solrmarc jar in the build directory">
+		<echo message="using solr version: ${solr.version}" />
+		<!-- use a chained mapper to seperate the jar file names -->
+		<pathconvert property="lib.jars.manifest.classpath" pathsep=" ">
+			<path refid="classpath.jars" />
+			<chainedmapper>
+				<flattenmapper />
+				<globmapper from="*" to="lib/*" />
+			</chainedmapper>
+		</pathconvert>
+		<jar destfile="${solrmarc.basedir}/${build.dir}/${site.jar.name}">
+			<fileset dir="${solrmarc.basedir}/${build.dir}" includes="**/*.class" />
+			<fileset dir="${solrmarc.basedir}/${build.dir}" includes="*.properties" excludes="build.properties"/>
+			<fileset dir="." includes="*.properties" excludes="stanfordBuild.properties"/>
+			<fileset dir="${trans.map.path}" includes="*.properties"/>
+			<fileset dir="${solrmarc.basedir}/${trans.map.path}" includes="*.properties"/>
+			<manifest>
+				<attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter" />
+				<attribute name="Class-Path" value="${lib.jars.manifest.classpath}" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="build" depends="jar" description="create site specific solrmarc jar in the build directory" />
+	
+	<target name="dist" depends="jar,solrjars" >
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<copy file="${solrmarc.basedir}/${lib.dir}/solr_${solr.version}_lib.jar" todir="${dist.dir}" />
+		<copy todir="${solrmarc.basedir}/${dist.dir}" >
+			<fileset dir="./scripts" includes="*" />
+			<filterset>
+         <filter token="LOCALJAR" value="${site.jar.name}"/>
+				 <filter token="SOLRJAR" value="solr_${solr.version}_lib.jar" />
+			</filterset>
+		</copy>
+	</target>
+
+  
+<!-- Site Testing Targets -->
+
+	<target name="testClean" description="clean generated test directories">
+		<delete dir="${solrmarc.basedir}/${test.build.dir}" />
+	</target>
+
+	<target name="testInit" depends="testClean" description="create (empty) generated test directories">
+		<mkdir dir="${solrmarc.basedir}/${test.build.dir}" />
+	</target>
+
+	<target name="testCompile" depends="testClean,testInit,build" description="Compile test source code into test build dir">
+		<javac destdir="${solrmarc.basedir}/${test.build.dir}" 
+		       srcdir="${site.test.src.dir}:${solrmarc.basedir}/${test.src.dir}" 
+		       target="${java.compat.version}" source="${java.compat.version}" 
+		       debug="on" encoding="utf-8">
+	    <include name="org/**/*.java"/>
+	    <include name="edu/**/*.java"/>
+	    <exclude name="solr/**/*.java"/>
+			<classpath>
+		  	<pathelement location="${solrmarc.basedir}/${build.dir}/${site.jar.name}"/>
+			  <path refid="classpath.jars" />
+			</classpath>
+		</javac>
+	</target>
+  	
+	<target name="testJar" depends="testCompile" description="jar up test class files">
+		<jar jarfile="${solrmarc.basedir}/${test.build.dir}/${site.test.jar}" >
+			<fileset dir="${solrmarc.basedir}/${test.build.dir}" includes="**/*.class" />
+		</jar>
+	</target>  
+  
+	<target name="testBibIx" depends="testJar" description="run junit tests for bib index">
+		<echo message="using solr version: ${solr.version}" />
+
+		<junit showoutput="yes" printsummary="yes" fork="yes" >
+			<formatter type="plain" usefile="no" />
+
+			<classpath>
+			  <pathelement location="${solrmarc.basedir}/${test.build.dir}/${site.test.jar}"/>
+				<pathelement location="${solrmarc.basedir}/${build.dir}/${site.jar.name}"/>
+				<path refid="classpath.jars" />
+			</classpath>
+
+			<sysproperty key="solrmarc.path" path="${solrmarc.basedir}"/>
+			<sysproperty key="solr.path" path="${test.solr.path}"/>
+			<sysproperty key="solr.data.dir" path="${test.solr.data.dir}"/>
+			<!-- these crucial properties set here b/c normally they are in 
+			   the properties file indicated with an argument in the command line -->
+			<sysproperty key="solr.indexer" value="${solr.indexer}"/>
+			<sysproperty key="solr.indexer.properties" value="${solr.indexer.properties}"/>		
+			<sysproperty key="marc.source" value="${marc.source}"/>
+			
+			<test name="${test.bibix.class}" />
+		</junit>
+	</target>
+	
+	<chmod dir="./scripts" perm="u+x" includes="*.sh" />
+</project>
