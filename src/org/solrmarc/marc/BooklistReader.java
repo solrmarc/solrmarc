@@ -9,12 +9,16 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 //import org.apache.lucene.document.Document;
+import org.solrmarc.marc.MarcImporter.MyShutdownThread;
+import org.solrmarc.tools.Utils;
 
 /**
  * 
@@ -28,19 +32,43 @@ public class BooklistReader extends SolrReIndexer
     Map<String, Map<String, Object>> documentCache = null;
     // Initialize logging category
     static Logger logger = Logger.getLogger(BooklistReader.class.getName());
-    
+    String booklistFilename = null;
     /**
      * Constructor
      * @param properties Path to properties files
      * @throws IOException
      */
-    public BooklistReader(String properties) throws IOException
+    public BooklistReader(String args[]) 
     {
-        super(properties, new String[0]);
-        if (solrFieldContainingEncodedMarcRecord == null) solrFieldContainingEncodedMarcRecord = "marc_display";
+        super(args);
+        loadLocalProperties(configProps);
+        processAdditionalArgs(addnlArgs);
         documentCache = new LinkedHashMap<String, Map<String, Object>>();
     }
+
+    private void loadLocalProperties(Properties props)
+    {
+        if (solrFieldContainingEncodedMarcRecord == null) 
+        {
+            solrFieldContainingEncodedMarcRecord = "marc_display";
+        }
+    }
     
+    private void processAdditionalArgs(String[] args) 
+    {
+        booklistFilename = args.length > 0 ? args[0] : "booklists.txt";
+    }
+
+    public int handleAll()
+    {
+        Date start = new Date();
+        
+        readBooklist(booklistFilename);
+        
+        finish(); 
+        return(0);
+    }
+        
     /**
      * Read a book list
      * @param filename Path to the book list file
@@ -187,34 +215,26 @@ public class BooklistReader extends SolrReIndexer
     /**
      * @param args
      */
-    public static void main(String[] args)
+
+    public static void main(String[] args) 
     {
-        String properties = "import.properties";
-        if(args.length > 0 && args[0].endsWith(".properties"))
-        {
-            properties = args[0];
-            String newArgs[] = new String[args.length-1];
-            System.arraycopy(args, 1, newArgs, 0, args.length-1);
-            args = newArgs;
-        }
-        System.out.println("Loading properties from " + properties);
+        logger.info("Starting Booklist processing.");
         
         BooklistReader reader = null;
         try
         {
-            reader = new BooklistReader(properties);
+            reader = new BooklistReader(args);
         }
-        catch (IOException e)
+        catch (IllegalArgumentException e)
         {
-            // e.printStackTrace();
-        	logger.info(e.getMessage());
-        	logger.error(e.getCause());
+            logger.error(e.getMessage());
+            System.err.println(e.getMessage());
+            //e.printStackTrace();
             System.exit(1);
         }
-        reader.readBooklist(args.length > 0 ? args[0] : "booklists.txt");
         
-        reader.finish();
-
+        int exitCode = reader.handleAll();
+        System.exit(exitCode);
     }
 
 }

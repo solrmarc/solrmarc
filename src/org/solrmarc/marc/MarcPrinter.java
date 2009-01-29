@@ -27,6 +27,7 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import org.marc4j.MarcException;
+import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.MarcXmlWriter;
 import org.marc4j.marc.Record;
@@ -52,14 +53,15 @@ public class MarcPrinter extends MarcHandler
     public MarcPrinter(String args[])
     {
     	super(args);
+        loadLocalProperties(configProps);
     	processAdditionalArgs(addnlArgs);
     }
 	
-    protected void processAdditionalArgs(String[] args) 
+    private void processAdditionalArgs(String[] args) 
 	{
         for (String arg : args)
         {
-        	if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml"))
+        	if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate"))
         	{
         		mode = arg;
         	}
@@ -70,8 +72,7 @@ public class MarcPrinter extends MarcHandler
         }
 	}
 
-    @Override
-	protected void loadLocalProperties(Properties props) 
+	private void loadLocalProperties(Properties props) 
 	{
 	    String marcIncludeIfPresent2 = Utils.getProperty(props, "marc.include_if_present2");
 		String marcIncludeIfMissing2 = Utils.getProperty(props, "marc.include_if_missing2");
@@ -101,14 +102,22 @@ public class MarcPrinter extends MarcHandler
                     
                     System.out.println(recStr);
                 }
-	            else if (mode.equals("to_xml"))
-	            {
-	                if (writer == null)
-	                {
-	                	writer = new MarcXmlWriter(System.out, "UTF-8", true);
-	                }
+                else if (mode.equals("to_xml"))
+                {
+                    if (writer == null)
+                    {
+                        writer = new MarcXmlWriter(System.out, "UTF-8", true);
+                    }
                     writer.write(record);
-	            }
+                }
+                else if (mode.equals("translate"))
+                {
+                    if (writer == null)
+                    {
+                        writer = new MarcStreamWriter(System.out, "UTF-8");
+                    }
+                    writer.write(record);
+                }
 	            else if (mode.equals("index"))
 	            {
                     String recStr = record.toString();
