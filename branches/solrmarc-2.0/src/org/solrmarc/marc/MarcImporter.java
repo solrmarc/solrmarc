@@ -42,8 +42,8 @@ public class MarcImporter extends MarcHandler
 	/** needs to be visible to StanfordCallnumMarcImporter ... */
     protected SolrCoreProxy solrCoreProxy;
 
-    private String solrCoreDir;
-    private String solrDataDir;
+    protected String solrCoreDir;
+    protected String solrDataDir;
     private String deleteRecordListFilename;
     private String deleteRecordIDMapper = null;
     private String SolrHostURL;
@@ -76,7 +76,7 @@ public class MarcImporter extends MarcHandler
 	 * Load the properties file
 	 * @param properties
 	 */
-	public void loadLocalProperties(Properties props) 
+	private void loadLocalProperties(Properties props) 
 	{
         // The solr.home directory
         solrCoreDir = Utils.getProperty(props, "solr.path");

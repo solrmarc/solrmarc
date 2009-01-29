@@ -20,7 +20,11 @@ import java.util.*;
 import org.marc4j.*;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
-import org.solrmarc.solr.*;
+
+import org.solrmarc.solr.SolrCoreLoader;
+import org.solrmarc.solr.SolrCoreProxy;
+import org.solrmarc.solr.SolrSearcherProxy;
+import org.solrmarc.tools.Utils;
 
 import org.apache.log4j.Logger;
 
@@ -31,21 +35,12 @@ import org.apache.log4j.Logger;
  * @version $Id$
  *
  */
-public class SolrReIndexer
+public class SolrReIndexer extends MarcImporter
 {
-	private String solrmarcPath;
-	private String siteSpecificPath;
-    private String solrCoreDir;
-    private String solrDataDir;
-    private SolrCoreProxy solrCoreProxy;   
-    private SolrSearcherProxy solrSearcherProxy;
-    private boolean verbose = false;
-    private SolrIndexer indexer;
+    protected SolrSearcherProxy solrSearcherProxy;
     private String queryForRecordsToUpdate;
     protected String solrFieldContainingEncodedMarcRecord;
     protected boolean doUpdate = true;
-//    private RefCounted<SolrIndexSearcher> refedSolrSearcher;
-//    private SolrIndexSearcher solrSearcher;
     
     // Initialize logging category
     static Logger logger = Logger.getLogger(SolrReIndexer.class.getName());
@@ -56,22 +51,31 @@ public class SolrReIndexer
      * @param args additional arguments
      * @throws IOException
      */
-    public SolrReIndexer(String properties, String[] args) throws IOException
+    public SolrReIndexer(String args[])
     {
-        Properties props = new Properties();
-        InputStream in = new FileInputStream(properties);
-        // load the properties
-        props.load(in);
-        in.close();
-        
-        solrmarcPath = getProperty(props, "solrmarc.path");
-        siteSpecificPath = getProperty(props, "solrmarc.site.path");
-        solrCoreDir = getProperty(props, "solr.path");
-        solrDataDir = getProperty(props, "solr.data.dir");
-        solrFieldContainingEncodedMarcRecord = getProperty(props, "solr.fieldname");
-        queryForRecordsToUpdate = getProperty(props, "solr.query");
-        String up = getProperty(props, "solr.do_update");
+        super(args);
+        loadLocalProperties(configProps);
+        processAdditionalArgs(addnlArgs);
+        solrSearcherProxy = new SolrSearcherProxy(solrCoreProxy);
+    }
+
+    @Override
+    public int handleAll()
+    {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    private void loadLocalProperties(Properties props)
+    {
+        solrFieldContainingEncodedMarcRecord = Utils.getProperty(props, "solr.fieldname");
+        queryForRecordsToUpdate = Utils.getProperty(props, "solr.query");
+        String up = Utils.getProperty(props, "solr.do_update");
         doUpdate = (up == null) ? true : Boolean.parseBoolean(up);
+    }
+    
+    private void processAdditionalArgs(String[] args) 
+    {
         if (queryForRecordsToUpdate == null && args.length > 0)
         {
             queryForRecordsToUpdate = args[0];
@@ -80,89 +84,8 @@ public class SolrReIndexer
         {
             solrFieldContainingEncodedMarcRecord = args[1];
         }
-        if (solrDataDir == null) solrDataDir = solrCoreDir + "/data";
-        // Set up Solr core
-  //      solrCoreProxy  = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, "", logger);  
-//        refedSolrSearcher = solrCore.getSearcher();
-//        solrSearcher = refedSolrSearcher.get();
-        solrSearcherProxy = new SolrSearcherProxy(solrCoreProxy);
-        verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
-        
-//        updateHandler = solrCore.getUpdateHandler();
-        String indexerName = getProperty(props, "solr.indexer");
-        String indexerProps = getProperty(props, "solr.indexer.properties");
-        
-        try
-        {
-            Class indexerClass;
-            try {
-                indexerClass = Class.forName(indexerName);
-            }
-            catch (ClassNotFoundException e)
-            {
-                Class baseIndexerClass = SolrIndexer.class;
-                String baseName = baseIndexerClass.getPackage().getName();
-                String fullName = baseName + "." + indexerName;
-                indexerClass = Class.forName(fullName);
-            }
-            Constructor constructor = indexerClass.getConstructor(new Class[]{String.class, String.class});
-            Object instance = constructor.newInstance(indexerProps, solrmarcPath, siteSpecificPath);
-            if (instance instanceof SolrIndexer)
-            {
-                indexer = (SolrIndexer)instance;
-            }
-            else
-            {
-                //System.err.println("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
-            	logger.error("Error: Custom Indexer "+ indexerName +" must be subclass of SolrIndexer .  Exiting...");
-                System.exit(1);
-            }
-        }
-        catch (Exception e)
-        {
-            if (e instanceof ParseException)
-            {
-                //System.err.println("Error configuring Indexer from properties file.  Exiting...");
-            	logger.error("Error configuring Indexer from properties file.  Exiting...");
-                System.exit(1);
-            }            
-            
-//            System.err.println("Unable to find Custom indexer: "+ indexerName);
-//            System.err.println("Using default SolrIndexer with properties file: " + indexerProps);
-            logger.error("Unable to find Custom indexer: "+ indexerName);
-            logger.error("Using default SolrIndexer with properties file: " + indexerProps);
-            
-            try {
- //               indexer = new SolrIndexer(indexerProps, solrmarcPath, siteSpecificPath);
-            }
-            catch (Exception e1)
-            {
-                //System.err.println("Error configuring Indexer from properties file.  Exiting...");
-            	logger.error("Error configuring Indexer from properties file.  Exiting...");
-                System.exit(1);
-            }
-        }
-        
     }
 
-     /*
-      * Check first for a particular property in the System Properties, so that the -Dprop="value" command line arg 
-      * mechanism can be used to override values defined in the passed in property file.  This is especially useful
-      * for defining the marc.source property to define which file to operate on, in a shell script loop.
-      */
-    private String getProperty(Properties props, String propname)
-    {
-        String prop;
-        if ((prop = System.getProperty(propname)) != null)
-        {
-            return(prop);
-        }
-        if ((prop = props.getProperty(propname)) != null)
-        {
-            return(prop);
-        }
-        return null;
-    }
     
 //    /**
 //     * Read matching records from the index
@@ -622,6 +545,7 @@ public class SolrReIndexer
         logger.info("Done with the commit, closing Solr");
         solrCoreProxy.close();
     }
+
 
 //    /**
 //     * @param args

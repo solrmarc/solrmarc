@@ -14,7 +14,6 @@ import org.solrmarc.tools.Utils;
 public abstract class MarcHandler {
 
 	abstract protected int handleAll();
-	abstract protected void loadLocalProperties(Properties props);
 
 	protected SolrIndexer indexer;
 	protected MarcReader reader;
