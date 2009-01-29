@@ -164,8 +164,8 @@ public final class Utils {
 	 * @param date String to parse
 	 * @return Numeric part of date String (or null)
 	 */
-	public static String cleanDate(final String date){
-		
+	public static String cleanDate(final String date)
+	{
 		matcher = FOUR_DIGIT_PATTERN.matcher(date);
 		
 		String cleanDate = null; // raises DD-anomaly
@@ -264,7 +264,7 @@ public final class Utils {
      * @return cleaned string
      */
     public static String removeAllTrailingCharAndPeriod(String origStr, String trailingCharsRegEx, String charsB4periodRegEx)
-            {
+    {
     	if (origStr == null)
     		return null;
 
@@ -302,7 +302,7 @@ public final class Utils {
      * @return cleaned string
      */
     public static String removeTrailingCharAndPeriod(String origStr, String trailingCharsRegEx, String charsB4periodRegEx)
-                {
+    {
     	if (origStr == null)
     		return null;
 
@@ -311,7 +311,7 @@ public final class Utils {
         result = removeTrailingPeriod(result, charsB4periodRegEx);
             
         return result ;       
-                }
+    }
     
     /**
      * Remove the characters per the regular expression if they are at the end
@@ -329,7 +329,7 @@ public final class Utils {
     		return origStr;
    		// get rid of reg ex specified chars at the end of the string
     	return origStr.trim().replaceAll(charsToReplaceRegEx + "$", "");
-            }
+    }
     
     /**
      * If there is a period at the end of the string, remove the period if it is
@@ -345,7 +345,7 @@ public final class Utils {
      *   param was found immediately before the trailing period
      */
     public static String removeTrailingPeriod(String origStr, String precedingCharsRegEx) 
-            {
+    {
     	if (origStr == null)
     		return origStr;
     	String result = origStr.trim();
@@ -353,7 +353,7 @@ public final class Utils {
             result = result.substring(0, result.length() - 1).trim();
 
        	return result;
-            }
+     }
 
     
     /**
@@ -362,17 +362,16 @@ public final class Utils {
      *  the string.
      */
     public static String removeOuterBrackets(String origStr) 
-            {
-    	if (origStr == null)
+    {
+    	if (origStr == null || origStr.length() == 0)
     		return origStr;
 
     	String result = origStr.trim();
-    	
-    	boolean openBracketFirst = result.charAt(0) == '[';
-    	boolean closeBracketLast = result.endsWith("]");
-    	
+    	    	
     	if (result.length() > 0)
-            {
+        {
+            boolean openBracketFirst = result.charAt(0) == '[';
+            boolean closeBracketLast = result.endsWith("]");
             if (openBracketFirst && closeBracketLast && 
             		result.indexOf('[', 1) == -1 && 
             		result.lastIndexOf(']', result.length()-2) == -1)
@@ -384,7 +383,7 @@ public final class Utils {
             else if (closeBracketLast && result.indexOf('[') == -1)
             	// ends with ']' but no '['; remove close bracket
                 result = result.substring(0, result.length()-1);                
-            }
+        }
 
     	return result.trim();
     }
