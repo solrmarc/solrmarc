@@ -58,9 +58,9 @@ public abstract class MarcHandler {
             // no manifest property defining the config
         }
         
+        List<String> addnlArgList = new ArrayList<String>();
         if(args.length > 0)
         {
-            List<String> addnlArgList = new ArrayList<String>();
             for (String arg : args)
             {
                 if (arg.endsWith(".properties"))
@@ -81,9 +81,9 @@ public abstract class MarcHandler {
                 	addnlArgList.add(arg);
                 }
             }
-            addnlArgs = addnlArgList.toArray(new String[0]);
         }
-
+        addnlArgs = addnlArgList.toArray(new String[0]);
+        
         // System.out.println("Loading properties from " + properties);
         logger.info("Loading config properties from " + configProperties);
         // Process Properties
