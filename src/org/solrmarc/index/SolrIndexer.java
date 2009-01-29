@@ -386,7 +386,7 @@ public class SolrIndexer
     {
     	Properties props = null;
         props = Utils.loadProperties(propertyFilePaths, transMapName);
-        System.out.println("Loading Custom Map: " + transMapName);
+        logger.info("Loading Custom Map: " + transMapName);
         loadTranslationMapValues(props, mapName, mapKeyPrefix);
     }
 
