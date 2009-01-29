@@ -40,9 +40,9 @@ public class BooklistReader extends SolrReIndexer
      */
     public BooklistReader(String args[]) 
     {
-        super(args);
+        super(new String[0]);
         loadLocalProperties(configProps);
-        processAdditionalArgs(addnlArgs);
+        processAdditionalArgs(args);
         documentCache = new LinkedHashMap<String, Map<String, Object>>();
     }
 
