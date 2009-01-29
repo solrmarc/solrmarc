@@ -37,9 +37,9 @@ public class SolrSearcherProxy
             Object query = Class.forName("org.apache.lucene.search.TermQuery")
                             .getConstructor(qterm.getClass())
                             .newInstance(qterm);
-            Object docSet = solrSearcher.getClass().getMethod("getDocSet", query.getClass());
+            Object docSet = solrSearcher.getClass().getMethod("getDocSet", query.getClass().getSuperclass()).invoke(solrSearcher, query);
             int totalSize = (Integer)docSet.getClass().getMethod("size").invoke(docSet);
-            System. out.println("Num found = " + totalSize);
+            System. out.println("Searching for :" + field +" : "+ term+ "    Num found = " + totalSize);
             Object docIterator = docSet.getClass().getMethod("iterator").invoke(docSet);
             return(docIterator);
         }
@@ -60,7 +60,7 @@ public class SolrSearcherProxy
         boolean ret = false;
         try
         {
-            ret = (Boolean)(docSetIterator.getClass().getMethod("hasNext").invoke(docSetIterator));
+            ret = (Boolean)(docSetIterator.getClass().getInterfaces()[0].getMethod("hasNext").invoke(docSetIterator));
         }
         catch (Exception e)
         {
@@ -75,8 +75,8 @@ public class SolrSearcherProxy
         Object document = null;
         try
         {
-            int docNo = (Integer)(docSetIterator.getClass().getMethod("next").invoke(docSetIterator));
-            document = solrSearcher.getClass().getMethod("getDocument", int.class).invoke(solrSearcher, docNo);
+            int docNo = (Integer)(docSetIterator.getClass().getInterfaces()[0].getMethod("next").invoke(docSetIterator));
+            document = solrSearcher.getClass().getMethod("doc", int.class).invoke(solrSearcher, docNo);
         }
         catch (Exception e)
         {
