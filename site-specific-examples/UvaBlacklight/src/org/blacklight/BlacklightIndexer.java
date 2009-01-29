@@ -233,11 +233,13 @@ public class BlacklightIndexer extends SolrIndexer
     	// part1_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first
     	// part2_format_facet = 999t, format_maps.properties(format)
     	String mapName1 = null;
-    	String mapName2 = null;
+        String mapName2 = null;
+        String mapName3 = null;
     	try
         {
             mapName1 = loadTranslationMap(null, "format_maps.properties(broad_format)");
-            mapName2 = loadTranslationMap(null, "format_maps.properties(format)");
+            mapName2 = loadTranslationMap(null, "format_maps.properties(format_007)");
+            mapName3 = loadTranslationMap(null, "format_maps.properties(format)");
         }
         catch (IllegalArgumentException e)
         {
@@ -245,9 +247,17 @@ public class BlacklightIndexer extends SolrIndexer
             e.printStackTrace();
         }
         Set<String> result = getFieldList(record, "999t");
-        result = Utils.remap(result, findMap(mapName2), false);
-        String broadFormat = getFirstFieldVal(record, mapName1, "000[6]:007[0]");
-        if (broadFormat != null) result.add(broadFormat);
+        result = Utils.remap(result, findMap(mapName3), false);
+        String format_007 = getFirstFieldVal(record, mapName2, "007[0]");
+        if (format_007 != null) 
+        {
+            result.add(format_007);
+        }
+        else 
+        {
+            String broadFormat = getFirstFieldVal(record, mapName1, "000[6-7]:000[6]");
+            if (broadFormat != null) result.add(broadFormat);
+        }
         return(result);
     }
     
