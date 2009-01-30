@@ -198,9 +198,16 @@ public class MarcImporter extends MarcHandler
                 recsReadCounter++;
                 
                 try {
-                    addToIndex(record);
-                    recsIndexedCounter++;
-                    logger.info("Added record " + recsReadCounter + " read from file: " + record.getControlNumber());
+                    boolean added = addToIndex(record);
+                    if (added)
+                    {
+                        recsIndexedCounter++;
+                        logger.info("Added record " + recsReadCounter + " read from file: " + record.getControlNumber());
+                    }
+                    else
+                    {
+                        logger.info("Deleted record " + recsReadCounter + " read from file: " + record.getControlNumber());                        
+                    }
                 }
                 catch (Exception e)
                 {
@@ -229,12 +236,21 @@ public class MarcImporter extends MarcHandler
      * Add a record to the index
      * @param record marc record to add
      */
-    private void addToIndex(Record record)
+    private boolean addToIndex(Record record)
     	throws IOException
     {
         Map<String, Object> fieldsMap = indexer.map(record); 
+        // test whether some indexing specification determined that this record should be omitted entirely
         if (fieldsMap.size() == 0) 
-            return;
+        {
+            // if so not only don't index it, but try to delete the record if its already there.
+            String id = record.getControlNumber();
+            if (id != null)
+            {
+                solrCoreProxy.delete(id, true, true);
+            }
+            return false;
+        }
         
         String docStr = addToIndex(fieldsMap);
 
@@ -243,6 +259,7 @@ public class MarcImporter extends MarcHandler
             logger.info(record.toString());
             logger.info(docStr);
         }
+        return(true);
     }
     
     /**
