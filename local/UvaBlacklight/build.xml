@@ -85,7 +85,7 @@
     </target>
 
     <target name="solrmarcjar1" depends="solrmarcexists" if="solrmarc.in.parent">
-        <ant antfile="build.xml" dir="../.." target="one-jar" />
+        <ant antfile="build.xml" dir="../.." target="singleJar" />
         <copy file="../../dist/SolrMarc.jar" todir="${lib.dir}" />
     </target>
 

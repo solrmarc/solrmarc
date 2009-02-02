@@ -78,7 +78,7 @@
 		</copy>
 
         <one-jar destfile="${solrmarc.basedir}/${dist.dir}/${ant.project.name}.jar" manifest="${solrmarc.basedir}/${buildtools.path}/manifest.mf">
-            <main jar="${solrmarc.basedir}/${build.dir}/MarcImporter.jar">
+            <main jar="${solrmarc.basedir}/${build.dir}/${jar.name}">
 			</main>
 
 			<lib>
