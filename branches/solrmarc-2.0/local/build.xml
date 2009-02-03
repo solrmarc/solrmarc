@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project basedir="." name="Local">
+
+    <tstamp>
+        <format property="year" pattern="yyyy" />
+        <format property="DSTAMP" pattern="yyyy-MM-dd" />
+        <format property="TSTAMP" pattern="HH:mm:ss" />
+        <format property="dateversion" pattern="yyyy.MM.dd.HH.mm.ss" />
+    </tstamp>
+
+    <target name="init">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${dist.dir}" />
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}" />
+        <delete dir="${dist.dir}" />
+        <delete dir="${tag.dir}" />
+        <delete file="${lib.dir}/SolrMarc.jar" />
+        <delete file="${lib.dir}/MarcImporter.jar" />
+        <delete file="${lib.dir}/marc4j.jar" />
+    </target>
+
+    <target name="dependencies" depends="solrversion">
+        <unjar src="${lib.dir}/SolrMarc.jar" dest="${lib.dir}">
+            <patternset includes="lib/marc4j.jar,main/MarcImporter.jar" />
+            <flattenmapper />
+        </unjar>
+        <path id="classpath" description="Sets the classpath to use the lib folder">
+            <fileset dir="${lib.dir}">
+                <include name="*.jar" />
+                <exclude name="SolrMarc.jar" />
+            </fileset>
+        </path>
+        <property name="custom.jar.name" value="CustomSite" />
+    </target>
+
+    <target name="solrversion" unless="${solr.version}">
+        <input message="solr.version must be defined as either 1.2, 1.3, or 1.4 (or war)" validargs="1.2,1.3,1.4,war" addproperty="solr.version" defaultvalue="1.3" />
+        <propertyfile file="build_override.properties">
+            <entry key="solr.version" value="${solr.version}" />
+        </propertyfile>
+    </target>
+
+    <target name="solrversioncheck">
+        <condition property="solr.version.war">
+            <equals arg1="${solr.version}" arg2="war" />
+        </condition>
+    </target>
+
+    <target name="solrwarlocation" depends="solrversioncheck" if="solr.version.war" unless="solr.war.location">
+        <input message="Enter full path of where solr.war file is located:" addproperty="solr.war.location" />
+        <condition property="war.exists">
+            <available file="${solr.war.location}" />
+        </condition>
+        <fail unless="war.exists">Solr.war file ${solr.war.location} does not exist</fail>
+        <propertyfile file="build_override.properties">
+            <entry key="solr.war.location" value="${solr.war.location}" />
+        </propertyfile>
+    </target>
+
+    <target name="solrlibextract" depends="solrversion,solrwarlocation" if="solr.version.war">
+        <mkdir dir="${lib.dir}/solr_war" />
+        <unwar src="${solr.war.location}" dest="${lib.dir}/solr_war" overwrite="true">
+            <patternset>
+                <include name="**/lucene-*.jar" />
+                <include name="**/apache-solr-*.jar" />
+                <include name="**/slf4j*.jar" />
+            </patternset>
+            <mapper type="flatten" />
+        </unwar>
+    </target>
+
+    <target name="solrmarcexists">
+        <condition property="solrmarc.in.parent">
+            <available file="../../build.xml" />
+        </condition>
+        <condition property="solrmarc.exists">
+            <available file="../../dist/SolrMarc.jar" />
+        </condition>
+    </target>
+
+    <target name="solrmarcjar1" depends="solrmarcexists" if="solrmarc.in.parent">
+        <ant antfile="build.xml" dir="../.." target="singleJar" />
+        <copy file="../../dist/SolrMarc.jar" todir="${lib.dir}" />
+    </target>
+
+    <target name="solrmarcjar2" depends="solrmarcexists" if="solrmarc.exists" unless="solrmarc.in.parent">
+        <echo message=" copy SolrMarc from somewhere" />
+    </target>
+
+    <target name="solrmarcjar" depends="solrmarcjar1,solrmarcjar2">
+    </target>
+
+    <target name="buildstage" depends="init,solrmarcjar,dependencies,solrlibextract">
+        <echo message="${ant.project.name}: ${ant.file}" />
+
+        <javac destdir="${build.dir}" debug="true" debuglevel="lines,vars,source" target="${java.compat.version}" source="${java.compat.version}" encoding="utf-8">
+            <src path="${src.dir}" />
+            <classpath refid="classpath" />
+        </javac>
+
+        <mkdir dir="${stage.dir}/lib" />
+        <jar destfile="${stage.dir}/lib/${custom.jar.name}.jar">
+            <fileset dir="bin" includes="**/*.class" excludes="add" />
+        </jar>
+
+        <copy todir="${stage.dir}/lib">
+            <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
+        </copy>
+
+        <unjar src="${lib.dir}/SolrMarc.jar" dest="${stage.dir}" />
+
+        <jar destfile="${dist.dir}/${custom.jar.name}_SolrMarc.jar" manifest="${stage.dir}/META-INF/MANIFEST.MF">
+            <fileset dir="${stage.dir}" includes="**/*.*" />
+            <fileset dir="." includes="*.properties" excludes="build*.properties" />
+            <fileset dir="translation_maps" includes="*.properties" excludes="build*.properties" />
+        </jar>
+
+        <copy todir="${dist.dir}">
+            <fileset dir="${script.template.dir}" includes="*" />
+            <filterset>
+                <filter token="CUSTOM_JAR_NAME" value="${custom.jar.name}_SolrMarc.jar" />
+                <filter token="MEM_ARGS" value="${exe.mem.args}" />
+            </filterset>
+        </copy>
+    </target>
+
+    <target name="build" depends="buildstage">
+        <chmod dir="${dist.dir}" includes="*.sh" perm="u+x" />
+
+        <delete dir="${stage.dir}" />
+    </target>
+
+    <target name="usage" description="Prints usage instructions">
+        <echo message="Welcome to the Solrmarc indexing project" />
+        <echo message="Use 'ant' to build the latest code" />
+        <echo message="Use 'ant -Dsolr.version=&quot;1.2&quot;' to build the latest code based on version 1.2 of Solr" />
+        <echo message="Use 'ant -Dsolr.version=&quot;1.3&quot;' to build the latest code based on version 1.3 of Solr" />
+        <echo message="For developers" />
+        <echo message="Use 'ant clean' to clean the compiled source directory" />
+        <echo message="Use 'ant doc' to generate JavaDoc documentation" />
+        <echo message="Use 'ant gzip' to build a gzipped tarball and checksum for distribution (be sure to svn export first)" />
+        <echo message="Use 'ant test' to run unit tests" />
+    </target>
+
+
+    <!-- Site Testing Targets -->
+
+    <target name="testClean" description="clean generated test directories">
+        <delete dir="${solrmarc.basedir}/${test.build.dir}" />
+    </target>
+
+    <target name="testInit" depends="testClean" description="create (empty) generated test directories">
+        <mkdir dir="${solrmarc.basedir}/${test.build.dir}" />
+    </target>
+
+    <target name="testCompile" depends="testClean,buildstage" description="Compile test source code into test build dir">
+        <javac destdir="${solrmarc.basedir}/${test.build.dir}" srcdir="${site.test.src.dir}:${solrmarc.basedir}/${test.src.dir}" target="${java.compat.version}" source="${java.compat.version}" debug="on" encoding="utf-8">
+            <include name="org/**/*.java" />
+            <include name="edu/**/*.java" />
+            <exclude name="solr/**/*.java" />
+            <classpath>
+                <pathelement location="${build.dir}/${site.jar.name}" />
+                <path refid="classpath.jars" />
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="testJar" depends="testCompile" description="jar up test class files">
+        <jar jarfile="${solrmarc.basedir}/${test.build.dir}/${site.test.jar}">
+            <fileset dir="${solrmarc.basedir}/${test.build.dir}" includes="**/*.class" />
+        </jar>
+    </target>
+
+    <target name="testBibIx" depends="testJar" description="run junit tests for bib index">
+        <echo message="using solr version: ${solr.version}" />
+
+        <junit showoutput="yes" printsummary="yes" fork="yes">
+            <formatter type="plain" usefile="no" />
+
+            <classpath>
+                <pathelement location="${solrmarc.basedir}/${test.build.dir}/${site.test.jar}" />
+                <pathelement location="${solrmarc.basedir}/${build.dir}/${site.jar.name}" />
+                <path refid="classpath.jars" />
+            </classpath>
+
+            <sysproperty key="solrmarc.path" path="${solrmarc.basedir}" />
+            <sysproperty key="solr.path" path="${test.solr.path}" />
+            <sysproperty key="solr.data.dir" path="${test.solr.data.dir}" />
+            <!-- these crucial properties set here b/c normally they are in 
+                   the properties file indicated with an argument in the command line -->
+            <sysproperty key="solr.indexer" value="${solr.indexer}" />
+            <sysproperty key="solr.indexer.properties" value="${solr.indexer.properties}" />
+            <sysproperty key="marc.source" value="${marc.source}"/>
+
+            <test name="${test.bibix.class}" />
+        </junit>
+    </target>
+</project>
