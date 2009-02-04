@@ -117,8 +117,8 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	
 	/**
 	 * Default constructor
-     * @param indexingPropsFile the name of x_index.properties file mapping solr
-     *  field names to values in the marc records
+     * @param indexingPropsFile the name of xxx_index.properties file mapping 
+     *  solr field names to values in the marc records
      * @param propertyDirs - array of directories holding properties files
 	 */
     public StanfordIndexer(String indexingPropsFile, String[] propertyDirs) 
@@ -1046,8 +1046,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	}
 	
 	/**
-	 * return the call number from the 999 if it is not withdrawn, if it is LC
-	 * or Dewey.  Also return an appropriate constant
+	 * return the building from the 999 for non-ignored item
 	 */
 	private String getBuildingFrom999(DataField f999) 
 	{
