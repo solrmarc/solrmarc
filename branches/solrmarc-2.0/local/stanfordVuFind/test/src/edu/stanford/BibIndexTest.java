@@ -27,9 +27,9 @@ public abstract class BibIndexTest extends IndexTest {
 		
 		siteSpecificPath = System.getProperty("solrmarc.site.path");
 		if (siteSpecificPath == null)
-			siteSpecificPath = solrmarcPath + File.separator + "site-specific-examples" + File.separator + "stanfordVuFind"; 
+			siteSpecificPath = solrmarcPath + File.separator + "local" + File.separator + "stanfordVuFind"; 
 		
-		configPropFile = siteSpecificPath + File.separator + "stanford_config.properties";
+		configPropFile = siteSpecificPath + File.separator + "bibix_config.properties";
 		
 		solrPath = System.getProperty("solr.path");
 		if (solrPath == null)
