@@ -39,7 +39,7 @@ import org.solrmarc.tools.Utils;
  */
 public class MarcImporter extends MarcHandler 
 {	
-	/** needs to be visible to StanfordCallnumMarcImporter ... */
+	/** needs to be visible to StanfordItemMarcImporter ... */
     protected SolrCoreProxy solrCoreProxy;
 
     protected String solrCoreDir;
@@ -284,7 +284,6 @@ public class MarcImporter extends MarcHandler
         return solrCoreProxy.addDoc(fieldsMap, verbose);
     }
             
-
     private void addErrorsToMap(Map<String, Object> map, ErrorHandler errors2)
     {
         map.put("marc_error", errors.getErrors());
@@ -457,13 +456,11 @@ public class MarcImporter extends MarcHandler
         }
         
         finish();
-        
         signalServer();
         
         isShutDown = true;
         
         Date end = new Date();
-        
         long totalTime = end.getTime() - start.getTime();
         
         logger.info("Finished indexing in " + Utils.calcTime(totalTime));
@@ -505,7 +502,5 @@ public class MarcImporter extends MarcHandler
         int exitCode = importer.handleAll();
         System.exit(exitCode);
     }
-
-
  		
 }
