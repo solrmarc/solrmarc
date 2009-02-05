@@ -94,18 +94,22 @@
   
 	<target name="testBibIx" depends="testJar" description="run site junit tests for bib index">
 		<echo message="using solr version: ${solr.version}" />
-
+	  <!-- logging properties file -->
+	  <copy file="${solrmarc.basedir}/log4j.properties" todir="${solrmarc.basedir}/${test.build.dir}" />
 		<junit showoutput="yes" printsummary="yes" fork="yes" >
 			<formatter type="plain" usefile="no" />
-
+		  
 			<classpath>
 			  <pathelement location="${solrmarc.basedir}/${test.build.dir}/${site.test.jar}"/>
 				<pathelement location="${solrmarc.basedir}/${build.dir}/${site.jar.name}"/>
 				<pathelement location="${solrmarc.basedir}/${build.dir}/${jar.name}"/>
+			  <!-- for logging properties file -->
+			  <pathelement location="${solrmarc.basedir}/${test.build.dir}"/>
 				<path refid="classpath.jars" />
 			</classpath>
 
-			<sysproperty key="solrmarc.path" path="${solrmarc.basedir}"/>
+		  <!-- solrmarc properties -->
+		  <sysproperty key="solrmarc.path" path="${solrmarc.basedir}"/>
 			<sysproperty key="solr.path" path="${test.solr.path}"/>
 			<sysproperty key="solr.data.dir" path="${test.solr.data.dir}"/>
 			<!-- these crucial properties set here b/c normally they are in 
