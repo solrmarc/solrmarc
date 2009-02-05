@@ -1,7 +1,6 @@
 package org.solrmarc.index;
 
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.After;
 import java.io.*;
 import java.nio.channels.FileChannel;
@@ -9,6 +8,9 @@ import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.log4j.Appender;
+import org.apache.log4j.AsyncAppender;
+import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
@@ -122,17 +124,62 @@ public abstract class IndexTest {
 
 		String[] args = new String[1];
 		args[0] = confPropFilePath;
-	    MarcImporter importer = new MarcImporter(args);
+        java.util.logging.Logger.getLogger("org.apache.solr").setLevel(java.util.logging.Level.SEVERE);
+        setLog4jLogLevel(org.apache.log4j.Level.WARN);
+        
+        MarcImporter importer = new MarcImporter(args);
 	    int numImported = importer.importRecords();
 	    int numDeleted = importer.deleteRecords();
 	    importer.finish();
 	}
 
+	private static void setLog4jLogLevel(org.apache.log4j.Level newLevel)
+	{
+        Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
+        Enumeration enLogger = Logger.getRootLogger().getLoggerRepository().getCurrentLoggers();
+        Logger tmpLogger = null;
+        /* If logger is root, then need to loop through all loggers under root
+        * and change their logging levels too.  Also, skip sql loggers so
+        they
+        * do not get effected.
+        */
+        while(enLogger.hasMoreElements())
+        {
+            tmpLogger = (Logger)(enLogger.nextElement());
+            tmpLogger.setLevel(newLevel);
+        }
+        Enumeration enAppenders = Logger.getRootLogger().getAllAppenders();
+        Appender appender;
+        while(enAppenders.hasMoreElements())
+        {
+            appender = (Appender)enAppenders.nextElement();
+            
+            if(appender instanceof AsyncAppender)
+            {
+                AsyncAppender asyncAppender = (AsyncAppender)appender;
+                asyncAppender.activateOptions();
+//                rfa = (RollingFileAppender)asyncAppender.getAppender("R");
+//                rfa.activateOptions();
+//                ca = (ConsoleAppender)asyncAppender.getAppender("STDOUT");
+//                ca.activateOptions();
+            }
+        }
+
+	}
 	
 	@After
 	public void tearDown()
 	{
-	    if (sis != null) 
+        try
+        {
+            Thread.sleep(2000);
+        }
+        catch (InterruptedException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        if (sis != null) 
 	    {
 	        try {
 	            sis.close();
@@ -144,7 +191,7 @@ public abstract class IndexTest {
 	    }
 	    if (solrCore != null)
 	    {
-	        solrCore.close();
+            solrCore.close();
 	        solrCore = null;
 	    }
 	}
