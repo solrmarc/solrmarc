@@ -8,10 +8,7 @@ import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.AsyncAppender;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Logger;
+import org.apache.log4j.*;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.*;
@@ -24,7 +21,8 @@ import org.solrmarc.solr.SolrCoreProxy;
 import org.xml.sax.SAXException;
 
 public abstract class IndexTest {
-
+        
+    
 	// Note:  the hardcodings below are only used when the tests are
 	//  invoked without the properties set
 	//   the properties ARE set when the tests are invoke via ant.
@@ -84,26 +82,6 @@ public abstract class IndexTest {
 	}
 
 	/**
-	 * assert there is a single doc in the index with the value indicated
-	 * @param docId - the identifier of the SOLR/Lucene document
-	 * @param fldname - the field to be searched
-	 * @param fldVal - field value to be found
-	 * @param sis
-	 */
-	public final void assertSingleResult(String docId, String fldName, String fldVal, SolrIndexSearcher sis) 
-			throws ParserConfigurationException, SAXException, IOException {
-		Document doc = getSingleDoc(fldName, fldVal, sis);
-		assertTrue("doc \"" + docId + "\" does not have " + fldName + " of " + fldVal, doc.getValues(docIDfname)[0].equals(docId));
-	
-	}
-
-	public final void assertZeroResults(String fldName, String fldVal, SolrIndexSearcher sis) 
-			throws ParserConfigurationException, SAXException, IOException
-	{
-		assertResultSize(fldName, fldVal, 0, sis);
-	}
-	
-	/**
 	 * Given the paths to a marc file to be indexed, the solr directory, and
 	 *  the path for the solr index, create the index from the marc file.
 	 * @param marc21FilePath
@@ -127,16 +105,18 @@ public abstract class IndexTest {
         java.util.logging.Logger.getLogger("org.apache.solr").setLevel(java.util.logging.Level.SEVERE);
         setLog4jLogLevel(org.apache.log4j.Level.WARN);
         
-        MarcImporter importer = new MarcImporter(args);
+	    MarcImporter importer = new MarcImporter(args);
 	    int numImported = importer.importRecords();
 	    int numDeleted = importer.deleteRecords();
 	    importer.finish();
 	}
 
-	private static void setLog4jLogLevel(org.apache.log4j.Level newLevel)
+
+	@SuppressWarnings("unchecked")
+    private static void setLog4jLogLevel(org.apache.log4j.Level newLevel)
 	{
         Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
-        Enumeration enLogger = Logger.getRootLogger().getLoggerRepository().getCurrentLoggers();
+        Enumeration<Logger> enLogger = rootLogger.getLoggerRepository().getCurrentLoggers();
         Logger tmpLogger = null;
         /* If logger is root, then need to loop through all loggers under root
         * and change their logging levels too.  Also, skip sql loggers so
@@ -148,7 +128,7 @@ public abstract class IndexTest {
             tmpLogger = (Logger)(enLogger.nextElement());
             tmpLogger.setLevel(newLevel);
         }
-        Enumeration enAppenders = Logger.getRootLogger().getAllAppenders();
+        Enumeration<Appender> enAppenders = rootLogger.getAllAppenders();
         Appender appender;
         while(enAppenders.hasMoreElements())
         {
@@ -167,19 +147,23 @@ public abstract class IndexTest {
 
 	}
 	
+	/**
+	 * ensure IndexSearcher and SolrCore are reset for next test
+	 */
 	@After
 	public void tearDown()
 	{
-        try
+	    // avoid "already closed" exception
+	    try
         {
-            Thread.sleep(2000);
+            Thread.sleep(1500);
         }
         catch (InterruptedException e1)
         {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-        if (sis != null) 
+        
+	    if (sis != null) 
 	    {
 	        try {
 	            sis.close();
@@ -191,7 +175,7 @@ public abstract class IndexTest {
 	    }
 	    if (solrCore != null)
 	    {
-            solrCore.close();
+	        solrCore.close();
 	        solrCore = null;
 	    }
 	}
@@ -268,6 +252,26 @@ public abstract class IndexTest {
 		d.delete();
 	}
 
+    /**
+     * assert there is a single doc in the index with the value indicated
+     * @param docId - the identifier of the SOLR/Lucene document
+     * @param fldname - the field to be searched
+     * @param fldVal - field value to be found
+     * @param sis
+     */
+    public final void assertSingleResult(String docId, String fldName, String fldVal, SolrIndexSearcher sis) 
+            throws ParserConfigurationException, SAXException, IOException {
+        Document doc = getSingleDoc(fldName, fldVal, sis);
+        assertTrue("doc \"" + docId + "\" does not have " + fldName + " of " + fldVal, doc.getValues(docIDfname)[0].equals(docId));
+    
+    }
+
+    public final void assertZeroResults(String fldName, String fldVal, SolrIndexSearcher sis) 
+            throws ParserConfigurationException, SAXException, IOException
+    {
+        assertResultSize(fldName, fldVal, 0, sis);
+    }
+    
 	/**
 	 * Get the Lucene document with the given id from the solr index at the
 	 *  solrDataDir
