@@ -3,13 +3,13 @@
 <project basedir="." default="singleJar" name="Solrmarc">
 
 	<!-- property files -->
-	<property file="build_override.properties" />
 	<property file="build.properties" />
 
 	<property name="buildtools.path" value="buildtools" />
 
 	<!-- import other ant scripts -->
-	<import file="${buildtools.path}/one-jar-ant-task.xml"/>
+    <property name="one-jar.dist.dir" value="${buildtools.path}" />
+    <import file="${buildtools.path}/one-jar-ant-task.xml"/>
 
 	<tstamp>
 		<format property="year" pattern="yyyy" />
@@ -29,9 +29,6 @@
              validargs="1.2,1.3,1.4,war" 
              addproperty="solr.version" defaultvalue="1.2" />
     <!-- put solr.version property into the build_override.properties -->
-    <propertyfile file="build_override.properties">
-      <entry key="solr.version" value="${solr.version}" />
-    </propertyfile>
   </target>
 
 <!-- General Targets -->
@@ -47,7 +44,7 @@
 		<mkdir dir="${dist.dir}" />
 	</target>
 
-	<target name="compile" depends="init,solrversion" description="Compile source code into the build directory">
+	<target name="compile" depends="init" description="Compile source code into the build directory">
 		<javac destdir="${build.dir}" 
 			     srcdir="${src.dir}" 
 			     target="${java.compat.version}" source="${java.compat.version}" 
@@ -57,7 +54,7 @@
 		</javac>
 	</target>
 	
-  <target name="build" depends="solrversion,compile" description="create ${jar.name} in the build directory">
+  <target name="build" depends="compile" description="create ${jar.name} in the build directory">
 		<echo message="${ant.project.name}: ${ant.file}" />
 
 		<jar destfile="${build.dir}/${jar.name}">
@@ -101,7 +98,7 @@
 		<mkdir dir="${test.build.dir}" />
 	</target>
 
-	<target name="testCompile" depends="build,testInit" description="Compile test source code into test build dir">
+	<target name="testCompile" depends="build,testInit,solrversion" description="Compile test source code into test build dir">
 		<javac destdir="${test.build.dir}" 
 		       srcdir="${test.src.dir}" 
 		       target="${java.compat.version}" source="${java.compat.version}" 
