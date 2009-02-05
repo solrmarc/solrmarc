@@ -24,18 +24,12 @@ public class FormatTests extends BibIndexTest {
 	// TODO: change this field name to format_facet
 	private String fldName = "format";
 
-@Before
-	public final void setup() 
-			throws ParserConfigurationException, IOException, SAXException 
-	{
-		createIxInitVars(testDataFname);
-	}
-
 @Test
 	public final void testFldProperties() 
 		throws ParserConfigurationException, IOException, SAXException
 	{
-		assertStringFieldProperties(fldName, solrCore);
+        createIxInitVars(testDataFname);
+        assertStringFieldProperties(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
@@ -65,6 +59,7 @@ public class FormatTests extends BibIndexTest {
 	public final void testBookFormat() 
 			throws IOException, ParserConfigurationException, SAXException 
 	{
+        createIxInitVars(testDataFname);
 		String fldVal = Format.BOOK.toString();
 		
 		Set<String> docIds = new HashSet<String>();
@@ -95,7 +90,8 @@ public class FormatTests extends BibIndexTest {
 	public final void testJournalFormat() 
 			throws IOException, ParserConfigurationException, SAXException 
 	{
-		String fldVal = "Journal";
+        createIxInitVars(testDataFname);
+        String fldVal = "Journal";
 
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("leader07sNo00600821p");
@@ -120,7 +116,8 @@ public class FormatTests extends BibIndexTest {
 	public final void testSerialPubFormat() 
 			throws IOException, ParserConfigurationException, SAXException 
 	{
-		String fldVal = "Serial Publication";
+        createIxInitVars(testDataFname);
+        String fldVal = "Serial Publication";
 		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("leader06a07s"); // leader/07 s 008/21 blank
@@ -148,7 +145,8 @@ public class FormatTests extends BibIndexTest {
 	public final void testJournalPeriodicalFormat() 
 			throws IOException, ParserConfigurationException, SAXException 
 	{
-		String fldVal = "Journal/Periodical";
+        createIxInitVars(testDataFname);
+        String fldVal = "Journal/Periodical";
 		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("leader06a07s"); // leader/07 s 008/21 blank
@@ -177,7 +175,8 @@ public class FormatTests extends BibIndexTest {
 	public final void testNewspaper() 
 			throws IOException, ParserConfigurationException, SAXException 
 	{
-		String fldVal = Format.NEWSPAPER.toString();
+        createIxInitVars(testDataFname);
+        String fldVal = Format.NEWSPAPER.toString();
 		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("newspaper");
@@ -202,7 +201,8 @@ public class FormatTests extends BibIndexTest {
 	public final void testConferenceProceedings() 
 			throws ParserConfigurationException, SAXException, IOException
 	{
-		String fldVal = Format.CONFERENCE_PROCEEDINGS.toString();
+        createIxInitVars(testDataFname);
+        String fldVal = Format.CONFERENCE_PROCEEDINGS.toString();
 		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("5666387");
@@ -221,7 +221,8 @@ public class FormatTests extends BibIndexTest {
 	public final void testOtherFormat() 
 			throws IOException, ParserConfigurationException, SAXException 
 	{
-	    String fldVal = Format.OTHER.toString();
+        createIxInitVars(testDataFname);
+        String fldVal = Format.OTHER.toString();
 
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("leader06t07b");
@@ -255,7 +256,8 @@ public class FormatTests extends BibIndexTest {
 	public final void testRemainingFormats() 
 			throws IOException, ParserConfigurationException, SAXException 
 	{
-		// map/globe
+        createIxInitVars(testDataFname);
+        // map/globe
 		assertDocHasFieldValue("leader06e", fldName, "Map/Globe", sis); 
 		assertDocHasFieldValue("leader06f", fldName, Format.MAP_GLOBE.toString(), sis); 
 		// image
