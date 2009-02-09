@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project basedir="." default="build" name="BlacklightIndexer">
+
+    <property file="build_override.properties" />
+    <property file="build.properties" />
+    <import file="../build.xml" />
+    
+</project>

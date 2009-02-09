@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project basedir="." default="singleJar" name="Solrmarc">
+
+	<!-- property files -->
+	<property file="build.properties" />
+
+	<property name="buildtools.path" value="buildtools" />
+
+	<!-- import other ant scripts -->
+    <property name="one-jar.dist.dir" value="${buildtools.path}" />
+    <import file="${buildtools.path}/one-jar-ant-task.xml"/>
+
+	<tstamp>
+		<format property="year" pattern="yyyy" />
+		<format property="DSTAMP" pattern="yyyy-MM-dd" />
+		<format property="TSTAMP" pattern="HH:mm:ss" />
+		<format property="dateversion" pattern="yyyy.MM.dd.HH.mm.ss" />
+	</tstamp>
+
+    <path id="classpath.jars" description="Jars for classpath (but not solr jars)">
+		<fileset dir="${lib.dir}" excludes="*/*.jar" includes="*.jar"/>
+	</path>
+  
+  
+<!-- Solr Version Properties Targets -->
+  <target name="solrversion" unless="${solr.version}">
+    <input message="solr.version must be defined as either 1.2, 1.3, or 1.4 (or war)" 
+             validargs="1.2,1.3,1.4,war" 
+             addproperty="solr.version" defaultvalue="1.2" />
+    <!-- put solr.version property into the build_override.properties -->
+  </target>
+
+<!-- General Targets -->
+
+	<target name="clean" description="clean the generated directories">
+		<delete dir="${build.dir}" />
+		<delete dir="${doc.dir}" />
+		<delete dir="${tag.dir}" />
+	</target>
+
+	<target name="init" description="create (empty) generated directories">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${dist.dir}" />
+	</target>
+
+	<target name="compile" depends="init" description="Compile source code into the build directory">
+		<javac destdir="${build.dir}" 
+			     srcdir="${src.dir}" 
+			     target="${java.compat.version}" source="${java.compat.version}" 
+                 debug="true" debuglevel="lines,vars,source" encoding="utf-8">
+	    <include name="**/*.java"/>
+			<classpath refid="classpath.jars" />
+		</javac>
+	</target>
+	
+  <target name="build" depends="compile" description="create ${jar.name} in the build directory">
+		<echo message="${ant.project.name}: ${ant.file}" />
+
+		<jar destfile="${build.dir}/${jar.name}">
+			<fileset dir="${build.dir}" includes="**/*.class" />
+			<manifest>
+				<attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter" />
+			</manifest>
+		</jar>
+
+		<jar destfile="${build.dir}/zclient.jar">
+			<fileset dir="${build.dir}" includes="**/ZClient.class,**/MarcTranslatedReader.class" />
+		</jar>
+	</target>
+
+  <target name="singleJar" depends="build"  description="Create single jar (using One-jar) which contains all of the code and libraries for running SolrMarc">
+    <copy tofile="${buildtools.path}/manifest.mf" 
+              file="${buildtools.path}/manifest_template.mf" overwrite="true">
+			<filterset>
+				<filter token="NAMEOFMAINCLASS" value="org.solrmarc.marc.MarcImporter"/>
+			</filterset>
+		</copy>
+
+    <one-jar destfile="${dist.dir}/${ant.project.name}.jar" 
+         manifest="${buildtools.path}/manifest.mf">
+     <main jar="${build.dir}/${jar.name}" />
+			<lib>
+				<fileset dir="${lib.dir}" includes="*.jar" />
+			</lib>
+			<fileset dir="${trans.map.path}" includes="*.properties" />
+		</one-jar>
+	</target>
+
+  
+<!-- Testing Targets -->
+
+	<target name="testClean" description="clean generated test directories">
+		<delete dir="${test.build.dir}" />
+	</target>
+
+	<target name="testInit" depends="testClean" description="create (empty) generated test directories">
+		<mkdir dir="${test.build.dir}" />
+	</target>
+
+	<target name="testCompile" depends="build,testInit,solrversion" description="Compile test source code into test build dir">
+		<javac destdir="${test.build.dir}" 
+		       srcdir="${test.src.dir}" 
+		       target="${java.compat.version}" source="${java.compat.version}" 
+		       debug="on" encoding="utf-8">
+	    <include name="org/**/*.java"/>
+	    <exclude name="solr/**/*.java"/>
+			<classpath>
+		  	<pathelement location="${build.dir}/${jar.name}"/>
+				<path refid="classpath.jars" />
+              <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="testJar" depends="testCompile" description="jar up test class files">
+		<jar jarfile="${test.build.dir}/${test.jar}" >
+			<fileset dir="${test.build.dir}" includes="**/*.class" />
+		</jar>
+	</target>
+
+	<target name="test" depends="testJar" description="run junit tests">
+		<echo message="using solr version: ${solr.version}" />
+
+		<junit showoutput="yes" printsummary="yes" fork="yes" >
+			<formatter type="plain" usefile="no" />
+
+			<classpath>
+				<pathelement location="${test.build.dir}/${test.jar}"/>
+				<pathelement location="${build.dir}/${jar.name}"/>
+				<path refid="classpath.jars" />
+			</classpath>
+
+			<sysproperty key="solrmarc.path" path="."/>
+			<sysproperty key="solr.path" path="${test.solr.path}"/>
+			<sysproperty key="solr.data.dir" path="${test.solr.data.dir}"/>
+			<!-- these crucial properties set here b/c normally they are in 
+			   the properties file indicated with an argument in the command line -->
+			<sysproperty key="solr.indexer" value="${solr.indexer}"/>
+			<sysproperty key="solr.indexer.properties" value="${solr.indexer.properties}"/>		
+			<sysproperty key="marc.source" value="${marc.source}"/>
+			
+			<test name="${test.class}" />
+		</junit>
+	</target>
+
+  
+<!-- Utility Targets -->
+
+	<target name="Z3950Client">
+		<java classname="MarcImporter" failonerror="true" fork="yes">
+			<classpath refid="classpath.jars" />
+		</java>
+	</target>
+
+	<!-- Macro to build a checksum file
+                Only needed until the "format" option is supported
+                by ant's checksum task -->
+	<macrodef name="solrmarc-checksum">
+		<attribute name="file" />
+		<sequential>
+			<checksum file="@{file}" property="@{file}.sum" algorithm="${checksum.algorithm}" />
+			<basename file="@{file}" property="@{file}.base" />
+			<concat destfile="@{file}.${checksum.algorithm}" force="yes" append="false" fixlastline="yes">
+				<header trimleading="yes">${@{file}.sum} </header>
+				<!-- empty fileset to trick concat -->
+				<fileset dir="." excludes="**" />
+				<footer trimleading="yes">${@file}.base}</footer>
+			</concat>
+		</sequential>
+	</macrodef>
+
+	<target name="gzip" description="Create a gzipped tarball and checksum file (in the tag directory)" depends="build">
+		<echo message="Make sure to export the project (svn export) before running this task" />
+
+		<mkdir dir="${tag.dir}" />
+		<tar destfile="${tag.dir}/${ant.project.name}.tar.gz" compression="gzip" 
+		     basedir="." 
+		     excludes="bin/**,src/**,**/build.xml,**/**.mrc,**/.svn" />
+		<solrmarc-checksum file="${tag.dir}/${ant.project.name}.tar.gz" />
+	</target>
+
+	<target name="doc" description="Generate JavaDoc documenation">
+		<mkdir dir="${doc.dir}" />
+		<javadoc destdir="${doc.dir}" 
+		         author="true" version="true" overview="overview.html" use="true" 
+		         windowtitle="${ant.project.name}" 
+		         doctitle="${ant.project.name} Java Documentation" bottom="">
+			<packageset dir="${src.dir}" defaultexcludes="yes" />
+			<link offline="true" href="http://java.sun.com/j2se/1.5.0/docs/api/" packagelistLoc="." />
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api/" />
+			<link href="http://junit.sourceforge.net/javadoc/" />
+			<link href="http://lucene.apache.org/java/docs/api/" />
+			<link href="http://lucene.apache.org/solr/api/" />
+		</javadoc>
+	</target>
+
+	<target name="usage" description="Prints usage instructions">
+		<echo message="Welcome to the Solrmarc indexing project" />
+		<echo message="Use 'ant' to build the latest code" />
+		<echo message="Use 'ant -Dsolr.version=&quot;1.2&quot;' to build the latest code based on version 1.2 of Solr" />
+		<echo message="Use 'ant -Dsolr.version=&quot;1.3&quot;' to build the latest code based on version 1.3 of Solr" />
+		<echo message="For developers" />
+		<echo message="Use 'ant -p' to see all available commands" />
+	</target>
+
+</project>
