@@ -19,11 +19,11 @@ public abstract class BibIndexTest extends IndexTest {
 	//  invoked without the properties set
 	//   the properties ARE set when the tests are invoke via ant.
 	{
-		String parentDir = File.separator + "Users" + File.separator + "naomi" + File.separator + "NGDE";
-		
-		solrmarcPath = System.getProperty("solrmarc.path");
-		if (solrmarcPath == null)
-			solrmarcPath = parentDir + File.separator + "solrmarc" + File.separator + "stanfordSolrmarc";
+//        String parentDir = "C:/Development";
+        
+        solrmarcPath = System.getProperty("solrmarc.path");
+        if (solrmarcPath == null)
+            solrmarcPath = new File(".").getAbsolutePath();
 		
 		siteSpecificPath = System.getProperty("solrmarc.site.path");
 		if (siteSpecificPath == null)
@@ -33,14 +33,14 @@ public abstract class BibIndexTest extends IndexTest {
 		
 		solrPath = System.getProperty("solr.path");
 		if (solrPath == null)
-			solrPath = parentDir +  File.separator + "vufind" + File.separator + "vufind - local svn" +  File.separator + "solr";
+			solrPath = siteSpecificPath +  File.separator + "solr";
 
 		testDir = solrmarcPath + File.separator + "test";
 		testDataParentPath = testDir + File.separator + "data";
 		testDataPath = testDataParentPath + File.separator + "allfieldsTests.mrc";
 		solrDataDir = System.getProperty("solr.data.dir");
 		if (solrDataDir == null)
-			solrDataDir = testDir + File.separator + "solr" + File.separator + "data";
+			solrDataDir = solrPath + File.separator + "data";
 	}
 
 	
