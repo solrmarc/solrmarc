@@ -69,17 +69,17 @@ public abstract class IndexTest {
 		sis = getSolrIndexSearcher(solrCore);
 	}
 	
-	/**
-	 * sets up the initial loading for tests, and does the field properties
-	 *  assertions on an expected string, multivalued field properties
-	 */
-	protected final void setupMultiValStrFldTests(String fldName, String datafile) 
-			throws IOException, ParserConfigurationException, SAXException {
-		createNewTestIndex(testDataParentPath + datafile, configPropFile, solrPath, solrDataDir, solrmarcPath, siteSpecificPath);
-		SolrCore solrCore = getSolrCore(solrPath, solrDataDir);
-		assertStringFieldProperties(fldName, solrCore);
-		assertFieldMultiValued(fldName, solrCore);
-	}
+//	/**
+//	 * sets up the initial loading for tests, and does the field properties
+//	 *  assertions on an expected string, multivalued field properties
+//	 */
+//	protected final void setupMultiValStrFldTests(String fldName, String datafile) 
+//			throws IOException, ParserConfigurationException, SAXException {
+//		createNewTestIndex(testDataParentPath + datafile, configPropFile, solrPath, solrDataDir, solrmarcPath, siteSpecificPath);
+//		SolrCore solrCore = getSolrCore(solrPath, solrDataDir);
+//		assertStringFieldProperties(fldName, solrCore);
+//		assertFieldMultiValued(fldName, solrCore);
+//	}
 
 	/**
 	 * Given the paths to a marc file to be indexed, the solr directory, and
@@ -154,9 +154,10 @@ public abstract class IndexTest {
 	public void tearDown()
 	{
 	    // avoid "already closed" exception
+	    logger.info("Calling teardown to close Solr");
 	    try
         {
-            Thread.sleep(1500);
+            Thread.sleep(2000);
         }
         catch (InterruptedException e1)
         {
@@ -166,6 +167,7 @@ public abstract class IndexTest {
 	    if (sis != null) 
 	    {
 	        try {
+	            logger.info("Closing searcher");
 	            sis.close();
 	            sis = null;
 	        }
@@ -175,6 +177,7 @@ public abstract class IndexTest {
 	    }
 	    if (solrCore != null)
 	    {
+            logger.info("Closing solr");
 	        solrCore.close();
 	        solrCore = null;
 	    }
@@ -324,9 +327,10 @@ public abstract class IndexTest {
 	 * @param fldName - name of the field that shouldn't be in index
 	 */
 	@SuppressWarnings("unchecked")
-	public static final void assertFieldPresent(String fldName, SolrCore solrCore) 
+	public static final void assertFieldPresent(String fldName, SolrIndexSearcher sis) 
 			throws ParserConfigurationException, IOException, SAXException {
-	    assertFieldPresent(fldName, getIndexReader(solrCore));
+	    IndexReader ir = sis.getReader();
+	    assertFieldPresent(fldName, ir);
 	}
 
 	/**
@@ -546,22 +550,22 @@ public abstract class IndexTest {
 		return (SolrCore) solrCoreProxy.getCore();
 	}
 
-	public static final IndexReader getIndexReader(String solrPath, String solrDataDir)
-			throws ParserConfigurationException, IOException, SAXException {
-	    return getSolrIndexSearcher(solrPath, solrDataDir).getReader();
-	}
-
-	public static final IndexReader getIndexReader(SolrCore solrCore)
-			throws ParserConfigurationException, IOException, SAXException {
-	    return getSolrIndexSearcher(solrCore).getReader();
-	}
+//	public static final IndexReader getIndexReader(String solrPath, String solrDataDir)
+//			throws ParserConfigurationException, IOException, SAXException {
+//	    return getSolrIndexSearcher(solrPath, solrDataDir).getReader();
+//	}
+//
+//	public static final IndexReader getIndexReader(SolrCore solrCore)
+//			throws ParserConfigurationException, IOException, SAXException {
+//	    return getSolrIndexSearcher(solrCore).getReader();
+//	}
 
 	/**
 	 * assert field is not tokenized, has no termVector and, if indexed, omitsNorm 
 	 */
-	public static final void assertStringFieldProperties(String fldName, SolrCore solrCore) 
+	public static final void assertStringFieldProperties(String fldName, SolrCore solrCore, SolrIndexSearcher sis) 
 			throws ParserConfigurationException, IOException, SAXException {
-		assertFieldPresent(fldName, solrCore);
+		assertFieldPresent(fldName, sis);
 		assertFieldNotTokenized(fldName, solrCore);
 		assertFieldHasNoTermVectors(fldName, solrCore);
 		// since omitNorms is only relevant if field is indexed, 
@@ -574,9 +578,9 @@ public abstract class IndexTest {
 	/**
 	 * assert field is present, tokenized, has no termVectors
 	 */
-	public static final void assertTextFieldProperties(String fldName, SolrCore solrCore) 
+	public static final void assertTextFieldProperties(String fldName, SolrCore solrCore, SolrIndexSearcher sis) 
 			throws ParserConfigurationException, IOException, SAXException {
-		assertFieldPresent(fldName, solrCore);
+		assertFieldPresent(fldName, sis);
 		assertFieldTokenized(fldName, solrCore);
 		assertFieldHasNoTermVectors(fldName, solrCore);
 	}

@@ -26,7 +26,7 @@ public class StandardNumberTests extends BibIndexTest {
 	{
 		String fldName = "oclc";
 		createIxInitVars("oclcNumTests.mrc");
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
 	
@@ -80,7 +80,7 @@ public class StandardNumberTests extends BibIndexTest {
 	{
 		String fldName = "oclc";
 		createIxInitVars("oclcNumTests.mrc");
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
 	
@@ -129,7 +129,7 @@ public class StandardNumberTests extends BibIndexTest {
 		// TODO: change this fieldname to isbn_store
 		String fldName = "isbn";
 		createIxInitVars("isbnTests.mrc");
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
 		assertFieldNotIndexed(fldName, solrCore);
@@ -200,7 +200,7 @@ public class StandardNumberTests extends BibIndexTest {
 	{
 		String fldName = "isbnUser_search";
 		createIxInitVars("isbnTests.mrc");
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -238,7 +238,7 @@ public class StandardNumberTests extends BibIndexTest {
 		// TODO: change this fieldname to issn_store
 		String fldName = "issn";
 		createIxInitVars("issnTests.mrc");
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
 		assertFieldNotIndexed(fldName, solrCore);
@@ -275,7 +275,7 @@ public class StandardNumberTests extends BibIndexTest {
 	{
 		String fldName = "issnUser_search";
 		createIxInitVars("issnTests.mrc");
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -308,7 +308,7 @@ public class StandardNumberTests extends BibIndexTest {
 	{
 		String fldName = "lccn";
 		createIxInitVars("lccnTests.mrc");
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotMultiValued(fldName, solrCore);		
 		assertFieldStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);

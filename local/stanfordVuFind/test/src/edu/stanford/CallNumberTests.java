@@ -32,7 +32,7 @@ public class CallNumberTests extends BibIndexTest {
 	{
 		String fldName = "lc-first-letter";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -104,7 +104,7 @@ public class CallNumberTests extends BibIndexTest {
 // TODO: this field should be eliminated and this functionality provided in the UI
 		String fldName = "lc-first-desc";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -147,7 +147,7 @@ public class CallNumberTests extends BibIndexTest {
 	{
 		String fldName = "lc-alpha";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -231,7 +231,7 @@ public class CallNumberTests extends BibIndexTest {
 	{
 		String fldName = "lc-alpha-desc";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -290,7 +290,7 @@ public class CallNumberTests extends BibIndexTest {
 		// first alpha chars  used in GetMoreLikeThis queries
 		String fldName = "lc-b4cutter";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		
 		assertFieldStored(fldName, solrCore);  // used in getMoreLikeThis queries
 		assertFieldIndexed(fldName, solrCore);
@@ -415,7 +415,7 @@ public class CallNumberTests extends BibIndexTest {
 		// first alpha chars  used in GetMoreLikeThis queries
 		String fldName = "lc-callnum";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		
 		assertFieldStored(fldName, solrCore);  
 		assertFieldIndexed(fldName, solrCore); // will be used in shelflist browse
@@ -497,7 +497,7 @@ public class CallNumberTests extends BibIndexTest {
 	{
 		String fldName = "dewey-first-digit";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 	
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -537,7 +537,7 @@ public class CallNumberTests extends BibIndexTest {
 // TODO: this field should be eliminated and this functionality provided in the UI
 		String fldName = "dewey-first-desc";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 	
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -571,7 +571,7 @@ public class CallNumberTests extends BibIndexTest {
 	{
 		String fldName = "dewey-2digits";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -605,7 +605,7 @@ public class CallNumberTests extends BibIndexTest {
 	{
 		String fldName = "dewey-2digit-desc";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -638,7 +638,7 @@ public class CallNumberTests extends BibIndexTest {
 	{
 		String fldName = "dewey-b4cutter";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		
 		assertFieldStored(fldName, solrCore); 
 		assertFieldIndexed(fldName, solrCore);
@@ -683,7 +683,7 @@ public class CallNumberTests extends BibIndexTest {
 	{
 		String fldName = "dewey-callnum";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		
 		assertFieldStored(fldName, solrCore);  
 		assertFieldIndexed(fldName, solrCore);  // will be used in shelflist browse
