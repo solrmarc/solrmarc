@@ -19,13 +19,6 @@ public class SubjectTests extends BibIndexTest {
 	
 	private final String testDataFname = "subjectTests.mrc";
 
-@Before
-	public final void setup() 
-			throws ParserConfigurationException, IOException, SAXException 
-	{
-		createIxInitVars(testDataFname);
-	}
-
 
 	/**
 	 * Test population and properties of topic field
@@ -34,6 +27,7 @@ public class SubjectTests extends BibIndexTest {
 	public final void testTopic() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
+        createIxInitVars(testDataFname);
 		String fldName = "topic";
 		assertTextFieldProps(fldName);
 		assertFieldStored(fldName, solrCore);
@@ -68,7 +62,8 @@ public class SubjectTests extends BibIndexTest {
 	public final void testTopicStr() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "topicStr";
+        createIxInitVars(testDataFname);
+        String fldName = "topicStr";
 		assertStringFieldProperties(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
@@ -169,6 +164,7 @@ public class SubjectTests extends BibIndexTest {
 	public final void testSubtopic() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
+        createIxInitVars(testDataFname);
 		String fldName = "subtopic";
 		assertTextFieldProps(fldName);
 		assertFieldNotStored(fldName, solrCore);
@@ -190,6 +186,7 @@ public class SubjectTests extends BibIndexTest {
 	public final void testFullTopic() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
+        createIxInitVars(testDataFname);
 		String fldName = "fulltopic";
 		assertTextFieldProps(fldName);
 		assertFieldStored(fldName, solrCore);
@@ -231,6 +228,7 @@ public class SubjectTests extends BibIndexTest {
 	public final void testGenreFields() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
+        createIxInitVars(testDataFname);
 		IndexReader ir = sis.getReader();
 		assertFieldNotPresent("fullgenre", ir);
 		assertFieldNotPresent("genre", ir);
@@ -246,6 +244,7 @@ public class SubjectTests extends BibIndexTest {
 	public final void testMultFullTopicFields() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
+        createIxInitVars(testDataFname);
 		String fldName = "fulltopic";
 		assertFieldStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -265,6 +264,7 @@ public class SubjectTests extends BibIndexTest {
 	public final void testGeographicStr()
 			throws ParserConfigurationException, IOException, SAXException
 	{
+        createIxInitVars(testDataFname);
 		String fldName = "geographicStr";
 		assertStringFieldProperties(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
@@ -292,6 +292,7 @@ public class SubjectTests extends BibIndexTest {
 	public final void testMultFullGeoFields() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
+        createIxInitVars(testDataFname);
 		String fldName = "fullgeographic";
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -355,6 +356,7 @@ public class SubjectTests extends BibIndexTest {
 	private final void assertTextFieldProps(String fldName) 
 			throws ParserConfigurationException, IOException, SAXException
 	{
+//        createIxInitVars(testDataFname);
 		assertFieldPresent(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
 		assertFieldTokenized(fldName, solrCore);
