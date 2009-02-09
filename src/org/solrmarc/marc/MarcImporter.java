@@ -17,256 +17,109 @@ package org.solrmarc.marc;
  */
 
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.log4j.*;
-import org.apache.solr.core.CoreContainer;
-import org.apache.solr.core.SolrConfig;
-import org.apache.solr.core.SolrCore;
-import org.apache.solr.update.AddUpdateCommand;
-import org.apache.solr.update.CommitUpdateCommand;
-import org.apache.solr.update.DeleteUpdateCommand;
-import org.apache.solr.update.DocumentBuilder;
-import org.apache.solr.update.UpdateHandler;
-import org.marc4j.MarcDirStreamReader;
-import org.marc4j.MarcPermissiveStreamReader;
-import org.marc4j.MarcReader;
+import org.marc4j.ErrorHandler;
 import org.marc4j.marc.Record;
-import org.solrmarc.index.SolrIndexer;
-import org.solrmarc.marc.MarcFilteredReader;
+import org.solrmarc.solr.SolrCoreProxy;
+import org.solrmarc.solr.SolrCoreLoader;
 import org.solrmarc.tools.Utils;
+
 
 /**
  * @author Wayne Graham (wsgrah@wm.edu)
  * @version $Id$
  *
  */
-public class MarcImporter {
-	
-    private String solrMarcDir;
-    private String solrCoreName;
-    private String solrCoreDir;
-    private String solrDataDir;
+public class MarcImporter extends MarcHandler 
+{	
+	/** needs to be visible to StanfordItemMarcImporter ... */
+    protected SolrCoreProxy solrCoreProxy;
+
+    protected String solrCoreDir;
+    protected String solrDataDir;
     private String deleteRecordListFilename;
-    private SolrIndexer indexer;
-    private MarcReader reader;
-    private SolrCore solrCore;
-    private SolrConfig solrConfig;
-    private UpdateHandler updateHandler;
+    private String deleteRecordIDMapper = null;
+    private String SolrHostURL;
     private boolean optimizeAtEnd = true;
-    private boolean verbose = false;
     private boolean shuttingDown = false;
     private boolean isShutDown = false;
-    private boolean to_utf_8 = false;
-    private boolean unicodeNormalize = false;
+    private int recsReadCounter = 0;
+    private int recsIndexedCounter = 0;
+    private int idsToDeleteCounter = 0;
+    private int recsDeletedCounter = 0;
     
     // Initialize logging category
-    static Logger logger = Logger.getLogger(MarcImporter.class.getName());
+    protected static Logger logger = Logger.getLogger(MarcImporter.class.getName());
     
-    private String SolrHostURL;
-	/**
-	 * Constructs an instance with a properties file
-	 * @param properties
-	 * @throws IOException 
-	 */
-    public MarcImporter(String properties) throws IOException
-    {
-        // Process Properties
-        loadProperties(properties);
-
-        // Set up Solr core
-        try{
-            System.setProperty("solr.data.dir", solrDataDir);
-            logger.info("Using the data directory of: " + solrDataDir);
-            
-            File configFile = new File(solrCoreDir + "/solr.xml");
-            logger.info("Using the multicore schema file at : " + configFile.getAbsolutePath());
-            logger.info("Using the " + solrCoreName + " core");
-            
-            CoreContainer cc = new CoreContainer(solrCoreDir, configFile);
-            
-            solrCore = cc.getCore(solrCoreName);
-           
-        }
-        catch (Exception e)
-        {
-            logger.error("Couldn't load the solr core directory");
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        // Setup UpdateHandler
-        updateHandler = solrCore.getUpdateHandler();
-
-	}
 
     /**
-     * Load the properties file
-     * @param properties
-     * @throws IOException
-     */
-    public void loadProperties(String properties) throws IOException
+	 * Constructs an instance with properties files
+	 */
+    public MarcImporter(String args[])
     {
-        Properties props = new Properties();
-
-        InputStream in = new FileInputStream(properties);
-
-        // load the properties
-        props.load(in);
-        in.close();
-
-        // The location of where the .properties files are located
-        solrMarcDir = getProperty(props, "solrmarc.path");
-
+        // Process Properties in super class MarcHandler
+    	super(args);
+    	
+    	loadLocalProperties(configProps);
+        // Set up Solr core
+        solrCoreProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, null, logger);
+	}
+	
+    /**
+	 * Load the properties file
+	 * @param properties
+	 */
+	private void loadLocalProperties(Properties props) 
+	{
         // The solr.home directory
-        solrCoreDir = getProperty(props, "solr.path");
-
-        // The solr core to be used
-        solrCoreName = getProperty(props, "solr.core.name");
+        solrCoreDir = Utils.getProperty(props, "solr.path");
 
         // The solr data diretory to use
-        solrDataDir = getProperty(props, "solr.data.dir");
-        if (solrDataDir == null) {
-            solrDataDir = solrCoreDir + "/" + solrCoreName;
-        }
+        solrDataDir = Utils.getProperty(props, "solr.data.dir");
 
-        // The SolrMarc indexer
-        String indexerName = getProperty(props, "solr.indexer");
-
-        // The SolrMarc indexer properties file
-        String indexerProps = getProperty(props, "solr.indexer.properties");
-
-
-
-        // Setup the SolrMarc Indexer
-        try
+        // Ths URL of the currently running Solr server
+        SolrHostURL = Utils.getProperty(props, "solr.hosturl");
+        
+        // Specification of how to modify the entries in the delete record file
+        // before passing the id onto Solr.   Based on syntax of String.replaceAll
+        //  To prepend a 'u' specify the following:  "(.*)->u$1"
+        deleteRecordIDMapper = Utils.getProperty(props, "marc.delete_record_id_mapper");
+        if (deleteRecordIDMapper != null)
         {
-            Class indexerClass;
-            
-            try {
-                indexerClass = Class.forName(indexerName);
-            }
-            catch (ClassNotFoundException e)
+            String parts[] = deleteRecordIDMapper.split("->");
+            if (parts.length == 2)
             {
-                logger.error("Cannot load class: " + indexerName);
-                Class baseIndexerClass = SolrIndexer.class;
-                String baseName = baseIndexerClass.getPackage().getName();
-                String fullName = baseName + "." + indexerName;
-                indexerClass = Class.forName(fullName);
-                logger.error(e.getCause());
-            }
-            
-            Constructor constructor = indexerClass.getConstructor(new Class[]{String.class, String.class});
-            Object instance = constructor.newInstance(indexerProps, solrMarcDir);
-
-            if (instance instanceof SolrIndexer)
-            {
-                indexer = (SolrIndexer)instance;
+                String mapPattern = parts[0];
+                String mapReplace = parts[1];
+                try {
+                    String testID = "12345";
+                    String tested = testID.replaceFirst(mapPattern, mapReplace);
+                    logger.info("Valid Regex pattern specified in property: marc.delete_record_id_mapper");
+                }
+                catch (PatternSyntaxException pse)                
+                {
+                    deleteRecordIDMapper = null;
+                    logger.warn("Invalid Regex pattern specified in property: marc.delete_record_id_mapper");
+                }
             }
             else
             {
-            	logger.error("Error: Custom Indexer " + indexerName + " must be subclass of SolrIndexer .  Exiting...");
-                System.exit(1);
+                deleteRecordIDMapper = null;
+                logger.warn("Invalid Regex pattern specified in property: marc.delete_record_id_mapper");
             }
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        
-            if (e instanceof ParseException)
-            {
-            	logger.error("Error configuring Indexer from properties file.  Exiting...");
-                System.exit(1);
-            }            
-            
-            logger.warn("Unable to load Custom indexer: " + indexerName);
-            logger.warn("Using default SolrIndexer with properties file: " + indexerProps); 
-            
-            try {
-                indexer = new SolrIndexer(indexerProps, solrMarcDir);
-            }
-            catch (Exception e1)
-            {
-            	logger.error("Error configuring Indexer from properties file.  Exiting...");
-                System.exit(1);
-            }
-        }
-        SolrHostURL = getProperty(props, "solr.hosturl");
 
-        boolean permissiveReader = Boolean.parseBoolean(System.getProperty("marc.permissive"));        
-        verbose = Boolean.parseBoolean(getProperty(props, "marc.verbose"));
-        to_utf_8 = Boolean.parseBoolean(getProperty(props, "marc.to_utf_8"));
-        unicodeNormalize = Boolean.parseBoolean(getProperty(props, "marc.unicode_normalize"));
-        deleteRecordListFilename = getProperty(props, "marc.ids_to_delete");
-        String source = getProperty(props, "marc.source").trim();
-        optimizeAtEnd = Boolean.parseBoolean(getProperty(props, "solr.optimize_at_end"));
-        if (getProperty(props, "marc.override")!= null)
-        {
-            System.setProperty("org.marc4j.marc.MarcFactory", getProperty(props, "marc.override").trim());
-        }
-        reader = null;
-        if (source.equals("FILE"))
-        {
-            reader = new MarcPermissiveStreamReader(new FileInputStream(getProperty(props, "marc.path").trim()), permissiveReader, to_utf_8);
-        }
-        else if (source.equals("DIR"))
-        {
-            reader = new MarcDirStreamReader(getProperty(props, "marc.path").trim(), permissiveReader, to_utf_8);
-        }
-        else if (source.equals("Z3950"))
-        {
-        	logger.warn("Error: Z3950 not yet implemented");
-            reader = null;
-        }
-        String marcIncludeIfPresent = getProperty(props, "marc.include_if_present");
-        String marcIncludeIfMissing = getProperty(props, "marc.include_if_missing");
-        if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null))
-        {
-            reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing);
-        }
-//        // Do translating last so that if we are Filtering as well as translating, we don't expend the 
-//        // effort to translate records, which may then be filtered out and discarded.
-//        if (reader != null && to_utf_8)
-//        {
-//            reader = new MarcTranslatedReader(reader, unicodeNormalize);
-//        }
+        deleteRecordListFilename = Utils.getProperty(props, "marc.ids_to_delete");
+        optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(props, "solr.optimize_at_end"));
         return;
-    }
-    
-    // Check first for a particular property in the System Properties, so that the -Dprop="value" command line arg 
-    // mechanism can be used to override values defined in the passed in property file.  This is especially useful
-    // for defining the marc.source property to define which file to operate on, in a shell script loop.
-    private String getProperty(Properties props, String propname)
-    {
-        String prop;
-        if ((prop = System.getProperty(propname)) != null)
-        {
-            return(prop);
-        }
-        if ((prop = props.getProperty(propname)) != null)
-        {
-            return(prop);
-        }
-        return null;
-    }
+	}
 
     /**
      * Delete records from the index
@@ -274,46 +127,45 @@ public class MarcImporter {
      */
     public int deleteRecords()
     {
-        int numDeleted = 0;
-        
-        // Ensure the file of IDs exists
+    	idsToDeleteCounter = 0;
+    	recsDeletedCounter = 0;
+    	
         if (deleteRecordListFilename == null || 
             deleteRecordListFilename.length() == 0) 
         {
-            return(numDeleted);
+            return recsDeletedCounter;
         }
-        
-        // Open file of IDs
+        String mapPattern = null;
+        String mapReplace = null;
+        if (deleteRecordIDMapper != null)
+        {
+            String parts[] = deleteRecordIDMapper.split("->");
+            if (parts.length == 2)
+            {
+                mapPattern = parts[0];
+                mapReplace = parts[1];
+            }
+        }
         File delFile = new File(deleteRecordListFilename);
         try
         {
             BufferedReader is = new BufferedReader(new FileReader(delFile));
             String line;
-            DeleteUpdateCommand delCmd = new DeleteUpdateCommand();
-            
-            // Loop through line by line
+            boolean fromCommitted = true;
+            boolean fromPending = true;
             while ((line = is.readLine()) != null)
             {
-                // Stop if shutting down
                 if (shuttingDown) break;
-                
-                // Ignore any lines with a # symbol
                 line = line.trim();
                 if (line.startsWith("#")) continue;
-                
-                /*
-                if (!line.startsWith("u"))
+                if (deleteRecordIDMapper != null)
                 {
-                    line = "u" + line;
-                }
-                */
-
-                // Delete id
-                delCmd.id = line;
-                delCmd.fromCommitted = true;
-                delCmd.fromPending = true;
-                updateHandler.delete(delCmd);
-                numDeleted++;
+                    line = line.replaceFirst(mapPattern, mapReplace);
+                }                
+                String id = line;
+                idsToDeleteCounter++;
+                solrCoreProxy.delete(id, fromCommitted, fromPending);
+                recsDeletedCounter++;
             }            
         }
         catch (FileNotFoundException fnfe)
@@ -322,9 +174,9 @@ public class MarcImporter {
         }
         catch (IOException ioe)
         {
-        	logger.error("Error: reading from delete-record-id-list: " + delFile);
+        	logger.error("Error: reading from delete-record-id-list: " + delFile, ioe);
         }
-        return(numDeleted);
+        return recsDeletedCounter;
     }
 
     /**
@@ -333,107 +185,108 @@ public class MarcImporter {
      */
     public int importRecords()
     {
-        // keep track of record count
-        int recordCounter = 0;
+        // keep track of record counts
+        recsReadCounter = 0;
+        recsIndexedCounter = 0;
         
         while(reader != null && reader.hasNext())
         {
             if (shuttingDown) break;
-            recordCounter++;
             
             try {
                 Record record = reader.next();
+                recsReadCounter++;
                 
                 try {
-                    addToIndex(record);
-                    logger.info("Adding record " + recordCounter + ": " + record.getControlNumber());
+                    boolean added = addToIndex(record);
+                    if (added)
+                    {
+                        recsIndexedCounter++;
+                        logger.info("Added record " + recsReadCounter + " read from file: " + record.getControlNumber());
+                    }
+                    else
+                    {
+                        logger.info("Deleted record " + recsReadCounter + " read from file: " + record.getControlNumber());                        
+                    }
                 }
-                catch (org.apache.solr.common.SolrException solrException)
+                catch (Exception e)
                 {
-                   //check for missing fields
-                	if (solrException.getMessage().contains("missing required fields"))
-                   {
-                	   logger.error(solrException.getMessage() +  " at record count = " + recordCounter);
-                	   logger.error("Control Number " + record.getControlNumber(), solrException);
-                   }
-                   else
-                   {
-                	   logger.error("Error indexing: " + solrException.getMessage());
-                	   logger.error("Control Number " + record.getControlNumber(), solrException);
-                   }
+                    // check for missing fields
+                    if (solrCoreProxy.isSolrException(e) &&
+                    		e.getMessage().contains("missing required fields"))
+                    {
+                   	   logger.error(e.getMessage() +  " at record count = " + recsReadCounter);
+                   	   logger.error("Control Number " + record.getControlNumber(), e);
+                    }
+                    else
+                    {
+                	    logger.error("Error indexing record: " + record.getControlNumber() + " -- " + e.getMessage(), e);
+                    }
                 }
-                catch(Exception e)
-                {
-                    // keep going?
-                	logger.error("Error indexing: " + e.getMessage());
-                	logger.error("Control Number " + record.getControlNumber(), e);
-                }
-            } catch (Exception e) {
-                logger.error("Error reading record: " + e.getMessage());
+            } 
+            catch (Exception e) {
+                logger.error("Error reading record: " + e.getMessage(), e);
             }
         }
         
-        return recordCounter;
+        return recsIndexedCounter;
     }
     
     /**
      * Add a record to the index
      * @param record marc record to add
      */
-    public void addToIndex(Record record)
+    private boolean addToIndex(Record record)
+    	throws IOException
     {
-        Map<String, Object> map = indexer.map(record); 
-        if (map.size() == 0) return;
-
-        AddUpdateCommand addcmd = new AddUpdateCommand();
-        DocumentBuilder builder = new DocumentBuilder(solrCore.getSchema());
-        builder.startDoc();
-    	Iterator<String> keys = map.keySet().iterator();
-        while (keys.hasNext())
+        Map<String, Object> fieldsMap = indexer.map(record); 
+        // test whether some indexing specification determined that this record should be omitted entirely
+        if (fieldsMap.size() == 0) 
         {
-        	String key = keys.next();
-        	Object value = map.get(key);
-        	if (value instanceof String)
-        	{
-        		builder.addField(key, (String)value);
-        	}
-        	else if (value instanceof Collection)
-        	{
-        		Iterator<String> valIter = ((Collection)value).iterator();
-        		while (valIter.hasNext())
-        		{
-        			String collVal = valIter.next();
-            		builder.addField(key, collVal);
-        		}
-        	}
+            // if so not only don't index it, but try to delete the record if its already there.
+            String id = record.getControlNumber();
+            if (id != null)
+            {
+                solrCoreProxy.delete(id, true, true);
+            }
+            return false;
         }
-        builder.endDoc();
         
-        // finish up
-        addcmd.doc = builder.getDoc();
-        
+        String docStr = addToIndex(fieldsMap);
+
         if (verbose)
         {
-            //System.out.println(record.toString());
-            String doc = addcmd.doc.toString().replaceAll("> ", "> \n");
-            //System.out.println(doc);
             logger.info(record.toString());
-            logger.info(doc);
+            logger.info(docStr);
         }
-        addcmd.allowDups = false;
-        addcmd.overwriteCommitted = true;
-        addcmd.overwritePending = true;
-       
-        try {
-            updateHandler.addDoc(addcmd);
-        } 
-        catch (IOException ioe) 
+        return(true);
+    }
+    
+    /**
+     * Add a document to the index according to the fields map
+     * @param record marc record to add
+     * @return the document added, as a String
+     */
+    protected String addToIndex(Map<String, Object> fieldsMap)
+        throws IOException
+    {
+        if (fieldsMap.size() == 0) 
+            return null;
+        if (errors != null && includeErrors)
         {
-            //System.err.println("Couldn't add document");
-        	logger.error("Couldn't add document: " + ioe.getMessage());
-            //e.printStackTrace();
-     	    logger.error("Control Number " + record.getControlNumber(), ioe);
-        }                
+            if (errors.hasErrors())
+            {
+                addErrorsToMap(fieldsMap, errors);
+            }
+        }
+
+        // NOTE: exceptions are dealt with by calling class
+        return solrCoreProxy.addDoc(fieldsMap, verbose);
+    }
+            
+    private void addErrorsToMap(Map<String, Object> map, ErrorHandler errors2)
+    {
+        map.put("marc_error", errors.getErrors());
     }
 
     /**
@@ -444,7 +297,9 @@ public class MarcImporter {
         try {
             //System.out.println("Calling commit");
         	logger.info("Calling commit");
-            commit(shuttingDown ? false : optimizeAtEnd);
+        	logger.info(" Adding " + recsIndexedCounter + " of " + recsReadCounter + " documents to index");
+        	logger.info(" Deleting " + recsDeletedCounter + " documents from index");
+            solrCoreProxy.commit(shuttingDown ? false : optimizeAtEnd);
         } 
         catch (IOException ioe) {
             //System.err.println("Final commit and optmization failed");
@@ -455,20 +310,8 @@ public class MarcImporter {
         
         //System.out.println("Done with commit, closing Solr");
         logger.info("Done with the commit, closing Solr");
-        solrCore.close();
+        solrCoreProxy.close();
     }
-
-
-	/**
-	 * Commit the document to the repository and optimize the index
-	 * @param optimize
-	 * @throws IOException
-	 */
-	public void commit(boolean optimize) throws IOException 
-    {
-		CommitUpdateCommand commitcmd = new CommitUpdateCommand(optimize);
-		updateHandler.commit(commitcmd);
-	}
     
    
    /**
@@ -589,55 +432,35 @@ public class MarcImporter {
     
     
     /**
-     * Main program instantiation for doing the indexing
+     * Main loop in the MarcImporter class the handles all of 
+     * importing and deleting of records.
      * @param args
      */
-    public static void main(String[] args) 
+    @Override
+	public int handleAll()
     {
-        logger.info("Starting SolrMarc indexing.");
-    	// default properties file
-        String properties = "import.properties";
-        
-        if(args.length > 0)
-        {
-            properties = args[0];
-        }
-        
-        // System.out.println("Loading properties from " + properties);
-        logger.info("Loading properties from " + properties);
-        
-        MarcImporter importer = null;
-        try
-        {
-            importer = new MarcImporter(properties);
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-        	logger.error("Couldn't load properties file." + e);
-            //e.printStackTrace();
-            System.exit(1);
-        }
-        
-        logger.debug("Shutdown hook for Solr");
-        Runtime.getRuntime().addShutdownHook(importer.new MyShutdownThread(importer));
-        
-        //System.out.println("Here we go...");
+        Runtime.getRuntime().addShutdownHook(new MyShutdownThread(this));
         
         Date start = new Date();
         
-        int numImported = importer.importRecords();
-
-        int numDeleted = importer.deleteRecords();
+        int numImported = 0;
+        int numDeleted = 0;
+        try
+        {        
+            numImported = importRecords();           
+            numDeleted = deleteRecords();
+        }
+        catch (Exception e)
+        {
+            logger.info("Exception occurred while Indexing: "+ e.getMessage());           
+        }
         
-        importer.finish();
+        finish();
+        signalServer();
         
-        importer.signalServer();
-        
-        importer.isShutDown = true;
+        isShutDown = true;
         
         Date end = new Date();
-        
         long totalTime = end.getTime() - start.getTime();
         
         logger.info("Finished indexing in " + Utils.calcTime(totalTime));
@@ -652,9 +475,32 @@ public class MarcImporter {
         logger.info("Indexed " + numImported + " at a rate of about " + indexingRate + " per sec");
         logger.info("Deleted " + numDeleted + " records");
         
-        System.exit(importer.shuttingDown ? 1 : 0);
+        return(shuttingDown ? 1 : 0);
     }
-
-
+    
+    /**
+     * Main program instantiation for doing the indexing
+     * @param args
+     */
+    public static void main(String[] args) 
+    {
+        logger.info("Starting SolrMarc indexing.");
+        
+        MarcImporter importer = null;
+        try
+        {
+            importer = new MarcImporter(args);
+        }
+        catch (IllegalArgumentException e)
+        {
+        	logger.error(e.getMessage());
+        	System.err.println(e.getMessage());
+            //e.printStackTrace();
+            System.exit(1);
+        }
+        
+        int exitCode = importer.handleAll();
+        System.exit(exitCode);
+    }
  		
 }

@@ -45,11 +45,21 @@ public class RawRecordReader
     public static void main(String[] args)
     {
     //    try {
+        if (args.length == 2)
+        {
             String idLookedFor = args[1].trim();
             byte[] byteArray = new byte[24];
             try
             {
-                DataInputStream input = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[0]))));
+                DataInputStream input;
+                if (args[0].equals("-"))
+                {
+                    input = new DataInputStream(new BufferedInputStream(System.in));
+                }
+                else
+                {    
+                    input = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[0]))));
+                }
                 while (true)
                 {
                     input.readFully(byteArray);
@@ -64,7 +74,7 @@ public class RawRecordReader
                     catch (UnsupportedEncodingException e)
                     {
                         // e.printStackTrace();
-                    	logger.error(e.getMessage());
+                        logger.error(e.getMessage());
                     }
                     if (recordStr.startsWith("001"))
                     {
@@ -79,7 +89,7 @@ public class RawRecordReader
                             System.out.write(recordBuf);
                         }
                     }
-
+    
                 }
             }
             catch (EOFException e)
@@ -88,9 +98,69 @@ public class RawRecordReader
             catch (IOException e)
             {
                 //  e.printStackTrace();
-            	logger.error(e.getMessage());
+                logger.error(e.getMessage());
             }
-
+        }
+        else if (args.length == 3)
+        {
+            String idStart = args[1].trim();
+            String idEnd = args[2].trim();
+            int idMin = Integer.parseInt(idStart.substring(1));
+            int idMax = Integer.parseInt(idEnd.substring(1));
+            byte[] byteArray = new byte[24];
+            try
+            {
+                DataInputStream input;
+                if (args[0].equals("-"))
+                {
+                    input = new DataInputStream(new BufferedInputStream(System.in));
+                }
+                else
+                {    
+                    input = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[0]))));
+                }
+                while (true)
+                {
+                    input.readFully(byteArray);
+                    int recordLength = parseRecordLength(byteArray);
+                    byte[] recordBuf = new byte[recordLength - 24];
+                    input.readFully(recordBuf);
+                    String recordStr = null;
+                    try
+                    {
+                        recordStr = new String(recordBuf, "ISO-8859-1");
+                    }
+                    catch (UnsupportedEncodingException e)
+                    {
+                        // e.printStackTrace();
+                        logger.error(e.getMessage());
+                    }
+                    if (recordStr.startsWith("001"))
+                    {
+                        String leader = new String(byteArray);
+                        int offset = Integer.parseInt(leader.substring(12,17)) - 24;
+                        int length = Integer.parseInt(recordStr.substring(3,7));
+                        int offset2 = Integer.parseInt(recordStr.substring(7,12));
+                        String id = recordStr.substring(offset+offset2, offset+offset2+length-1);
+                        int idAsInt = Integer.parseInt(id.substring(1));
+                        if ( idAsInt >= idMin && idAsInt < idMax)
+                        { 
+                            System.out.write(byteArray);
+                            System.out.write(recordBuf);
+                        }
+                    }
+    
+                }
+            }
+            catch (EOFException e)
+            {
+            }
+            catch (IOException e)
+            {
+                //  e.printStackTrace();
+                logger.error(e.getMessage());
+            }
+        }
     //    }
     }
 
