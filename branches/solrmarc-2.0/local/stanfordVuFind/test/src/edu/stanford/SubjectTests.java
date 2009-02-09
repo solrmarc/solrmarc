@@ -64,7 +64,7 @@ public class SubjectTests extends BibIndexTest {
 	{
         createIxInitVars(testDataFname);
         String fldName = "topicStr";
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -266,7 +266,7 @@ public class SubjectTests extends BibIndexTest {
 	{
         createIxInitVars(testDataFname);
 		String fldName = "geographicStr";
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -312,7 +312,7 @@ public class SubjectTests extends BibIndexTest {
 		String fldName = "era";
 		createIxInitVars("eraTests.mrc");
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
 	
@@ -357,7 +357,7 @@ public class SubjectTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException
 	{
 //        createIxInitVars(testDataFname);
-		assertFieldPresent(fldName, solrCore);
+		assertFieldPresent(fldName, sis);
 		assertFieldIndexed(fldName, solrCore);
 		assertFieldTokenized(fldName, solrCore);
 		assertFieldHasNorms(fldName, solrCore);

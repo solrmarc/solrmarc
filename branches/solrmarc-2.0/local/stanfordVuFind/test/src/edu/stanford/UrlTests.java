@@ -28,7 +28,7 @@ public class UrlTests extends BibIndexTest {
 // TODO: rename field to urlFullText_store
 		String fldName = "url";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotIndexed(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
 	
@@ -67,7 +67,7 @@ public class UrlTests extends BibIndexTest {
 	{
 		String fldName = "urlSfx_store";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotIndexed(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
 			
@@ -92,7 +92,7 @@ public class UrlTests extends BibIndexTest {
 	{
 		String fldName = "urlSuppl_store";
 		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotIndexed(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
 			

@@ -34,7 +34,7 @@ public class AccessTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException
 	{
 		// facets are indexed, not stored
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);

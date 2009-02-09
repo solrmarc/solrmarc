@@ -28,7 +28,7 @@ public class DisplayFieldTests extends BibIndexTest {
 
 	private final void assertDisplayOnlyFldProperties(String fldName) 
 			throws ParserConfigurationException, IOException, SAXException {
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotIndexed(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
 	}
@@ -202,7 +202,7 @@ public class DisplayFieldTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "physical";
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldIndexed(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);

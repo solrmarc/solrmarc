@@ -34,7 +34,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author";
-		assertTextFieldProperties(fldName, solrCore);
+		assertTextFieldProperties(fldName, solrCore, sis);
 		assertFieldHasNorms(fldName, solrCore);
 		assertFieldNotMultiValued(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
@@ -70,7 +70,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "authorStr";
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -96,7 +96,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author-letter";
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldOmitsNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
@@ -129,7 +129,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author2";
-		assertTextFieldProperties(fldName, solrCore);
+		assertTextFieldProperties(fldName, solrCore, sis);
 		assertFieldHasNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
@@ -177,7 +177,7 @@ public class AuthorTests extends BibIndexTest {
 	{
 		String fldName = "author2Str";
 		// assert field has correct properties
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -239,7 +239,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author_pers_name_facet";
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldOmitsNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
@@ -292,7 +292,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author_corp_name_facet";
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldOmitsNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
@@ -339,7 +339,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author_mtg_name_facet";
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldOmitsNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
@@ -371,7 +371,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author_combined_facet";
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldOmitsNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
@@ -404,7 +404,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author_pers_name_search";
-		assertTextFieldProperties(fldName, solrCore);
+		assertTextFieldProperties(fldName, solrCore, sis);
 		assertFieldHasNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
@@ -445,7 +445,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author_corp_name_search";
-		assertTextFieldProperties(fldName, solrCore);
+		assertTextFieldProperties(fldName, solrCore, sis);
 		assertFieldHasNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
@@ -474,7 +474,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author_mtg_name_search";
-		assertTextFieldProperties(fldName, solrCore);
+		assertTextFieldProperties(fldName, solrCore, sis);
 		assertFieldHasNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
@@ -505,7 +505,7 @@ public class AuthorTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "author_combined_search";
-		assertTextFieldProperties(fldName, solrCore);
+		assertTextFieldProperties(fldName, solrCore, sis);
 		assertFieldHasNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);

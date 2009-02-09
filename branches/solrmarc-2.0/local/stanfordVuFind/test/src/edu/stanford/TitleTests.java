@@ -79,7 +79,7 @@ public class TitleTests extends BibIndexTest {
 	{
 		String fldName = "titleStr";
 		assertFieldNotMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 // TODO: not positive titleStr needs to be indexed, since title is indexed -- b/c sort by title is this field???
 		assertFieldIndexed(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
@@ -174,7 +174,7 @@ public class TitleTests extends BibIndexTest {
 	{
 		String fldName = "brief_title_display";
 		
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotIndexed(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
 		assertFieldNotMultiValued(fldName, solrCore);
@@ -220,7 +220,7 @@ public class TitleTests extends BibIndexTest {
 	{
 		String fldName = "uniform_title_display";
 		
-		assertStringFieldProperties(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotIndexed(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
 		assertFieldNotMultiValued(fldName, solrCore);
@@ -296,7 +296,7 @@ public class TitleTests extends BibIndexTest {
 	{
 		String fldName = "title_sort";
 		// field is not string; rather tokenized with single term
-		assertTextFieldProperties(fldName, solrCore);
+		assertTextFieldProperties(fldName, solrCore, sis);
 		assertFieldOmitsNorms(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
@@ -416,7 +416,7 @@ public class TitleTests extends BibIndexTest {
 	private final void assertSingleValFieldProps(String fldName) 
 			throws ParserConfigurationException, IOException, SAXException
 	{
-		assertFieldPresent(fldName, solrCore);
+		assertFieldPresent(fldName, sis);
 		assertFieldIndexed(fldName, solrCore);
 		assertFieldTokenized(fldName, solrCore);
 		assertFieldHasNorms(fldName, solrCore);
@@ -431,7 +431,7 @@ public class TitleTests extends BibIndexTest {
 	private final void assertMultiValFieldProps(String fldName) 
 			throws ParserConfigurationException, IOException, SAXException
 	{
-		assertFieldPresent(fldName, solrCore);
+		assertFieldPresent(fldName, sis);
 		assertFieldIndexed(fldName, solrCore);
 		assertFieldTokenized(fldName, solrCore);
 		assertFieldHasNorms(fldName, solrCore);

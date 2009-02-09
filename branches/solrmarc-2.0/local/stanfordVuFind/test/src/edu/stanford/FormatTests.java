@@ -29,7 +29,7 @@ public class FormatTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException
 	{
         createIxInitVars(testDataFname);
-        assertStringFieldProperties(fldName, solrCore);
+        assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
 		assertFieldStored(fldName, solrCore);
