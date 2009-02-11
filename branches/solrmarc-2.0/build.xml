@@ -107,8 +107,9 @@
         </unwar>
     </target>
 
-    <target name="compile" depends="init,dependencies,custom" description="Compile custom source code into the build directory"
-        if="customization.dir">
+    <target name="compile" depends="init,dependencies,custom,solrlibextract" 
+            description="Compile custom source code into the build directory"
+            if="customization.dir">
         <javac destdir="${customization.build.dir}" srcdir="${customization.src.dir}" 
                 target="${java.compat.version}" 
                 source="${java.compat.version}" 
