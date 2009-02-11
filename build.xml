@@ -159,7 +159,7 @@
         <copy todir="${dist.dir}">
              <fileset dir="${script.template.dir}" includes="*" />
              <filterset>
-                 <filter token="CUSTOM_JAR_NAME" value="${custom.jar.name}_SolrMarc.jar" />
+                 <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
                  <filter token="MEM_ARGS" value="${exe.mem.args}" />
              </filterset>
          </copy>
