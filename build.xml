@@ -143,7 +143,7 @@
         
         <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
                manifest="${buildtools.path}/manifest.mf">
-            <main jar="${lib.dir}/solrmarc/${jar.name}" />
+            <main jar="${lib.dir}/solrmarc/${dist.dir}/${jar.name}" />
             <lib>
                 <fileset dir="${lib.dir}" includes="*.jar" excludes="junit*.jar,jzkit_client.jar"/>
                 <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
