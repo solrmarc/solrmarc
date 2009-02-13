@@ -19,17 +19,21 @@ public abstract class BibIndexTest extends IndexTest {
 	//  invoked without the properties set
 	//   the properties ARE set when the tests are invoke via ant.
 	{
-//        String parentDir = "C:/Development";
-        
         solrmarcPath = System.getProperty("solrmarc.path");
         if (solrmarcPath == null)
-            solrmarcPath = new File(".").getAbsolutePath();
+            solrmarcPath = new File("lib/solrmarc").getAbsolutePath();
 		
 		siteSpecificPath = System.getProperty("solrmarc.site.path");
 		if (siteSpecificPath == null)
-			siteSpecificPath = solrmarcPath + File.separator + "local" + File.separator + "stanfordVuFind"; 
+			siteSpecificPath = new File("customization_examples/stanfordVufind").getAbsolutePath(); 
 		
-		configPropFile = siteSpecificPath + File.separator + "bibix_config.properties";
+        String configPropDir = System.getProperty("test.config.dir");
+        if (configPropDir == null)
+            configPropDir = siteSpecificPath;
+        
+        configPropFile = System.getProperty("test.config.file");
+		if (configPropFile == null)
+		    configPropFile = configPropDir + File.separator + "bibix_config.properties";
 		
 		solrPath = System.getProperty("solr.path");
 		if (solrPath == null)
