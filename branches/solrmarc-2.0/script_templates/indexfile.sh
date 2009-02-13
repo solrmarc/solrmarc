@@ -5,7 +5,7 @@
 
 E_BADARGS=65
 
-if [ $# -ne 1 && $# -ne 2 && $# -ne 3 ]
+if [ $# -eq 0 ]
 then
   echo "    Usage: `basename $0` [config.properties] ./path/to/marc.mrc [./path/to/ids_to_delete.del]"
   echo "      Note that if the config.properties file is not specified the Jarfile will be searched for"
