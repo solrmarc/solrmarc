@@ -52,13 +52,13 @@
             <entry key="customization.dir" value="${customization.dir}" />
         </propertyfile>
         <input message="Enter name to use for Jar File containing custom indexing functions, libraries, and properties\n(Note: omit &quot;.jar&quot; from end of Jar Name) "
-            addproperty="custom.jar.name" default="Custom"/>
+            addproperty="custom.jar.name" defaultvalue="Custom"/>
         <input message="Enter prefix of properties files for config and index for custom modifications ${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
-            addproperty="custom.config.file.prefix" default="${custom.jar.name}" />
+            addproperty="custom.config.file.prefix" defaultvalue="${custom.jar.name}" />
         <input message="Enter name to use for final resulting Jar File containing all code, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
-            addproperty="distribution.jar.name" default="${custom.jar.name}_SolrMarc"/>
+            addproperty="distribution.jar.name" defaultvalue="${custom.jar.name}_SolrMarc"/>
         <input message="Enter java heap size memory argument to put in generated scripts for running custom SolrMarc Indexer "
-            addproperty="exe.mem.args" default="-Xmx256m"/>
+            addproperty="exe.mem.args" defaultvalue="-Xmx256m"/>
         <mkdir dir="${customization.dir}" />
         <propertyfile file="${customization.dir}/build.properties">
             <entry key="custom.config.file.prefix" value="${custom.config.file.prefix}" />
