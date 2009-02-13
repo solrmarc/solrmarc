@@ -194,7 +194,8 @@ public abstract class IndexTest {
 			String solrDataDir, String solrmarcPath, String siteSpecificPath) 
 	{
 		// crucial to set solr.path and marc.path properties
-		System.setProperty("marc.path", marc21FilePath);
+        System.setProperty("marc.path", marc21FilePath);
+        System.setProperty("marc.source", "FILE");
 		System.setProperty("solr.path", solrPath);
 		System.setProperty("solr.data.dir", solrDataDir);
 		System.setProperty("solrmarc.path", solrmarcPath);
