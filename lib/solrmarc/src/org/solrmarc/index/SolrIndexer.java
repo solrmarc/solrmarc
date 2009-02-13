@@ -453,7 +453,7 @@ public class SolrIndexer
             {
                 Set<String> fields = getFieldList(record, indexParm);
                 if (mapName != null && findMap(mapName) != null)
-                    fields = Utils.remap(fields, findMap(mapName), false);
+                    fields = Utils.remap(fields, findMap(mapName), true);
 
                 if (fields.size() != 0)
                     addFields(indexMap, indexField, null, fields);
@@ -650,7 +650,7 @@ public class SolrIndexer
     protected void addField(Map<String, Object> indexMap, String indexField, String mapName, String fieldVal)
     {
         if (mapName != null && findMap(mapName) != null)
-            fieldVal = Utils.remap(fieldVal, findMap(mapName), false);
+            fieldVal = Utils.remap(fieldVal, findMap(mapName), true);
 
         if (fieldVal != null && fieldVal.length() > 0)
             indexMap.put(indexField, fieldVal);
@@ -664,7 +664,7 @@ public class SolrIndexer
     protected void addFields(Map<String, Object> indexMap, String indexField, String mapName, Set<String> fields)
     {
         if (mapName != null && findMap(mapName) != null)
-            fields = Utils.remap(fields, findMap(mapName), false);
+            fields = Utils.remap(fields, findMap(mapName), true);
 
         if (!fields.isEmpty())
         {
@@ -764,8 +764,13 @@ public class SolrIndexer
     {
         Set<String> result = getFieldList(record, tagStr);
         if (mapName != null && findMap(mapName) != null)
+        {
             result = Utils.remap(result, findMap(mapName), false);
-
+            if (findMap(mapName).containsKey(""))
+            {
+                result.add(findMap(mapName).get(""));
+            }
+        }
         Iterator<String> iter = result.iterator();
         if (iter.hasNext()) 
         	return iter.next();

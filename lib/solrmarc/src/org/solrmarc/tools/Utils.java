@@ -428,7 +428,7 @@ public final class Utils {
 	 * @param copyEntryIfNotInMap
 	 * @return
 	 */
-    public static String remap(String fieldVal, Map<String, String> map, boolean copyEntryIfNotInMap)
+    public static String remap(String fieldVal, Map<String, String> map, boolean allowDefault)
     {
         String result = null;
         
@@ -453,9 +453,9 @@ public final class Utils {
         {
             result = map.get(fieldVal);
         }
-        else if (copyEntryIfNotInMap)
+        else if (allowDefault && map.containsKey(""))
         {
-            result = fieldVal;
+            result = map.get("");
         }                      
         if (result == null || result.length() == 0) return null;
         return result;
@@ -468,7 +468,7 @@ public final class Utils {
      * @param copyEntryIfNotInMap
      * @return
      */
-    public static Set<String> remap(Set<String> set, Map<String, String> map, boolean copyEntryIfNotInMap)
+    public static Set<String> remap(Set<String> set, Map<String, String> map, boolean allowDefault)
     {
         if (map == null)  return(set);
         Iterator<String> iter = set.iterator();
@@ -496,7 +496,7 @@ public final class Utils {
             }
             else
             {            
-                String mappedVal = remap(val, map, copyEntryIfNotInMap);
+                String mappedVal = remap(val, map, allowDefault);
                 if (mappedVal != null)
                 {
                     result.add(mappedVal);
