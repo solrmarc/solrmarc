@@ -239,6 +239,7 @@
     </target>
 
     <target name="testJar" depends="testCompile" description="jar up test class files">
+        <echo message=" creating test jar :  ${customization.test.dir}/${site.test.jar}" />
         <jar jarfile="${customization.test.dir}/${site.test.jar}">
             <fileset dir="${customization.test.dir}/${build.dir}" includes="**/*.class" />
         </jar>
@@ -270,7 +271,6 @@
                    the properties file indicated with an argument in the command line -->
             <sysproperty key="solr.indexer" value="${solr.indexer}" />
             <sysproperty key="solr.indexer.properties" value="${solr.indexer.properties}" />
-            <sysproperty key="marc.source" value="${marc.source}"/>  
 
             <test name="${test.bibix.class}" />
         </junit>
