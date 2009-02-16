@@ -148,11 +148,55 @@
         </jar>
     </target>
 
-    <target name="build" depends="compile" description="create ${jar.name} in the build directory">
+
+    <target name="defaultconfigcnt" unless="default.config" >
+        <condition property="only.one.config" >
+            <resourcecount when="equal" count="1" >
+                <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties" />
+            </resourcecount>
+        </condition>
+        <condition property="zero.configs" >
+            <resourcecount when="equal" count="0" >
+                <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties" />
+            </resourcecount>
+        </condition>
+        <condition property="several.configs" >
+            <resourcecount when="greater" count="1" >
+                <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties" />
+            </resourcecount>
+        </condition>
+        <pathconvert property="config.file.list" pathsep=",">
+            <path >
+                <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties" />
+            </path>
+            <flattenmapper />
+        </pathconvert>
+    </target>
+    
+    <target name="defaultconfig0" if="zero.configs" unless="default.config">
+        <property name="default.config" value="" />
+    </target>
+    
+    <target name="defaultconfig1" if="only.one.config" unless="default.config">
+        <property name="default.config" value="${config.file.list}" />
+    </target>
+    
+    <target name="defaultconfiginput" if="several.configs" unless="default.config">
+        <input message="Select the default config file to use if no such file is specified on the command line" 
+            validargs="${config.file.list}" 
+            addproperty="default.config" />
+    </target>
+
+    <target name="defaultconfig" depends="defaultconfigcnt,defaultconfig0, defaultconfig1, defaultconfiginput" 
+            unless="default.config" >
+    </target>
+    
+    <target name="build" depends="compile,defaultconfig" description="create ${jar.name} in the build directory">
         <copy tofile="${buildtools.path}/manifest.mf" 
               file="${buildtools.path}/manifest_template.mf" overwrite="true">
             <filterset>
                 <filter token="NAMEOFMAINCLASS" value="org.solrmarc.marc.MarcImporter"/>
+                <filter token="NAMEOFDEFAULTCONFIGFILE" value="${default.config}" />
             </filterset>
         </copy>
         
@@ -180,7 +224,7 @@
             <fileset dir="${site.map.dir}" includes="*.properties" />
         </one-jar>
         
-        <copy todir="${dist.dir}">
+        <copy todir="${dist.dir}" overwrite="true">
              <fileset dir="${script.template.dir}" includes="*" />
              <filterset>
                  <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
