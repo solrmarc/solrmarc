@@ -1,2 +1,3 @@
 Main-Class: com.simontuffs.onejar.Boot
 One-Jar-Main-Class: @NAMEOFMAINCLASS@
+Default-Config-File: @NAMEOFDEFAULTCONFIGFILE@
