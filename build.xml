@@ -25,7 +25,7 @@
             <exclude name="junit*.jar" />
         </fileset>
         <fileset dir="${lib.dir}/solrmarc/dist" includes="*.jar" />
-        <fileset dir="${customization.dir}/lib" includes="*.jar" />
+        <fileset dir="${site.dir}/lib" includes="*.jar" />
     </path>
 
     <target name="clean" description="clean the generated directories">
@@ -35,7 +35,7 @@
         <delete dir="${tag.dir}" />
     </target>
 
-    <target name="init" depends="init_custom,init_custom_finish" description="create (empty) generated directories">
+    <target name="init" depends="init_site,init_site_finish" description="create (empty) generated directories">
         <mkdir dir="${build.dir}" />
         <mkdir dir="${dist.dir}" />
     </target>
@@ -44,42 +44,42 @@
         <ant dir="${lib.dir}/solrmarc" target="build" inheritAll="false"/>
     </target>
 
-    <target name="init_custom" description="Create the src, lib, bin, test directories for a customization"
-            unless="customization.dir">
-        <input message="Enter name of directory to contain all custom modifications:"       
-            addproperty="customization.dir" />
+    <target name="init_site" description="Create the src, lib, bin, test directories for a custom site"
+            unless="site.dir">
+        <input message="Enter name of directory to contain all site-specific modifications:"       
+            addproperty="site.dir" />
         <propertyfile file="build_override.properties">
-            <entry key="customization.dir" value="${customization.dir}" />
+            <entry key="site.dir" value="${site.dir}" />
         </propertyfile>
-        <input message="Enter name to use for Jar File containing custom indexing functions, libraries, and properties\n(Note: omit &quot;.jar&quot; from end of Jar Name) "
+        <input message="Enter name to use for Jar File containing custom indexing functions, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
             addproperty="custom.jar.name" defaultvalue="Custom"/>
         <input message="Enter prefix of properties files for config and index for custom modifications ${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
             addproperty="custom.config.file.prefix" defaultvalue="${custom.jar.name}" />
         <input message="Enter name to use for final resulting Jar File containing all code, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
             addproperty="distribution.jar.name" defaultvalue="${custom.jar.name}_SolrMarc"/>
-        <input message="Enter java heap size memory argument to put in generated scripts for running custom SolrMarc Indexer "
+        <input message="Enter java heap size memory argument to put in generated scripts for running site-specific SolrMarc Indexer "
             addproperty="exe.mem.args" defaultvalue="-Xmx256m"/>
-        <mkdir dir="${customization.dir}" />
-        <propertyfile file="${customization.dir}/build.properties">
+        <mkdir dir="${site.dir}" />
+        <propertyfile file="${site.dir}/build.properties">
             <entry key="custom.config.file.prefix" value="${custom.config.file.prefix}" />
             <entry key="distribution.jar.name" value="${distribution.jar.name}" />
             <entry key="custom.jar.name" value="${custom.jar.name}" />
         </propertyfile>
     </target>
     
-    <target name="init_custom_finish" if="customization.dir" >
-        <property file="${customization.dir}/build.properties" />
+    <target name="init_site_finish" if="site.dir" >
+        <property file="${site.dir}/build.properties" />
          
-         <property name="customization.src.dir" value="${customization.dir}/${src.dir}" />
-         <property name="customization.lib.dir" value="${customization.dir}/${lib.dir}" />
-         <property name="customization.build.dir" value="${customization.dir}/${build.dir}" />
-         <property name="customization.test.dir" value="${customization.dir}/${test.dir}" />
-         <property name="customization.map.dir" value="${customization.dir}/${trans.map.path}" />
-         <mkdir dir="${customization.src.dir}" />
-         <mkdir dir="${customization.build.dir}" />
-         <mkdir dir="${customization.lib.dir}" />
-         <mkdir dir="${customization.test.dir}" />
-         <mkdir dir="${customization.map.dir}" /> 
+         <property name="site.src.dir" value="${site.dir}/${src.dir}" />
+         <property name="site.lib.dir" value="${site.dir}/${lib.dir}" />
+         <property name="site.build.dir" value="${site.dir}/${build.dir}" />
+         <property name="site.test.dir" value="${site.dir}/${test.dir}" />
+         <property name="site.map.dir" value="${site.dir}/${trans.map.path}" />
+         <mkdir dir="${site.src.dir}" />
+         <mkdir dir="${site.build.dir}" />
+         <mkdir dir="${site.lib.dir}" />
+         <mkdir dir="${site.test.dir}" />
+         <mkdir dir="${site.map.dir}" /> 
          
          <!-- Now set some defaults for properties if they are not defined yet -->
          <property name="custom.jar.name" value="Custom" />
@@ -133,8 +133,8 @@
 
     <target name="compile" depends="init,dependencies,solrlibextract" 
             description="Compile custom source code into the build directory"
-            if="customization.dir">
-        <javac destdir="${customization.build.dir}" srcdir="${customization.src.dir}" 
+            if="site.dir">
+        <javac destdir="${site.build.dir}" srcdir="${site.src.dir}" 
                 target="${java.compat.version}" 
                 source="${java.compat.version}" 
                 debug="true" debuglevel="lines,vars,source" 
@@ -143,8 +143,8 @@
             <classpath refid="classpath.jars" />
         </javac>
 
-        <jar destfile="${customization.build.dir}/${custom.jar.name}.jar">
-            <fileset dir="${customization.build.dir}" includes="**/*.class" />
+        <jar destfile="${site.build.dir}/${custom.jar.name}.jar">
+            <fileset dir="${site.build.dir}" includes="**/*.class" />
         </jar>
     </target>
 
@@ -171,13 +171,13 @@
             <lib>
                 <fileset dir="${lib.dir}" includes="*.jar" excludes="junit*.jar,jzkit_client.jar"/>
                 <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
-                <fileset dir="${customization.build.dir}" includes="*.jar" />
-                <fileset dir="${customization.lib.dir}" includes="*.jar" />
+                <fileset dir="${site.build.dir}" includes="*.jar" />
+                <fileset dir="${site.lib.dir}" includes="*.jar" />
             </lib>
             <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
-            <fileset dir="${customization.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties"/>
+            <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties"/>
             <fileset dir="." includes="log4j.properties" />
-            <fileset dir="${customization.map.dir}" includes="*.properties" />
+            <fileset dir="${site.map.dir}" includes="*.properties" />
         </one-jar>
         
         <copy todir="${dist.dir}">
@@ -209,24 +209,24 @@
     <!-- Site Testing Targets -->
 
     <target name="testClean" description="clean generated test directories">
-        <delete dir="${customization.test.dir}/${build.dir}" />
+        <delete dir="${site.test.dir}/${build.dir}" />
     </target>
 
     <target name="testInit" depends="testClean" description="create (empty) generated test directories">
-        <mkdir dir="${customization.test.dir}/${build.dir}" />
+        <mkdir dir="${site.test.dir}/${build.dir}" />
     </target>
 
     <target name="testCompile" depends="testInit,compile" description="Compile test source code into test build dir">
         <path id="test.classpath.jars" description="Jars for classpath for building/running Test code">
             <fileset dir="${lib.dir}" includes="*.jar" />
             <fileset dir="${lib.dir}/solrmarc/dist" includes="*.jar" />
-            <fileset dir="${customization.lib.dir}" includes="*.jar" /> 
-            <fileset file="${customization.build.dir}/${custom.jar.name}.jar" />
+            <fileset dir="${site.lib.dir}" includes="*.jar" /> 
+            <fileset file="${site.build.dir}/${custom.jar.name}.jar" />
             <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />   
         </path>
 
-        <javac destdir="${customization.test.dir}/${build.dir}" 
-               srcdir="${customization.test.dir}/${src.dir}:${lib.dir}/solrmarc/${test.dir}/${src.dir}" 
+        <javac destdir="${site.test.dir}/${build.dir}" 
+               srcdir="${site.test.dir}/${src.dir}:${lib.dir}/solrmarc/${test.dir}/${src.dir}" 
                target="${java.compat.version}" source="${java.compat.version}" 
                debug="on" encoding="utf-8">
             <include name="org/**/*.java" />
@@ -239,9 +239,9 @@
     </target>
 
     <target name="testJar" depends="testCompile" description="jar up test class files">
-        <echo message=" creating test jar :  ${customization.test.dir}/${site.test.jar}" />
-        <jar jarfile="${customization.test.dir}/${site.test.jar}">
-            <fileset dir="${customization.test.dir}/${build.dir}" includes="**/*.class" />
+        <echo message=" creating test jar :  ${site.test.dir}/${site.test.jar}" />
+        <jar jarfile="${site.test.dir}/${site.test.jar}">
+            <fileset dir="${site.test.dir}/${build.dir}" includes="**/*.class" />
         </jar>
     </target>
 
@@ -250,7 +250,7 @@
 
         <path id="test.run.classpath.jars" >
             <path refid="test.classpath.jars" />
-            <fileset file="${customization.test.dir}/${site.test.jar}" />
+            <fileset file="${site.test.dir}/${site.test.jar}" />
             <!-- Add classpath entries for properties files -->
             <fileset dir="." includes="log4j.properties" />
         </path>
@@ -264,9 +264,9 @@
             </classpath>
 
             <sysproperty key="solrmarc.path" path="${lib.dir}/solrmarc" />
-            <sysproperty key="solrmarc.site.path" path="${customization.dir}" />
-            <sysproperty key="solr.path" path="${customization.dir}/solr" />
-            <sysproperty key="solr.data.dir" path="${customization.dir}/solr/data" />
+            <sysproperty key="solrmarc.site.path" path="${site.dir}" />
+            <sysproperty key="solr.path" path="${site.dir}/solr" />
+            <sysproperty key="solr.data.dir" path="${site.dir}/solr/data" />
             <!-- these crucial properties set here b/c normally they are in 
                    the properties file indicated with an argument in the command line -->
             <sysproperty key="solr.indexer" value="${solr.indexer}" />
