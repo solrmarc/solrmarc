@@ -4,6 +4,7 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
 import org.apache.log4j.Logger;
@@ -43,13 +44,22 @@ public abstract class MarcHandler {
             Class<?> bootClass = Class.forName("com.simontuffs.onejar.Boot");
             String jar = bootClass.getMethod("getMyJarPath").invoke(null).toString();
             JarFile jarFile = new JarFile(jar);
-            Enumeration entries = jarFile.entries();
-            while (entries.hasMoreElements())
+            Manifest manifest = jarFile.getManifest();
+            String defConfig = manifest.getMainAttributes().getValue("Default-Config-File");
+            if (defConfig != null && defConfig.length() > 0)
             {
-                ZipEntry entry = (ZipEntry)entries.nextElement();
-                if (entry.getName().contains("config.properties"))
+                configProperties = defConfig; 
+            }
+            else
+            {
+                Enumeration entries = jarFile.entries();
+                while (entries.hasMoreElements())
                 {
-                    configProperties = entry.getName();
+                    ZipEntry entry = (ZipEntry)entries.nextElement();
+                    if (entry.getName().contains("config.properties"))
+                    {
+                        configProperties = entry.getName();
+                    }
                 }
             }
         }
