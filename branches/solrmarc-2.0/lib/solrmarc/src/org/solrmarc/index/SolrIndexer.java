@@ -74,8 +74,13 @@ public class SolrIndexer
     {
         this();
         propertyFilePaths = propertyDirs;
-        Properties indexingProps = Utils.loadProperties(propertyFilePaths, indexingPropsFile);
-        fillMapFromProperties(indexingProps);
+        String indexingPropsFiles[] = indexingPropsFile.split("[;,]");
+        for (String indexProps : indexingPropsFiles )
+        {
+            indexProps = indexProps.trim();
+            Properties indexingProps = Utils.loadProperties(propertyFilePaths, indexProps);
+            fillMapFromProperties(indexingProps);
+        }
     }
 
     /**
