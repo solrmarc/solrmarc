@@ -87,6 +87,7 @@ public class RawRecordReader
                         { 
                             System.out.write(byteArray);
                             System.out.write(recordBuf);
+                            System.out.flush();
                         }
                     }
     
@@ -147,6 +148,7 @@ public class RawRecordReader
                         { 
                             System.out.write(byteArray);
                             System.out.write(recordBuf);
+                            System.out.flush();
                         }
                     }
     
@@ -161,7 +163,6 @@ public class RawRecordReader
                 logger.error(e.getMessage());
             }
         }
-    //    }
     }
 
 }
