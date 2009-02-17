@@ -70,24 +70,26 @@
     <target name="init_site_finish" if="site.dir" >
         <property file="${site.dir}/build.properties" />
          
-         <property name="site.src.dir" value="${site.dir}/${src.dir}" />
-         <property name="site.lib.dir" value="${site.dir}/${lib.dir}" />
-         <property name="site.build.dir" value="${site.dir}/${build.dir}" />
-         <property name="site.test.dir" value="${site.dir}/${test.dir}" />
-         <property name="site.map.dir" value="${site.dir}/${trans.map.path}" />
-         <mkdir dir="${site.src.dir}" />
-         <mkdir dir="${site.build.dir}" />
-         <mkdir dir="${site.lib.dir}" />
-         <mkdir dir="${site.test.dir}" />
-         <mkdir dir="${site.map.dir}" /> 
+        <property name="site.src.dir" value="${site.dir}/${src.dir}" />
+        <property name="site.lib.dir" value="${site.dir}/${lib.dir}" />
+        <property name="site.build.dir" value="${site.dir}/${build.dir}" />
+        <property name="site.test.dir" value="${site.dir}/${test.dir}" />
+        <property name="site.map.dir" value="${site.dir}/${trans.map.path}" />
+        <property name="site.script.dir" value="${site.dir}/${script.template.dir}" />
+        <mkdir dir="${site.src.dir}" />
+        <mkdir dir="${site.build.dir}" />
+        <mkdir dir="${site.lib.dir}" />
+        <mkdir dir="${site.test.dir}" />
+        <mkdir dir="${site.map.dir}" /> 
+        <mkdir dir="${site.script.dir}" /> 
          
-         <!-- Now set some defaults for properties if they are not defined yet -->
-         <property name="custom.jar.name" value="Custom" />
-         <property name="distribution.jar.name" value="SolrMarc" />
-         <property name="custom.config.file.prefix" value="" />
-         <property name="exe.mem.args" value="-Xmx256m" />
+        <!-- Now set some defaults for properties if they are not defined yet -->
+        <property name="custom.jar.name" value="Custom" />
+        <property name="distribution.jar.name" value="SolrMarc" />
+        <property name="custom.config.file.prefix" value="" />
+        <property name="exe.mem.args" value="-Xmx256m" />
          
-         <echo message="custom.jar.name = ${custom.jar.name}" />
+        <echo message="custom.jar.name = ${custom.jar.name}" />
     </target>
     
     <!-- Solr Version Properties Targets -->
@@ -187,8 +189,10 @@
             addproperty="default.config" />
     </target>
 
-    <target name="defaultconfig" depends="defaultconfigcnt,defaultconfig0, defaultconfig1, defaultconfiginput" 
-            unless="default.config" >
+    <target name="defaultconfig" depends="defaultconfigcnt,defaultconfig0, defaultconfig1, defaultconfiginput" >
+        <propertyfile file="build_override.properties">
+            <entry key="default.config" value="${default.config}" />>
+        </propertyfile>
     </target>
     
     <target name="build" depends="compile,defaultconfig" description="create ${jar.name} in the build directory">
@@ -225,14 +229,20 @@
         </one-jar>
         
         <copy todir="${dist.dir}" overwrite="true">
-             <fileset dir="${script.template.dir}" includes="*" />
-             <filterset>
-                 <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
-                 <filter token="MEM_ARGS" value="${exe.mem.args}" />
-             </filterset>
-         </copy>
-         
-         <chmod dir="${dist.dir}" includes="*.sh" perm="u+x" />
+            <fileset dir="${script.template.dir}" includes="*" />
+            <fileset dir="${site.script.dir}" includes="*" />
+            <filterchain>
+                <fixcrlf />
+            </filterchain>
+            <filterset>
+                <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
+                <filter token="MEM_ARGS" value="${exe.mem.args}" />
+            </filterset>
+        </copy>
+        
+        <chmod perm="u+x" >
+            <fileset dir="${dist.dir}" excludes="*.jar" />
+        </chmod>
 
     </target>
 
