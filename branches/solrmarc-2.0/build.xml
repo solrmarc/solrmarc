@@ -194,7 +194,20 @@
         </propertyfile>
     </target>
     
-    <target name="build" depends="compile,defaultconfig" description="create ${jar.name} in the build directory">
+    <target name="solrpath" unless="solr.path" >
+        <input message="Enter absolute path to location of solr home (should contain conf and data directories)"
+            addproperty="solr.path" />
+        <condition property="solr.home.exists">
+            <available file="${solr.path}/conf" />
+        </condition>
+        <fail unless="solr.home.exists">Specified solr home ${solr.path} doesn't contain conf directory</fail>
+        <propertyfile file="${site.dir}/build.properties">
+            <entry key="solr.path" value="${solr.path}" />
+        </propertyfile>
+    </target>
+    
+    <target name="build" depends="compile,defaultconfig,solrpath" 
+            description="create ${jar.name} in the build directory">
         <copy tofile="${buildtools.path}/manifest.mf" 
               file="${buildtools.path}/manifest_template.mf" overwrite="true">
             <filterset>
@@ -212,6 +225,13 @@
             </filterchain>
         </loadproperties>
         
+        <copy todir="${site.build.dir}" overwrite="true">
+            <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties"/>
+            <filterset>
+                <filter token="PATH_TO_SOLR" value="${solr.path}" />
+            </filterset>
+        </copy>
+        
         <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
                manifest="${buildtools.path}/manifest.mf">
             <main jar="${lib.dir}/solrmarc/${dist.dir}/${jar.name}" />
@@ -222,7 +242,7 @@
                 <fileset dir="${site.lib.dir}" includes="*.jar" />
             </lib>
             <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
-            <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties"/>
+            <fileset dir="${site.build.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties"/>
             <fileset dir="." includes="log4j.properties" />
             <fileset dir="${site.map.dir}" includes="*.properties" />
         </one-jar>
@@ -235,6 +255,7 @@
             </filterchain>
             <filterset>
                 <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
+                <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
                 <filter token="MEM_ARGS" value="${exe.mem.args}" />
             </filterset>
         </copy>

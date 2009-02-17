@@ -5,6 +5,8 @@
 
 E_BADARGS=65
 
+scriptdir=$(dirname "$0") 
+
 if [ $# -eq 0 ]
 then
   echo "    Usage: `basename $0` [config.properties] ./path/to/marc.mrc [./path/to/ids_to_delete.del]"
@@ -13,7 +15,11 @@ then
   exit $E_BADARGS
 fi
 
+pushd $scriptdir
+
 java @MEM_ARGS@ -jar @CUSTOM_JAR_NAME@ $1 $2 $3
+
+popd
 
 exit 0
 
