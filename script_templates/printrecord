@@ -13,7 +13,11 @@ then
   exit $E_BADARGS
 fi
 
+pushd $scriptdir
+
 java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.MarcPrinter" -jar @CUSTOM_JAR_NAME@ $1 $2 print
+
+popd
 
 exit 0
 
