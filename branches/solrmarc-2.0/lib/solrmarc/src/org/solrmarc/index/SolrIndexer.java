@@ -168,6 +168,7 @@ public class SolrIndexer
                     }
                     else if (values[0].equalsIgnoreCase("FullRecordAsXML") ||
                              values[0].equalsIgnoreCase("FullRecordAsMARC") ||
+                             values[0].equalsIgnoreCase("FullRecordAsText") ||
                              values[0].equalsIgnoreCase("DateOfPublication") ||
                              values[0].equalsIgnoreCase("DateRecordIndexed"))
                     {
@@ -571,8 +572,11 @@ public class SolrIndexer
         		indexParm.equalsIgnoreCase("FullRecordAsMARC"))
             return writeRaw(record);
         else if (indexParm.equals("xml") ||
-                 	indexParm.equalsIgnoreCase("FullRecordAsXML"))
+                indexParm.equalsIgnoreCase("FullRecordAsXML"))
             return writeXml(record);
+        else if (indexParm.equals("xml") ||
+                indexParm.equalsIgnoreCase("FullRecordAsText"))
+            return (record.toString());
         else if (indexParm.equals("date") ||
         			indexParm.equalsIgnoreCase("DateOfPublication"))
             return getDate(record);
