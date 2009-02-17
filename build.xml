@@ -19,15 +19,6 @@
         <format property="dateversion" pattern="yyyy.MM.dd.HH.mm.ss" />
     </tstamp>
  
-    <path id="classpath.jars" description="Jars for classpath for building custom code (but not solr jars)">
-        <fileset dir="${lib.dir}">
-            <include name="*.jar" />
-            <exclude name="junit*.jar" />
-        </fileset>
-        <fileset dir="${lib.dir}/solrmarc/dist" includes="*.jar" />
-        <fileset dir="${site.dir}/lib" includes="*.jar" />
-    </path>
-
     <target name="clean" description="clean the generated directories">
         <delete dir="${build.dir}" />
         <delete dir="${dist.dir}" />
@@ -38,6 +29,14 @@
     <target name="init" depends="init_site,init_site_finish" description="create (empty) generated directories">
         <mkdir dir="${build.dir}" />
         <mkdir dir="${dist.dir}" />
+        <path id="classpath.jars" description="Jars for classpath for building custom code (but not solr jars)">
+            <fileset dir="${lib.dir}">
+                <include name="*.jar" />
+                <exclude name="junit*.jar" />
+            </fileset>
+            <fileset dir="${lib.dir}/solrmarc/dist" includes="*.jar" />
+            <fileset dir="${site.lib.dir}" includes="*.jar" />
+        </path>
     </target>
 
     <target name="dependencies" depends="solrversion"  description="Build the core SolrMarc code" >
