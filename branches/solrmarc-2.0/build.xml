@@ -114,7 +114,7 @@
             <available file="${solr.war.location}" />
         </condition>
         <fail unless="war.exists">Solr.war file ${solr.war.location} does not exist</fail>
-        <propertyfile file="build_override.properties">
+        <propertyfile file="${site.dir}/build.properties">
             <entry key="solr.war.location" value="${solr.war.location}" />
         </propertyfile>
     </target>
