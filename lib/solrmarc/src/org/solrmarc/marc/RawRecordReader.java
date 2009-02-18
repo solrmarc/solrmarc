@@ -83,7 +83,7 @@ public class RawRecordReader
                         int length = Integer.parseInt(recordStr.substring(3,7));
                         int offset2 = Integer.parseInt(recordStr.substring(7,12));
                         String id = recordStr.substring(offset+offset2, offset+offset2+length-1);
-                        if (id.equals(idLookedFor))
+                        if (id.trim().equals(idLookedFor))
                         { 
                             System.out.write(byteArray);
                             System.out.write(recordBuf);
