@@ -921,7 +921,7 @@ public class SolrIndexer
             else 
             {
                 // Control Field
-                resultSet.add(((ControlField) vf).getData());
+                resultSet.add(((ControlField) vf).getData().trim());
             }
         }
         return resultSet;
