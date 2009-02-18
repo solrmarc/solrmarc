@@ -95,7 +95,7 @@ public abstract class MarcHandler {
         addnlArgs = addnlArgList.toArray(new String[0]);
         
         // System.out.println("Loading properties from " + properties);
-        logger.info("Loading config properties from " + configProperties);
+        logger.debug("Loading config properties from " + configProperties);
         // Process Properties
         loadProperties(configProperties);
 
