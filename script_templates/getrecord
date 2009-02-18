@@ -5,18 +5,26 @@
 
 E_BADARGS=65
 
-if [ $# -eq 0 ]
-then
-  echo "    Usage: `basename $0` ./path/to/marc.mrc id_to_extract"
-  echo "    Usage: `basename $0` ./path/to/marc.mrc first_id_to_extract  last_id_to_extract"
-  exit $E_BADARGS
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+if ! [ -p /dev/stdin ]
+then  
+  if [ $# -eq 0 ]
+  then
+    echo "    Usage: `basename $0` ./path/to/marc.mrc id_to_extract"
+    echo "    Usage: `basename $0` ./path/to/marc.mrc first_id_to_extract  last_id_to_extract"
+    exit $E_BADARGS
+  fi
+  arg1=$1
+  arg2=$2
+  arg3=$3
+else
+  arg1=-
+  arg2=$1
+  arg3=$2
 fi
 
-pushd $scriptdir
-
-java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.RawRecordReader" -jar @CUSTOM_JAR_NAME@ $1 $2 $3
-
-popd
+java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.RawRecordReader" -jar $scriptdir/@CUSTOM_JAR_NAME@ $arg1 $arg2 $arg3
 
 exit 0
 
