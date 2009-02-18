@@ -11,6 +11,8 @@
     <!-- import other ant scripts -->
     <property name="one-jar.dist.dir" value="${buildtools.path}" />
     <import file="${buildtools.path}/one-jar-ant-task.xml"/>
+    <property name="lowercase.dist.dir" value="${buildtools.path}" />
+    <import file="${buildtools.path}/lowercase-ant-task.xml"/>
     
     <tstamp>
         <format property="year" pattern="yyyy" />
@@ -42,7 +44,7 @@
     <target name="dependencies" depends="solrversion"  description="Build the core SolrMarc code" >
         <ant dir="${lib.dir}/solrmarc" target="build" inheritAll="false"/>
     </target>
-
+   
     <target name="init_site" description="Create the src, lib, bin, test directories for a custom site"
             unless="site.dir">
         <input message="Enter name of directory to contain all site-specific modifications:"       
@@ -50,25 +52,11 @@
         <propertyfile file="build_override.properties">
             <entry key="site.dir" value="${site.dir}" />
         </propertyfile>
-        <input message="Enter name to use for Jar File containing custom indexing functions, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
-            addproperty="custom.jar.name" defaultvalue="Custom"/>
-        <input message="Enter prefix of properties files for config and index for custom modifications ${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
-            addproperty="custom.config.file.prefix" defaultvalue="${custom.jar.name}" />
-        <input message="Enter name to use for final resulting Jar File containing all code, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
-            addproperty="distribution.jar.name" defaultvalue="${custom.jar.name}_SolrMarc"/>
-        <input message="Enter java heap size memory argument to put in generated scripts for running site-specific SolrMarc Indexer "
-            addproperty="exe.mem.args" defaultvalue="-Xmx256m"/>
         <mkdir dir="${site.dir}" />
-        <propertyfile file="${site.dir}/build.properties">
-            <entry key="custom.config.file.prefix" value="${custom.config.file.prefix}" />
-            <entry key="distribution.jar.name" value="${distribution.jar.name}" />
-            <entry key="custom.jar.name" value="${custom.jar.name}" />
-        </propertyfile>
-    </target>
+     </target>
     
     <target name="init_site_finish" if="site.dir" >
-        <property file="${site.dir}/build.properties" />
-         
+        
         <property name="site.src.dir" value="${site.dir}/${src.dir}" />
         <property name="site.lib.dir" value="${site.dir}/${lib.dir}" />
         <property name="site.build.dir" value="${site.dir}/${build.dir}" />
@@ -81,13 +69,28 @@
         <mkdir dir="${site.test.dir}" />
         <mkdir dir="${site.map.dir}" /> 
         <mkdir dir="${site.script.dir}" /> 
-         
-        <!-- Now set some defaults for properties if they are not defined yet -->
-        <property name="custom.jar.name" value="Custom" />
-        <property name="distribution.jar.name" value="SolrMarc" />
-        <property name="custom.config.file.prefix" value="" />
-        <property name="exe.mem.args" value="-Xmx256m" />
-         
+
+        <property file="${site.dir}/build.properties" />
+      
+        <input message="Enter name to use for Jar File containing custom indexing functions, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
+            addproperty="custom.jar.name" defaultvalue="Custom"/>
+        <lowercase property="custom.jar.name.lc" value="${custom.jar.name}" />
+        <echo message="lowercase = ${custom.jar.name.lc}" level="verbose" />
+        
+        <input message="Enter prefix of properties files for config and index for custom modifications ${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
+            addproperty="custom.config.file.prefix" defaultvalue="${custom.jar.name.lc}" />
+        <input message="Enter name to use for final resulting Jar File containing all code, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
+            addproperty="distribution.jar.name" defaultvalue="${custom.jar.name}_SolrMarc"/>
+        <input message="Enter java heap size memory argument to put in generated scripts for running site-specific SolrMarc Indexer "
+            addproperty="exe.mem.args" defaultvalue="-Xmx256m"/>
+
+        <propertyfile file="${site.dir}/build.properties">
+            <entry key="custom.config.file.prefix" value="${custom.config.file.prefix}" />
+            <entry key="distribution.jar.name" value="${distribution.jar.name}" />
+            <entry key="custom.jar.name" value="${custom.jar.name}" />
+            <entry key="exe.mem.args" value="${exe.mem.args}" />
+        </propertyfile>
+
         <echo message="custom.jar.name = ${custom.jar.name}" />
     </target>
     
