@@ -261,4 +261,39 @@ public class BlacklightIndexer extends SolrIndexer
         return(result);
     }
     
+    public Set<String> getShadowedLocation(final Record record, String propertiesMap)
+    {
+        String mapName = null;
+        try
+        {
+            mapName = loadTranslationMap(null, "location_map.properties");
+        }
+        catch (IllegalArgumentException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        Set<String> fields = getFieldList(record, "999kl';'");
+        Set<String> result = new LinkedHashSet<String>();
+        for (String field : fields)
+        {
+            String fparts[] = field.split(";");
+            if (fparts.length == 1)
+            {
+                String mappedFpart = Utils.remap(fparts[0], findMap(mapName), true);
+                if (mappedFpart != null) result.add(mappedFpart);
+            }
+            else if (fparts.length == 2)
+            {
+                String mappedFpart1 = Utils.remap(fparts[0], findMap(mapName), true);
+                String mappedFpart2 = Utils.remap(fparts[1], findMap(mapName), true);
+                if (mappedFpart1 != null && mappedFpart2 != null)
+                {
+                    result.add(mappedFpart1);
+                    result.add(mappedFpart2);
+                }
+            }
+        }
+        return(result);        
+    }
 }
