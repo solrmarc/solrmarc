@@ -61,11 +61,16 @@ public class BooklistReader extends SolrReIndexer
 
     public int handleAll()
     {
+        Runtime.getRuntime().addShutdownHook(new MyShutdownThread(this));
+
         Date start = new Date();
         
         readBooklist(booklistFilename);
         
         finish(); 
+        
+        signalServer();
+        
         return(0);
     }
         
@@ -92,6 +97,8 @@ public class BooklistReader extends SolrReIndexer
             String line;
             while ((line = reader.readLine()) != null)
             {
+                if (shuttingDown) break;
+                
                 String fields[] = line.split("\\|");
                 Map<String, String> valuesToAdd = new LinkedHashMap<String, String>();
                 valuesToAdd.put("fund_code_facet", fields[11]);
