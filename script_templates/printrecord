@@ -18,7 +18,7 @@ then
   fi
 fi
 
-java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.MarcPrinter" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 print
+java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.MarcPrinter" -jar $scriptdir/@CUSTOM_JAR_NAME@ print $1 $2 
 
 exit 0
 
