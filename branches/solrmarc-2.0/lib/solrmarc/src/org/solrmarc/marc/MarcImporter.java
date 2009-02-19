@@ -29,6 +29,7 @@ import org.marc4j.ErrorHandler;
 import org.marc4j.marc.Record;
 import org.solrmarc.solr.SolrCoreProxy;
 import org.solrmarc.solr.SolrCoreLoader;
+import org.solrmarc.tools.SolrUpdate;
 import org.solrmarc.tools.Utils;
 
 
@@ -330,52 +331,8 @@ public class MarcImporter extends MarcHandler
         if (shuttingDown) return;
         if (SolrHostURL == null || SolrHostURL.length() == 0) return;
         try {
-            URL         url;
-            URLConnection   urlConn;
-            DataOutputStream    printout;
-            BufferedReader input;
-
-            // URL of CGI-Bin script.
-            url = new URL (SolrHostURL);
-
-            // URL connection channel.
-            urlConn = url.openConnection();
-
-            // Let the run-time system (RTS) know that we want input.
-            urlConn.setDoInput (true);
-
-            // Let the RTS know that we want to do output.
-            urlConn.setDoOutput (true);
-
-            // No caching, we want the real thing.
-            urlConn.setUseCaches (false);
-
-            // Specify the content type.
-            urlConn.setRequestProperty("Content-Type", "text/xml");
-            urlConn.setRequestProperty("charset", "utf-8");
-
-            // Send POST output.
-            printout = new DataOutputStream (urlConn.getOutputStream ());
-
-            String content = "<commit/>";
-             
-            printout.writeBytes (content);
-            printout.flush ();
-            printout.close ();
-
-            // Get response data.
-            input = new BufferedReader(new InputStreamReader(urlConn.getInputStream ()));
-
-            String str;
-            while (null != ((str = input.readLine())))
-            {
-                System.out.println (str);
-            }
-
-            input.close ();
-
-            // Display response.
-         }
+            SolrUpdate.signalServer(SolrHostURL);
+        }
         catch (MalformedURLException me)
         {
             //System.err.println("MalformedURLException: " + me);
@@ -456,6 +413,7 @@ public class MarcImporter extends MarcHandler
         }
         
         finish();
+        if (!shuttingDown && SolrHostURL != null  && SolrHostURL.length() > 0)
         signalServer();
         
         isShutDown = true;
