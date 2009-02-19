@@ -114,9 +114,9 @@ public class SolrIndexer
                 {
 					// split it into two pieces at first comma or space 
                     String values[] = propValue.split("[, ]+", 2);
-                    if (values[0].equals("custom"))
+                    if (values[0].equals("custom") || values[0].equals("customDeleteRecordIfFieldEmpty") )
                     {
-                        fieldDef[1] = "custom";
+                        fieldDef[1] = values[0];
 
                         // parse sections of custom value assignment line in 
                         //   _index.properties file
@@ -251,7 +251,7 @@ public class SolrIndexer
             String indexParm = fieldMapVal[2];
             String mapName = fieldMapVal[3];
             
-            if (indexType.equals("custom"))
+            if (indexType.startsWith("custom"))
             	verifyCustomMethodExists(indexParm);
             
             // check that translation maps are present in transMapMap
@@ -480,8 +480,12 @@ public class SolrIndexer
                 else
                     addField(indexMap, indexField, getStd(record, indexParm));
             }
-            else if (indexType.equals("custom"))
-                handleCustom(indexMap, indexField, mapName, record, indexParm);
+            else if (indexType.startsWith("custom"))
+            {
+                boolean shouldBeDeleted = handleCustom(indexMap, indexType, indexField, mapName, record, indexParm);
+                if (shouldBeDeleted) 
+                    return new HashMap<String, Object>();
+            }
         }
         return indexMap;
     }
@@ -489,8 +493,11 @@ public class SolrIndexer
     /**
      * do the processing indicated by a custom function, putting the solr
      *  field name and value into the indexMap parameter
+     *  
+     *  returns true if the indexing process should stop and the solr record should be deleted.
      */
-    private void handleCustom(Map<String, Object> indexMap, String indexField, String mapName, Record record, String indexParm)
+    private boolean handleCustom(Map<String, Object> indexMap, String indexType, String indexField, 
+                                 String mapName, Record record, String indexParm)
     {
         try
         {
@@ -507,7 +514,8 @@ public class SolrIndexer
                 parmClasses[0] = Record.class;
                 Object objParms[] = new Object[numparms+1];
                 objParms[0] = record;                
-                for (int i = 0 ; i < numparms; i++)  { 
+                for (int i = 0 ; i < numparms; i++)  
+                { 
                 	parmClasses[i+1] = String.class; 
                 	objParms[i+1] = dequote(parms[i].trim()); 
                 }
@@ -519,12 +527,32 @@ public class SolrIndexer
                 method = getClass().getMethod(indexParm, new Class[]{Record.class});
                 retval = method.invoke(this, new Object[]{record});
             }
+            
             if (retval instanceof Map) 
+            {
+                if (indexType.equals("customDeleteRecordIfFieldEmpty") && ((Map<String, String>)retval).size()== 0)
+                    return(true);
                 indexMap.putAll((Map<String, String>)retval);         
+            }
             else if (retval instanceof Set) 
-                addFields(indexMap, indexField, mapName, (Set<String>) retval);
+            {
+                Set<String> fields = (Set<String>) retval;
+                if (mapName != null && findMap(mapName) != null)
+                    fields = Utils.remap(fields, findMap(mapName), true);
+                
+                if (indexType.equals("customDeleteRecordIfFieldEmpty") && fields.size()== 0)
+                    return(true);
+                addFields(indexMap, indexField, null, fields);
+            }
             else if (retval instanceof String)
-                addField(indexMap, indexField, mapName, (String) retval);
+            {
+                String field = (String) retval;
+                if (mapName != null && findMap(mapName) != null)
+                    field = Utils.remap(field, findMap(mapName), true);
+                if (indexType.equals("customDeleteRecordIfFieldEmpty") && retval == null)
+                    return(true);
+                addField(indexMap, indexField, null, field);
+            }
         }
         catch (SecurityException e)
         {
@@ -551,6 +579,7 @@ public class SolrIndexer
             //e.printStackTrace();
             logger.error(e.getCause());
         }
+        return(false);
     }
 
     private String dequote(String str)
