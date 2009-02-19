@@ -1,0 +1,24 @@
+#! /bin/bash
+# updatesolrserver
+# send an update message to a running solr server, 
+# $Id: updatesolrserver
+
+E_BADARGS=65
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+if ! [ -p /dev/stdin ]
+then  
+  if [ $# -eq 0 ]
+  then
+    echo "    Usage: `basename $0` [url_to_running_solr_server] "
+    echo "      Note that if the config.properties file is not specified the Jarfile will be searched for"
+    echo "      a file whose name ends with \"config.properties\""
+    exit $E_BADARGS
+  fi
+fi
+
+java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.tools.SolrUpdate" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 
+
+exit 0
+
