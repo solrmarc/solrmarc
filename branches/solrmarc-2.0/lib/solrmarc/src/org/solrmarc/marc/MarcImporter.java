@@ -49,7 +49,7 @@ public class MarcImporter extends MarcHandler
     private String deleteRecordIDMapper = null;
     private String SolrHostURL;
     private boolean optimizeAtEnd = true;
-    private boolean shuttingDown = false;
+    protected boolean shuttingDown = false;
     private boolean isShutDown = false;
     private int recsReadCounter = 0;
     private int recsIndexedCounter = 0;
@@ -326,7 +326,7 @@ public class MarcImporter extends MarcHandler
      * This value is taken from the  solr.hosturl  entry in the properties file. 
      */
     
-    private void signalServer()
+    protected void signalServer()
     {
         if (shuttingDown) return;
         if (SolrHostURL == null || SolrHostURL.length() == 0) return;
@@ -413,7 +413,7 @@ public class MarcImporter extends MarcHandler
         }
         
         finish();
-        if (!shuttingDown && SolrHostURL != null  && SolrHostURL.length() > 0)
+
         signalServer();
         
         isShutDown = true;
