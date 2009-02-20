@@ -160,6 +160,7 @@ public class MarcPrinter extends MarcHandler
                 logger.error("Error reading Marc Record: "+ me.getMessage());
                 return(1);
             }
+            if (writer != null) { writer.close(); }
         }
 		return 0;
 	}
