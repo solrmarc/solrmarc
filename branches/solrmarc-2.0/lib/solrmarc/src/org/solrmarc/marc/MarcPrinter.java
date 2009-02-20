@@ -159,9 +159,9 @@ public class MarcPrinter extends MarcHandler
                 System.err.println("Error reading Marc Record: "+ me.getMessage());                                   
                 logger.error("Error reading Marc Record: "+ me.getMessage());
                 return(1);
-            }
-            if (writer != null) { writer.close(); }
+            }        
         }
+        if (writer != null) { writer.close(); }
 		return 0;
 	}
 
