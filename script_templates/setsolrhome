@@ -1,0 +1,109 @@
+#! /bin/bash
+
+E_BADARGS=65
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+case $1 in
+http*) url=$1 ;;
+/*) solrpath=$1 ;;
+\./*) solrpath=$1 ;;
+*\.jar) jar=$1 ;;
+*config.properties) config=$1
+esac
+
+case $2 in
+http*) url=$2 ;;
+/*) solrpath=$2 ;;
+\./*) solrpath=$2 ;;
+*\.jar) jar=$2 ;;
+*config.properties) config=$2
+esac
+
+case $3 in
+http*) url=$3 ;;
+/*) solrpath=$3 ;;
+\./*) solrpath=$3 ;;
+*\.jar) jar=$3 ;;
+*config.properties) config=$3
+esac
+
+case $4 in
+http*) url=$4 ;;
+/*) solrpath=$4 ;;
+\./*) solrpath=$4 ;;
+*\.jar) jar=$4 ;;
+*config.properties) config=$4
+esac
+
+echo "url = $url"
+echo "solrpath = $solrpath"
+echo "config = $config"
+echo "jar = $jar"
+
+if [[ "$jar" = "" ]] 
+then
+    jar="$scriptdir/@CUSTOM_JAR_NAME@"
+fi
+
+if [[ "$config" = "" && jar != "" ]]
+then
+    config=`java -Done-jar.main.class="org.solrmarc.tools.GetDefaultConfig" -jar "$jar"`
+fi
+
+if [[ "$solrpath" = "" && "$url" != "" ]]
+then
+    echo "no solrpath, hitting URL"
+    solrhomeline=`wget -o /dev/null -O - $url/admin | grep SolrHome`
+    if [[ "$solrhomeline" = "" ]]
+    then
+        echo "Error: no Solr server currently running at URL: $url"
+        exit $E_BADARGS
+    fi
+    solrpath=`echo $solrhomeline | sed -e 's/.*SolrHome=//'`
+    case "$solrpath" in
+    /*) ;;
+    *)  solrpathpre=`echo $solrhomeline | sed -e 's/cwd=//' -e 's/ *SolrHome=.*//'`
+        solrpath="$solrpathpre"/"$solrpath" ;;
+    esac
+    solrpath=`echo $solrpath | sed -e 's%/$%%'`
+fi
+
+if [[ ! -d "$solrpath" ]]
+then
+    echo "Error: unable to access directory designated as Solr home: $solrpath"
+    exit $E_BAD_ARGS
+fi
+
+if [[ ! -d "$solrpath"/conf ]]
+then
+    echo "Error: no 'conf' directory in directory designated as Solr home: $solrpath"
+    exit $E_BAD_ARGS
+fi
+
+echo "url = $url"
+echo "solrpath = $solrpath"
+echo "config = $config"
+echo "jar = $jar"
+
+tmp=tmp"$RANDOM""$$"
+
+mkdir $tmp
+cd $tmp
+jar xf $jar $config 
+if [[ $solrpath != "" && $url != "" ]]
+then
+    sed -e "s%solr\.path *= *.*%solr.path = $solrpath%" -e "s%solr\.hosturl *= *.*%solr.hosturl = $url/update%" < $config > "$config"."$tmp"
+elif [[ $solrpath != "" && $url == "" ]]
+then
+    sed -e "s%solr\.path *= *.*%solr.path = $solrpath%" < $config > "$config"."$tmp"
+fi    
+
+mv "$config"."$tmp" $config
+
+jar uf $jar $config
+
+#cat "$config" 
+
+cd ..
+rm -rf "$tmp"
+
