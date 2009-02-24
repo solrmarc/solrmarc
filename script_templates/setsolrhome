@@ -3,6 +3,8 @@
 E_BADARGS=65
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
 
+showconfig=0
+
 case $1 in
 http*) url=$1 ;;
 /*) solrpath=$1 ;;
@@ -35,11 +37,15 @@ http*) url=$4 ;;
 *config.properties) config=$4
 esac
 
-echo "url = $url"
-echo "solrpath = $solrpath"
-echo "config = $config"
-echo "jar = $jar"
+#echo "url = $url"
+#echo "solrpath = $solrpath"
+#echo "config = $config"
+#echo "jar = $jar"
 
+case $url in 
+*/update) url=`echo $url | sed -e 's%/update$%%'` ;;
+esac
+ 
 if [[ "$jar" = "" ]] 
 then
     jar="$scriptdir/@CUSTOM_JAR_NAME@"
@@ -48,6 +54,17 @@ fi
 if [[ "$config" = "" && jar != "" ]]
 then
     config=`java -Done-jar.main.class="org.solrmarc.tools.GetDefaultConfig" -jar "$jar"`
+fi
+
+if [[ "$solrpath" = "" && "$url" = "" ]]
+then
+    solrpath=`$scriptdir/showconfig $jar $config | egrep '^solr\.path' | sed -e 's%.*= *%%'`
+    url=`$scriptdir/showconfig $jar $config | egrep '^solr\.hosturl' | sed -e 's%.*= *%%'`
+    echo "jar = $jar"
+    echo "config = $config"
+    echo "solrpath = $solrpath"
+    echo "url = $url"
+    exit 0
 fi
 
 if [[ "$solrpath" = "" && "$url" != "" ]]
@@ -80,10 +97,10 @@ then
     exit $E_BAD_ARGS
 fi
 
-echo "url = $url"
-echo "solrpath = $solrpath"
-echo "config = $config"
 echo "jar = $jar"
+echo "config = $config"
+echo "solrpath = $solrpath"
+echo "url = $url/update"
 
 tmp=tmp"$RANDOM""$$"
 
