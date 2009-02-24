@@ -13,6 +13,8 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 
+import org.solrmarc.tools.GetDefaultConfig;
+
 public class SolrUpdate
 {
 
@@ -36,34 +38,7 @@ public class SolrUpdate
         }
         if (solrServerURL == null)
         {
-            String configProperties = null;
-            try {
-                Class<?> bootClass = Class.forName("com.simontuffs.onejar.Boot");
-                String jar = bootClass.getMethod("getMyJarPath").invoke(null).toString();
-                JarFile jarFile = new JarFile(jar);
-                Manifest manifest = jarFile.getManifest();
-                String defConfig = manifest.getMainAttributes().getValue("Default-Config-File");
-                if (defConfig != null && defConfig.length() > 0)
-                {
-                    configProperties = defConfig; 
-                }
-                else
-                {
-                    Enumeration entries = jarFile.entries();
-                    while (entries.hasMoreElements())
-                    {
-                        ZipEntry entry = (ZipEntry)entries.nextElement();
-                        if (entry.getName().contains("config.properties"))
-                        {
-                            configProperties = entry.getName();
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                // no manifest property defining the config
-            }
+            String configProperties = GetDefaultConfig.getConfigName(null);
             if (configProperties != null)
             {
                 configProps = Utils.loadProperties(null, configProperties);
