@@ -10,6 +10,7 @@ import java.util.zip.ZipEntry;
 import org.apache.log4j.Logger;
 import org.marc4j.*;
 import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.tools.GetDefaultConfig;
 import org.solrmarc.tools.Utils;
 
 public abstract class MarcHandler {
@@ -38,36 +39,7 @@ public abstract class MarcHandler {
 	
 	public MarcHandler(String args[])
 	{
-        String configProperties = "config.properties";
-        
-        try {
-            Class<?> bootClass = Class.forName("com.simontuffs.onejar.Boot");
-            String jar = bootClass.getMethod("getMyJarPath").invoke(null).toString();
-            JarFile jarFile = new JarFile(jar);
-            Manifest manifest = jarFile.getManifest();
-            String defConfig = manifest.getMainAttributes().getValue("Default-Config-File");
-            if (defConfig != null && defConfig.length() > 0)
-            {
-                configProperties = defConfig; 
-            }
-            else
-            {
-                Enumeration entries = jarFile.entries();
-                while (entries.hasMoreElements())
-                {
-                    ZipEntry entry = (ZipEntry)entries.nextElement();
-                    if (entry.getName().contains("config.properties"))
-                    {
-                        configProperties = entry.getName();
-                    }
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            // no manifest property defining the config
-        }
-        
+        String configProperties = GetDefaultConfig.getConfigName("config.properties");
         List<String> addnlArgList = new ArrayList<String>();
         if(args.length > 0)
         {
