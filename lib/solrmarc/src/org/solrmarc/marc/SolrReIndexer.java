@@ -524,28 +524,6 @@ public class SolrReIndexer extends MarcImporter
         }                
     }
     
-    /**
-     * finish reindexing
-     */
-    public void finish()
-    {
-        try {
-            //System.out.println("Calling commit");
-            logger.info("Calling commit");
-            solrCoreProxy.commit(false);
-        } 
-        catch (IOException ioe) {
-            //System.err.println("Final commit and optmization failed");
-            logger.error("Final commit and optimization failed: " + ioe.getMessage());
-            logger.debug(ioe);
-            //e.printStackTrace();
-        }
-        
-        //System.out.println("Done with commit, closing Solr");
-        logger.info("Done with the commit, closing Solr");
-        solrCoreProxy.close();
-    }
-
 
 //    /**
 //     * @param args
