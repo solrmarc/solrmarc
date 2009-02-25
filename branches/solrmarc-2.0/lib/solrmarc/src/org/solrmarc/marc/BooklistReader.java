@@ -70,7 +70,7 @@ public class BooklistReader extends SolrReIndexer
         finish(); 
         
         signalServer();
-        
+
         return(0);
     }
         

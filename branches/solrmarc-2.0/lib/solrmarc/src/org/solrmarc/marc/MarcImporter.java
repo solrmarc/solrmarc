@@ -48,9 +48,9 @@ public class MarcImporter extends MarcHandler
     private String deleteRecordListFilename;
     private String deleteRecordIDMapper = null;
     private String SolrHostURL;
-    private boolean optimizeAtEnd = true;
+    protected boolean optimizeAtEnd = false;
     protected boolean shuttingDown = false;
-    private boolean isShutDown = false;
+    protected boolean isShutDown = false;
     private int recsReadCounter = 0;
     private int recsIndexedCounter = 0;
     private int idsToDeleteCounter = 0;
@@ -297,9 +297,7 @@ public class MarcImporter extends MarcHandler
     {
         try {
             //System.out.println("Calling commit");
-        	logger.info("Calling commit");
-        	logger.info(" Adding " + recsIndexedCounter + " of " + recsReadCounter + " documents to index");
-        	logger.info(" Deleting " + recsDeletedCounter + " documents from index");
+            logger.info("Calling commit");
             solrCoreProxy.commit(shuttingDown ? false : optimizeAtEnd);
         } 
         catch (IOException ioe) {
@@ -312,6 +310,9 @@ public class MarcImporter extends MarcHandler
         //System.out.println("Done with commit, closing Solr");
         logger.info("Done with the commit, closing Solr");
         solrCoreProxy.close();
+
+        logger.info("Setting Solr closed flag");
+        isShutDown = true;
     }
     
    
@@ -364,10 +365,11 @@ public class MarcImporter extends MarcHandler
         public void run()
         {
             //System.err.println("Starting Shutdown hook");
-        	logger.info("Starting Shutdown hook");
+            logger.info("Starting Shutdown hook");
             
-        	if (!importer.isShutDown) 
+            if (!importer.isShutDown) 
             {
+                logger.info("Stopping main loop");
                 importer.shutDown();
             }
             while (!importer.isShutDown) 
@@ -412,11 +414,12 @@ public class MarcImporter extends MarcHandler
             logger.info("Exception occurred while Indexing: "+ e.getMessage());           
         }
         
+        logger.info(" Adding " + recsIndexedCounter + " of " + recsReadCounter + " documents to index");
+        logger.info(" Deleting " + recsDeletedCounter + " documents from index");
+
         finish();
 
         signalServer();
-        
-        isShutDown = true;
         
         Date end = new Date();
         long totalTime = end.getTime() - start.getTime();
