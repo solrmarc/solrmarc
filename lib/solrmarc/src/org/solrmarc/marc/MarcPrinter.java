@@ -52,41 +52,41 @@ public class MarcPrinter extends MarcHandler
     
     public MarcPrinter(String args[])
     {
-    	super(args);
+        super(args);
         loadLocalProperties(configProps);
-    	processAdditionalArgs(addnlArgs);
+        processAdditionalArgs(addnlArgs);
     }
-	
+    
     private void processAdditionalArgs(String[] args) 
-	{
+    {
         for (String arg : args)
         {
-        	if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate"))
-        	{
-        		mode = arg;
-        	}
-        	else if (mode.equals("index"))
-        	{
-        		indexkeyprefix = arg;
-        	}
+            if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate"))
+            {
+                mode = arg;
+            }
+            else if (mode.equals("index"))
+            {
+                indexkeyprefix = arg;
+            }
         }
-	}
+    }
 
-	private void loadLocalProperties(Properties props) 
-	{
-	    String marcIncludeIfPresent2 = Utils.getProperty(props, "marc.include_if_present2");
-		String marcIncludeIfMissing2 = Utils.getProperty(props, "marc.include_if_missing2");
+    private void loadLocalProperties(Properties props) 
+    {
+        String marcIncludeIfPresent2 = Utils.getProperty(props, "marc.include_if_present2");
+        String marcIncludeIfMissing2 = Utils.getProperty(props, "marc.include_if_missing2");
 
-		if (reader != null && (marcIncludeIfPresent2 != null || marcIncludeIfMissing2 != null)) 
-		{
-			reader = new MarcFilteredReader(reader, marcIncludeIfPresent2, marcIncludeIfMissing2, null);
-		}
-	}
+        if (reader != null && (marcIncludeIfPresent2 != null || marcIncludeIfMissing2 != null)) 
+        {
+            reader = new MarcFilteredReader(reader, marcIncludeIfPresent2, marcIncludeIfMissing2, null);
+        }
+    }
 
     @Override
-	protected int handleAll() 
-	{
-	       // keep track of record count
+    protected int handleAll() 
+    {
+           // keep track of record count
         int recordCounter = 0;
         
         while(reader != null && reader.hasNext())
@@ -94,10 +94,10 @@ public class MarcPrinter extends MarcHandler
             recordCounter++;
  
             try {
-            	Record record = reader.next();
+                Record record = reader.next();
                 
-	            if (mode.equals("print"))
-	            {
+                if (mode.equals("print"))
+                {
                     String recStr = record.toString();
                     
                     System.out.println(recStr);
@@ -118,12 +118,19 @@ public class MarcPrinter extends MarcHandler
                     }
                     writer.write(record);
                 }
-	            else if (mode.equals("index"))
-	            {
+                else if (mode.equals("index"))
+                {
                     String recStr = record.toString();
-	                    
-	                if (verbose) System.out.println(recStr);
+                        
+                    if (verbose) System.out.println(recStr);
                     Map<String,Object> indexMap = indexer.map(record);
+                    if (errors != null && includeErrors)
+                    {
+                        if (errors.hasErrors())
+                        {
+                            indexMap.put("marc_error", errors.getErrors());
+                        }
+                    }
                     TreeSet<String> sortedKeys = new TreeSet<String>();
                     sortedKeys.addAll(indexMap.keySet());
                     Iterator<String> keys = sortedKeys.iterator();
@@ -137,22 +144,22 @@ public class MarcPrinter extends MarcHandler
                         if (key.equals("id")) continue;
                         if (key.startsWith(indexkeyprefix))
                         {
-                        	if (value instanceof String)
-	                        {
-	                            System.out.println("IndexID= "+ key + "  Value = "+ value);
-	                        }
-	                        else if (value instanceof Collection)
-	                        {
-	                            Iterator<String> valIter = ((Collection)value).iterator();
-	                            while (valIter.hasNext())
-	                            {
-	                                String collVal = valIter.next();
-	                                System.out.println("IndexID= "+ key + "  Value = "+ collVal);
-	                            }
-	                        }
+                            if (value instanceof String)
+                            {
+                                System.out.println("IndexID= "+ key + "  Value = "+ value);
+                            }
+                            else if (value instanceof Collection)
+                            {
+                                Iterator<?> valIter = ((Collection)value).iterator();
+                                while (valIter.hasNext())
+                                {
+                                    String collVal = valIter.next().toString();
+                                    System.out.println("IndexID= "+ key + "  Value = "+ collVal);
+                                }
+                            }
                         }
                     }
-	            }
+                }
             }
             catch (MarcException me)
             {
@@ -162,8 +169,8 @@ public class MarcPrinter extends MarcHandler
             }        
         }
         if (writer != null) { writer.close(); }
-		return 0;
-	}
+        return 0;
+    }
 
     
     /**
@@ -174,12 +181,12 @@ public class MarcPrinter extends MarcHandler
     {
         MarcPrinter marcPrinter = null;
         try {
-        	marcPrinter = new MarcPrinter(args);
+            marcPrinter = new MarcPrinter(args);
         }
         catch (IllegalArgumentException e)
         {
-        	logger.error(e.getMessage());
-        	System.err.println(e.getMessage());
+            logger.error(e.getMessage());
+            System.err.println(e.getMessage());
             //e.printStackTrace();
             System.exit(1);
         }
