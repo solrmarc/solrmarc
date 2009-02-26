@@ -19,8 +19,7 @@ elif [ "$1" == "daily" ]
 then
   url="http://virgo.lib.virginia.edu/booklists.txt"
 else
-  echo 'Error:  must specify either "monthly" or "daily" as a parameter to this script'
-  exit $E_BADARGS
+  url=$1
 fi
 
 java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.BooklistReader" -jar $scriptdir/@CUSTOM_JAR_NAME@ $url
