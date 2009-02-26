@@ -3,6 +3,7 @@ JAVA_HOME=/usr/java/latest
 export JAVA_HOME
 fpath=$1
 fpattern=$2
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
 
 for file in `find $fpath -name '*.mrc' -print | sort | egrep "$fpattern"`
     do
@@ -15,7 +16,7 @@ for file in `find $fpath -name '*.mrc' -print | sort | egrep "$fpattern"`
             else  del=""
         fi
         echo $file
-        ./indexfile $file $del > $output 2>&1
+        $scriptdir/indexfile $file $del > $output 2>&1
         if [ "$?" -eq 1 ]
         then
            break  # Skip entire rest of loop.
