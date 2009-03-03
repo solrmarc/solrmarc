@@ -26,6 +26,7 @@ public abstract class MarcHandler {
 	protected String indexerName;
 	protected String addnlArgs[] = null;
 	protected Properties configProps;
+	protected boolean inputTypeXML = false;
 	
 	private String solrmarcPath;
 	private String siteSpecificPath;
@@ -50,6 +51,11 @@ public abstract class MarcHandler {
                     configProperties = arg;
                 }
                 else if (arg.endsWith(".mrc"))
+                {
+                    System.setProperty("marc.path", arg);
+                    System.setProperty("marc.source", "FILE");
+                }
+                else if (arg.endsWith(".xml"))
                 {
                     System.setProperty("marc.path", arg);
                     System.setProperty("marc.source", "FILE");
@@ -123,6 +129,8 @@ public abstract class MarcHandler {
         	if (source.equals("FILE")) 
         	{
         		String fName = Utils.getProperty(configProps, "marc.path").trim();
+        		if (fName.toLowerCase().endsWith(".xml")) 
+        		    inputTypeXML = true;
         		try {
 					is = new FileInputStream(fName);
 				} 
@@ -134,9 +142,25 @@ public abstract class MarcHandler {
         	}
         	else
         	{
-        		is = System.in;
+        		is = new BufferedInputStream(System.in);
+        		is.mark(10);
+        		int b = -1;
+        		try { 
+        		    b = is.read();
+                    is.reset();
+        		}
+        		catch (IOException e)
+        		{
+                    logger.error("Fatal error: Exception reading from stdin");
+                    throw new IllegalArgumentException("Fatal error: Exception reading from stdin");
+        		}
+        		if (b == '<') inputTypeXML = true;        		
         	}
-            if (permissiveReader)
+            if (inputTypeXML)
+            {
+                reader = new MarcXmlReader(is);
+            }
+            else if (permissiveReader)
             {
                 errors = new ErrorHandler();
                 reader = new MarcPermissiveStreamReader(is, errors, to_utf_8, defaultEncoding);
