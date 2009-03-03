@@ -1,2 +1,0 @@
-Main-Class: com.simontuffs.onejar.Boot
-One-Jar-Main-Class: org.solrmarc.marc.MarcImporter
