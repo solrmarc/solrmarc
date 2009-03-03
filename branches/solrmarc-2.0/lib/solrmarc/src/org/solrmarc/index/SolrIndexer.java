@@ -605,7 +605,7 @@ public class SolrIndexer
             return writeXml(record);
         else if (indexParm.equals("xml") ||
                 indexParm.equalsIgnoreCase("FullRecordAsText"))
-            return (record.toString());
+            return (record.toString().replaceAll("\n", "<br/>"));
         else if (indexParm.equals("date") ||
         			indexParm.equalsIgnoreCase("DateOfPublication"))
             return getDate(record);
@@ -1224,6 +1224,52 @@ public class SolrIndexer
         if (result1 != null) 
         	result2.addAll(result1);
         return result2;
+    }
+    
+    private int localParseInt(String str, int defValue)
+    {
+        int value = defValue;
+        try {
+            value = Integer.parseInt(str);
+        }
+        catch (NumberFormatException nfe)
+        {
+            // provided value is not valid numeric string  
+            // Ignoring it and moving happily on.
+        }
+        return(value);
+    }
+
+    /**
+     * Loops through all datafields and creates a field for "all fields"
+     * searching.  Shameless stolen from Vufind Indexer Custom Code
+     *
+     * @param record Marc record to extract data from
+     */
+    public String getAllSearchableFields(final Record record, String lowerBoundStr, String upperBoundStr)
+    {
+        StringBuffer buffer = new StringBuffer("");
+        int lowerBound = localParseInt(lowerBoundStr, 100);
+        int upperBound = localParseInt(upperBoundStr, 900);
+ 
+        List<DataField> fields = record.getDataFields();
+        for ( DataField field : fields )
+        {
+            // Get all fields starting with the 100 and ending with the 839
+            // This will ignore any "code" fields and only use textual fields
+            int tag = localParseInt(field.getTag(), -1);
+            if ((tag >= lowerBound) && (tag < upperBound)) 
+            {
+                // Loop through subfields
+                List<Subfield> subfields = field.getSubfields();
+                for ( Subfield subfield : subfields )
+                {
+                    if (buffer.length() > 0)  buffer.append(" ");
+                    buffer.append(subfield.getData());
+                }
+            }
+         }
+        return buffer.toString();
     }
 
 }
