@@ -27,35 +27,35 @@ public class UrlTests extends BibIndexTest {
 	{
 // TODO: rename field to urlFullText_store
 		String fldName = "url";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
-		assertFieldNotIndexed(fldName, solrCore);
-		assertFieldStored(fldName, solrCore);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
+		assertFieldNotIndexed(fldName);
+		assertFieldStored(fldName);
 	
 		// field is stored - retrieve values from specific documents
 		// fulltext url(s) in docs 
-		assertDocHasFieldValue("856ind2is0", fldName, "http://www.netLibrary.com/urlapi.asp?action=summary&v=1&bookid=122436", sis); 
-		assertDocHasFieldValue("856ind2is0Again", fldName, "http://www.url856.com/fulltext/ind2_0", sis); 
-		assertDocHasFieldValue("856ind2is1NotToc", fldName, "http://www.url856.com/fulltext/ind2_1/not_toc", sis); 
-		assertDocHasFieldValue("856ind2isBlankFulltext", fldName, "http://www.url856.com/fulltext/ind2_blank/not_toc", sis); 
-		assertDocHasFieldValue("956BlankIndicators", fldName, "http://www.url956.com/fulltext/blankIndicators", sis); 
-		assertDocHasFieldValue("956ind2is0", fldName, "http://www.url956.com/fulltext/ind2_is_0", sis); 
-		assertDocHasFieldValue("956and856TOC", fldName, "http://www.url956.com/fulltext/ind2_is_blank", sis); 
-		assertDocHasFieldValue("mult856and956", fldName, "http://www.sciencemag.org/", sis); 
-		assertDocHasFieldValue("mult856and956", fldName, "http://www.jstor.org/journals/00368075.html", sis); 
-		assertDocHasFieldValue("mult856and956", fldName, "http://www.sciencemag.org/archive/", sis); 
-		assertDocHasFieldValue("956and856TOCand856suppl", fldName, "http://www.url956.com/fulltext/ind2_is_blank", sis); 
+		assertDocHasFieldValue("856ind2is0", fldName, "http://www.netLibrary.com/urlapi.asp?action=summary&v=1&bookid=122436"); 
+		assertDocHasFieldValue("856ind2is0Again", fldName, "http://www.url856.com/fulltext/ind2_0"); 
+		assertDocHasFieldValue("856ind2is1NotToc", fldName, "http://www.url856.com/fulltext/ind2_1/not_toc"); 
+		assertDocHasFieldValue("856ind2isBlankFulltext", fldName, "http://www.url856.com/fulltext/ind2_blank/not_toc"); 
+		assertDocHasFieldValue("956BlankIndicators", fldName, "http://www.url956.com/fulltext/blankIndicators"); 
+		assertDocHasFieldValue("956ind2is0", fldName, "http://www.url956.com/fulltext/ind2_is_0"); 
+		assertDocHasFieldValue("956and856TOC", fldName, "http://www.url956.com/fulltext/ind2_is_blank"); 
+		assertDocHasFieldValue("mult856and956", fldName, "http://www.sciencemag.org/"); 
+		assertDocHasFieldValue("mult856and956", fldName, "http://www.jstor.org/journals/00368075.html"); 
+		assertDocHasFieldValue("mult856and956", fldName, "http://www.sciencemag.org/archive/"); 
+		assertDocHasFieldValue("956and856TOCand856suppl", fldName, "http://www.url956.com/fulltext/ind2_is_blank"); 
 		
 		// SFX url
-		assertDocHasNoFieldValue("mult856and956", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?superLongURL", sis); 
+		assertDocHasNoFieldValue("mult856and956", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?superLongURL"); 
 	
 		// docs with no fulltext url in bib rec
-		assertDocHasNoField("856ind2is1TocSubz", fldName, sis); 
-		assertDocHasNoField("856ind2is1TocSub3", fldName, sis); 
-		assertDocHasNoField("856ind2is2suppl", fldName, sis); 
-		assertDocHasNoField("856ind2isBlankTocSubZ", fldName, sis); 
-		assertDocHasNoField("856ind2isBlankTocSub3", fldName, sis); 
-		assertDocHasNoField("856tocAnd856SupplNoFulltext", fldName, sis);
+		assertDocHasNoField("856ind2is1TocSubz", fldName); 
+		assertDocHasNoField("856ind2is1TocSub3", fldName); 
+		assertDocHasNoField("856ind2is2suppl", fldName); 
+		assertDocHasNoField("856ind2isBlankTocSubZ", fldName); 
+		assertDocHasNoField("856ind2isBlankTocSub3", fldName); 
+		assertDocHasNoField("856tocAnd856SupplNoFulltext", fldName);
 	}
 	
 	/**
@@ -66,19 +66,19 @@ public class UrlTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException
 	{
 		String fldName = "urlSfx_store";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
-		assertFieldNotIndexed(fldName, solrCore);
-		assertFieldStored(fldName, solrCore);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
+		assertFieldNotIndexed(fldName);
+		assertFieldStored(fldName);
 			
 		// 956 SFX fields
 		// field is stored - retrieve format values from specific documents
-		assertDocHasFieldValue("mult856and956", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?superLongURL", sis); 
-		assertDocHasFieldValue("7117119", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&ctx_enc=info:ofi/enc:UTF-8&rfr_id=info:sid/sfxit.com:opac_856&url_ctx_fmt=info:ofi/fmt:kev:mtx:ctx&sfx.ignore_date_threshold=1&rft.object_id=110978984448763&svc_val_fmt=info:ofi/fmt:kev:mtx:sch_svc&", sis); 
+		assertDocHasFieldValue("mult856and956", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?superLongURL"); 
+		assertDocHasFieldValue("7117119", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&ctx_enc=info:ofi/enc:UTF-8&rfr_id=info:sid/sfxit.com:opac_856&url_ctx_fmt=info:ofi/fmt:kev:mtx:ctx&sfx.ignore_date_threshold=1&rft.object_id=110978984448763&svc_val_fmt=info:ofi/fmt:kev:mtx:sch_svc&"); 
 		
 		// 956 non-SFX fields (a representative few of them)
-		assertDocHasNoField("956BlankIndicators", fldName, sis);
-		assertDocHasNoField("956ind2is0", fldName, sis);
+		assertDocHasNoField("956BlankIndicators", fldName);
+		assertDocHasNoField("956ind2is0", fldName);
 	}
 	
 	
@@ -91,35 +91,35 @@ public class UrlTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "urlSuppl_store";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
-		assertFieldNotIndexed(fldName, solrCore);
-		assertFieldStored(fldName, solrCore);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
+		assertFieldNotIndexed(fldName);
+		assertFieldStored(fldName);
 			
 		// field is stored - retrieve format values from specific documents
 		// book
-		assertDocHasFieldValue("856ind2is1TocSubz", fldName, "http://www.url856.com/ind2_1/toc_subz", sis); 
-		assertDocHasFieldValue("856ind2is1TocSub3", fldName, "http://www.url856.com/ind2_1/toc_sub3", sis); 
-		assertDocHasFieldValue("856ind2is2suppl", fldName, "http://www.url856.com/ind2_2/supplementaryMaterial", sis); 
-		assertDocHasFieldValue("856ind2isBlankTocSubZ", fldName, "http://www.url856.com/ind2_blank/toc_subz", sis); 
-		assertDocHasFieldValue("856ind2isBlankTocSub3", fldName, "http://www.url856.com/ind2_blank/toc_sub3", sis); 
-		assertDocHasFieldValue("956and856TOC", fldName, "http://www.url856.com/toc", sis); 
-		assertDocHasFieldValue("956and856TOCand856suppl", fldName, "http://www.url856.com/ind2_2/supplMaterial", sis); 
-		assertDocHasFieldValue("956and856TOCand856suppl", fldName, "http://www.url856.com/toc", sis); 
-		assertDocHasFieldValue("856tocAnd856SupplNoFulltext", fldName, "http://www.url856.com/toc", sis); 
-		assertDocHasFieldValue("856tocAnd856SupplNoFulltext", fldName, "http://www.url856.com/ind2_2/supplMaterial", sis); 
-		assertDocHasFieldValue("7423084", fldName, "http://www.loc.gov/catdir/samples/prin031/2001032103.html", sis); 
-		assertDocHasFieldValue("7423084", fldName, "http://www.loc.gov/catdir/toc/prin031/2001032103.html", sis); 
-		assertDocHasFieldValue("7423084", fldName, "http://www.loc.gov/catdir/description/prin022/2001032103.html", sis); 
+		assertDocHasFieldValue("856ind2is1TocSubz", fldName, "http://www.url856.com/ind2_1/toc_subz"); 
+		assertDocHasFieldValue("856ind2is1TocSub3", fldName, "http://www.url856.com/ind2_1/toc_sub3"); 
+		assertDocHasFieldValue("856ind2is2suppl", fldName, "http://www.url856.com/ind2_2/supplementaryMaterial"); 
+		assertDocHasFieldValue("856ind2isBlankTocSubZ", fldName, "http://www.url856.com/ind2_blank/toc_subz"); 
+		assertDocHasFieldValue("856ind2isBlankTocSub3", fldName, "http://www.url856.com/ind2_blank/toc_sub3"); 
+		assertDocHasFieldValue("956and856TOC", fldName, "http://www.url856.com/toc"); 
+		assertDocHasFieldValue("956and856TOCand856suppl", fldName, "http://www.url856.com/ind2_2/supplMaterial"); 
+		assertDocHasFieldValue("956and856TOCand856suppl", fldName, "http://www.url856.com/toc"); 
+		assertDocHasFieldValue("856tocAnd856SupplNoFulltext", fldName, "http://www.url856.com/toc"); 
+		assertDocHasFieldValue("856tocAnd856SupplNoFulltext", fldName, "http://www.url856.com/ind2_2/supplMaterial"); 
+		assertDocHasFieldValue("7423084", fldName, "http://www.loc.gov/catdir/samples/prin031/2001032103.html"); 
+		assertDocHasFieldValue("7423084", fldName, "http://www.loc.gov/catdir/toc/prin031/2001032103.html"); 
+		assertDocHasFieldValue("7423084", fldName, "http://www.loc.gov/catdir/description/prin022/2001032103.html"); 
 	
 		// docs with no urlSuppl_store in bib rec
-		assertDocHasNoField("856ind2is0", fldName, sis); 
-		assertDocHasNoField("856ind2is0Again", fldName, sis); 
-		assertDocHasNoField("856ind2is1NotToc", fldName, sis); 
-		assertDocHasNoField("856ind2isBlankFulltext", fldName, sis); 
-		assertDocHasNoField("956BlankIndicators", fldName, sis); 
-		assertDocHasNoField("956ind2is0", fldName, sis); 
-		assertDocHasNoField("mult856and956", fldName, sis); 
+		assertDocHasNoField("856ind2is0", fldName); 
+		assertDocHasNoField("856ind2is0Again", fldName); 
+		assertDocHasNoField("856ind2is1NotToc", fldName); 
+		assertDocHasNoField("856ind2isBlankFulltext", fldName); 
+		assertDocHasNoField("956BlankIndicators", fldName); 
+		assertDocHasNoField("956ind2is0", fldName); 
+		assertDocHasNoField("mult856and956", fldName); 
 	}
 
 }

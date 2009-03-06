@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.lucene.document.Document;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
@@ -34,10 +33,10 @@ public class AccessTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException
 	{
 		// facets are indexed, not stored
-		assertStringFieldProperties(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
+		assertStringFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
+		assertFieldIndexed(fldName);
+		assertFieldNotStored(fldName);
 		assertEquals("accessMethod string incorrect: ", "Online", Access.ONLINE.toString());
 		assertEquals("accessMethod string incorrect: ", "At the Library", Access.AT_LIBRARY.toString());
 	}
@@ -66,7 +65,7 @@ public class AccessTests extends BibIndexTest {
 		docIds.add("956and856TOCand856suppl"); 
 		docIds.add("7117119"); 
 
-		assertSearchResults(fldName, fldVal, docIds, sis);
+		assertSearchResults(fldName, fldVal, docIds);
 	}
 	
 	/**
@@ -84,7 +83,7 @@ public class AccessTests extends BibIndexTest {
 		// has SFX url in 956
 		docIds.add("7117119"); 
     	
-		assertSearchResults(fldName, fldVal, docIds, sis);
+		assertSearchResults(fldName, fldVal, docIds);
 	}
 
 
@@ -102,11 +101,11 @@ public class AccessTests extends BibIndexTest {
 		docIds.add("123http"); 
 		docIds.add("1234https"); 
 		docIds.add("7423084"); 
-		assertSearchResults(fldName, fldVal, docIds, sis);
+		assertSearchResults(fldName, fldVal, docIds);
 		
 		String urlFldName = "url";
-		assertDocHasNoField("123http", urlFldName, sis);
-		assertDocHasNoField("1234https", urlFldName, sis);
+		assertDocHasNoField("123http", urlFldName);
+		assertDocHasNoField("1234https", urlFldName);
 	}
 
 
@@ -122,30 +121,31 @@ public class AccessTests extends BibIndexTest {
 		createIxInitVars("buildingTests.mrc");
 
 	 	// "Online"
-	 	assertSingleResult("7117119", fldName, Access.ONLINE.toString(), sis);
+	 	assertSingleResult("7117119", fldName, Access.ONLINE.toString());
 
 	 	// "At the Library"
 	 	String fldVal = "\"" + Access.AT_LIBRARY.toString() + "\"";
 	 	// don't want to check *all* of them ...
-	 	List<Document> docList = getAllMatchingDocs(fldName, fldVal, sis);
+	 	String resultDocIds[] = searcherProxy.getIdSet(fldName, fldVal);
+	// 	List<DocumentProxy> docList = getAllMatchingDocs(fldName, fldVal);
 	 	String msg = fldName + " " + Access.AT_LIBRARY.toString() + ": ";
 	 	// formerly "On campus"
-	 	assertDocInList(docList, "115472", msg, sis); 
-	 	assertDocInList(docList, "2442876", msg, sis); 
-	 	assertDocInList(docList, "3142611", msg, sis);
+	 	assertDocInList(resultDocIds, "115472", msg); 
+	 	assertDocInList(resultDocIds, "2442876", msg); 
+	 	assertDocInList(resultDocIds, "3142611", msg);
 	 	// formerly "Upon request"
 	 	// SAL1 & 2
-	 	assertDocInList(docList, "1033119", msg, sis);  
-	 	assertDocInList(docList, "1962398", msg, sis);  
-	 	assertDocInList(docList, "2328381", msg, sis);  
-	 	assertDocInList(docList, "2913114", msg, sis);  
+	 	assertDocInList(resultDocIds, "1033119", msg);  
+	 	assertDocInList(resultDocIds, "1962398", msg);  
+	 	assertDocInList(resultDocIds, "2328381", msg);  
+	 	assertDocInList(resultDocIds, "2913114", msg);  
 	 	// SAL3
-	 	assertDocInList(docList, "690002", msg, sis);  
-	 	assertDocInList(docList, "3941911", msg, sis); 
-	 	assertDocInList(docList, "7651581", msg, sis);  
-	 	assertDocInList(docList, "2214009", msg, sis);  
+	 	assertDocInList(resultDocIds, "690002", msg);  
+	 	assertDocInList(resultDocIds, "3941911", msg); 
+	 	assertDocInList(resultDocIds, "7651581", msg);  
+	 	assertDocInList(resultDocIds, "2214009", msg);  
 	 	// SAL-NEWARK
-	 	assertDocInList(docList, "804724", msg, sis); 
+	 	assertDocInList(resultDocIds, "804724", msg); 
 	}
 
 }

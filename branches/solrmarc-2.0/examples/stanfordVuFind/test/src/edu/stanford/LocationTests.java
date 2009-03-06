@@ -40,16 +40,16 @@ public class LocationTests extends BibIndexTest {
 		docIds.add("115472");
 		docIds.add("1261173");
 		docIds.add("2557826");
-		assertSearchResults(fldName, fldVal, docIds, sis);
+		assertSearchResults(fldName, fldVal, docIds);
 				
 		fldVal = "\"Hoover Institution\"";
 		docIds.clear();
 		docIds.add("229800");
 		docIds.add("460947");
 		docIds.add("690002");
-		assertSearchResults(fldName, fldVal, docIds, sis);
+		assertSearchResults(fldName, fldVal, docIds);
 		
-		assertSingleResult("7651581", fldName, "\"Off-campus (SAL3)\"", sis);
+		assertSingleResult("7651581", fldName, "\"Off-campus (SAL3)\"");
 	}		
 	
 	
@@ -62,19 +62,19 @@ public class LocationTests extends BibIndexTest {
 	{
 		// building is indexed, not stored, so search to confirm buildings with
 		//  only shadow locations in test data
-		assertZeroResults(fldName, "\"Crown (Law)\"", sis);
-		assertZeroResults(fldName, "\"Mathematical & Computer Sciences\"", sis);
-		assertZeroResults(fldName, "\"Cubberley (Education)\"", sis);
-		assertZeroResults(fldName, "\"Meyer\"", sis);
-		assertZeroResults(fldName, "\"Stanford Auxiliary Library (SAL 1&2)\"", sis);
-		assertZeroResults(fldName, "\"Stanford University Libraries\"", sis);
+		assertZeroResults(fldName, "\"Crown (Law)\"");
+		assertZeroResults(fldName, "\"Mathematical & Computer Sciences\"");
+		assertZeroResults(fldName, "\"Cubberley (Education)\"");
+		assertZeroResults(fldName, "\"Meyer\"");
+		assertZeroResults(fldName, "\"Stanford Auxiliary Library (SAL 1&2)\"");
+		assertZeroResults(fldName, "\"Stanford University Libraries\"");
 		
 		// there are 3 green locations that aren't shadowed (confirmed in
 		//  testValidLocations()
-		assertResultSize(fldName, "\"Green (Humanities & Social Sciences)\"", 3, sis);
+		assertResultSize(fldName, "\"Green (Humanities & Social Sciences)\"", 3);
 		
 		// there is 1 SAL3 location that isn't shadowed (it's online)
-		assertSingleResult("7651581", fldName, "\"Off-campus (SAL3)\"", sis);
+		assertSingleResult("7651581", fldName, "\"Off-campus (SAL3)\"");
 	}
 
 
@@ -91,7 +91,7 @@ public class LocationTests extends BibIndexTest {
 		// there are 3 green locations that aren't ignored for any reason
 		//  (confirmed in testValidLocations()
 		//   the docs that should be ignored are 345228, 575946, 919006
-		assertResultSize(fldName, "\"Green (Humanities & Social Sciences)\"", 3, sis);
+		assertResultSize(fldName, "\"Green (Humanities & Social Sciences)\"", 3);
 	}
 	
 
@@ -104,13 +104,13 @@ public class LocationTests extends BibIndexTest {
 	{
 		// building is indexed, not stored
 		//   three of these locations are in hoover library
-	 	assertDocHasNoFieldValue("115472", fldName, "Green", sis); 
+	 	assertDocHasNoFieldValue("115472", fldName, "Green"); 
 		String fldVal = "\"Hoover Institution\"";
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("229800");
 		docIds.add("460947");
 		docIds.add("690002");
-		assertSearchResults(fldName, fldVal, docIds, sis);
+		assertSearchResults(fldName, fldVal, docIds);
 	 	
 	 	// accessMethod is indexed, not stored, so also test by searching
 	 	String fldName = "accessMethod_facet";
@@ -120,7 +120,7 @@ public class LocationTests extends BibIndexTest {
 	 	docIds.add("229800");
 	 	docIds.add("460947");
 	 	docIds.add("690002");
-	 	assertSearchResults(fldName, fldVal, docIds, sis);
+	 	assertSearchResults(fldName, fldVal, docIds);
 	}
 
 }

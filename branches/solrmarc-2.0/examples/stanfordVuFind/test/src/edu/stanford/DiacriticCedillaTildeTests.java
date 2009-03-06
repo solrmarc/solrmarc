@@ -37,7 +37,7 @@ public class DiacriticCedillaTildeTests extends BibIndexTest {
 	public final void testExact() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("7651581", fldName, "exaltação", sis);
+		assertSingleResult("7651581", fldName, "exaltação");
 	}
 		
 	/**
@@ -47,7 +47,7 @@ public class DiacriticCedillaTildeTests extends BibIndexTest {
 	public final void testPlainText() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("7651581", fldName, "exaltacao", sis);
+		assertSingleResult("7651581", fldName, "exaltacao");
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class DiacriticCedillaTildeTests extends BibIndexTest {
 	public final void testCedillaPlainTildeExact() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("7651581", fldName, "exaltacão", sis);
+		assertSingleResult("7651581", fldName, "exaltacão");
 	}
 	
 	/**
@@ -67,7 +67,7 @@ public class DiacriticCedillaTildeTests extends BibIndexTest {
 	public final void testCedillaExactTildePlain() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("7651581", fldName, "exaltaçao", sis);
+		assertSingleResult("7651581", fldName, "exaltaçao");
 	}
 
 	/**
@@ -77,13 +77,13 @@ public class DiacriticCedillaTildeTests extends BibIndexTest {
 	public final void testWeirdLooking() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("7651581", fldName, "exaltaÃ§Ão", sis);
+		assertSingleResult("7651581", fldName, "exaltaÃ§Ão");
 		
 		// ones that look normal in oxygen, etc. index incorrectly  :-P
-		//	assertSingleDocWithValue("7651581", fldName, "Seleção", sis);
-		//	assertSingleDocWithValue("7651581", fldName, "Selecão", sis);
-		//	assertSingleDocWithValue("7651581", fldName, "Seleçao", sis);
-		// assertSingleDocWithValue("7651581", fldName, "SeleÃ§Ão", sis);
-		//	assertSingleDocWithValue("7651581", fldName, "Selecao", sis);
+		//	assertSingleDocWithValue("7651581", fldName, "Seleção");
+		//	assertSingleDocWithValue("7651581", fldName, "Selecão");
+		//	assertSingleDocWithValue("7651581", fldName, "Seleçao");
+		// assertSingleDocWithValue("7651581", fldName, "SeleÃ§Ão");
+		//	assertSingleDocWithValue("7651581", fldName, "Selecao");
 	}
 }
