@@ -38,7 +38,7 @@ public class DiacriticMacronTest extends BibIndexTest {
 	public final void testMacronExact() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("2099904", fldName, "istorīi", sis);
+		assertSingleResult("2099904", fldName, "istorīi");
 	}
 	
 	/**
@@ -48,7 +48,7 @@ public class DiacriticMacronTest extends BibIndexTest {
 	public final void testMacronText() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("2099904", fldName, "istorii", sis);
+		assertSingleResult("2099904", fldName, "istorii");
 	}
 	
 }

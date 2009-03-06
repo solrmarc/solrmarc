@@ -16,7 +16,7 @@ import org.junit.runners.Suite;
         StanfordFieldTests.class,
         SubjectTests.class,
         TitleTests.class,
-        UrlTests.class,
+        UrlTests.class ,
         VernacularTests.class
         })
 

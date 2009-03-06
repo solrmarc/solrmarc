@@ -31,66 +31,66 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "lc-first-letter";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 		
 		// confirm records that should not have the field
 	    	
 		//   bad LC values
 		// LC 999 "NO CALL NUMBER" and 852 to ignore
-		assertDocHasNoField("7370014", fldName, sis); 
+		assertDocHasNoField("7370014", fldName); 
 		// LC 999 starts with X and 852s and 946s to ignore
-		assertDocHasNoField("7233951", fldName, sis); 
+		assertDocHasNoField("7233951", fldName); 
 		// 999 withdrawn to ignore and LC 050 "IN PROCESS"
-		assertDocHasNoField("3277173", fldName, sis); 
+		assertDocHasNoField("3277173", fldName); 
 		// 999 ASIS and LC 090 numeric (looks like barcode)
-		assertDocHasNoField("7117119", fldName, sis); 		
+		assertDocHasNoField("7117119", fldName); 		
 		// ALPHANUM 999 "SUSEL" 
-		assertDocHasNoField("4578538", fldName, sis); 
+		assertDocHasNoField("4578538", fldName); 
 		// ALPHANUM 999 "MFILM ...": No call number (format checked in format tests)
-		assertDocHasNoField("1261173", fldName, sis); 
+		assertDocHasNoField("1261173", fldName); 
 		// ALPHANUM 999 "MCD ...": No call number  (format checked in format tests)
-		assertDocHasNoField("1234673", fldName, sis); 		
+		assertDocHasNoField("1234673", fldName); 		
 		// ASIS 999 "INTERNET RESOURCE": No call number, but access Online
-		assertDocHasNoField("6280316", fldName, sis); 
+		assertDocHasNoField("6280316", fldName); 
 		// ASIS 999 "INTERNET RESOURCE" and 050 LC and 082 Dewey values: 
-		assertDocHasNoField("7531910", fldName, sis);
+		assertDocHasNoField("7531910", fldName);
 	
 		// bad values should not be found
 		// bad start chars for LC
-		assertZeroResults(fldName, "I", sis); // IN PROCESS and illegal LC
-		assertZeroResults(fldName, "X", sis); // illegal LC
-		assertZeroResults(fldName, "W", sis); // illegal LC
+		assertZeroResults(fldName, "I"); // IN PROCESS and illegal LC
+		assertZeroResults(fldName, "X"); // illegal LC
+		assertZeroResults(fldName, "W"); // illegal LC
 		// only N call number in test data is "NO CALL NUMBER"
-		assertZeroResults(fldName, "N", sis);
+		assertZeroResults(fldName, "N");
 	
 		// search for LC classification values
 		// single char LC classification
-		assertSingleResult("6661112", fldName, "Z", sis);
-		assertSingleResult("1033119", fldName, "B", sis);
+		assertSingleResult("6661112", fldName, "Z");
+		assertSingleResult("1033119", fldName, "B");
 		// two char LC classification
-		assertSingleResult("999LC22", fldName, "C", sis);	
+		assertSingleResult("999LC22", fldName, "C");	
 		// mixed one char and two char classification values
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("999LC1dec");
 		docIds.add("2913114");
 		docIds.add("3400092");
-		assertSearchResults(fldName, "D", docIds, sis);
+		assertSearchResults(fldName, "D", docIds);
 		// mixed 2 and 3 three char LC classification
 		docIds.clear();
 		docIds.add("999LC3NoDec");
 		docIds.add("999LC3Dec");
 		docIds.add("999LC3DecSpace");
-		assertSearchResults(fldName, "K", docIds, sis);
+		assertSearchResults(fldName, "K", docIds);
 
 		// LCPER
-		assertSingleResult("460947", fldName, "E", sis);
+		assertSingleResult("460947", fldName, "E");
 	
 		// SUDOC
-		assertResultSize(fldName, "\"" + govDocStr + "\"", 3, sis);
+		assertResultSize(fldName, "\"" + govDocStr + "\"", 3);
 	}
 
 	/**
@@ -103,38 +103,38 @@ public class CallNumberTests extends BibIndexTest {
 	{
 // TODO: this field should be eliminated and this functionality provided in the UI
 		String fldName = "lc-first-desc";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 		
 		// LC classification values
 		// single char LC classification
-		assertSingleResult("6661112", fldName, "\"Z - Bibliography, Library Science, Information Resources\"", sis);
+		assertSingleResult("6661112", fldName, "\"Z - Bibliography, Library Science, Information Resources\"");
 		// two char LC classification
-		assertSingleResult("999LC22", fldName, "\"C - Historical Sciences (Archaeology, Genealogy)\"", sis);
-		assertSingleResult("1033119", fldName, "\"B - Philosophy, Psychology, Religion\"", sis);
+		assertSingleResult("999LC22", fldName, "\"C - Historical Sciences (Archaeology, Genealogy)\"");
+		assertSingleResult("1033119", fldName, "\"B - Philosophy, Psychology, Religion\"");
 		// mixed one char and two char classification values
 		String val = "\"D - World History\"";
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("999LC1dec");
 		docIds.add("2913114");
 		docIds.add("3400092");
-		assertSearchResults(fldName, val, docIds, sis);
+		assertSearchResults(fldName, val, docIds);
 		// mixed 2 and 3 three char LC classification
 		val = "\"K - Law\"";
 		docIds.clear();
 		docIds.add("999LC3NoDec");
 		docIds.add("999LC3Dec");
 		docIds.add("999LC3DecSpace");
-		assertSearchResults(fldName, val, docIds, sis);
+		assertSearchResults(fldName, val, docIds);
 						
 		// LCPER
-		assertSingleResult("460947", fldName, "\"E - History of the Americas (General)\"", sis);
+		assertSingleResult("460947", fldName, "\"E - History of the Americas (General)\"");
 
 		// SUDOC
-		assertResultSize(fldName, "\"" + govDocStr + "\"", 3, sis);
+		assertResultSize(fldName, "\"" + govDocStr + "\"", 3);
 	}
 
 	/**
@@ -146,78 +146,78 @@ public class CallNumberTests extends BibIndexTest {
 		throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "lc-alpha";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 		
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 		
 		// bad values should not be found
-		assertZeroResults(fldName, "NO", sis);  // NO CALL NUMBER
-		assertZeroResults(fldName, "IN", sis);  // IN PROCESS
-		assertZeroResults(fldName, "I*", sis);  // illegal LC char
-		assertZeroResults(fldName, "X*", sis);  // illegal LC char
-		assertZeroResults(fldName, "WITHDRAWN", sis);
-		assertZeroResults(fldName, "W*", sis);  // illegal LC char
+		assertZeroResults(fldName, "NO");  // NO CALL NUMBER
+		assertZeroResults(fldName, "IN");  // IN PROCESS
+		assertZeroResults(fldName, "I*");  // illegal LC char
+		assertZeroResults(fldName, "X*");  // illegal LC char
+		assertZeroResults(fldName, "WITHDRAWN");
+		assertZeroResults(fldName, "W*");  // illegal LC char
 		//   bad LC values
 		// LC 999 "NO CALL NUMBER" and 852 to ignore
-		assertDocHasNoField("7370014", fldName, sis); 
+		assertDocHasNoField("7370014", fldName); 
 		// LC 999 starts with X and 852s and 946s to ignore
-		assertDocHasNoField("7233951", fldName, sis); 
+		assertDocHasNoField("7233951", fldName); 
 		// 999 withdrawn to ignore and LC 050 "IN PROCESS"
-		assertDocHasNoField("3277173", fldName, sis); 
+		assertDocHasNoField("3277173", fldName); 
 		// 999 ASIS and LC 090 numeric (looks like barcode)
-		assertDocHasNoField("7117119", fldName, sis); 		
+		assertDocHasNoField("7117119", fldName); 		
 		// ALPHANUM 999 "SUSEL" 
-		assertDocHasNoField("4578538", fldName, sis); 
+		assertDocHasNoField("4578538", fldName); 
 		// ALPHANUM 999 "MFILM ...": No call number, but format Microfilm
-		assertDocHasNoField("1261173", fldName, sis); 
+		assertDocHasNoField("1261173", fldName); 
 		// ALPHANUM 999 "MCD ...": No call number, but format Music - Audio
-		assertDocHasNoField("1234673", fldName, sis); 
+		assertDocHasNoField("1234673", fldName); 
 		// ASIS 999 "INTERNET RESOURCE": No call number, but access Online
-		assertDocHasNoField("6280316", fldName, sis); 
+		assertDocHasNoField("6280316", fldName); 
 		// ASIS 999 "INTERNET RESOURCE" and 050 LC and 082 Dewey values: 
-		assertDocHasNoField("7531910", fldName, sis);
+		assertDocHasNoField("7531910", fldName);
 
 		// single char LC classification
-		assertSingleResult("6661112", fldName, "Z", sis);
+		assertSingleResult("6661112", fldName, "Z");
 		// LC 999 one letter, space before Cutter
-		assertSingleResult("7772223", fldName, "F", sis);
-		assertSingleResult("999LC1dec", fldName, "D", sis);
+		assertSingleResult("7772223", fldName, "F");
+		assertSingleResult("999LC1dec", fldName, "D");
 
 		// two char LC classification
-		assertZeroResults(fldName, "B", sis);
-		assertSingleResult("1033119", fldName, "BX", sis);
+		assertZeroResults(fldName, "B");
+		assertSingleResult("1033119", fldName, "BX");
 		// LC 999 two letters, space before Cutter
-		assertSingleResult("999LC2", fldName, "HG", sis);
-		assertZeroResults(fldName, "C", sis);
-		assertSingleResult("999LC22", fldName, "CB", sis);		
-		assertSingleResult("2913114", fldName, "DH", sis);
-		assertSingleResult("1732616", fldName, "QA", sis); 
-		assertSingleResult("115472", fldName, "HC", sis); 
+		assertSingleResult("999LC2", fldName, "HG");
+		assertZeroResults(fldName, "C");
+		assertSingleResult("999LC22", fldName, "CB");		
+		assertSingleResult("2913114", fldName, "DH");
+		assertSingleResult("1732616", fldName, "QA"); 
+		assertSingleResult("115472", fldName, "HC"); 
 		// mult values for a single doc
-		assertSingleResult("3400092", fldName, "DC", sis);
+		assertSingleResult("3400092", fldName, "DC");
 
 		// three char LC classification
-		assertZeroResults(fldName, "K", sis);
+		assertZeroResults(fldName, "K");
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("999LC3NoDec");
 		docIds.add("999LC3Dec");
 		docIds.add("999LC3DecSpace");
-		assertSearchResults(fldName, "KJH", docIds, sis);
+		assertSearchResults(fldName, "KJH", docIds);
 		
 		// LCPER
-		assertSingleResult("460947", fldName, "E", sis);
+		assertSingleResult("460947", fldName, "E");
 
 		// SUDOC
 // TODO: not sure if there should be a callnum-lc-alpha value for SUDOCs
-		assertResultSize(fldName, "\"" + govDocStr + "\"", 0, sis);
+		assertResultSize(fldName, "\"" + govDocStr + "\"", 0);
 /*
 		docIds.clear();
 		docIds.add("2557826");
 		docIds.add("2678655");
 		docIds.add("5511738");
-		assertSearchResults(fldName, govDocStr, docIds, sis);
+		assertSearchResults(fldName, govDocStr, docIds);
 */
 	}
 
@@ -230,51 +230,51 @@ public class CallNumberTests extends BibIndexTest {
 		throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "lc-alpha-desc";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 		
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 		
 		// single char LC classification
-		assertSingleResult("6661112", fldName, "\"Z - Bibliography, Library Science, Information Resources\"", sis);
+		assertSingleResult("6661112", fldName, "\"Z - Bibliography, Library Science, Information Resources\"");
 		// LC 999 one letter, space before Cutter
-		assertSingleResult("7772223", fldName, "\"F - History of the Americas (Local)\"", sis);
-		assertSingleResult("999LC1dec", fldName, "\"D - World History\"", sis);
+		assertSingleResult("7772223", fldName, "\"F - History of the Americas (Local)\"");
+		assertSingleResult("999LC1dec", fldName, "\"D - World History\"");
 
 		// two char LC classification
-		assertZeroResults(fldName, "\"B - Philosophy, Psychology, Religion\"", sis);
-		assertSingleResult("1033119", fldName, "\"BX - Christian Denominations\"", sis);
+		assertZeroResults(fldName, "\"B - Philosophy, Psychology, Religion\"");
+		assertSingleResult("1033119", fldName, "\"BX - Christian Denominations\"");
 		// LC 999 two letters, space before Cutter
-		assertSingleResult("999LC2", fldName, "\"HG - Finance\"", sis);
-		assertZeroResults(fldName, "\"C - Auxiliary Sciences of History (General)\"", sis);
-		assertSingleResult("999LC22", fldName, "\"CB - History of Civilization\"", sis);		
-		assertSingleResult("2913114", fldName, "\"DH - Low Countries (History)\"", sis);
-		assertSingleResult("1732616", fldName, "\"QA - Mathematics\"", sis); 
-		assertSingleResult("115472", fldName, "\"HC - Economic History & Conditions\"", sis); 
+		assertSingleResult("999LC2", fldName, "\"HG - Finance\"");
+		assertZeroResults(fldName, "\"C - Auxiliary Sciences of History (General)\"");
+		assertSingleResult("999LC22", fldName, "\"CB - History of Civilization\"");		
+		assertSingleResult("2913114", fldName, "\"DH - Low Countries (History)\"");
+		assertSingleResult("1732616", fldName, "\"QA - Mathematics\""); 
+		assertSingleResult("115472", fldName, "\"HC - Economic History & Conditions\""); 
 		// mult values for a single doc
-		assertSingleResult("3400092", fldName, "\"DC - France (History)\"", sis);
+		assertSingleResult("3400092", fldName, "\"DC - France (History)\"");
 
 		// three char LC classification
-		assertZeroResults(fldName, "\"K - Law\"", sis);
+		assertZeroResults(fldName, "\"K - Law\"");
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("999LC3NoDec");
 		docIds.add("999LC3Dec");
 		docIds.add("999LC3DecSpace");
-		assertSearchResults(fldName, "\"KJH - Law of Andorra\"", docIds, sis);
+		assertSearchResults(fldName, "\"KJH - Law of Andorra\"", docIds);
 		
 		// LCPER
-		assertSingleResult("460947", fldName, "\"E - History of the Americas (General)\"", sis);
+		assertSingleResult("460947", fldName, "\"E - History of the Americas (General)\"");
 
 		// SUDOC
 // TODO: not sure if there should be a callnum-lc-alpha value for SUDOCs
-		assertResultSize(fldName, "\"" + govDocStr + "\"", 0, sis);
+		assertResultSize(fldName, "\"" + govDocStr + "\"", 0);
 /*
 		docIds.clear();
 		docIds.add("2557826");
 		docIds.add("2678655");
 		docIds.add("5511738");
-		assertSearchResults(fldName, govDocStr, docIds, sis);
+		assertSearchResults(fldName, govDocStr, docIds);
 */
 	}
 
@@ -289,119 +289,119 @@ public class CallNumberTests extends BibIndexTest {
 	{
 		// first alpha chars  used in GetMoreLikeThis queries
 		String fldName = "lc-b4cutter";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 		
-		assertFieldStored(fldName, solrCore);  // used in getMoreLikeThis queries
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldStored(fldName);  // used in getMoreLikeThis queries
+		assertFieldIndexed(fldName);
 	
 		// lc-b4cutter field is stored - retrieve values from specific documents
 	
 		// LC 999 one letter
-		assertDocHasFieldValue("6661112", fldName, "Z3871", sis);
+		assertDocHasFieldValue("6661112", fldName, "Z3871");
 		// LC 999 one letter, space before Cutter
-		assertDocHasFieldValue("7772223", fldName, "F1356", sis);
+		assertDocHasFieldValue("7772223", fldName, "F1356");
 		// LC 999 one letter, decimal digits and space before Cutter
-		assertDocHasFieldValue("999LC1dec", fldName, "D764.7", sis);
+		assertDocHasFieldValue("999LC1dec", fldName, "D764.7");
 		// LC 999 two letters, space before Cutter
-		assertDocHasFieldValue("999LC2", fldName, "HG6046", sis);
-		assertDocHasFieldValue("999LC22", fldName, "CB3", sis);
+		assertDocHasFieldValue("999LC2", fldName, "HG6046");
+		assertDocHasFieldValue("999LC22", fldName, "CB3");
 		// LC 999 two letters, no space before Cutter
-		assertDocHasFieldValue("999LC2NoDec", fldName, "PQ2678", sis);
+		assertDocHasFieldValue("999LC2NoDec", fldName, "PQ2678");
 		// LC 999 three letters, no space before Cutter
-		assertDocHasFieldValue("999LC3NoDec", fldName, "KJH2678", sis);
+		assertDocHasFieldValue("999LC3NoDec", fldName, "KJH2678");
 		// LC 999 three letters, decimal digit, no space before Cutter
-		assertDocHasFieldValue("999LC3Dec", fldName, "KJH666.4", sis);
+		assertDocHasFieldValue("999LC3Dec", fldName, "KJH666.4");
 		// LC 999 three letters, decimal digit, space before Cutter
-		assertDocHasFieldValue("999LC3DecSpace", fldName, "KJH66.6", sis);
+		assertDocHasFieldValue("999LC3DecSpace", fldName, "KJH66.6");
 		// LC 999, LC 050, multiple LC facet values, 082 Dewey
-		assertDocHasNoFieldValue("2913114", fldName, "D810", sis);
-		assertDocHasFieldValue("2913114", fldName, "DH135", sis);
+		assertDocHasNoFieldValue("2913114", fldName, "D810");
+		assertDocHasFieldValue("2913114", fldName, "DH135");
 		// LC 999, LC 050, multiple LC facet values, 082 Dewey
-		assertDocHasFieldValue("3400092", fldName, "DC34.5", sis);
-		assertDocHasNoFieldValue("3400092", fldName, "BL1844", sis); // 050
+		assertDocHasFieldValue("3400092", fldName, "DC34.5");
+		assertDocHasNoFieldValue("3400092", fldName, "BL1844"); // 050
 	
 		// LC 999, LC 050, tough cutter
-		assertDocHasFieldValue("115472", fldName, "HC241.25", sis);
-		assertDocHasFieldValue("1033119", fldName, "BX4659", sis);
+		assertDocHasFieldValue("115472", fldName, "HC241.25");
+		assertDocHasFieldValue("1033119", fldName, "BX4659");
 	
 		//  bad LC values
 		// LC 999 "NO CALL NUMBER" and 852 to ignore
-		assertDocHasNoField("7370014", fldName, sis); 
+		assertDocHasNoField("7370014", fldName); 
 		// LC 999 starts with X and 852s and 946s to ignore
-		assertDocHasNoField("7233951", fldName, sis); 
+		assertDocHasNoField("7233951", fldName); 
 		// LC 050 "IN PROCESS" and 999 withdrawn to ignore
-		assertDocHasNoField("3277173", fldName, sis); 
+		assertDocHasNoField("3277173", fldName); 
 		// LC 090 numeric (looks like barcode) and 999 ASIS
-		assertDocHasNoField("7117119", fldName, sis); 
+		assertDocHasNoField("7117119", fldName); 
 	
 		// LCPER 999
-		assertDocHasFieldValue("460947", fldName, "E184", sis); 
+		assertDocHasFieldValue("460947", fldName, "E184"); 
 		
 		// 082 Dewey, LC 999, 050 (same value)
-		assertDocHasFieldValue("1732616", fldName, "QA273", sis); 
+		assertDocHasFieldValue("1732616", fldName, "QA273"); 
 		// 082 Dewey, LC 999, 050 (same value)  	
-		assertDocHasFieldValue("115472", fldName, "HC241.25", sis); 
+		assertDocHasFieldValue("115472", fldName, "HC241.25"); 
 	
 	
 		// SUDOC 999 and 086 (same values, as it happens)
-		assertDocHasNoFieldValue("2557826", fldName, govDocStr, sis);
+		assertDocHasNoFieldValue("2557826", fldName, govDocStr);
 		// SUDOC 999 and 086, two 088 to ignore
-		assertDocHasNoFieldValue("2678655", fldName, govDocStr, sis);
+		assertDocHasNoFieldValue("2678655", fldName, govDocStr);
 		// SUDOC 999 and 086 (same values, as it happens), LC 050
-		assertDocHasNoFieldValue("5511738", fldName, govDocStr, sis);
-		assertDocHasNoFieldValue("5511738", fldName, "KJ27", sis);
+		assertDocHasNoFieldValue("5511738", fldName, govDocStr);
+		assertDocHasNoFieldValue("5511738", fldName, "KJ27");
 	
 		// ALPHANUM 999 "SUSEL" 
-		assertDocHasNoField("4578538", fldName, sis); 
+		assertDocHasNoField("4578538", fldName); 
 		// ALPHANUM 999 "MFILM ...": No call number, but format Microfilm
-		assertDocHasNoField("1261173", fldName, sis); 
+		assertDocHasNoField("1261173", fldName); 
 		// ALPHANUM 999 "MCD ...": No call number, but format Music - Audio
-		assertDocHasNoField("1234673", fldName, sis); 
+		assertDocHasNoField("1234673", fldName); 
 		
 		// ASIS 999 "INTERNET RESOURCE": No call number, but access Online
-		assertDocHasNoField("6280316", fldName, sis); 
+		assertDocHasNoField("6280316", fldName); 
 		// ASIS 999 "INTERNET RESOURCE" and 090 with bad LC value: No call number but access Online
-		assertDocHasNoField("7117119", fldName, sis); 
+		assertDocHasNoField("7117119", fldName); 
 		// ASIS 999 "INTERNET RESOURCE" and 050 LC and 082 Dewey values: 
-		assertDocHasNoField("7531910", fldName, sis);
+		assertDocHasNoField("7531910", fldName);
 	
 		// lc-b4cutter field is INDEXED - SEARCH for values
 	
 		// bad values should not be found
-		assertZeroResults(fldName, "NO CALL NUMBER", sis);
-		assertZeroResults(fldName, "IN PROCESS", sis);
-		assertZeroResults(fldName, "I*", sis);
-		assertZeroResults(fldName, "X*", sis);
-		assertZeroResults(fldName, "WITHDRAWN", sis);
-		assertZeroResults(fldName, "W*", sis);
-		assertZeroResults(fldName, "110978984448763", sis);
+		assertZeroResults(fldName, "NO CALL NUMBER");
+		assertZeroResults(fldName, "IN PROCESS");
+		assertZeroResults(fldName, "I*");
+		assertZeroResults(fldName, "X*");
+		assertZeroResults(fldName, "WITHDRAWN");
+		assertZeroResults(fldName, "W*");
+		assertZeroResults(fldName, "110978984448763");
 			
 		// search for LC values
-		assertZeroResults(fldName, "Z", sis);
-		assertSingleResult("6661112", fldName, "Z3871", sis);
-		assertSingleResult("999LC1dec", fldName, "D764.7", sis);
-		assertZeroResults(fldName, "C", sis);
-		assertZeroResults(fldName, "CB", sis);
-		assertSingleResult("999LC22", fldName, "CB3", sis);		
-		assertZeroResults(fldName, "D810", sis);
-		assertSingleResult("2913114", fldName, "DH135", sis);
-		assertZeroResults(fldName, "K", sis);
-		assertZeroResults(fldName, "KJ", sis);
-		assertZeroResults(fldName, "KJH", sis);
-		assertSingleResult("999LC3NoDec", fldName, "KJH2678", sis);
-		assertSingleResult("999LC3DecSpace", fldName, "KJH66.6", sis);
-		assertSingleResult("1033119", fldName, "BX4659", sis);
+		assertZeroResults(fldName, "Z");
+		assertSingleResult("6661112", fldName, "Z3871");
+		assertSingleResult("999LC1dec", fldName, "D764.7");
+		assertZeroResults(fldName, "C");
+		assertZeroResults(fldName, "CB");
+		assertSingleResult("999LC22", fldName, "CB3");		
+		assertZeroResults(fldName, "D810");
+		assertSingleResult("2913114", fldName, "DH135");
+		assertZeroResults(fldName, "K");
+		assertZeroResults(fldName, "KJ");
+		assertZeroResults(fldName, "KJH");
+		assertSingleResult("999LC3NoDec", fldName, "KJH2678");
+		assertSingleResult("999LC3DecSpace", fldName, "KJH66.6");
+		assertSingleResult("1033119", fldName, "BX4659");
 		// tricky cutter
-		assertZeroResults(fldName, "HC241", sis);
-		assertSingleResult("115472", fldName, "HC241.25", sis);
-		assertSingleResult("3400092", fldName, "DC34.5", sis);
+		assertZeroResults(fldName, "HC241");
+		assertSingleResult("115472", fldName, "HC241.25");
+		assertSingleResult("3400092", fldName, "DC34.5");
 				
 		// LCPER
-		assertSingleResult("460947", fldName, "E184", sis);
+		assertSingleResult("460947", fldName, "E184");
 	
 		// SUDOC
-		assertResultSize(fldName, "\"" + govDocStr + "\"", 0, sis);
+		assertResultSize(fldName, "\"" + govDocStr + "\"", 0);
 	}
 
 
@@ -414,76 +414,76 @@ public class CallNumberTests extends BibIndexTest {
 	{
 		// first alpha chars  used in GetMoreLikeThis queries
 		String fldName = "lc-callnum";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 		
-		assertFieldStored(fldName, solrCore);  
-		assertFieldIndexed(fldName, solrCore); // will be used in shelflist browse
+		assertFieldStored(fldName);  
+		assertFieldIndexed(fldName); // will be used in shelflist browse
 	
 		// lc-b4cutter field is stored - retrieve values from specific documents
 	
 		// LC 999 one letter
-		assertDocHasFieldValue("6661112", fldName, "Z3871.Z8", sis);
+		assertDocHasFieldValue("6661112", fldName, "Z3871.Z8");
 		// LC 999 one letter, space before Cutter
-		assertDocHasFieldValue("7772223", fldName, "F1356 .M464 2005", sis);
+		assertDocHasFieldValue("7772223", fldName, "F1356 .M464 2005");
 		// LC 999 one letter, decimal digits and space before Cutter
-		assertDocHasFieldValue("999LC1dec", fldName, "D764.7 .K72 1990", sis);
+		assertDocHasFieldValue("999LC1dec", fldName, "D764.7 .K72 1990");
 		// LC 999 two letters, space before Cutter
-		assertDocHasFieldValue("999LC2", fldName, "HG6046 .V28 1986", sis);
-		assertDocHasFieldValue("999LC22", fldName, "CB3 .A6 SUPPL. V.31", sis);
+		assertDocHasFieldValue("999LC2", fldName, "HG6046 .V28 1986");
+		assertDocHasFieldValue("999LC22", fldName, "CB3 .A6 SUPPL. V.31");
 		// LC 999 two letters, no space before Cutter
-		assertDocHasFieldValue("999LC2NoDec", fldName, "PQ2678.I26 P54 1992", sis);
+		assertDocHasFieldValue("999LC2NoDec", fldName, "PQ2678.I26 P54 1992");
 		// LC 999 three letters, no space before Cutter
-		assertDocHasFieldValue("999LC3NoDec", fldName, "KJH2678.I26 P54 1992", sis);
+		assertDocHasFieldValue("999LC3NoDec", fldName, "KJH2678.I26 P54 1992");
 		// LC 999 three letters, decimal digit, no space before Cutter
-		assertDocHasFieldValue("999LC3Dec", fldName, "KJH666.4.I26 P54 1992", sis);
+		assertDocHasFieldValue("999LC3Dec", fldName, "KJH666.4.I26 P54 1992");
 		// LC 999 three letters, decimal digit, space before Cutter
-		assertDocHasFieldValue("999LC3DecSpace", fldName, "KJH66.6 .I26 P54 1992", sis);
+		assertDocHasFieldValue("999LC3DecSpace", fldName, "KJH66.6 .I26 P54 1992");
 		// LC 999, LC 050, multiple LC facet values, 082 Dewey
-		assertDocHasFieldValue("2913114", fldName, "DH135 .P6 I65", sis);
+		assertDocHasFieldValue("2913114", fldName, "DH135 .P6 I65");
 		// LC 999, LC 050, multiple LC facet values, 082 Dewey
-		assertDocHasFieldValue("3400092", fldName, "DC34.5 .A78 L4 1996", sis);
+		assertDocHasFieldValue("3400092", fldName, "DC34.5 .A78 L4 1996");
 	
 		// LC 999, LC 050, tough cutter
-		assertDocHasFieldValue("115472", fldName, "HC241.25 .I4 D47", sis);
-		assertDocHasFieldValue("1033119", fldName, "BX4659.E85 W44", sis);
-		assertDocHasFieldValue("1033119", fldName, "BX4659 .E85 W44 1982", sis);
+		assertDocHasFieldValue("115472", fldName, "HC241.25 .I4 D47");
+		assertDocHasFieldValue("1033119", fldName, "BX4659.E85 W44");
+		assertDocHasFieldValue("1033119", fldName, "BX4659 .E85 W44 1982");
 		// 082 Dewey, LC 999, 050 (same value)
-		assertDocHasFieldValue("1732616", fldName, "QA273 .C83 1962", sis); 
+		assertDocHasFieldValue("1732616", fldName, "QA273 .C83 1962"); 
 	
 		//  bad LC values
 		// LC 999 "NO CALL NUMBER" and 852 to ignore
-		assertDocHasNoField("7370014", fldName, sis); 
+		assertDocHasNoField("7370014", fldName); 
 		// LC 999 starts with X and 852s and 946s to ignore
-		assertDocHasNoField("7233951", fldName, sis); 
+		assertDocHasNoField("7233951", fldName); 
 		// LC 050 "IN PROCESS" and 999 withdrawn to ignore
-		assertDocHasNoField("3277173", fldName, sis); 
+		assertDocHasNoField("3277173", fldName); 
 		// LC 090 numeric (looks like barcode) and 999 ASIS
-		assertDocHasNoField("7117119", fldName, sis); 
+		assertDocHasNoField("7117119", fldName); 
 	
 		// LCPER 999
-		assertDocHasFieldValue("460947", fldName, "E184.S75 R47A V.1 1980", sis); 
+		assertDocHasFieldValue("460947", fldName, "E184.S75 R47A V.1 1980"); 
 		
 	
 		// SUDOC 999 and 086 (same values, as it happens)
-		assertDocHasNoFieldValue("2557826", fldName, govDocStr, sis);
+		assertDocHasNoFieldValue("2557826", fldName, govDocStr);
 		// SUDOC 999 and 086, two 088 to ignore
-		assertDocHasNoFieldValue("2678655", fldName, govDocStr, sis);
+		assertDocHasNoFieldValue("2678655", fldName, govDocStr);
 		// SUDOC 999 and 086 (same values, as it happens), LC 050
-		assertDocHasNoFieldValue("5511738", fldName, govDocStr, sis);
-		assertDocHasNoFieldValue("5511738", fldName, "KJ27", sis);
+		assertDocHasNoFieldValue("5511738", fldName, govDocStr);
+		assertDocHasNoFieldValue("5511738", fldName, "KJ27");
 	
 		// ALPHANUM 999 "SUSEL" 
-		assertDocHasNoField("4578538", fldName, sis); 
+		assertDocHasNoField("4578538", fldName); 
 		// ALPHANUM 999 "MFILM ...": No call number, but format Microfilm
-		assertDocHasNoField("1261173", fldName, sis); 
+		assertDocHasNoField("1261173", fldName); 
 		// ALPHANUM 999 "MCD ...": No call number, but format Music - Audio
-		assertDocHasNoField("1234673", fldName, sis); 
+		assertDocHasNoField("1234673", fldName); 
 		
 		// ASIS 999 "INTERNET RESOURCE": No call number, but access Online
-		assertDocHasNoField("6280316", fldName, sis); 
-		assertDocHasNoField("7117119", fldName, sis); 
-		assertDocHasNoField("7531910", fldName, sis);
+		assertDocHasNoField("6280316", fldName); 
+		assertDocHasNoField("7117119", fldName); 
+		assertDocHasNoField("7531910", fldName);
 	}
 
 
@@ -496,32 +496,32 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey-first-digit";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 	
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 		
 		// bad values should not be found
 		// should be 000s
-		assertZeroResults(fldName, "1", sis);
+		assertZeroResults(fldName, "1");
 		
-		assertSingleResult("690002", fldName, "100s", sis);
-		assertSingleResult("2328381", fldName, "800s", sis);
+		assertSingleResult("690002", fldName, "100s");
+		assertSingleResult("2328381", fldName, "800s");
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("2214009");
 		docIds.add("1849258");
-		assertSearchResults(fldName, "300s", docIds, sis);
+		assertSearchResults(fldName, "300s", docIds);
 		docIds.clear();
 		docIds.add("1");
 		docIds.add("11");
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "000s", docIds, sis);
+		assertSearchResults(fldName, "000s", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "900s", docIds, sis);
+		assertSearchResults(fldName, "900s", docIds);
 	}
 
 
@@ -536,28 +536,28 @@ public class CallNumberTests extends BibIndexTest {
 	{
 // TODO: this field should be eliminated and this functionality provided in the UI
 		String fldName = "dewey-first-desc";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 	
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 		
-		assertSingleResult("690002", fldName, "\"100s - Philosophy & Psychology\"", sis);
-		assertSingleResult("2328381", fldName, "\"800s - Literature\"", sis);
+		assertSingleResult("690002", fldName, "\"100s - Philosophy & Psychology\"");
+		assertSingleResult("2328381", fldName, "\"800s - Literature\"");
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("2214009");
 		docIds.add("1849258");
-		assertSearchResults(fldName, "\"300s - Social Sciences\"", docIds, sis);
+		assertSearchResults(fldName, "\"300s - Social Sciences\"", docIds);
 		docIds.clear();
 		docIds.add("1");
 		docIds.add("11");
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds, sis);
+		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "\"900s - History & Geography\"", docIds, sis);
+		assertSearchResults(fldName, "\"900s - History & Geography\"", docIds);
 	}
 
 
@@ -570,28 +570,28 @@ public class CallNumberTests extends BibIndexTest {
 		throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey-2digits";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 		
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 		
-		assertSingleResult("690002", fldName, "150s", sis);
-		assertSingleResult("2328381", fldName, "820s", sis);
-		assertSingleResult("1849258", fldName, "350s", sis);	
-		assertSingleResult("2214009", fldName, "370s", sis);
+		assertSingleResult("690002", fldName, "150s");
+		assertSingleResult("2328381", fldName, "820s");
+		assertSingleResult("1849258", fldName, "350s");	
+		assertSingleResult("2214009", fldName, "370s");
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("1");
 		docIds.add("11");
-		assertSearchResults(fldName, "000s", docIds, sis);
+		assertSearchResults(fldName, "000s", docIds);
 		docIds.clear();
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "020s", docIds, sis);
+		assertSearchResults(fldName, "020s", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "990s", docIds, sis);
+		assertSearchResults(fldName, "990s", docIds);
 	}
 
 
@@ -604,28 +604,28 @@ public class CallNumberTests extends BibIndexTest {
 		throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey-2digit-desc";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 		
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 		
-		assertSingleResult("690002", fldName, "\"150s - Psychology\"", sis);
-		assertSingleResult("2328381", fldName, "\"820s - English & Old English Literatures\"", sis);
-		assertSingleResult("1849258", fldName, "\"350s - Public Administration\"", sis);	
-		assertSingleResult("2214009", fldName, "\"370s - Education\"", sis);
+		assertSingleResult("690002", fldName, "\"150s - Psychology\"");
+		assertSingleResult("2328381", fldName, "\"820s - English & Old English Literatures\"");
+		assertSingleResult("1849258", fldName, "\"350s - Public Administration\"");	
+		assertSingleResult("2214009", fldName, "\"370s - Education\"");
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("1");
 		docIds.add("11");
-		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds, sis);
+		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds);
 		docIds.clear();
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "\"020s - Library & Information Sciences\"", docIds, sis);
+		assertSearchResults(fldName, "\"020s - Library & Information Sciences\"", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "\"990s - General History of Other Areas\"", docIds, sis);
+		assertSearchResults(fldName, "\"990s - General History of Other Areas\"", docIds);
 	}
 
 	/**
@@ -637,41 +637,41 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey-b4cutter";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 		
-		assertFieldStored(fldName, solrCore); 
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldStored(fldName); 
+		assertFieldIndexed(fldName);
 		
-		assertDocHasFieldValue("690002", fldName, "159.32", sis); 
-		assertDocHasFieldValue("2328381", fldName, "827.5", sis); 
-		assertDocHasFieldValue("1849258", fldName, "352.042", sis); 
-		assertDocHasFieldValue("2214009", fldName, "370.1", sis); 
-		assertDocHasNoFieldValue("2214009", fldName, "WITHDRAWN", sis);
-		assertDocHasFieldValue("1", fldName, "001", sis); 
-		assertDocHasFieldValue("11", fldName, "001.123", sis); 
-		assertDocHasFieldValue("2", fldName, "022", sis); 
-		assertDocHasFieldValue("22", fldName, "022.456", sis); 
-		assertDocHasFieldValue("3", fldName, "999", sis); 
-		assertDocHasFieldValue("31", fldName, "999.85", sis); 
+		assertDocHasFieldValue("690002", fldName, "159.32"); 
+		assertDocHasFieldValue("2328381", fldName, "827.5"); 
+		assertDocHasFieldValue("1849258", fldName, "352.042"); 
+		assertDocHasFieldValue("2214009", fldName, "370.1"); 
+		assertDocHasNoFieldValue("2214009", fldName, "WITHDRAWN");
+		assertDocHasFieldValue("1", fldName, "001"); 
+		assertDocHasFieldValue("11", fldName, "001.123"); 
+		assertDocHasFieldValue("2", fldName, "022"); 
+		assertDocHasFieldValue("22", fldName, "022.456"); 
+		assertDocHasFieldValue("3", fldName, "999"); 
+		assertDocHasFieldValue("31", fldName, "999.85"); 
 		
 		// search for values
-		assertZeroResults(fldName, "159", sis);
-		assertSingleResult("690002", fldName, "159.32", sis);
-		assertZeroResults(fldName, "827", sis);
-		assertSingleResult("2328381", fldName, "827.5", sis); 
-		assertZeroResults(fldName, "352", sis);
-		assertSingleResult("1849258", fldName, "352.042", sis); 
-		assertZeroResults(fldName, "370", sis);
-		assertSingleResult("2214009", fldName, "370.1", sis); 
-		assertZeroResults(fldName, "WITHDRAWN", sis);
+		assertZeroResults(fldName, "159");
+		assertSingleResult("690002", fldName, "159.32");
+		assertZeroResults(fldName, "827");
+		assertSingleResult("2328381", fldName, "827.5"); 
+		assertZeroResults(fldName, "352");
+		assertSingleResult("1849258", fldName, "352.042"); 
+		assertZeroResults(fldName, "370");
+		assertSingleResult("2214009", fldName, "370.1"); 
+		assertZeroResults(fldName, "WITHDRAWN");
 		
-		assertSingleResult("1", fldName, "001", sis); 
-		assertSingleResult("11", fldName, "001.123", sis); 
-		assertSingleResult("2", fldName, "022", sis); 
-		assertSingleResult("22", fldName, "022.456", sis); 
-		assertSingleResult("3", fldName, "999", sis); 
-		assertSingleResult("31", fldName, "999.85", sis); 
+		assertSingleResult("1", fldName, "001"); 
+		assertSingleResult("11", fldName, "001.123"); 
+		assertSingleResult("2", fldName, "022"); 
+		assertSingleResult("22", fldName, "022.456"); 
+		assertSingleResult("3", fldName, "999"); 
+		assertSingleResult("31", fldName, "999.85"); 
 	}
 
 	/**
@@ -682,22 +682,22 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey-callnum";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
 		
-		assertFieldStored(fldName, solrCore);  
-		assertFieldIndexed(fldName, solrCore);  // will be used in shelflist browse
+		assertFieldStored(fldName);  
+		assertFieldIndexed(fldName);  // will be used in shelflist browse
 		
-		assertDocHasFieldValue("690002", fldName, "159.32 .W211", sis); 
-		assertDocHasFieldValue("2328381", fldName, "827.5 .S97TG", sis); 
-		assertDocHasFieldValue("1849258", fldName, "352.042 .C594 ED.2", sis); 
-		assertDocHasFieldValue("2214009", fldName, "370.1 .S655", sis); 
-		assertDocHasFieldValue("1", fldName, "001 .N44", sis); 
-		assertDocHasFieldValue("11", fldName, "001.123 .N44", sis); 
-		assertDocHasFieldValue("2", fldName, "022 .N47", sis); 
-		assertDocHasFieldValue("22", fldName, "022.456 .S655", sis); 
-		assertDocHasFieldValue("3", fldName, "999 .F67", sis); 
-		assertDocHasFieldValue("31", fldName, "999.85 .P84", sis); 
+		assertDocHasFieldValue("690002", fldName, "159.32 .W211"); 
+		assertDocHasFieldValue("2328381", fldName, "827.5 .S97TG"); 
+		assertDocHasFieldValue("1849258", fldName, "352.042 .C594 ED.2"); 
+		assertDocHasFieldValue("2214009", fldName, "370.1 .S655"); 
+		assertDocHasFieldValue("1", fldName, "001 .N44"); 
+		assertDocHasFieldValue("11", fldName, "001.123 .N44"); 
+		assertDocHasFieldValue("2", fldName, "022 .N47"); 
+		assertDocHasFieldValue("22", fldName, "022.456 .S655"); 
+		assertDocHasFieldValue("3", fldName, "999 .F67"); 
+		assertDocHasFieldValue("31", fldName, "999.85 .P84"); 
 	}
 
 
@@ -716,11 +716,11 @@ public class CallNumberTests extends BibIndexTest {
 		docIds.add("11");
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "000s", docIds, sis);
+		assertSearchResults(fldName, "000s", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "900s", docIds, sis);
+		assertSearchResults(fldName, "900s", docIds);
 
 		fldName = "dewey-first-desc";
 		// not stored: search for values
@@ -729,50 +729,50 @@ public class CallNumberTests extends BibIndexTest {
 		docIds.add("11");
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds, sis);
+		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "\"900s - History & Geography\"", docIds, sis);
+		assertSearchResults(fldName, "\"900s - History & Geography\"", docIds);
 
 		fldName = "dewey-2digits";
 		// not stored: search for values
 		docIds.clear();
 		docIds.add("1");
 		docIds.add("11");
-		assertSearchResults(fldName, "000s", docIds, sis);
+		assertSearchResults(fldName, "000s", docIds);
 		docIds.clear();
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "020s", docIds, sis);
+		assertSearchResults(fldName, "020s", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "990s", docIds, sis);
+		assertSearchResults(fldName, "990s", docIds);
 
 		fldName = "dewey-2digit-desc";
 		// not stored: search for values
 		docIds.clear();
 		docIds.add("1");
 		docIds.add("11");
-		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds, sis);
+		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds);
 		docIds.clear();
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "\"020s - Library & Information Sciences\"", docIds, sis);
+		assertSearchResults(fldName, "\"020s - Library & Information Sciences\"", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "\"990s - General History of Other Areas\"", docIds, sis);
+		assertSearchResults(fldName, "\"990s - General History of Other Areas\"", docIds);
 
 		fldName = "dewey-b4cutter";
 		// stored: retrieve values from specific docs
-		assertDocHasFieldValue("1", fldName, "001", sis); 
-		assertDocHasFieldValue("11", fldName, "001.123", sis); 
-		assertDocHasFieldValue("2", fldName, "022", sis); 
-		assertDocHasFieldValue("22", fldName, "022.456", sis); 
-		assertDocHasFieldValue("3", fldName, "999", sis); 
-		assertDocHasFieldValue("31", fldName, "999.85", sis); 
+		assertDocHasFieldValue("1", fldName, "001"); 
+		assertDocHasFieldValue("11", fldName, "001.123"); 
+		assertDocHasFieldValue("2", fldName, "022"); 
+		assertDocHasFieldValue("22", fldName, "022.456"); 
+		assertDocHasFieldValue("3", fldName, "999"); 
+		assertDocHasFieldValue("31", fldName, "999.85"); 
 	}
 
 
@@ -789,7 +789,7 @@ public class CallNumberTests extends BibIndexTest {
 		docIds.add("6280316");
 		docIds.add("7117119");
 		docIds.add("7531910");
-		assertSearchResults(afld, fldVal, docIds, sis);
+		assertSearchResults(afld, fldVal, docIds);
 	}
 
 
@@ -807,16 +807,16 @@ public class CallNumberTests extends BibIndexTest {
 		docIds.add("3311");
 		
 		for (String docId : docIds) {
-			assertDocHasNoField(docId, "lc-first-letter", sis);
-			assertDocHasNoField(docId, "lc-first-desc", sis);
-			assertDocHasNoField(docId, "lc-alpha", sis);
-			assertDocHasNoField(docId, "lc-alpha-desc", sis);
-			assertDocHasNoField(docId, "lc-b4cutter", sis);
-			assertDocHasNoField(docId, "dewey-first-digit", sis);
-			assertDocHasNoField(docId, "dewey-first-desc", sis);
-			assertDocHasNoField(docId, "dewey-2digits", sis);
-			assertDocHasNoField(docId, "dewey-2digit-desc", sis);
-			assertDocHasNoField(docId, "dewey-b4cutter", sis);
+			assertDocHasNoField(docId, "lc-first-letter");
+			assertDocHasNoField(docId, "lc-first-desc");
+			assertDocHasNoField(docId, "lc-alpha");
+			assertDocHasNoField(docId, "lc-alpha-desc");
+			assertDocHasNoField(docId, "lc-b4cutter");
+			assertDocHasNoField(docId, "dewey-first-digit");
+			assertDocHasNoField(docId, "dewey-first-desc");
+			assertDocHasNoField(docId, "dewey-2digits");
+			assertDocHasNoField(docId, "dewey-2digit-desc");
+			assertDocHasNoField(docId, "dewey-b4cutter");
 		}
 	}
 
@@ -834,7 +834,7 @@ public class CallNumberTests extends BibIndexTest {
 		docIds.add("999LC2NoDec");
 		docIds.add("2328381");
 		
-		assertSearchResults(fldName, "\"" + fldVal + "\"", docIds, sis);
+		assertSearchResults(fldName, "\"" + fldVal + "\"", docIds);
 	}
 
 }

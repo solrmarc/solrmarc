@@ -6,7 +6,6 @@ import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.lucene.index.IndexReader;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
@@ -30,26 +29,26 @@ public class SubjectTests extends BibIndexTest {
         createIxInitVars(testDataFname);
 		String fldName = "topic";
 		assertTextFieldProps(fldName);
-		assertFieldStored(fldName, solrCore);
+		assertFieldStored(fldName);
 
 		// topic = 600abcdq:600t:610ab:610t:630a:630t:650a:655a
 
 		// first one has period after two chars, so period left in.
-		assertDocHasFieldValue("1261173", fldName, "Letter ballancing the necessity of keeping a land-force in times of peace, with the dangers that may follow on it.", sis);  // 600t
-		assertDocHasFieldValue("115472", fldName, "European Economic Community", sis);  // 610a
-		assertDocHasFieldValue("1261173", fldName, "Magna Carta", sis);  // 630a
-		assertDocHasFieldValue("4698973", fldName, "Multiculturalism", sis);  // 650a
-		assertDocHasFieldValue("6552", fldName, "Dictionaries", sis);  // 655a
+		assertDocHasFieldValue("1261173", fldName, "Letter ballancing the necessity of keeping a land-force in times of peace, with the dangers that may follow on it.");  // 600t
+		assertDocHasFieldValue("115472", fldName, "European Economic Community");  // 610a
+		assertDocHasFieldValue("1261173", fldName, "Magna Carta");  // 630a
+		assertDocHasFieldValue("4698973", fldName, "Multiculturalism");  // 650a
+		assertDocHasFieldValue("6552", fldName, "Dictionaries");  // 655a
 
-		assertSingleResult("3743949", fldName, "Federico", sis); // 600a
-		assertSingleResult("3743949", fldName, "1936", sis);  // 600d
-		assertSingleResult("919006", fldName, "Emesa", sis);  // 600c
-		assertSingleResult("1261173", fldName, "peace", sis);  // 600t
-		assertSingleResult("115472", fldName, "Economic", sis);  // 610a
-		assertSingleResult("1261173", fldName, "army", sis);  // 610b
-		assertSingleResult("1261173", fldName, "magna", sis);  // 630a
-		assertSingleResult("4698973", fldName, "Multiculturalism", sis);  // 650a
-		assertSingleResult("6552", fldName, "dictionaries", sis);  // 655a
+		assertSingleResult("3743949", fldName, "Federico"); // 600a
+		assertSingleResult("3743949", fldName, "1936");  // 600d
+		assertSingleResult("919006", fldName, "Emesa");  // 600c
+		assertSingleResult("1261173", fldName, "peace");  // 600t
+		assertSingleResult("115472", fldName, "Economic");  // 610a
+		assertSingleResult("1261173", fldName, "army");  // 610b
+		assertSingleResult("1261173", fldName, "magna");  // 630a
+		assertSingleResult("4698973", fldName, "Multiculturalism");  // 650a
+		assertSingleResult("6552", fldName, "dictionaries");  // 655a
 	}
 
 
@@ -64,97 +63,97 @@ public class SubjectTests extends BibIndexTest {
 	{
         createIxInitVars(testDataFname);
         String fldName = "topicStr";
-		assertStringFieldProperties(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertStringFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 		
 		// topicStr is a copy field from topic, but it is a string
 		// topic = 600abcdq:600t:610ab:610t:630a:630t:650a:655a
 		
 		// 600a, trailing period removed
-		assertSingleResult("345228", fldName, "\"Zemnukhov, Ivan\"", sis); 
-		assertZeroResults(fldName, "\"Zemnukhov, Ivan.\"", sis);
+		assertSingleResult("345228", fldName, "\"Zemnukhov, Ivan\""); 
+		assertZeroResults(fldName, "\"Zemnukhov, Ivan.\"");
 		// 600acd, trailing period removed
-		assertSingleResult("1261173", fldName, "\"Somers, John Somers, Baron, 1651-1716\"", sis);  
-		assertZeroResults(fldName, "\"Somers, John Somers, Baron, 1651-1716.\"", sis); 
+		assertSingleResult("1261173", fldName, "\"Somers, John Somers, Baron, 1651-1716\"");  
+		assertZeroResults(fldName, "\"Somers, John Somers, Baron, 1651-1716.\""); 
 		// 600ad, trailing comma removed
-		assertSingleResult("600trailingComma", fldName, "\"Monroe, Marilyn, 1926-1962\"", sis); 
-		assertZeroResults(fldName, "\"Monroe, Marilyn, 1926-1962,\"", sis);
+		assertSingleResult("600trailingComma", fldName, "\"Monroe, Marilyn, 1926-1962\""); 
+		assertZeroResults(fldName, "\"Monroe, Marilyn, 1926-1962,\"");
 		// 600q now bundled with abcdq
-		assertSingleResult("600aqdx", fldName, "\"Kennedy, John F. (John Fitzgerald), 1917-1963\"", sis); 
-		assertZeroResults(fldName, "\"(John Fitzgerald),\"", sis);
-		assertZeroResults(fldName, "\"(John Fitzgerald)\"", sis);
-		assertZeroResults(fldName, "\"Kennedy, John F. 1917-1963\"", sis);
+		assertSingleResult("600aqdx", fldName, "\"Kennedy, John F. (John Fitzgerald), 1917-1963\""); 
+		assertZeroResults(fldName, "\"(John Fitzgerald),\"");
+		assertZeroResults(fldName, "\"(John Fitzgerald)\"");
+		assertZeroResults(fldName, "\"Kennedy, John F. 1917-1963\"");
 		// 600t, too few letters at end to remove trailing period
-		assertSingleResult("1261173", fldName, "\"Letter ballancing the necessity of keeping a land-force in times of peace, with the dangers that may follow on it.\"", sis);  // 630
-		assertZeroResults(fldName, "\"Letter ballancing the necessity of keeping a land-force in times of peace, with the dangers that may follow on it\"", sis);  // 630
+		assertSingleResult("1261173", fldName, "\"Letter ballancing the necessity of keeping a land-force in times of peace, with the dangers that may follow on it.\"");  // 630
+		assertZeroResults(fldName, "\"Letter ballancing the necessity of keeping a land-force in times of peace, with the dangers that may follow on it\"");  // 630
 		// 600p no longer included
-		assertZeroResults(fldName, "\"Meditation;\"", sis);
-		assertZeroResults(fldName, "\"Meditation\"", sis);
-		assertZeroResults(fldName, "\"Hindemith, Paul, 1895-1963. Meditation\"", sis);
-		assertZeroResults(fldName, "\"Hindemith, Paul, 1895-1963. Meditation;\"", sis);
+		assertZeroResults(fldName, "\"Meditation;\"");
+		assertZeroResults(fldName, "\"Meditation\"");
+		assertZeroResults(fldName, "\"Hindemith, Paul, 1895-1963. Meditation\"");
+		assertZeroResults(fldName, "\"Hindemith, Paul, 1895-1963. Meditation;\"");
 		// 600ad 
-		assertSingleResult("600adtpof", fldName, "\"Hindemith, Paul, 1895-1963\"", sis);
-		assertZeroResults(fldName, "\"Hindemith, Paul, 1895-1963.\"", sis);
+		assertSingleResult("600adtpof", fldName, "\"Hindemith, Paul, 1895-1963\"");
+		assertZeroResults(fldName, "\"Hindemith, Paul, 1895-1963.\"");
 		// 600t separate
-		assertSingleResult("600adtpof", fldName, "\"Nobilissima visione\"", sis); 
-		assertZeroResults(fldName, "\"Nobilissima visione.\"", sis);
+		assertSingleResult("600adtpof", fldName, "\"Nobilissima visione\""); 
+		assertZeroResults(fldName, "\"Nobilissima visione.\"");
 		
 		// 610ab, trailing period removed
-		assertSingleResult("1261173", fldName, "\"England and Wales. Army\"", sis);
-		assertZeroResults(fldName, "\"England and Wales. Army.\"", sis);
-		assertSingleResult("610trailing", fldName, "\"Augusta (Ga.)\"", sis); 
-		assertZeroResults(fldName, "\"Augusta (Ga.).\"", sis);  
+		assertSingleResult("1261173", fldName, "\"England and Wales. Army\"");
+		assertZeroResults(fldName, "\"England and Wales. Army.\"");
+		assertSingleResult("610trailing", fldName, "\"Augusta (Ga.)\""); 
+		assertZeroResults(fldName, "\"Augusta (Ga.).\"");  
 		// 610t separate
-		assertSingleResult("610atpv", fldName, "\"Reports\"", sis); 
-		assertZeroResults(fldName, "\"Reports.\"", sis);
-		assertSingleResult("610atpv", fldName, "\"United States Strategic Bombing Survey\"", sis); 
-		assertZeroResults(fldName, "\"United States Strategic Bombing Survey.\"", sis);
+		assertSingleResult("610atpv", fldName, "\"Reports\""); 
+		assertZeroResults(fldName, "\"Reports.\"");
+		assertSingleResult("610atpv", fldName, "\"United States Strategic Bombing Survey\""); 
+		assertZeroResults(fldName, "\"United States Strategic Bombing Survey.\"");
 		// 610p no longer included
-		assertZeroResults(fldName, "\"Pacific war\"", sis);
-		assertZeroResults(fldName, "\"United States Strategic Bombing Survey Pacific war\"", sis);
+		assertZeroResults(fldName, "\"Pacific war\"");
+		assertZeroResults(fldName, "\"United States Strategic Bombing Survey Pacific war\"");
 		
 		// 630a, trailing period
-		assertSingleResult("1261173", fldName, "\"Magna Carta\"", sis);  
-		assertZeroResults(fldName, "\"Magna Carta.\"", sis);  
+		assertSingleResult("1261173", fldName, "\"Magna Carta\"");  
+		assertZeroResults(fldName, "\"Magna Carta.\"");  
 		// 630p - no longer included
-		assertZeroResults(fldName, "\"N.T.\"", sis); 
-		assertZeroResults(fldName, "\"N.T\"", sis);  
+		assertZeroResults(fldName, "\"N.T.\""); 
+		assertZeroResults(fldName, "\"N.T\"");  
 		// 630s no longer included
-		assertZeroResults(fldName, "\"Vulgate\"", sis);  
-		assertZeroResults(fldName, "\"Vulgate.\"", sis);  
+		assertZeroResults(fldName, "\"Vulgate\"");  
+		assertZeroResults(fldName, "\"Vulgate.\"");  
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("630alsf");
 		docIds.add("630trailing");
-		assertSearchResults(fldName, "\"Bible\"", docIds, sis);
-		assertZeroResults(fldName, "\"Bible.\"", sis);  
+		assertSearchResults(fldName, "\"Bible\"", docIds);
+		assertZeroResults(fldName, "\"Bible.\"");  
 
 		// 650a, trailing period
-		assertSingleResult("919006", fldName, "\"Literature, Comparative\"", sis);
-		assertZeroResults(fldName, "\"Literature, Comparative.\"", sis);  
+		assertSingleResult("919006", fldName, "\"Literature, Comparative\"");
+		assertZeroResults(fldName, "\"Literature, Comparative.\"");  
 		// 650a, trailing comma
-		assertSingleResult("650trailingComma", fldName, "\"Seabiscuit (Race horse)\"", sis); 
-		assertZeroResults(fldName, "\"Seabiscuit (Race horse),\"", sis);  
-		assertZeroResults(fldName, "\"Seabiscuit (Race horse\"", sis);  
+		assertSingleResult("650trailingComma", fldName, "\"Seabiscuit (Race horse)\""); 
+		assertZeroResults(fldName, "\"Seabiscuit (Race horse),\"");  
+		assertZeroResults(fldName, "\"Seabiscuit (Race horse\"");  
 		// 650a, trailing paren left in
-		assertSingleResult("650trailing", fldName, "\"BASIC (Computer program language)\"", sis); 
-		assertZeroResults(fldName, "\"BASIC (Computer program language\"", sis);
+		assertSingleResult("650trailing", fldName, "\"BASIC (Computer program language)\""); 
+		assertZeroResults(fldName, "\"BASIC (Computer program language\"");
 		
 		// 655a, trailing period
-		assertSingleResult("6551", fldName, "\"bust\"", sis); 
-		assertZeroResults(fldName, "\"bust.\"", sis);
+		assertSingleResult("6551", fldName, "\"bust\""); 
+		assertZeroResults(fldName, "\"bust.\"");
 		// 655b no longer used
-		assertZeroResults(fldName, "\"Laminated marblewood bust\"", sis);
-		assertZeroResults(fldName, "\"Laminated marblewood bust.\"", sis);
-		assertZeroResults(fldName, "\"Laminated marblewood\"", sis);
+		assertZeroResults(fldName, "\"Laminated marblewood bust\"");
+		assertZeroResults(fldName, "\"Laminated marblewood bust.\"");
+		assertZeroResults(fldName, "\"Laminated marblewood\"");
 
 // TODO: this should NOT be true once we have bad Lane topics out of the topic field
 		docIds.clear();
 		docIds.add("7233951");
 		docIds.add("1132");
 		docIds.add("1133");
-		assertSearchResults(fldName, "\"Internet Resource\"", docIds, sis);
+		assertSearchResults(fldName, "\"Internet Resource\"", docIds);
 	}
 
 	/**
@@ -167,16 +166,16 @@ public class SubjectTests extends BibIndexTest {
         createIxInitVars(testDataFname);
 		String fldName = "subtopic";
 		assertTextFieldProps(fldName);
-		assertFieldNotStored(fldName, solrCore);
+		assertFieldNotStored(fldName);
 		
 		// subtopic = 600v:600x:600y:600z:610v:610x:610y:610z:630v:630x:630y:630z:650v:650x:650y:650z:655v:655x:655y:655z
 
-		assertSingleResult("5666387", fldName, "congress", sis); // 600v
-		assertSingleResult("3027805", fldName, "interview", sis); // 600x
-		assertSingleResult("115472", fldName, "india", sis); // 610z
-		assertSingleResult("1261173", fldName, "early", sis); // 650x
-		assertSingleResult("111", fldName, "1955", sis); // 655y
-		assertSingleResult("6553", fldName, "panama", sis); // 655z
+		assertSingleResult("5666387", fldName, "congress"); // 600v
+		assertSingleResult("3027805", fldName, "interview"); // 600x
+		assertSingleResult("115472", fldName, "india"); // 610z
+		assertSingleResult("1261173", fldName, "early"); // 650x
+		assertSingleResult("111", fldName, "1955"); // 655y
+		assertSingleResult("6553", fldName, "panama"); // 655z
 	}
 
 	/**
@@ -189,7 +188,7 @@ public class SubjectTests extends BibIndexTest {
         createIxInitVars(testDataFname);
 		String fldName = "fulltopic";
 		assertTextFieldProps(fldName);
-		assertFieldStored(fldName, solrCore);
+		assertFieldStored(fldName);
 		
 		//  remember to look for subfields absent from other topic fields
 		// fulltopic -  all 600, 610, 630, 650, 655
@@ -197,27 +196,27 @@ public class SubjectTests extends BibIndexTest {
 		// subtopic = 600v:600x:600y:600z:610v:610x:610y:610z:630v:630x:630y:630z:650v:650x:650y:650z:655v:655x:655y:655z
 
 		// field is stored - retrieve topic values from specific documents
-		assertDocHasFieldValue("6808639", fldName, "880-04 Zhongguo gong chan dang Party work.", sis);  // 610-6
-		assertDocHasFieldValue("4698973", fldName, "Flyby missions. nasat", sis);  // 650-2
-		assertDocHasFieldValue("6553", fldName, "Municipal Fire Station records Fire Reports Atlanta, Georgia 1978 [thesaurus code]", sis);  // 655-3
+		assertDocHasFieldValue("6808639", fldName, "880-04 Zhongguo gong chan dang Party work.");  // 610-6
+		assertDocHasFieldValue("4698973", fldName, "Flyby missions. nasat");  // 650-2
+		assertDocHasFieldValue("6553", fldName, "Municipal Fire Station records Fire Reports Atlanta, Georgia 1978 [thesaurus code]");  // 655-3
 		// TODO:   note: trailing periods not accepted here.  Not sure why.
-		assertSingleResult("345228", fldName, "\"Zemnukhov, Ivan\"", sis); // 600a
-		assertSingleResult("1261173", fldName, "\"Magna Carta\"", sis);  // 630a
-		assertSingleResult("919006", fldName, "\"Literature, Comparative\"", sis);  // 650a
-		assertSingleResult("4698973", fldName, "Multiculturalism", sis);  // 650a
-		assertSingleResult("7233951", fldName, "\"Lectures\"", sis);  // 655a
+		assertSingleResult("345228", fldName, "\"Zemnukhov, Ivan\""); // 600a
+		assertSingleResult("1261173", fldName, "\"Magna Carta\"");  // 630a
+		assertSingleResult("919006", fldName, "\"Literature, Comparative\"");  // 650a
+		assertSingleResult("4698973", fldName, "Multiculturalism");  // 650a
+		assertSingleResult("7233951", fldName, "\"Lectures\"");  // 655a
 
 		// field is indexed and tokenized - search for values
-		assertSingleResult("4698973", fldName, "nasat", sis); // 650-2
-		assertSingleResult("6553", fldName, "fire", sis); // 655-3
-		assertSingleResult("3743949", fldName, "Federico", sis); // 600a
-		assertSingleResult("3743949", fldName, "1936", sis);  // 600d
-		assertSingleResult("919006", fldName, "Emesa", sis);  // 600c
-		assertSingleResult("1261173", fldName, "peace", sis);  // 600t
-		assertSingleResult("115472", fldName, "Economic", sis);  // 610a
-		assertSingleResult("1261173", fldName, "army", sis);  // 610b
-		assertSingleResult("1261173", fldName, "magna", sis);  // 630a
-		assertSingleResult("6552", fldName, "dictionaries", sis);  // 655a
+		assertSingleResult("4698973", fldName, "nasat"); // 650-2
+		assertSingleResult("6553", fldName, "fire"); // 655-3
+		assertSingleResult("3743949", fldName, "Federico"); // 600a
+		assertSingleResult("3743949", fldName, "1936");  // 600d
+		assertSingleResult("919006", fldName, "Emesa");  // 600c
+		assertSingleResult("1261173", fldName, "peace");  // 600t
+		assertSingleResult("115472", fldName, "Economic");  // 610a
+		assertSingleResult("1261173", fldName, "army");  // 610b
+		assertSingleResult("1261173", fldName, "magna");  // 630a
+		assertSingleResult("6552", fldName, "dictionaries");  // 655a
 	}
 
 
@@ -229,11 +228,11 @@ public class SubjectTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
         createIxInitVars(testDataFname);
-		IndexReader ir = sis.getReader();
-		assertFieldNotPresent("fullgenre", ir);
-		assertFieldNotPresent("genre", ir);
-		assertFieldNotPresent("genreStr", ir);
-		assertFieldNotPresent("subgenre", ir);
+//		IndexReader ir = sis.getReader();
+//		assertFieldNotPresent("fullgenre", ir);
+//		assertFieldNotPresent("genre", ir);
+//		assertFieldNotPresent("genreStr", ir);
+//		assertFieldNotPresent("subgenre", ir);
 	}
 
 	/**
@@ -246,14 +245,14 @@ public class SubjectTests extends BibIndexTest {
 	{
         createIxInitVars(testDataFname);
 		String fldName = "fulltopic";
-		assertFieldStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldStored(fldName);
+		assertFieldIndexed(fldName);
 
-		assertDocHasFieldValue("229800", fldName, "Commodity exchanges.", sis);  
-		assertDocHasFieldValue("229800", fldName, "Foreign exchange.", sis); 
+		assertDocHasFieldValue("229800", fldName, "Commodity exchanges.");  
+		assertDocHasFieldValue("229800", fldName, "Foreign exchange."); 
 	
-		assertSingleResult("229800", fldName, "Commodity exchanges.", sis); 
-		assertSingleResult("229800", fldName, "Foreign exchange.", sis); 
+		assertSingleResult("229800", fldName, "Commodity exchanges."); 
+		assertSingleResult("229800", fldName, "Foreign exchange."); 
 	}	
 
 	/**
@@ -266,22 +265,22 @@ public class SubjectTests extends BibIndexTest {
 	{
         createIxInitVars(testDataFname);
 		String fldName = "geographicStr";
-		assertStringFieldProperties(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertStringFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 	
 	    // trailing period should be stripped
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("651a");
 		docIds.add("651again");
-		assertSearchResults(fldName, "Muppets", docIds, sis);
-		assertSingleResult("651numPeriod", fldName, "7.150", sis);
-		assertSingleResult("651parens", fldName, "\"Syracuse (N.Y.)\"", sis);
-		assertZeroResults(fldName, "\"Syracuse (N.Y.\"", sis);
-		assertZeroResults(fldName, "\"Syracuse (N.Y\"", sis);
-		assertSingleResult("651siberia", fldName, "\"Siberia (Russia)\"", sis);
-		assertZeroResults(fldName, "\"Siberia (Russia).\"", sis);
+		assertSearchResults(fldName, "Muppets", docIds);
+		assertSingleResult("651numPeriod", fldName, "7.150");
+		assertSingleResult("651parens", fldName, "\"Syracuse (N.Y.)\"");
+		assertZeroResults(fldName, "\"Syracuse (N.Y.\"");
+		assertZeroResults(fldName, "\"Syracuse (N.Y\"");
+		assertSingleResult("651siberia", fldName, "\"Siberia (Russia)\"");
+		assertZeroResults(fldName, "\"Siberia (Russia).\"");
 	}
 
 	/**
@@ -294,11 +293,11 @@ public class SubjectTests extends BibIndexTest {
 	{
         createIxInitVars(testDataFname);
 		String fldName = "fullgeographic";
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 
-		assertSingleResult("6280316", fldName, "Tennessee", sis); 
-		assertSingleResult("6280316", fldName, "Arkansas", sis); 
+		assertSingleResult("6280316", fldName, "Tennessee"); 
+		assertSingleResult("6280316", fldName, "Arkansas"); 
 	}	
 
 	/**
@@ -311,40 +310,40 @@ public class SubjectTests extends BibIndexTest {
 	{
 		String fldName = "era";
 		createIxInitVars("eraTests.mrc");
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertFieldMultiValued(fldName);
+		assertStringFieldProperties(fldName);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
 	
 	    // trailing period should be stripped
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("650y");
 		docIds.add("666");
-		assertSearchResults(fldName, "\"20th century\"", docIds, sis);
+		assertSearchResults(fldName, "\"20th century\"", docIds);
 	    
 	    // trailing period stripped after 3 digit year
 		docIds.clear();
 		docIds.add("888");
 		docIds.add("999");
-		assertSearchResults(fldName, "\"To 449\"", docIds, sis);
-	    assertZeroResults(fldName, "\"To 449.\"", sis);
+		assertSearchResults(fldName, "\"To 449\"", docIds);
+	    assertZeroResults(fldName, "\"To 449.\"");
 	    
 	    // trailing period stripped after 4 digit year
-	    assertSingleResult("111", fldName, "\"449-1066\"", sis);
+	    assertSingleResult("111", fldName, "\"449-1066\"");
 	    
 	    // trailing dash - period NOT stripped
-	    assertSingleResult("222", fldName, "\"1921-\"", sis);
+	    assertSingleResult("222", fldName, "\"1921-\"");
 	    
 	    // trailing period NOT stripped
-	    assertSingleResult("777", fldName, "\"Roman period, 55 B.C.-449 A.D.\"", sis);
+	    assertSingleResult("777", fldName, "\"Roman period, 55 B.C.-449 A.D.\"");
 	    
 		// no longer assigning "other" when unknown (just leaving value out)
-	    assertZeroResults(fldName, "other", sis);
+	    assertZeroResults(fldName, "other");
 /*
 	    docIds.clear();
 	    docIds.add("no650or045a");
 	    docIds.add("no650but045a");
-	    assertSearchResults(fldName, "other", docIds, sis);
+	    assertSearchResults(fldName, "other", docIds);
 */
 	}
 
@@ -357,12 +356,12 @@ public class SubjectTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException
 	{
 //        createIxInitVars(testDataFname);
-		assertFieldPresent(fldName, sis);
-		assertFieldIndexed(fldName, solrCore);
-		assertFieldTokenized(fldName, solrCore);
-		assertFieldHasNorms(fldName, solrCore);
-		assertFieldHasNoTermVectors(fldName, solrCore);
-		assertFieldMultiValued(fldName, solrCore);
+//		assertFieldPresent(fldName);
+		assertFieldIndexed(fldName);
+		assertFieldTokenized(fldName);
+		assertFieldHasNorms(fldName);
+		assertFieldHasNoTermVectors(fldName);
+		assertFieldMultiValued(fldName);
 	}
 
 }
