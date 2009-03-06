@@ -26,6 +26,43 @@ public class SolrCoreProxy
         return solrCore;
     }
     
+    public boolean checkSchemaField(String fldName, String fieldOrType, String conditionName)
+    {
+        final String conditionNames[] = { "indexed", "stored", "multiValued", "omitNorms", "storeTermVector", "isTokenized"};
+        String nameCheck = null;
+        for (String name : conditionNames)
+        {
+            if (name.equals(conditionName)) 
+            {
+                nameCheck = name;
+                break;
+            }
+        }
+        if (nameCheck == null)
+        {
+            return(false);
+        }
+        String schemaMethod = fieldOrType.equals("type") ? "getFieldType" : "getFieldOrNull";
+        try        
+        {
+            Object schema = solrCore.getClass().getMethod("getSchema").invoke(solrCore);
+            Object schemaField = schema.getClass().getMethod(schemaMethod, String.class).invoke(schema, fldName);
+            if (schemaField != null)
+            {
+                Object booleanResp = schemaField.getClass().getMethod(nameCheck).invoke(schemaField);
+                if (booleanResp instanceof Boolean) 
+                {
+                    return(((Boolean)booleanResp).booleanValue());
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return(false);
+    }
     /**
      * return true if exception is a SolrException
      */
@@ -113,6 +150,35 @@ public class SolrCoreProxy
         invokeUpdateHandlerMethodNoArgs("delete", deleteUpdateCommand);
     }
 
+    /**
+     * delete all docs from the index
+     * Warning: be very sure you want to call this
+     */
+    public void deleteAllDocs() throws IOException
+    {
+        initializeDeleteObjects();
+        
+        setObjFldVal(deleteUpdateCommand, "query", "*:*");
+        setObjFldVal(deleteUpdateCommand, "fromCommitted", true);
+        setObjFldVal(deleteUpdateCommand, "fromPending", true);
+        
+        invokeUpdateHandlerMethodNoArgs("deleteByQuery", deleteUpdateCommand);
+        commit(true);
+                
+        updateHandler = null;
+        
+//        try
+//        {
+//            Thread.sleep(1000);
+//        }
+//        catch (InterruptedException e)
+//        {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//
+    }
+
     
     /**
      * commit changes to the index
@@ -121,6 +187,8 @@ public class SolrCoreProxy
     {
         initializeCommitObjects();
         setObjFldVal(commitUpdateCommand, "optimize", optimize);
+        setObjFldVal(commitUpdateCommand, "waitFlush", true);
+        setObjFldVal(commitUpdateCommand, "waitSearcher", true);
         invokeUpdateHandlerMethodNoArgs("commit", commitUpdateCommand);
     }
 

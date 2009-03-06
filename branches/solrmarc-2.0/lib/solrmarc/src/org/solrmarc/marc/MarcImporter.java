@@ -70,9 +70,9 @@ public class MarcImporter extends MarcHandler
     	
     	loadLocalProperties(configProps);
         // Set up Solr core
-        solrCoreProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, null, logger);
+        solrCoreProxy = getSolrCoreProxy();
 	}
-	
+    	
     /**
 	 * Load the properties file
 	 * @param properties
@@ -310,7 +310,7 @@ public class MarcImporter extends MarcHandler
         //System.out.println("Done with commit, closing Solr");
         logger.info("Done with the commit, closing Solr");
         solrCoreProxy.close();
-
+        solrCoreProxy = null;
         logger.info("Setting Solr closed flag");
         isShutDown = true;
     }
@@ -437,6 +437,15 @@ public class MarcImporter extends MarcHandler
         logger.info("Deleted " + numDeleted + " records");
         
         return(shuttingDown ? 1 : 0);
+    }
+
+    public SolrCoreProxy getSolrCoreProxy()
+    {
+        if (solrCoreProxy == null)
+        {
+            solrCoreProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, null, logger);
+        }
+        return(solrCoreProxy);
     }
     
     /**
