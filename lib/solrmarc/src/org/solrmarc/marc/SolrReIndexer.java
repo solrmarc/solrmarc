@@ -21,6 +21,7 @@ import org.marc4j.*;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
 
+import org.solrmarc.solr.DocumentProxy;
 import org.solrmarc.solr.SolrCoreLoader;
 import org.solrmarc.solr.SolrCoreProxy;
 import org.solrmarc.solr.SolrSearcherProxy;
@@ -118,7 +119,7 @@ public class SolrReIndexer extends MarcImporter
             int count = 0;
             while (solrSearcherProxy.iteratorHasNext(docSetIterator))
             {
-                Object doc = solrSearcherProxy.iteratorGetNext(docSetIterator);
+                DocumentProxy doc = solrSearcherProxy.iteratorGetNextDoc(docSetIterator);
     //            count ++;
     //            if (count == 100 || count == 1000 || count == 10000 || count % 10000 == 0)
     //            {
@@ -155,7 +156,7 @@ public class SolrReIndexer extends MarcImporter
      * @param doc
      * @param map
      */
-    protected void addExtraInfoFromDocToMap(Object doc, Map<String, Object> docMap)
+    protected void addExtraInfoFromDocToMap(DocumentProxy doc, Map<String, Object> docMap)
     {
         addExtraInfoFromDocToMap(doc, docMap, "fund_code_facet");
         addExtraInfoFromDocToMap(doc, docMap, "date_received_facet");   
@@ -167,18 +168,10 @@ public class SolrReIndexer extends MarcImporter
      * @param map Map to add information to
      * @param keyVal Value to add
      */
-    protected void addExtraInfoFromDocToMap(Object doc, Map<String, Object> map, String keyVal)
+    protected void addExtraInfoFromDocToMap(DocumentProxy doc, Map<String, Object> map, String keyVal)
     {
         String fieldVals[] = null;
-        try
-        {
-            fieldVals = (String[])doc.getClass().getMethod("getValues", String.class).invoke(doc, keyVal);
-        }
-        catch (Exception e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        fieldVals = doc.getValuesForField(keyVal);
         if (fieldVals != null && fieldVals.length > 0)
         {
             for (int i = 0; i < fieldVals.length; i++)
@@ -208,19 +201,11 @@ public class SolrReIndexer extends MarcImporter
      * @return marc4j Record
      * @throws IOException
      */
-    public Record getRecordFromDocument(Object doc) throws IOException
+    public Record getRecordFromDocument(DocumentProxy doc) throws IOException
     {
-        Object field = null;
-        try
-        {
-            field = doc.getClass().getMethod("getField", String.class).invoke(doc, solrFieldContainingEncodedMarcRecord);
-        }
-        catch (Exception e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        if (field == null)
+        String fields[] = null;
+        fields = doc.getValuesForField(solrFieldContainingEncodedMarcRecord);
+        if (fields == null || fields.length == 0)
         {
             //System.err.println("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
         	logger.warn("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
@@ -228,7 +213,7 @@ public class SolrReIndexer extends MarcImporter
         String marcRecordStr = null;
         try
         {
-            if (field != null) marcRecordStr = (String)field.getClass().getMethod("stringValue").invoke(field);
+            if (fields[0] != null) marcRecordStr = fields[0];
         }
         catch (Exception e)
         {

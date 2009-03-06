@@ -27,6 +27,9 @@ public abstract class MarcHandler {
 	protected String addnlArgs[] = null;
 	protected Properties configProps;
 	protected boolean inputTypeXML = false;
+	protected boolean permissiveReader;
+	protected String defaultEncoding;
+    protected boolean to_utf_8;
 	
 	private String solrmarcPath;
 	private String siteSpecificPath;
@@ -37,7 +40,7 @@ public abstract class MarcHandler {
 	
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcHandler.class.getName());
-	
+	    
 	public MarcHandler(String args[])
 	{
         String configProperties = GetDefaultConfig.getConfigName("config.properties");
@@ -54,6 +57,10 @@ public abstract class MarcHandler {
                 {
                     System.setProperty("marc.path", arg);
                     System.setProperty("marc.source", "FILE");
+                }
+                else if (arg.equals("NONE"))
+                {
+                    System.setProperty("marc.source", "NONE");
                 }
                 else if (arg.endsWith(".xml"))
                 {
@@ -103,8 +110,7 @@ public abstract class MarcHandler {
         indexerProps = Utils.getProperty(configProps, "solr.indexer.properties");
 
 
-        boolean permissiveReader = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.permissive"));
-        String defaultEncoding;
+        permissiveReader = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.permissive"));
         if (Utils.getProperty(configProps, "marc.default_encoding") != null)
         {
             defaultEncoding = Utils.getProperty(configProps, "marc.default_encoding").trim();    
@@ -123,13 +129,20 @@ public abstract class MarcHandler {
             System.setProperty("org.marc4j.marc.MarcFactory", Utils.getProperty(configProps, "marc.override").trim());
         }
         reader = null;
+        String fName = Utils.getProperty(configProps, "marc.path");
+        if (fName != null)  fName = fName.trim();
+        
+        loadReader(source, fName);
+	}
+	
+	public void loadReader(String source, String fName)
+	{       
         if (source.equals("FILE") || source.equals("STDIN"))
         {
         	InputStream is = null;
         	if (source.equals("FILE")) 
         	{
-        		String fName = Utils.getProperty(configProps, "marc.path").trim();
-        		if (fName.toLowerCase().endsWith(".xml")) 
+        		if (fName != null && fName.toLowerCase().endsWith(".xml")) 
         		    inputTypeXML = true;
         		try {
 					is = new FileInputStream(fName);
