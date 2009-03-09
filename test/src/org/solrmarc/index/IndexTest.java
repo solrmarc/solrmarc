@@ -51,9 +51,13 @@ public abstract class IndexTest {
         if (solrPath != null)  
         {
             System.setProperty("solr.path", solrPath);
-            if (solrDataDir != null)
-                System.setProperty("solr.data.dir", solrDataDir);
+            if (solrDataDir == null)
+            {
+                solrDataDir = solrPath + File.separator + "data";
+            }
+            System.setProperty("solr.data.dir", solrDataDir);
         }
+        deleteDirContents(solrDataDir);
         if (configPropFilename != null)
         {
             importer = new MarcImporter(new String[]{configPropFilename, testDataParentPath + File.separator + testDataFname});
@@ -62,7 +66,7 @@ public abstract class IndexTest {
         {
             importer = new MarcImporter(new String[]{testDataParentPath + File.separator + testDataFname});
         }
-        importer.getSolrCoreProxy().deleteAllDocs();
+      //  importer.getSolrCoreProxy().deleteAllDocs();
         
         int numImported = importer.importRecords();       
         importer.finish();
@@ -136,6 +140,19 @@ public abstract class IndexTest {
 	{
 	    // avoid "already closed" exception
 	    logger.info("Calling teardown to close importer");
+        if (searcherProxy != null) 
+        {
+            logger.info("Closing searcher");
+            searcherProxy.close();
+            searcherProxy = null;
+        }
+        if (solrCoreProxy != null)
+        {
+            logger.info("Closing solr");
+ //           solrCoreProxy.close();
+            solrCoreProxy = null;
+        }
+	    
 	    importer.finish();
 	    importer = null;
 	}
@@ -184,35 +201,35 @@ public abstract class IndexTest {
 //	}
 
 	
-//	/**
-//	 * delete the directory indicated by the argument.
-//	 * @param dirPath - path of directory to be deleted.
-//	 */
-//	public static final void deleteDirContents(String dirPath) {
-//		File d = new File(dirPath);
-//		File[] files = d.listFiles();
-//		if (files != null)	
-//			for (File file: files)
-//			{	// recursively remove files and directories
-//				deleteDir(file.getAbsolutePath());
-//			}
-//	}
-//	
-//	/**
-//	 * delete the directory indicated by the argument.
-//	 * @param dirPath - path of directory to be deleted.
-//	 */
-//	public static final void deleteDir(String dirPath) {
-//		File d = new File(dirPath);
-//		File[] files = d.listFiles();
-//		if (files != null)	
-//			for (File file: files)
-//			{	// recursively remove files and directories
-//				deleteDir(file.getAbsolutePath());
-//			}
-//		d.delete();
-//	}
-//
+	/**
+	 * delete the directory indicated by the argument.
+	 * @param dirPath - path of directory to be deleted.
+	 */
+	public static final void deleteDirContents(String dirPath) {
+		File d = new File(dirPath);
+		File[] files = d.listFiles();
+		if (files != null)	
+			for (File file: files)
+			{	// recursively remove files and directories
+				deleteDir(file.getAbsolutePath());
+			}
+	}
+	
+	/**
+	 * delete the directory indicated by the argument.
+	 * @param dirPath - path of directory to be deleted.
+	 */
+	public static final void deleteDir(String dirPath) {
+		File d = new File(dirPath);
+		File[] files = d.listFiles();
+		if (files != null)	
+			for (File file: files)
+			{	// recursively remove files and directories
+				deleteDir(file.getAbsolutePath());
+			}
+		d.delete();
+	}
+
     /**
      * assert there is a single doc in the index with the value indicated
      * @param docId - the identifier of the SOLR/Lucene document
