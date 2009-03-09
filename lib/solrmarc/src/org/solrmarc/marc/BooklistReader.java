@@ -40,12 +40,20 @@ public class BooklistReader extends SolrReIndexer
      */
     public BooklistReader(String args[]) 
     {
-        super(new String[0]);
+        super(addArg(args, "NONE"));
         loadLocalProperties(configProps);
         processAdditionalArgs(args);
         documentCache = new LinkedHashMap<String, Map<String, Object>>();
     }
-
+    
+    static String[] addArg(String args[], String toAdd)
+    {
+        String result[] = new String[args.length + 1];
+        System.arraycopy(args, 0, result, 1, args.length);
+        result[0] = toAdd;
+        return(result);
+    }
+    
     private void loadLocalProperties(Properties props)
     {
         if (solrFieldContainingEncodedMarcRecord == null) 
