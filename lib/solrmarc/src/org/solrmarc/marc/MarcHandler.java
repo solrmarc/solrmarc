@@ -121,7 +121,7 @@ public abstract class MarcHandler {
         }
         verbose = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.verbose"));
         includeErrors = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.include_errors"));
-        boolean to_utf_8 = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.to_utf_8"));
+        to_utf_8 = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.to_utf_8"));
         boolean unicodeNormalize = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.unicode_normalize"));
         String source = Utils.getProperty(configProps, "marc.source", "STDIN").trim();
         if (Utils.getProperty(configProps, "marc.override")!= null)
