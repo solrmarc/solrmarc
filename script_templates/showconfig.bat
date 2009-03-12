@@ -7,10 +7,10 @@ for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
 set jar=
 set config=
 
-for /f "delims=" %%a in ('echo %1 ^| egrep "\.jar$"') do @set jar=%%a
-for /f "delims=" %%a in ('echo %1 ^| egrep "config\.properties$"') do @set config=%%a
-for /f "delims=" %%a in ('echo %2 ^| egrep "\.jar$"') do @set jar=%%a
-for /f "delims=" %%a in ('echo %2 ^| egrep "config\.properties$"') do @set config=%%a
+for /f "delims=" %%a in ('echo %1 ^| findstr "\.jar$"') do @set jar=%%a
+for /f "delims=" %%a in ('echo %1 ^| findstr "config\.properties$"') do @set config=%%a
+for /f "delims=" %%a in ('echo %2 ^| findstr "\.jar$"') do @set jar=%%a
+for /f "delims=" %%a in ('echo %2 ^| findstr "config\.properties$"') do @set config=%%a
 
 if "%jar%" == ""  set jar=%scriptdir%@CUSTOM_JAR_NAME@
 set defconfig=

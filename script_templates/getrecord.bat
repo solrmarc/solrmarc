@@ -9,7 +9,7 @@ for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
 set inarg=%1
 
 set arg1=-
-for /f "delims=" %%a in ('echo %inarg% ^| egrep "\.mrc"') do @set arg1=%%a
+for /f "delims=" %%a in ('echo %inarg% ^| findstr "\.mrc"') do @set arg1=%%a
 
 if "%arg1%" EQU "-" set arg2=%1
 if "%arg1%" NEQ "-" set arg2=%2
@@ -17,4 +17,4 @@ if "%arg1%" NEQ "-" set arg2=%2
 if "%arg1%" EQU "-" set arg3=%2 
 if "%arg1%" NEQ "-" set arg3=%3
 
-echo java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.RawRecordReader" -jar %scriptdir%@CUSTOM_JAR_NAME@ %arg1% %arg2% %arg3%
+java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.RawRecordReader" -jar %scriptdir%@CUSTOM_JAR_NAME@ %arg1% %arg2% %arg3%
