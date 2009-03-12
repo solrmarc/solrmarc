@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<project>
-    <property name="lowercase.dist.dir" value="./dist" />   
-    <taskdef name="lowercase" classname="org.solrmarc.ant.LowerCase" 
-        classpath="${lowercase.dist.dir}/lowercase-ant-task.jar" onerror="report" />
-
-</project>
