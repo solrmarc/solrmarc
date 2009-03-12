@@ -11,8 +11,8 @@
     <!-- import other ant scripts -->
     <property name="one-jar.dist.dir" value="${buildtools.path}" />
     <import file="${buildtools.path}/one-jar-ant-task.xml"/>
-    <property name="lowercase.dist.dir" value="${buildtools.path}" />
-    <import file="${buildtools.path}/lowercase-ant-task.xml"/>
+    <property name="ant_extras.dist.dir" value="${buildtools.path}" />
+    <import file="${buildtools.path}/ant_extras.xml"/>
     
     <tstamp>
         <format property="year" pattern="yyyy" />
@@ -28,7 +28,7 @@
         <delete dir="${tag.dir}" />
     </target>
 
-    <target name="init" depends="init_site,init_site_finish,solrversion,solrwarlocation" 
+    <target name="init" depends="init_site,solrversion" unless="init.already.run"
         description="create (empty) generated directories">
         <mkdir dir="${build.dir}" />
         <mkdir dir="${dist.dir}" />
@@ -40,111 +40,256 @@
             <fileset dir="${lib.dir}/solrmarc/dist" includes="*.jar" />
             <fileset dir="${site.lib.dir}" includes="*.jar" />
         </path>
+        <property name="init.already.run" value="true" />
     </target>
 
     <target name="dependencies" depends="solrversion"  description="Build the core SolrMarc code" >
         <ant dir="${lib.dir}/solrmarc" target="build" inheritAll="false"/>
     </target>
    
-    <target name="init_site" description="Create the src, lib, bin, test directories for a custom site"
-            unless="site.dir">
-        <input message="Enter name of directory to contain all site-specific modifications:"       
-            addproperty="site.dir" />
-        <propertyfile file="build_override.properties">
-            <entry key="site.dir" value="${site.dir}" />
-        </propertyfile>
-        <mkdir dir="${site.dir}" />
+    <macrodef name="init_site_props">
+        <sequential>
+            <property name="site.src.dir" value="${site.dir}/${src.dir}" />
+            <property name="site.lib.dir" value="${site.dir}/${lib.dir}" />
+            <property name="site.build.dir" value="${site.dir}/${build.dir}" />
+            <property name="site.test.dir" value="${site.dir}/${test.dir}" />
+            <property name="site.test.src.dir" value="${site.test.dir}/${src.dir}" />
+            <property name="site.test.solr.dir" value="${site.test.dir}/solr" />
+            <property name="site.map.dir" value="${site.dir}/${trans.map.path}" />
+            <property name="site.script.dir" value="${site.dir}/${script.template.dir}" />
+
+            <property file="${site.dir}/build_override.properties" /> 
+            <property file="${site.dir}/build.properties" />
+        </sequential>
+    </macrodef>
+
+    <macrodef name="get_indexer_class" >
+        <sequential>
+            <fileset id="custom_indexer_source" dir="${site.src.dir}" includes="**/*.java" >
+                <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+SolrIndexer"/>
+            </fileset>
+    
+            <condition property="custom.index.source.exists">
+                <resourcecount count="0" when="gt" refid="custom_indexer_source" />
+            </condition>
+            
+            <property name="custom.indexer.source" refid="custom_indexer_source" />
+            
+            <if>
+                <resourcecount count="0" when="gt" refid="custom_indexer_source" />
+                <then>
+                    <pathconvert property="custom.indexer.class" refid="custom_indexer_source">
+                        <chainedmapper>
+                            <regexpmapper from="^.*src[/\\](.*java)$$" to="\1" />
+                            <packagemapper from="*.java" to="*"/>
+                        </chainedmapper>
+                    </pathconvert>
+                </then>
+                <else>
+                    <property name="custom.indexer.class" value="org.solrmarc.index.SolrIndexer" />
+                </else>
+            </if>
+            
+            <echo message="custom.indexer.source = ${custom.indexer.source}" />
+            <echo message="custom.indexer.class = ${custom.indexer.class}" />
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="get_properties_for_config_file" >
+        <sequential>
+            <input message="Enter URL of where solr server will be located:" addproperty="solr.hosturl"  
+                defaultvalue="http://localhost:8983/solr" />
+         <!--   <get src="${solr.hosturl}" dest="${dist.dir}/_hostResp.txt" ignoreerrors="true" /> --> 
+            <input message="Enter full path of Solr home directory:${line.separator}(Note: directory should contain 'conf' directory containing solrconfig.xml and schema.xml) " 
+                addproperty="solr.path" defaultvalue="" />
+            <condition property="solr.path.available" >
+                <and>
+                    <available file="${solr.path}/conf/solrconfig.xml" />
+                    <available file="${solr.path}/conf/schema.xml" />
+                </and>
+            </condition>
+            <fail message="Unable to find both solrconfig.xml and schema.xml in conf directory under specified solr home."  unless="solr.path.available" />
+            
+            <get_indexer_class/>
+            
+            <property name="solr.indexer" value="${custom.indexer.class}" />
+            <property name="solr.indexer.properties"   value="${custom.config.file.prefix}_index.properties" /> 
+            <input message="Enter encoding used in MARC records to be read in:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You have no idea what encoding your records are in, and want the program to try to determine it." 
+                addproperty="marc.default_encoding"  validargs="MARC8,UNIMARC,UTF-8,BESTGUESS" defaultvalue="MARC8" />
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="get_site_specific_settings" >
+        <sequential>
+            <input-save message="Enter name to use for Jar File containing custom indexing functions${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
+                addproperty="custom.jar.name" defaultvalue="Custom"  propertyfile="${site.dir}/build_override.properties" />
+            <lowercase property="custom.jar.name.lc" value="${custom.jar.name}" />
+            <echo message="lowercase = ${custom.jar.name.lc}" level="verbose" />
+            
+            <input-save message="Enter prefix of properties files for config and index for custom modifications ${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
+                addproperty="custom.config.file.prefix" defaultvalue="${custom.jar.name.lc}"  propertyfile="${site.dir}/build_override.properties" />
+            <input-save message="Enter name to use for final resulting Jar File containing all code, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
+                addproperty="distribution.jar.name" defaultvalue="${custom.jar.name}_SolrMarc"  propertyfile="${site.dir}/build_override.properties" />
+            <input-save message="Enter java heap size memory argument to put in generated scripts for running site-specific SolrMarc Indexer "
+                addproperty="exe.mem.args" defaultvalue="-Xmx256m" propertyfile="${site.dir}/build_override.properties" />
+
+        </sequential>
+    </macrodef>
+    
+    <target name="init_site" description="Create the src, lib, bin, test directories for a custom site" unless="init_site.already.run" >
+        <input-save message="Enter name of directory to contain all site-specific modifications:"       
+            addproperty="site.dir" propertyfile="build_override.properties" />
+        <init_site_props /> 
+
+        <echo message="site.test.solr.dir = ${site.test.solr.dir}" />
+        <if>
+            <and> 
+                <available file="${site.dir}" /> 
+                <resourcecount count="2" when="ge">
+                    <fileset dir="${site.dir}" includes="*_config.properties,*_index.properties" />
+                </resourcecount>  
+            </and> 
+            <then>
+                <echo message="site_dir ${site.dir} already inited skipping forward. "/>
+                <get_indexer_class />
+            </then>
+            <else>
+                <mkdir dir="${site.dir}" />
+                <pathconvert property="example.dir.list" pathsep="," >
+                    <path >
+                        <dirset dir="examples" includes="*" />
+                    </path>
+                    <flattenmapper />
+                </pathconvert>
+                <input message="Enter name of example configuration to start from:"  addproperty="example.configuration"
+                        validargs="${example.dir.list},none" defaultvalue="none" />
+                <if >
+                    <equals arg1="${example.configuration}" arg2="none" />
+                    <then>
+                        <mkdir dir="${site.src.dir}" />
+                        <mkdir dir="${site.build.dir}" />
+                        <mkdir dir="${site.lib.dir}" />
+                        <mkdir dir="${site.test.dir}" />
+                        <mkdir dir="${site.test.src.dir}" />
+                        <mkdir dir="${site.test.solr.dir}" />
+                        <mkdir dir="${site.map.dir}" /> 
+                        <mkdir dir="${site.script.dir}" /> 
+                        <get_site_specific_settings />
+
+                        <echo message="custom.jar.name = ${custom.jar.name}" />
+                        <antcall target="create_config" />
+                        <touch file="${site.dir}/${custom.config.file.prefix}_index.properties" />
+                        <echo message="Directory created for site specific code in directory: ${site.dir}" />
+                        <echo message="------------------------------------------------------------------------------------" />
+                        <echo message="A configuration file (named ${custom.config.file.prefix}_config.properties)  and " />
+                        <echo message="an empty index specification file (named ${custom.config.file.prefix}_index.properties  were  "/>
+                        <echo message="created for you in that directory, as well as a number of directories, "/>
+                        <echo message="most of which are currently empty. These directories are:"/>
+                        <echo message="    ${src.dir} - where you should place the source code for any custom indexing functions needed by your index specification"/>
+                        <echo message="    ${trans.map.path} - where you should place any translation map properties files needed by your index specification"/>
+                        <echo message="    ${lib.dir} - where you should place any jar files needed by your custom indexing functions"/>
+                        <echo message="    ${script.template.dir} - where you should place any shell scripts and/or batch files to be copied to the ${dist.dir} "/>
+                        <echo message="Note: you must create the index specification file before you will be able to "/>
+                        <echo message="      finish the build process or successfully index any MARC files." />                        
+                    </then>
+                    <else>
+                        <copy todir="${site.dir}" >
+                            <fileset dir="examples/${example.configuration}" includes="src/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,build.properties" />
+                        </copy>
+                        <property file="${site.dir}/build.properties" />
+                        <get_site_specific_settings />
+                        <get_properties_for_config_file />
+                        <copy todir="${site.dir}" >
+                            <fileset dir="examples/${example.configuration}" includes="*_config.properties,*_index.properties" />
+                            <regexpmapper from="^[^_]*(.*)" to="${custom.config.file.prefix}\1"/>
+                            <tokenfilter>
+                                <linetokenizer/>
+                                <replaceregex pattern="(solr.path *=).*" replace="\1 ${solr.path}"/>
+                                <replaceregex pattern="(solr.hosturl *=).*" replace="\1 ${solr.hosturl}/update"/>
+                                <replaceregex pattern="(solr.indexer *=).*" replace="\1 ${solr.indexer}"/>
+                                <replaceregex pattern="(solr.indexer.properties *=).*" replace="\1 ${solr.indexer.properties}"/>
+                                <replaceregex pattern="(marc.default_encoding *=).*" replace="\1 ${marc.default_encoding}"/>
+                            </tokenfilter>
+                        </copy>
+                    </else>
+                </if>
+            </else>
+        </if>
+        <property name="init_site.already.run" value="true" />
      </target>
     
-    <target name="init_site_finish" if="site.dir" >
         
-        <property name="site.src.dir" value="${site.dir}/${src.dir}" />
-        <property name="site.lib.dir" value="${site.dir}/${lib.dir}" />
-        <property name="site.build.dir" value="${site.dir}/${build.dir}" />
-        <property name="site.test.dir" value="${site.dir}/${test.dir}" />
-        <property name="site.test.src.dir" value="${site.test.dir}/${src.dir}" />
-        <property name="site.test.solr.dir" value="${site.test.dir}/solr" />
-        <property name="site.map.dir" value="${site.dir}/${trans.map.path}" />
-        <property name="site.script.dir" value="${site.dir}/${script.template.dir}" />
-        <mkdir dir="${site.src.dir}" />
-        <mkdir dir="${site.build.dir}" />
-        <mkdir dir="${site.lib.dir}" />
-        <mkdir dir="${site.test.dir}" />
-        <mkdir dir="${site.test.src.dir}" />
-        <mkdir dir="${site.test.solr.dir}" />
-        <mkdir dir="${site.map.dir}" /> 
-        <mkdir dir="${site.script.dir}" /> 
+    <!-- Solr Version Properties Targets -->
+    <target name="solrversion" description="Set the version of Solr to use" unless="solrversion.already.run">
+        <input-save message="solr.version must be defined as either 1.2, 1.3, or 1.4 (or war)" 
+            validargs="1.2,1.3,1.4,war" 
+            addproperty="solr.version" defaultvalue="war"  propertyfile="${site.dir}/build_override.properties" />
+        <if>
+            <equals arg1="${solr.version}" arg2="war" />
+            <then>
+                <property name="solr.version.war" value="true" />
+                <if>
+                    <not> <isset property="${solr.war.location}" /> </not>
+                    <then>
+                        <input message="Enter full path of where solr.war file is located:" addproperty="solr.war.location" />
+                        <condition property="war.exists">
+                            <available file="${solr.war.location}" />
+                        </condition>
+                        <fail unless="war.exists">Solr.war file ${solr.war.location} does not exist</fail>
+                        <propertyfile file="${site.dir}/build_override.properties">
+                            <entry key="solr.war.location" value="${solr.war.location}" />
+                        </propertyfile>
+                    </then>
+                </if>
+                <delete dir="${lib.dir}/solr_war" />
+                <mkdir dir="${lib.dir}/solr_war" />
+                <unwar src="${solr.war.location}" dest="${lib.dir}/solr_war" overwrite="true">
+                    <patternset>
+                        <include name="**/lucene-*.jar" />
+                        <include name="**/apache-solr-*.jar" />
+                        <include name="**/slf4j*.jar" />
+                    </patternset>
+                    <mapper type="flatten" />
+                </unwar>
+            </then>
+        </if>
+        <property name="solrversion.already.run" value="true" />
+    </target>
 
-        <property file="${site.dir}/build_override.properties" /> 
-        <property file="${site.dir}/build.properties" />
-      
-        <input message="Enter name to use for Jar File containing custom indexing functions, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
-            addproperty="custom.jar.name" defaultvalue="Custom"/>
-        <lowercase property="custom.jar.name.lc" value="${custom.jar.name}" />
-        <echo message="lowercase = ${custom.jar.name.lc}" level="verbose" />
+    <target name="check_config_exists" >
+        <condition property="config.exists" >
+            <available file="${site.dir}/${custom.config.file.prefix}_config.properties" /> 
+        </condition>
+        <condition property="index.exists" >
+            <available file="${site.dir}/${custom.config.file.prefix}_index.properties" /> 
+        </condition>
         
-        <input message="Enter prefix of properties files for config and index for custom modifications ${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
-            addproperty="custom.config.file.prefix" defaultvalue="${custom.jar.name.lc}" />
-        <input message="Enter name to use for final resulting Jar File containing all code, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
-            addproperty="distribution.jar.name" defaultvalue="${custom.jar.name}_SolrMarc"/>
-        <input message="Enter java heap size memory argument to put in generated scripts for running site-specific SolrMarc Indexer "
-            addproperty="exe.mem.args" defaultvalue="-Xmx256m"/>
+    </target>
 
-        <propertyfile file="${site.dir}/build_override.properties">
-            <entry key="custom.config.file.prefix" value="${custom.config.file.prefix}" />
-            <entry key="distribution.jar.name" value="${distribution.jar.name}" />
-            <entry key="custom.jar.name" value="${custom.jar.name}" />
-            <entry key="exe.mem.args" value="${exe.mem.args}" />
-        </propertyfile>
-
-        <echo message="custom.jar.name = ${custom.jar.name}" />
+    <target name="create_config" depends="check_config_exists" unless="config.exists" >
+        <get_properties_for_config_file />
+        <property name="marc.to_utf_8"   value="true" />
+        <property name="marc.permissive"   value="true" />
+        <property name="marc.include_errors" value="false" />
+        <copy file="${buildtools.path}/template_config.properties" tofile="${site.dir}/${custom.config.file.prefix}_config.properties" >
+            <filterset>
+                <filter token="SOLR_PATH" value="${solr.path}" />
+                <filter token="SOLR_INDEXER" value="${solr.indexer}" />
+                <filter token="SOLR_INDEXER_PROPERTIES" value="${solr.indexer.properties}" />
+                <filter token="SOLR_HOSTURL" value="${solr.hosturl}/update" />
+                <filter token="MARC_TO_UTF_8" value="${marc.to_utf_8}" />
+                <filter token="MARC_PERMISSIVE" value="${marc.permissive}" />
+                <filter token="MARC_DEFAULT_ENCODING" value="${solr.hosturl}/update" />
+                <filter token="MARC_TO_UTF_8" value="${marc.default_encoding}" />
+                <filter token="MARC_INCLUDE_ERRORS" value="${marc.include_errors}" />
+            </filterset>
+        </copy>
     </target>
     
-    <!-- Solr Version Properties Targets -->
-    <target name="solrversion" unless="${solr.version}" description="Set the version of Solr to use" >
-        <input message="solr.version must be defined as either 1.2, 1.3, or 1.4 (or war)" 
-            validargs="1.2,1.3,1.4,war" 
-            addproperty="solr.version" defaultvalue="war" />
-        <propertyfile file="${site.dir}/build_override.properties">
-            <entry key="solr.version" value="${solr.version}" />
-        </propertyfile>
-    </target>
-
-    <target name="solrversioncheck"  description="Check whether a solr.war file needs to be unbundled to get the Solr jars" >
-        <condition property="solr.version.war">
-            <equals arg1="${solr.version}" arg2="war" />
-        </condition>
-    </target>
-
-    <target name="solrwarlocation" depends="solrversioncheck" if="solr.version.war" unless="solr.war.location"
-                description="Set the location of the solr.war file to unbundle to extract the Solr jars" >
-        <input message="Enter full path of where solr.war file is located:" addproperty="solr.war.location" />
-        <condition property="war.exists">
-            <available file="${solr.war.location}" />
-        </condition>
-        <fail unless="war.exists">Solr.war file ${solr.war.location} does not exist</fail>
-        <propertyfile file="${site.dir}/build_override.properties">
-            <entry key="solr.war.location" value="${solr.war.location}" />
-        </propertyfile>
-    </target>
-
-    <target name="solrlibextract" depends="solrversion,solrwarlocation" if="solr.version.war"
-                description="Unbundle Solr jars from the solr.war file used by the Solr server"> 
-        <mkdir dir="${lib.dir}/solr_war" />
-        <unwar src="${solr.war.location}" dest="${lib.dir}/solr_war" overwrite="true">
-            <patternset>
-                <include name="**/lucene-*.jar" />
-                <include name="**/apache-solr-*.jar" />
-                <include name="**/slf4j*.jar" />
-            </patternset>
-            <mapper type="flatten" />
-        </unwar>
-    </target>
-
-    <target name="compile" depends="init,dependencies,solrlibextract" 
+    <target name="compile" depends="init,dependencies" 
             description="Compile custom source code into the build directory"
-            if="site.dir">
-        <javac destdir="${site.build.dir}" srcdir="${site.src.dir}" 
+            if="custom.index.source.exists">
+         <javac destdir="${site.build.dir}" srcdir="${site.src.dir}" 
                 target="${java.compat.version}" 
                 source="${java.compat.version}" 
                 debug="true" debuglevel="lines,vars,source" 
@@ -158,93 +303,68 @@
         </jar>
     </target>
 
+    <target name="defaultconfig" unless="default.config">
+        <fileset id="config.file.set" dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties"  />
+        <resourcecount property="config.file.cnt" refid="config.file.set" />
+        <if >
+            <equals arg1="${config.file.cnt}" arg2="0" />
+            <then>
+                <property name="default.config" value="" />
+            </then>
+            <elseif>
+            <equals arg1="${config.file.cnt}" arg2="1" />
+            <then>
+                <property name="default.config" value="${config.file.list}" />
+            </then>
+            </elseif>
+            <else>
+                <pathconvert property="config.file.list" pathsep="," >
+                     <path refid="config.file.set" />
+                     <flattenmapper />
+                </pathconvert>
 
-    <target name="defaultconfigcnt" unless="default.config" >
-        <condition property="only.one.config" >
-            <resourcecount when="equal" count="1" >
-                <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties" />
-            </resourcecount>
-        </condition>
-        <condition property="zero.configs" >
-            <resourcecount when="equal" count="0" >
-                <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties" />
-            </resourcecount>
-        </condition>
-        <condition property="several.configs" >
-            <resourcecount when="greater" count="1" >
-                <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties" />
-            </resourcecount>
-        </condition>
-        <pathconvert property="config.file.list" pathsep=",">
-            <path >
-                <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties" />
-            </path>
-            <flattenmapper />
-        </pathconvert>
+                <input-save message="Select the default config file to use if no such file is specified on the command line" 
+                    validargs="${config.file.list}" addproperty="default.config" propertyfile="${site.dir}/build_override.properties" />
+            </else>
+        </if>
     </target>
     
-    <target name="defaultconfig0" if="zero.configs" unless="default.config">
-        <property name="default.config" value="" />
-    </target>
-    
-    <target name="defaultconfig1" if="only.one.config" unless="default.config">
-        <property name="default.config" value="${config.file.list}" />
-    </target>
-    
-    <target name="defaultconfiginput" if="several.configs" unless="default.config">
-        <input message="Select the default config file to use if no such file is specified on the command line" 
-            validargs="${config.file.list}" 
-            addproperty="default.config" />
-    </target>
-
-    <target name="defaultconfig" depends="defaultconfigcnt,defaultconfig0, defaultconfig1, defaultconfiginput" >
-        <propertyfile file="${site.dir}/build_override.properties">
-            <entry key="default.config" value="${default.config}" />
-        </propertyfile>
-    </target>
-    
-    <target name="check_os" >
-        <condition property="os.is.windows">
+    <target name="scripts" depends="init" description="Copy scripts or batch files from script_templates directory to the dist directory" >
+        <if>
             <os family="windows" />
-        </condition>
-    </target>
-        
-    <target name="copy_shell" depends="check_os" unless="os.is.windows" >
-         <copy todir="${dist.dir}" overwrite="true">
-              <fileset dir="${script.template.dir}" includes="*" excludes="*.bat"/>
-              <fileset dir="${site.script.dir}" includes="*" excludes="*.bat"/>
-              <filterchain>
-                  <fixcrlf />
-              </filterchain>
-              <filterset>
-                  <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
-                  <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
-                  <filter token="MEM_ARGS" value="${exe.mem.args}" />
-              </filterset>
-          </copy>
-         
-         <chmod perm="u+x" >
-              <fileset dir="${dist.dir}" excludes="*.jar,*.bat" />
-         </chmod>
-
-    </target>
-     
-    <target name="copy_batch" depends="check_os" if="os.is.windows" >
-        <copy todir="${dist.dir}" overwrite="true">
-              <fileset dir="${script.template.dir}" includes="*.bat" />
-              <fileset dir="${site.script.dir}" includes="*.bat" />
-              <filterchain>
-                  <fixcrlf />
-              </filterchain>
-              <filterset>
-                  <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
-                  <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
-                  <filter token="MEM_ARGS" value="${exe.mem.args}" />
-              </filterset>
-         </copy>
-    </target>   
-    
-    <target name="scripts" depends="copy_shell,copy_batch" >
+            <then>
+                <copy todir="${dist.dir}" overwrite="true">
+                      <fileset dir="${script.template.dir}" includes="*.bat" />
+                      <fileset dir="${site.script.dir}" includes="*.bat" />
+                      <filterchain>
+                          <fixcrlf />
+                      </filterchain>
+                      <filterset>
+                          <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
+                          <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
+                          <filter token="MEM_ARGS" value="${exe.mem.args}" />
+                      </filterset>
+                 </copy>
+            </then>
+            <else>
+                <copy todir="${dist.dir}" overwrite="true">
+                     <fileset dir="${script.template.dir}" includes="*" excludes="*.bat"/>
+                     <fileset dir="${site.script.dir}" includes="*" excludes="*.bat"/>
+                     <filterchain>
+                         <fixcrlf />
+                     </filterchain>
+                     <filterset>
+                         <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
+                         <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
+                         <filter token="MEM_ARGS" value="${exe.mem.args}" />
+                     </filterset>
+                 </copy>
+                
+                <chmod perm="u+x" >
+                     <fileset dir="${dist.dir}" excludes="*.jar,*.bat" />
+                </chmod>
+            </else>
+        </if>
     </target>
     
     <target name="build" depends="compile,defaultconfig" 
@@ -350,7 +470,7 @@
         <echo message=" creating test jar :  ${site.test.dir}/${site.test.jar}" />
         <one-jar destfile="${site.test.dir}/${site.test.jar}" 
                manifest="${buildtools.path}/manifest.mf">
-            <main jar="${buildtools.path}/lowercase-ant-task.jar" />
+            <main jar="${buildtools.path}/ant_extras.jar" />
             <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
             <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties"/>
             <fileset dir="." includes="log4j.properties" />
