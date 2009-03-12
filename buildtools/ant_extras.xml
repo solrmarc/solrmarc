@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<project>
+    <property name="ant_extras.dist.dir" value="./dist" />   
+    
+    <taskdef name="lowercase" classname="org.solrmarc.ant.LowerCase" 
+        classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
+
+    <taskdef name="if" classname="net.sf.antcontrib.logic.IfTask" 
+        classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
+
+    <macrodef name="input-save">
+        <attribute name="message" />
+        <attribute name="validargs" default=""/>
+        <attribute name="addproperty" />
+        <attribute name="defaultvalue" default=""/>
+        <attribute name="propertyfile"/>
+        <sequential>
+            <if>
+                <not>
+                    <isset property="@{addproperty}" />
+                </not>
+                <then>
+                    <sequential>
+                        <if>
+                            <equals arg1="@{validargs}"  arg2="" />
+                            <then>
+                                <if>
+                                    <equals arg1="@{defaultvalue}" arg2="" />
+                                    <then>
+                                        <input message="@{message}" addproperty="@{addproperty}" />
+                                    </then>
+                                    <else>
+                                        <input message="@{message}" addproperty="@{addproperty}" defaultvalue="@{defaultvalue}" />
+                                    </else>
+                                </if>
+                            </then>
+                            <else>
+                                 <if>
+                                    <equals arg1="@{defaultvalue}" arg2="" />
+                                    <then>
+                                        <input message="@{message}" validargs="@{validargs}" addproperty="@{addproperty}" />
+                                    </then>
+                                    <else>
+                                        <input message="@{message}" validargs="@{validargs}" addproperty="@{addproperty}" defaultvalue="@{defaultvalue}" />
+                                    </else>
+                                </if>
+                            </else>
+                        </if>
+                        <propertyfile file="@{propertyfile}" >
+                            <entry key="@{addproperty}" value="${@{addproperty}}" />
+                        </propertyfile>
+                    </sequential>
+                </then>
+            </if>
+         </sequential>
+    </macrodef>
+
+</project>
