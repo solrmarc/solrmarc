@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.DateFormat;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -103,6 +106,7 @@ public class BooklistReader extends SolrReIndexer
             }
             BufferedReader reader = new BufferedReader(input);
             String line;
+            Date today = new Date();
             while ((line = reader.readLine()) != null)
             {
                 if (shuttingDown) break;
@@ -111,6 +115,10 @@ public class BooklistReader extends SolrReIndexer
                 Map<String, String> valuesToAdd = new LinkedHashMap<String, String>();
                 valuesToAdd.put("fund_code_facet", fields[11]);
                 valuesToAdd.put("date_received_facet", fields[0]);
+                DateFormat format = new SimpleDateFormat("yyyyMMdd");
+                Date dateReceived = format.parse(fields[0], new ParsePosition(0));
+                if (dateReceived.after(today)) continue;
+                
                 String docID = "u"+fields[9];
                 Map<String, Object> docMap = getDocumentMap(docID);
                 if (docMap != null)
