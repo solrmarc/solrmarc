@@ -70,19 +70,14 @@ fi
 if [[ "$solrpath" = "" && "$url" != "" ]]
 then
     echo "no solrpath, hitting URL"
-    solrhomeline=`wget -o /dev/null -O - $url/admin | grep SolrHome`
-    if [[ "$solrhomeline" = "" ]]
+
+    solrpath=`java -Done-jar.main.class="org.solrmarc.tools.GetSolrHomeFromServer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $url`
+    
+    if [[ "$solrpath" = "" ]]
     then
         echo "Error: no Solr server currently running at URL: $url"
         exit $E_BADARGS
     fi
-    solrpath=`echo $solrhomeline | sed -e 's/.*SolrHome=//'`
-    case "$solrpath" in
-    /*) ;;
-    *)  solrpathpre=`echo $solrhomeline | sed -e 's/cwd=//' -e 's/ *SolrHome=.*//'`
-        solrpath="$solrpathpre"/"$solrpath" ;;
-    esac
-    solrpath=`echo $solrpath | sed -e 's%/$%%'`
 fi
 
 if [[ ! -d "$solrpath" ]]
