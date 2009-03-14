@@ -89,9 +89,28 @@ public final class Utils {
      */
     public static Properties loadProperties(String propertyPaths[], String propertyFileName)
     {
+        InputStream in = getPropertyFileInputStream(propertyPaths, propertyFileName);
+        String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
+        
+        // load the properties
+        Properties props = new Properties();
+        try
+        {
+            props.load(in);
+            in.close();
+        }
+        catch (IOException e)
+        {
+        	throw new IllegalArgumentException(errmsg);
+        }
+        return props;
+    }
+
+	public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName) 
+	{
+        InputStream in = null;
         // look for properties file in paths
         File propertyFile = new File(propertyFileName);
-        InputStream in = null;
         int pathCnt = 0;
         do 
         {
@@ -144,20 +163,8 @@ public final class Utils {
                 throw new IllegalArgumentException(errmsg);
             }
         }
-        
-        // load the properties
-        Properties props = new Properties();
-        try
-        {
-            props.load(in);
-            in.close();
-        }
-        catch (IOException e)
-        {
-        	throw new IllegalArgumentException(errmsg);
-        }
-        return props;
-    }
+        return(in);
+	}
 
 	/**
 	 * Cleans non-digits from a String
