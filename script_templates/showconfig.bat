@@ -7,32 +7,22 @@ for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
 set jar=
 set config=
 
-for /f "delims=" %%a in ('echo %1 ^| findstr "\.jar$"') do @set jar=%%a
-for /f "delims=" %%a in ('echo %1 ^| findstr "config\.properties$"') do @set config=%%a
-for /f "delims=" %%a in ('echo %2 ^| findstr "\.jar$"') do @set jar=%%a
-for /f "delims=" %%a in ('echo %2 ^| findstr "config\.properties$"') do @set config=%%a
+if "%1" NEQ "" call :set_arg %1
+if "%2" NEQ "" call :set_arg %2
 
 if "%jar%" == ""  set jar=%scriptdir%@CUSTOM_JAR_NAME@
 set defconfig=
 
-java -Done-jar.main.class="org.solrmarc.tools.GetDefaultConfig" -jar %jar% > %tmp%\tmpdefconfig
+java -Done-jar.main.class="org.solrmarc.tools.ConfigDisplayer" -jar %jar% %config%
 
-set /p defconfig= < %tmp%\tmpdefconfig
+goto :done
 
-del %tmp%\tmpdefconfig
+:set_arg
 
-if "%config%" == "" if %jar% NEQ "" @set config=%defconfig%
+set arg=%1
+if "%arg:~-17%" == "config.properties" set config=%arg%
+if "%arg:~-4%" == ".jar" set jar=%arg%
 
-echo %config%
+goto :eof
 
-::tmp=tmp"%random%"
-
-::mkdir %tmp%
-pushd %tmp%
-jar xf %jar% %config% 
-
-cat "%config%" 
-
-popd ..
-del "%tmp%\%config%"
-
+:done
