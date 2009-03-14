@@ -63,9 +63,22 @@
         </sequential>
     </macrodef>
 
+    <macrodef name="make_site_dirs">
+        <sequential>
+        	<mkdir dir="${site.src.dir}" />
+            <mkdir dir="${site.build.dir}" />
+            <mkdir dir="${site.lib.dir}" />
+            <mkdir dir="${site.test.dir}" />
+            <mkdir dir="${site.test.src.dir}" />
+            <mkdir dir="${site.test.solr.dir}" />
+            <mkdir dir="${site.map.dir}" /> 
+            <mkdir dir="${site.script.dir}" /> 
+        </sequential>
+    </macrodef>
+
     <macrodef name="get_indexer_class" >
         <sequential>
-            <fileset id="custom_indexer_source" dir="${site.src.dir}" includes="**/*.java" >
+            <fileset id="custom_indexer_source" dir="${site.dir}" includes="${src.dir}/**/*.java" >
                 <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+SolrIndexer"/>
             </fileset>
     
@@ -100,9 +113,11 @@
             <input message="Enter URL of where solr server will be located:" addproperty="solr.hosturl"  
                 defaultvalue="http://localhost:8983/solr" />
          <!--   <get src="${solr.hosturl}" dest="${dist.dir}/_hostResp.txt" ignoreerrors="true" /> --> 
-            <input message="Enter full path of Solr home directory:${line.separator}(Note: directory should contain 'conf' directory containing solrconfig.xml and schema.xml) " 
-                addproperty="solr.path" defaultvalue="" />
-            <condition property="solr.path.available" >
+            <input-filepath message="Enter full path of Solr home directory:${line.separator}(Note: directory should contain 'conf' directory containing solrconfig.xml and schema.xml) " 
+                addproperty="solr.path" defaultvalue="" />        	
+
+        	<echo message="solr path = ${solr.path} "/>
+        	<condition property="solr.path.available" >
                 <and>
                     <available file="${solr.path}/conf/solrconfig.xml" />
                     <available file="${solr.path}/conf/schema.xml" />
@@ -166,14 +181,7 @@
                 <if >
                     <equals arg1="${example.configuration}" arg2="none" />
                     <then>
-                        <mkdir dir="${site.src.dir}" />
-                        <mkdir dir="${site.build.dir}" />
-                        <mkdir dir="${site.lib.dir}" />
-                        <mkdir dir="${site.test.dir}" />
-                        <mkdir dir="${site.test.src.dir}" />
-                        <mkdir dir="${site.test.solr.dir}" />
-                        <mkdir dir="${site.map.dir}" /> 
-                        <mkdir dir="${site.script.dir}" /> 
+                        <make_site_dirs />
                         <get_site_specific_settings />
 
                         <echo message="custom.jar.name = ${custom.jar.name}" />
@@ -197,19 +205,22 @@
                             <fileset dir="examples/${example.configuration}" includes="src/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,build.properties" />
                         </copy>
                         <property file="${site.dir}/build.properties" />
-                        <get_site_specific_settings />
+                        <make_site_dirs />
+                    	<get_site_specific_settings />
                         <get_properties_for_config_file />
-                        <copy todir="${site.dir}" >
+                        <copy todir="${site.dir}" filtering="true">
                             <fileset dir="examples/${example.configuration}" includes="*_config.properties,*_index.properties" />
                             <regexpmapper from="^[^_]*(.*)" to="${custom.config.file.prefix}\1"/>
-                            <tokenfilter>
-                                <linetokenizer/>
-                                <replaceregex pattern="(solr.path *=).*" replace="\1 ${solr.path}"/>
-                                <replaceregex pattern="(solr.hosturl *=).*" replace="\1 ${solr.hosturl}/update"/>
-                                <replaceregex pattern="(solr.indexer *=).*" replace="\1 ${solr.indexer}"/>
-                                <replaceregex pattern="(solr.indexer.properties *=).*" replace="\1 ${solr.indexer.properties}"/>
-                                <replaceregex pattern="(marc.default_encoding *=).*" replace="\1 ${marc.default_encoding}"/>
-                            </tokenfilter>
+                        	<filterchain>
+                        		<tokenfilter>
+	                                <linetokenizer/>
+	                                <replaceregex pattern="(solr.path *=).*" replace="\1 ${solr.path}"/>
+	                                <replaceregex pattern="(solr.hosturl *=).*" replace="\1 ${solr.hosturl}/update"/>
+	                                <replaceregex pattern="(solr.indexer *=).*" replace="\1 ${solr.indexer}"/>
+	                                <replaceregex pattern="(solr.indexer.properties *=).*" replace="\1 ${solr.indexer.properties}"/>
+	                                <replaceregex pattern="(marc.default_encoding *=).*" replace="\1 ${marc.default_encoding}"/>
+	                            </tokenfilter>
+                            </filterchain>
                         </copy>
                     </else>
                 </if>
@@ -231,7 +242,7 @@
                 <if>
                     <not> <isset property="${solr.war.location}" /> </not>
                     <then>
-                        <input message="Enter full path of where solr.war file is located:" addproperty="solr.war.location" />
+                        <input-filepath message="Enter full path of where solr.war file is located:" addproperty="solr.war.location" />
                         <condition property="war.exists">
                             <available file="${solr.war.location}" />
                         </condition>
@@ -304,29 +315,33 @@
     </target>
 
     <target name="defaultconfig" unless="default.config">
-        <fileset id="config.file.set" dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties"  />
+        <path id="config.file.set" >
+    		<fileset dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties"  />
+    	</path>
         <resourcecount property="config.file.cnt" refid="config.file.set" />
         <if >
             <equals arg1="${config.file.cnt}" arg2="0" />
             <then>
                 <property name="default.config" value="" />
             </then>
-            <elseif>
-            <equals arg1="${config.file.cnt}" arg2="1" />
-            <then>
-                <property name="default.config" value="${config.file.list}" />
-            </then>
-            </elseif>
             <else>
                 <pathconvert property="config.file.list" pathsep="," >
                      <path refid="config.file.set" />
                      <flattenmapper />
                 </pathconvert>
-
-                <input-save message="Select the default config file to use if no such file is specified on the command line" 
-                    validargs="${config.file.list}" addproperty="default.config" propertyfile="${site.dir}/build_override.properties" />
+            	<if>
+            		<equals arg1="${config.file.cnt}" arg2="1" />
+		            <then>
+		                <property name="default.config" value="${config.file.list}" />
+		            </then>
+		            <else>
+		                <input-save message="Select the default config file to use if no such file is specified on the command line" 
+		                    validargs="${config.file.list}" addproperty="default.config" propertyfile="${site.dir}/build_override.properties" />
+		            </else>
+            	</if>
             </else>
         </if>
+    	<echo message="default.config = ${default.config} " />
     </target>
     
     <target name="scripts" depends="init" description="Copy scripts or batch files from script_templates directory to the dist directory" >
@@ -435,11 +450,25 @@
         <property name="test.data.dir" value="${test.dir}/data" />
         <property name="test.data.file" value="u399.mrc" />
 
-        <copy overwrite="true" todir="${site.test.solr.dir}/conf" failonerror="false">
-            <fileset dir="${site.test.solr.conf.override}" includes="*.xml" />
-        </copy>
+    	<if >
+    		<not> <isset property="solr.path" />  </not>
+    		<then>
+    	        <loadproperties srcfile="${site.dir}/${default.config}">
+    	            <filterchain>
+    	                <linecontains>
+    	                    <contains value="solr.path"/>
+    	                </linecontains>
+    	            </filterchain>
+    	        </loadproperties>
+    		</then>
+    	</if>
+    	<property name="site.test.solr.conf.override" value="${solr.path}/conf" />	
+    	
         <copy overwrite="false" todir="${site.test.solr.dir}" >
             <fileset dir="${test.solr.dir}" includes="lib/*.jar,conf/*.*,conf/xslt/*,data" excludes="data/**" />
+        </copy>
+        <copy overwrite="true" todir="${site.test.solr.dir}/conf" failonerror="false">
+            <fileset dir="${site.test.solr.conf.override}" includes="*.xml" />
         </copy>
         <property name="test.class" value="org.solrmarc.index.UtilUnitTests" />
     </target>
