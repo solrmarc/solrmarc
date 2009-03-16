@@ -89,7 +89,7 @@ public class SolrCoreProxy
      * @param fieldsMap - map of field names and values to add to the document
      * @return a string representation of the document
      */
-    public String addDoc(Map<String, Object> fieldsMap, boolean verbose) throws IOException
+    public String addDoc(Map<String, Object> fieldsMap, boolean verbose, boolean addDocToIndex) throws IOException
     {
         initializeAddDocObjects();            
             
@@ -121,16 +121,23 @@ public class SolrCoreProxy
         }
         
         invokeDocBuilderMethodNoArgs("endDoc");
-
-        Object doc = invokeDocBuilderMethodNoArgs("getDoc");
-        setObjFldVal(addUpdateCommand, "doc", doc);
-        setObjFldVal(addUpdateCommand, "allowDups", false);
-        setObjFldVal(addUpdateCommand, "overwriteCommitted", true);
-        setObjFldVal(addUpdateCommand, "overwritePending", true);
         
-        invokeUpdateHandlerMethodNoArgs("addDoc", addUpdateCommand);
+        Object doc = invokeDocBuilderMethodNoArgs("getDoc");
+        
+        if (addDocToIndex)
+        {
+	        setObjFldVal(addUpdateCommand, "doc", doc);
+	        setObjFldVal(addUpdateCommand, "allowDups", false);
+	        setObjFldVal(addUpdateCommand, "overwriteCommitted", true);
+	        setObjFldVal(addUpdateCommand, "overwritePending", true);
+	        
+	        invokeUpdateHandlerMethodNoArgs("addDoc", addUpdateCommand);
+        }
 
-        return doc.toString().replaceAll("> ", "> \n");
+        if (verbose || !addDocToIndex)
+        	return doc.toString().replaceAll("> ", "> \n");
+        else
+        	return(null);
     }
 
     

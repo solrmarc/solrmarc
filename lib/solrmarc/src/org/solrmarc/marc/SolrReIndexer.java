@@ -492,7 +492,7 @@ public class SolrReIndexer extends MarcImporter
     public void update(Map<String, Object> map)
     { 
         try {
-            String docStr = solrCoreProxy.addDoc(map, verbose);
+            String docStr = solrCoreProxy.addDoc(map, verbose, true);
             if (verbose)
             {
  //               logger.info(record.toString());

@@ -7,16 +7,17 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Enumeration;
 import java.util.Properties;
-import java.util.jar.JarFile;
-import java.util.jar.Manifest;
-import java.util.zip.ZipEntry;
 
+import org.apache.log4j.Logger;
+import org.solrmarc.marc.MarcImporter;
 import org.solrmarc.tools.GetDefaultConfig;
+
 
 public class SolrUpdate
 {
+	// Initialize logging category
+	protected static Logger logger = Logger.getLogger(MarcImporter.class.getName());
 
     /**
      * @param args
@@ -115,7 +116,7 @@ public class SolrUpdate
         String str;
         while (null != ((str = input.readLine())))
         {
-            System.out.println (str);
+        	logger.info(str);
         }
 
         input.close ();

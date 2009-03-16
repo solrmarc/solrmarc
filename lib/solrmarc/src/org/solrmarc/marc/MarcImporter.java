@@ -51,6 +51,7 @@ public class MarcImporter extends MarcHandler
     protected boolean optimizeAtEnd = false;
     protected boolean shuttingDown = false;
     protected boolean isShutDown = false;
+    protected boolean justIndexDontAdd = false;
     private int recsReadCounter = 0;
     private int recsIndexedCounter = 0;
     private int idsToDeleteCounter = 0;
@@ -116,7 +117,8 @@ public class MarcImporter extends MarcHandler
                 logger.warn("Invalid Regex pattern specified in property: marc.delete_record_id_mapper");
             }
         }
-
+        
+        justIndexDontAdd = Boolean.parseBoolean(Utils.getProperty(props, "marc.just_index_dont_add"));
         deleteRecordListFilename = Utils.getProperty(props, "marc.ids_to_delete");
         optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(props, "solr.optimize_at_end"));
         return;
@@ -255,9 +257,11 @@ public class MarcImporter extends MarcHandler
         
         String docStr = addToIndex(fieldsMap);
 
-        if (verbose)
+        if (verbose || justIndexDontAdd)
         {
+            System.out.println(record.toString());
             logger.info(record.toString());
+            System.out.println(docStr);
             logger.info(docStr);
         }
         return(true);
@@ -282,7 +286,7 @@ public class MarcImporter extends MarcHandler
         }
 
         // NOTE: exceptions are dealt with by calling class
-        return solrCoreProxy.addDoc(fieldsMap, verbose);
+        return solrCoreProxy.addDoc(fieldsMap, verbose, !justIndexDontAdd);
     }
             
     private void addErrorsToMap(Map<String, Object> map, ErrorHandler errors2)
