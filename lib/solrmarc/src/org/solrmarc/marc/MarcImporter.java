@@ -259,8 +259,11 @@ public class MarcImporter extends MarcHandler
 
         if (verbose || justIndexDontAdd)
         {
-            System.out.println(record.toString());
-            logger.info(record.toString());
+            if (verbose) 
+            {
+                System.out.println(record.toString());
+                logger.info(record.toString());
+            }
             System.out.println(docStr);
             logger.info(docStr);
         }
