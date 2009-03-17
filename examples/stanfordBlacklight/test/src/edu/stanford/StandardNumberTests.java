@@ -5,7 +5,7 @@ import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.lucene.document.Document;
+//import org.apache.lucene.document.Document;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -206,14 +206,16 @@ public class StandardNumberTests extends BibIndexTest {
 	
 		// isbn search with sub a value from record with mult a and z
 		String value = "052185668X";
-		List<Document> docList = assertResultSize(fldName, value, 2, sis);
+		assertResultSize(fldName, value, 2, sis);
+		String docList[] = getDocIDList(fldName, value);
 		String msg = "isbn search \""+ value + "\": ";
 		assertDocInList(docList, "020suba10trailingText", msg, sis);
 		assertDocInList(docList, "020SubaAndz", msg, sis);
 	
 		// isbn search with sub z value from record with mult a and z
 		value = "9780809424887";
-		docList = assertResultSize(fldName, value, 7, sis);
+		assertResultSize(fldName, value, 7, sis);
+		docList = getDocIDList(fldName, value);
 		msg = fldName + " search \""+ value + "\": ";
 		assertDocInList(docList, "020suba13", msg, sis);
 		assertDocInList(docList, "020suba13trailingText", msg, sis);
@@ -277,7 +279,8 @@ public class StandardNumberTests extends BibIndexTest {
 		assertSingleResult("022suba", fldName, "1047-2010", sis);
 		assertSingleResult("022subaX", fldName, "1047-201X", sis);
 	
-		List<Document> docList = assertResultSize(fldName, "0796-5621", 3, sis);
+		assertResultSize(fldName, "0796-5621", 3, sis);
+		String docList[] = getDocIDList(fldName, "0796-5621");
 		assertDocInList(docList, "022subL", fldName + " search \"0796-5621\": ", sis);
 		assertDocInList(docList, "022subAandL", fldName + " search \"0796-5621\": ", sis);
 		assertDocInList(docList, "022subLandM", fldName + " search \"0796-5621\": ", sis);

@@ -37,6 +37,10 @@ public class DocumentProxy
         if (result instanceof String[])  return((String[]) result);
         return(new String[0]);
     }
-    
-    
+
+    public String[] getValues(String fldName)
+    {
+        return(getValuesForField(fldName));
+    }
+
 }

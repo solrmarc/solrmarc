@@ -7,8 +7,8 @@ import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
+//import org.apache.lucene.document.Document;
+//import org.apache.lucene.document.Field;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
@@ -612,63 +612,63 @@ public class AuthorTests extends BibIndexTest {
 	/**
 	 * Author sort order must be correct
 	 */
-@Test
-	public final void testAuthorSortOrder() 
-		throws ParserConfigurationException, IOException, SAXException
-	{
-		// list of doc ids in correct author sort order
-		List<String> expectedOrderList = new ArrayList<String>(10);
-		expectedOrderList.add("345228");  // Bashkov Vladimir 100a only
-		expectedOrderList.add("999");  // everything in 100
-		expectedOrderList.add("111faim");  // FAIM Forum mtg name facet from 111 should be FAIM Forum
-		expectedOrderList.add("100240");  // Hoos Foos Marvin OGravel Balloon Face 100 and 240
-		expectedOrderList.add("555");  // ind 0 leading quote elipsis in 100
-		expectedOrderList.add("111");  // ind 0 leading quotes in 100
-		expectedOrderList.add("888");  // interspersed punctuation here
-		expectedOrderList.add("1006");  // Sox on Fox 100 has sub 6
-		expectedOrderList.add("110710corpname");  // Thelma facets from 110 and 710
-// 100 / 110 / 111 is missing;  sort last, THEN sort by title		
-		expectedOrderList.add("2458");  // 245 has sub 8
-		expectedOrderList.add("245only");  // 245 no 100 or 240
-		expectedOrderList.add("575946");  // De incertitudine et vanitate scientiarum German Ruckzug der biblischen Prophetie von der neueren Geschichte
-		expectedOrderList.add("666");  // De incertitudine et vanitate scientiarum German ZZZZ
-		expectedOrderList.add("444");  // ind 0 leading elipsis in 240
-		expectedOrderList.add("333");  // ind 0 leading hyphens in 240
-		expectedOrderList.add("777");  // ind 4 leading quote elipsis in 240
-		expectedOrderList.add("24025");  // la di dah 240 has sub 2 and 5
-		expectedOrderList.add("1261174");  // second part of the Confutation of the Ballancing letter
-		expectedOrderList.add("0240");  // sleep little fishies 240 has sub 0
-		expectedOrderList.add("2407");  // Tacky 240 7 nonfiling
-		expectedOrderList.add("2400");  // Wacky 240 0 nonfiling
-		expectedOrderList.add("2402");  // Wacky 240 2 nonfiling
-		expectedOrderList.add("892452");  // Wacky 240 245 nonfiling
-		
-		// get search results sorted by author_sort field
-		List<Document> results = getSortedDocs("collection", "Catalog", "author_sort", sis);
-		
-		// we know we have documents that are not in the expected order list
-		int expDocIx = 0;
-		for (Document doc : results) {
-			if (expDocIx < expectedOrderList.size() - 1) {
-				// we haven't found all docs in the expected list yet
-				Field f = doc.getField("id");  // author_sort isn't stored
-				if (f != null) {
-					String docId = f.stringValue();
-					if (docId.equals(expectedOrderList.get(expDocIx + 1))) {
-						
-						expDocIx++;
-					}
-					
-					
-				}
-			}
-			else break;  // we found all the documents in the expected order list
-		}
-		
-		if (expDocIx != expectedOrderList.size() - 1) {
-			String lastCorrDocId = expectedOrderList.get(expDocIx);
-			fail("Author Sort Order is incorrect.  Last correct document was " + lastCorrDocId);
-		}
-	}
+//@Test
+//	public final void testAuthorSortOrder() 
+//		throws ParserConfigurationException, IOException, SAXException
+//	{
+//		// list of doc ids in correct author sort order
+//		List<String> expectedOrderList = new ArrayList<String>(10);
+//		expectedOrderList.add("345228");  // Bashkov Vladimir 100a only
+//		expectedOrderList.add("999");  // everything in 100
+//		expectedOrderList.add("111faim");  // FAIM Forum mtg name facet from 111 should be FAIM Forum
+//		expectedOrderList.add("100240");  // Hoos Foos Marvin OGravel Balloon Face 100 and 240
+//		expectedOrderList.add("555");  // ind 0 leading quote elipsis in 100
+//		expectedOrderList.add("111");  // ind 0 leading quotes in 100
+//		expectedOrderList.add("888");  // interspersed punctuation here
+//		expectedOrderList.add("1006");  // Sox on Fox 100 has sub 6
+//		expectedOrderList.add("110710corpname");  // Thelma facets from 110 and 710
+//// 100 / 110 / 111 is missing;  sort last, THEN sort by title		
+//		expectedOrderList.add("2458");  // 245 has sub 8
+//		expectedOrderList.add("245only");  // 245 no 100 or 240
+//		expectedOrderList.add("575946");  // De incertitudine et vanitate scientiarum German Ruckzug der biblischen Prophetie von der neueren Geschichte
+//		expectedOrderList.add("666");  // De incertitudine et vanitate scientiarum German ZZZZ
+//		expectedOrderList.add("444");  // ind 0 leading elipsis in 240
+//		expectedOrderList.add("333");  // ind 0 leading hyphens in 240
+//		expectedOrderList.add("777");  // ind 4 leading quote elipsis in 240
+//		expectedOrderList.add("24025");  // la di dah 240 has sub 2 and 5
+//		expectedOrderList.add("1261174");  // second part of the Confutation of the Ballancing letter
+//		expectedOrderList.add("0240");  // sleep little fishies 240 has sub 0
+//		expectedOrderList.add("2407");  // Tacky 240 7 nonfiling
+//		expectedOrderList.add("2400");  // Wacky 240 0 nonfiling
+//		expectedOrderList.add("2402");  // Wacky 240 2 nonfiling
+//		expectedOrderList.add("892452");  // Wacky 240 245 nonfiling
+//		
+//		// get search results sorted by author_sort field
+//		List<Document> results = getSortedDocs("collection", "Catalog", "author_sort", sis);
+//		
+//		// we know we have documents that are not in the expected order list
+//		int expDocIx = 0;
+//		for (Document doc : results) {
+//			if (expDocIx < expectedOrderList.size() - 1) {
+//				// we haven't found all docs in the expected list yet
+//				Field f = doc.getField("id");  // author_sort isn't stored
+//				if (f != null) {
+//					String docId = f.stringValue();
+//					if (docId.equals(expectedOrderList.get(expDocIx + 1))) {
+//						
+//						expDocIx++;
+//					}
+//					
+//					
+//				}
+//			}
+//			else break;  // we found all the documents in the expected order list
+//		}
+//		
+//		if (expDocIx != expectedOrderList.size() - 1) {
+//			String lastCorrDocId = expectedOrderList.get(expDocIx);
+//			fail("Author Sort Order is incorrect.  Last correct document was " + lastCorrDocId);
+//		}
+//	}
 
 }
