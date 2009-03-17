@@ -611,7 +611,7 @@ public abstract class IndexTest {
         // assertFieldPresent(fldName);
         assertFieldNotTokenized(fldName);
         assertFieldIndexed(fldName);
-        assertFieldStored(fldName);
+  //      assertFieldStored(fldName);
         assertFieldHasNoTermVectors(fldName);
     }
 
