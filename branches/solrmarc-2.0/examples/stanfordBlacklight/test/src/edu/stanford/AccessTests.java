@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.lucene.document.Document;
+//import org.apache.lucene.document.Document;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
@@ -127,7 +127,7 @@ public class AccessTests extends BibIndexTest {
 	 	// "At the Library"
 	 	String fldVal = "\"" + Access.AT_LIBRARY.toString() + "\"";
 	 	// don't want to check *all* of them ...
-	 	List<Document> docList = getAllMatchingDocs(fldName, fldVal, sis);
+	 	String docList[] = getDocIDList(fldName, fldVal);
 	 	String msg = fldName + " " + Access.AT_LIBRARY.toString() + ": ";
 	 	// formerly "On campus"
 	 	assertDocInList(docList, "115472", msg, sis); 

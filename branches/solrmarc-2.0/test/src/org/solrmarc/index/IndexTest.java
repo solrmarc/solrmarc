@@ -494,6 +494,12 @@ public abstract class IndexTest {
 				+ text + "\" but got " + num, num == numExp);
 	}
 
+	public final String[] getDocIDList(String fld, String text)
+	        throws ParserConfigurationException, SAXException, IOException 
+	{
+	    return searcherProxy.getIdSet(fld, text);
+	}
+	
 	/**
 	 * Given an index field name and value, return a list of Lucene Documents
 	 *  that match the term query sent to the index
@@ -588,6 +594,26 @@ public abstract class IndexTest {
 		assertFieldTokenized(fldName);
 		assertFieldHasNoTermVectors(fldName);
 	}
+
+	public final void assertDisplayFieldProperties(String fldName) 
+            throws ParserConfigurationException, IOException, SAXException 
+    {
+	    // assertFieldPresent(fldName);
+        assertFieldNotTokenized(fldName);
+        assertFieldNotIndexed(fldName);
+        assertFieldStored(fldName);
+	    assertFieldHasNoTermVectors(fldName);
+    }
+
+    public final void assertFacetFieldProperties(String fldName) 
+        throws ParserConfigurationException, IOException, SAXException 
+    {
+        // assertFieldPresent(fldName);
+        assertFieldNotTokenized(fldName);
+        assertFieldIndexed(fldName);
+        assertFieldStored(fldName);
+        assertFieldHasNoTermVectors(fldName);
+    }
 
 	public final void assertDocInList(String[] docIdList, String doc_id, String msgPrefix) 
 			throws ParserConfigurationException, SAXException, IOException 
