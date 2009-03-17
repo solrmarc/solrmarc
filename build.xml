@@ -79,25 +79,37 @@
     <macrodef name="get_indexer_class" >
         <sequential>
             <fileset id="custom_indexer_source" dir="${site.dir}" includes="${src.dir}/**/*.java" >
-                <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+SolrIndexer"/>
+                <or >
+                    <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+SolrIndexer"/>
+                    <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+org[.]solrmarc[.]index[.]SolrIndexer"/>
+                </or>
             </fileset>
     
             <condition property="custom.index.source.exists">
-                <resourcecount count="0" when="gt" refid="custom_indexer_source" />
+                <or >
+                    <resourcecount count="0" when="gt" refid="custom_indexer_source" />
+                    <isset property="solr.indexer" />
+                </or>
             </condition>
             
             <property name="custom.indexer.source" refid="custom_indexer_source" />
             
             <if>
-                <resourcecount count="0" when="gt" refid="custom_indexer_source" />
+                <isset property="solr.indexer" />
                 <then>
-                    <pathconvert property="custom.indexer.class" refid="custom_indexer_source">
-                        <chainedmapper>
-                            <regexpmapper from="^.*src[/\\](.*java)$$" to="\1" />
-                            <packagemapper from="*.java" to="*"/>
-                        </chainedmapper>
-                    </pathconvert>
+                    <property name="custom.indexer.class" value="${solr.indexer}" />
                 </then>
+                <elseif>
+                    <resourcecount count="0" when="gt" refid="custom_indexer_source" />
+                    <then>
+                        <pathconvert property="custom.indexer.class" refid="custom_indexer_source">
+                            <chainedmapper>
+                                <regexpmapper from="^.*src[/\\](.*java)$$" to="\1" />
+                                <packagemapper from="*.java" to="*"/>
+                            </chainedmapper>
+                        </pathconvert>
+                    </then>
+                </elseif>
                 <else>
                     <property name="custom.indexer.class" value="org.solrmarc.index.SolrIndexer" />
                 </else>
@@ -167,6 +179,7 @@
             <then>
                 <echo message="site_dir ${site.dir} already inited skipping forward. "/>
                 <get_indexer_class />
+                <make_site_dirs />
             </then>
             <else>
                 <mkdir dir="${site.dir}" />
