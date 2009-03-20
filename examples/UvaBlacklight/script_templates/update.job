@@ -69,6 +69,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
 	else
 	    # no .del file exists corresponding to the .mrc file found in the incoming directory
 	    # do nothing, be happy
+	    nodelfile=true
 	fi
 
     done
