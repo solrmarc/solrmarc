@@ -77,9 +77,11 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
 # for now due to some wonkyness pertaining to "shadowed" items  then following two statements need 
 # to be run to remove some items that need to be hidden 
 
-indexfile $DATADIR/shadowed/modifiedShadowedRecs.mrc $DATADIR/shadowed/shadowedTitles.del
-indexfile blacklight_sas_config.properties $DATADIR/shadowed/modifiedShadowedRecs.mrc $DATADIR/shadowed/shadowedTitles.del
-
+if [ "$num" -ne 0 ] ; then
+    then
+	indexfile $DATADIR/shadowed/modifiedShadowedRecs.mrc $DATADIR/shadowed/shadowedTitles.del > $RESULTSDIR/results_shadowed
+	indexfile blacklight_sas_config.properties $DATADIR/shadowed/modifiedShadowedRecs.mrc $DATADIR/shadowed/shadowedTitles.del > $RESULTSDIR/results_sas_shadowed
+fi
 
 # now move auth files to another directory
 for file in `find $INPUTDIR -name '*.auth*' -print`
@@ -93,7 +95,7 @@ runbooklist daily > $RESULTSDIR/results_booklists_$froot 2>&1
 # if any files were indexed, optimize solr index
 if [ "$num" -ne 0 ] 
     then
-	optimizesolr
-	optimizesolr blacklight_sas_config.properties
+	optimizesolr > $RESULTSDIR/results_optimize
+	optimizesolr blacklight_sas_config.properties > $RESULTSDIR/results_sas_optimize
     fi
 
