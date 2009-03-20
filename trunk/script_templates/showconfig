@@ -1,0 +1,36 @@
+#! /bin/bash
+
+E_BADARGS=65
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+case $1 in
+*\.jar) jar=$1 ;;
+*config.properties) config=$1
+esac
+
+case $2 in
+*\.jar) jar=$2 ;;
+*config.properties) config=$2
+esac
+
+if [[ "$jar" = "" ]] 
+then
+    jar="$scriptdir/@CUSTOM_JAR_NAME@"
+fi
+
+if [[ "$config" = "" && jar != "" ]]
+then
+    config=`java -Done-jar.main.class="org.solrmarc.tools.GetDefaultConfig" -jar "$jar"`
+fi
+
+tmp=tmp"$RANDOM""$$"
+
+mkdir $tmp
+cd $tmp
+jar xf $jar $config 
+
+cat "$config" 
+
+cd ..
+rm -rf "$tmp"
+

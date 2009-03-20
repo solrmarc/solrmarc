@@ -1,0 +1,13 @@
+#! /bin/bash
+# optimizesolr
+# Run an optimize process on the solr index
+# $Id: optimizesolr
+
+E_BADARGS=65
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+java @MEM_ARGS@ -Dmarc.source="NONE" -Dsolr.optimize_at_end="true" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 
+
+exit 0
+
