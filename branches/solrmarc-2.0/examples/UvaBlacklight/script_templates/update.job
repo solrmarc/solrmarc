@@ -73,6 +73,19 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
 
     done
 
+# for now due to some wonkyness pertaining to "shadowed" items  then following two statements need 
+# to be run to remove some items that need to be hidden 
+
+indexfile $DATADIR/shadowed/modifiedShadowedRecs.mrc $DATADIR/shadowed/shadowedTitles.del
+indexfile blacklight_sas_config.properties $DATADIR/shadowed/modifiedShadowedRecs.mrc $DATADIR/shadowed/shadowedTitles.del
+
+
+# now move auth files to another directory
+for file in `find $INPUTDIR -name '*.auth*' -print`
+    do
+	mv $file $DATADIR/not_processed
+    done
+
 # run booklist daily update
 runbooklist daily > $RESULTSDIR/results_booklists_$froot 2>&1
 
