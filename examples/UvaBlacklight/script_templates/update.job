@@ -78,7 +78,6 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
 # to be run to remove some items that need to be hidden 
 
 if [ "$num" -ne 0 ] ; then
-    then
 	indexfile $DATADIR/shadowed/modifiedShadowedRecs.mrc $DATADIR/shadowed/shadowedTitles.del > $RESULTSDIR/results_shadowed
 	indexfile blacklight_sas_config.properties $DATADIR/shadowed/modifiedShadowedRecs.mrc $DATADIR/shadowed/shadowedTitles.del > $RESULTSDIR/results_sas_shadowed
 fi
@@ -97,5 +96,5 @@ if [ "$num" -ne 0 ]
     then
 	optimizesolr > $RESULTSDIR/results_optimize
 	optimizesolr blacklight_sas_config.properties > $RESULTSDIR/results_sas_optimize
-    fi
+fi
 
