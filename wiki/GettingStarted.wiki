@@ -1,13 +1,107 @@
-#summary These pages will guide you through indexing your records using solrmarc in both Vufind and Blacklight.
+#summary These pages will guide you through installing and building solrmarc
 #labels Phase-Implementation
 
-= Introduction =
+=== About This Guide ===
 
-SolrMarc aims to make your life a lot easier by implementing standardized ways in which to create a modern index of your marc records. Our aim is to be robust, configurable, and easy-to-use. By taking care of the back-end indexing using several open-source projects, developers are able to commit more of their time to creating innovative front-end interfaces to their library holdings, without having to learn an entirely new set of tools.
+This getting started guide describes SolrMarc, defines its software dependencies, steps the user through configuring and building the importer program, and gives basic information about some helpful scripts that are included in the SolrMarc program’s tools.
 
 
-= Details =
+=== What Is SolrMarc? ===
+
+SolrMarc is a utility that reads in MARC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified SOLR index.
+
+SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your SOLR index record, but it also allows the creation of custom index functions if you cannot achieve what you require using the predefined mapping techniques.
 
 Currently, solrmarc is configured to work with:
   * Blacklight
   * [VufindHowTo Vufind]
+
+=== Software Dependencies ===
+
+SolrMarc requires the java development kit (JDK) version 1.5 or newer and ant version 1.7 or newer.
+
+==== Java ====
+
+To check the version of the java development kit (JDK), at the command prompt type
+
+   _javac -version_
+
+To download the proper version of the java development kit, go to http://java.sun.com/javase/downloads/index.jsp
+
+==== Ant ====
+
+To check the ant version, at the command prompt type
+
+   _ant -version_
+
+To download the proper version of ant, go to http://ant.apache.org/
+
+==== Solr ====
+
+While SolrMarc can build a Solr index on its own, you probably already have Solr installed on your system. If not, you will want to install Solr. SolrMarc 2.0 has been tested with 1.2, 1.3, and several versions of 1.4 (still in beta).
+
+To download Solr, go to http://lucene.apache.org/solr/
+
+==== SolrMarc 2.0 ====
+
+Download the software via a subversion checkout:
+
+{{{ svn checkout http://solrmarc.googlecode.com/svn/trunk  solrmarc }}}
+
+=== Configuring the Importer Program ===
+
+At the command prompt, run 
+
+   _ant init_
+
+By default, ant builds the whole program and will query user for correct settings.
+
+==== Questions: ====
+
+*_1.Enter the name of a directory to contain all site specific modifications, including the configuration and index files_*
+
+The program builder will query which of the three example directories you wish you use as a template for your SolrMarc installation, for example, ../vanillaBlacklightDemo/.
+
+Once you've chosen, the builder creates the directory and subdirectories based on this template to prepare the structure to be filled in with rest of setup information.
+
+*_2.Enter the name of the Jar file containing custom indexing functions._*
+
+If you require custom indexing functions, provide the jar file name that contains that code.
+
+   ex. custom.jar
+
+Enter _"none"_ if you expect not to have any custom indexing functions.
+
+*_3.Enter prefix of the properties files for config and index files for custom modifications._*
+
+Enter the name to be used to identify this instance of SolrMarc.
+
+   ex. my_config.properties; my_index.properties
+
+*_4.Enter name of the final resulting Jar file that will contain all the code, libraries, and properties for running SolrMarc._*
+
+   Default suggestion customprefix_solrmarc.jar
+
+*_5.Enter java heap size memory argument to put in generated scripts for site-specific SolrMARC indexer._*
+
+   Default value=256MB
+
+Note: While 256MB is sufficient to load the demo, a real-world indexing job requires a much larger java heap size. The developer uses 1024MB on his desktop and at least 2048MB on the server where the indexing job will include millions of records.
+
+Custom settings are now written out to a file so that they are preserved for future updates.
+
+*_6.Enter the version of SOLR you will be running in your local environment._*
+
+(SolrMarc has been tested with 1.2, 1.3, and several versions of 1.4(still in beta))
+
+Best practice is to specify _“war”_ as the answer to this question, and then give the full path to the current solr.war file which will be used by the jetty or tomcat web server for searching the solr index. This will ensure that you won’t create an index that is out of sync with what the webserver code expects.
+
+==== Configuration files: ====
+
+Fill in the xxxx_config and xxxx_index files in the site specific directory that you've just created using the template files that were created in the build.
+
+*xxxx_config.properties:* controls overall operation of the program
+
+*xxxx_index.properties:* where the mapping from MARC tags to SOLR fields is specified
+
+Because it is possible to have multiple instances of SolrMarc running on a server, the prefix helps the system administrator know to which instance the configuration files refer.
