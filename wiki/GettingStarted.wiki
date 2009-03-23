@@ -1,4 +1,4 @@
-#summary These pages will guide you through installing and building solrmarc
+#summary This page will guide you through installing and building SolrMarc
 #labels Phase-Implementation
 <wiki:toc max_depth="5" />
 
