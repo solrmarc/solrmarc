@@ -5,18 +5,6 @@ import java.lang.reflect.Constructor;
 import java.text.ParseException;
 import java.util.*;
 
-//import javax.xml.xpath.*;
-
-//import org.apache.lucene.document.Document;
-//import org.apache.lucene.document.Field;
-//import org.apache.lucene.index.Term;
-//import org.apache.lucene.search.Query;
-//import org.apache.lucene.search.TermQuery;
-//import org.apache.solr.core.SolrConfig;
-//import org.apache.solr.core.SolrCore;
-//import org.apache.solr.search.*;
-//import org.apache.solr.update.*;
-//import org.apache.solr.util.RefCounted;
 import org.marc4j.*;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
@@ -42,7 +30,8 @@ public class SolrReIndexer extends MarcImporter
     private String queryForRecordsToUpdate;
     protected String solrFieldContainingEncodedMarcRecord;
     protected boolean doUpdate = true;
-    
+    protected MarcWriter output = null;
+ 
     // Initialize logging category
     static Logger logger = Logger.getLogger(SolrReIndexer.class.getName());
     
@@ -63,7 +52,11 @@ public class SolrReIndexer extends MarcImporter
     @Override
     public int handleAll()
     {
-        // TODO Auto-generated method stub
+        verbose = false;
+        output = new MarcStreamWriter(System.out, "UTF8");
+        if (solrFieldContainingEncodedMarcRecord == null) solrFieldContainingEncodedMarcRecord = "marc_display";
+        readAllMatchingDocs(queryForRecordsToUpdate);
+        output.close();
         return 0;
     }
 
@@ -88,22 +81,41 @@ public class SolrReIndexer extends MarcImporter
     }
 
     
-//    /**
-//     * Read matching records from the index
-//     * @param queryForRecordsToUpdate
-//     */
-//    public void readAllMatchingDocs(String queryForRecordsToUpdate)
-//    {
-//        String queryparts[] = queryForRecordsToUpdate.split(":");
-//        if (queryparts.length != 2) 
-//        {
-//            //System.err.println("Error query must be of the form    field:term");
-//        	logger.warn("Error query must be of the form    field:term");
-//            return;
-//        }
-//        Map<String, Object> docMap = readAndIndexDoc(queryparts[0], queryparts[1], doUpdate);  
-//    }
-//    
+    /**
+     * Read matching records from the index
+     * @param queryForRecordsToUpdate
+     */
+    public void readAllMatchingDocs(String queryForRecordsToUpdate)
+    {
+        String queryparts[] = queryForRecordsToUpdate.split(":");
+        if (queryparts.length != 2) 
+        {
+            //System.err.println("Error query must be of the form    field:term");
+            logger.error("Error query must be of the form    field:term");
+            System.out.println("Error: query must be of the form    field:term  " + queryForRecordsToUpdate);
+            return;
+        }
+        try
+        {
+            int solrDocNums[] = solrSearcherProxy.getDocSet(queryparts[0], queryparts[1]);
+            for (int docNum : solrDocNums)
+            {
+                DocumentProxy doc = solrSearcherProxy.getDocumentBySolrDocNum(docNum);
+                Record record = getRecordFromDocument(doc);
+                if (output != null) 
+                {
+                    output.write(record);
+                    System.out.flush();
+                }
+             }
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }  
+    }
+    
     /**
      * Read and index a Solr document
      * @param field Solr field
@@ -115,6 +127,7 @@ public class SolrReIndexer extends MarcImporter
     {
         try 
         {
+            int solrDocNums[] = solrSearcherProxy.getDocSet(field, term);
             Object docSetIterator = solrSearcherProxy.getDocSetIterator(field, term);
             int count = 0;
             while (solrSearcherProxy.iteratorHasNext(docSetIterator))
@@ -208,7 +221,7 @@ public class SolrReIndexer extends MarcImporter
         if (fields == null || fields.length == 0)
         {
             //System.err.println("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
-        	logger.warn("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
+            logger.warn("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
         }
         String marcRecordStr = null;
         try
@@ -304,12 +317,12 @@ public class SolrReIndexer extends MarcImporter
                     catch (FileNotFoundException e)
                     {
                         // e.printStackTrace();
-                    	logger.error(e.getMessage());
+                        logger.error(e.getMessage());
                     }
                     catch (IOException e)
                     {
                         // e.printStackTrace();
-                    	logger.error(e.getMessage());
+                        logger.error(e.getMessage());
                     }
                 }
                 if (doUpdate == false && errOut != null)
@@ -324,7 +337,7 @@ public class SolrReIndexer extends MarcImporter
                     catch (IOException e)
                     {
                         // e.printStackTrace();
-                    	logger.error(e.getMessage());
+                        logger.error(e.getMessage());
                     }
                 }
                 if (marcRecordStr.contains("<subfield code=\"&#31;\">"))
@@ -345,16 +358,16 @@ public class SolrReIndexer extends MarcImporter
                 {
                     me.printStackTrace();
                     if (verbose) {
-                    	//System.out.println("The bad record is: "+ marcRecordStr);
-                    	logger.info("The bad record is: "+ marcRecordStr);
-                    	logger.error("The bad record is: "+ marcRecordStr);
+                        //System.out.println("The bad record is: "+ marcRecordStr);
+                        logger.info("The bad record is: "+ marcRecordStr);
+                        logger.error("The bad record is: "+ marcRecordStr);
                     }
                 }
             }
             catch (UnsupportedEncodingException e)
             {
                 // e.printStackTrace();
-            	logger.error(e.getMessage());
+                logger.error(e.getMessage());
             }
         } while (tryAgain);
         return(null);
@@ -451,7 +464,7 @@ public class SolrReIndexer extends MarcImporter
 //            }
 //            else
 //            {
-//            	//TODO: construct this from the properties
+//                //TODO: construct this from the properties
 //                URL url = new URL("http://solrpowr.lib.virginia.edu:8080/solr/select/?q=id%3A"+doc_id+"&start=0&rows=1");
 //                InputStream stream = url.openStream();
 //                //The evaluate methods in the XPath and XPathExpression interfaces are used to parse an XML document with XPath expressions. The XPathFactory class is used to create an XPath object. Create an XPathFactory object with the static newInstance method of the XPathFactory class.
@@ -475,12 +488,12 @@ public class SolrReIndexer extends MarcImporter
 //        catch (IOException e)
 //        {
 //            // e.printStackTrace();
-//        	logger.error(e.getMessage());
+//            logger.error(e.getMessage());
 //        }
 //        catch (XPathExpressionException e)
 //        {
 //            // e.printStackTrace();
-//        	logger.error(e.getMessage());
+//            logger.error(e.getMessage());
 //        }
 //        return(rec);
 //    }
@@ -510,52 +523,21 @@ public class SolrReIndexer extends MarcImporter
     }
     
 
-//    /**
-//     * @param args
-//     */
-//    public static void main(String[] args)
-//    {
-//        String properties = "import.properties";
-//        if(args.length > 0 && args[0].endsWith(".properties"))
-//        {
-//            properties = args[0];
-//            String newArgs[] = new String[args.length-1];
-//            System.arraycopy(args, 1, newArgs, 0, args.length-1);
-//            args = newArgs;
-//        }
-//       // System.out.println("Loading properties from " + properties);
-//        logger.info("Loading properties from " + properties);
-//        
-//        SolrReIndexer reader = null;
-//        try
-//        {
-//            reader = new SolrReIndexer(properties, args);
-//        }
-//        catch (IOException e)
-//        {
-//            //  e.printStackTrace();
-//        	logger.error(e.getMessage());
-//            System.exit(1);
-//        }
-//        
-//        reader.readAllMatchingDocs(reader.queryForRecordsToUpdate);
-//        
-//        reader.finish();
-//        if (errOut != null)
-//        {
-//            try
-//            {
-//                errOut.write("\n</collection>");
-//                errOut.flush();
-//
-//            }
-//            catch (IOException e)
-//            {
-//                // e.printStackTrace();
-//            	logger.error(e.getMessage());
-//            }
-//        }
-//
-//    }
+    /*
+     * @param args
+     */
+    public static void main(String[] args)
+    {
+        String newArgs[] = new String[args.length + 1];
+        System.arraycopy(args, 0, newArgs, 1, args.length);
+        newArgs[0] = "NONE";
+        
+        SolrReIndexer reader = null;
+        reader = new SolrReIndexer(newArgs);
+          
+        reader.handleAll();
+        
+        reader.finish();
+    }
 
 }

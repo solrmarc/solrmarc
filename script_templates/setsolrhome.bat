@@ -136,7 +136,8 @@ set arg=%1
 if "%arg:~0,4%" == "http" set url=%arg%
 if "%arg:~-17%" == "config.properties" set config=%arg%
 if "%arg:~-4%" == ".jar" set jar=%arg%
-if "%arg:~1,2%" == ":/" set solrpath=%arg%
+if "%arg:~-4%" NEQ ".jar" if "%arg:~1,2%" == ":/" set solrpath=%arg%
+if "%arg:~-4%" NEQ ".jar" if "%arg:~1,2%" == ":\" set solrpath=%arg%
 
 goto :eof
 
