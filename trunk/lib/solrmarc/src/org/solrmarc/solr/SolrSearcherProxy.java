@@ -74,7 +74,7 @@ public class SolrSearcherProxy
             Object docSet = getSolrDocSet(field, term);
             int totalSize = (Integer)docSet.getClass().getMethod("size").invoke(docSet);
             resultSet = new String[totalSize];
-            System. out.println("Searching for :" + field +" : "+ term+ "    Num found = " + totalSize);
+            //System. out.println("Searching for :" + field +" : "+ term+ "    Num found = " + totalSize);
             Object docIterator = docSet.getClass().getMethod("iterator").invoke(docSet);
             int i = 0;
             while (iteratorHasNext(docIterator))
@@ -103,7 +103,7 @@ public class SolrSearcherProxy
             Object docSet = getSolrDocSet(field, term);
             int totalSize = (Integer)docSet.getClass().getMethod("size").invoke(docSet);
             resultSet = new int[totalSize];
-            System. out.println("Searching for :" + field +" : "+ term+ "    Num found = " + totalSize);
+            //System. out.println("Searching for :" + field +" : "+ term+ "    Num found = " + totalSize);
             Object docIterator = docSet.getClass().getMethod("iterator").invoke(docSet);
             int i = 0;
             while (iteratorHasNext(docIterator))
@@ -129,7 +129,7 @@ public class SolrSearcherProxy
         {
             Object docSet = getSolrDocSet(field, term);
             int totalSize = (Integer)docSet.getClass().getMethod("size").invoke(docSet);
-            System. out.println("Searching for :" + field +" : "+ term+ "    Num found = " + totalSize);
+            //System. out.println("Searching for :" + field +" : "+ term+ "    Num found = " + totalSize);
             Object docIterator = docSet.getClass().getMethod("iterator").invoke(docSet);
             return(docIterator);
         }
