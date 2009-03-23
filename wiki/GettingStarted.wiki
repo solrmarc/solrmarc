@@ -1,19 +1,19 @@
 #summary These pages will guide you through installing and building solrmarc
 #labels Phase-Implementation
-#sidebar TableOfContents
+<wiki:toc max_depth="4" />
 
 === About This Guide ===
 
 This getting started guide describes SolrMarc, defines its software dependencies, steps the user through configuring and building the importer program, and gives basic information about some helpful scripts that are included in the SolrMarc program’s tools.
 
 
-=== What Is SolrMarc? ===
+=== About SolrMarc ===
 
 SolrMarc is a utility that reads in MARC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified SOLR index.
 
 SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your SOLR index record, but it also allows the creation of custom index functions if you cannot achieve what you require using the predefined mapping techniques.
 
-Currently, solrmarc is configured to work with:
+Currently, SolrMarc is configured to work with:
   * Blacklight
   * [VufindHowTo Vufind]
 
@@ -101,9 +101,9 @@ Best practice is to specify _“war”_ as the answer to this question, and then
 
 Fill in the xxxx_config and xxxx_index files in the site specific directory that you've just created using the template files that were created in the build.
 
-*xxxx_config.properties:* controls overall operation of the program
+   *xxxx_config.properties:* controls overall operation of the program
 
-*xxxx_index.properties:* where the mapping from MARC tags to SOLR fields is specified
+   *xxxx_index.properties:* where the mapping from MARC tags to SOLR fields is specified
 
 Because it is possible to have multiple instances of SolrMarc running on a server, the prefix helps the system administrator know to which instance the configuration files refer.
 
@@ -134,9 +134,9 @@ marc.include_errors = true }}}
 
 Once you have finished editing the xxxx_config.properties file and the xxxx_index.properties file located in your site specific directory, 
 
-   1.Change back to the top level directory where you first ran _ant init_,  and 
+   1. Change back to the top level directory where you first ran _ant init_,  and 
 
-   2.run _ant build_   
+   2. run _ant build_   
 
 This action compiles all of the standard source code for the importer, compiles any custom source code that you have created in your site specific directory, and creates a large jar file containing all of the compiled code, any jar files needed by the code, and the properties files that control how the program runs, including your xxxx_ config.properties, and your  xxxx_index.properties.  
 
