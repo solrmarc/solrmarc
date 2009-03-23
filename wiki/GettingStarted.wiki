@@ -1,13 +1,13 @@
 #summary These pages will guide you through installing and building solrmarc
 #labels Phase-Implementation
-<wiki:toc max_depth="4" />
+<wiki:toc max_depth="5" />
 
 === About This Guide ===
 
 This getting started guide describes SolrMarc, defines its software dependencies, steps the user through configuring and building the importer program, and gives basic information about some helpful scripts that are included in the SolrMarc program’s tools.
 
-
-=== About SolrMarc ===
+<br />
+=== About !SolrMarc ===
 
 SolrMarc is a utility that reads in MARC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified SOLR index.
 
@@ -17,6 +17,7 @@ Currently, SolrMarc is configured to work with:
   * Blacklight
   * [VufindHowTo Vufind]
 
+<br />
 === Software Dependencies ===
 
 SolrMarc requires the java development kit (JDK) version 1.5 or newer and ant version 1.7 or newer.
@@ -43,12 +44,13 @@ While SolrMarc can build a Solr index on its own, you probably already have Solr
 
 To download Solr, go to http://lucene.apache.org/solr/
 
-==== SolrMarc 2.0 ====
+==== !SolrMarc 2.0 ====
 
 Download the software via a subversion checkout:
 
 {{{ svn checkout http://solrmarc.googlecode.com/svn/trunk  solrmarc }}}
 
+<br />
 === Configuring the Importer Program ===
 
 At the command prompt, run 
@@ -57,7 +59,7 @@ At the command prompt, run
 
 By default, ant builds the whole program and will query user for correct settings.
 
-==== Questions: ====
+==== Installation Questions ====
 
 *_1.Enter the name of a directory to contain all site specific modifications, including the configuration and index files_*
 
@@ -83,7 +85,7 @@ Enter the name to be used to identify this instance of SolrMarc.
 
    Default suggestion customprefix_solrmarc.jar
 
-*_5.Enter java heap size memory argument to put in generated scripts for site-specific SolrMARC indexer._*
+*_5.Enter java heap size memory argument to put in generated scripts for site-specific SolrMarc indexer._*
 
    Default value=256MB
 
@@ -101,15 +103,16 @@ Best practice is to specify _“war”_ as the answer to this question, and then
 
 Fill in the xxxx_config and xxxx_index files in the site specific directory that you've just created using the template files that were created in the build.
 
-   *xxxx_config.properties:* controls overall operation of the program
+ xxxx_config.properties: controls overall operation of the program
 
-   *xxxx_index.properties:* where the mapping from MARC tags to SOLR fields is specified
+ xxxx_index.properties: where the mapping from MARC tags to SOLR fields is specified
 
 Because it is possible to have multiple instances of SolrMarc running on a server, the prefix helps the system administrator know to which instance the configuration files refer.
 
-==== Configuration file: ====
+===== Config file =====
 
-{{{# Properties for the Java import program
+{{{
+# Properties for the Java import program
 # $Id: importSamples.properties 17 2008-06-20 14:40:13Z wayne.graham $
 
 # Path to your solr instance
@@ -124,37 +127,39 @@ solr.hosturl = http://localhost:8983/solr/update
 marc.to_utf_8 = true
 marc.permissive = true
 marc.default_encoding = MARC8
-marc.include_errors = true }}}
+marc.include_errors = true 
+}}}
 
-==== Index file: ====
+===== Index file =====
 
-[coming soon]
+(coming soon)
 
+<br />
 === Building the Importer Program ===
 
 Once you have finished editing the xxxx_config.properties file and the xxxx_index.properties file located in your site specific directory, 
 
-   1. Change back to the top level directory where you first ran _ant init_,  and 
-
-   2. run _ant build_   
+ # Change back to the top level directory where you first ran _ant init_
+ # Run _ant build_   
 
 This action compiles all of the standard source code for the importer, compiles any custom source code that you have created in your site specific directory, and creates a large jar file containing all of the compiled code, any jar files needed by the code, and the properties files that control how the program runs, including your xxxx_ config.properties, and your  xxxx_index.properties.  
 
-A directory called {{{.dist/}}} is created by the build process. The builder places the jar file that contains all the code and libraries for SolrMarc to run in this directory.   Additionally, several shell scripts/batch files that make using the indexing program and its associated utilities much easier to run are placed in this dist directory.
+A directory called {{{.dist/}}} is created by the build process. The builder places the jar file that contains all the code and libraries for SolrMarc to run in this directory.   Additionally, several shell scripts/batch files that make using the indexing program and its associated utilities much easier to run are placed in this {{{.dist/}}} directory.
 
 Assuming no errors are encountered in the build process, the build is now complete.
 
-For documentation on using SolrMarc to index your marc records, please see the Using SolrMarc document. [coming soon]
+For documentation on using SolrMarc to index your marc records, please see the Using SolrMarc document. (coming soon)
 
-
+<br />
 === Batch Files/Shell Scripts ===
 
 *indexfile:* indexes file of MARC records, adding all data from those records to the Solr index.
 
 *setsolrhome:* extracts the settings for where the Solr server is running and where the Solr files are to be found from the config file and 
 
-   if issued without parameters: displays them
-   if issued with parameters: sets them
+   if issued _without_ parameters: displays them
+
+   if issued _with_ parameters: sets them
 
 *showconfig:* finds the config file it will be using and displays it onscreen.
 
