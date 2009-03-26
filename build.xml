@@ -55,6 +55,9 @@
 
     <macrodef name="init_site_props">
         <sequential>
+            <property file="${site.dir}/build_override.properties" />
+            <property file="${site.dir}/build.properties" />
+
             <property name="site.src.dir" value="${site.dir}/${src.dir}" />
             <property name="site.lib.dir" value="${site.dir}/${lib.dir}" />
             <property name="site.build.dir" value="${site.dir}/${build.dir}" />
@@ -63,9 +66,6 @@
             <property name="site.test.solr.dir" value="${site.test.dir}/solr" />
             <property name="site.map.dir" value="${site.dir}/${trans.map.path}" />
             <property name="site.script.dir" value="${site.dir}/${script.template.dir}" />
-
-            <property file="${site.dir}/build_override.properties" />
-            <property file="${site.dir}/build.properties" />
         </sequential>
     </macrodef>
 
@@ -494,15 +494,17 @@
     </target>
 
 
+    <target name="package" description="Create a gzipped tarball or a .zip file for distribution" >
+    </target>
+        
+        
     <target name="usage" description="Prints usage instructions">
         <echo message="Welcome to the Solrmarc indexing project" />
         <echo message="Use 'ant' to build the latest code" />
-        <echo message="Use 'ant -Dsolr.version=&quot;1.2&quot;' to build the latest code based on version 1.2 of Solr" />
-        <echo message="Use 'ant -Dsolr.version=&quot;1.3&quot;' to build the latest code based on version 1.3 of Solr" />
+        <echo message="Use 'ant' to build the latest code" />
         <echo message="For developers" />
         <echo message="Use 'ant clean' to clean the compiled source directory" />
-        <echo message="Use 'ant doc' to generate JavaDoc documentation" />
-        <echo message="Use 'ant gzip' to build a gzipped tarball and checksum for distribution (be sure to svn export first)" />
+        <echo message="Use 'ant package' to build a gzipped tarball and checksum for distribution (be sure to svn export first)" />
         <echo message="Use 'ant test' to run unit tests" />
     </target>
 
