@@ -4,19 +4,13 @@ package org.blacklight;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 
-import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
-import org.marc4j.marc.Subfield;
 import org.solrmarc.index.SolrIndexer;
-import org.solrmarc.marc.MarcImporter;
 import org.solrmarc.tools.Utils;
 
 
@@ -44,7 +38,6 @@ public class BlacklightIndexer extends SolrIndexer
      * @throws Exception
      */
     public BlacklightIndexer(final String propertiesMapFile, final String propertyPaths[])
-        throws FileNotFoundException, IOException, ParseException
     {
         super(propertiesMapFile, propertyPaths);
     }
@@ -232,20 +225,11 @@ public class BlacklightIndexer extends SolrIndexer
     {    
     	// part1_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first
     	// part2_format_facet = 999t, format_maps.properties(format)
-    	String mapName1 = null;
-        String mapName2 = null;
-        String mapName3 = null;
-    	try
-        {
-            mapName1 = loadTranslationMap(null, "format_maps.properties(broad_format)");
-            mapName2 = loadTranslationMap(null, "format_maps.properties(format_007)");
-            mapName3 = loadTranslationMap(null, "format_maps.properties(format)");
-        }
-        catch (IllegalArgumentException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
+	    String mapName1 = loadTranslationMap(null, "format_maps.properties(broad_format)");
+	    String mapName2 = loadTranslationMap(null, "format_maps.properties(format_007)");
+	    String mapName3 = loadTranslationMap(null, "format_maps.properties(format)");
+
         Set<String> result = getFieldList(record, "999t");
         result = Utils.remap(result, findMap(mapName3), false);
         String format_007 = getFirstFieldVal(record, mapName2, "007[0]");
@@ -263,16 +247,8 @@ public class BlacklightIndexer extends SolrIndexer
     
     public Set<String> getShadowedLocation(final Record record, String propertiesMap)
     {
-        String mapName = null;
-        try
-        {
-            mapName = loadTranslationMap(null, "location_map.properties");
-        }
-        catch (IllegalArgumentException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        String mapName = loadTranslationMap(null, propertiesMap);
+
         Set<String> fields = getFieldList(record, "999kl';'");
         Set<String> result = new LinkedHashSet<String>();
         for (String field : fields)
