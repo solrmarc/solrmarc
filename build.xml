@@ -622,8 +622,10 @@
             <fileset file="${site.test.dir}/${site.test.jar}" />
         </path>
 
+        <!--
         <test-index-rec file="u17922.mrc" lookfor="oclc_text" expect="10072685" />
         <test-index-rec file="u470059.mrc" lookfor="ports_of_call" expect="Penang|Malaysia" />
+        --> 
         
         <echo message="test class = ${test.class} " />
       
