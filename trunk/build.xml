@@ -2,7 +2,13 @@
 <project basedir="." default="build" name="SolrMarc Custom">
 
     <!-- property files -->
-    <property file="examples/stanfordBlacklight/build.properties" />
+    <!-- Include a reference here to your site specific build.properties file
+         if you use that file to define the property "site.dir" or to override 
+         standard settings that are defined in the main build.properties file 
+         listed just below.  The following line is an example.  Note if you do 
+         not include a reference to this file here, everything will still work. -->
+           
+    <!-- <property file="examples/stanfordBlacklight/build.properties" /> -->
     <property file="build_override.properties" />
     <property file="build.properties" />
 
@@ -13,6 +19,7 @@
     <import file="${buildtools.path}/one-jar-ant-task.xml" />
     <property name="ant_extras.dist.dir" value="${buildtools.path}" />
     <import file="${buildtools.path}/ant_extras.xml" />
+    <!-- <import file="test_def.xml" /> -->
 
     <tstamp>
         <format property="year" pattern="yyyy" />
@@ -24,6 +31,7 @@
     <target name="clean" description="clean the generated directories">
         <delete dir="${build.dir}" />
         <delete dir="${dist.dir}" />
+        <delete file="build_override.properties" />
     </target>
 
     <target name="init" depends="init_site,solrversion" unless="init.already.run"
@@ -122,9 +130,6 @@
         <sequential>
             <input message="Enter URL of where solr server will be located:" addproperty="solr.hosturl"  
                 defaultvalue="http://localhost:8983/solr" />
-          <!--   
-            <get src="${solr.hosturl}" dest="${dist.dir}/_hostResp.txt" ignoreerrors="true" /> 
-          -->
             <input-filepath message="Enter full path of Solr home directory:${line.separator}(Note: directory should contain 'conf' directory containing solrconfig.xml and schema.xml) " 
                 addproperty="solr.path" defaultvalue="" />        	
 
@@ -203,16 +208,15 @@
                         <echo message="Directory created for site specific code in directory: ${site.dir}" />
                         <echo message="------------------------------------------------------------------------------------" />
                         <echo message="A configuration file (named ${custom.config.file.prefix}_config.properties)  and " />
-                        <echo message="an empty index specification file (named ${custom.config.file.prefix}_index.properties  were  " />
-                        <echo message="created for you in that directory, as well as a number of directories, " />
-                        <echo message="most of which are currently empty. These directories are:" />
-                        <echo message="    ${src.dir} - where you should place the source code for any custom indexing functions needed by your index specification" />
-                        <echo message="    ${trans.map.path} - where you should place any translation map properties files needed by your index specification" />
-                        <echo message="    ${lib.dir} - where you should place any jar files needed by your custom indexing functions" />
-<!-- Should this be site.script.dir? -->                        
-                        <echo message="    ${script.template.dir} - where you should place any shell scripts and/or batch files to be copied to the ${dist.dir} " />
-                        <echo message="Note: you must create the index specification file before you will be able to " />
-                        <echo message="      finish the build process or successfully index any MARC files." />
+                        <echo message="an empty index specification file (named ${custom.config.file.prefix}_index.properties  were  "/>
+                        <echo message="created for you in that directory, as well as a number of directories, "/>
+                        <echo message="most of which are currently empty. These directories are:"/>
+                        <echo message="    ${src.dir} - where you should place the source code for any custom indexing functions needed by your index specification"/>
+                        <echo message="    ${trans.map.path} - where you should place any translation map properties files needed by your index specification"/>
+                        <echo message="    ${lib.dir} - where you should place any jar files needed by your custom indexing functions"/>
+                        <echo message="    ${script.template.dir} - where you should place any shell scripts and/or batch files to be copied to the ${dist.dir} "/>
+                        <echo message="Note: you must create the index specification file before you will be able to "/>
+                        <echo message="      finish the build process or successfully index any MARC files." />                        
                     </then>
                     <else>
                         <copy todir="${site.dir}">
@@ -280,6 +284,7 @@
                 </unwar>
             </then>
         </if>
+        <echo message="solr version: ${solr.version}" />
         <property name="solrversion.already.run" value="true" />
     </target>
 
@@ -415,26 +420,75 @@
                 </linecontains>
             </filterchain>
         </loadproperties>
+        
+        <delete dir="${build.dir}/tmp_map_dir" />
+        
+        <!-- copy standard translation maps and site-specific translation maps to the same 
+             temporary directory.  If there are files with duplicate names only keep the 
+             site-specific version, but warn the user that duplicates are present. -->
+        <copy todir="${build.dir}/tmp_map_dir" >
+            <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
+        </copy>
+        
+        <copy todir="${build.dir}/tmp_map_dir" overwrite="true">
+            <fileset dir="${site.map.dir}" includes="*.properties" />
+        </copy>
+        
+        <pathconvert pathsep=" "  property="std_maps" >
+            <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
+            <flattenmapper />
+        </pathconvert>
+        
+        <pathconvert pathsep=" "  property="site_maps" >
+            <fileset dir="${site.map.dir}" includes="*.properties" />
+            <flattenmapper />
+        </pathconvert>
+        
+        <resources id="intersect_std_maps_with_site_maps" >
+            <intersect>
+                <resources>
+                    <tokens>
+                        <string value="${std_maps}" />
+                        <stringtokenizer />
+                    </tokens>
+                </resources>
+                <resources>
+                    <tokens>
+                        <string value="${site_maps}" />
+                        <stringtokenizer />
+                    </tokens>
+              </resources>
+            </intersect>
+        </resources>
 
+        <pathconvert pathsep=", "  property="both_maps" refid="intersect_std_maps_with_site_maps" />
+
+        <if >
+            <resourcecount refid="intersect_std_maps_with_site_maps" when="greater" count="0" />
+            <then>
+                <echo level="error" message="-----------------------------------------------------------------------------------------" />
+                <echo level="error" message="Warning: Site specific translation map replaces standard translation map of the same name" />
+                <echo level="error" message="         Duplicate map names = ${both_maps} " />
+                <echo level="error" message="-----------------------------------------------------------------------------------------" />
+            </then>
+        </if>
+        
         <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
                manifest="${buildtools.path}/manifest.mf">
             <main jar="${lib.dir}/solrmarc/${dist.dir}/${jar.name}" />
             <lib>
                 <fileset dir="${lib.dir}" includes="*.jar" excludes="junit*.jar,jzkit_client.jar" />
-<!--
                 <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
-                <fileset dir="${lib.dir}/solr/solr_${solr.version}" includes="*.jar" />
--->
-                <fileset dir="${solr.path}/lib" includes="*.jar" />
                 <fileset dir="${site.build.dir}" includes="*.jar" />
                 <fileset dir="${site.lib.dir}" includes="*.jar" />
             </lib>
-            <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
+            <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
             <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
             <fileset dir="." includes="log4j.properties" />
-            <fileset dir="${site.map.dir}" includes="*.properties" />
         </one-jar>
-
+        
+        <delete dir="${build.dir}/tmp_map_dir" />
+        
         <antcall target="scripts" />
 
     </target>
@@ -465,14 +519,15 @@
         <property name="site.test.jar" value="${custom.jar.name}Test.jar" />
         <mkdir dir="${site.test.solr.dir}" />
         <mkdir dir="${site.test.solr.dir}/conf" />
-<!--
+		<!-- Note:  Although default values are created here for the following 
+		     three properties, you should really define values for these 
+		     in your site specific build.properties file or in your site
+		     specific test/test.properties file.  If you define these values
+		     there, those values will be used, and the following three lines
+		     will have no effect -->
         <property name="test.solr.dir" value="${test.dir}/solr" />
         <property name="test.data.dir" value="${test.dir}/data" />
         <property name="test.data.file" value="u399.mrc" />
--->
-        <property name="test.solr.dir" value="${test.solr.dir}" />
-        <property name="test.data.dir" value="${test.data.dir}" />
-        <property name="test.data.file" value="${test.data.file}" />
 
         <if>
             <not>
@@ -489,17 +544,30 @@
             </then>
         </if>
         <property name="site.test.solr.conf.override" value="${solr.path}/conf" />
+        <property name="site.test.solr.lib.override" value="${solr.path}/lib" />
 
+        <!-- create a solr directory for testing by copying a boilerplate solr directory -->
         <copy overwrite="false" todir="${site.test.solr.dir}">
             <fileset dir="${test.solr.dir}" includes="lib/*.jar,conf/*.*,conf/xslt/*,data" excludes="data/**" />
         </copy>
+        
+        <!-- now copy files from the conf directory and lib directory under the installed solr directory that
+             will be used by the installation  -->
         <copy overwrite="true" todir="${site.test.solr.dir}/conf" failonerror="false">
-            <fileset dir="${site.test.solr.conf.override}" includes="*.xml" />
+            <fileset dir="${site.test.solr.lib.override}" includes="*" />
         </copy>
-<!--
+        <copy overwrite="true" todir="${site.test.solr.dir}/lib" failonerror="false">
+            <fileset dir="${site.test.solr.conf.override}" includes="*.jar" />
+        </copy>
+		<!--  
+		      Note: the following property specifies the name of the class containing the tests
+		      that are to be run.  If you want to run anything more than the simplest low level tests
+		      you need to define the property test.class in your site specific build.properties file
+		      or in your site specific test/test.properties file.
+		      If you don't the following default value will be used, which only does simple low-level tests.
+		  -->
         <property name="test.class" value="org.solrmarc.index.UtilUnitTests" />
--->
-        <property name="test.class" value="${test.class}" />
+
     </target>
 
     <target name="testCompile" depends="testInit,compile" description="Compile test source code into test build dir">
@@ -547,40 +615,41 @@
     <target name="test" depends="testJar" description="run junit tests for bib index">
         <echo message="using solr version: ${solr.version}" />
         <echo message="solr.path: ${solr.path}" />
-
+        <echo message="solr.path being used for testing: ${site.test.solr.dir}" />
+        
         <path id="test.run.classpath.jars">
             <path refid="test.classpath.jars" />
             <fileset file="${site.test.dir}/${site.test.jar}" />
         </path>
-<!--
-        <java jar="${dist.dir}/${distribution.jar.name}.jar" fork="true" maxmemory="128m" failonerror="true">
-            <arg line="${test.data.dir}/${test.data.file}" />
-            <sysproperty key="solr.path" value="${site.test.solr.dir}" />
-            <sysproperty key="solr.data.dir" value="${site.test.solr.dir}/data" />
-            <redirector errorproperty="errorproperty">
-                <errorfilterchain>
-                    <linecontainsregexp>
-                        <regexp pattern=" INFO:*" />
-                    </linecontainsregexp>
-                </errorfilterchain>
-            </redirector>
-        </java>
-        <echo message="${errorproperty}" />
--->
 
-
-        <junit showoutput="yes" printsummary="yes" fork="yes">
-            <formatter type="plain" usefile="no" />
-
-            <classpath>
-                <path refid="test.run.classpath.jars" />
-            </classpath>
-
-            <sysproperty key="test.data.parent.path" path="${test.data.dir}" />
-            <sysproperty key="solr.path" path="${site.test.solr.dir}" />
-            <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
-
-            <test name="${test.class}" />
-        </junit>
+        <test-index-rec file="u17922.mrc" lookfor="oclc_text" expect="10072685" />
+        <test-index-rec file="u470059.mrc" lookfor="ports_of_call" expect="Penang|Malaysia" />
+        
+        <echo message="test class = ${test.class} " />
+      
+        <if >
+            <and> 
+                <isset property="test.class" />
+                <available classname="${test.class}" classpathref="test.run.classpath.jars" />
+            </and>
+            <then>
+                <junit showoutput="yes" printsummary="yes" fork="yes">
+                    <formatter type="plain" usefile="no" />
+        
+                    <classpath>
+                        <path refid="test.run.classpath.jars" />
+                    </classpath>
+        
+                    <sysproperty key="test.data.path" path="${test.data.dir}" />
+                    <sysproperty key="solr.path" path="${site.test.solr.dir}" />
+                    <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
+        
+                    <test name="${test.class}" />
+                </junit>
+            </then>
+            <else>
+                <echo message="test class ${test.class} not defined or not available" />
+            </else>
+        </if>  
     </target>
 </project>
