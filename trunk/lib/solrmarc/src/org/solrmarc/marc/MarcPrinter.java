@@ -135,18 +135,18 @@ public class MarcPrinter extends MarcHandler
                     sortedKeys.addAll(indexMap.keySet());
                     Iterator<String> keys = sortedKeys.iterator();
                     String key = "id";
-                    Object value = indexMap.get(key);
-                    System.out.println("\nIndexID= "+ key + "  Value = "+ value);
+                    Object recordID = indexMap.get(key);
+                    //System.out.println("\nIndexID= "+ key + "  Value = "+ value);
                     while (keys.hasNext())
                     {
                         key = keys.next();
-                        value = indexMap.get(key);
+                        Object value = indexMap.get(key);
                         if (key.equals("id")) continue;
                         if (key.startsWith(indexkeyprefix))
                         {
                             if (value instanceof String)
                             {
-                                System.out.println("IndexID= "+ key + "  Value = "+ value);
+                                System.out.println(recordID+ " : "+ key + " = "+ value);
                             }
                             else if (value instanceof Collection)
                             {
@@ -154,7 +154,7 @@ public class MarcPrinter extends MarcHandler
                                 while (valIter.hasNext())
                                 {
                                     String collVal = valIter.next().toString();
-                                    System.out.println("IndexID= "+ key + "  Value = "+ collVal);
+                                    System.out.println(recordID+ " : "+ key + " = "+ collVal);
                                 }
                             }
                         }
