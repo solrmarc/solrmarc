@@ -46,8 +46,12 @@ public abstract class IndexTest {
 	                             String testDataParentPath, String testDataFname) 
 			                     throws ParserConfigurationException, IOException, SAXException 
 	{
-        java.util.logging.Logger.getLogger("org.apache.solr").setLevel(java.util.logging.Level.SEVERE);
-        setLog4jLogLevel(org.apache.log4j.Level.WARN);
+        //System.err.println("test.solr.verbose = " + System.getProperty("test.solr.verbose"));
+        if (!Boolean.parseBoolean(System.getProperty("test.solr.verbose")))
+        {
+            java.util.logging.Logger.getLogger("org.apache.solr").setLevel(java.util.logging.Level.SEVERE);
+            setLog4jLogLevel(org.apache.log4j.Level.WARN);
+        }
         if (solrPath != null)  
         {
             System.setProperty("solr.path", solrPath);
@@ -149,11 +153,11 @@ public abstract class IndexTest {
         if (solrCoreProxy != null)
         {
             logger.info("Closing solr");
- //           solrCoreProxy.close();
+            solrCoreProxy.close();
             solrCoreProxy = null;
         }
 	    
-	    importer.finish();
+	//    importer.finish();
 	    importer = null;
 	}
 	
