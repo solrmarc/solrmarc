@@ -1,5 +1,7 @@
 package edu.stanford;
 
+import static org.junit.Assert.fail;
+
 import java.io.*;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -58,13 +60,15 @@ public abstract class BibIndexTest extends OldIndexTest {
 	{
         String solrPath = System.getProperty("solr.path");
         if (solrPath == null)
-            solrPath = new File("examples/stanfordVufind/test/solr").getAbsolutePath();
-
+        {
+            fail("property solr.path  must be defined for the tests to run" );
+        }
 
         String testDataParentPath = System.getProperty("test.data.path");
-        
-        if (testDataParentPath == null)  testDataParentPath = "test/data";
-
+        if (testDataParentPath == null)
+        {
+            fail("property test.data.path  must be defined for the tests to run" );
+        }
         createIxInitVars(null, solrPath, null, testDataParentPath, testDataFname);
 	}
 

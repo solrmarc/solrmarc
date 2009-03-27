@@ -2,14 +2,12 @@
 <project basedir="." default="build" name="SolrMarc Custom">
 
     <!-- property files -->
-    <!-- Include a reference here to your site specific build.properties file
-         if you use that file to define the property "site.dir" or to override 
-         standard settings that are defined in the main build.properties file 
-         listed just below.  The following line is an example.  Note if you do 
-         not include a reference to this file here, everything will still work. -->
-           
-    <!-- <property file="examples/stanfordBlacklight/build.properties" /> -->
-    <property file="build_override.properties" />
+    <!-- the following properties file is expected to define a single property site.dir
+         which defines the directory that will contain all of the site specific source code
+         properties, etc for a given sites customization of SolrMarc.   Note that if you don't 
+         manually define that property in this file, the build process will prompt you for the
+         correct value and store the value in this file for future builds  -->
+    <property file="site.dir.properties" />
     <property file="build.properties" />
 
     <property name="buildtools.path" value="buildtools" />
@@ -31,7 +29,23 @@
     <target name="clean" description="clean the generated directories">
         <delete dir="${build.dir}" />
         <delete dir="${dist.dir}" />
-        <delete file="build_override.properties" />
+        <if>
+            <isset property="site.dir" />
+            <then>
+                <init_site_props />
+                <delete dir="${site.build.dir}" /> 
+                <delete dir="${site.test.build.dir}" />
+                <delete dir="${site.test.solr.dir}" />
+            </then>
+        </if>
+    </target>
+
+    <target name="veryclean" depends="clean" 
+        description="clean any generated files and restore the 
+                     project as near as possible to a just-downloaded state">
+        <delete file="${site.dir.properties}" />
+        <!-- delete properties file generated in site.dir in response to prompts  -->
+        <delete file="${site.dir}/build_override.properties" />
     </target>
 
     <target name="init" depends="init_site,solrversion" unless="init.already.run"
@@ -63,6 +77,7 @@
             <property name="site.build.dir" value="${site.dir}/${build.dir}" />
             <property name="site.test.dir" value="${site.dir}/${test.dir}" />
             <property name="site.test.src.dir" value="${site.test.dir}/${src.dir}" />
+            <property name="site.test.build.dir" value="${site.test.dir}/${build.dir}" />
             <property name="site.test.solr.dir" value="${site.test.dir}/solr" />
             <property name="site.map.dir" value="${site.dir}/${trans.map.path}" />
             <property name="site.script.dir" value="${site.dir}/${script.template.dir}" />
@@ -170,7 +185,7 @@
 
     <target name="init_site" description="Create the src, lib, bin, test directories for a custom site" unless="init_site.already.run">
         <input-save message="Enter name of directory to contain all site-specific modifications:"       
-            addproperty="site.dir" propertyfile="build_override.properties" />
+            addproperty="site.dir" propertyfile="site.dir.properties" />
         <init_site_props />
 
         <echo message="site.test.solr.dir = ${site.test.solr.dir}" />
@@ -402,6 +417,67 @@
         </if>
     </target>
 
+    <macrodef name="merge_maps"  description="copy and merge translation maps" >
+        <sequential>
+            <delete_merged_maps />
+            <!-- copy standard translation maps and site-specific translation maps to the same 
+                 temporary directory.  If there are files with duplicate names only keep the 
+                 site-specific version, but warn the user that duplicates are present. -->
+            <copy todir="${build.dir}/tmp_map_dir" >
+                <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
+            </copy>
+            
+            <copy todir="${build.dir}/tmp_map_dir" overwrite="true">
+                <fileset dir="${site.map.dir}" includes="*.properties" />
+            </copy>
+            
+            <pathconvert pathsep=" "  property="std_maps" >
+                <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
+                <flattenmapper />
+            </pathconvert>
+            
+            <pathconvert pathsep=" "  property="site_maps" >
+                <fileset dir="${site.map.dir}" includes="*.properties" />
+                <flattenmapper />
+            </pathconvert>
+            
+            <resources id="intersect_std_maps_with_site_maps" >
+                <intersect>
+                    <resources>
+                        <tokens>
+                            <string value="${std_maps}" />
+                            <stringtokenizer />
+                        </tokens>
+                    </resources>
+                    <resources>
+                        <tokens>
+                            <string value="${site_maps}" />
+                            <stringtokenizer />
+                        </tokens>
+                  </resources>
+                </intersect>
+            </resources>
+    
+            <pathconvert pathsep=", "  property="both_maps" refid="intersect_std_maps_with_site_maps" />
+    
+            <if >
+                <resourcecount refid="intersect_std_maps_with_site_maps" when="greater" count="0" />
+                <then>
+                    <echo level="error" message="-----------------------------------------------------------------------------------------" />
+                    <echo level="error" message="Warning: Site specific translation map replaces standard translation map of the same name" />
+                    <echo level="error" message="         Duplicate map names = ${both_maps} " />
+                    <echo level="error" message="-----------------------------------------------------------------------------------------" />
+                </then>
+            </if>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="delete_merged_maps" >
+        <sequential>
+            <delete dir="${build.dir}/tmp_map_dir" />
+        </sequential>
+    </macrodef>
+    
     <target name="build" depends="compile,defaultconfig" 
             description="create ${jar.name} in the build directory">
         <copy tofile="${buildtools.path}/manifest.mf" 
@@ -421,58 +497,8 @@
             </filterchain>
         </loadproperties>
         
-        <delete dir="${build.dir}/tmp_map_dir" />
-        
-        <!-- copy standard translation maps and site-specific translation maps to the same 
-             temporary directory.  If there are files with duplicate names only keep the 
-             site-specific version, but warn the user that duplicates are present. -->
-        <copy todir="${build.dir}/tmp_map_dir" >
-            <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
-        </copy>
-        
-        <copy todir="${build.dir}/tmp_map_dir" overwrite="true">
-            <fileset dir="${site.map.dir}" includes="*.properties" />
-        </copy>
-        
-        <pathconvert pathsep=" "  property="std_maps" >
-            <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
-            <flattenmapper />
-        </pathconvert>
-        
-        <pathconvert pathsep=" "  property="site_maps" >
-            <fileset dir="${site.map.dir}" includes="*.properties" />
-            <flattenmapper />
-        </pathconvert>
-        
-        <resources id="intersect_std_maps_with_site_maps" >
-            <intersect>
-                <resources>
-                    <tokens>
-                        <string value="${std_maps}" />
-                        <stringtokenizer />
-                    </tokens>
-                </resources>
-                <resources>
-                    <tokens>
-                        <string value="${site_maps}" />
-                        <stringtokenizer />
-                    </tokens>
-              </resources>
-            </intersect>
-        </resources>
-
-        <pathconvert pathsep=", "  property="both_maps" refid="intersect_std_maps_with_site_maps" />
-
-        <if >
-            <resourcecount refid="intersect_std_maps_with_site_maps" when="greater" count="0" />
-            <then>
-                <echo level="error" message="-----------------------------------------------------------------------------------------" />
-                <echo level="error" message="Warning: Site specific translation map replaces standard translation map of the same name" />
-                <echo level="error" message="         Duplicate map names = ${both_maps} " />
-                <echo level="error" message="-----------------------------------------------------------------------------------------" />
-            </then>
-        </if>
-        
+        <merge_maps />
+                
         <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
                manifest="${buildtools.path}/manifest.mf">
             <main jar="${lib.dir}/solrmarc/${dist.dir}/${jar.name}" />
@@ -487,7 +513,7 @@
             <fileset dir="." includes="log4j.properties" />
         </one-jar>
         
-        <delete dir="${build.dir}/tmp_map_dir" />
+        <delete_merged_maps />
         
         <antcall target="scripts" />
 
@@ -553,14 +579,37 @@
             <fileset dir="${test.solr.dir}" includes="lib/*.jar,conf/*.*,conf/xslt/*,data" excludes="data/**" />
         </copy>
         
-        <!-- now copy files from the conf directory and lib directory under the installed solr directory that
-             will be used by the installation  -->
-        <copy overwrite="true" todir="${site.test.solr.dir}/conf" failonerror="false">
-            <fileset dir="${site.test.solr.lib.override}" includes="*" />
-        </copy>
-        <copy overwrite="true" todir="${site.test.solr.dir}/lib" failonerror="false">
-            <fileset dir="${site.test.solr.conf.override}" includes="*.jar" />
-        </copy>
+        <!-- now copy files from the conf directory and lib directory from the solr.path/conf  and /lib directories
+             if they exist, otherwise copy files from the conf directory and lib directory as specified by the 
+             properties ${site.test.solr.conf.override} and  ${site.test.solr.lib.override}   -->
+        <if>
+            <available file="${solr.path}/conf" />
+            <then>
+                <copy overwrite="true" todir="${site.test.solr.dir}/conf" failonerror="false">
+                    <fileset dir="${solr.path}/conf" includes="*" />
+                </copy>
+            </then>
+            <else>
+                <copy overwrite="true" todir="${site.test.solr.dir}/conf" failonerror="false">
+                    <fileset dir="${site.test.solr.conf.override}" includes="*" />
+                </copy>
+            </else>
+        </if>
+            
+        <if>
+            <available file="${solr.path}/lib" />
+            <then>
+                <copy overwrite="true" todir="${site.test.solr.dir}/lib" failonerror="false">
+                    <fileset dir="${solr.path}/lib" includes="*.jar" />
+                </copy>
+            </then>
+            <else>
+                 <copy overwrite="true" todir="${site.test.solr.dir}/lib" failonerror="false">
+                     <fileset dir="${site.test.solr.lib.override}" includes="*.jar" />
+                 </copy>
+             </else>
+        </if>
+        
 		<!--  
 		      Note: the following property specifies the name of the class containing the tests
 		      that are to be run.  If you want to run anything more than the simplest low level tests
@@ -581,7 +630,7 @@
             <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
         </path>
 
-        <javac destdir="${site.test.dir}/${build.dir}" 
+        <javac destdir="${site.test.build.dir}" 
                srcdir="${site.test.dir}/${src.dir}:${test.dir}/${src.dir}" 
                target="${java.compat.version}" source="${java.compat.version}" 
                debug="on" encoding="utf-8">
@@ -595,7 +644,7 @@
     </target>
 
     <target name="testJar" depends="testCompile" description="jar up test class files">
-        <echo message=" creating test jar :  ${site.test.dir}/${site.test.jar}" />
+        <echo message=" creating test jar :  ${site.test.build.dir}/${site.test.jar}" />
         <copy tofile="${buildtools.path}/manifest.mf" 
               file="${buildtools.path}/manifest_template.mf" overwrite="true">
             <filterset>
@@ -603,15 +652,22 @@
                 <filter token="NAMEOFDEFAULTCONFIGFILE" value="${default.config}" />
             </filterset>
         </copy>
-        <one-jar destfile="${site.test.dir}/${site.test.jar}" 
+        
+        <merge_maps />
+        
+        <!-- This task builds a one jar containing all of the properties files needed to run the tests so that the 
+             property file loading as jar resources works correctly in the tests.  Note we need to include a main 
+             jar attribute to make the one-jar task happy, the jar defined there doesnt have to exist for it to work. -->
+        <one-jar destfile="${site.test.build.dir}/${site.test.jar}" 
                manifest="${buildtools.path}/manifest.mf">
-            <main jar="${buildtools.path}/ant_extras.jar" />
-            <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
+            <main jar="${buildtools.path}/doesntexist.jar" />
+            <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
             <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
             <fileset dir="." includes="log4j.properties" />
-            <fileset dir="${site.map.dir}" includes="*.properties" />
-            <fileset dir="${site.test.dir}/${build.dir}" includes="**/*.class" />
+            <fileset dir="${site.test.build.dir}" includes="**/*.class" />
         </one-jar>
+        
+        <delete_merged_maps />
     </target>
 
     <target name="test" depends="testJar" description="run junit tests for bib index">
@@ -621,7 +677,7 @@
         
         <path id="test.run.classpath.jars">
             <path refid="test.classpath.jars" />
-            <fileset file="${site.test.dir}/${site.test.jar}" />
+            <fileset file="${site.test.build.dir}/${site.test.jar}" />
         </path>
 
         <!--
@@ -647,6 +703,7 @@
                     <sysproperty key="test.data.path" path="${test.data.dir}" />
                     <sysproperty key="solr.path" path="${site.test.solr.dir}" />
                     <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
+                    <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
         
                     <test name="${test.class}" />
                 </junit>
