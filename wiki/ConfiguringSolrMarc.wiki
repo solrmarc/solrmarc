@@ -1,0 +1,73 @@
+#summary This page will guide you through installing and building SolrMarc
+<wiki:toc max_depth="5" />
+
+=== About This Guide ===
+
+This configuring SolrMarc guide explains the setup of the two configuration files that control the operation of SolrMarc and gives examples of custom indexing routines.
+
+<br />
+
+=== About !SolrMarc ===
+
+A Configurable Java-based program for indexing MARC records into a Solr index.
+
+The SolrMarc program reads in MARC records stored in standard binary format (ISO 2709) and uses a configurable and customizable script for extracting values from the fields and sub-fields of the MARC record to build an index entry for adding to Solr.  Additionally, so that it can run faster, rather than building the records and POSTing them to a Solr search engine, this program directly writes to the index directory of the Solr search engine.
+
+<br />
+
+=== config.properties File ===
+
+The main configuration of the program is currently done via a properties file that is created and stored in the jar file produced by the build process. The name of this file can be passed in as the first parameter on the command line, however if only one config.properties file is stored in the jar file, that one will be used by default.  An example config.properties file is below:
+
+{{{
+# Properties for the Java import program
+
+# Path to your solr instance
+solr.path = C:/Development/blacklight-0.2/solr-home
+solr.indexer.properties = blacklight.properties
+solr.indexer = BlacklightIndexer
+
+#optional URL of running solr search engine to cause updates to be recognized.
+solr.hosturl = http://localhost:8983/solr/update
+
+marc.to_utf_8 = true
+marc.permissive = true
+marc.default_encoding = MARC8
+marc.include_errors = true
+}}}
+
+<br />
+
+==== config.properties File Entries ====
+
+ * *solr.path:* lists the full path to the Solr home directory, which should contain the directories {{{etc}}}, {{{conf}}} and {{{data}}}.  The directory {{{conf}}} should contain a file named _schema.xml_ which describes the different indexing fields that the instance of the Solr search engine is expecting, and the data directory is where the Solr index files will be placed.
+
+ * *solr.indexer.properties:* lists the name of the properties file that defines the mapping from the MARC record fields and sub-fields to the Solr index entries. For details of how this mapping is done, please see below.
+
+ * *solr.indexer:* (optional); specifies the name of a custom indexing class which defines any custom routines for extracting and mapping data for a particular Solr index field. These custom routines will only be needed in cases where values from several different Marc fields and sub-fields need to be consulted to determine the value to add to the Solr index field. Several examples of these custom indexing routines are given below. If, however, you can handle all of the necessary MARC field-to-Solr index field mappings using the available specification language, you do not need to define a value for this entry, and the default SolrIndexer class will be used.
+
+ * *solr.hosturl:* (optional); specifies the URL of a currently running Solr search engine that is referencing the same index data that is specified in the {{{solr.path}}}, entry.  If this value is given, when the indexing process completes, this indexing program will send a signal to the currently running Solr search engine, which will cause it to read the newly modified index files. This is purely a convenience function, to avoid having to stop and restart the running Solr search engine. If no search engine is running at the URL specified, the program will quietly proceed along it way, with the understanding that when that search engine is eventually restarted it will read in the new index data anyway.
+
+ * *marc.to_utf_8:* a boolean value, defaulting to false.  If it is set to true, then as MARC records are read in the program translate the fields of the record to UTF-8, prior to sending the record to the indexer.  If the records are determined to already be encoded in UTF-8 the field values will be unchanged.   
+
+  <b>Note:</b>  You are strongly recommended to use this setting to translate your records to UTF-8, any of the other character encodings that are commonly used in MARC records likely to cause display problems for special characters that occur in the data.
+
+ * *marc.permissive:* a boolean value, defaulting to false.  If it is set to true, then as MARC records are read in if the program encounters ill-formed records, it will make an attempt to work around the problem and read in and index the record rather than simply skipping over the bad record.  Note that the feature does not and cannot fix records that have a valid MARC record structure, but only which have incorrect or invalid data entered in some fields. 
+
+ * *marc.default_encoding:* valid values:  {{{MARC8}}}, {{{UTF8}}}, {{{UNIMARC}}}, {{{ISO8859_1}}}, or {{{BESTGUESS}}}.  It is used to specify what encoding is used in the marc records that you will be importing.  In all likelihood your data will be in one of the first two listed above, or maybe in the third if you are a European institution.  If you have no idea what encoding your original data is in, you can specify {{{BESTGUESS}}} and the program will do its best to correctly determine what encoding is used.  Note also if you provide an incorrect value for this entry, _and_ if you set the entry {{{marc.permissive}}} to true, the MARC record reader will try to detect when you are wrong, and do its best to recover from the problem.
+
+ * *marc.include_errors:* a boolean value, defaulting to false.  If it is set, _and_ if {{{marc.permissive}}} is also set to true, then any errors that are encountered in the process of reading a MARC record, will be stored in the solr index record that is produced, this will allow catalogers to review the errors encountered during reading and to correct the original records in which the errors occurred.
+
+<br />
+
+==== Special Purpose config.properties File Entries ====
+
+Lastly, there are several special purpose entries that will not be used in general, and usually won’t appear in the config.properties file.
+
+ * *marc.override:* lists the class name of the implementation of the MarcFactory object to use to override the default one provided in the {{{marc4j}}} library.  You almost certainly will not need to use this entry.  It is needed at UVa since the MARC records that we are working from have multiple 001 fields (which actually makes them invalid MARC records) and rather than simply keeping the last of these 001 fields that occurs (and discarding the rest), we need to specifically select the correct 001 field to use in the indexing process.
+
+ * *solr.optimize_at_end:* a boolean value, defaulting to false. If it is set to true, when the program has finished indexing all of the MARC records provided to it, it will optimize the index, which will make searches perform much faster.  This entry is set by the shell script {{{optimizesolr}}}, which is found in the dist directory.
+
+ * *marc.ids_to_delete:* supplies the name of a file that contains a list of Solr item ids, one per line, that are to be removed from the Solr index.  In conjunction with this entry is another named marc.delete_record_id_mapper which can be used when the entries that occur in the marc.ids_to_delete file need to be processed to correspond to the actual ids that occur in the solr index.   For instance at UVA the records have ids like  u184783  but the entry that would appear in the marc.ids_to_delete file produced by our system would be merely 184783.
+
+The next entry, marc.verbose, if it is set to true, instructs the program to print out the entire MARC record as it is read in, followed by the entire index record that will be sent to Solr.
