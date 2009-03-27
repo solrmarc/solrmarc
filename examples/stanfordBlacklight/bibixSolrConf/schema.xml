@@ -207,6 +207,8 @@
 	<field name="lc_callnum" type="string" indexed="true" stored="true" multiValued="true"/>
 	<field name="dewey_callnum" type="string" indexed="true" stored="true" multiValued="true"/>
  -->	
+	<!-- Item Info Fields (derived from 999) -->
+	<field name="barcode_search" type="string" indexed="true" stored="false" multiValued="true"/>
 	
 	<!-- Vernacular Fields -->
 	<field name="vern_author_person_display" type="string" indexed="false" stored="true"/>
@@ -242,7 +244,6 @@
  <copyField source="physical_display" dest="physical_search"/>
  <copyField source="all_search" dest="spell"/>
 
- <!-- Default Boolean Operator:  "OR", but dismax request handler effectively makes it "AND" -->
- <solrQueryParser defaultOperator="OR"/>
+ <solrQueryParser defaultOperator="AND"/>
 
 </schema>

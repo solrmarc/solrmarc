@@ -16,6 +16,12 @@
         <datafield tag="019" ind1=" " ind2=" ">
             <subfield code="a">8040009</subfield>
         </datafield>
+		    <datafield tag="020" ind1=" " ind2=" ">
+		      <subfield code="a">1417559128</subfield>
+		    </datafield>
+		    <datafield tag="022" ind1=" " ind2=" ">
+		      <subfield code="a">1047-2010</subfield>
+		    </datafield>
         <datafield tag="022" ind1="0" ind2=" ">
             <subfield code="a">0276-0509</subfield>
         </datafield>
@@ -243,10 +249,12 @@
         </datafield>
         <datafield tag="650" ind1=" " ind2="0">
             <subfield code="a">Foreign exchange.</subfield>
+            <subfield code="y">500-1400.</subfield>
         </datafield>
         <datafield tag="651" ind1=" " ind2="0">
             <subfield code="a">Africa, Sub-Saharan</subfield>
             <subfield code="x">Library resources</subfield>
+            <subfield code="y">Great War, 1843-1852.</subfield>
             <subfield code="z">United States.</subfield>
         </datafield>
         <datafield tag="651" ind1=" " ind2="0">
@@ -349,13 +357,18 @@
             <subfield code="x">CIN=ALY; OID=ALY</subfield>
         </datafield>
         <datafield tag="856" ind1="4" ind2="1">
-            <subfield code="3">Text version:</subfield>
-            <subfield code="u">http://purl.access.gpo.gov/GPO/LPS21381</subfield>
-        </datafield>
-        <datafield tag="856" ind1="4" ind2="1">
             <subfield code="3">PDF version:</subfield>
             <subfield code="u">http://purl.access.gpo.gov/GPO/LPS21382</subfield>
             <subfield code="z">Adobe Acrobat Reader required</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="1">
+            <subfield code="3">coverage: blah</subfield>
+            <subfield code="u">http://www.url856.com/ind2_1/toc_subz</subfield>
+            <subfield code="z">Online table of contents from PCI available to Stanford-affiliated users</subfield>    
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="2">
+            <subfield code="3">not fulltext</subfield>
+            <subfield code="u">http://www.url856.com/ind2_2/supplementaryMaterial</subfield>
         </datafield>
         <datafield tag="899" ind1=" " ind2="0">
             <subfield code="a">Dermatologica ;</subfield>
@@ -404,6 +417,39 @@
             <subfield code="u">1/23/1974</subfield>
             <subfield code="z">DIGI-SENT</subfield>
             <subfield code="o">.TECHSTAFF. 900915</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">370.1 .S655</subfield>
+            <subfield code="w">DEWEY</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">36105033336780</subfield>
+            <subfield code="d">5/26/2003</subfield>
+            <subfield code="e">5/15/2003</subfield>
+            <subfield code="l">STACKS</subfield>
+            <subfield code="m">SAL3</subfield>
+            <subfield code="n">1</subfield>
+            <subfield code="p">$40.00</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">STKS-MONO</subfield>
+            <subfield code="u">12/2/1971</subfield>
+            <subfield code="o">.TECHSTAFF. tf:EDUCATION 05/24/06 batch</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">E 1.28:COO-4274-1</subfield>
+            <subfield code="w">SUDOC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">001AMR5851</subfield>
+            <subfield code="d">11/22/1998</subfield>
+            <subfield code="l">FED-DOCS</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="p">$40.00</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">GOVSTKS</subfield>
+            <subfield code="u">5/20/1979</subfield>
+            <subfield code="x">MARCIVE</subfield>
+            <subfield code="o">.TECHSTAFF. tf:GOV-DOCS 11/98 batch</subfield>
         </datafield>
     </record>
 </collection>
