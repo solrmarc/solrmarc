@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <config>
+  <!-- NOTE: various comments and unused configuration possibilities have been purged 
+     from this file.  Please refer to solr documentation on the web, as well
+     as the default solrconfig file included with solr -->
+
   <!-- Set this to 'false' if you want solr to continue working after it has 
        encountered an severe configuration error.  In a production environment, 
        you may want solr to keep working even if one handler is mis-configured.
@@ -30,36 +34,16 @@
     <writeLockTimeout>1000</writeLockTimeout>
     <commitLockTimeout>10000</commitLockTimeout>
     
-    <!--
-      Expert: Turn on Lucene's auto commit capability.
-      NOTE: Despite the name, this value does not have any relation to Solr's autoCommit functionality
-    -->
-    <!--<luceneAutoCommit>false</luceneAutoCommit>-->
-    <!--
-      Expert:
-      The Merge Policy in Lucene controls how merging is handled by Lucene.        
-      LogByteSizeMergePolicy chooses segments to merge based on their size.  
-			LogDocMergePolicy choose segments to merge based on number of documents
-			The default in 2.3 is the LogByteSizeMergePolicy
-    -->
-    <!--<mergePolicy>org.apache.lucene.index.LogByteSizeMergePolicy</mergePolicy>-->
-    <!--
-      Expert:
-      The Merge Scheduler in Lucene controls how merges are performed.  The ConcurrentMergeScheduler (Lucene 2.3 default)
-      can perform merges in the background using separate threads.  The SerialMergeScheduler does not.
-    -->
-    <!--<mergeScheduler>org.apache.lucene.index.ConcurrentMergeScheduler</mergeScheduler>-->
+    <!-- See docs re: luceneAutoCommit -->
     
     <!--
-      As long as Solr is the only process modifying your index, it is
-      safe to use Lucene's in process locking mechanism.  But you may
-      specify one of the other Lucene LockFactory implementations in
-      the event that you have a custom situation.
+      This option specifies which Lucene LockFactory implementation to use.
       
-      none = NoLockFactory (typically only used with read only indexes)
-      single = SingleInstanceLockFactory (suggested)
+      single = SingleInstanceLockFactory - suggested for a read-only index
+               or when there is no possibility of another process trying
+               to modify the index.
       native = NativeFSLockFactory
-      simple = SimpleFSLockFactory  (default for backwards compatibility with Solr 1.2)
+      simple = SimpleFSLockFactory
     -->
     <lockType>single</lockType>
   </indexDefaults>
@@ -80,48 +64,14 @@
      -->
     <unlockOnStartup>false</unlockOnStartup>
 
-    <!--
-        Custom deletion policies can specified here. The class must
-        implement org.apache.lucene.index.IndexDeletionPolicy.
-
-        http://lucene.apache.org/java/2_3_2/api/org/apache/lucene/index/IndexDeletionPolicy.html
-
-        The standard Solr IndexDeletionPolicy implementation supports deleting
-        index commit points on number of commits, age of commit point and
-        optimized status.
-
-        The latest commit point should always be preserved regardless
-        of the criteria.
-    -->
+	<!--  For deletion policy, please refer to solr documentation on the web, as well
+     as the default solrconfig file included with solr -->
     <deletionPolicy class="solr.SolrDeletionPolicy">
-      <!-- Keep only optimized commit points -->
       <str name="keepOptimizedOnly">false</str>
-      <!-- The maximum number of commit points to be kept -->
       <str name="maxCommitsToKeep">1</str>
-      <!--
-          Delete all commit points once they have reached the given age.
-          Supports DateMathParser syntax e.g.
-          
-          <str name="maxCommitAge">30MINUTES</str>
-          <str name="maxCommitAge">1DAY</str>
-      -->
     </deletionPolicy>
 
   </mainIndex>
-
-  <!--	Enables JMX if and only if an existing MBeanServer is found, use 
-  		this if you want to configure JMX through JVM parameters. Remove
-  		this to disable exposing Solr configuration and statistics to JMX.
-
-		If you want to connect to a particular server, specify the agentId
-		e.g. <jmx agentId="myAgent" />
-
-		If you want to start a new MBeanServer, specify the serviceUrl
-		e.g <jmx serviceUrl="service:jmx:rmi:///jndi/rmi://localhost:9999/solr" />
-
-		For more details see http://wiki.apache.org/solr/SolrJmx
-  -->
-  <jmx />
 
   <!-- the default high-performance update handler -->
   <updateHandler class="solr.DirectUpdateHandler2">
@@ -135,31 +85,9 @@
     </autoCommit>
     -->
 
-    <!-- The RunExecutableListener executes an external command.
-         exe - the name of the executable to run
-         dir - dir to use as the current working directory. default="."
-         wait - the calling thread waits until the executable returns. default="true"
-         args - the arguments to pass to the program.  default=nothing
-         env - environment variables to set.  default=nothing
-      -->
-    <!-- A postCommit event is fired after every commit or optimize command
-    <listener event="postCommit" class="solr.RunExecutableListener">
-      <str name="exe">solr/bin/snapshooter</str>
-      <str name="dir">.</str>
-      <bool name="wait">true</bool>
-      <arr name="args"> <str>arg1</str> <str>arg2</str> </arr>
-      <arr name="env"> <str>MYVAR=val1</str> </arr>
-    </listener>
-    -->
-    <!-- A postOptimize event is fired only after every optimize command, useful
-         in conjunction with index distribution to only distribute optimized indicies 
-    <listener event="postOptimize" class="solr.RunExecutableListener">
-      <str name="exe">snapshooter</str>
-      <str name="dir">solr/bin</str>
-      <bool name="wait">true</bool>
-    </listener>
-    -->
-
+    <!-- RunExecutableListener can execute an external command. See other documentation -->
+    <!-- examples given are postCommit, postOptimize -->
+    
   </updateHandler>
 
 
@@ -169,7 +97,6 @@
         queries.  An exception is thrown if exceeded.  -->
     <maxBooleanClauses>1024</maxBooleanClauses>
 
-    
     <!-- There are two implementations of cache available for Solr,
          LRUCache, based on a synchronized LinkedHashMap, and
          FastLRUCache, based on a ConcurrentHashMap.  FastLRUCache has faster gets
@@ -178,7 +105,10 @@
          faster under other scenarios on multi-cpu systems. -->
 
     <!-- filterCache: Cache used by SolrIndexSearcher for filters (DocSets),
-         unordered sets of *all* documents that match a query.
+         unordered sets of *all* documents that match a query.  Three uses:
+           fq param
+           faceting, when TermEnum method
+           sorting, if useFilterForSortedQuery config option is set to true
          When a new searcher is opened, its caches may be prepopulated
          or "autowarmed" using data from caches in the old searcher.
          autowarmCount is the number of items to prepopulate.  For LRUCache,
@@ -191,43 +121,47 @@
          autowarmCount - the number of entries to prepopulate from
            and old cache.
          -->
- <!-- not clear if we ever do a live update via SOLR ... so will we ever have
- an opportunity to autowarm -->
     <filterCache
       class="solr.LRUCache"
-      size="100000"
-      initialSize="100000"
-      autowarmCount="50000"/>
+      size="102400"
+      initialSize="102400"
+      autowarmCount="51200"/>
+
+<!-- TODO: (Stanford) not clear if we ever do a live update via SOLR ... do we ever autowarm ?? -->
 
     <!-- Cache used to hold field values that are quickly accessible
-         by document id.  The fieldValueCache is created by default
-         even if not configured here.
+         by document id. Used for sorting, and in some cases, faceting.
+         The fieldValueCache is created by default even if not configured here.
+    -->
       <fieldValueCache
         class="solr.FastLRUCache"
-        size="512"
-        autowarmCount="128"
-        showItems="32"
+        size="5120"
+        autowarmCount="2048"
+        showItems="64"
       />
-    -->
 
    <!-- queryResultCache caches results of searches - ordered lists of
          document ids (DocList) based on a query, a sort, and the range
          of documents requested.
   -->
-<!-- TODO: dial this way down once code uses filter queries for facets -->
     <queryResultCache
       class="solr.LRUCache"
-      size="100000"
-      initialSize="5000"
-      autowarmCount="5000"/>
+      size="8192"
+      initialSize="8192"
+      autowarmCount="0"/>
 
   <!-- documentCache caches Lucene Document objects (the stored fields for each document).
-       Since Lucene internal document ids are transient, this cache will not be autowarmed.  -->
+       Since Lucene internal document ids are transient, this cache will not be autowarmed.        
+       The size for the documentCache should always be greater than 
+         max_results * max_concurrent_queries, 
+       to ensure that Solr does not need to refetch a document during a request. The more 
+       fields you store in your documents, the higher the memory usage of this cache will be.
+  -->
     <documentCache
       class="solr.LRUCache"
-      size="50000"
-      initialSize="50000"
-      autowarmCount="10000"/>
+      size="51200"
+      initialSize="51200"
+      autowarmCount="10240"/>
 
     <!-- If true, stored fields that are not requested will be loaded lazily.
 
@@ -248,9 +182,9 @@
          is requested, a superset of the requested number of document ids
          are collected.  For example, if a search for a particular query
          requests matching documents 10 through 19, and queryWindowSize is 50,
-         then documents 0 through 50 will be collected and cached.  Any further
+         then documents 0 through 49 will be collected and cached.  Any further
          requests in that range can be satisfied via the cache.  -->
-    <queryResultWindowSize>60</queryResultWindowSize>
+    <queryResultWindowSize>80</queryResultWindowSize>
     
     <!-- Maximum number of documents to cache for any entry in the
       queryResultCache. -->
@@ -262,8 +196,8 @@
          iterate over, and faster to take intersections.  -->
     <HashDocSet maxSize="200000" loadFactor="0.75"/>
 
-<!-- not clear if we ever do a live update via SOLR ... so will we ever have
- a new searche?  Or always a first searcher?  -->
+<!-- TODO: (Stanford) not clear if we ever do a live update via SOLR ... do we ever autowarm ?? -->
+<!-- do we ever have a new searcher?  Or always a first searcher?  -->
     <!-- a newSearcher event is fired whenever a new searcher is being prepared
          and there is a current searcher handling requests (aka registered). -->
     <!-- QuerySenderListener takes an array of NamedList and executes a
@@ -419,167 +353,28 @@
     </httpCaching>
   </requestDispatcher>
 
-   <!-- The spell check search component can return a list of alternative 
-        spelling suggestions.  -->
-  <searchComponent name="spellcheck" class="solr.SpellCheckComponent">
-    <str name="queryAnalyzerFieldType">textSpell</str>
 
-    <lst name="spellchecker">
-      <str name="name">default</str>
-      <str name="field">spell</str>
-      <str name="spellcheckIndexDir">./spellchecker</str>
-			<str name="accuracy">0.7</str>
-    </lst>
-    <lst name="spellchecker">
-      <str name="name">jarowinkler</str>
-      <str name="field">spell</str>
-      <!-- Use a different Distance Measure -->
-      <str name="distanceMeasure">org.apache.lucene.search.spell.JaroWinklerDistance</str>
-      <str name="spellcheckIndexDir">./spellcheckerJaroWin</str>
-    </lst>
-
-    <lst name="spellchecker">
-      <str name="classname">solr.FileBasedSpellChecker</str>
-      <str name="name">file</str>
-      <str name="sourceLocation">spellings.txt</str>
-      <str name="characterEncoding">UTF-8</str>
-      <str name="spellcheckIndexDir">./spellcheckerFile</str>
-    </lst>
-
-    <str name="queryAnalyzerFieldType">textSpell</str>
-  </searchComponent>
-
-
-  <!-- requestHandler plugins... incoming queries will be dispatched to the
-     correct handler based on the path or the qt (query type) param.
-     Names starting with a '/' are accessed with the a path equal to the 
-     registered name.  Names without a leading '/' are accessed with:
-      http://host/app/select?qt=name
-     If no qt is defined, the requestHandler that declares default="true"
-     will be used.
+  <!-- requestHandler plugins:  Please refer to solr documentation on the web, as well
+     as the default solrconfig file included with solr
   -->
+  <!-- "standard" is not used by Blacklight -->
   <requestHandler name="standard" class="solr.SearchHandler" >
-    <!-- default values for query parameters -->
      <lst name="defaults">
        <str name="echoParams">explicit</str>
-       <str name="rows">20</str>  <!-- change for record view -->
-       <!-- fl:  fields needed for search results -->
-       <str name="fl">
-         score,
-         id,
-         author_corp_display,
-         author_meeting_display,
-         author_person_display,
-         author_person_full_display,
-         format_display,
-         edition_display,
-         isbn_display,
-         lccn_display,
-         oclc_display,
-         physical_display,
-         publication_display,
-         publish_date_display,
-         title_display,
-         title_245a_display,
-         title_uniform_display,
-         url_display,
-         url_sfx_display,
-         vern_author_corp_display,
-         vern_author_meeting_display,
-         vern_author_person_display,
-         vern_author_person_full_display,
-         vern_edition_display,
-         vern_publication_display
-         vern_title_display,
-         vern_title_uniform_display,
-       </str>
-
-       <!-- facet config, enable per-query with facet=true -->
-       <str name="facet.mincount">1</str>
-       <str name="facet.limit">30</str>
-       <str name="facet.field">access_facet</str>
-  	   <str name="facet.field">author_person_facet</str>
-  	   <str name="facet.field">author_corp_facet</str>
-  	   <str name="facet.field">author_meeting_facet</str>
-  	   <str name="facet.field">author_combined_facet</str>
-       <str name="facet.field">building_facet</str>
-       <str name="facet.field">dewey_1digit_facet</str>
-       <str name="facet.field">era_facet</str>
-       <str name="facet.field">format_facet</str>
-       <str name="facet.field">geographic_facet</str>
-       <str name="facet.field">language_facet</str>
-       <str name="facet.field">lc_1letter_facet</str>
-       <str name="facet.field">topic_facet</str>
-
-      <!-- highlighter config, enable per-query with hl=true -->
-<!-- TODO: revisit highlighter config when fulltext avail -->
-      <str name="hl.fl">
-        author_person_display
-        vern_author_person_display
-        author_person_full_display
-        vern_author_person_full_display
-        author_corp_display
-        vern_author_corp_display
-        author_meeting_display
-        vern_author_meeting_display
-        publication_display
-        vern_publication_display
-        title_display 
-        vern_title_display
-        title_uniform_display
-        vern_title_uniform_display
-      </str>
-      <!-- no fragmenting, just highlighting -->
-      <str name="hl.fragsize">0</str>
-      <str name="hl.snippets">0</str> 
-      <str name="f.text.hl.fragmenter">regex</str> <!-- defined below -->
-      
-      <!-- spellcheck config, enable per-query with spellcheck=true -->
-      <str name="spellcheck.onlyMorePopular">true</str>
-      <str name="spellcheck.extendedResults">true</str>
-      <str name="spellcheck.collate">true</str>
-      <str name="spellcheck.count">1</str>
-    </lst>
-    <arr name="last-components">
-      <str>spellcheck</str>
-    </arr>
-
-
+       <str name="rows">10</str> 
+       <str name="fl">*</str>
+     </lst>
   </requestHandler>
 
-<!-- Please refer to http://wiki.apache.org/solr/SolrReplication for details on configuring replication -->
-<!--Master config-->
-<!--
-  <requestHandler name="/replication" class="solr.ReplicationHandler" >
-    <lst name="master">
-        <str name="replicateAfter">commit</str>
-        <str name="confFiles">schema.xml,stopwords.txt</str>
-    </lst>
-  </requestHandler>
--->
-<!-- Slave config-->
-<!--
-  <requestHandler name="/replication" class="solr.ReplicationHandler">
-    <lst name="slave">
-      <str name="masterUrl">http://localhost:8983/solr/replication</str>
-      <str name="pollInterval">00:00:60</str>  
-    </lst>
-  </requestHandler>
--->
-
-  <!-- DisMaxRequestHandler allows easy searching across multiple fields
-       for simple user-entered phrases.  Its implementation is now
-       just the standard SearchHandler with a default query type
-       of "dismax". 
-       see http://wiki.apache.org/solr/DisMaxRequestHandler
-   -->
-
-	<!-- handler for search requests -->
+  <!-- handler for everywhere/unfielded search requests -->
   <requestHandler name="search" class="solr.SearchHandler" default="true">
     <lst name="defaults">
       <str name="defType">dismax</str>
       <str name="echoParams">explicit</str>
       <float name="tie">0.01</float>
+      <str name="mm">2&lt;-1 5&lt;-2 6&lt;90%</str>
+      <str name="q.alt">*:*</str>
+
       <str name="qf">
 <!--
 https://consul.stanford.edu/display/NGDE/relevancyRanking
@@ -609,10 +404,8 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
         issn_search
         id
       </str>
-      <!-- pf: Phrase Fields.  After set of matching docs determined (from fq 
-        and qf), pf can be used to "boost" the score of documents in cases where
-        all of the terms in the "q" param appear in close proximity.
-       -->
+
+      <int name="ps">100</int>
       <str name="pf">
 <!-- TODO: add vernacular fields -->
         title_search^625
@@ -634,8 +427,29 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
         all_search
       </str>
       
-      <!-- fl:  fields needed for search results;  single records retrieved with
-        "details" request handler -->
+      <str name="facet">true</str>
+      <str name="facet.mincount">1</str>
+      <str name="facet.limit">30</str> 
+      <str name="facet.field">access_facet</str>
+  	  <str name="facet.field">author_person_facet</str>
+  	  <str name="facet.field">author_corp_facet</str>
+  	  <str name="facet.field">author_meeting_facet</str>
+  	  <str name="facet.field">author_combined_facet</str>
+      <str name="facet.field">building_facet</str>
+      <str name="facet.field">dewey_1digit_facet</str>
+      <str name="facet.field">era_facet</str>
+      <str name="facet.field">format_facet</str>
+      <str name="facet.field">geographic_facet</str>
+      <str name="facet.field">language_facet</str>
+      <str name="facet.field">lc_1letter_facet</str>
+      <str name="facet.field">topic_facet</str>
+      
+      <!-- spellcheck config, enable per-query with spellcheck=true -->
+      <str name="spellcheck.onlyMorePopular">true</str>
+      <str name="spellcheck.extendedResults">true</str>
+      <str name="spellcheck.collate">true</str>
+      <str name="spellcheck.count">1</str>
+
       <str name="fl">
         score,
         id,
@@ -666,29 +480,6 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
         vern_title_uniform_display,
       </str>
       
-      <str name="facet">true</str>
-      <str name="facet.mincount">1</str>
-      <str name="facet.limit">30</str> 
-      <str name="facet.field">access_facet</str>
-  	  <str name="facet.field">author_person_facet</str>
-  	  <str name="facet.field">author_corp_facet</str>
-  	  <str name="facet.field">author_meeting_facet</str>
-  	  <str name="facet.field">author_combined_facet</str>
-      <str name="facet.field">building_facet</str>
-      <str name="facet.field">dewey_1digit_facet</str>
-      <str name="facet.field">era_facet</str>
-      <str name="facet.field">format_facet</str>
-      <str name="facet.field">geographic_facet</str>
-      <str name="facet.field">language_facet</str>
-      <str name="facet.field">lc_1letter_facet</str>
-      <str name="facet.field">topic_facet</str>
-      
-      <str name="mm">
-        2&lt;-1 5&lt;-2 6&lt;90%
-      </str>
-      <int name="ps">100</int>
-      <str name="q.alt">collection:Catalog</str>
-
       <!-- highlighter config, enable per-query with hl=true -->
 <!-- TODO: revisit highlighter config when fulltext avail -->
       <str name="hl.fl">
@@ -707,16 +498,10 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
         title_uniform_display
         vern_title_uniform_display
       </str>
-      <!-- no fragmenting, just highlighting -->
       <str name="hl.fragsize">0</str>
       <str name="hl.snippets">0</str> 
       <str name="f.text.hl.fragmenter">regex</str> <!-- defined below -->
       
-      <!-- spellcheck config, enable per-query with spellcheck=true -->
-      <str name="spellcheck.onlyMorePopular">true</str>
-      <str name="spellcheck.extendedResults">true</str>
-      <str name="spellcheck.collate">true</str>
-      <str name="spellcheck.count">1</str>
     </lst>
     <arr name="last-components">
       <str>spellcheck</str>
@@ -729,6 +514,9 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
       <str name="defType">dismax</str>
       <str name="echoParams">explicit</str>
       <float name="tie">0.01</float>
+      <str name="mm">2&lt;-1 5&lt;-2 6&lt;90%</str>
+      <str name="q.alt">*:*</str>
+
       <str name="qf">
 <!-- TODO:  add vernacular title search fields --> 
         title_245a_search^2500
@@ -739,6 +527,8 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
         series_search
         series_addl_search
       </str>
+
+      <int name="ps">100</int>
       <str name="pf">
 <!-- TODO: add vernacular title search fields -->
         title_search^20000
@@ -748,38 +538,6 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
         series_addl_search
         title_old_search
         title_new_search
-      </str>
-      
-      <!-- fl:  fields needed for search results;  single records retrieved with
-        "details" request handler -->
-      <str name="fl">
-        score,
-        id,
-        author_corp_display,
-        author_meeting_display,
-        author_person_display,
-        author_person_full_display,
-        format_display,
-        edition_display,
-        isbn_display,
-        lccn_display,
-        oclc_display,
-        physical_display,
-        publication_display,
-        publish_date_display,
-        title_display,
-        title_245a_display,
-        title_uniform_display,
-        url_display,
-        url_sfx_display,
-        vern_author_corp_display,
-        vern_author_meeting_display,
-        vern_author_person_display,
-        vern_author_person_full_display,
-        vern_edition_display,
-        vern_publication_display
-        vern_title_display,
-        vern_title_uniform_display,
       </str>
       
       <str name="facet">true</str>
@@ -799,64 +557,12 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
       <str name="facet.field">lc_1letter_facet</str>
       <str name="facet.field">topic_facet</str>
       
-      <str name="mm">
-        2&lt;-1 5&lt;-2 6&lt;90%
-      </str>
-      <int name="ps">100</int>
-      <str name="q.alt">collection:Catalog</str>
-
-      <!-- highlighter config, enable per-query with hl=true -->
-<!-- TODO: revisit highlighter config when fulltext avail -->
-      <str name="hl.fl">
-        title_display 
-        vern_title_display
-        title_uniform_display
-        vern_title_uniform_display
-      </str>
-      <!-- no fragmenting, just highlighting -->
-      <str name="hl.fragsize">0</str>
-      <str name="hl.snippets">0</str> 
-      <str name="f.text.hl.fragmenter">regex</str> <!-- defined below -->
-      
       <!-- spellcheck config, enable per-query with spellcheck=true -->
       <str name="spellcheck.onlyMorePopular">true</str>
       <str name="spellcheck.extendedResults">true</str>
       <str name="spellcheck.collate">true</str>
       <str name="spellcheck.count">1</str>
-    </lst>
-    <arr name="last-components">
-      <str>spellcheck</str>
-    </arr>
-  </requestHandler>
-  
-  
-  <!-- request handler for author searches -->  
-  <requestHandler name="search_author" class="solr.SearchHandler" >
-    <lst name="defaults">
-      <str name="defType">dismax</str>
-      <str name="echoParams">explicit</str>
-      <float name="tie">0.01</float>
-      <str name="qf">
-<!-- TODO:  add vernacular author search fields -->        
-        author_person_facet^50
-        author_corp_facet^5
-        author_meeting_facet^5
-        author_person_search^2
-        author_corp_search
-        author_meeting_search
-      </str>
-      <str name="pf">
-<!-- TODO: add vernacular author search fields -->
-        author_person_facet^3
-        author_corp_facet^1.5
-        author_meeting_facet^1.5
-        author_person_search
-        author_corp_search
-        author_meeting_search
-      </str>
-      
-      <!-- fl:  fields needed for search results;  single records retrieved with
-        "details" request handler -->
+
       <str name="fl">
         score,
         id,
@@ -885,6 +591,55 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
         vern_publication_display
         vern_title_display,
         vern_title_uniform_display,
+      </str>
+      
+      <!-- highlighter config, enable per-query with hl=true -->
+<!-- TODO: revisit highlighter config when fulltext avail -->
+      <str name="hl.fl">
+        title_display 
+        vern_title_display
+        title_uniform_display
+        vern_title_uniform_display
+      </str>
+      <str name="hl.fragsize">0</str>
+      <str name="hl.snippets">0</str> 
+      <str name="f.text.hl.fragmenter">regex</str> <!-- defined below -->
+      
+    </lst>
+    <arr name="last-components">
+      <str>spellcheck</str>
+    </arr>
+  </requestHandler>
+  
+  
+  <!-- request handler for author searches -->  
+  <requestHandler name="search_author" class="solr.SearchHandler" >
+    <lst name="defaults">
+      <str name="defType">dismax</str>
+      <str name="echoParams">explicit</str>
+      <float name="tie">0.01</float>
+      <str name="mm">2&lt;-1 5&lt;-2 6&lt;90%</str>
+      <str name="q.alt">*:*</str>
+
+      <str name="qf">
+<!-- TODO:  add vernacular author search fields -->        
+        author_person_facet^50
+        author_corp_facet^5
+        author_meeting_facet^5
+        author_person_search^2
+        author_corp_search
+        author_meeting_search
+      </str>
+
+      <int name="ps">100</int>
+      <str name="pf">
+<!-- TODO: add vernacular author search fields -->
+        author_person_facet^3
+        author_corp_facet^1.5
+        author_meeting_facet^1.5
+        author_person_search
+        author_corp_search
+        author_meeting_search
       </str>
       
       <str name="facet">true</str>
@@ -904,68 +659,12 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
       <str name="facet.field">lc_1letter_facet</str>
       <str name="facet.field">topic_facet</str>
       
-      <str name="mm">
-        2&lt;-1 5&lt;-2 6&lt;90%
-      </str>
-      <int name="ps">100</int>
-      <str name="q.alt">collection:Catalog</str>
-
-      <!-- highlighter config, enable per-query with hl=true -->
-<!-- TODO: revisit highlighter config when fulltext avail -->
-      <str name="hl.fl">
-        author_person_display
-        vern_author_person_display
-        author_person_full_display
-        vern_author_person_full_display
-        author_corp_display
-        vern_author_corp_display
-        author_meeting_display
-        vern_author_meeting_display
-      </str>
-      <!-- no fragmenting, just highlighting -->
-      <str name="hl.fragsize">0</str>
-      <str name="hl.snippets">0</str> 
-      <str name="f.text.hl.fragmenter">regex</str> <!-- defined below -->
-      
       <!-- spellcheck config, enable per-query with spellcheck=true -->
       <str name="spellcheck.onlyMorePopular">true</str>
       <str name="spellcheck.extendedResults">true</str>
       <str name="spellcheck.collate">true</str>
       <str name="spellcheck.count">1</str>
-    </lst>
-    <arr name="last-components">
-      <str>spellcheck</str>
-    </arr>
-  </requestHandler>
-  
-  <!-- request handler for subject searches -->  
-  <requestHandler name="search_subject" class="solr.SearchHandler" >
-    <lst name="defaults">
-      <str name="defType">dismax</str>
-      <str name="echoParams">explicit</str>
-      <float name="tie">0.01</float>
-      <str name="qf">
-<!-- TODO:  add subject search field boost factors -->     
-<!-- TODO:  add subject search vernacular fields -->     
-        topic_search^5
-        geographic_search^5
-        topic_full_search^3
-        geographic_full_search^3
-        era_search
-      </str>
-      <!-- pf: Phrase Fields.  After set of matching docs determined (from fq 
-        and qf), pf can be used to "boost" the score of documents in cases where
-        all of the terms in the "q" param appear in close proximity.
-      -->
-      <str name="pf">
-<!-- TODO:  add subject search vernacular fields -->        
-        topic_search^5
-        geographic_search^5
-        topic_full_search^3
-        geographic_full_search^3
-        era_search^3
-      </str>
-      
+
       <str name="fl">
         score,
         id,
@@ -996,68 +695,44 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
         vern_title_uniform_display,
       </str>
       
-      <str name="facet">true</str>
-      <str name="facet.mincount">1</str>
-      <str name="facet.limit">30</str>
-      <str name="facet.field">access_facet</str>
-  	  <str name="facet.field">author_person_facet</str>
- 	    <str name="facet.field">author_corp_facet</str>
- 	    <str name="facet.field">author_meeting_facet</str>
- 	    <str name="facet.field">author_combined_facet</str>
-      <str name="facet.field">building_facet</str>
-      <str name="facet.field">dewey_1digit_facet</str>
-      <str name="facet.field">era_facet</str>
-      <str name="facet.field">format_facet</str>
-      <str name="facet.field">geographic_facet</str>
-      <str name="facet.field">language_facet</str>
-      <str name="facet.field">lc_1letter_facet</str>
-      <str name="facet.field">topic_facet</str>
-      
-      <str name="mm">
-        2&lt;-1 5&lt;-2 6&lt;90%
+      <!-- highlighter config, enable per-query with hl=true -->
+<!-- TODO: revisit highlighter config when fulltext avail -->
+      <str name="hl.fl">
+        author_person_display
+        vern_author_person_display
+        author_person_full_display
+        vern_author_person_full_display
+        author_corp_display
+        vern_author_corp_display
+        author_meeting_display
+        vern_author_meeting_display
       </str>
-      <int name="ps">100</int>
-      <str name="q.alt">collection:Catalog</str>
-      <!-- no highlighter stuff b/c subjects not shown in search results display -->
+      <!-- no fragmenting, just highlighting -->
+      <str name="hl.fragsize">0</str>
+      <str name="hl.snippets">0</str> 
+      <str name="f.text.hl.fragmenter">regex</str> <!-- defined below -->
       
-      <!-- spellcheck config, enable per-query with spellcheck=true -->
-      <str name="spellcheck.onlyMorePopular">true</str>
-      <str name="spellcheck.extendedResults">true</str>
-      <str name="spellcheck.collate">true</str>
-      <str name="spellcheck.count">1</str>
     </lst>
     <arr name="last-components">
       <str>spellcheck</str>
     </arr>
-  </requestHandler>
+  </requestHandler>  
   
-  <!-- for requests to get a single document; id is specified with fq param,
-      since dismax handler doesn't accommodate fielded searches -->
-  <requestHandler name="details" class="solr.SearchHandler" >
-    <lst name="defaults">
-      <str name="defType">dismax</str>
-      <str name="echoParams">explicit</str>
-      <str name="fl">*, score</str>
-      <str name="rows">1</str>
-      <str name="qf">id^10</str>
-      <str name="q.alt">collection:Catalog</str>
-    </lst>
-  </requestHandler>
-
-  <!-- for requests to get a single document; id is specified with fq param,
-      since dismax handler doesn't accommodate fielded searches -->
+  <!-- for requests to get a single document; use id=blah instead of q=id:blah -->
   <requestHandler name="document" class="solr.SearchHandler" >
     <lst name="defaults">
-      <str name="defType">standard</str>
       <str name="echoParams">explicit</str>
       <str name="fl">*</str>
       <str name="rows">1</str>
+      <str name="q">{!raw f=id v=$id}</str> <!-- use id=blah instead of q=id:blah -->
     </lst>
   </requestHandler>
 
 
   <!--
-   Search components are registered to SolrCore and used by Search Handlers
+   Search components are registered to SolrCore and used by Search Handlers 
+   Please refer to solr documentation on the web, as well as the default solrconfig file
+    included with solr
    
    By default, the following components are avaliable:
     
@@ -1070,94 +745,68 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
    
    Default configuration in a requestHandler would look like:
     <arr name="components">
-      <str>query</str>
-      <str>facet</str>
       <str>mlt</str>
       <str>highlight</str>
-      <str>stats</str>
-      <str>debug</str>
     </arr>
 
-    If you register a searchComponent to one of the standard names, that will be used instead.
     To insert components before or after the 'standard' components, use:
     
     <arr name="first-components">
       <str>myFirstComponentName</str>
     </arr>
-    
     <arr name="last-components">
       <str>myLastComponentName</str>
     </arr>
   -->
 
+   <!-- The spell check component can return a list of alternative spelling
+  suggestions.  -->
+  <searchComponent name="spellcheck" class="solr.SpellCheckComponent">
+    <str name="queryAnalyzerFieldType">textSpell</str>
 
-<!--
-  <requestHandler name="/update/extract" class="solr.ExtractingRequestHandler">
-    <lst name="defaults">
-      <str name="ext.map.Last-Modified">last_modified</str>
-      <bool name="ext.ignore.und.fl">true</bool>
+    <lst name="spellchecker">
+      <str name="name">default</str>
+      <str name="field">spell</str>
+      <str name="spellcheckIndexDir">./spellchecker</str>
+			<str name="accuracy">0.7</str>
     </lst>
-  </requestHandler>
--->
+    <lst name="spellchecker">
+      <str name="name">jarowinkler</str>
+      <str name="field">spell</str>
+      <!-- Use a different Distance Measure -->
+      <str name="distanceMeasure">org.apache.lucene.search.spell.JaroWinklerDistance</str>
+      <str name="spellcheckIndexDir">./spellcheckerJaroWin</str>
+    </lst>
 
-    <requestHandler name="/search" class="org.apache.solr.handler.component.SearchHandler" startup="lazy">
-      <lst name="defaults">
-        <str name="echoParams">explicit</str>
-      </lst>
-      <!--
-        By default, this will register the following components:
-        
-        <arr name="components">
-        <str>query</str>
-        <str>facet</str>
-        <str>mlt</str>
-        <str>highlight</str>
-        <str>debug</str>
-        </arr>
-        
-        To insert handlers before or after the 'standard' components, use:
-        
-        <arr name="first-components">
-        <str>first</str>
-        </arr>
-        
-        <arr name="last-components">
-        <str>last</str>
-        </arr>
-        
-      -->
-    </requestHandler>
-    
-    <searchComponent name="elevator" class="org.apache.solr.handler.component.QueryElevationComponent" startup="lazy">
-      <!-- pick a fieldType to analyze queries -->
-      <str name="queryFieldType">string</str>
-      <str name="config-file">elevate.xml</str>
-    </searchComponent>
-    
-    <requestHandler name="/elevate" class="org.apache.solr.handler.component.SearchHandler" startup="lazy">
-      <lst name="defaults">
-        <str name="echoParams">explicit</str>
-      </lst>
-      <arr name="last-components">
-        <str>elevator</str>
-      </arr>
-    </requestHandler>
-    
+    <lst name="spellchecker">
+      <str name="classname">solr.FileBasedSpellChecker</str>
+      <str name="name">file</str>
+      <str name="sourceLocation">spellings.txt</str>
+      <str name="characterEncoding">UTF-8</str>
+      <str name="spellcheckIndexDir">./spellcheckerFile</str>
+    </lst>
+
+    <str name="queryAnalyzerFieldType">textSpell</str>
+  </searchComponent>
+
+<!-- Please refer to http://wiki.apache.org/solr/SolrReplication for details on configuring replication -->
+
+
+  <!-- elevator component and request handler:
+   Please refer to solr documentation on the web, as well as the default solrconfig file
+    included with solr -->    
 
     <!-- Update request handler.  
       
       Note: Since solr1.1 requestHandlers requires a valid content type header if posted in 
       the body. For example, curl now requires: -H 'Content-type:text/xml; charset=utf-8'
       The response format differs from solr1.1 formatting and returns a standard error code.
-      
-      To enable solr1.1 behavior, remove the /update handler or change its path
     -->
     <requestHandler name="/update" class="solr.XmlUpdateRequestHandler" startup="lazy"/>
-    
     <requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" startup="lazy"/>
     
     <!--
-      Analysis request handler.  Since Solr 1.3.  Use to returnhow a document is analyzed.  Useful
+      Analysis request handler.  Since Solr 1.3.  Use to return how a document is analyzed.  Useful
       for debugging and as a token server for other types of applications
     -->
     <requestHandler name="/analysis" class="solr.AnalysisRequestHandler" startup="lazy" />
@@ -1167,7 +816,7 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
     
     <!-- 
       Admin Handlers - This will register all the standard admin RequestHandlers.  Adding 
-      this single handler is equivolent to registering:
+      this single handler is equivalent to registering:
       
       <requestHandler name="/admin/luke"       class="org.apache.solr.handler.admin.LukeRequestHandler" />
       <requestHandler name="/admin/system"     class="org.apache.solr.handler.admin.SystemInfoHandler" />
@@ -1236,19 +885,19 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
   <!-- queryResponseWriter plugins... query responses will be written using the
     writer specified by the 'wt' request parameter matching the name of a registered
     writer.
-    The "standard" writer is the default and will be used if 'wt' is not specified 
+    A writer with default="true" will be used if 'wt' is not specified 
     in the request. XMLResponseWriter will be used if nothing is specified here.
-    The json, python, and ruby writers are also available by default.
 
-    <queryResponseWriter name="standard" class="org.apache.solr.request.XMLResponseWriter"/>
+    <queryResponseWriter name="xml" class="org.apache.solr.request.XMLResponseWriter" default="true"/>
     <queryResponseWriter name="json" class="org.apache.solr.request.JSONResponseWriter"/>
     <queryResponseWriter name="python" class="org.apache.solr.request.PythonResponseWriter"/>
     <queryResponseWriter name="ruby" class="org.apache.solr.request.RubyResponseWriter"/>
+    <queryResponseWriter name="php" class="org.apache.solr.request.PHPResponseWriter"/>
+    <queryResponseWriter name="phps" class="org.apache.solr.request.PHPSerializedResponseWriter"/>
 
     <queryResponseWriter name="custom" class="com.example.MyResponseWriter"/>
   -->
-
-    <queryResponseWriter name="standard" class="org.apache.solr.request.RubyResponseWriter"/>
+    
   <!-- XSLT response writer transforms the XML output by any xslt file found
        in Solr's conf/xslt directory.  Changes to xslt files are checked for
        every xsltCacheLifetimeSeconds.  
@@ -1257,11 +906,18 @@ https://consul.stanford.edu/display/NGDE/relevancyRanking
      <int name="xsltCacheLifetimeSeconds">5</int>
    </queryResponseWriter> 
     
+
+  <!-- example of registering a query parser
+  <queryParser name="lucene" class="org.apache.solr.search.LuceneQParserPlugin"/>
+  -->
+
+  <!-- example of registering a custom function parser 
+  <valueSourceParser name="myfunc" class="com.mycompany.MyValueSourceParser" />
+  -->
+
   <!-- config for the admin interface --> 
   <admin>
     <defaultQuery>id:666</defaultQuery>
-    <gettableFiles>solrconfig.xml schema.xml admin-extra.html</gettableFiles>
-    <pingQuery>q=id:666&amp;start=0&amp;rows=0</pingQuery>
 
     <!-- configure a healthcheck file for servers behind a loadbalancer
     <healthcheck type="file">server-enabled</healthcheck>
