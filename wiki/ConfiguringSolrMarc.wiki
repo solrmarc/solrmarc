@@ -1,4 +1,4 @@
-#summary This page will guide you through installing and building SolrMarc
+#summary This page will guide you through configuring and using SolrMarc
 <wiki:toc max_depth="5" />
 
 === About This Guide ===
@@ -44,7 +44,7 @@ marc.include_errors = true
 
  * *solr.indexer.properties:* lists the name of the properties file that defines the mapping from the MARC record fields and sub-fields to the Solr index entries. For details of how this mapping is done, please see below.
 
- * *solr.indexer:* (optional); specifies the name of a custom indexing class which defines any custom routines for extracting and mapping data for a particular Solr index field. These custom routines will only be needed in cases where values from several different Marc fields and sub-fields need to be consulted to determine the value to add to the Solr index field. Several examples of these custom indexing routines are given below. If, however, you can handle all of the necessary MARC field-to-Solr index field mappings using the available specification language, you do not need to define a value for this entry, and the default SolrIndexer class will be used.
+ * *solr.indexer:* (optional); specifies the name of a custom indexing class which defines any custom routines for extracting and mapping data for a particular Solr index field. These custom routines will only be needed in cases where values from several different MARC fields and sub-fields need to be consulted to determine the value to add to the Solr index field. Several examples of these custom indexing routines are given below. If, however, you can handle all of the necessary MARC field-to-Solr index field mappings using the available specification language, you do not need to define a value for this entry, and the default SolrIndexer class will be used.
 
  * *solr.hosturl:* (optional); specifies the URL of a currently running Solr search engine that is referencing the same index data that is specified in the {{{solr.path}}}, entry.  If this value is given, when the indexing process completes, this indexing program will send a signal to the currently running Solr search engine, which will cause it to read the newly modified index files. This is purely a convenience function, to avoid having to stop and restart the running Solr search engine. If no search engine is running at the URL specified, the program will quietly proceed along it way, with the understanding that when that search engine is eventually restarted it will read in the new index data anyway.
 
@@ -68,6 +68,126 @@ Lastly, there are several special purpose entries that will not be used in gener
 
  * *solr.optimize_at_end:* a boolean value, defaulting to false. If it is set to true, when the program has finished indexing all of the MARC records provided to it, it will optimize the index, which will make searches perform much faster.  This entry is set by the shell script {{{optimizesolr}}}, which is found in the dist directory.
 
- * *marc.ids_to_delete:* supplies the name of a file that contains a list of Solr item ids, one per line, that are to be removed from the Solr index.  In conjunction with this entry is another named marc.delete_record_id_mapper which can be used when the entries that occur in the marc.ids_to_delete file need to be processed to correspond to the actual ids that occur in the solr index.   For instance at UVA the records have ids like  u184783  but the entry that would appear in the marc.ids_to_delete file produced by our system would be merely 184783.
+ * *marc.ids_to_delete:* supplies the name of a file that contains a list of Solr item ids, one per line, that are to be removed from the Solr index.
 
-The next entry, marc.verbose, if it is set to true, instructs the program to print out the entire MARC record as it is read in, followed by the entire index record that will be sent to Solr.
+ * *marc.delete_record_id_mapper:* used in conjunction with {{{marc.ids_to_delete}}} when the entries that occur in the {{{marc.ids_to_delete}}} file need to be processed to correspond to the actual ids that occur in the solr index. For instance at UVa the records have ids like _u184783_ but the entry that would appear in the {{{marc.ids_to_delete}}} file produced by our system would be merely 184783.
+
+ * *marc.verbose:* a boolean value. If it is set to true, instructs the program to print out the entire MARC record as it is read in, followed by the entire index record that will be sent to Solr.
+
+ * *marc.include_if_present* and *marc.include_if_missing:* used for reprocessing records that have already been indexed, if a new index field is added.  They are only useful when the newly added field draws its information from fields that only occur in a small subset of records. For example, in the Indexer configuration file shown below, the following field specification:
+ 
+   {{{instrument_facet = 048m[0-1], instrument_map}}}
+
+ specifies that the information should be found in the 048m field of the MARC record. This was a typo, it should have read 048a, therefore no index records were created with a value for {{{instrument_facet}}}.  To fix it, rather than re-index all of our records, I was able to set {{{marc.include_if_present = 048a}}}  which specifies that only those records that have one or more 048a fields will be re-indexed, the rest will be skipped (which is fine since the indexed record would be the same in any case.)  Rather than setting these entries, you should use the {{{filterrecords}}} script which internally uses these settings to operate as a marc-based-grep program.
+
+<br />
+
+===The Index Configuration Properties File ===
+
+The specification of which MARC fields and sub-fields are to be mapped to which Solr index fields is handled via the index configuration properties file, the name of which is specified in the {{{solr.indexer.properties}}} entry in the main properties file as described above. Since this configuration file is a properties file, there are certain constraints of how the file is structured. Basically all properties files consist of a number of pairs of values separated by an equals sign. The key values represent the name of the field that will be added to the Solr index record. All of these must either match a field definition that occurs in the _schema.xml_ file for the Solr search engine, or they must match a dynamicField definition in that file.   If any index entries are listed here that do not match either a field definition or a dynamicField definition from the _schema.xml_ file, the indexing will fail.
+
+ {{{
+ id = 001, first
+author_text = 100a:110a:111a:130a
+author_display = 100a:110a
+published_text = 260a
+material_type_text = 300a
+notes_text = 500a:505a
+uniform_title_text = 240a:240b
+uniform_title_display = 240a
+uniform_subtitle_display = 240b
+marc_display = FullRecordAsXML
+marc_text = custom, getAllSearchableFields(100, 900)
+
+title_text = 245a:245b:240a:240b:700t 
+title_display = 245a
+subtitle_display = 245b 
+title_added_entry_display = 700t
+call_number_text = custom, getCallNumberCleaned
+call_number_display = 999a:090a:050a, first
+year_multisort_i = DateOfPublication
+isbn_text = 020a
+isbn_display = 020a
+oclc_text = custom, getOclcNum
+        
+call_number_facet = custom, getCallNumberPrefix
+date_indexed_facet = index_date
+source_facet = "Library Catalog"
+subject_era_facet = 650d:650y:651y:655y
+topic_form_genre_facet = 650a:650b:650x:655a
+subject_geographic_facet = 650c:650z:651a:651x:651z:655z
+broad_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first
+format_facet = 999t, format_maps.properties(format)
+language_facet = 008[35-37]:041a:041d, language_map.properties
+location_facet = 999k:999l, location_map.properties
+library_facet = 999m, library_map.properties
+instrument_facet = 048a[0-1], instrument_map.properties
+recording_type_facet = 000[6], (map.recording_type)
+recordings_and_scores_facet = custom, getRecordingAndScore
+recording_format_facet = custom, getRecordingFormat, format_maps.properties(recording_format)
+music_catagory_facet = 999a[0-1]:999a[0], music_maps.properties(music_catagory), first
+ports_of_call_facet = 650c:650z:651a:651x:651z:655z, semester_at_sea.properties(port_of_call)
+guide_book_facet = 651v, (pattern_map.guide_book)
+composition_era_facet = era, music_maps.properties(composition_era)
+}}}
+
+If any duplicates are found in the index specification file, the last entry that occurs will be used, and previous entries will be silently ignored. Also note that due to how java handles properties files, the order in which the entries occur is unimportant, if there is some reason you need the index fields to be added to the Solr index in a certain order, you will need to customize this program.
+
+The values that are defined for the index field entries consist of 1 to 3 fields separated by commas.  The first field specifies either the MARC field or fields that the index entry should be extracted from or it indicates that the field is a special case.  These special cases are described below:
+
+The simplest case is when a quoted string appears after the equals sign. Everything that appears in the quotes is taken verbatim and added to the Solr index as is. So in the above example, every record added to the Solr index by this program will have a value of {{{“Library Catalog”}}} stored for the index field named {{{source_facet}}}.  This can be useful when data from several different sources is being added to the same Solr index, to allow searchers to narrow their search to data from one or another of the sources.
+
+
+If the value after the equals sign is {{{FullRecordAsMARC}}}, {{{FullRecordAsXML}}}, {{{date}}}, {{{index_date}}}, or {{{custom}}} the following actions will be taken:
+
+ * *FullRecordAsMARC:* specifies that the entire MARC record should be added in the standard binary form (ISO 2709).
+
+ * *FullRecordAsXML:* specifies that the entire MARC record should be added encoded using the MARCXML standard.
+
+ * *FullRecordAsText:* specifies that the entire MARC record should be translated to a readable format, and stored, (with {{{<br/>}}} tags being inserted in place of newline characters.
+
+ * *date:* extracts the 260 c subfield from the MARC record, and then extracts a four digit year from that subfield.
+
+ * *index_date:* returns a value for the date and time of when the record was indexed.
+
+ * *custom:* specifies that a custom java routine is to be invoked to extract the value for this field. Examples of when custom might be necessary are:  
+   # Create an index entry based on the value in field X, but only if a certain value appears in field Y.  
+   # Create an index entry that consists of the first characters from a given field, but only as many characters as are letters.  
+   # Create an index entry based on a portion of a given field, but only if the remaining portion of that field contains a certain value.   
+ Details of how to define a custom indexing routine are explained later in this document.
+
+If the value after the equals sign is not one of these special cases entries, it is assumed to be a list of MARC fields from which to extract the data to use for the index field.
+
+<br />
+
+==== Specifying Which Fields and Subfields to Use ====
+
+The syntax for specifying what fields/subfields (or what portion of a field or subfield) is to be looked-at to create the Solr index field(s) consists of one or more field specifications separated by colons (:).  
+
+A field specification consists of a three-digit string (000 – 999) followed by an optional subfield specification letter (a – z) followed by an optional field segment specification (either a single number enclosed within brackets [0] indicating that only the first letter of the field is to be returned, or two numbers, separated by a dash, enclosed within brackets [35-37] indicating characters 35 through 37 should be returned)
+
+<br />
+===== Example Field Specifications =====
+
+ {{{title_display = 245a}}}
+
+This field specification gathers will extract all of the subfield _a_ for all of the 245 fields in the MARC and add a separate index record entry labeled {{{title_display}}}, for each of them.  Although in this case since the MARC record specification states that there can only be a single 245 field and only a single subfield _a_, the results of this specification will be identical to what they would be if the field specification was{{{title_display = 245a, first}}} 
+
+<br />
+ {{{author_text = 100a:110a:111a:130a}}}
+
+This field specification gathers all of the entries from the _a_ subfields of the fields 100, 110, 111 and 130.  Each of these entries is added as a separate index record entry for current documents in the Solr search engine.
+
+<br />
+ {{{language_facet = 008[35-37]:041a:041d, language_map.properties}}}
+
+This field specification states that characters 35 through 37 should be selected from the 008 control field of the MARC record (which is where a three-letter encoding of the primary language of a bibliographic work is found.) Additionally, all occurrences of the _a_ and _d_ subfields of all 041 fields in the MARC record are added to the set of strings.
+
+Note that you CANNOT specify 041ad in the field specification, each colon separated item can only reference a single field and subfield.  Also note that a second parameter is present on the field specification entry: {{{language_map.properties}}}.  If this optional parameter is present, once the set of strings is created for all of the fields and subfields specified in the first parameter, the entire set is translated using the translation map that is defined in the separate property file named {{{language_map.properties}}}, (which maps the three-letter abbreviations for languages to the full name of that language; Hence "eng" becomes "English," "fre" becomes "French," "chp" becomes "Chipewyan," and "peo" becomes the ever-popular "Old Persian (ca. 600-400 B.C.)."  The details of how to define a translation map is covered in the next section.
+
+<br />
+ {{{broad_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first}}}
+
+This field specification states that the value of character 6 (counting from 0) of field 000 (which stands for the leader of the MARC record) and character 0 of field 007 are to be extracted.  Both of these values are to then be translated using the translation map that is defined in the separate property file named {{{format_maps.properties}}}, by loading all the entries there that start with the string {{{broad_format}}}. The first translated value is to be used as the value for the Solr index entry.  
+
+Or to put it more succinctly, look up character 6 of the 000 field in the map {{{broad_format}}}, if the map contains a mapping for that character, use that value; otherwise, look up character 0 of the 007 field in the map {{{broad_format}}}, if the map contains a mapping for that character use that value. If neither extracted value matches an entry in the translation map, check to see whether the map defines a default value, if so use that default value, otherwise leave the {{{broad_format_facet}}} index entry unassigned.
