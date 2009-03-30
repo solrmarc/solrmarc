@@ -148,7 +148,7 @@ A directory called {{{.dist/}}} is created by the build process. The builder pla
 
 Assuming no errors are encountered in the build process, the build is now complete.
 
-For documentation on using SolrMarc to index your marc records, please see the Using SolrMarc document. (coming soon)
+For documentation on using SolrMarc to index your marc records, please see the ConfiguringSolrMarc document.
 
 <br />
 === Batch Files/Shell Scripts ===
