@@ -602,7 +602,7 @@
         <delete dir="${site.test.dir}/${build.dir}" />
     </target>
 
-    <target name="testInit" depends="testClean" description="create (empty) generated test directories">
+    <target name="testInit" depends="testClean,defaultconfig" description="create (empty) generated test directories">
         <mkdir dir="${site.test.dir}/${build.dir}" />
         <property file="${site.test.dir}/test.properties" />
         <property name="site.test.jar" value="${custom.jar.name}Test.jar" />
