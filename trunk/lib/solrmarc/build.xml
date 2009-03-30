@@ -29,8 +29,7 @@
 
     <target name="clean" description="clean the generated directories">
         <delete dir="${build.dir}" />
-        <delete dir="${doc.dir}" />
-        <delete dir="${tag.dir}" />
+        <delete dir="${dist.dir}" />
     </target>
 
     <target name="init" description="create (empty) generated directories">

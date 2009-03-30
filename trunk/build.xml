@@ -29,6 +29,7 @@
     <target name="clean" description="clean the generated directories">
         <delete dir="${build.dir}" />
         <delete dir="${dist.dir}" />
+        <ant dir="${lib.dir}/solrmarc" target="clean" inheritAll="false" />
         <if>
             <isset property="site.dir" />
             <then>
@@ -145,8 +146,21 @@
         <sequential>
             <input message="Enter URL of where solr server will be located:" addproperty="solr.hosturl"  
                 defaultvalue="http://localhost:8983/solr" />
+            <if> 
+                <and>
+                    <available file="../jetty" />
+                    <available file="../jetty/solr" />
+                    <available file="../jetty/solr/conf" />
+                </and>
+                <then>
+                    <property name="solr.path.default" location="../jetty/solr" />
+                </then>
+                <else>
+                    <property name="solr.path.default" value="" />
+                </else>
+            </if>
             <input-filepath message="Enter full path of Solr home directory:${line.separator}(Note: directory should contain 'conf' directory containing solrconfig.xml and schema.xml) " 
-                addproperty="solr.path" defaultvalue="" />        	
+                addproperty="solr.path" defaultvalue="${solr.path.default}" />        	
 
             <echo message="solr path = ${solr.path} " />
             <condition property="solr.path.available">
@@ -277,7 +291,21 @@
                         <isset property="${solr.war.location}" />
                     </not>
                     <then>
-                        <input-filepath message="Enter full path of where solr.war file is located:" addproperty="solr.war.location" />
+                        <if> 
+                            <and>
+                                <available file="../jetty" />
+                                <available file="../jetty/webapps" />
+                                <available file="../jetty/webapps/solr.war" />
+                            </and>
+                            <then>
+                                <property name="solr.war.location.default" location="../jetty/webapps/solr.war" />
+                            </then>
+                            <else>
+                                <property name="solr.war.location.default" value="" />
+                            </else>
+                        </if>
+                        <input-filepath message="Enter full path of where solr.war file is located:" addproperty="solr.war.location" 
+                             defaultValue="${solr.war.location.default}" />
                         <condition property="war.exists">
                             <available file="${solr.war.location}" />
                         </condition>
@@ -519,10 +547,43 @@
 
     </target>
 
-
-    <target name="package" description="Create a gzipped tarball or a .zip file for distribution" >
+    <target name="package" description="Create a gzipped tarball for distribution" >
+        <tar destfile="SolrMarc_Distribution.tar.gz" compression="gzip" >
+            <tarfileset dir=".">
+                <include name="build.xml" />
+                <include name="build.properties" />
+                <include name="log4j.properties" />
+                <include name="test/**" />
+                <include name="script_templates/*" />
+                <include name="lib/*.jar" />
+                <!--<exclude name="lib/jzkit_client.jar" /> -->
+                <include name="lib/solrmarc/**" />
+                <exclude name="lib/solrmarc/**/*.class" />
+                <exclude name="lib/solrmarc/**/*.jar" />
+                <include name="lib/solr_1.2/**" />
+                <include name="lib/solr_1.3/**" />
+                <include name="lib/solr_1.4/**" />
+                <include name="docs/*" />
+                <include name="buildtools/**" />
+                <exclude name="buildtools/manifest.mf"/>
+                <include name="examples/GenericVuFind/script_templates/*"/>
+                <include name="examples/GenericVuFind/src/**"/>
+                <include name="examples/GenericVuFind/translation_maps/*"/>
+                <include name="examples/GenericVuFind/*.properties"/>
+                <include name="examples/VanillaBlacklightDemo/*.properties"/>
+                <include name="examples/UvaBlacklight/script_templates/*"/>
+                <include name="examples/UvaBlacklight/src/**"/>
+                <include name="examples/UvaBlacklight/translation_maps/*"/>
+                <include name="examples/UvaBlacklight/*.properties"/>
+                <include name="examples/stanfordBlacklight/scripts/*"/>
+                <include name="examples/stanfordBlacklight/src/**"/>
+                <include name="examples/stanfordBlacklight/translation_maps/*"/>
+                <include name="examples/stanfordBlacklight/*.properties"/>
+                <include name="examples/stanfordBlacklight/test/src/**"/>
+                <include name="examples/stanfordBlacklight/bibixSolrConf/*"/>
+            </tarfileset>
+        </tar>
     </target>
-        
         
     <target name="usage" description="Prints usage instructions">
         <echo message="Welcome to the Solrmarc indexing project" />
