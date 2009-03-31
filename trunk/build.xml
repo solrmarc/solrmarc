@@ -453,19 +453,23 @@
                  site-specific version, but warn the user that duplicates are present. -->
             <copy todir="${build.dir}/tmp_map_dir" >
                 <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
+                <fileset dir="${basedir}" includes="log4j.properties" />
             </copy>
             
             <copy todir="${build.dir}/tmp_map_dir" overwrite="true">
                 <fileset dir="${site.map.dir}" includes="*.properties" />
+                <fileset dir="${site.dir}" includes="log4j.properties" />
             </copy>
             
             <pathconvert pathsep=" "  property="std_maps" >
                 <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
+                <fileset dir="${basedir}" includes="log4j.properties" />
                 <flattenmapper />
             </pathconvert>
             
             <pathconvert pathsep=" "  property="site_maps" >
                 <fileset dir="${site.map.dir}" includes="*.properties" />
+                <fileset dir="${site.dir}" includes="log4j.properties" />
                 <flattenmapper />
             </pathconvert>
             
@@ -538,7 +542,6 @@
             </lib>
             <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
             <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
-            <fileset dir="." includes="log4j.properties" />
         </one-jar>
         
         <delete_merged_maps />
@@ -724,7 +727,6 @@
             <main jar="${buildtools.path}/doesntexist.jar" />
             <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
             <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
-            <fileset dir="." includes="log4j.properties" />
             <fileset dir="${site.test.build.dir}" includes="**/*.class" />
         </one-jar>
         
