@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.log4j.*;
@@ -89,6 +90,23 @@ public class MarcImporter extends MarcHandler
         // Ths URL of the currently running Solr server
         SolrHostURL = Utils.getProperty(props, "solr.hosturl");
         
+        String solrLogLevel = Utils.getProperty(props, "solr.log.level");
+        
+        Level level = Level.WARNING;
+        if (solrLogLevel != null)
+        {
+            if (solrLogLevel.equals("OFF"))     level = Level.OFF;
+            if (solrLogLevel.equals("SEVERE"))  level = Level.SEVERE;
+            if (solrLogLevel.equals("WARNING")) level = Level.WARNING;
+            if (solrLogLevel.equals("INFO"))    level = Level.INFO;
+            if (solrLogLevel.equals("FINE"))    level = Level.FINE;
+            if (solrLogLevel.equals("FINER"))   level = Level.FINER;
+            if (solrLogLevel.equals("FINEST"))  level = Level.FINEST;
+            if (solrLogLevel.equals("ALL"))     level = Level.ALL;
+        }
+        
+        java.util.logging.Logger.getLogger("org.apache.solr").setLevel(level);
+
         // Specification of how to modify the entries in the delete record file
         // before passing the id onto Solr.   Based on syntax of String.replaceAll
         //  To prepend a 'u' specify the following:  "(.*)->u$1"
