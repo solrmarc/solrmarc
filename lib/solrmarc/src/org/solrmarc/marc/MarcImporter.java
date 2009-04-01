@@ -214,39 +214,43 @@ public class MarcImporter extends MarcHandler
         {
             if (shuttingDown) break;
             
+            Record record = null;
             try {
-                Record record = reader.next();
+                record = reader.next();
                 recsReadCounter++;
-                
-                try {
-                    boolean added = addToIndex(record);
-                    if (added)
-                    {
-                        recsIndexedCounter++;
-                        logger.info("Added record " + recsReadCounter + " read from file: " + record.getControlNumber());
-                    }
-                    else
-                    {
-                        logger.info("Deleted record " + recsReadCounter + " read from file: " + record.getControlNumber());                        
-                    }
-                }
-                catch (Exception e)
-                {
-                    // check for missing fields
-                    if (solrCoreProxy.isSolrException(e) &&
-                    		e.getMessage().contains("missing required fields"))
-                    {
-                   	   logger.error(e.getMessage() +  " at record count = " + recsReadCounter);
-                   	   logger.error("Control Number " + record.getControlNumber(), e);
-                    }
-                    else
-                    {
-                	    logger.error("Error indexing record: " + record.getControlNumber() + " -- " + e.getMessage(), e);
-                    }
-                }
-            } 
-            catch (Exception e) {
+            }
+            catch (Exception e) 
+            {
                 logger.error("Error reading record: " + e.getMessage(), e);
+                continue;
+            }
+                
+            try {
+                boolean added = addToIndex(record);
+                if (added)
+                {
+                    recsIndexedCounter++;
+                    logger.info("Added record " + recsReadCounter + " read from file: " + record.getControlNumber());
+                }
+                else
+                {
+                    logger.info("Deleted record " + recsReadCounter + " read from file: " + record.getControlNumber());                        
+                }
+            }
+            catch (Exception e)
+            {
+                // check for missing fields
+                if (solrCoreProxy.isSolrException(e) &&
+                		e.getMessage().contains("missing required fields"))
+                {
+               	   logger.error(e.getMessage() +  " at record count = " + recsReadCounter);
+               	   logger.error("Control Number " + record.getControlNumber(), e);
+                }
+                else
+                {
+            	    logger.error("Error indexing record: " + record.getControlNumber() + " -- " + e.getMessage(), e);
+            	    if (e instanceof RuntimeException) throw ((RuntimeException)e);
+                }
             }
         }
         
@@ -436,13 +440,15 @@ public class MarcImporter extends MarcHandler
         }
         catch (Exception e)
         {
-            logger.info("Exception occurred while Indexing: "+ e.getMessage());           
+            logger.info("Exception occurred while Indexing: "+ e.getMessage());
+            logger.info("Setting Solr closed flag");
+            isShutDown = true;
         }
         
         logger.info(" Adding " + recsIndexedCounter + " of " + recsReadCounter + " documents to index");
         logger.info(" Deleting " + recsDeletedCounter + " documents from index");
 
-        finish();
+        if (!isShutDown) finish();
 
         signalServer();
         

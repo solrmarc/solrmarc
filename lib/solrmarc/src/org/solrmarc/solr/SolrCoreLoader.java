@@ -141,7 +141,15 @@ public class SolrCoreLoader
                     Constructor<?> coreConstructor = solrCoreClass.getConstructor(String.class, String.class, solrConfigClass, indexSchemaClass, coreDescClass);
                     solrCore = coreConstructor.newInstance(solrCoreName, solrDataDir, solrConfig, solrSchema, genericCoreDesc);
                 }
-            }   
+            }
+            else // can't find any solr libraries
+            {
+                System.err.println("Error: SolrMarc cannot find any Solr libraries");
+                System.err.println("Error: SolrMarc was built expecting solr libraries to be referenced at runtime, but none were found. ");               
+                logger.error("Error: SolrMarc cannot find any Solr libraries");
+                logger.error("Error: SolrMarc was built expecting solr libraries to be referenced at runtime, but none were found. ");               
+                System.exit(1);               
+            }
         }
         catch (Exception e)
         {
