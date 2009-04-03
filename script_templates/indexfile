@@ -18,7 +18,7 @@ then
   fi
 fi
 
-java @MEM_ARGS@ -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3
+java @MEM_ARGS@ @SOLR_JAR_DEF@ -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3
 
 exit 0
 

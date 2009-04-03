@@ -7,7 +7,7 @@ E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
 
-java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3 2> /dev/null
+java @MEM_ARGS@ @SOLR_JAR_DEF@ -Done-jar.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3 2> /dev/null
 
 exit 0
 

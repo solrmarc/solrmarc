@@ -7,7 +7,7 @@ E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
 
-java @MEM_ARGS@ -Dmarc.source="NONE" -Dsolr.optimize_at_end="true" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 
+java @MEM_ARGS@ @SOLR_JAR_DEF@ -Dmarc.source="NONE" -Dsolr.optimize_at_end="true" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 
 
 exit 0
 
