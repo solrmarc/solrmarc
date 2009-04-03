@@ -213,7 +213,7 @@ public class SolrCoreProxy
         catch (Exception e)
         {
             System.err.println("Error: Problem invoking close in SolrCoreProxy");             
-            throw new RuntimeException("Error: Problem invoking close  in SolrCoreProxy", e);
+            throw new SolrRuntimeException("Error: Problem invoking close  in SolrCoreProxy", e);
         }
     }
 
@@ -254,7 +254,7 @@ public class SolrCoreProxy
         {
             String errmsg = "Error: Problem invoking " + methodName + " in SolrCoreProxy";
             System.err.println(errmsg);               
-            throw new RuntimeException(errmsg, e);
+            throw new SolrRuntimeException(errmsg, e);
         }
         return result;
     }
@@ -275,7 +275,7 @@ public class SolrCoreProxy
             String errmsg = "Error: Problem invoking addField in SolrCoreProxy";
             System.err.println(errmsg);  
             e.printStackTrace();
-            throw new RuntimeException(errmsg, e);
+            throw new SolrRuntimeException(errmsg, e);
         }
     }
     
@@ -299,12 +299,12 @@ public class SolrCoreProxy
             if (cause instanceof IOException) 
                 throw (IOException) cause;
             System.err.println(errmsg);               
-            throw new RuntimeException(errmsg, e);
+            throw new SolrRuntimeException(errmsg, e);
         }
         catch (Exception e)
         {
             System.err.println(errmsg);               
-            throw new RuntimeException(errmsg, e);
+            throw new SolrRuntimeException(errmsg, e);
         } 
     }
 
@@ -339,7 +339,7 @@ public class SolrCoreProxy
         {
             String errmsg = "Error: Problem creating DeleteUpdateCommand in SolrCoreProxy";
             System.err.println(errmsg);               
-            throw new RuntimeException(errmsg, e);
+            throw new SolrRuntimeException(errmsg, e);
         }
     }
 
@@ -362,7 +362,7 @@ public class SolrCoreProxy
         {
             String errmsg = "Error: Problem creating CommitUpdateCommand in SolrCoreProxy";
             System.err.println(errmsg);               
-            throw new RuntimeException(errmsg, e);
+            throw new SolrRuntimeException(errmsg, e);
         }
     }
     
@@ -388,7 +388,7 @@ public class SolrCoreProxy
         {
             String errmsg = "Error: Problem creating AddUpdateCommand in SolrCoreProxy";
             System.err.println(errmsg); 
-            throw new RuntimeException(errmsg, e);
+            throw new SolrRuntimeException(errmsg, e);
         }
     }
     
@@ -410,7 +410,7 @@ public class SolrCoreProxy
         {
             String errmsg = "Error: Problem creating updateHandler in SolrCoreProxy";
             System.err.println(errmsg);               
-            throw new RuntimeException(errmsg, e);
+            throw new SolrRuntimeException(errmsg, e);
         }
     }
     
@@ -434,7 +434,7 @@ public class SolrCoreProxy
         {
             String errmsg = "Error: Problem creating documentBuilder in SolrCoreProxy";
             System.err.println(errmsg); 
-            throw new RuntimeException(errmsg, e);
+            throw new SolrRuntimeException(errmsg, e);
         }
     }
     

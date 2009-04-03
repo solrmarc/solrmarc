@@ -30,6 +30,7 @@ import org.marc4j.ErrorHandler;
 import org.marc4j.marc.Record;
 import org.solrmarc.solr.SolrCoreProxy;
 import org.solrmarc.solr.SolrCoreLoader;
+import org.solrmarc.solr.SolrRuntimeException;
 import org.solrmarc.tools.SolrUpdate;
 import org.solrmarc.tools.Utils;
 
@@ -46,6 +47,7 @@ public class MarcImporter extends MarcHandler
 
     protected String solrCoreDir;
     protected String solrDataDir;
+    protected String solrCoreName;
     private String deleteRecordListFilename;
     private String deleteRecordIDMapper = null;
     private String SolrHostURL;
@@ -87,6 +89,9 @@ public class MarcImporter extends MarcHandler
         // The solr data diretory to use
         solrDataDir = Utils.getProperty(props, "solr.data.dir");
 
+        // The name of the solr core to use, in a solr multicore environment
+        solrCoreName = Utils.getProperty(props, "solr.core.name");
+        
         // Ths URL of the currently running Solr server
         SolrHostURL = Utils.getProperty(props, "solr.hosturl");
         
@@ -137,6 +142,8 @@ public class MarcImporter extends MarcHandler
         }
         
         justIndexDontAdd = Boolean.parseBoolean(Utils.getProperty(props, "marc.just_index_dont_add"));
+        if (justIndexDontAdd)
+            Utils.setLog4jLogLevel(org.apache.log4j.Level.WARN);
         deleteRecordListFilename = Utils.getProperty(props, "marc.ids_to_delete");
         optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(props, "solr.optimize_at_end"));
         return;
@@ -249,7 +256,7 @@ public class MarcImporter extends MarcHandler
                 else
                 {
             	    logger.error("Error indexing record: " + record.getControlNumber() + " -- " + e.getMessage(), e);
-            	    if (e instanceof RuntimeException) throw ((RuntimeException)e);
+            	    if (e instanceof SolrRuntimeException) throw ((SolrRuntimeException)e);
                 }
             }
         }
@@ -450,7 +457,7 @@ public class MarcImporter extends MarcHandler
 
         if (!isShutDown) finish();
 
-        signalServer();
+        if (!justIndexDontAdd) signalServer();
         
         Date end = new Date();
         long totalTime = end.getTime() - start.getTime();
@@ -474,7 +481,7 @@ public class MarcImporter extends MarcHandler
     {
         if (solrCoreProxy == null)
         {
-            solrCoreProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, null, logger);
+            solrCoreProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, solrCoreName, logger);
         }
         return(solrCoreProxy);
     }
