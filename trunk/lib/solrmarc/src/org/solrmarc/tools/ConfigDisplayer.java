@@ -42,7 +42,7 @@ public class ConfigDisplayer {
 				{
 					if (line.matches(parms[i][0] + " *= *.*")) 
 					{
-						line = parms[i][0] + " = " + parms[i][1];
+						line = parms[i][0] + " = " + parms[i][1].replace('\\', '/');
 					}
 				}
 				System.out.println(line);
