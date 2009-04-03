@@ -2,7 +2,6 @@ echo off
 
 setlocal
 set file_=%1
-echo file = %file_%
 
 ::Get the current batch file's short path
 for %%x in (%0) do set scriptdir=%%~dpsx
@@ -45,7 +44,6 @@ goto _done
 
 :_file
 set suffix_=%file_:~-4%
-echo %suffix_%
 if "%suffix_%"==".war" goto _checkwar1
 
 echo Error : Filename specified is not a .war file:  
@@ -77,8 +75,8 @@ goto _done
 :_process_all
 
 endlocal 
-set SOLRWARLOCATIONORJARDIR=%1
-echo set SOLRWARLOCATIONORJARDIR=%1
+for %%g in (%1) do set SOLRWARLOCATIONORJARDIR=%%~fg
+echo set SOLRWARLOCATIONORJARDIR=%SOLRWARLOCATIONORJARDIR%
 
 goto :eof
 
