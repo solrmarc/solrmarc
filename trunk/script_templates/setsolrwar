@@ -1,0 +1,48 @@
+#! /bin/bash
+# setsolrwar.sh
+# Sets the war file or directory to use to load solr jar files when running solrmarc
+# $Id: setsolrwar.sh 
+
+E_BADARGS=65
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+if [ $# -eq 0 ]
+  then
+    echo "   Usage: `basename $0` /full/path/to/solr.war "
+    echo "     or : `basename $0` /full/path/to/directory/with/solr/jars "
+    exit $E_BADARGS
+fi
+
+if [ -d $1 ] then
+    jarcount=`ls -1 $1/*.jar | wc -l`
+    if [ $jarcount -eq 0 ] then 
+        echo " Error : No Jar files found in specified solr jar directory: $1"
+        exit $E_BADARGS
+    fi
+else 
+    suffix=`echo $1 | sed -e's/.*\([.][^.]*\)/\1/'`
+    if [ $suffix != ".war" ] then
+        echo " Error : Filename specified is not a .war file: $1"
+        exit $E_BADARGS
+    fi
+    if [ -f $1 ] then
+        echo " Error : Specified .war file does not a exist: $1"
+        exit $E_BADARGS
+    fi
+    solrjarcnt=`jar tvf $file | grep apache-solr | wc -l`
+    if [ $solrjarcnt -eq 0 ] then
+        echo " Error : Specified .war file does not contain any apache solr jar files: $1"
+        exit $E_BADARGS
+    fi
+fi
+
+for file in getfromsolr indexfile indextest2 optimizesolr 
+do
+    cat $file | sed -e's|-Done-jar.class.path="[^"]*"|-Done-jar.class.path="$1"|' > tmp$file
+    mv tmp$file $file
+    chmod u+x $file 
+done
+
+exit 0
+
