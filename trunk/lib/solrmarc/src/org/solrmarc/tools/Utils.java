@@ -23,6 +23,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Appender;
+import org.apache.log4j.AsyncAppender;
+import org.apache.log4j.Logger;
 import org.marc4j.marc.*;
 
 /**
@@ -873,5 +876,41 @@ public final class Utils {
             default:      return(0x00);
         }
     }
+	
+   @SuppressWarnings("unchecked")
+    public static void setLog4jLogLevel(org.apache.log4j.Level newLevel)
+    {
+        Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
+        Enumeration<Logger> enLogger = rootLogger.getLoggerRepository().getCurrentLoggers();
+        Logger tmpLogger = null;
+        /* If logger is root, then need to loop through all loggers under root
+        * and change their logging levels too.  Also, skip sql loggers so
+        they
+        * do not get effected.
+        */
+        while(enLogger.hasMoreElements())
+        {
+            tmpLogger = (Logger)(enLogger.nextElement());
+            tmpLogger.setLevel(newLevel);
+        }
+        Enumeration<Appender> enAppenders = rootLogger.getAllAppenders();
+        Appender appender;
+        while(enAppenders.hasMoreElements())
+        {
+            appender = (Appender)enAppenders.nextElement();
+            
+            if(appender instanceof AsyncAppender)
+            {
+                AsyncAppender asyncAppender = (AsyncAppender)appender;
+                asyncAppender.activateOptions();
+//	                rfa = (RollingFileAppender)asyncAppender.getAppender("R");
+//	                rfa.activateOptions();
+//	                ca = (ConsoleAppender)asyncAppender.getAppender("STDOUT");
+//	                ca.activateOptions();
+            }
+        }
+
+    }
+
 
 }
