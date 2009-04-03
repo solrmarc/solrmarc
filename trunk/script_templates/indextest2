@@ -19,7 +19,7 @@ then
   fi
 fi
 
-java @MEM_ARGS@ -Dmarc.just_index_dont_add="true" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3 2> /dev/null
+java @MEM_ARGS@ @SOLR_JAR_DEF@ -Dmarc.just_index_dont_add="true" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3 
 
 exit 0
 
