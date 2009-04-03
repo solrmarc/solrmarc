@@ -59,7 +59,10 @@
                 <exclude name="junit*.jar" />
             </fileset>
             <fileset dir="${lib.dir}/solrmarc/dist" includes="*.jar" />
-            <fileset dir="${site.lib.dir}" includes="*.jar" />
+            <fileset dir="${site.lib.dir}" >
+                <include name="*.jar" />
+                <exclude name="jzkit_client.jar" />
+            </fileset>
         </path>
         <property name="init.already.run" value="true" />
     </target>
@@ -144,8 +147,8 @@
 
     <macrodef name="get_properties_for_config_file">
         <sequential>
-            <input message="Enter URL of where solr server will be located:" addproperty="solr.hosturl"  
-                defaultvalue="http://localhost:8983/solr" />
+            <input-save message="Enter URL of where solr server will be located:" addproperty="solr.hosturl"  
+                defaultvalue="http://localhost:8983/solr"  propertyfile="${site.dir}/build_override.properties" />
             <if> 
                 <and>
                     <available file="../jetty" />
@@ -164,13 +167,23 @@
 
             <echo message="solr path = ${solr.path} " />
             <condition property="solr.path.available">
-                <and>
-                    <available file="${solr.path}/conf/solrconfig.xml" />
-                    <available file="${solr.path}/conf/schema.xml" />
-                </and>
+                <or>
+                    <and>
+                        <available file="${solr.path}/conf/solrconfig.xml" />
+                        <available file="${solr.path}/conf/schema.xml" />
+                    </and>
+                    <available file="${solr.path}/solr.xml" />
+                </or>
             </condition>
-            <fail message="Unable to find both solrconfig.xml and schema.xml in conf directory under specified solr home." unless="solr.path.available" />
-
+            <if>
+                <not> <isset property="solr.path.available" /> </not>
+                <then>
+                    <echo level="error" message="Warning: Unable to find solr.xml in specified solr home  AND  " />
+                    <echo level="error" message="Warning: Unable to find both solrconfig.xml and schema.xml in conf directory under specified solr home." />
+                    <echo level="error" message="Warning: solr.home will have to be defined before you can run SolrMarc" />
+                    <propertyregex property="solr.path" override="true" input="" regexp="noneSuch" replace="nothing" defaultValue="@SOLR_PATH@" />
+                </then>
+            </if>
             <get_indexer_class />
 
             <property name="solr.indexer" value="${custom.indexer.class}" />
@@ -214,6 +227,7 @@
                 <echo message="site_dir ${site.dir} already inited skipping forward. " />
                 <get_indexer_class />
                 <make_site_dirs />
+                <get_site_specific_settings />
             </then>
             <else>
                 <mkdir dir="${site.dir}" />
@@ -249,9 +263,8 @@
                     </then>
                     <else>
                         <copy todir="${site.dir}">
-                            <fileset dir="examples/${example.configuration}" includes="src/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,build.properties" />
+                            <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,build.properties" />
                         </copy>
-                        <property file="${site.dir}/build.properties" />
                         <make_site_dirs />
                         <get_site_specific_settings />
                         <get_properties_for_config_file />
@@ -267,6 +280,7 @@
                                     <replaceregex pattern="(solr.indexer.properties *=).*" replace="\1 ${solr.indexer.properties}" />
                                     <replaceregex pattern="(marc.default_encoding *=).*" replace="\1 ${marc.default_encoding}" />
                                 </tokenfilter>
+                                <fixcrlf />
                             </filterchain>
                         </copy>
                     </else>
@@ -279,8 +293,8 @@
 
     <!-- Solr Version Properties Targets -->
     <target name="solrversion" description="Set the version of Solr to use" unless="solrversion.already.run">
-        <input-save message="solr.version must be defined as either 1.2, 1.3, or 1.4 (or war)" 
-            validargs="1.2,1.3,1.4,war" 
+        <input-save message="solr.version must be defined as either 1.2, 1.3, or 1.4 (or war)(or external)" 
+            validargs="1.2,1.3,1.4,war,external" 
             addproperty="solr.version" defaultvalue="war"  propertyfile="${site.dir}/build_override.properties" />
         <if>
             <equals arg1="${solr.version}" arg2="war" />
@@ -319,13 +333,61 @@
                 <mkdir dir="${lib.dir}/solr_war" />
                 <unwar src="${solr.war.location}" dest="${lib.dir}/solr_war" overwrite="true">
                     <patternset>
-                        <include name="**/lucene-*.jar" />
-                        <include name="**/apache-solr-*.jar" />
-                        <include name="**/slf4j*.jar" />
+                        <include name="**/*.jar" />
                     </patternset>
                     <mapper type="flatten" />
                 </unwar>
             </then>
+            <elseif>
+                <equals arg1="${solr.version}" arg2="external" />
+                <then>
+                    <property name="solr.version.external" value="true" />
+                    <if>
+                        <or>
+                            <not> <isset property="solr.external.location" /> </not>
+                            <equals arg1="${solr.external.location}" arg2="" />
+                        </or>
+                        <then>
+                            <if> 
+                                <and>
+                                    <available file="../jetty" />
+                                    <available file="../jetty/webapps" />
+                                    <available file="../jetty/webapps/solr.war" />
+                                </and>
+                                <then>
+                                    <property name="solr.external.location.default" location="../jetty/webapps/solr.war" />
+                                </then>
+                                <else>
+                                    <property name="solr.external.location.default" value="" />
+                                </else>
+                            </if>
+                            <input-filepath message="Enter full path of where either solr.war file is located (including name of war file) ${line.separator} or full path of directory containing solr jar files:" 
+                                 addproperty="solr.external.location"  defaultValue="${solr.external.location.default}" />
+                            <condition property="solr.external.exists">
+                                <and>
+                                    <not> <equals arg1="${solr.external.location}" arg2="" /> </not>
+                                    <available file="${solr.external.location}" />
+                                </and>
+                            </condition>
+                            <if>
+                                <not> <isset property="solr.external.exists" /> </not>
+                                <then>
+                                    <echo level="error" message="Warning: Solr.war file or Solr jar directory ${solr.external.location} does not exist  " />
+                                    <echo level="error" message="Warning: Path to solr jars will have to be defined before you can run SolrMarc" />
+                                    <propertyregex property="solr.external.location" override="true" input="" regexp="noneSuch" replace="nothing" defaultValue="%SOLRWARLOCATIONORJARDIR%" />
+                                    <property name="solr.external.exists" value="true" />
+                                    <echo message="solr.external.exists = ${solr.external.exists}" />
+                                </then>
+                                <else>
+                                    <propertyfile file="${site.dir}/build_override.properties">
+                                        <entry key="solr.external.location" value="${solr.external.location}" />
+                                    </propertyfile>
+                                </else>
+                            </if>
+                        </then>
+                    </if>
+                </then>
+            </elseif>
         </if>
         <echo message="solr version: ${solr.version}" />
         <property name="solrversion.already.run" value="true" />
@@ -369,6 +431,7 @@
                 debug="true" debuglevel="lines,vars,source" 
                 encoding="utf-8">
             <include name="**/*.java" />
+            <exclude name="**/z3950/*.java" />
             <classpath refid="classpath.jars" />
         </javac>
 
@@ -409,39 +472,59 @@
 
     <target name="scripts" depends="init" description="Copy scripts or batch files from script_templates directory to the dist directory">
         <if>
-            <os family="windows" />
+            <equals arg1="${solr.external.exists}" arg2="true"/>
+            <then>
+                <property name="solr.jar.def.string" value="-Done-jar.class.path=&quot;${solr.external.location}&quot;" />
+            </then>
+            <else>
+                <property name="solr.jar.def.string" value="" />
+            </else>
+        </if>
+        <if>
+            <or> 
+                <os family="windows" />
+                <equals arg1="${package-prebuilt.allscripts.batch}" arg2="true"/>
+            </or>
             <then>
                 <copy todir="${dist.dir}" overwrite="true">
                     <fileset dir="${script.template.dir}" includes="*.bat" />
                     <fileset dir="${site.script.dir}" includes="*.bat" />
                     <filterchain>
-                        <fixcrlf />
+                        <fixcrlf eol="dos"/>
                     </filterchain>
                     <filterset>
                         <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
                         <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
                         <filter token="MEM_ARGS" value="${exe.mem.args}" />
+                        <filter token="SOLR_JAR_DEF" value="${solr.jar.def.string}" />
                     </filterset>
                 </copy>
             </then>
-            <else>
+        </if>
+        <if> 
+            <or> 
+                <not> <os family="windows" /> </not>
+                <equals arg1="${package-prebuilt.allscripts.shell}" arg2="true"/>
+            </or>
+            <then>
                 <copy todir="${dist.dir}" overwrite="true">
                     <fileset dir="${script.template.dir}" includes="*" excludes="*.bat" />
                     <fileset dir="${site.script.dir}" includes="*" excludes="*.bat" />
                     <filterchain>
-                        <fixcrlf />
+                        <fixcrlf eol="unix"/>
                     </filterchain>
                     <filterset>
                         <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
                         <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
                         <filter token="MEM_ARGS" value="${exe.mem.args}" />
+                        <filter token="SOLR_JAR_DEF" value="${solr.jar.def.string}" />
                     </filterset>
                 </copy>
 
                 <chmod perm="u+x">
                     <fileset dir="${dist.dir}" excludes="*.jar,*.bat" />
                 </chmod>
-            </else>
+            </then>
         </if>
     </target>
 
@@ -523,9 +606,10 @@
         <!-- Load in name of main jar file from solrmarc dist build.properties -->
         <loadproperties srcfile="${lib.dir}/solrmarc/build.properties">
             <filterchain>
-                <linecontains>
-                    <contains value="jar.name" />
-                </linecontains>
+                <tokenfilter>
+                    <containsregex pattern="(dist.dir|jar.name)" />
+                </tokenfilter>
+                <prefixlines prefix="solrmarc.core." />
             </filterchain>
         </loadproperties>
         
@@ -533,7 +617,7 @@
                 
         <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
                manifest="${buildtools.path}/manifest.mf">
-            <main jar="${lib.dir}/solrmarc/${dist.dir}/${jar.name}" />
+            <main jar="${lib.dir}/solrmarc/${solrmarc.core.dist.dir}/${solrmarc.core.jar.name}" />
             <lib>
                 <fileset dir="${lib.dir}" includes="*.jar" excludes="junit*.jar,jzkit_client.jar" />
                 <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
@@ -546,11 +630,13 @@
         
         <delete_merged_maps />
         
-        <antcall target="scripts" />
+        <antcall target="scripts" >
+            <param name="solr.external.location" value="${solr.external.location}" />
+        </antcall>
 
     </target>
 
-    <target name="package" description="Create a gzipped tarball for distribution" >
+    <target name="package-src" description="Create a gzipped src tarball for distribution" >
         <tar destfile="SolrMarc_Distribution.tar.gz" compression="gzip" >
             <tarfileset dir=".">
                 <include name="build.xml" />
@@ -559,13 +645,15 @@
                 <include name="test/**" />
                 <include name="script_templates/*" />
                 <include name="lib/*.jar" />
-                <!--<exclude name="lib/jzkit_client.jar" /> -->
+                <exclude name="lib/jzkit_client.jar" /> 
                 <include name="lib/solrmarc/**" />
-                <exclude name="lib/solrmarc/**/*.class" />
+                <exclude name="lib/solrmarc/**/*.class" /> 
+                <exclude name="lib/solrmarc/**/z3950/*.java" />
                 <exclude name="lib/solrmarc/**/*.jar" />
                 <include name="lib/solr_1.2/**" />
                 <include name="lib/solr_1.3/**" />
                 <include name="lib/solr_1.4/**" />
+                <include name="lib/solr_external" />
                 <include name="docs/*" />
                 <include name="buildtools/**" />
                 <exclude name="buildtools/manifest.mf"/>
@@ -588,13 +676,49 @@
         </tar>
     </target>
         
+    <target name="package-prebuilt" description="Create a gzipped pre-built version for distribution" >
+        <antcall target="build" inheritAll="false" >
+            <param name="site.dir" value="tmpexternal" />
+            <param name="dist.dir" value="external" />
+            <param name="solr.path" value="" />
+            <param name="solr.version" value="external" />
+            <param name="solr.external.location" value="" />
+            <param name="package-prebuilt.allscripts.batch" value="true" />
+            <param name="package-prebuilt.allscripts.shell" value="true" />
+        </antcall>
+        <loadproperties srcfile="tmpexternal/build_override.properties">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex pattern="distribution.jar.name" />
+                </tokenfilter>
+                <prefixlines prefix="external." />
+            </filterchain>
+        </loadproperties>
+        <loadproperties srcfile="tmpexternal/build.properties">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex pattern="distribution.jar.name" />
+                </tokenfilter>
+                <prefixlines prefix="external." />
+            </filterchain>
+        </loadproperties>
+        <property name="external.distribution.jar.name" value="SolrMarc" />
+        <tar destfile="Binary_${external.distribution.jar.name}_Distribution.tar.gz" compression="gzip" >
+            <tarfileset dir="external">
+                <include name="*" />
+			</tarfileset>
+	    </tar> 
+        <delete dir="tmpexternal" />
+        <delete dir="external" />
+    </target>
+        
     <target name="usage" description="Prints usage instructions">
         <echo message="Welcome to the Solrmarc indexing project" />
         <echo message="Use 'ant' to build the latest code" />
-        <echo message="Use 'ant' to build the latest code" />
         <echo message="For developers" />
         <echo message="Use 'ant clean' to clean the compiled source directory" />
-        <echo message="Use 'ant package' to build a gzipped tarball and checksum for distribution (be sure to svn export first)" />
+        <echo message="Use 'ant package-src' to build a gzipped tarball of the source code for distribution" />
+        <echo message="Use 'ant package-prebuilt' to build a gzipped tarball of a pre-built, pre-configured, binary release" />
         <echo message="Use 'ant test' to run unit tests" />
     </target>
 
