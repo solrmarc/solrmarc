@@ -54,11 +54,11 @@ public class SolrUpdate
         }
         catch (MalformedURLException me)
         {
-            System.err.println("MalformedURLException: " + me);
+            System.err.println("Specified URL is malformed: " + solrServerURL);
         }
         catch (IOException ioe)
         {
-            System.err.println("IOException: " + ioe.getMessage());
+            System.err.println("Unable to establish connection to solr server at URL: " + solrServerURL);
         }
    }
     
