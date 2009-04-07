@@ -1,5 +1,5 @@
 #summary This page will guide you through installing and building SolrMarc
-#labels Phase-Implementation
+#labels Phase-Deploy
 <wiki:toc max_depth="5" />
 
 === About This Guide ===
@@ -14,7 +14,7 @@ SolrMarc is a utility that reads in MARC records from a file, extracts informati
 SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your SOLR index record, but it also allows the creation of custom index functions if you cannot achieve what you require using the predefined mapping techniques.
 
 Currently, SolrMarc is configured to work with:
-  * Blacklight
+  * [http://blacklightopac.org/ Blacklight]
   * [VufindHowTo Vufind]
 
 <br />
