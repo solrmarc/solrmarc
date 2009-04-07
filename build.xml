@@ -269,7 +269,7 @@
                     </then>
                     <else>
                         <copy todir="${site.dir}">
-                            <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,build.properties" />
+                            <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,build.properties,log4j.properties" />
                         </copy>
                         <loadproperties srcfile="examples/${example.configuration}/build.properties">
                             <filterchain>
