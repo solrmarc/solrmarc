@@ -8,4 +8,4 @@ for %%x in (%0) do set scriptdir=%%~dpsx
 for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
 ::echo BatchPath = %scriptdir%
 
-java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.MarcPrinter" -jar %scriptdir%@CUSTOM_JAR_NAME@ print %1 %2 %3
+java -Done-jar.main.class="org.solrmarc.marc.MarcPrinter" -jar %scriptdir%@CUSTOM_JAR_NAME@ print %1 %2 %3
