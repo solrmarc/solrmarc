@@ -195,17 +195,23 @@
 
     <macrodef name="get_site_specific_settings">
         <sequential>
+            <property name="example.default.custom.jar.name" value="Custom" />
             <input-save message="Enter name to use for Jar File containing custom indexing functions${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
-                addproperty="custom.jar.name" defaultvalue="Custom"  propertyfile="${site.dir}/build_override.properties" />
+                addproperty="custom.jar.name" defaultvalue="${example.default.custom.jar.name}"  propertyfile="${site.dir}/build_override.properties" />
+            
             <lowercase property="custom.jar.name.lc" value="${custom.jar.name}" />
             <echo message="lowercase = ${custom.jar.name.lc}" level="verbose" />
-
+            <property name="example.default.custom.config.file.prefix" value="${custom.jar.name.lc}" />
             <input-save message="Enter prefix of properties files for config and index for custom modifications ${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
-                addproperty="custom.config.file.prefix" defaultvalue="${custom.jar.name.lc}"  propertyfile="${site.dir}/build_override.properties" />
+                addproperty="custom.config.file.prefix" defaultvalue="${example.default.custom.config.file.prefix}"  propertyfile="${site.dir}/build_override.properties" />
+            
+            <property name="example.default.distribution.jar.name" value="${custom.jar.name}_SolrMarc" />            
             <input-save message="Enter name to use for final resulting Jar File containing all code, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
-                addproperty="distribution.jar.name" defaultvalue="${custom.jar.name}_SolrMarc"  propertyfile="${site.dir}/build_override.properties" />
+                addproperty="distribution.jar.name" defaultvalue="${example.default.distribution.jar.name}"  propertyfile="${site.dir}/build_override.properties" />
+            
+            <property name="example.default.exe.mem.args" value="-Xmx256m" />            
             <input-save message="Enter java heap size memory argument to put in generated scripts for running site-specific SolrMarc Indexer "
-                addproperty="exe.mem.args" defaultvalue="-Xmx256m" propertyfile="${site.dir}/build_override.properties" />
+                addproperty="exe.mem.args" defaultvalue="${example.default.exe.mem.args}" propertyfile="${site.dir}/build_override.properties" />
 
         </sequential>
     </macrodef>
@@ -265,6 +271,15 @@
                         <copy todir="${site.dir}">
                             <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,build.properties" />
                         </copy>
+                        <loadproperties srcfile="examples/${example.configuration}/build.properties">
+                            <filterchain>
+                                <tokenfilter>
+                                    <containsregex pattern="(custom.config.file.prefix|custom.jar.name|distribution.jar.name|exe.mem.args)" />
+                                </tokenfilter>
+                                <prefixlines prefix="example.default." />
+                            </filterchain>
+                        </loadproperties>
+
                         <make_site_dirs />
                         <get_site_specific_settings />
                         <get_properties_for_config_file />
@@ -703,11 +718,18 @@
             </filterchain>
         </loadproperties>
         <property name="external.distribution.jar.name" value="SolrMarc" />
-        <tar destfile="Binary_${external.distribution.jar.name}_Distribution.tar.gz" compression="gzip" >
-            <tarfileset dir="external">
+        <tar destfile="Binary_${external.distribution.jar.name}_Unix.tar.gz" compression="gzip">
+            <tarfileset dir="external" filemode="755">
                 <include name="*" />
-			</tarfileset>
-	    </tar> 
+                <exclude name="*.bat" />
+            </tarfileset>
+        </tar> 
+        <tar destfile="Binary_${external.distribution.jar.name}_PC.tar.gz" compression="gzip">
+            <fileset dir="external" >
+                <include name="*.bat" />
+                <include name="*.jar" />
+            </fileset>
+        </tar> 
         <delete dir="tmpexternal" />
         <delete dir="external" />
     </target>
