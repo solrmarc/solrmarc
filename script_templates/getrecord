@@ -24,7 +24,7 @@ else
   arg3=$2
 fi
 
-java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.RawRecordReader" -jar $scriptdir/@CUSTOM_JAR_NAME@ $arg1 $arg2 $arg3
+java -Done-jar.main.class="org.solrmarc.marc.RawRecordReader" -jar $scriptdir/@CUSTOM_JAR_NAME@ $arg1 $arg2 $arg3
 
 exit 0
 
