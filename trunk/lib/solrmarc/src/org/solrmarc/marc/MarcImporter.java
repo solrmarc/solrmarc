@@ -373,12 +373,12 @@ public class MarcImporter extends MarcHandler
         catch (MalformedURLException me)
         {
             //System.err.println("MalformedURLException: " + me);
-        	logger.error("MalformedURLException" + me);
+        	logger.error("Specified URL is malformed: " + SolrHostURL);
         }
         catch (IOException ioe)
         {
             //System.err.println("IOException: " + ioe.getMessage());
-        	logger.error("IOException: " + ioe.getMessage());
+        	logger.warn("Unable to establish connection to solr server at URL: " + SolrHostURL);
         }
     }  
 
