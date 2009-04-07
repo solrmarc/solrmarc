@@ -6,35 +6,39 @@ scriptdir=$( (cd -P $(dirname $0) && pwd) )
 showconfig=0
 
 case $1 in
+*config.properties) config=$1 ;;
 http*) url=$1 ;;
+*\.jar) jar=$1 ;;
 /*) solrpath=$1 ;;
 \./*) solrpath=$1 ;;
-*\.jar) jar=$1 ;;
-*config.properties) config=$1
+\../*) solrpath=$1 
 esac
 
 case $2 in
+*config.properties) config=$2 ;;
 http*) url=$2 ;;
+*\.jar) jar=$2 ;;
 /*) solrpath=$2 ;;
 \./*) solrpath=$2 ;;
-*\.jar) jar=$2 ;;
-*config.properties) config=$2
+\../*) solrpath=$2 
 esac
 
 case $3 in
+*config.properties) config=$3 ;;
 http*) url=$3 ;;
+*\.jar) jar=$3 ;;
 /*) solrpath=$3 ;;
 \./*) solrpath=$3 ;;
-*\.jar) jar=$3 ;;
-*config.properties) config=$3
+\../*) solrpath=$3 
 esac
 
 case $4 in
+*config.properties) config=$4 ;;
 http*) url=$4 ;;
+*\.jar) jar=$4 ;;
 /*) solrpath=$4 ;;
 \./*) solrpath=$4 ;;
-*\.jar) jar=$4 ;;
-*config.properties) config=$4
+\../*) solrpath=$4 
 esac
 
 #echo "url = $url"
@@ -54,6 +58,13 @@ fi
 if [[ "$config" = "" && jar != "" ]]
 then
     config=`java -Done-jar.main.class="org.solrmarc.tools.GetDefaultConfig" -jar "$jar"`
+fi
+
+if [[ `echo $solrpath | cut -c1` = "." ]]
+then
+    path=$( (cd -P $(dirname $1) && pwd) )
+    file=$(basename $1)
+    solrpath=$path/$file
 fi
 
 if [[ "$solrpath" = "" && "$url" = "" ]]
