@@ -9,6 +9,8 @@ for %%x in (%0) do set scriptdir=%%~dpsx
 for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
 ::echo BatchPath = %scriptdir%
 ::
-java @MEM_ARGS@ %solrjardef% -Dmarc.just_index_dont_add="true" -jar %scriptdir%@CUSTOM_JAR_NAME@ %1 %2 %3 
+if (%SOLRMARC_MEM_ARGS%) EQU ()  set SOLRMARC_MEM_ARGS=@MEM_ARGS@
+::
+java %SOLRMARC_MEM_ARGS% %solrjardef% -Dmarc.just_index_dont_add="true" -jar %scriptdir%@CUSTOM_JAR_NAME@ %1 %2 %3 
 
 
