@@ -30,7 +30,7 @@ fi
 # -XX:+UseParallelGC
 # -XX:+AggressiveOpts
 ##################################################
-INDEX_OPTIONS="-Xms512m -Xmx512m"
+INDEX_OPTIONS='@MEM_ARGS@'
 
 
 ##################################################
@@ -80,20 +80,24 @@ fi
 ##################################################
 # Set Command Options
 ##################################################
-JAR_FILE="import/solrmarc/dist/@CUSTOM_JAR_NAME@"
+JAR_FILE="$VUFIND_HOME/import/@CUSTOM_JAR_NAME@"
 PROPERTIES_FILE="vufind_config.properties"
 ERROR_LOG="import/error-log"
 IMPORT_LOG="import/import-log"
-
+SOLRWARLOCATIONORJARDIR=%VUFIND_HOME%/solr/jetty/webapps/solr.war
+TEST_SOLR_JAR_DEF=@SOLR_JAR_DEF@
+SOLR_JAR_DEF=`echo $TEST_SOLR_JAR_DEF | sed -e"s|-Done-jar.class.path=.*|-Done-jar.class.path=\"$SOLRWARLOCATIONORJARDIR\"|"`
 
 #####################################################
 # Execute Importer
 #####################################################
 
-RUN_CMD="$JAVA $INDEX_OPTIONS -Dsolr.core.name=$SOLRCORE -Dsolrmarc.path=$SOLRMARC_HOME -Dsolr.path=$SOLR_HOME -jar $JAR_FILE $1"
+pushd $SOLRHOME
+RUN_CMD="$JAVA $INDEX_OPTIONS $SOLR_JAR_DEF -Dsolr.core.name=$SOLRCORE -Dsolrmarc.path=$SOLRMARC_HOME -Dsolr.path=$SOLR_HOME -jar $JAR_FILE $PROPERTIES_FILE $1"
 exec > $IMPORT_LOG
 exec 2> $ERROR_LOG
 echo "Now Importing $1 ..."
 exec $RUN_CMD
+popd
 
 exit 0
