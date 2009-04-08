@@ -622,7 +622,7 @@
         <loadproperties srcfile="${lib.dir}/solrmarc/build.properties">
             <filterchain>
                 <tokenfilter>
-                    <containsregex pattern="(dist.dir|jar.name)" />
+                    <containsregex pattern="(build.dir|jar.name)" />
                 </tokenfilter>
                 <prefixlines prefix="solrmarc.core." />
             </filterchain>
@@ -632,7 +632,7 @@
                 
         <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
                manifest="${buildtools.path}/manifest.mf">
-            <main jar="${lib.dir}/solrmarc/${solrmarc.core.dist.dir}/${solrmarc.core.jar.name}" />
+            <main jar="${lib.dir}/solrmarc/${solrmarc.core.build.dir}/${solrmarc.core.jar.name}" />
             <lib>
                 <fileset dir="${lib.dir}" includes="*.jar" excludes="junit*.jar,jzkit_client.jar" />
                 <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
@@ -692,7 +692,7 @@
     </target>
         
     <target name="package-prebuilt" description="Create a gzipped pre-built version for distribution" >
-        <antcall target="build" inheritAll="false" >
+        <antcall target="build" inheritAll="true" >
             <param name="site.dir" value="tmpexternal" />
             <param name="dist.dir" value="external" />
             <param name="solr.path" value="" />
@@ -701,22 +701,32 @@
             <param name="package-prebuilt.allscripts.batch" value="true" />
             <param name="package-prebuilt.allscripts.shell" value="true" />
         </antcall>
-        <loadproperties srcfile="tmpexternal/build_override.properties">
-            <filterchain>
-                <tokenfilter>
-                    <containsregex pattern="distribution.jar.name" />
-                </tokenfilter>
-                <prefixlines prefix="external." />
-            </filterchain>
-        </loadproperties>
-        <loadproperties srcfile="tmpexternal/build.properties">
-            <filterchain>
-                <tokenfilter>
-                    <containsregex pattern="distribution.jar.name" />
-                </tokenfilter>
-                <prefixlines prefix="external." />
-            </filterchain>
-        </loadproperties>
+        <if>
+            <available file="tmpexternal/build_override.properties" />
+            <then>
+                <loadproperties srcfile="tmpexternal/build_override.properties">
+                    <filterchain>
+                        <tokenfilter>
+                            <containsregex pattern="distribution.jar.name" />
+                        </tokenfilter>
+                        <prefixlines prefix="external." />
+                    </filterchain>
+                </loadproperties>
+            </then>
+        </if>
+        <if>
+            <available file="tmpexternal/build_override.properties" />
+            <then>
+                <loadproperties srcfile="tmpexternal/build.properties">
+                    <filterchain>
+                        <tokenfilter>
+                            <containsregex pattern="distribution.jar.name" />
+                        </tokenfilter>
+                        <prefixlines prefix="external." />
+                    </filterchain>
+                </loadproperties>
+            </then>
+        </if>
         <property name="external.distribution.jar.name" value="SolrMarc" />
         <tar destfile="Binary_${external.distribution.jar.name}_Unix.tar.gz" compression="gzip">
             <tarfileset dir="external" filemode="755">
