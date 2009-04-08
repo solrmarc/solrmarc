@@ -113,29 +113,32 @@ public final class Utils {
 	{
         InputStream in = null;
         // look for properties file in paths
-        File propertyFile = new File(propertyFileName);
-        int pathCnt = 0;
-        do 
+        if (propertyPaths != null)
         {
-            if (propertyFile.exists() && propertyFile.isFile() && propertyFile.canRead())
+            File propertyFile = new File(propertyFileName);
+
+            int pathCnt = 0;
+            do 
             {
-                try
+                if (propertyFile.exists() && propertyFile.isFile() && propertyFile.canRead())
                 {
-                    in = new FileInputStream(propertyFile);
+                    try
+                    {
+                        in = new FileInputStream(propertyFile);
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        // simply eat this exception since we should only try to open the file if we previously
+                        // determined that the file exists and is readable. 
+                    }
+                    break;   // we found it!
                 }
-                catch (FileNotFoundException e)
+                if (propertyPaths != null && pathCnt < propertyPaths.length)
                 {
-                    // simply eat this exception since we should only try to open the file if we previously
-                    // determined that the file exists and is readable. 
+                    propertyFile = new File(propertyPaths[pathCnt++], propertyFileName);
                 }
-                break;   // we found it!
-            }
-            if (propertyPaths != null && pathCnt < propertyPaths.length)
-            {
-                propertyFile = new File(propertyPaths[pathCnt++], propertyFileName);
-            }
-        } while (propertyPaths != null && pathCnt < propertyPaths.length);
-        
+            } while (propertyPaths != null && pathCnt < propertyPaths.length);
+        }
         // if we didn't find it as a file, look for it as a URL
         String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
         if (in == null)
