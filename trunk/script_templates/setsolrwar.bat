@@ -1,4 +1,4 @@
-echo off
+@echo off
 
 setlocal
 set file_=%1

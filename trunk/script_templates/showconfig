@@ -18,19 +18,5 @@ then
     jar="$scriptdir/@CUSTOM_JAR_NAME@"
 fi
 
-if [[ "$config" = "" && jar != "" ]]
-then
-    config=`java -Done-jar.main.class="org.solrmarc.tools.GetDefaultConfig" -jar "$jar"`
-fi
-
-tmp=tmp"$RANDOM""$$"
-
-mkdir $tmp
-cd $tmp
-jar xf $jar $config 
-
-cat "$config" 
-
-cd ..
-rm -rf "$tmp"
+java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar $jar $config
 
