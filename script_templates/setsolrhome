@@ -109,24 +109,21 @@ echo "solrpath = $solrpath"
 echo "url = $url/update"
 
 tmp=tmp"$RANDOM""$$"
-
 mkdir $tmp
-cd $tmp
-jar xf $jar $config 
-if [[ $solrpath != "" && $url != "" ]]
-then
-    sed -e "s%solr\.path *= *.*%solr.path = $solrpath%" -e "s%solr\.hosturl *= *.*%solr.hosturl = $url/update%" < $config > "$config"."$tmp"
-elif [[ $solrpath != "" && $url == "" ]]
-then
-    sed -e "s%solr\.path *= *.*%solr.path = $solrpath%" < $config > "$config"."$tmp"
-fi    
+solrpathdef="solr.path=$solrpath"
+urldef=
+if [[ "$url" != "" ]]
+then 
+   urldef="solr.hosturl=$url/update"
 
-mv "$config"."$tmp" $config
+java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar $jar $config% | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar $jar "$solrpathdef" "$urldef" > $tmp/$config
+
+pushd $tmp 2> /dev/null
 
 jar uf $jar $config
 
 #cat "$config" 
 
-cd ..
+popd 2> /dev/null
 rm -rf "$tmp"
 
