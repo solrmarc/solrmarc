@@ -2,31 +2,48 @@
 
 = Introduction =
 
-Solrmarc makes creating your index for Vufind extremely simple. First, you need to get the latest version of either the Subversion repository, or latest binary. If you're not comfortable with building source code, don't worry, the binary will work on all platforms with Java 1.5 or higher. 
+SolrMarc makes creating your index for Vufind extremely simple. First, you need to get the latest version of either the Subversion repository, or latest binary. If you're not comfortable with building source code, don't worry, the binary will work on all platforms with Java 1.5 or higher. 
+
+To get the Source distribution you can either do a subversion checkout as described on the page [http://code.google.com/p/solrmarc/source/checkout] or download the souce code distribution named SolrMarc_Distribution.tar.gz from the downloads page [http://code.google.com/p/solrmarc/downloads/list].
+
+To get the binary distribution, download either the  Binary_Generic_VuFind_SolrMarc_Unix.tar.gz  or  Binary_Generic_VuFind_SolrMarc_PC.tar.gz from the downloads page [http://code.google.com/p/solrmarc/downloads/list].  The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run Solrmarc.  
+
+The only difference between the two binary distributions is that the Unix version contains a number of bash shell scripts for running the SolrMarc indexer or for running the the other utility programs associated with running  SolrMarc, whereas the PC version of the binary distribution contain batch files to perform the same tasks.  
+
+If you choose to use a Source distribution, the ant build process walks you through the process, asking questions about certain item that need to be configured or customized for your site.  See the wiki page [http://code.google.com/p/solrmarc/wiki/GettingStarted] for more information about the process of building SolrMarc from source.
 
 
-= Editing the code =
-Solrmarc uses a series of Java properties files for its configuration. To get started, we need to edit the import.properties file that is used in the indexing script. Your code will look something like
+= Using the Binary Distibution =
+Solrmarc uses a series of Java properties files for its configuration, these are stored inside the single large jar file that is included in the binary distribution.   Some of the values in these properties files need to be set before you will be able to run SolrMarc to produce an index for your VuFind installation.  The main configuration file is named vufind_config.properties, an example of it is shown below: 
 
 {{{
  # Path to your solr instance
-
  solr.path = /usr/local/vufind/solr
+ solr.core.name = biblio
  solr.indexer = VufindIndexer
  solr.indexer.properties = vufind.properties
 
  #optional URL of running solr search engine to cause updates to be recognized.
+ solr.hosturl = http://localhost:8983/solr/update
 
- solr.hosturl = http://localhost:8080/solr/update
- solr.optimize_at_end = true
-
- # Path to your marc file
- # marc source =  FILE or Z3950 or DIR
-
- marc.source = FILE  
- marc.path = /home/wsgrah/vufind/import/catalog.mrc
- marc.override = marcoverride.UVAMarcFactoryImpl 
  marc.to_utf_8 = true
+ marc.permissive = true
+ marc.default_encoding = MARC8
+ marc.include_errors = false
 
- marc.ids_to_delete =
-}}} 
+}}}
+
+If you unpack the binary distribution into a directory named import inside the VuFind distribution, all you need to do is run two shell scripts to configure the SolrMarc indexer.
+
+First run:
+ import/setsolrwar  ./solr/jetty/webapps/solr.war
+then run:
+ import/setsolrhome ./solr
+
+You will then be ready index MARC record into the solr index that will be used by VuFind via either of the following two commands:
+
+import/import /path/to/marcrecords.mrc
+ or
+import/indexfile /path/to/marcrecords.mrc
+
+The first of these will merely print "Now Importing /path/to/marcrecords.mrc ..." and quietly import all of the record in that file.   The second will be somewhat more verbose as it processes records, displaying informational messages and warnings while it is running.
