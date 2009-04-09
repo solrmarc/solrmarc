@@ -56,9 +56,9 @@ fi
 
 for file in getfromsolr indexfile indextest2 optimizesolr
 do
-     cat $file | sed -e"s|-Done-jar.class.path=[^ ]*|-Done-jar.class.path=\"$solrclasspath\"|" > tmp$file
-     mv tmp$file $file
-     chmod u+x $file
+     cat $scriptdir/$file | sed -e"s|-Done-jar.class.path=[^ ]*|-Done-jar.class.path=\"$solrclasspath\"|" > $scriptdir/tmp$file
+     mv $scriptdir/tmp$file $scriptdir/$file
+     chmod u+x $scriptdir/$file
 done
 
 exit 0
