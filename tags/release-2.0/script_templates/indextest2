@@ -1,0 +1,30 @@
+#! /bin/bash
+# indextest.sh
+# Diagnostic program to show how a set of marc records would be indexed,
+# without actually adding any records to Solr.
+# $Id: indextest.sh 
+
+E_BADARGS=65
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+if ! [ -p /dev/stdin ]
+then  
+  if [ $# -eq 0 ]
+  then
+    echo "    Usage: `basename $0` [config.properties] ./path/to/marc.mrc "
+    echo "      Note that if the config.properties file is not specified the Jarfile will be searched for"
+    echo "      a file whose name ends with \"config.properties\""
+    exit $E_BADARGS
+  fi
+fi
+
+if [[ "$SOLRMARC_MEM_ARGS" == "" ]] 
+then
+    SOLRMARC_MEM_ARGS='@MEM_ARGS@'
+fi
+
+java $SOLRMARC_MEM_ARGS @SOLR_JAR_DEF@ -Dmarc.just_index_dont_add="true" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3 
+
+exit 0
+

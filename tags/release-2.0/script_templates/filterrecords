@@ -1,0 +1,24 @@
+#! /bin/bash
+# filterrecords
+# Grep for marc records
+# $Id: filterrecords
+
+E_BADARGS=65
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+if ! [ -p /dev/stdin ]
+then  
+  if [ $# -eq 0 ]
+  then
+    echo "    Usage: `basename $0` [config.properties] ./path/to/marc.mrc "
+    echo "      Note that if the config.properties file is not specified the Jarfile will be searched for"
+    echo "      a file whose name ends with \"config.properties\""
+    exit $E_BADARGS
+  fi
+fi
+
+java -Done-jar.main.class="org.solrmarc.marc.MarcPrinter" -Dmarc.include_if_present="$1" -jar $scriptdir/@CUSTOM_JAR_NAME@ translate $2 $3 
+
+exit 0
+

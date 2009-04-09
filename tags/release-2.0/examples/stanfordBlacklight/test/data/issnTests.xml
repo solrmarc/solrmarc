@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+  <!-- no 022 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">aNo022</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">no 022, no issn</subfield>
+    </datafield>
+  </record>
+  <!-- sub a -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022suba</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="a">1047-2010</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub a, numeric check digit</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022subaX</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="a">1047-201X</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub a, checkdigit X</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022subaNoHyphen</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="a">1047201X</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub a, no hyphen</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022subaTooManyChars</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="a">1234-56789</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub a, too many chars</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022subL</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="l">0796-5621</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub l</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022subAandL</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="a">0945-2419</subfield>
+      <subfield code="l">0796-5621</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub a and l</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022subM</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="m">0863-4564</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub m</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022subLandM</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="l">0038-6073</subfield>
+      <subfield code="m">0796-5621</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub l and m</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022subZ</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="z">1144-585X</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub z</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022subMandZ</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="m">0103-8915</subfield>
+      <subfield code="z">1144-5858</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub m and z</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">aTwo022a</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="a">0666-7770</subfield>
+    </datafield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="a">1221-2112</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, two 022 with subfield a only</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a022subY</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="022" ind1=" " ind2=" ">
+      <subfield code="y">0813-1964</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">issn, sub z</subfield>
+    </datafield>
+  </record>
+</collection>

@@ -1,0 +1,65 @@
+#! /bin/bash
+# setsolrwar.sh
+# Sets the war file or directory to use to load solr jar files when running solrmarc
+# $Id: setsolrwar.sh 
+
+E_BADARGS=65
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+if [ $# -eq 0 ]
+  then
+    echo "   Usage: `basename $0` /full/path/to/solr.war "
+    echo "     or : `basename $0` /full/path/to/directory/with/solr/jars "
+    echo "     or : `basename $0` ../relative/path/to/solr.war "
+    echo "     or : `basename $0` ../relative/path/to/directory/with/solr/jars "
+    exit $E_BADARGS
+fi
+
+if [[ `echo $1 | cut -c1` = "." ]] 
+then
+    path=$( (cd -P $(dirname $1) && pwd) )
+    file=$(basename $1)
+    solrclasspath=$path/$file
+else
+    solrclasspath=$1
+fi
+echo solrclasspath=$solrclasspath
+
+if [ -d $solrclasspath ] 
+then
+    jarcount=`ls -1 $solrclasspath/*.jar | wc -l`
+    if [ $jarcount -eq 0 ] 
+    then 
+        echo " Error : No Jar files found in specified solr jar directory: $solrclasspath"
+        exit $E_BADARGS
+    fi
+else 
+    suffix=`echo $solrclasspath | sed -e's/.*\([.][^.]*\)/\1/'`
+    if [ $suffix != ".war" ] 
+    then
+        echo " Error : Filename specified is not a .war file: $solrclasspath"
+        exit $E_BADARGS
+    fi
+    if [ ! -f $solrclasspath ] 
+    then
+        echo " Error : Specified .war file does not exist: $solrclasspath"
+        exit $E_BADARGS
+    fi
+    solrjarcnt=`jar tvf $solrclasspath | grep apache-solr | wc -l`
+    if [ $solrjarcnt -eq 0 ] 
+    then
+        echo " Error : Specified .war file does not contain any apache solr jar files: $solrclasspath"
+        exit $E_BADARGS
+    fi
+fi
+
+for file in getfromsolr indexfile indextest2 optimizesolr
+do
+     cat $scriptdir/$file | sed -e"s|-Done-jar.class.path=[^ ]*|-Done-jar.class.path=\"$solrclasspath\"|" > $scriptdir/tmp$file
+     mv $scriptdir/tmp$file $scriptdir/$file
+     chmod u+x $scriptdir/$file
+done
+
+exit 0
+

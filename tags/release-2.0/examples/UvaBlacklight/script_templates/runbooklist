@@ -1,0 +1,28 @@
+#! /bin/bash
+# runbooklist
+# process the entries in the UVA Booklist to add fund codes and date received to solr records
+# $Id: runbooklist 
+
+E_BADARGS=65
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+if [ $# -eq 0 ]
+  then
+    echo "    Usage: `basename $0` [monthly | daily] "
+    exit $E_BADARGS
+fi
+if [ "$1" == "monthly" ]
+then
+  url="http://virgo.lib.virginia.edu/booklistsMonthly.txt"
+elif [ "$1" == "daily" ]
+then
+  url="http://virgo.lib.virginia.edu/booklists.txt"
+else
+  url=$1
+fi
+
+java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.BooklistReader" -jar $scriptdir/@CUSTOM_JAR_NAME@ $url
+
+exit 0
+
