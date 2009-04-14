@@ -5,6 +5,8 @@ fpath=$1
 marcpattern=$2
 fpattern=$3
 
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
 for file in `find $fpath -name '*.mrc' -print | sort | egrep "$fpattern"`
     do
         f1=${file%.*}
@@ -16,7 +18,7 @@ for file in `find $fpath -name '*.mrc' -print | sort | egrep "$fpattern"`
             else  del=""
         fi
         echo $file
-        cat $file | ./filterrecords $marcpattern | ./indexfile $del > $output 2>&1
+        cat $file | $scriptdir/filterrecords $marcpattern | $scriptdir/indexfile $del > $output 2>&1
         if [ "$?" -eq 1 ]
         then
            break  # Skip entire rest of loop.
