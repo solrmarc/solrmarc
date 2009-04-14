@@ -234,9 +234,9 @@ For documentation on using SolrMarc to index your marc records, please see the C
 
 *indexfile:* indexes file of MARC records, adding all data from those records to the Solr index.
 
-*indextest:* processes the file of MARC records and displays to the screen what it will be sending  to SOLR for the records in the file.
+*indextest:* processes the file of MARC records and displays to the screen what will be sent to Solr for the records in the file. 
 
-*indextest2:*
+*indextest2:* processes the file of MARC records more fully than {{{indextest}}} and displays to the screen what will be sent to Solr for each record in the file.
 
 *optimizesolr:* optimizes the solr index to be a single segment.
 
