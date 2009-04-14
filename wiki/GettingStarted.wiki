@@ -228,7 +228,7 @@ For documentation on using SolrMarc to index your marc records, please see the C
 
 *filterrecords:* could be called “marcgrep,” selects only those records that contain certain fields or certain values in certain fields. The user specifies the pattern they are seeking in the file on the command line.
 
-*getfromsolr:* 
+*getfromsolr:* extracts complete MARC records from the records stored in the Solr index.
 
 *getrecord:* extracts a record from a MARC file, matching a record id specified by user.
 
