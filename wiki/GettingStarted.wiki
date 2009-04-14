@@ -236,7 +236,7 @@ For documentation on using SolrMarc to index your marc records, please see the C
 
 *indextest:* processes the file of MARC records and displays to the screen what it will be sending  to SOLR for the records in the file.
 
-*indextext2:*
+*indextest2:*
 
 *optimizesolr:* optimizes the solr index to be a single segment.
 
@@ -248,7 +248,7 @@ For documentation on using SolrMarc to index your marc records, please see the C
 
    if issued _with_ parameters: sets them
 
-*setsolrwar:*
+*setsolrwar:*  if the location of the Solr war file was declared to be “external” during the Solrmarc build (or if you're using a pre-built binary version of Solrmarc), you must use this script to specify where  Solr's Jar files are located. You may specify either a directory containing the Jar files, or the war file that is used by the webserver.
 
 *showconfig:* finds the config file it will be using and displays it onscreen.
 
