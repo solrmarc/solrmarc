@@ -1,4 +1,5 @@
 #summary How to get started with solrmarc and Vufind
+#labels Phase-Deploy
 
 = Introduction =
 
@@ -13,7 +14,7 @@ The only difference between the two binary distributions is that the Unix versio
 If you choose to use a Source distribution, the ant build process walks you through the process, asking questions about certain item that need to be configured or customized for your site.  See the wiki page [http://code.google.com/p/solrmarc/wiki/GettingStarted] for more information about the process of building SolrMarc from source.
 
 
-= Using the Binary Distibution =
+= Using the Binary Distribution =
 Solrmarc uses a series of Java properties files for its configuration, these are stored inside the single large jar file that is included in the binary distribution.   Some of the values in these properties files need to be set before you will be able to run SolrMarc to produce an index for your VuFind installation.  The main configuration file is named vufind_config.properties, an example of it is shown below: 
 
 {{{
