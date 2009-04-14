@@ -244,8 +244,7 @@ For documentation on using SolrMarc to index your marc records, please see the C
 
 *setsolrhome:* extracts the settings for where the Solr server is running and where the Solr files are to be found from the config file and 
 
-   if issued _without_ parameters: displays them
-
+   if issued _without_ parameters: displays them<br />
    if issued _with_ parameters: sets them
 
 *setsolrwar:*  if the location of the Solr war file was declared to be “external” during the Solrmarc build (or if you're using a pre-built binary version of Solrmarc), you must use this script to specify where  Solr's Jar files are located. You may specify either a directory containing the Jar files, or the war file that is used by the webserver.
