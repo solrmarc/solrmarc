@@ -1,0 +1,24 @@
+#!/bin/sh
+JAVA_HOME=/usr/java/latest
+export JAVA_HOME
+fpath=$1
+marcpattern=$2
+fpattern=$3
+
+for file in `find $fpath -name '*.mrc' -print | sort | egrep "$fpattern"`
+    do
+        f1=${file%.*}
+        f2=${f1##*/}
+        output=/usr/local/projects/marc/results/results_$marcpattern_$f2
+        del="$f1".del
+        if [ -a "$del" ]
+            then f3=$del
+            else  del=""
+        fi
+        echo $file
+        cat $file | ./filterrecords $marcpattern | ./indexfile $del > $output 2>&1
+        if [ "$?" -eq 1 ]
+        then
+           break  # Skip entire rest of loop.
+        fi
+    done
