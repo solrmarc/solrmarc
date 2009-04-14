@@ -63,11 +63,15 @@ By default, ant builds the whole program and will query user for correct setting
 
 *_1.Enter the name of a directory to contain all site specific modifications, including the configuration and index files_*
 
-The program builder will query which of the three example directories you wish you use as a template for your SolrMarc installation, for example, ../vanillaBlacklightDemo/.
+   ex. test, demo, uva
+
+*_2. Enter the name of example configuration to start from: (GenericVuFind, UvaBlacklight, VanillaBlacklightDemo, StanfordBlacklight, StanfordVuFind, [none])
+
+Define which of the example directories you wish you use as a template for your SolrMarc installation.
 
 Once you've chosen, the builder creates the directory and subdirectories based on this template to prepare the structure to be filled in with rest of setup information.
 
-*_2.Enter the name of the Jar file containing custom indexing functions._*
+*_3. Enter the name of the Jar file containing custom indexing functions._*
 
 If you require custom indexing functions, provide the jar file name that contains that code.
 
@@ -75,17 +79,17 @@ If you require custom indexing functions, provide the jar file name that contain
 
 Enter _"none"_ if you expect not to have any custom indexing functions.
 
-*_3.Enter prefix of the properties files for config and index files for custom modifications._*
+*_4. Enter prefix of the properties files for config and index files for custom modifications._*
 
 Enter the name to be used to identify this instance of SolrMarc.
 
    ex. my_config.properties; my_index.properties
 
-*_4.Enter name of the final resulting Jar file that will contain all the code, libraries, and properties for running SolrMarc._*
+*_5. Enter name of the final resulting Jar file that will contain all the code, libraries, and properties for running SolrMarc._*
 
    Default suggestion customprefix_solrmarc.jar
 
-*_5.Enter java heap size memory argument to put in generated scripts for site-specific SolrMarc indexer._*
+*_6. Enter java heap size memory argument to put in generated scripts for site-specific SolrMarc indexer._*
 
    Default value=256MB
 
@@ -93,12 +97,32 @@ Note: While 256MB is sufficient to load the demo, a real-world indexing job requ
 
 Custom settings are now written out to a file so that they are preserved for future updates.
 
-*_6.Enter the version of SOLR you will be running in your local environment._*
+*_7. Enter URL where solr server will be located.
+
+   ex. http://localhost:8983/solr
+
+*_8. Enter the full path of the Solr home directory. (Note: directory should contain {{{conf}}} directory, containing {{{solrconfig.xml}}} and {{{schema.xml}}}.)
+
+   ex. c:\solr\solr
+
+*_9. Enter encoding used in MARC records to be read in: MARC8, UNIMARC, UTF8, BESTGUESS
+
+MARC8 - Longstanding standard encoding scheme used by U.S. libraries<br />
+UNIMARC - Encoding scheme used by many European libraries<br />
+UTF8 - Unicode character encoding scheme, used in some newer systems<br />
+BESTGUESS - You have no idea what encoding your records are in and want the program to try to determine it.
+
+*_10.Enter the version of SOLR you will be running in your local environment._*
 
 (SolrMarc has been tested with 1.2, 1.3, and several versions of 1.4(still in beta))
 
 Best practice is to specify _“war”_ as the answer to this question, and then give the full path to the current solr.war file which will be used by the jetty or tomcat web server for searching the solr index. This will ensure that you won’t create an index that is out of sync with what the webserver code expects.
 
+*_11. Enter full path where solr.war file is located.
+
+   ex. c:\solr\webapps\solr.war
+
+<br />
 ==== Configuration files: ====
 
 Fill in the xxxx_config and xxxx_index files in the site specific directory that you've just created using the template files that were created in the build.
@@ -202,7 +226,21 @@ For documentation on using SolrMarc to index your marc records, please see the C
 <br />
 === Batch Files/Shell Scripts ===
 
+*filterrecords:* could be called “marcgrep,” selects only those records that contain certain fields or certain values in certain fields. The user specifies the pattern they are seeking in the file on the command line.
+
+*getfromsolr:* 
+
+*getrecord:* extracts a record from a MARC file, matching a record id specified by user.
+
 *indexfile:* indexes file of MARC records, adding all data from those records to the Solr index.
+
+*indextest:* processes the file of MARC records and displays to the screen what it will be sending  to SOLR for the records in the file.
+
+*indextext2:*
+
+*optimizesolr:* optimizes the solr index to be a single segment.
+
+*printrecord:* looks at the MARC records and transforms them into human-readable format. The user specifies the name of the MARC file, and the script prints all records to the screen. This script is helpful in troubleshooting indexing operations, and for selecting tags/fields/subfields for mapping.
 
 *setsolrhome:* extracts the settings for where the Solr server is running and where the Solr files are to be found from the config file and 
 
@@ -210,16 +248,8 @@ For documentation on using SolrMarc to index your marc records, please see the C
 
    if issued _with_ parameters: sets them
 
+*setsolrwar:*
+
 *showconfig:* finds the config file it will be using and displays it onscreen.
 
-*printrecord:* looks at the MARC records and transforms them into human-readable format. The user specifies the name of the MARC file, and the script prints all records to the screen. This script is helpful in troubleshooting indexing operations, and for selecting tags/fields/subfields for mapping.
-
-*indextest:* processes the file of MARC records and displays to the screen what it will be sending  to SOLR for the records in the file.
-
-*filterrecords:* could be called “marcgrep,” selects only those records that contain certain fields or certain values in certain fields. The user specifies the pattern they are seeking in the file on the command line.
-
-*getrecord:* extracts a record from a MARC file, matching a record id specified by user.
-
 *updatesolrserver:* sends a commit message to the URL where solr is running to update a running instance with new index data.
-
-*optimizesolr:* optimizes the solr index to be a single segment.
