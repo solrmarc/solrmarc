@@ -119,12 +119,12 @@ fi
 
 java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar $jar $config% | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar $jar "$solrpathdef" "$urldef" > $tmp/$config
 
-pushd $tmp 2> /dev/null
+pushd $tmp > /dev/null
 
 jar uf $jar $config
 
 #cat "$config" 
 
-popd 2> /dev/null
+popd > /dev/null
 rm -rf "$tmp"
 
