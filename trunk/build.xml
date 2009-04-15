@@ -224,14 +224,19 @@
         </sequential>
     </macrodef>
     
-    <macrodef name="copy_files_from_example_directory">
+    <macrodef name="copy_files_from_example_directory_1">
         <sequential>
             <copy todir="${site.dir}" preservelastmodified="true">
                 <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties" >
                     <depend targetdir="${site.dir}" />
                 </fileset>
             </copy>
-            <copy todir="${site.dir}" filtering="true" preservelastmodified="true">
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="copy_files_from_example_directory_2">
+        <sequential>
+           <copy todir="${site.dir}" filtering="true" preservelastmodified="true">
                 <fileset dir="examples/${example.configuration}" includes="*_config.properties,*_index.properties">
                     <depend targetdir="${site.dir}" >
                         <mapper type="regexp" from="^[^_]*(.*)" to="${custom.config.file.prefix}\1" />
@@ -308,7 +313,8 @@
                                     <elseif>
                                         <equals arg1="c" arg2="${input.continue.processing.with.not.uptodate}"/>
                                         <then>
-                                            <copy_files_from_example_directory />
+                                            <copy_files_from_example_directory_1 />
+                                            <copy_files_from_example_directory_2 />
                                         </then>
                                     </elseif>
                                 </if>
@@ -361,8 +367,9 @@
 
                         <make_site_dirs />
                         <get_site_specific_settings />
+                        <copy_files_from_example_directory_1 />
                         <get_properties_for_config_file />
-                        <copy_files_from_example_directory />
+                        <copy_files_from_example_directory_2 />
                                         
                         <!-- <copy todir="${site.dir}" preservelastmodified="true">
                             <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties" />
@@ -473,7 +480,7 @@
                                 <then>
                                     <echo level="error" message="Warning: Solr.war file or Solr jar directory ${solr.external.location} does not exist  " />
                                     <echo level="error" message="Warning: Path to solr jars will have to be defined before you can run SolrMarc" />
-                                    <propertyregex property="solr.external.location" override="true" input="" regexp="noneSuch" replace="nothing" defaultValue="%SOLRWARLOCATIONORJARDIR%" />
+                                    <propertyregex property="solr.external.location" override="true" input="" regexp="noneSuch" replace="nothing" defaultValue="@SOLREXTERNALLOCATIONOVERRIDE@" />
                                     <property name="solr.external.exists" value="true" />
                                     <echo message="solr.external.exists = ${solr.external.exists}" />
                                 </then>
@@ -596,6 +603,7 @@
                         <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
                         <filter token="MEM_ARGS" value="${exe.mem.args}" />
                         <filter token="SOLR_JAR_DEF" value="${solr.jar.def.string}" />
+                        <filter token="SOLREXTERNALLOCATIONOVERRIDE" value="%SOLRWARLOCATIONORJARDIR%" />
                     </filterset>
                 </copy>
             </then>
@@ -617,6 +625,7 @@
                         <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
                         <filter token="MEM_ARGS" value="${exe.mem.args}" />
                         <filter token="SOLR_JAR_DEF" value="${solr.jar.def.string}" />
+                        <filter token="SOLREXTERNALLOCATIONOVERRIDE" value="$$SOLRWARLOCATIONORJARDIR" />
                     </filterset>
                 </copy>
 
