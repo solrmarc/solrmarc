@@ -789,7 +789,7 @@
             </then>
         </if>
         <if>
-            <available file="tmpexternal/build_override.properties" />
+            <available file="tmpexternal/build.properties" />
             <then>
                 <loadproperties srcfile="tmpexternal/build.properties">
                     <filterchain>
