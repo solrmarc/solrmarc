@@ -816,12 +816,18 @@
                 <include name="*" />
                 <exclude name="*.bat" />
             </tarfileset>
+            <tarfileset dir="${buildtools.path}">
+                <include name="README_UNIX" />
+            </tarfileset>
         </tar> 
         <tar destfile="Binary_${external.distribution.jar.name}_PC.tar.gz" compression="gzip">
-            <fileset dir="external" >
+            <tarfileset dir="external" >
                 <include name="*.bat" />
                 <include name="*.jar" />
-            </fileset>
+            </tarfileset>
+            <tarfileset dir="${buildtools.path}" >
+                 <include name="README_PC.txt" />
+            </tarfileset>
         </tar> 
         <delete dir="tmpexternal" />
         <delete dir="external" />
