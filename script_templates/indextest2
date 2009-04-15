@@ -24,7 +24,9 @@ then
     SOLRMARC_MEM_ARGS='@MEM_ARGS@'
 fi
 
-java $SOLRMARC_MEM_ARGS @SOLR_JAR_DEF@ -Dmarc.just_index_dont_add="true" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3 
+SOLRWAR_OR_JARS=@SOLR_JAR_DEF@
+
+java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -Dmarc.just_index_dont_add="true" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3 
 
 exit 0
 
