@@ -12,7 +12,9 @@ then
     SOLRMARC_MEM_ARGS='@MEM_ARGS@'
 fi
 
-java $SOLRMARC_MEM_ARGS @SOLR_JAR_DEF@ -Dmarc.source="NONE" -Dsolr.optimize_at_end="true" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 
+SOLRWAR_OR_JARS=@SOLR_JAR_DEF@
+
+java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -Dmarc.source="NONE" -Dsolr.optimize_at_end="true" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 
 
 exit 0
 
