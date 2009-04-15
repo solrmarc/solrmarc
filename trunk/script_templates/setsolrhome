@@ -115,6 +115,7 @@ urldef=
 if [[ "$url" != "" ]]
 then 
    urldef="solr.hosturl=$url/update"
+fi
 
 java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar $jar $config% | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar $jar "$solrpathdef" "$urldef" > $tmp/$config
 
