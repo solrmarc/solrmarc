@@ -26,11 +26,16 @@ public class PropertyFileEditor {
 			{
 				for (int i = 0; i < count; i++)
 				{
-					if (line.matches(parms[i][0] + " *= *.*")) 
-					{
-						found[i] = true;
-						line = parms[i][0] + " = " + parms[i][1].replace('\\', '/');
-					}
+                    if (line.matches(parms[i][0] + " = .*")) 
+                    {
+                        found[i] = true;
+                        line = parms[i][0] + " = " + parms[i][1].replace('\\', '/');
+                    }
+                    else if (line.matches(parms[i][0] + "=.*")) 
+                    {
+                        found[i] = true;
+                        line = parms[i][0] + "=" + parms[i][1].replace('\\', '/');
+                    }
 				}
                 System.out.println(line);
 			}

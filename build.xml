@@ -722,6 +722,7 @@
                 <fileset dir="${site.build.dir}" includes="*.jar" />
                 <fileset dir="${site.lib.dir}" includes="*.jar" />
             </lib>
+            <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
             <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
             <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
         </one-jar>
