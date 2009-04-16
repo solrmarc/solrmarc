@@ -99,7 +99,7 @@ pushd %tmp%
 
 ::jar uf "%jar%" %config%
 java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "%jar%" JarUtils.jar %scriptdir%
-java -classpath %scriptdir%JarUtils.jar JarUpdater "%jar%" %config% > NUL
+java -classpath %scriptdir%JarUtils.jar JarUpdate "%jar%" %config% > NUL
 del /q %scriptdir%JarUtils.jar
 
 del /q %config%
