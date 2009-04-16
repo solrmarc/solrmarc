@@ -1,6 +1,7 @@
 @echo off
 ::
 ::Get the current batch file's short path
+setlocal
 for %%x in (%0) do set scriptdir=%%~dpsx
 for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
 

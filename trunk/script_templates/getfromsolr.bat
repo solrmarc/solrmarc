@@ -3,6 +3,7 @@
 :: Program to extract one or more MARC records from a solr index 
 :: $Id: getfromsolr.bat 
 ::Get the current batch file's short path
+setlocal
 set solrjardef=@SOLR_JAR_DEF@
 ::
 for %%x in (%0) do set scriptdir=%%~dpsx

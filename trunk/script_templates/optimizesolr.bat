@@ -2,6 +2,7 @@
 :: optimizesolr.bat
 :: Run an optimize process on the solr index
 :: $Id: optimizesolr.bat
+setlocal
 set solrjardef=@SOLR_JAR_DEF@
 ::Get the current batch file's short path
 for %%x in (%0) do set scriptdir=%%~dpsx
