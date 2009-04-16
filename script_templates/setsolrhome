@@ -121,7 +121,10 @@ java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar $jar $co
 
 pushd $tmp > /dev/null
 
-jar uf $jar $config
+# jar uf "$jar" $config
+java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "$jar" JarUtils.jar $scriptdir
+java -classpath $scriptdir/JarUtils.jar JarUpdater "$jar" $config > /dev/null
+rm -f $scriptdir/JarUtils.jar
 
 #cat "$config" 
 

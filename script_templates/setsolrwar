@@ -46,7 +46,12 @@ else
         echo " Error : Specified .war file does not exist: $solrclasspath"
         exit $E_BADARGS
     fi
-    solrjarcnt=`jar tvf $solrclasspath | grep apache-solr | wc -l`
+    
+    # solrjarcnt=`jar tvf $solrclasspath | grep apache-solr | wc -l`
+    java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "$jar" JarUtils.jar $scriptdir
+    solrjarcnt=`java -classpath $scriptdir/JarUtils.jar JarContains "$jar" '.*/apache-solr.*'`
+    rm -f $scriptdir/JarUtils.jar   
+
     if [ $solrjarcnt -eq 0 ] 
     then
         echo " Error : Specified .war file does not contain any apache solr jar files: $solrclasspath"
