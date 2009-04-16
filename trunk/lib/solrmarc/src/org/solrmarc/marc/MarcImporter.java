@@ -481,6 +481,27 @@ public class MarcImporter extends MarcHandler
     {
         if (solrCoreProxy == null)
         {
+            if (solrCoreDir.equals("@SOLR_PATH@") )
+            {
+                System.err.println("Error: Solr home directory not initialized, please run setsolrhome") ;
+                logger.error("Error: Solr home directory not initialized, please run setsolrhome") ;
+                System.exit(1);               
+            }
+            File solrcoretest = new File(solrCoreDir);
+            if (!solrcoretest.exists() || !solrcoretest.isDirectory() )
+            {
+                System.err.println("Error: Supplied Solr home directory does not exist: "+ solrCoreDir) ;
+                logger.error("Error: Supplied Solr home directory does not exist: "+ solrCoreDir) ;
+                System.exit(1);               
+            }
+            File solrcoretest1 = new File(solrCoreDir, "solr.xml");
+            File solrcoretest2 = new File(solrCoreDir, "conf");
+            if (!solrcoretest1.exists() &&  !solrcoretest2.exists() )
+            {
+                System.err.println("Error: Supplied Solr home directory does not contain proper solr configuration: "+ solrCoreDir) ;
+                logger.error("Error: Supplied Solr home directory does not contain proper solr configuration: "+ solrCoreDir) ;
+                System.exit(1);               
+            }
             solrCoreProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, solrCoreName, logger);
         }
         return(solrCoreProxy);
