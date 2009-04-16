@@ -34,19 +34,14 @@ del /q %tmp%\_tmpdefconfig
 
 if "%config%" == "" if %jar% NEQ "" @set config=%defconfig%
 
-pushd %tmp%
-jar xf %jar% %config% 
-popd
-
 if "%solrpath%" NEQ "" goto :hiturl 
 if "%url%" NEQ "" goto :hiturl
-    for /f "usebackq delims=" %%a in (`type %tmp%\%config% ^| findstr "^solr\.path" `) do set solrpathline=%%a
-    for /f "usebackq delims=" %%g in (`type %tmp%\%config% ^| findstr "^solr\.hosturl"`) do set urlline=%%g
+    for /f "usebackq delims=" %%a in (`%scriptdir%showconfig %jar% %config% ^| findstr "^solr\.path" `) do set solrpathline=%%a
+    for /f "usebackq delims=" %%g in (`%scriptdir%showconfig %jar% %config% ^| findstr "^solr\.hosturl"`) do set urlline=%%g
     echo jar = %jar%
     echo config = %config%
     echo solrpath = %solrpathline:~12%
     echo url = %urlline:~15%
-    del "%tmp%\%config%"
     goto :done
 
 
@@ -102,7 +97,10 @@ java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar %jar% %c
 
 pushd %tmp%
 
-jar uf %jar% %config%
+::jar uf "%jar%" %config%
+java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "%jar%" JarUtils.jar %scriptdir%
+java -classpath %scriptdir%JarUtils.jar JarUpdater "%jar%" %config% > NUL
+del /q %scriptdir%JarUtils.jar
 
 del /q %config%
 

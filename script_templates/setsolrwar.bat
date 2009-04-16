@@ -60,10 +60,13 @@ echo.
 goto _done
 
 :_checkwar2
-jar tvf %1 | find "apache-solr" > nul
+::jar tvf %1 | find "apache-solr" > nul
+java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "%jar%" JarUtils.jar %scriptdir%
+java -Dverbose="true" -classpath %scriptdir%JarUtils.jar JarContains "%file_%" '.*/apache-solr.*' | find "apache-solr" > nul
 set found_=yes
 if errorlevel==2 set found_=no
 if errorlevel==1 set found_=no
+del /q %scriptdir%JarUtils.jar   
 
 if "%found_%"=="yes" goto _process_all
 
@@ -74,9 +77,20 @@ goto _done
 
 :_process_all
 
-endlocal 
 for %%g in (%1) do set SOLRWARLOCATIONORJARDIR=%%~fg
 echo set SOLRWARLOCATIONORJARDIR=%SOLRWARLOCATIONORJARDIR%
+call :_edit_bat_file getfromsolr.bat
+call :_edit_bat_file indexfile.bat
+call :_edit_bat_file indextest2.bat
+call :_edit_bat_file optimizesolr.bat
+
+goto :eof
+
+:_edit_bat_file
+
+set batch=%1
+type %scriptdir%%batch% | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar %jar% "set solrjardef=-Done-jar.class.path=\"%SOLRWARLOCATIONORJARDIR%\"" > %scriptdir%tmp%batch%
+move /Y %scriptdir%tmp%batch% %scriptdir%%batch%
 
 goto :eof
 

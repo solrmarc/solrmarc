@@ -22,7 +22,11 @@ set properties=%props:~26%
 
 :haveproperties
 
-jar uf "%jar%" %properties
+::jar uf "%jar%" %properties%
+java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "%jar%" JarUtils.jar %scriptdir%
+java -classpath %scriptdir%JarUtils.jar JarUpdater "%jar%" %file% > NUL
+del /q %scriptdir%JarUtils.jar
+
 
 echo Property file: %properties%  extracted from jar file.
 
