@@ -469,28 +469,28 @@
                             </if>
                             <input-filepath message="Enter full path of where either solr.war file is located (including name of war file) ${line.separator} or full path of directory containing solr jar files:" 
                                  addproperty="solr.external.location"  defaultValue="${solr.external.location.default}" />
-                            <condition property="solr.external.exists">
-                                <and>
-                                    <not> <equals arg1="${solr.external.location}" arg2="" /> </not>
-                                    <available file="${solr.external.location}" />
-                                </and>
-                            </condition>
-                            <if>
-                                <not> <isset property="solr.external.exists" /> </not>
-                                <then>
-                                    <echo level="error" message="Warning: Solr.war file or Solr jar directory ${solr.external.location} does not exist  " />
-                                    <echo level="error" message="Warning: Path to solr jars will have to be defined before you can run SolrMarc" />
-                                    <propertyregex property="solr.external.location" override="true" input="" regexp="noneSuch" replace="nothing" defaultValue="@SOLREXTERNALLOCATIONOVERRIDE@" />
-                                    <property name="solr.external.exists" value="true" />
-                                    <echo message="solr.external.exists = ${solr.external.exists}" />
-                                </then>
-                                <else>
-                                    <propertyfile file="${site.dir}/build_override.properties">
-                                        <entry key="solr.external.location" value="${solr.external.location}" />
-                                    </propertyfile>
-                                </else>
-                            </if>
                         </then>
+                    </if>
+                    <condition property="solr.external.exists">
+                        <and>
+                            <not> <equals arg1="${solr.external.location}" arg2="" /> </not>
+                            <available file="${solr.external.location}" />
+                        </and>
+                    </condition>
+                    <if>
+                        <not> <isset property="solr.external.exists" /> </not>
+                        <then>
+                            <echo level="error" message="Warning: Solr.war file or Solr jar directory ${solr.external.location} does not exist  " />
+                            <echo level="error" message="Warning: Path to solr jars will have to be defined before you can run SolrMarc" />
+                            <propertyregex property="solr.external.location" override="true" input="" regexp="noneSuch" replace="nothing" defaultValue="@SOLREXTERNALLOCATIONOVERRIDE@" />
+                            <property name="solr.external.exists" value="true" />
+                            <echo message="solr.external.exists = ${solr.external.exists}" />
+                        </then>
+                        <else>
+                            <propertyfile file="${site.dir}/build_override.properties">
+                                <entry key="solr.external.location" value="${solr.external.location}" />
+                            </propertyfile>
+                        </else>
                     </if>
                 </then>
             </elseif>
