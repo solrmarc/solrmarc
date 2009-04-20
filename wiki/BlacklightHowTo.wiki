@@ -1,15 +1,33 @@
+#summary Getting started with the binary distribution of Solrmarc.
 #labels Phase-Deploy
-# Getting started with the binary distribution of Solrmarc.
 
-== Introduction ==
+=== About This Document ===
 
-Add your content here.
+This getting started guide describes the SolrMarc binary distribution, defines its software dependencies, guides the user through using the SolrMarc binary to index a file of MARC records.
 
-== Prerequisites ==
+=== About !SolrMarc ===
 
-== Details ==
+SolrMarc is a utility that reads in MARC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified SOLR index.
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your SOLR index record, but it also allows the creation of custom index functions if you cannot achieve what you require using the predefined mapping techniques.
+
+Currently, SolrMarc is configured to work with:
+  * [http://blacklightopac.org/ Blacklight]
+  * [VufindHowTo Vufind]
+
+<br />
+=== Software Dependencies ===
+
+SolrMarc requires the java development kit (JDK) version 1.5 or newer.
+
+To check the version of the java development kit (JDK), at the command prompt type
+
+   _javac -version_
+
+To download the proper version of the java development kit, go to http://java.sun.com/javase/downloads/index.jsp
+
+<br/>
+=== Downloading the Solrmarc Binary Distribution ===
+
+
+=== Unpacking the Binary Distribution ===
