@@ -48,6 +48,10 @@ else
     fi
     
     # solrjarcnt=`jar tvf $solrclasspath | grep apache-solr | wc -l`
+    if [[ "$jar" = "" ]] 
+    then
+        jar="$scriptdir/@CUSTOM_JAR_NAME@"
+    fi  
     java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "$jar" JarUtils.jar $scriptdir
     solrjarcnt=`java -classpath $scriptdir/JarUtils.jar JarContains "$solrclasspath" '.*/apache-solr.*'`
     rm -f $scriptdir/JarUtils.jar   
