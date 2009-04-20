@@ -17,6 +17,10 @@ Currently, SolrMarc is configured to work with:
   * [http://blacklightopac.org/ Blacklight]
   * [VufindHowTo Vufind]
 
+If you do not anticipate a need for custom indexing functions, the binary distribution of SolrMarc is a simpler option. The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run SolrMarc. 
+
+To get the binary distribution, go to [http://code.google.com/p/solrmarc/downloads/list this project's downloads page] and download {{{Binary_Generic_Blacklight_SolrMarc_Unix.tar.gz}}}, {{{Binary_Generic_VuFind_SolrMarc_Unix.tar.gz}}}, {{{Binary_Generic_VuFind_SolrMarc_PC.tar.gz}}}, or {{{Binary_Generic_Blacklight_SolrMarc_PC.tar.gz}}}. 
+
 <br />
 === Software Dependencies ===
 
