@@ -69,7 +69,7 @@ By default, ant builds the whole program and will query user for correct setting
 
    ex. test, demo, uva
 
-*_2. Enter the name of example configuration to start from: (GenericVuFind, UvaBlacklight, VanillaBlacklightDemo, StanfordBlacklight, StanfordVuFind, [none])
+*_2. Enter the name of example configuration to start from: (!GenericVuFind, !UvaBlacklight, !VanillaBlacklightDemo, !StanfordBlacklight, !StanfordVuFind, none)
 
 Define which of the example directories you wish you use as a template for your SolrMarc installation.
 
