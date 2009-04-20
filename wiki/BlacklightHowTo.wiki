@@ -56,7 +56,7 @@ SolrMarc uses a series of Java properties files for its configuration, these are
 
 <br />
 
-=== Using !SolrMarc ===
+=== Configuring !SolrMarc ===
 
 If you unpack the binary distribution into a directory named {{{indexer}}} inside the Blacklight demo distribution, all you need to do is run two shell scripts to configure the SolrMarc indexer. 
 
@@ -67,8 +67,22 @@ then run:
 
    indexer/setsolrhome ./jetty/solr
 
+=== Running !SolrMarc ===
+
 You will then be ready index MARC record into the solr index that will be used by your implementation of Blacklight via the following command: 
 
    indexer/indexfile /path/to/marcrecords.mrc 
 
 The command will display informational messages and warnings while it is running, processing MARC records. 
+
+To index the sample record included in the Blacklight demo distribution in the data directory use the following commands:
+
+   indexer/indexfile ./data/test_data.utf8.mrc
+   indexer/indexfile ./data/lc_records.utf8.mrc
+
+or to index both at one time:
+
+   cat ./data/*.mrc | indexer/indexfile
+
+
+
