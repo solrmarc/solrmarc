@@ -61,6 +61,7 @@ goto _done
 
 :_checkwar2
 ::jar tvf %1 | find "apache-solr" > nul
+if "%jar%" == ""  set jar=%scriptdir%@CUSTOM_JAR_NAME@
 java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "%jar%" JarUtils.jar %scriptdir%
 java -Dverbose="true" -classpath %scriptdir%JarUtils.jar JarContains "%file_%" '.*/apache-solr.*' | find "apache-solr" > nul
 set found_=yes
