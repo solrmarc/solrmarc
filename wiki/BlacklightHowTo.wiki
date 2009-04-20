@@ -5,6 +5,7 @@
 
 This getting started guide describes the SolrMarc binary distribution, defines its software dependencies, guides the user through using the SolrMarc binary to index a file of MARC records.
 
+<br/>
 === About !SolrMarc ===
 
 SolrMarc is a utility that reads in MARC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified SOLR index.
@@ -14,6 +15,9 @@ SolrMarc provides a rich set of techniques for mapping the tags, fields, and sub
 Currently, SolrMarc is configured to work with:
   * [http://blacklightopac.org/ Blacklight]
   * [VufindHowTo Vufind]
+
+
+NOTE: If you anticipate a need for custom indexing functions, you will need to download the SolrMarc source code and build the package using the instructions from the [GettingStarted] document on this wiki.
 
 <br />
 === Software Dependencies ===
@@ -27,7 +31,11 @@ To check the version of the java development kit (JDK), at the command prompt ty
 To download the proper version of the java development kit, go to http://java.sun.com/javase/downloads/index.jsp
 
 <br/>
-=== Downloading the Solrmarc Binary Distribution ===
+=== Downloading the !SolrMarc Binary Distribution ===
 
+To get the binary distribution, download Binary_Generic_VuFind_!SolrMarc_Unix.tar.gz, Binary_Generic_Blacklight_!SolrMarc_Unix.tar.gz, Binary_Generic_VuFind_!SolrMarc_PC.tar.gz, or Binary_Generic_Blacklight_!SolrMarc_PC.tar.gz from the downloads page http://code.google.com/p/solrmarc/downloads/list. The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run Solrmarc.
 
+The only difference between the two binary distributions is that the Unix version contains a number of bash shell scripts for running the !SolrMarc indexer or for running the the other utility programs associated with running !SolrMarc, whereas the PC version of the binary distribution contain batch files to perform the same tasks. 
+
+<br />
 === Unpacking the Binary Distribution ===
