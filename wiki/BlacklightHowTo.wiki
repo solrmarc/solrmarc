@@ -57,7 +57,7 @@ SolrMarc uses a series of Java properties files for its configuration, these are
 
 <br />
 
-=== Using SolrMarc ===
+=== Using !SolrMarc ===
 
 If you unpack the binary distribution into a directory named {{{import}}} inside the Blacklight distribution, all you need to do is run two shell scripts to configure the SolrMarc indexer. 
 
