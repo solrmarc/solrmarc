@@ -49,7 +49,7 @@ else
     
     # solrjarcnt=`jar tvf $solrclasspath | grep apache-solr | wc -l`
     java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "$jar" JarUtils.jar $scriptdir
-    solrjarcnt=`java -classpath $scriptdir/JarUtils.jar JarContains "$jar" '.*/apache-solr.*'`
+    solrjarcnt=`java -classpath $scriptdir/JarUtils.jar JarContains "$solrclasspath" '.*/apache-solr.*'`
     rm -f $scriptdir/JarUtils.jar   
 
     if [ $solrjarcnt -eq 0 ] 
