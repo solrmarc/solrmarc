@@ -30,7 +30,7 @@
                                 <not> <equals arg1="@{defaultvalue}" arg2="" /> </not>
                             </and>
                             <then>
-                                <property name="@{addproperty}" value="${@{defaultvalue}}" />
+                                <property name="@{addproperty}" value="@{defaultvalue}" />
                             </then>
                             <else>
                                 <if>
