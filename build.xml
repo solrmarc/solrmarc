@@ -196,8 +196,8 @@
 
             <property name="solr.indexer" value="${custom.indexer.class}" />
             <property name="solr.indexer.properties" value="${custom.config.file.prefix}_index.properties" />
-            <input message="Enter encoding used in MARC records to be read in:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You have no idea what encoding your records are in, and want the program to try to determine it." 
-                addproperty="marc.default_encoding"  validargs="MARC8,UNIMARC,UTF-8,BESTGUESS" defaultvalue="MARC8" />
+            <input-save message="Enter encoding used in MARC records to be read in:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You have no idea what encoding your records are in, and want the program to try to determine it." 
+                addproperty="marc.default_encoding"  validargs="MARC8,UNIMARC,UTF-8,BESTGUESS" defaultvalue="MARC8" propertyfile="${site.dir}/build_override.properties" />
         </sequential>
     </macrodef>
 
@@ -776,7 +776,7 @@
     </target>
         
     <target name="package-prebuilt" description="Create a gzipped pre-built version for distribution" >
-        <antcall target="build" inheritAll="true" >
+        <antcall target="build" inheritAll="false" >
             <param name="site.dir" value="tmpexternal" />
             <param name="dist.dir" value="external" />
             <param name="solr.path" value="" />
@@ -821,17 +821,29 @@
                 <include name="README_UNIX" />
             </tarfileset>
         </tar> 
-        <tar destfile="Binary_${external.distribution.jar.name}_PC.tar.gz" compression="gzip">
-            <tarfileset dir="external" >
+        <zip destfile="Binary_${external.distribution.jar.name}_PC.zip" compress="true">
+            <zipfileset dir="external" >
                 <include name="*.bat" />
                 <include name="*.jar" />
-            </tarfileset>
-            <tarfileset dir="${buildtools.path}" >
+            </zipfileset>
+            <zipfileset dir="${buildtools.path}" >
                  <include name="README_PC.txt" />
-            </tarfileset>
-        </tar> 
+            </zipfileset>
+        </zip> 
         <delete dir="tmpexternal" />
         <delete dir="external" />
+    </target>
+        
+    <target name="package" description="Create both prebuilt binary distributions and a source distribution" >
+        <antcall target="package-src" inheritAll="false" />
+        <antcall target="package-prebuilt" inheritAll="false">
+            <param name="example.configuration" value="VanillaBlacklightDemo" />
+            <param name="accept.default.for.input" value="true" />
+        </antcall>
+        <antcall target="package-prebuilt" inheritAll="false">
+            <param name="example.configuration" value="GenericVuFind" />
+            <param name="accept.default.for.input" value="true" />
+        </antcall>
     </target>
         
     <target name="usage" description="Prints usage instructions">

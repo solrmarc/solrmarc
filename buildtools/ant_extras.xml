@@ -25,26 +25,37 @@
                 <then>
                     <sequential>
                         <if>
-                            <equals arg1="@{validargs}"  arg2="" />
+                            <and>
+                                <isset property="accept.default.for.input" />
+                                <not> <equals arg1="@{defaultvalue}" arg2="" /> </not>
+                            </and>
                             <then>
-                                <if>
-                                    <equals arg1="@{defaultvalue}" arg2="" />
-                                    <then>
-                                        <input message="@{message}" addproperty="@{addproperty}" />
-                                    </then>
-                                    <else>
-                                        <input message="@{message}" addproperty="@{addproperty}" defaultvalue="@{defaultvalue}" />
-                                    </else>
-                                </if>
+                                <property name="@{addproperty}" value="${@{defaultvalue}}" />
                             </then>
                             <else>
-                                 <if>
-                                    <equals arg1="@{defaultvalue}" arg2="" />
+                                <if>
+                                    <equals arg1="@{validargs}"  arg2="" />
                                     <then>
-                                        <input message="@{message}" validargs="@{validargs}" addproperty="@{addproperty}" />
+                                        <if>
+                                            <equals arg1="@{defaultvalue}" arg2="" />
+                                            <then>
+                                                <input message="@{message}" addproperty="@{addproperty}" />
+                                            </then>
+                                            <else>
+                                                <input message="@{message}" addproperty="@{addproperty}" defaultvalue="@{defaultvalue}" />
+                                            </else>
+                                        </if>
                                     </then>
                                     <else>
-                                        <input message="@{message}" validargs="@{validargs}" addproperty="@{addproperty}" defaultvalue="@{defaultvalue}" />
+                                         <if>
+                                            <equals arg1="@{defaultvalue}" arg2="" />
+                                            <then>
+                                                <input message="@{message}" validargs="@{validargs}" addproperty="@{addproperty}" />
+                                            </then>
+                                            <else>
+                                                <input message="@{message}" validargs="@{validargs}" addproperty="@{addproperty}" defaultvalue="@{defaultvalue}" />
+                                            </else>
+                                        </if>
                                     </else>
                                 </if>
                             </else>
