@@ -1,2 +1,3 @@
 u17922.mrc, oclc_text, 10072685
-u470059.mrc, ports_of_call, Penang|Malaysia
+u470059.mrc, ports_of_call_facet, Penang|Malaysia
+u4802090.mrc, linked_responsibility_statement_display, 編著黃仁, 王唯 ; 撰述委員王清華 ... [et al.].

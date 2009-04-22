@@ -71,12 +71,12 @@ public class ParameterizedIndexTest
         dataFile = System.getProperty("test.data.file");
         String fullIndexTestFilename = dataDirectory + File.separator + dataFile;
         File file = new File(fullIndexTestFilename);
-        BufferedReader rIn = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        BufferedReader rIn = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
         String line;
         List result = new LinkedList();
         while (( line = rIn.readLine()) != null)
         {
-            String split[] = line.split(", ");
+            String split[] = line.split(", ", 3);
             if (split.length == 3) 
                 result.add(split);
         }
