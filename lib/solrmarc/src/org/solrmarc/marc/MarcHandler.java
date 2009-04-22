@@ -97,7 +97,7 @@ public abstract class MarcHandler {
 	 */
 	public void loadProperties(String configProperties)
 	{
-	    configProps = Utils.loadProperties(null, configProperties);
+	    configProps = Utils.loadProperties(new String[]{"."}, configProperties);
 
         solrmarcPath = Utils.getProperty(configProps, "solrmarc.path");
 

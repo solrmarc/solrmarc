@@ -18,6 +18,9 @@ package org.solrmarc.marc;
 
 
 import java.io.FileNotFoundException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -47,12 +50,14 @@ public class MarcPrinter extends MarcHandler
      // Initialize logging category
     static Logger logger = Logger.getLogger(MarcPrinter.class.getName());
     private String mode;
-    private String indexkeyprefix = "";
+    private String indexkeyprefix = ".*";
     private MarcWriter writer = null;
+    private PrintWriter out;
     
-    public MarcPrinter(String args[])
+    public MarcPrinter(String args[], PrintWriter out)
     {
         super(args);
+        this.out = out;
         loadLocalProperties(configProps);
         processAdditionalArgs(addnlArgs);
     }
@@ -67,7 +72,7 @@ public class MarcPrinter extends MarcHandler
             }
             else if (mode.equals("index"))
             {
-                indexkeyprefix = arg;
+                indexkeyprefix = arg.replaceAll("\\*", ".*").replaceAll("\\?", ".");
             }
         }
     }
@@ -84,7 +89,7 @@ public class MarcPrinter extends MarcHandler
     }
 
     @Override
-    protected int handleAll() 
+    public int handleAll() 
     {
            // keep track of record count
         int recordCounter = 0;
@@ -100,7 +105,7 @@ public class MarcPrinter extends MarcHandler
                 {
                     String recStr = record.toString();
                     
-                    System.out.println(recStr);
+                    out.println(recStr);
                 }
                 else if (mode.equals("to_xml"))
                 {
@@ -122,7 +127,7 @@ public class MarcPrinter extends MarcHandler
                 {
                     String recStr = record.toString();
                         
-                    if (verbose) System.out.println(recStr);
+                    if (verbose) out.println(recStr);
                     Map<String,Object> indexMap = indexer.map(record);
                     if (errors != null && includeErrors)
                     {
@@ -136,17 +141,17 @@ public class MarcPrinter extends MarcHandler
                     Iterator<String> keys = sortedKeys.iterator();
                     String key = "id";
                     Object recordID = indexMap.get(key);
-                    //System.out.println("\nIndexID= "+ key + "  Value = "+ value);
+                    //out.println("\nIndexID= "+ key + "  Value = "+ value);
                     while (keys.hasNext())
                     {
                         key = keys.next();
                         Object value = indexMap.get(key);
                         if (key.equals("id")) continue;
-                        if (key.startsWith(indexkeyprefix))
+                        if (key.matches(indexkeyprefix))
                         {
                             if (value instanceof String)
                             {
-                                System.out.println(recordID+ " : "+ key + " = "+ value);
+                                out.println(recordID+ " : "+ key + " = "+ value);
                             }
                             else if (value instanceof Collection)
                             {
@@ -154,7 +159,7 @@ public class MarcPrinter extends MarcHandler
                                 while (valIter.hasNext())
                                 {
                                     String collVal = valIter.next().toString();
-                                    System.out.println(recordID+ " : "+ key + " = "+ collVal);
+                                    out.println(recordID+ " : "+ key + " = "+ collVal);
                                 }
                             }
                         }
@@ -180,8 +185,10 @@ public class MarcPrinter extends MarcHandler
     public static void main(String[] args) throws FileNotFoundException
     {
         MarcPrinter marcPrinter = null;
+        PrintWriter pOut = null;
         try {
-            marcPrinter = new MarcPrinter(args);
+            pOut = new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"));
+            marcPrinter = new MarcPrinter(args, pOut);
         }
         catch (IllegalArgumentException e)
         {
@@ -190,8 +197,16 @@ public class MarcPrinter extends MarcHandler
             //e.printStackTrace();
             System.exit(1);
         }
+        catch (UnsupportedEncodingException e)
+        {
+            logger.error(e.getMessage());
+            System.err.println(e.getMessage());
+            //e.printStackTrace();
+            System.exit(1);
+        }
         
         int exitCode = marcPrinter.handleAll();
+        if (pOut != null) pOut.flush();
         System.exit(exitCode);
     }
 
