@@ -90,6 +90,7 @@
             <property name="site.test.dir" value="${site.dir}/${test.dir}" />
             <property name="site.test.src.dir" value="${site.test.dir}/${src.dir}" />
             <property name="site.test.build.dir" value="${site.test.dir}/${build.dir}" />
+            <property name="site.test.data.dir" value="${site.test.dir}/data" />
             <property name="site.test.solr.dir" value="${site.test.dir}/solr" />
             <property name="site.map.dir" value="${site.dir}/${trans.map.path}" />
             <property name="site.script.dir" value="${site.dir}/${script.template.dir}" />
@@ -370,25 +371,6 @@
                         <copy_files_from_example_directory_1 />
                         <get_properties_for_config_file />
                         <copy_files_from_example_directory_2 />
-                                        
-                        <!-- <copy todir="${site.dir}" preservelastmodified="true">
-                            <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties" />
-                        </copy>
-                        <copy todir="${site.dir}" filtering="true">
-                            <fileset dir="examples/${example.configuration}" includes="*_config.properties,*_index.properties" />
-                            <regexpmapper from="^[^_]*(.*)" to="${custom.config.file.prefix}\1" />
-                            <filterchain>
-                                <tokenfilter>
-                                    <linetokenizer />
-                                    <replaceregex pattern="(solr.path *=).*" replace="\1 ${solr.path}" />
-                                    <replaceregex pattern="(solr.hosturl *=).*" replace="\1 ${solr.hosturl}/update" />
-                                    <replaceregex pattern="(solr.indexer *=).*" replace="\1 ${solr.indexer}" />
-                                    <replaceregex pattern="(solr.indexer.properties *=).*" replace="\1 ${solr.indexer.properties}" />
-                                    <replaceregex pattern="(marc.default_encoding *=).*" replace="\1 ${marc.default_encoding}" />
-                                </tokenfilter>
-                                <fixcrlf />
-                            </filterchain>
-                        </copy> -->
                     </else>
                 </if>
             </else>
@@ -876,8 +858,8 @@
 		     there, those values will be used, and the following three lines
 		     will have no effect -->
         <property name="test.solr.dir" value="${test.dir}/solr" />
-        <property name="test.data.dir" value="${test.dir}/data" />
-        <property name="test.data.file" value="u399.mrc" />
+        <property name="test.data.dir" value="${site.test.data.dir}" />
+        <property name="test.data.file" value="indextest.txt" />
 
         <if>
             <not>
@@ -939,7 +921,7 @@
 		      or in your site specific test/test.properties file.
 		      If you don't the following default value will be used, which only does simple low-level tests.
 		  -->
-        <property name="test.class" value="org.solrmarc.index.UtilUnitTests" />
+        <property name="test.class" value="org.solrmarc.index.ParameterizedIndexTest" />
 
     </target>
 
@@ -1022,6 +1004,7 @@
                     </classpath>
         
                     <sysproperty key="test.data.path" path="${test.data.dir}" />
+                    <sysproperty key="test.data.file" value="${test.data.file}" />
                     <sysproperty key="solr.path" path="${site.test.solr.dir}" />
                     <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
                     <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
