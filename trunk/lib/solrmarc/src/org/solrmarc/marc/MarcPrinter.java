@@ -165,6 +165,7 @@ public class MarcPrinter extends MarcHandler
                         }
                     }
                 }
+                out.flush();
             }
             catch (MarcException me)
             {
