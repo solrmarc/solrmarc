@@ -79,9 +79,9 @@ Chances are you aren't going to want to index your own data exactly the way we h
 
 Go to the {{{indexer}}} directory where you unpacked solrmarc. The .jar file you see there contains several configuration files that you can extract, edit, and replace. The basic pattern looks like this: 
 
-1. extract the file: {{{jar xvf Vanilla_Blacklight_SolrMarc.jar demo_index.properties}}}
-2. edit the file you just extracted ({{{demo_index.properties in this case}}}
-3. replace the file: {{{jar uvf Vanilla_Blacklight_SolrMarc.jar demo_index.properties}}}
+  # extract the file: {{{jar xvf Vanilla_Blacklight_SolrMarc.jar demo_index.properties}}}
+  # edit the file you just extracted ({{{demo_index.properties in this case}}})
+  # replace the file: {{{jar uvf Vanilla_Blacklight_SolrMarc.jar demo_index.properties}}}
 
 ==== demo_config.properties ====
 
