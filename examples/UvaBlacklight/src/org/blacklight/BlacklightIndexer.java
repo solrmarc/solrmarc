@@ -180,18 +180,131 @@ public class BlacklightIndexer extends SolrIndexer
     }
 
     /**
+     * Get the specified subfields from the specified MARC field, returned as
+     *  a set of strings to become lucene document field values
+     * @param record
+     * @param fldTag - the field name, e.g. 245
+     * @param subfldsStr - the string containing the desired subfields
+     * @returns the result set of strings 
+     */
+   /* @SuppressWarnings("unchecked")
+    protected static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldsStr, String separator)
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+
+        // Process Leader
+        if (fldTag.equals("000"))
+        {
+        	resultSet.add(record.getLeader().toString());
+            return resultSet;
+        }
+        
+        // Loop through Data and Control Fields
+        int iTag = new Integer(fldTag).intValue();
+        List<VariableField> varFlds = record.getVariableFields(fldTag);
+        for (VariableField vf : varFlds)
+        {
+            if (iTag > 9 && subfldsStr != null) 
+            {
+                // DataField
+                DataField dfield = (DataField) vf;
+
+                if (subfldsStr.length() > 1 || separator != null) 
+                {
+                    // Allow automatic concatenation of grouped subfields
+                    StringBuffer buffer = new StringBuffer("");
+                    List<Subfield> subFlds = dfield.getSubfields();
+                    for (Subfield sf : subFlds) 
+                    {
+                        String subfldsStrLC = subfldsStr.toLowerCase();
+                        int index = subfldsStrLC.indexOf(sf.getCode());
+                        if (index != -1)
+                        {
+	                        if (buffer.length() > 0)  
+	                        {
+	                            if (Character.isUpperCase(subfldsStr.charAt(index)))
+	                            {
+	                                resultSet.add(buffer.toString());
+	                                buffer = new StringBuffer("");
+	                            }
+	                            else 
+	                            {
+	                                buffer.append(separator != null ? separator : " ");
+	                            }
+	                        }
+                            buffer.append(sf.getData().trim());
+                        }
+                    }                        
+	                if (buffer.length() > 0) 
+	                	resultSet.add(buffer.toString());
+                } 
+                else 
+                {
+	                // get all instances of the single subfield
+	                List<Subfield> subFlds = dfield.getSubfields(subfldsStr.charAt(0));
+	                for (Subfield sf : subFlds)                         
+	                {
+	                    resultSet.add(sf.getData().trim());
+	                }
+                }
+            }
+            else 
+            {
+                // Control Field
+                resultSet.add(((ControlField) vf).getData().trim());
+            }
+        }
+        return resultSet;
+    } */
+    /**
      * Extract a cleaned call number from a record
      * @param record
      * @return Clean call number
      */
-    public String getCallNumberCleaned(final Record record)
+    public Set<String> getCallNumbersCleaned(final Record record, String fieldSpec, String conflatePrefixes)
     {
-        String val = getFirstFieldVal(record, "999a:090a:050a");
-        if (val == null || val.length() == 0) {
+        boolean conflate = conflatePrefixes.equalsIgnoreCase("true");
+        Set<String> set = getFieldList(record, fieldSpec);
+        if (set.isEmpty())  {
             return(null);
         }
-        val = val.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".").toLowerCase();
-        return(val);
+        Set<String> resultNormed = new LinkedHashSet<String>();
+        Set<String> resultToReturn = new LinkedHashSet<String>();
+        for (String callNum : set)
+        {
+            String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+            String valUC = val.toUpperCase();
+            boolean addIt = true;
+            /*if (conflate)
+            {
+                for (String callNumInResult : resultNormed )
+                {
+                    // if callNum is a prefix of one already in the result set, discard it.
+                    if (callNumInResult.startsWith(val))
+                    {
+                        addIt = false;
+                        break;
+                    }
+                    // if one already in the result set is a proper prefix of callNum, delete the one in the result set.
+                    if (val.startsWith(callNumInResult))
+                    {
+                        resultNormed.remove(callNumInResult); 
+                        break;
+                    }                   
+                }
+            }
+            else */ 
+            if (resultNormed.contains(valUC))
+            {
+                addIt = false;
+            }
+            if (addIt) 
+            {
+                resultNormed.add(valUC);
+                resultToReturn.add(val);
+            }
+        }
+        return resultToReturn;
     }
     
     /**
