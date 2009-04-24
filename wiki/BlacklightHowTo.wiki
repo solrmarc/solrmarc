@@ -122,4 +122,4 @@ language_facet = 008[35-37]:041a:041d, language_map.properties
 marc_display = FullRecordAsXML
 }}}
 
-See ConfiguringSolrMarc for more information about configuration options for this file. 
+See ConfiguringSolrMarc for more information about configuration options for these files. 
