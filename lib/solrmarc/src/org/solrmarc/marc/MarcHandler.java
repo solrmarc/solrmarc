@@ -58,6 +58,11 @@ public abstract class MarcHandler {
                     System.setProperty("marc.path", arg);
                     System.setProperty("marc.source", "FILE");
                 }
+                else if (arg.endsWith(".marc"))
+                {
+                    System.setProperty("marc.path", arg);
+                    System.setProperty("marc.source", "FILE");
+                }
                 else if (arg.equals("NONE"))
                 {
                     System.setProperty("marc.source", "NONE");
