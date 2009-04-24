@@ -77,7 +77,7 @@ or to index both at one time:
 
 Chances are you aren't going to want to index your own data exactly the way we have things set up for the demo application. Here's how to start making changes to the index mappings. 
 
-Go to the {{{indexer}}} directory where you unpacked solrmarc. The .jar file you see there contains several configuration files that you can extract, edit, and replace. The basic patterns looks like this: 
+Go to the {{{indexer}}} directory where you unpacked solrmarc. The .jar file you see there contains several configuration files that you can extract, edit, and replace. The basic pattern looks like this: 
 
 1. extract the file: {{{jar xvf Vanilla_Blacklight_SolrMarc.jar demo_index.properties}}}
 2. edit the file you just extracted ({{{demo_index.properties in this case}}}
