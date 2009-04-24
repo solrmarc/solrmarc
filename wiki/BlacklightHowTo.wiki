@@ -40,23 +40,12 @@ The only difference between the two binary distributions is that the Unix versio
 <br />
 === Unpacking the Binary Distribution ===
 
-SolrMarc uses a series of Java properties files for its configuration, these are stored inside the single large jar file that is included in the binary distribution. Some of the values in these properties files need to be set before you will be able to run SolrMarc to produce an index for your Blacklight installation. The main configuration file is named demo_config.properties, an example of it is shown below: 
-{{{
- # Path to your solr instance
- solr.path = /usr/local/blacklight/solr
- solr.indexer = org.solrmarc.index.SolrIndexer
- solr.indexer.properties = demo_index.properties
- #optional URL of running solr search engine to cause updates to be recognized.
- solr.hosturl = http://localhost:8983/solr/update
- marc.to_utf_8 = true
- marc.permissive = true
- marc.default_encoding = MARC8
- marc.include_errors = false
-}}}
+Create a directory and copy the solrmarc distribution you just made into it. You can do this anywhere, but for this example let's create a directory called {{{indexer}}} at the top level of your blacklight directory. Now unzip the distribution file. On unix, the command is {{{tar zxvf Binary_Vanilla_Blacklight_SolrMarc_Unix.tar.gz}}}. On windows, you can run winzip or some similar program. 
 
-<br />
-
+<br/>
 === Configuring !SolrMarc ===
+
+SolrMarc uses a series of Java properties files for its configuration, and these are stored inside the single large jar file that is included in the binary distribution. Some of the values in these properties files need to be set before you will be able to run SolrMarc to produce an index for your Blacklight installation. 
 
 If you unpack the binary distribution into a directory named {{{indexer}}} inside the Blacklight demo distribution, all you need to do is run two shell scripts to configure the SolrMarc indexer. 
 
@@ -83,6 +72,4 @@ To index the sample record included in the Blacklight demo distribution in the d
 or to index both at one time:
 
    cat ./data/*.mrc | indexer/indexfile
-
-
 
