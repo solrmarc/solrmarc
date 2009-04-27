@@ -42,16 +42,45 @@ Create a directory and copy the !SolrMarc distribution you just made into it. Yo
 
 <br />
 === Configuring !SolrMarc ===
+!SolrMarc uses a series of Java properties files for its configuration, and these are stored inside the single large jar file that is included in the binary distribution. Some of the values in these properties files need to be set before you will be able to run !SolrMarc to produce an index for your VuFind or Blacklight installation.
+ 
+If you unpack the binary distribution into a directory named {{{indexer}}} inside your chosen demo distribution, all you need to do is run two shell scripts to configure the !SolrMarc indexer.
 
+First run:
+ 
+   {{{indexer/setsolrwar ./jetty/webapps/solr.war}}}
+
+then run:
+ 
+   {{{indexer/setsolrhome ./jetty/solr}}} 
 
 <br />
 === Running !SolrMarc ===
+You will then be ready index MARC records into the solr index that will be used by your implementation of Blacklight or VuFind via the following command:
+ 
+   {{{indexer/indexfile /path/to/marcrecords.mrc}}}
+
+The command will display informational messages and warnings while it is running, processing MARC records. 
+
+To index the sample record included in the demo distribution in the data directory use the following commands: 
+
+   {{{indexer/indexfile ./data/test_data.utf8.mrc}}}<br />
+   {{{indexer/indexfile ./data/lc_records.utf8.mrc}}} 
+
+or to index both at one time: 
+
+   {{{cat ./data/*.mrc | indexer/indexfile }}}
 
 
 <br />
-
 === Changing your indexing options ===
+Chances are you aren't going to want to index your own data exactly the way we have things set up for the demo application. Here's how to start making changes to the index mappings.
 
+Go to the {{{indexer}}} directory where you unpacked !SolrMarc. The .jar file you see there contains several configuration files that you can extract, edit, and replace. The basic pattern looks like this:
+ 
+   # extract the file: {{{jar xvf Vanilla_Blacklight_SolrMarc.jar demo_index.properties}}} 
+   # edit the file you just extracted (demo_index.properties in this case) 
+   # replace the file: {{{jar uvf Vanilla_Blacklight_SolrMarc.jar demo_index.properties}}} 
 
 <br />
 ==== demo_config.properties ====
