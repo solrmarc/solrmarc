@@ -1,0 +1,64 @@
+#summary Getting started with the binary distribution of Solrmarc.
+
+=== About This Document ===
+
+This getting started guide describes the !SolrMarc binary distribution for Blacklight and VuFind, defines its software dependencies, guides the user through using the !SolrMarc binary to index a file of MARC records.
+
+<br/>
+=== About !SolrMarc ===
+
+!SolrMarc is a utility that reads in MARC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified SOLR index.
+
+!SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your SOLR index record, but it also allows the creation of custom index functions if you cannot achieve what you require using the predefined mapping techniques.
+
+Currently, !SolrMarc is configured to work with:
+  * [http://blacklightopac.org/ Blacklight]
+  * [VufindHowTo Vufind]
+
+
+NOTE: If you anticipate a need for custom indexing functions, you will need to download the !SolrMarc source code and build the package using the instructions from the [GettingStarted] document on this wiki.
+
+<br />
+=== Software Dependencies ===
+
+!SolrMarc requires the java runtime environment (JRE) version 1.5 or newer (or version 1.5 or newer of the java development kit (JDK).)
+
+To check the version of your installed java at the command prompt type:
+
+   _java -version_
+
+To download the proper version of the java, go to http://java.sun.com/javase/downloads/index.jsp
+
+<br/>
+=== Downloading the !SolrMarc Binary Distribution ===
+
+To get the binary distribution, download {{{Binary_Generic_VuFind_SolrMarc_Unix.tar.gz}}}, {{{Binary_Generic_VuFind_SolrMarc_PC.zip}}}, {{{Binary_Vanilla_Blacklight_SolrMarc_Unix.tar.gz}}} or {{{Binary_Vanilla_Blacklight_SolrMarc_PC.zip}}} from [http://code.google.com/p/solrmarc/downloads/list the project's downloads page]. The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run !SolrMarc.
+
+The only difference between the two binary distributions is that the Unix version contains a number of bash shell scripts for running the !SolrMarc indexer or for running the the other utility programs associated with running !SolrMarc, whereas the PC version of the binary distribution contain batch files to perform the same tasks. 
+
+<br />
+=== Unpacking the Binary Distribution ===
+
+
+<br />
+=== Configuring !SolrMarc ===
+
+
+<br />
+=== Running !SolrMarc ===
+
+
+<br />
+
+=== Changing your indexing options ===
+
+
+<br />
+==== demo_config.properties ====
+
+
+<br />
+==== demo_index.properties ====
+
+
+<br />
