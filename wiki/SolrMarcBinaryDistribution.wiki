@@ -1,4 +1,4 @@
-#summary Getting started with the binary distribution of Solrmarc.
+#summary Getting started with the binary distribution of SolrMarc.
 
 === About This Document ===
 
@@ -101,6 +101,23 @@ Depending on your local MARC records, you might want to change the default encod
 
 <br />
 ==== demo_index.properties ====
-
+The configuration that handles all of the mappings from MARC to Solr is {{{demo_index.properties}}}. You will probably want to use it to get started, and then as you shape what your institution's MARC mappings look like, it will be worthwhile to build your own distribution from source. The {{{demo_index.properties}}} that is configured to work with the Blacklight demo application looks like this:
+{{{
+id = 001, first
+title_t = custom, removeTrailingPunct(245a)
+sub_title_t = custom, removeTrailingPunct(245c)
+alt_titles_t = custom, removeTrailingPunct(240b:700t:710t:711t:440a:490a:505a:830a)
+title_added_entry_t = custom, removeTrailingPunct(700t)
+author_t = custom, removeTrailingPunct(110a:111a:130a:700a:710a:711a)
+published_t = custom, removeTrailingPunct(260a)
+isbn_t = 020a, (pattern_map.isbn_clean)
+material_type_t = custom, removeTrailingPunct(300a)
+subject_t = custom, removeTrailingPunct(600a:610a:611a:630a:650a:651a:655a:690a)
+subject_era_facet = custom, removeTrailingPunct(650d:650y:651y:655y)
+geographic_subject_facet = custom, removeTrailingPunct(650z:651a:650c:651x:651z:655:z)
+language_facet = 008[35-37]:041a:041d, language_map.properties
+marc_display = FullRecordAsXML
+}}}
+See [ConfiguringSolrMarc] for more information about configuration options for these files. 
 
 <br />
