@@ -38,7 +38,7 @@ The only difference between the two binary distributions is that the Unix versio
 
 <br />
 === Unpacking the Binary Distribution ===
-
+Create a directory and copy the !SolrMarc distribution you just made into it. You can do this anywhere, but for this example let's create a directory called {{{indexer}}} at the top level of either your blacklight or your vufind directory. Now unzip the distribution file. On unix, the command is _tar zxvf _filename__. On windows, you can run winzip or some similar program.
 
 <br />
 === Configuring !SolrMarc ===
