@@ -84,7 +84,20 @@ Go to the {{{indexer}}} directory where you unpacked !SolrMarc. The .jar file yo
 
 <br />
 ==== demo_config.properties ====
-
+The main configuration file is named demo_config.properties. A Blacklight example of it is shown below.
+{{{
+# Path to your solr instance
+solr.path = /usr/local/blacklight/solr
+solr.indexer = org.solrmarc.index.SolrIndexer
+solr.indexer.properties = demo_index.properties
+#optional URL of running solr search engine to cause updates to be recognized.
+solr.hosturl = http://localhost:8983/solr/update
+marc.to_utf_8 = true
+marc.permissive = true
+marc.default_encoding = MARC8
+marc.include_errors = false
+}}}
+Depending on your local MARC records, you might want to change the default encoding, or other values. If you need lots of customization it's probably better to build a custom distribution from source. For instructions on building a custom distribution, please see the [GettingStarted] doc on this wiki.
 
 <br />
 ==== demo_index.properties ====
