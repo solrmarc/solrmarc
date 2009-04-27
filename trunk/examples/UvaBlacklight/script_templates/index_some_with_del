@@ -4,6 +4,7 @@ export JAVA_HOME
 fpath=$1
 marcpattern=$2
 fpattern=$3
+marcpattern2=`echo $2 | sed -e 's:/:_:g'`
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
 
@@ -11,7 +12,7 @@ for file in `find $fpath -name '*.mrc' -print | sort | egrep "$fpattern"`
     do
         f1=${file%.*}
         f2=${f1##*/}
-        output=/usr/local/projects/marc/results/results_${marcpattern}_${f2}
+        output=/usr/local/projects/marc/results/results_${marcpattern2}_${f2}
         del="$f1".del
         if [ -a "$del" ]
             then f3=$del
