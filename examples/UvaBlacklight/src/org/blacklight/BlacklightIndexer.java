@@ -376,7 +376,11 @@ public class BlacklightIndexer extends SolrIndexer
             {
                 String mappedFpart1 = Utils.remap(fparts[0], findMap(mapName), true);
                 String mappedFpart2 = Utils.remap(fparts[1], findMap(mapName), true);
-                if (mappedFpart1 != null && mappedFpart2 != null)
+                if (mappedFpart1 == "-"  && mappedFpart2 != null)
+                {
+                    result.add(mappedFpart2);
+                }
+                else if (mappedFpart1 != null  && mappedFpart2 != null)
                 {
                     result.add(mappedFpart1);
                     result.add(mappedFpart2);
