@@ -4,3 +4,4 @@ u4802090.mrc, linked_responsibility_statement_display, 編著黃仁, 王唯 ; �
 u235.mrc, location_facet, Biology/Psychology Library Journals|Brown Library Journals
 u151.mrc, call_number_text, DT73.D47 Z5 1979
 u60.mrc, call_number_text, DP269.27.S67 H47 1982 V.1|DP269.27.S67 H47 1982 V.2
+mss-11848.mrc, location_facet, Special Collections SC-STKS
