@@ -263,7 +263,8 @@ public class BlacklightIndexer extends SolrIndexer
      */
     public Set<String> getCallNumbersCleaned(final Record record, String fieldSpec, String conflatePrefixes)
     {
-        boolean conflate = conflatePrefixes.equalsIgnoreCase("true");
+        boolean conflate = !conflatePrefixes.equalsIgnoreCase("false");
+        int conflateThreshhold = conflate ? Integer.parseInt(conflatePrefixes) : 0;
         Set<String> set = getFieldList(record, fieldSpec);
         if (set.isEmpty())  {
             return(null);
@@ -275,7 +276,7 @@ public class BlacklightIndexer extends SolrIndexer
             String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
             String valUC = val.toUpperCase();
             boolean addIt = true;
-            /*if (conflate)
+            if (conflate)
             {
                 for (String callNumInResult : resultNormed )
                 {
@@ -293,7 +294,7 @@ public class BlacklightIndexer extends SolrIndexer
                     }                   
                 }
             }
-            else */ 
+            else  
             if (resultNormed.contains(valUC))
             {
                 addIt = false;
@@ -376,7 +377,7 @@ public class BlacklightIndexer extends SolrIndexer
             {
                 String mappedFpart1 = Utils.remap(fparts[0], findMap(mapName), true);
                 String mappedFpart2 = Utils.remap(fparts[1], findMap(mapName), true);
-                if (mappedFpart1.equals("-")  && mappedFpart2 != null)
+                if (mappedFpart1 != null && mappedFpart1.equals("-") && mappedFpart2 != null)
                 {
                     result.add(mappedFpart2);
                 }
