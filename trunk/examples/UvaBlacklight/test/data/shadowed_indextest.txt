@@ -1,0 +1,24 @@
+u17922.mrc, oclc_text, 10072685
+u470059.mrc, ports_of_call_facet, Penang|Malaysia
+u4802090.mrc, linked_responsibility_statement_display, 編著黃仁, 王唯 ; 撰述委員王清華 ... [et al.].
+u235.mrc, location_facet, Biology/Psychology Library Journals|Brown Library Journals
+mss-11848.mrc, location_facet, Special Collections SC-STKS
+
+u151.mrc, call_number_text, DT73.D47 Z5 1979
+u210.mrc, call_number_text, HB2615.V8O23 1983|PD VIRG.O1536O|UVATM 2/OC 2
+
+#u60.mrc, call_number_display, DP269.27.S67 H47 1982 V.1
+#u55.mrc, call_number_display, PR4231.A43 1984 v.1
+#u115.mrc, call_number_display, PT2619.A6 A24 1984b
+
+u60.mrc, call_number_display, DP269.27.S67 H47 1982  V.1, V.2
+u55.mrc, call_number_display, PR4231.A43 1984  v.1, v.2, v.3, v.4, v.5, v.6, v.7, v.8, v.9, v.10, v.11, v.12, v.13
+u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
+u2112.mrc, call_number_display, Computer File|HB1.N39 (23 instances)
+u642.mrc, call_number_display, ML5.G654 (43 instances)
+
+u200.mrc, shadowed_location_facet, HIDDEN-OVERRIDE
+#u200.mrc, shadowed_location_facet, VISIBLE
+u210.mrc, shadowed_location_facet, VISIBLE
+u63.mrc, shadowed_location_facet, HIDDEN
+#u63.mrc, shadowed_location_facet, 

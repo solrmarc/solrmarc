@@ -19,6 +19,6 @@ u115.mrc, call_number_display, PT2619.A6 A24 1984b
 
 #u200.mrc, shadowed_location_facet, HIDDEN-OVERRIDE
 u200.mrc, shadowed_location_facet, VISIBLE
-#u210.mrc, shadowed_location_facet, VISIBLE
+u210.mrc, shadowed_location_facet, VISIBLE
 #u63.mrc, shadowed_location_facet, HIDDEN
 u63.mrc, shadowed_location_facet, 
