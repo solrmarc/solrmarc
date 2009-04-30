@@ -3,5 +3,13 @@ u470059.mrc, ports_of_call_facet, Penang|Malaysia
 u4802090.mrc, linked_responsibility_statement_display, 編著黃仁, 王唯 ; 撰述委員王清華 ... [et al.].
 u235.mrc, location_facet, Biology/Psychology Library Journals|Brown Library Journals
 u151.mrc, call_number_text, DT73.D47 Z5 1979
-u60.mrc, call_number_text, DP269.27.S67 H47 1982 V.1|DP269.27.S67 H47 1982 V.2
+u60.mrc, call_number_display, DP269.27.S67 H47 1982  V.1, V.2
+u55.mrc, call_number_display, PR4231.A43 1984  v.1, v.2, v.3, v.4, v.5, v.6, v.7, v.8, v.9, v.10, v.11, v.12, v.13
+u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
+u2112.mrc, call_number_display, Computer File|HB1.N39  order AAA2160-001, v.23-24 1984-85, v.25-26 1986-87, v.27 1988, v.28 1989, v.29 1990, v.30 1991, v.31 1992, v.32 1993, v.33 1994, v.34 1995, v.35 1996, v.36 1997, v.37 1998, v.38 1999, v.39 2000, v.40 2001, v.41 2002, v.42 2003, v.43 2004, v.44 2005, v.45 2006, v.46 2007
+u642.mrc, call_number_display, ML5.G654  INDEX Jahrg.37-55 1912-1930, INDEX v.1-35 1876-1910, INDEX v.56-72 1931-1950, v.1-5 1876-1880, v.6-10 1881-1885, v.11-15 1886-1890, v.16-20 1891-1895, v.21-25 1896-1900, v.26-30 1901-1905, v.31-35 1906-1910, v.36-40 1911-1915, v.41-44 1916-1919, v.45 1920, v.46-48 1921-1923, v.49 1924, v.50-52 1925-1927, v.53-54 1928-1929, v.55 1930, v.56 1931, v.57 1932, v.58 1933, v.59 1934, v.60 1935, v.61 1936, v.62 1937, v.63 1938, v.64 1939, v.65 1940, v.66 1941, v.67 1946, v.68 1947, v.69 1948, v.70 1949, v.71 1950, v.72 1951, v.73 1952, v.74 1953, v.75 1954, v.76 1955, v.77 1956, v.78 1957, v.79 1958, v.80:nr.4 1959:Apr.
+u210.mrc, call_number_text, HB2615.V8O23 1983|PD VIRG.O1536O|UVATM 2/OC 2
 mss-11848.mrc, location_facet, Special Collections SC-STKS
+u200.mrc, shadowed_location_facet, HIDDEN-OVERRIDE
+u210.mrc, shadowed_location_facet, VISIBLE
+u63.mrc, shadowed_location_facet, HIDDEN
