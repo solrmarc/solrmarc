@@ -1,12 +1,22 @@
 package org.blacklight;
 
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.Collator;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 
 import org.marc4j.marc.Record;
@@ -37,6 +47,8 @@ public class BlacklightIndexer extends SolrIndexer
      * @throws FileNotFoundException 
      * @throws Exception
      */
+    Set<String> addnlShadowedIds = null;
+    
     public BlacklightIndexer(final String propertiesMapFile, final String propertyPaths[])
     {
         super(propertiesMapFile, propertyPaths);
@@ -256,6 +268,7 @@ public class BlacklightIndexer extends SolrIndexer
         }
         return resultSet;
     } */
+
     /**
      * Extract a cleaned call number from a record
      * @param record
@@ -263,51 +276,124 @@ public class BlacklightIndexer extends SolrIndexer
      */
     public Set<String> getCallNumbersCleaned(final Record record, String fieldSpec, String conflatePrefixes)
     {
+        Comparator<String> normedComparator = new Comparator<String>() 
+        {
+            public int compare(String s1, String s2)
+            {
+                String s1Norm = s1.replaceAll("[. ]", "");
+                String s2Norm = s2.replaceAll("[. ]", "");
+                return s1Norm.compareToIgnoreCase(s2Norm);
+            }
+        };
+
         boolean conflate = !conflatePrefixes.equalsIgnoreCase("false");
-        int conflateThreshhold = conflate ? Integer.parseInt(conflatePrefixes) : 0;
-        Set<String> set = getFieldList(record, fieldSpec);
-        if (set.isEmpty())  {
+        //int conflateThreshhold = conflate ? Integer.parseInt(conflatePrefixes) : 0;
+        Set<String> fieldList = getFieldList(record, fieldSpec);
+        if (fieldList.isEmpty())  {
             return(null);
         }
-        Set<String> resultNormed = new LinkedHashSet<String>();
-        Set<String> resultToReturn = new LinkedHashSet<String>();
-        for (String callNum : set)
+        if (conflate)
         {
-            String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
-            String valUC = val.toUpperCase();
-            boolean addIt = true;
-            if (conflate)
+            Map<String, Set<String>> resultNormed = new TreeMap<String, Set<String>>();
+            for (String callNum : fieldList)
             {
-                for (String callNumInResult : resultNormed )
+                String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+                String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
+                if (!nVal.equals(val))
                 {
-                    // if callNum is a prefix of one already in the result set, discard it.
-                    if (callNumInResult.startsWith(val))
-                    {
-                        addIt = false;
-                        break;
-                    }
-                    // if one already in the result set is a proper prefix of callNum, delete the one in the result set.
-                    if (val.startsWith(callNumInResult))
-                    {
-                        resultNormed.remove(callNumInResult); 
-                        break;
-                    }                   
+                    val = nVal;
+                }
+                String key = val.substring(0, Math.min(val.length(), 5)).toUpperCase();
+                if (resultNormed.containsKey(key))
+                {
+                    Set<String> set = resultNormed.get(key);
+                    set.add(val);
+                    resultNormed.put(key, set);
+                }
+                else
+                {
+                    Set<String> set = new TreeSet<String>(normedComparator);
+                    set.add(val);
+                    resultNormed.put(key, set);
                 }
             }
-            else  
-            if (resultNormed.contains(valUC))
+            Set<String> keys = resultNormed.keySet();
+            Set<String> results = new TreeSet<String>(normedComparator);
+            for (String key : keys)
             {
-                addIt = false;
+                Set<String> values = resultNormed.get(key);
+                String valueArr[] = values.toArray(new String[0]);
+                if (valueArr.length == 1)
+                {
+                    results.add(valueArr[0]);
+                }
+                else
+                {
+                    String prefix = valueArr[0];
+                    for (int i = 1; i < valueArr.length; i++)
+                    {
+                        prefix = getCommonPrefix(prefix, valueArr[i], normedComparator);
+                    }
+                    if (prefix.lastIndexOf(' ') != -1)
+                    {
+                        prefix = prefix.substring(0, prefix.lastIndexOf(' '));
+                    }
+                    StringBuffer sb = new StringBuffer(prefix);
+                    String sep = " ";
+                    for (int i = 0; i < valueArr.length; i++)
+                    {
+                        valueArr[i] = valueArr[i].substring(prefix.length());
+                    }
+                    Comparator<String> comp = new StringNaturalCompare();
+                    Arrays.sort(valueArr, comp);
+                    for (int i = 0; i < valueArr.length; i++)
+                    {
+                        if (valueArr[i].length() > 0) 
+                        {
+                            sb.append(sep+valueArr[i]);
+                            sep = ",";
+                        }
+                    }
+                    results.add(sb.toString());
+                }
             }
-            if (addIt) 
-            {
-                resultNormed.add(valUC);
-                resultToReturn.add(val);
-            }
+            return(results);
         }
-        return resultToReturn;
+        else 
+        {
+            Comparator<String> comp = new StringNaturalCompare();
+            Set<String> resultNormed = new TreeSet<String>(comp);
+            for (String callNum : fieldList)
+            {
+                String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+                String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
+                if (!nVal.equals(val))
+                {
+                    val = nVal;
+                }
+                resultNormed.add(val);
+            }
+            return resultNormed;
+        }
     }
     
+    private String getCommonPrefix(String string1, String string2, Comparator comp)
+    {
+        int l1 = string1.length();
+        int l2 = string2.length();
+        int l = Math.min(l1, l2);
+        int prefixLen = l;
+        for (int i = 0; i < l; i++)
+        {
+            if (comp.compare(string1.substring(i, i+1), string2.substring(i, i+1))!= 0)
+            {
+                prefixLen = i;
+                break;
+            }
+        }
+        return(string1.substring(0, prefixLen));
+    }
+
     /**
      * Extract the OCLC number from a record
      * @param record
@@ -359,35 +445,54 @@ public class BlacklightIndexer extends SolrIndexer
         return(result);
     }
     
-    public Set<String> getShadowedLocation(final Record record, String propertiesMap)
+    public String getShadowedLocation(final Record record, String propertiesMap)
     {
+        if (addnlShadowedIds == null)
+        {
+            addnlShadowedIds = new LinkedHashSet<String>();
+            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(null, "extra_data/AllShadowedIds.txt");
+            BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
+            String id;
+            try
+            {
+                while ((id = addnlIdsReader.readLine()) != null)
+                {
+                    if (!id.startsWith("#"))  addnlShadowedIds.add(id);
+                }
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
         String mapName = loadTranslationMap(null, propertiesMap);
-
+        
         Set<String> fields = getFieldList(record, "999kl';'");
-        Set<String> result = new LinkedHashSet<String>();
+        boolean visible = false;
         for (String field : fields)
         {
             String fparts[] = field.split(";");
             if (fparts.length == 1)
             {
                 String mappedFpart = Utils.remap(fparts[0], findMap(mapName), true);
-                if (mappedFpart != null) result.add(mappedFpart);
+                if (mappedFpart.equals("VISIBLE"))  visible = true;
             }
             else if (fparts.length == 2)
             {
                 String mappedFpart1 = Utils.remap(fparts[0], findMap(mapName), true);
                 String mappedFpart2 = Utils.remap(fparts[1], findMap(mapName), true);
-                if (mappedFpart1 != null && mappedFpart1.equals("-") && mappedFpart2 != null)
+                if (mappedFpart1.equals("VISIBLE") && mappedFpart2.equals("VISIBLE"))
                 {
-                    result.add(mappedFpart2);
-                }
-                else if (mappedFpart1 != null  && mappedFpart2 != null)
-                {
-                    result.add(mappedFpart1);
-                    result.add(mappedFpart2);
+                    visible = true;
                 }
             }
         }
-        return(result);        
+        String result = (visible ? "VISIBLE" : "HIDDEN"); 
+        if (visible && addnlShadowedIds.contains(record.getControlNumber()))
+        {
+            result = "HIDDEN-OVERRIDE";
+        }  
+        return(result);
     }
 }
