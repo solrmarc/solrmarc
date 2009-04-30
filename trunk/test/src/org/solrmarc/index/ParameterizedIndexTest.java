@@ -54,10 +54,10 @@ public class ParameterizedIndexTest
             //System.out.println("" + i + ":  " + resultLines[i] + "   -->  " + results[i] );
         }
         String expected[] = expectedValue.split("[|]");
-        assertEquals("Array lengths should be equal", results.length, expected.length);
+        assertEquals("Array lengths should be equal", expected.length, results.length);
         for (int i = 0; i < results.length; i++)
         {
-            assertEquals("Array entries should be equal", results[i], expected[i]);
+            assertEquals("Array entries should be equal", expected[i], results[i]);
         }
         System.out.println(recordFilename + " : " + fieldToCheck + " --> " + expectedValue);
     }
@@ -74,6 +74,7 @@ public class ParameterizedIndexTest
         List result = new LinkedList();
         while (( line = rIn.readLine()) != null)
         {
+            if (line.startsWith("#") || line.trim().length() == 0) continue;
             String split[] = line.split(", ", 3);
             if (split.length == 3) 
                 result.add(split);
