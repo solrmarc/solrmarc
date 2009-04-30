@@ -872,8 +872,7 @@
         <property name="test.solr.dir" value="${test.dir}/solr" />
         <property name="test.data.dir" value="${site.test.data.dir}" />
         <property name="test.data.file" value="indextest.txt" />
-        <property name="test.config.props" value="${default.config}" />
-
+ 
         <if>
             <not>
                 <isset property="solr.path" />
@@ -1022,7 +1021,6 @@
                     <sysproperty key="solr.path" path="${site.test.solr.dir}" />
                     <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
                     <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
-                    <sysproperty key="test.config.props" value="${test.config.props}" />
                     <test name="${test.class}" />
                 </junit>
             </then>
