@@ -26,6 +26,7 @@ public class ParameterizedIndexTest
     String expectedValue;
     static String dataDirectory;
     static String dataFile;
+    static String config;
     
     public ParameterizedIndexTest(String recordFilename, String fieldToCheck, String expectedValue)
     {
@@ -34,14 +35,13 @@ public class ParameterizedIndexTest
         this.expectedValue = expectedValue;
     }
     
-    @SuppressWarnings("deprecation")
     @Test
     public void verifyIndexingResults() throws Exception 
     {
         StringWriter strOut = new StringWriter();
         PrintWriter pOut = new PrintWriter(strOut);
         String fullRecordFilename = dataDirectory + File.separator + recordFilename;
-        MarcPrinter indexTest = new MarcPrinter(new String[]{fullRecordFilename, "index", fieldToCheck}, pOut );
+        MarcPrinter indexTest = new MarcPrinter(new String[]{config, fullRecordFilename, "index", fieldToCheck}, pOut );
         indexTest.handleAll();
         StringBuffer buffer = strOut.getBuffer();
         //System.out.println(buffer.toString());
@@ -67,6 +67,8 @@ public class ParameterizedIndexTest
     {
         dataDirectory = System.getProperty("test.data.path");
         dataFile = System.getProperty("test.data.file");
+        config = System.getProperty("test.config.props");
+        System.out.println("Using config: "+ config);
         String fullIndexTestFilename = dataDirectory + File.separator + dataFile;
         File file = new File(fullIndexTestFilename);
         BufferedReader rIn = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
