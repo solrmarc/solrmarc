@@ -268,7 +268,22 @@ public class BlacklightIndexer extends SolrIndexer
         }
         return resultSet;
     } */
-
+    
+    /* 
+     * Extract a cleaned call number from a record
+    * @param record
+    * @return Clean call number
+    */
+   public String getCallNumberCleaned(final Record record)
+   {
+       String val = getFirstFieldVal(record, "999a");
+       if (val == null || val.length() == 0) {
+           return(null);
+       }
+       val = val.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+       return(val);
+   }
+   
     /**
      * Extract a cleaned call number from a record
      * @param record
