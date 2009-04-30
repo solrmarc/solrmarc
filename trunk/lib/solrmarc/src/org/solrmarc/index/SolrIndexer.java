@@ -557,27 +557,27 @@ public class SolrIndexer
         catch (SecurityException e)
         {
             //e.printStackTrace();
-            logger.error(e.getCause());
+            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
         }
         catch (NoSuchMethodException e)
         {
             //e.printStackTrace();
-            logger.error(e.getCause());
+            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
         }
         catch (IllegalArgumentException e)
         {
             //e.printStackTrace();
-            logger.error(e.getCause());
+            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
         }
         catch (IllegalAccessException e)
         {
             //e.printStackTrace();
-            logger.error(e.getCause());
+            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
         }
         catch (InvocationTargetException e)
         {
             //e.printStackTrace();
-            logger.error(e.getCause());
+            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
         }
         return(false);
     }
