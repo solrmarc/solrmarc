@@ -156,8 +156,9 @@
 
     <macrodef name="get_properties_for_config_file">
         <sequential>
+            <property name="example.default.solr.hosturl" value="http://localhost:8983/solr" />
             <input-save message="Enter URL of where solr server will be located:" addproperty="solr.hosturl"  
-                defaultvalue="http://localhost:8983/solr"  propertyfile="${site.dir}/build_override.properties" />
+                defaultvalue="${example.default.solr.hosturl}"  propertyfile="${site.dir}/build_override.properties" />
             <if> 
                 <and>
                     <available file="../jetty" />
@@ -197,8 +198,10 @@
 
             <property name="solr.indexer" value="${custom.indexer.class}" />
             <property name="solr.indexer.properties" value="${custom.config.file.prefix}_index.properties" />
+            <property name="example.default.marc.default_encoding" value="MARC8" />
             <input-save message="Enter encoding used in MARC records to be read in:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You have no idea what encoding your records are in, and want the program to try to determine it." 
-                addproperty="marc.default_encoding"  validargs="MARC8,UNIMARC,UTF-8,BESTGUESS" defaultvalue="MARC8" propertyfile="${site.dir}/build_override.properties" />
+                addproperty="marc.default_encoding"  validargs="MARC8,UNIMARC,UTF-8,BESTGUESS" 
+                defaultvalue="${example.default.marc.default_encoding}" propertyfile="${site.dir}/build_override.properties" />
         </sequential>
     </macrodef>
 
@@ -228,7 +231,7 @@
     <macrodef name="copy_files_from_example_directory_1">
         <sequential>
             <copy todir="${site.dir}" preservelastmodified="true">
-                <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties" >
+                <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties,extra_data/**" >
                     <depend targetdir="${site.dir}" />
                 </fileset>
             </copy>
@@ -301,7 +304,7 @@
                             <resourcecount refid="nonuptodatecopies" when="greater" count="0" /> 
                             <then>
                                 <echo level="warning" message="Warning: One or more of the example files your site is based on have changed:" />
-                                <pathconvert pathsep="\n" property="filelist.nonuptodatecopies" refid="nonuptodatecopies">
+                                <pathconvert pathsep="${line.separator}" property="filelist.nonuptodatecopies" refid="nonuptodatecopies">
                                     <map from="${basedir}/examples/${example.configuration}/" to="    Changed example file:  " />
                                 </pathconvert>
                                 <echo message="${filelist.nonuptodatecopies}" /> 
@@ -360,7 +363,7 @@
                         <loadproperties srcfile="examples/${example.configuration}/build.properties">
                             <filterchain>
                                 <tokenfilter>
-                                    <containsregex pattern="(custom.config.file.prefix|custom.jar.name|distribution.jar.name|exe.mem.args)" />
+                                    <containsregex pattern="(custom.config.file.prefix|custom.jar.name|distribution.jar.name|exe.mem.args|solr.hosturl|marc.default_encoding|default.config)" />
                                 </tokenfilter>
                                 <prefixlines prefix="example.default." />
                             </filterchain>
@@ -549,8 +552,10 @@
                         <property name="default.config" value="${config.file.list}" />
                     </then>
                     <else>
-		                <input-save message="Select the default config file to use if no such file is specified on the command line" 
-		                    validargs="${config.file.list}" addproperty="default.config" propertyfile="${site.dir}/build_override.properties" />
+		                <property name="example.default.default.config" value="" />
+                        <input-save message="Select the default config file to use if no such file is specified on the command line" 
+		                    validargs="${config.file.list}" defaultvalue="${example.default.default.config}" 
+                            addproperty="default.config" propertyfile="${site.dir}/build_override.properties" />
                     </else>
                 </if>
             </else>
@@ -707,6 +712,7 @@
             <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
             <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
             <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
+            <fileset dir="${site.dir}" includes="extra_data/**" />
         </one-jar>
         
         <delete_merged_maps />
@@ -967,6 +973,7 @@
             <main jar="${buildtools.path}/doesntexist.jar" />
             <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
             <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
+            <fileset dir="${site.dir}" includes="extra_data/**" />
             <fileset dir="${site.test.build.dir}" includes="**/*.class" />
         </one-jar>
         
