@@ -21,15 +21,16 @@ import org.solrmarc.marc.MarcPrinter;
 @RunWith(Parameterized.class)
 public class ParameterizedIndexTest
 {
+    String config;
     String recordFilename;
     String fieldToCheck;
     String expectedValue;
     static String dataDirectory;
     static String dataFile;
-    static String config;
     
-    public ParameterizedIndexTest(String recordFilename, String fieldToCheck, String expectedValue)
+    public ParameterizedIndexTest(String config, String recordFilename, String fieldToCheck, String expectedValue)
     {
+        this.config = config;
         this.recordFilename = recordFilename;
         this.fieldToCheck = fieldToCheck;
         this.expectedValue = expectedValue;
@@ -59,7 +60,7 @@ public class ParameterizedIndexTest
         {
             assertEquals("Array entries should be equal", expected[i], results[i]);
         }
-        System.out.println(recordFilename + " : " + fieldToCheck + " --> " + expectedValue);
+        System.out.println(config + " : " + recordFilename + " : " + fieldToCheck + " --> " + expectedValue);
     }
     
     @Parameters
@@ -67,8 +68,6 @@ public class ParameterizedIndexTest
     {
         dataDirectory = System.getProperty("test.data.path");
         dataFile = System.getProperty("test.data.file");
-        config = System.getProperty("test.config.props");
-        System.out.println("Using config: "+ config);
         String fullIndexTestFilename = dataDirectory + File.separator + dataFile;
         File file = new File(fullIndexTestFilename);
         BufferedReader rIn = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
@@ -77,8 +76,8 @@ public class ParameterizedIndexTest
         while (( line = rIn.readLine()) != null)
         {
             if (line.startsWith("#") || line.trim().length() == 0) continue;
-            String split[] = line.split(", ", 3);
-            if (split.length == 3) 
+            String split[] = line.split(", ", 4);
+            if (split.length == 4) 
                 result.add(split);
         }
         return(result);
