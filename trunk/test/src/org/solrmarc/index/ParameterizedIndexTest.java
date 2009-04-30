@@ -5,16 +5,13 @@ import static org.junit.Assert.assertEquals;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -62,6 +59,7 @@ public class ParameterizedIndexTest
         {
             assertEquals("Array entries should be equal", results[i], expected[i]);
         }
+        System.out.println(recordFilename + " : " + fieldToCheck + " --> " + expectedValue);
     }
     
     @Parameters
