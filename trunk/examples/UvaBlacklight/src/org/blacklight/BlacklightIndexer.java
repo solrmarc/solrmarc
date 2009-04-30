@@ -354,7 +354,14 @@ public class BlacklightIndexer extends SolrIndexer
                             sep = ",";
                         }
                     }
-                    results.add(sb.toString());
+                    if (sb.length() > 100 || valueArr.length > 20)
+                    {
+                        results.add(prefix + " (" + valueArr.length + " instances)");
+                    }
+                    else
+                    {
+                        results.add(sb.toString());
+                    }
                 }
             }
             return(results);
@@ -445,27 +452,64 @@ public class BlacklightIndexer extends SolrIndexer
         return(result);
     }
     
-    public String getShadowedLocation(final Record record, String propertiesMap)
+//    public Set<String> getLocationWithShadowing(final Record record, String propertiesMap)
+//    {
+//        String mapName = loadTranslationMap(null, propertiesMap);
+//
+//        Set<String> fields = getFieldList(record, "999kl';'");
+//        Set<String> result = new LinkedHashSet<String>();
+//        for (String field : fields)
+//        {
+//            String fparts[] = field.split(";");
+//            if (fparts.length == 1)
+//            {
+//                String mappedFpart = Utils.remap(fparts[0], findMap(mapName), true);
+//                if (mappedFpart != null) result.add(mappedFpart);
+//            }
+//            else if (fparts.length == 2)
+//            {
+//                String mappedFpart1 = Utils.remap(fparts[0], findMap(mapName), true);
+//                String mappedFpart2 = Utils.remap(fparts[1], findMap(mapName), true);
+//                if (mappedFpart1 != null && mappedFpart1.equals("-") && mappedFpart2 != null)
+//                {
+//                    result.add(mappedFpart2);
+//                }
+//                else if (mappedFpart1 != null  && mappedFpart2 != null)
+//                {
+//                    result.add(mappedFpart1);
+//                    result.add(mappedFpart2);
+//                }
+//            }
+//        }
+//        return(result);        
+//    }
+    
+    public String getShadowedLocation(final Record record, String propertiesMap, String returnHidden, String processExtra)
     {
-        if (addnlShadowedIds == null)
+        boolean processExtraShadowedIds = processExtra.startsWith("extraIds");
+        if (processExtraShadowedIds)
         {
-            addnlShadowedIds = new LinkedHashSet<String>();
-            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(null, "extra_data/AllShadowedIds.txt");
-            BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
-            String id;
-            try
+            if (addnlShadowedIds == null)
             {
-                while ((id = addnlIdsReader.readLine()) != null)
+                addnlShadowedIds = new LinkedHashSet<String>();
+                InputStream addnlIdsStream = Utils.getPropertyFileInputStream(null, "extra_data/AllShadowedIds.txt");
+                BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
+                String id;
+                try
                 {
-                    if (!id.startsWith("#"))  addnlShadowedIds.add(id);
+                    while ((id = addnlIdsReader.readLine()) != null)
+                    {
+                        if (!id.startsWith("#"))  addnlShadowedIds.add(id);
+                    }
+                }
+                catch (IOException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
             }
-            catch (IOException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
         }
+        boolean returnHiddenRecs = returnHidden.startsWith("return");
         String mapName = loadTranslationMap(null, propertiesMap);
         
         Set<String> fields = getFieldList(record, "999kl';'");
@@ -489,10 +533,14 @@ public class BlacklightIndexer extends SolrIndexer
             }
         }
         String result = (visible ? "VISIBLE" : "HIDDEN"); 
-        if (visible && addnlShadowedIds.contains(record.getControlNumber()))
+        if (processExtraShadowedIds && visible && addnlShadowedIds.contains(record.getControlNumber()))
         {
             result = "HIDDEN-OVERRIDE";
         }  
+        if (!visible && !returnHiddenRecs)
+        {
+            return(null);
+        }
         return(result);
     }
 }
