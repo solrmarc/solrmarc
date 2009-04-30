@@ -808,6 +808,10 @@ public class SolrIndexer
             {
                 result.add(findMap(mapName).get(""));
             }
+            if (findMap(mapName).containsKey("__DEFAULT"))
+            {
+                result.add(findMap(mapName).get("__DEFAULT"));
+            }
         }
         Iterator<String> iter = result.iterator();
         if (iter.hasNext()) 

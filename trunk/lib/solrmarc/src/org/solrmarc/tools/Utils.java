@@ -466,6 +466,10 @@ public final class Utils {
         {
             result = map.get(fieldVal);
         }
+        else if (allowDefault && map.containsKey("__DEFAULT"))
+        {
+            result = map.get("__DEFAULT");
+        }                      
         else if (allowDefault && map.containsKey(""))
         {
             result = map.get("");
