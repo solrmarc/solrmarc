@@ -7,6 +7,33 @@ E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
 
+if [ $# -eq 0 ]
+  then
+    echo "    Usage: `basename $0` http://remoteMachine:port/solr id:u30980"
+    echo "    Usage: `basename $0` id:u38989"
+    exit $E_BADARGS
+fi
+
+id=
+url=
+
+case $1 in
+http*) url=$1 ;;
+.*:.*) query=$1 ;;
+.*) id=$1 ;;
+esac
+
+case $2 in
+http*) url=$2 ;;
+.*:.*) query=$2 ;;
+.*) id=$2 ;;
+esac
+
+if [ "$query" == "" -a "$id" != ""] 
+then
+    query="id:$id"
+fi
+
 if [[ "$SOLRMARC_MEM_ARGS" == "" ]] 
 then
     SOLRMARC_MEM_ARGS='@MEM_ARGS@'
@@ -14,7 +41,12 @@ fi
 
 SOLRWAR_OR_JARS=@SOLR_JAR_DEF@
 
-java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -Done-jar.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3 2> /dev/null
+if [ "$url" == "" ]
+then
+    java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -Done-jar.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $query
+else
+    java $SOLRMARC_MEM_ARGS -Done-jar.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar $scriptdir/@CUSTOM_JAR_NAME@ $url $query
+fi
 
 exit 0
 
