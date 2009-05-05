@@ -19,17 +19,17 @@ url=
 
 case $1 in
 http*) url=$1 ;;
-.*:.*) query=$1 ;;
-.*) id=$1 ;;
+*:*) query=$1 ;;
+[A-Za-z]*) id=$1 ;;
 esac
 
 case $2 in
 http*) url=$2 ;;
-.*:.*) query=$2 ;;
-.*) id=$2 ;;
+*:*) query=$2 ;;
+[A-Za-z]*) id=$2 ;;
 esac
 
-if [ "$query" == "" -a "$id" != ""] 
+if [[ "$query" == "" && "$id" != "" ]]
 then
     query="id:$id"
 fi
@@ -43,7 +43,7 @@ SOLRWAR_OR_JARS=@SOLR_JAR_DEF@
 
 if [ "$url" == "" ]
 then
-    java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -Done-jar.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $query
+    java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -Done-jar.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $query 2> /dev/null
 else
     java $SOLRMARC_MEM_ARGS -Done-jar.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar $scriptdir/@CUSTOM_JAR_NAME@ $url $query
 fi
