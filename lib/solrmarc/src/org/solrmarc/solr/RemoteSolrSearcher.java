@@ -68,6 +68,7 @@ public class RemoteSolrSearcher
             if (record != null)  
             {
                 output.write(record);
+                System.out.flush();
             }
         }
         output.close();
