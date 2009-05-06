@@ -503,6 +503,7 @@ public class SolrIndexer
         {
             Method method;
             Object retval;
+            Class<?> returnType;
             if (indexParm.indexOf("(") != -1)
             {
                 String functionName = indexParm.substring(0, indexParm.indexOf('('));
@@ -520,22 +521,26 @@ public class SolrIndexer
                 	objParms[i+1] = dequote(parms[i].trim()); 
                 }
                 method = getClass().getMethod(functionName, parmClasses);
+                returnType = method.getReturnType();
                 retval = method.invoke(this, objParms);
             }
             else 
             {
                 method = getClass().getMethod(indexParm, new Class[]{Record.class});
+                returnType = method.getReturnType();
                 retval = method.invoke(this, new Object[]{record});
             }
             
-            if (retval instanceof Map) 
+            if (returnType.isAssignableFrom(Map.class)) 
             {
+                if (retval == null)  return(indexType.equals("customDeleteRecordIfFieldEmpty"));
                 if (indexType.equals("customDeleteRecordIfFieldEmpty") && ((Map<String, String>)retval).size()== 0)
                     return(true);
-                indexMap.putAll((Map<String, String>)retval);         
+                if (retval != null) indexMap.putAll((Map<String, String>)retval);         
             }
-            else if (retval instanceof Set) 
+            else if (returnType.isAssignableFrom(Set.class)) 
             {
+                if (retval == null)  return(indexType.equals("customDeleteRecordIfFieldEmpty"));
                 Set<String> fields = (Set<String>) retval;
                 if (mapName != null && findMap(mapName) != null)
                     fields = Utils.remap(fields, findMap(mapName), true);
@@ -544,13 +549,12 @@ public class SolrIndexer
                     return(true);
                 addFields(indexMap, indexField, null, fields);
             }
-            else if (retval instanceof String)
+            else if (returnType.isAssignableFrom(String.class))
             {
+                if (retval == null)  return(indexType.equals("customDeleteRecordIfFieldEmpty"));
                 String field = (String) retval;
                 if (mapName != null && findMap(mapName) != null)
                     field = Utils.remap(field, findMap(mapName), true);
-                if (indexType.equals("customDeleteRecordIfFieldEmpty") && retval == null)
-                    return(true);
                 addField(indexMap, indexField, null, field);
             }
         }
@@ -1170,7 +1174,7 @@ public class SolrIndexer
         Set<String> set = getFieldList(record,"8806");
         
         if (set.isEmpty())
-            return null;
+            return set;
         
         String[] tags = fieldSpec.split(":");
         Set<String> result = new LinkedHashSet<String>();
