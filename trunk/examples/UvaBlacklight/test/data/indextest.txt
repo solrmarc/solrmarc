@@ -15,6 +15,22 @@ blacklight_config.properties, u200.mrc, shadowed_location_facet, VISIBLE
 blacklight_config.properties, u210.mrc, shadowed_location_facet, VISIBLE
 blacklight_config.properties, u63.mrc, shadowed_location_facet, 
 
+blacklight_config.properties, u3344744.mrc, location_facet, 
+blacklight_config.properties, u3344744.mrc, library_facet, 
+blacklight_config.properties, u3344744.mrc, shadowed_location_facet, 
+
+blacklight_config.properties, u2956.mrc, location_facet, Fine Arts Regular Stacks|Ivy Annex
+blacklight_config.properties, u2956.mrc, library_facet, Fine Arts|Ivy Annex
+blacklight_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
+
+blacklight_sas_config.properties, u3344744.mrc, location_facet, Semester at Sea Collection
+blacklight_sas_config.properties, u3344744.mrc, library_facet, Semester at Sea
+blacklight_sas_config.properties, u3344744.mrc, shadowed_location_facet, VISIBLE
+
+blacklight_sas_config.properties, u2956.mrc, location_facet, Semester at Sea Collection
+blacklight_sas_config.properties, u2956.mrc, library_facet, Semester at Sea
+blacklight_sas_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
+
 blacklight_shadowed_config.properties, u60.mrc, call_number_display, DP269.27.S67 H47 1982  V.1, V.2
 blacklight_shadowed_config.properties, u55.mrc, call_number_display, PR4231.A43 1984  v.1, v.2, v.3, v.4, v.5, v.6, v.7, v.8, v.9, v.10, v.11, v.12, v.13
 blacklight_shadowed_config.properties, u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
@@ -24,3 +40,14 @@ blacklight_shadowed_config.properties, u642.mrc, call_number_display, ML5.G654 (
 blacklight_shadowed_config.properties, u200.mrc, shadowed_location_facet, HIDDEN-OVERRIDE
 blacklight_shadowed_config.properties, u210.mrc, shadowed_location_facet, VISIBLE
 blacklight_shadowed_config.properties, u63.mrc, shadowed_location_facet, HIDDEN
+
+blacklight_shadowed_config.properties, u3344744.mrc, location_facet, 
+blacklight_shadowed_config.properties, u3344744.mrc, library_facet, 
+blacklight_shadowed_config.properties, u3344744.mrc, shadowed_location_facet, HIDDEN
+
+blacklight_shadowed_config.properties, u2956.mrc, location_facet, Fine Arts Regular Stacks|Ivy Annex
+blacklight_shadowed_config.properties, u2956.mrc, library_facet, Fine Arts|Ivy Annex
+blacklight_shadowed_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
+
+
+
