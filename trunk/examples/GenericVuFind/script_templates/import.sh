@@ -62,7 +62,7 @@ fi
 ##################################################
 if [ -z "$SOLRMARC_HOME" ]
 then
-  SOLRMARC_HOME="$VUFIND_HOME/import/solrmarc"
+  SOLRMARC_HOME="$VUFIND_HOME/indexer/solrmarc"
 fi
 
 
