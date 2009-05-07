@@ -25,7 +25,7 @@ fi
 
 # jar uf "$jar" $file
 java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "$jar" JarUtils.jar $scriptdir
-java -classpath $scriptdir/JarUtils.jar JarUpdater "$jar" $file > /dev/null
+java -classpath $scriptdir/JarUtils.jar JarUpdate "$jar" $file > /dev/null
 rm -f $scriptdir/JarUtils.jar
 
 echo "Property file: $file  updated into jar file."
