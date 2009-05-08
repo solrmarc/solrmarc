@@ -55,10 +55,12 @@ public class ParameterizedIndexTest
             //System.out.println("" + i + ":  " + resultLines[i] + "   -->  " + results[i] );
         }
         String expected[] = expectedValue.split("[|]");
-        assertEquals("Array lengths should be equal", expected.length, results.length);
+        assertEquals("For test: " + config + " : " + recordFilename + " : " + fieldToCheck + "\n" +
+                     "    Array lengths should be equal", expected.length, results.length);
         for (int i = 0; i < results.length; i++)
         {
-            assertEquals("Array entries should be equal", expected[i], results[i]);
+            assertEquals("For test: " + config + " : " + recordFilename + " : " + fieldToCheck + "\n" +
+                         "    Array entries should be equal", expected[i], results[i]);
         }
         System.out.println(config + " : " + recordFilename + " : " + fieldToCheck + " --> " + expectedValue);
     }
