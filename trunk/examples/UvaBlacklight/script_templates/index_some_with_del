@@ -1,6 +1,16 @@
 #!/bin/sh
 JAVA_HOME=/usr/java/latest
 export JAVA_HOME
+if [ $# -eq 0 ]
+  then
+    echo "    Usage: `basename $0` /directory/containing/marc/files  'MarcFieldSubfield/string to look for' 'regexForFileNameMacthing' "
+    echo "  example: `basename $0` /directory/containing/marc/files  '999m/AT-SEA' 'regexForFileNameMacthing' "
+    echo "  example: `basename $0` /directory/containing/marc/files  '856u' 'regexForFileNameMacthing' "
+    echo "  example: `basename $0` /directory/containing/marc/files  'XXXa/string'  "
+    echo "  example: `basename $0` /directory/containing/marc/files  'XXXa' 'regexForFileNameMacthing' "
+    exit $E_BADARGS
+fi
+
 fpath=$1
 marcpattern=$2
 fpattern=$3
