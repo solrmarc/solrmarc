@@ -1,6 +1,13 @@
 #!/bin/sh
 JAVA_HOME=/usr/java/latest
 export JAVA_HOME
+if [ $# -eq 0 ]
+  then
+    echo "    Usage: `basename $0` /directory/containing/marc/files  'regexForFileNameMacthing' "
+    echo "      or : `basename $0` /directory/containing/marc/files "
+    exit $E_BADARGS
+fi
+
 fpath=$1
 fpattern=$2
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
