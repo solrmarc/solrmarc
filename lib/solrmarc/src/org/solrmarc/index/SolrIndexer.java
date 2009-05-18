@@ -870,6 +870,7 @@ public class SolrIndexer
     public String getDate(Record record)
     {
         String date = getFieldVals(record, "260c", ", ");
+        if (date == null || date.length() == 0) return(null);
         return Utils.cleanDate(date);
     }
 
