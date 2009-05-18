@@ -454,16 +454,26 @@ public class BlacklightIndexer extends SolrIndexer
 
         Set<String> result = getFieldList(record, "999t");
         result = Utils.remap(result, findMap(mapName3), false);
-        String format_007 = getFirstFieldVal(record, mapName2, "007[0]");
-        if (format_007 != null) 
-        {
-            result.add(format_007);
-        }
-        else 
-        {
-            String broadFormat = getFirstFieldVal(record, mapName1, "000[6-7]:000[6]");
-            if (broadFormat != null) result.add(broadFormat);
-        }
+
+        Set<String> urls = getFieldList(record, "856u");
+	    if (Utils.setItemContains(urls, "serialssolutions"))
+	    {
+            String serialsFormat = Utils.remap("as", findMap(mapName1), true);
+            if (serialsFormat != null) result.add(serialsFormat);
+	    }
+	    else
+	    {
+	        String format_007 = getFirstFieldVal(record, mapName2, "007[0]");
+            if (format_007 != null) 
+            {
+                result.add(format_007);
+            }
+            else 
+            {
+                String broadFormat = getFirstFieldVal(record, mapName1, "000[6-7]:000[6]");
+                if (broadFormat != null) result.add(broadFormat);
+            }
+	    }
         return(result);
     }
     
