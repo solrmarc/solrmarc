@@ -246,11 +246,11 @@ public final class Utils {
         } 
 		if (cleanDate != null)
 		{
-            logger.info("Date : "+ date + " mapped to : "+ cleanDate);		    
+            logger.debug("Date : "+ date + " mapped to : "+ cleanDate);		    
 		}
 		else
 		{
-		    logger.info("No Date match: "+ date);
+		    logger.debug("No Date match: "+ date);
 		}
 		return cleanDate;
 	}
