@@ -45,7 +45,8 @@ public class BooklistReader extends SolrReIndexer
     {
         super(addArg(args, "NONE"));
         loadLocalProperties(configProps);
-        processAdditionalArgs(args);
+        //handle args that weren't grabbed by some super class.
+        processAdditionalArgs(this.addnlArgs);
         documentCache = new LinkedHashMap<String, Map<String, Object>>();
     }
     
