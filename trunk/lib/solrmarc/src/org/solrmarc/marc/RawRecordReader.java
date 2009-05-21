@@ -120,12 +120,14 @@ public class RawRecordReader
                 // e.printStackTrace();
                 logger.error(e.getMessage());
             }
-            if (recordStr.startsWith("001"))
+            String leader = new String(byteArray);
+            int offset = Integer.parseInt(leader.substring(12,17)) - 24;
+            int dirOffset = 0;
+            String fieldNum = recordStr.substring(dirOffset, dirOffset+3);
+            for ( ;fieldNum.equals("001"); dirOffset += 12, fieldNum = recordStr.substring(dirOffset, dirOffset+3))
             {
-                String leader = new String(byteArray);
-                int offset = Integer.parseInt(leader.substring(12,17)) - 24;
-                int length = Integer.parseInt(recordStr.substring(3,7));
-                int offset2 = Integer.parseInt(recordStr.substring(7,12));
+                int length = Integer.parseInt(recordStr.substring(dirOffset + 3, dirOffset + 7));
+                int offset2 = Integer.parseInt(recordStr.substring(dirOffset + 7, dirOffset + 12));
                 String id = recordStr.substring(offset+offset2, offset+offset2+length-1).trim();
                 if ( (idsLookedFor == null && id.matches(idRegex)) ||
                      (idsLookedFor != null && idsLookedFor.contains(id) ) )
