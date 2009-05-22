@@ -380,9 +380,11 @@ public class VuFindIndexer extends SolrIndexer
 
         if (val != null) {
             String [] callNumberSubject = val.toUpperCase().split("[^A-Z]+");
-        	return callNumberSubject[0];
-        } else {
-            return val;
+        	if (callNumberSubject.length > 0)
+        	{
+        	    return callNumberSubject[0];
+        	}
+        return(null);
         }
     }
 
