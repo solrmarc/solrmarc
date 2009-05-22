@@ -384,8 +384,8 @@ public class VuFindIndexer extends SolrIndexer
         	{
         	    return callNumberSubject[0];
         	}
-        return(null);
         }
+        return(null);
     }
 
 }
