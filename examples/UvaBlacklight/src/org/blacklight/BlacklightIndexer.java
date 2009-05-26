@@ -560,7 +560,7 @@ public class BlacklightIndexer extends SolrIndexer
         String result = (visible ? "VISIBLE" : "HIDDEN"); 
         if (processExtraShadowedIds && visible && addnlShadowedIds.contains(record.getControlNumber()))
         {
-            result = "HIDDEN-OVERRIDE";
+            result = "HIDDEN";
         }  
         if (!visible && !returnHiddenRecs)
         {
