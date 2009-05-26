@@ -39,8 +39,8 @@ blacklight_sas_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
 blacklight_shadowed_config.properties, u60.mrc, call_number_display, DP269.27.S67 H47 1982  V.1, V.2
 blacklight_shadowed_config.properties, u55.mrc, call_number_display, PR4231.A43 1984  v.1, v.2, v.3, v.4, v.5, v.6, v.7, v.8, v.9, v.10, v.11, v.12, v.13
 blacklight_shadowed_config.properties, u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
-blacklight_shadowed_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (23 instances)
-blacklight_shadowed_config.properties, u642.mrc, call_number_display, ML5.G654 (43 instances)
+blacklight_shadowed_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (23 volumes)
+blacklight_shadowed_config.properties, u642.mrc, call_number_display, ML5.G654 (43 volumes)
 
 blacklight_shadowed_config.properties, u200.mrc, shadowed_location_facet, HIDDEN-OVERRIDE
 blacklight_shadowed_config.properties, u210.mrc, shadowed_location_facet, VISIBLE
