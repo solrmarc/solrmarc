@@ -64,21 +64,21 @@ a SolrMarc command that accesses the solr index will fail horribly.
 To set the value to use for solrpath you need to run the command and pass in the path of where
 the solr configuration can be found:
 
-setsolrhome /full/path/to/directory/containing/solr/conf
+setsolrhome /full/path/to/directory/containing/solr
 
     or
        
-setsolrhome ./relative/path/to/directory/containing/solr/conf
+setsolrhome ./relative/path/to/directory/containing/solr
 
 
 Note that if the url at which the solr server will be running is incorrect, this command can also 
 be used to set that value as well.  Thusly:
 
-setsolrhome /full/path/to/directory/containing/solr/conf  http://localhost:8080/solr
+setsolrhome /full/path/to/directory/containing/solr  http://localhost:8080/solr
 
     or
        
-setsolrhome ./relative/path/to/directory/containing/solr/conf  http://localhost:8080/solr
+setsolrhome ./relative/path/to/directory/containing/solr  http://localhost:8080/solr
 
 
 Also if the solr server is already running at a particular URL address, you can simply specify
