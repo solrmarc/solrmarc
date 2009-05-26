@@ -369,9 +369,9 @@ public class BlacklightIndexer extends SolrIndexer
                             sep = ",";
                         }
                     }
-                    if (sb.length() > 100 || valueArr.length > 20)
+                    if (sb.length() > 100 || valueArr.length > 10)
                     {
-                        results.add(prefix + " (" + valueArr.length + " instances)");
+                        results.add(prefix + " (" + valueArr.length + " volumes)");
                     }
                     else
                     {
