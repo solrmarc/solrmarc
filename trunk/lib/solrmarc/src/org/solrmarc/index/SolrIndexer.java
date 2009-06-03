@@ -1105,10 +1105,13 @@ public class SolrIndexer
     }
     
     /**
-     * extract all the subfields in a given marc field
+     * extract all the subfields requested in requested marc fields
      * @param record
-     * @param marcFieldNum - the marc field number as a string (e.g. "245")
-     * @return
+     * @param fieldSpec - the desired marc fields and subfields as given in 
+     *   the xxx_index.properties file
+     * @param separator - the character to use between subfield values in the 
+     *   solr field contents
+     * @return Set of values (as strings) for solr field
      */
     public Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
     {
