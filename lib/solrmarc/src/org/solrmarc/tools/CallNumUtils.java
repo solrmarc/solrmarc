@@ -31,6 +31,11 @@ import schema.UnicodeCharUtil;
 
 public final class CallNumUtils {
 	
+
+// TODO:  should have LCcallnum and DeweyCallnum classes, with the call number
+//   pieces as fields.  Then parsing would happen once per call number, not
+//   all over the place and some parsing repeated.
+	
 	/**
 	 * Default Constructor: private, so it can't be instantiated by other objects
 	 */	
@@ -79,7 +84,7 @@ public final class CallNumUtils {
 	public static String DEWEY_CLASS_REGEX = "\\d{1,3}(\\.\\d+)?";
 	
 	/**
-	 * Dewey cutters can have following letters, preceeded by space or not
+	 * Dewey cutters can have following letters, preceded by space or not
 	 */
 	public static String DEWEY_CUTTER_REGEX = CUTTER_REGEX + " *[A-Z]*";
 	
@@ -130,7 +135,9 @@ public final class CallNumUtils {
 	private static StringBuffer reverseDefault = new StringBuffer(75);
 	static {
 		for (int i = 0; i < 75; i++) 
+			// this char is hard to use in URLs
 			reverseDefault.append(Character.toChars(Character.MAX_CODE_POINT));
+//			reverseDefault.append(Character.toChars('~'));  // not working properly ???
 	}
 
 //------ public methods --------	
@@ -252,7 +259,7 @@ public final class CallNumUtils {
 			return null;
 		
 	    String classDigits = getLCClassDigits(rawLCcallnum);
-	
+	    
 	    if (classDigits != null) {
 	        int reqClassLen = b4cutter.indexOf(classDigits) + classDigits.length();
 	
@@ -327,7 +334,7 @@ public final class CallNumUtils {
 						result = result.trim() + " " + rawLCcallnum.substring(endLastIx, matcher.start()).trim();
 	        	}
 	        	else
-	        		result = result.trim() + " " + rawLCcallnum.substring(endLastIx).trim();
+        			result = result + rawLCcallnum.substring(endLastIx);
 	    	}
 	    }
 	    else {
@@ -368,20 +375,26 @@ public final class CallNumUtils {
 	        }
 		}
 		else {
-			// get the call number after the first cutter suffix, then parse out
-			//   the cutter from any potential following text.
+			// get the text AFTER the first cutter suffix, then parse out
+			//   cutter text from any potential following text.
 			int ix = rawLCcallnum.indexOf(firstCutSuffix) + firstCutSuffix.length();
 			if (ix < rawLCcallnum.length()) {
 				String remaining = rawLCcallnum.substring(ix).trim();
-				String regex = "(" + CUTTER_REGEX + ")";
-	    		Pattern pattern = Pattern.compile(regex);
+	    		Pattern pattern = Pattern.compile("(" + CUTTER_REGEX + ")");
 	            Matcher matcher = pattern.matcher(remaining);
 	            if (matcher.find() && matcher.group(1) != null && matcher.group(1).length() > 0) {
 	            	result = matcher.group(1).trim();
 	            }
 			}
+			// if we still have nothing, look for 2nd cutter in first cutter suffix
+			if (result == null) {
+	    		Pattern pattern = Pattern.compile("\\.(" + CUTTER_REGEX + ")");
+				Matcher matcher = pattern.matcher(firstCutSuffix);
+	            if (matcher.find() && matcher.group(1) != null && matcher.group(1).length() > 0) {
+	            	result = matcher.group(1).trim();
+	            }
+			}
 		}
-	    
 		return result;
 	}
 
@@ -405,43 +418,43 @@ public final class CallNumUtils {
 	}
 
 	/**
-	     * return the suffix after the first cutter, if there is one.  This occurs
-	     *  before the second cutter, if there is one.
-	     * @param rawLCcallnum - the entire LC call number, as a string
-	     * @deprecated
-	     */
-	// do we want to separate out year suffixes?  for all or just here? - unused
-	    public static String getSecondLCcutterYearSuffix(String rawLCcallnum) {
-	    	String result = null;
-	    	
-	    	String regex = LC_CLASS_N_CUTTER + " *(" + NOT_CUTTER + ")*"; 
-	        Pattern pattern = Pattern.compile(regex);
-	        Matcher matcher = pattern.matcher(rawLCcallnum);
-	
-	        if (matcher.find() && matcher.groupCount() > 5 
-	        		&& matcher.group(6) != null && matcher.group(6).length() > 0) {
-	
-	        	// this only grabs the FIRST non-cutter string it encounters after
-	        	//   the first cutter
-	        	result = matcher.group(6);
-	        	
-	        	// this is to cope with additional non-cutter strings after the
-	        	//  first cutter  (e.g. M211 .M93 K.240 1988)
-	        	int endLastIx = matcher.end(6); // end of previous match
-	        	if (endLastIx < rawLCcallnum.length()) {
-	            	Pattern cutterPat = Pattern.compile(" *\\.?" + CUTTER_REGEX + ".*");
-	            	matcher.usePattern(cutterPat);
-	            	if (matcher.find(endLastIx)) {
-						if (endLastIx < matcher.start())
-							result = result.trim() + " " + rawLCcallnum.substring(endLastIx, matcher.start()).trim();
-	            	}
-	            	else
-	            		result = result.trim() + rawLCcallnum.substring(endLastIx);
-	        	}
-	        }
-	
-	        return result;
-	    }
+     * return the suffix after the first cutter, if there is one.  This occurs
+     *  before the second cutter, if there is one.
+     * @param rawLCcallnum - the entire LC call number, as a string
+     * @deprecated
+     */
+// do we want to separate out year suffixes?  for all or just here? - unused
+    public static String getSecondLCcutterYearSuffix(String rawLCcallnum) {
+    	String result = null;
+    	
+    	String regex = LC_CLASS_N_CUTTER + " *(" + NOT_CUTTER + ")*"; 
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(rawLCcallnum);
+
+        if (matcher.find() && matcher.groupCount() > 5 
+        		&& matcher.group(6) != null && matcher.group(6).length() > 0) {
+
+        	// this only grabs the FIRST non-cutter string it encounters after
+        	//   the first cutter
+        	result = matcher.group(6);
+        	
+        	// this is to cope with additional non-cutter strings after the
+        	//  first cutter  (e.g. M211 .M93 K.240 1988)
+        	int endLastIx = matcher.end(6); // end of previous match
+        	if (endLastIx < rawLCcallnum.length()) {
+            	Pattern cutterPat = Pattern.compile(" *\\.?" + CUTTER_REGEX + ".*");
+            	matcher.usePattern(cutterPat);
+            	if (matcher.find(endLastIx)) {
+					if (endLastIx < matcher.start())
+						result = result.trim() + " " + rawLCcallnum.substring(endLastIx, matcher.start()).trim();
+            	}
+            	else
+            		result = result.trim() + rawLCcallnum.substring(endLastIx);
+        	}
+        }
+
+        return result;
+    }
 
 	// DEWEY    
 	/**
@@ -461,109 +474,153 @@ public final class CallNumUtils {
 	}
 
 	/**
-	     * return the first cutter in the call number, without the preceding 
-		 * characters (such as the "required" period, which is sometimes missing, 
-		 * or spaces).
-	     * @param rawCallnum - the entire call number, as a string
-	     */
-	// TODO:  need to allow weird suffixes for Dewey, and not see next thing as cutter
-	    public static String getDeweyCutter(String rawCallnum) {
-	    	String result = null;
-	
-			String regex = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_REGEX + ").*";
-	        Pattern pattern = Pattern.compile(regex);
-	        Matcher matcher = pattern.matcher(rawCallnum);
-	
-	        if (matcher.find())
-	        	result = matcher.group(2).trim();
-	        
-			return result;
-	    }
+     * return the first cutter in the call number, without the preceding 
+	 * characters (such as the "required" period, which is sometimes missing, 
+	 * or spaces).
+     * @param rawCallnum - the entire call number, as a string
+     */
+// TODO:  need to allow weird suffixes for Dewey, and not see next thing as cutter
+    public static String getDeweyCutter(String rawCallnum) {
+    	String result = null;
+
+    	// dewey cutters can have trailing letters, preceded by a space or not
+		String regex = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_REGEX + ")(.*)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(rawCallnum);
+
+        if (matcher.find()) {
+        	String cutter = matcher.group(2);
+        	String suffix = matcher.group(3);
+        	if (suffix.length() == 0)
+        		result = cutter.trim();
+        	else {
+	        	// check if there are letters in the cutter that should be assigned
+	        	//  to the suffix
+	        	if (suffix.startsWith(" ") || cutter.endsWith(" "))
+	        		result = cutter.trim();
+	        	else {
+	        		int ix = cutter.lastIndexOf(' ');
+	        		if (ix != -1)
+	        			result = cutter.substring(0, ix);
+	        		else
+	        			result = cutter.trim();
+	        	}
+        	}
+        }
+        else {
+        	regex = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_REGEX + ").*";
+            pattern = Pattern.compile(regex);
+            matcher = pattern.matcher(rawCallnum);
+            
+            if (matcher.find())
+            	result = matcher.group(2).trim();
+        }
+        if (result != null)
+        	return result.trim();
+		return result;
+    }
 
 	/**
-	     * return the first cutter in the call number, without the preceding 
-		 * characters (such as the "required" period, which is sometimes missing, 
-		 * or spaces).
-	     * @param rawCallnum - the entire call number, as a string
-	     */
-	// TODO:  need to allow weird suffixes for Dewey, and not see next thing as cutter
-	// TODO: need to normalize this suffix
-	    public static String getDeweyCutterSuffix(String rawCallnum) {
-	    	String result = null;
-	
-			String regex = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_REGEX + ")(.*)";
-	        Pattern pattern = Pattern.compile(regex);
-	        Matcher matcher = pattern.matcher(rawCallnum);
-	
-	        if (matcher.find())
-	        	result = matcher.group(3).trim();
-	        
-			return result;
-	    }
+     * return the first cutter in the call number, without the preceding 
+	 * characters (such as the "required" period, which is sometimes missing, 
+	 * or spaces).
+     * @param rawCallnum - the entire call number, as a string
+     */
+// TODO:  need to allow weird suffixes for Dewey, and not see next thing as cutter
+// TODO: need to normalize this suffix
+    public static String getDeweyCutterSuffix(String rawCallnum) {
+    	String result = null;
+    	// dewey cutters can have trailing letters, preceded by a space or not
+		String regex = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_REGEX + ")(.*)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(rawCallnum);
 
-	// TODO:  method to normalize year and immediate following chars (no space)?   <-- stupid?
-	    
-	    /**
-	     * given a raw LC call number, return the shelf key - a sortable version
-	     *  of the call number
-	     */
-	    public static String getLCShelfkey(String rawLCcallnum, String recid) {
-	    	StringBuffer resultBuf = new StringBuffer();
-	    	String upcaseLCcallnum = rawLCcallnum.toUpperCase();
-	    	
-	// TODO: don't repeat same parsing -- some of these methods could take the
-	//   portion of the callnumber before the cutter as the input string.    	
-	    	
-	    	// pad initial letters with trailing blanks to be 4 chars long
-	    	StringBuffer initLetBuf = new StringBuffer("    ");
-	    	String lets = getLCstartLetters(upcaseLCcallnum);
-	    	initLetBuf.replace(0, lets.length(), lets);
-	   		resultBuf.append(initLetBuf);
-	    	
-	   		try {
-	   	    	// normalize first numeric portion to a constant length:
-	   	    	//  four digits before decimal, 6 digits after
-	   	   		String digitStr = getLCClassDigits(upcaseLCcallnum);
-	   	   		if (digitStr != null) 
-	   	   			resultBuf.append(normalizeFloat(digitStr, 4, 6));
-	   	   	    else
-	   	   	    	resultBuf.append(normalizeFloat("0", 4, 6));
-	   	    	
-	   	    	// optional string b/t class and first cutter
-	   	    	String classSuffix = getLCClassSuffix(upcaseLCcallnum);
-	   	    	if (classSuffix != null)
-	   	    		resultBuf.append(" " + normalizeSuffix(classSuffix));
-	   	    	
-	   	    	// normalize first cutter  - treat number as a fraction
-	   	    	String firstCutter = getFirstLCcutter(upcaseLCcallnum);
-	   	    	if (firstCutter != null) {
-	   	    		resultBuf.append(" " + normalizeCutter(firstCutter, 6));
-	   	    	
-	   		    	// normalize optional first cutter suffix
-	   		    	String firstCutterSuffix = getFirstLCcutterSuffix(upcaseLCcallnum);
-	   		    	if (firstCutterSuffix != null)
-	   		    		resultBuf.append(" " + normalizeSuffix(firstCutterSuffix));
-	   		    	
-	   		    	// optional second cutter - normalize
-	   		       	String secondCutter = getSecondLCcutter(upcaseLCcallnum);
-	   		    	if (secondCutter != null) {
-	   		    		resultBuf.append(" " + normalizeCutter(secondCutter, 6));
-	   		    		
-	   			    	String secondCutterSuffix = getSecondLCcutterSuffix(upcaseLCcallnum);
-	   			    	if (secondCutterSuffix != null)
-	   			    		resultBuf.append(" " + normalizeSuffix(secondCutterSuffix));
-	   		    	}
-	   	    	}
-	   		} catch (NumberFormatException e) {
-	   			System.err.println("Problem creating shelfkey for record " + recid + "; call number: " + rawLCcallnum);
-	   			e.printStackTrace();
-	   		}
-	    	
-	    	if (resultBuf.length() == 0)
-	    		resultBuf.append(upcaseLCcallnum);
-	
-	    	return resultBuf.toString().trim();
-	    }
+        if (matcher.find()) {
+        	String cutter = matcher.group(2);
+        	String suffix = matcher.group(3);
+			if (suffix.length() > 0) {
+	        	// check if there are letters in the cutter that should be assigned
+	        	//  to the suffix
+	        	if (suffix.startsWith(" ") || cutter.endsWith(" "))
+	        		result = suffix;
+	        	else {
+	        		int ix = cutter.lastIndexOf(' ');
+	        		if (ix != -1)
+	        			result = cutter.substring(ix) + suffix;
+	        		else
+	        			result = suffix;
+	        	}
+			}
+        }
+
+        if (result != null)
+        	return result.trim();
+        return result;
+    }
+
+// TODO:  method to normalize year and immediate following chars (no space)?   <-- stupid?
+    
+    /**
+     * given a raw LC call number, return the shelf key - a sortable version
+     *  of the call number
+     */
+    public static String getLCShelfkey(String rawLCcallnum, String recid) {
+    	StringBuffer resultBuf = new StringBuffer();
+    	String upcaseLCcallnum = rawLCcallnum.toUpperCase();
+    	
+// TODO: don't repeat same parsing -- some of these methods could take the
+//   portion of the callnumber before the cutter as the input string.    	
+    	
+    	// pad initial letters with trailing blanks to be 4 chars long
+    	StringBuffer initLetBuf = new StringBuffer("    ");
+    	String lets = getLCstartLetters(upcaseLCcallnum);
+    	initLetBuf.replace(0, lets.length(), lets);
+   		resultBuf.append(initLetBuf);
+    	
+   		try {
+   	    	// normalize first numeric portion to a constant length:
+   	    	//  four digits before decimal, 6 digits after
+   	   		String digitStr = getLCClassDigits(upcaseLCcallnum);
+   	   		if (digitStr != null) 
+   	   			resultBuf.append(normalizeFloat(digitStr, 4, 6));
+   	   	    else
+   	   	    	resultBuf.append(normalizeFloat("0", 4, 6));
+   	    	
+   	    	// optional string b/t class and first cutter
+   	    	String classSuffix = getLCClassSuffix(upcaseLCcallnum);
+   	    	if (classSuffix != null)
+   	    		resultBuf.append(" " + normalizeSuffix(classSuffix));
+   	    	
+   	    	// normalize first cutter  - treat number as a fraction
+   	    	String firstCutter = getFirstLCcutter(upcaseLCcallnum);
+   	    	if (firstCutter != null) {
+   	    		resultBuf.append(" " + normalizeCutter(firstCutter, 6));
+   	    	
+   		    	// normalize optional first cutter suffix
+   		    	String firstCutterSuffix = getFirstLCcutterSuffix(upcaseLCcallnum);
+   		    	if (firstCutterSuffix != null)
+   		    		resultBuf.append(" " + normalizeSuffix(firstCutterSuffix));
+   		    	
+   		    	// optional second cutter - normalize
+   		       	String secondCutter = getSecondLCcutter(upcaseLCcallnum);
+   		    	if (secondCutter != null) {
+   		    		resultBuf.append(" " + normalizeCutter(secondCutter, 6));
+   		    		
+   			    	String secondCutterSuffix = getSecondLCcutterSuffix(upcaseLCcallnum);
+   			    	if (secondCutterSuffix != null)
+   			    		resultBuf.append(" " + normalizeSuffix(secondCutterSuffix));
+   		    	}
+   	    	}
+   		} catch (NumberFormatException e) {
+   			System.err.println("Problem creating shelfkey for record " + recid + "; call number: " + rawLCcallnum);
+   			e.printStackTrace();
+   		}
+    	
+    	if (resultBuf.length() == 0)
+    		resultBuf.append(upcaseLCcallnum);
+
+    	return resultBuf.toString().trim();
+    }
 
 	/**
 	 * normalize the cutter string for shelf list sorting - make number into  
@@ -641,65 +698,65 @@ public final class CallNumUtils {
 	}
 
 	/**
-	     * return the reverse String value, mapping A --> 9, B --> 8, ...
-	     *   9 --> A
-	     */
-	    private static String reverseAlphanum(String orig) {
-	
-	/*    	
-	    	char[] origArray = orig.toCharArray();
-	
-	    	char[] reverse = new char[origArray.length];
-	    	for (int i = 0; i < origArray.length; i++) {
-	    		Character ch = origArray[i];
-	    		if (ch != null) {
-	            	if (Character.isLetterOrDigit(ch))
-	            		reverse[i] = alphanumReverseMap.get(ch);
-	            	else 
-	            		reverse[i] = reverseNonAlphanum(ch);
-	    		}
-	    	}
-	*/    	    
-	    	StringBuilder reverse = new StringBuilder();
-	    	for (int ix = 0; ix < orig.length(); ) {
-	    		int codePoint = Character.toUpperCase(orig.codePointAt(ix));
-				char[] chs = Character.toChars(codePoint);
-				
-	    		if (Character.isLetterOrDigit(codePoint)) {
-	    			if (chs.length == 1) {
-						char c = chs[0];
-	    				if (alphanumReverseMap.containsKey(c))
-	        				reverse.append(alphanumReverseMap.get(c));
-	    				else {
-	    					// not an ASCII letter or digit
-	    					
-	    					// map latin chars with diacritic to char without
-	        				char foldC;
-	        				if (!UnicodeCharUtil.isCombiningCharacter(c) &&  
-	        					 !UnicodeCharUtil.isSpacingModifier(c) &&
-	        					 (foldC = Utils.foldDiacriticLatinChar(c)) != 0x00)
-	        					// we mapped a latin char w diacritic to plain ascii 
-	        					reverse.append(alphanumReverseMap.get(foldC));
-	        				else
-	        					// single char, but non-latin, non-digit
-	            				// ... view it as after Z in regular alphabet, for now
-	            				reverse.append(SORT_FIRST_CHAR);
-	    				}
-	    			}
-	    			else  {
-	    				// multiple 16 bit character unicode letter
-	    				// ... view it as after Z in regular alphabet, for now
-	    				reverse.append(SORT_FIRST_CHAR);
-	    			}
-	    		}
-	           	else // not a letter or a digit
-	      			reverse.append(reverseNonAlphanum(chs[0]));
-	
-	    		ix += chs.length;
-	    	}
-	
-	    	return new String(reverse);    	
-	    }
+     * return the reverse String value, mapping A --> 9, B --> 8, ...
+     *   9 --> A
+     */
+    private static String reverseAlphanum(String orig) {
+
+/*    	
+    	char[] origArray = orig.toCharArray();
+
+    	char[] reverse = new char[origArray.length];
+    	for (int i = 0; i < origArray.length; i++) {
+    		Character ch = origArray[i];
+    		if (ch != null) {
+            	if (Character.isLetterOrDigit(ch))
+            		reverse[i] = alphanumReverseMap.get(ch);
+            	else 
+            		reverse[i] = reverseNonAlphanum(ch);
+    		}
+    	}
+*/    	    
+    	StringBuilder reverse = new StringBuilder();
+    	for (int ix = 0; ix < orig.length(); ) {
+    		int codePoint = Character.toUpperCase(orig.codePointAt(ix));
+			char[] chs = Character.toChars(codePoint);
+			
+    		if (Character.isLetterOrDigit(codePoint)) {
+    			if (chs.length == 1) {
+					char c = chs[0];
+    				if (alphanumReverseMap.containsKey(c))
+        				reverse.append(alphanumReverseMap.get(c));
+    				else {
+    					// not an ASCII letter or digit
+    					
+    					// map latin chars with diacritic to char without
+        				char foldC;
+        				if (!UnicodeCharUtil.isCombiningCharacter(c) &&  
+        					 !UnicodeCharUtil.isSpacingModifier(c) &&
+        					 (foldC = Utils.foldDiacriticLatinChar(c)) != 0x00)
+        					// we mapped a latin char w diacritic to plain ascii 
+        					reverse.append(alphanumReverseMap.get(foldC));
+        				else
+        					// single char, but non-latin, non-digit
+            				// ... view it as after Z in regular alphabet, for now
+            				reverse.append(SORT_FIRST_CHAR);
+    				}
+    			}
+    			else  {
+    				// multiple 16 bit character unicode letter
+    				// ... view it as after Z in regular alphabet, for now
+    				reverse.append(SORT_FIRST_CHAR);
+    			}
+    		}
+           	else // not a letter or a digit
+      			reverse.append(reverseNonAlphanum(chs[0]));
+
+    		ix += chs.length;
+    	}
+
+    	return new String(reverse);    	
+    }
 
 	/**
 	 * for non alpha numeric characters, return a character that will sort
@@ -719,39 +776,38 @@ public final class CallNumUtils {
 	}
 
 	/**
-	     * given a raw Dewey call number, return the shelf key - a sortable 
-	     *  version of the call number
-	     */
-	    public static String getDeweyShelfKey(String rawDeweyCallnum) {
-	    	StringBuffer resultBuf = new StringBuffer();
-	
-	    	// class 
-	    	// float number, normalized to have 3 leading zeros
-	    	//   and trailing zeros if blank doesn't sort before digits
-	    	String classNum = normalizeFloat(getDeweyB4Cutter(rawDeweyCallnum), 3, 8);
-	    	resultBuf.append(classNum);
-	    	
-	    	// cutter   1-3 digits
-	    	// optional cutter letters suffix
-	    	//   letters preceded by space or not.
-	
-	    	// normalize cutter  - treat number as a fraction.
-	//   TODO:  normalize dewey cutter 
-	    	String cutter = getDeweyCutter(rawDeweyCallnum);
-	    	if (cutter != null)
-	    		resultBuf.append(" " + cutter);
-	
-	    	// optional suffix (year, part, volume, edition) ...
-	    	String cutterSuffix = getDeweyCutterSuffix(rawDeweyCallnum);
-	    	if (cutterSuffix != null)
-	    		resultBuf.append(" " + cutterSuffix);
-	    	
-	    	
-	    	if (resultBuf.length() == 0)
-	    		resultBuf.append(rawDeweyCallnum);
-	
-	    	return resultBuf.toString().trim();
-	    }   
+     * given a raw Dewey call number, return the shelf key - a sortable 
+     *  version of the call number
+     */
+    public static String getDeweyShelfKey(String rawDeweyCallnum) {
+    	StringBuffer resultBuf = new StringBuffer();
+
+    	// class 
+    	// float number, normalized to have 3 leading zeros
+    	//   and trailing zeros if blank doesn't sort before digits
+    	String classNum = normalizeFloat(getDeweyB4Cutter(rawDeweyCallnum), 3, 8);
+    	resultBuf.append(classNum);
+    	
+    	// cutter   1-3 digits
+    	// optional cutter letters suffix
+    	//   letters preceded by space or not.
+
+    	// normalize cutter  - treat number as a fraction.
+    	String cutter = getDeweyCutter(rawDeweyCallnum);
+    	if (cutter != null)
+    		resultBuf.append(" " + cutter);
+
+    	// optional suffix (year, part, volume, edition) ...
+    	String cutterSuffix = getDeweyCutterSuffix(rawDeweyCallnum);
+    	if (cutterSuffix != null)
+    		resultBuf.append(" " + normalizeSuffix(cutterSuffix));
+    	
+    	
+    	if (resultBuf.length() == 0)
+    		resultBuf.append(rawDeweyCallnum);
+
+    	return resultBuf.toString().trim();
+    }   
 
 	    
 	/**
@@ -781,8 +837,103 @@ public final class CallNumUtils {
 			norm = norm.substring(0, norm.length() - 1);
 		return norm;
 	}
-			
+		
+	private static String PUNCT_PREFIX = "([\\.:\\/])?";
+	private static String NS_PREFIX = "(n\\.s\\.?\\,? ?)?";
+	private static String VOL_LETTERS = "[\\:\\/]?(bd|jahrg|new ser|no|pts?|ser|t|v|vols?|vyp)";
+	private static String VOL_NUMBERS = "\\d+([\\/-]\\d+)?( \\d{4}([\\/-]\\d{4})?)?( ?suppl\\.?)?";
+	private static String VOL_NUMBERS_LOOSER = "\\d+.*";
+	private static String VOL_NUM_AS_LETTERS = "[A-Z]([\\/-]\\[A-Z]+)?.*";
+	
+	private static Pattern volPattern = Pattern.compile(PUNCT_PREFIX + NS_PREFIX + VOL_LETTERS + "\\.? ?" + VOL_NUMBERS, Pattern.CASE_INSENSITIVE);
+	private static Pattern volPatternLoose = Pattern.compile(PUNCT_PREFIX + NS_PREFIX + VOL_LETTERS + "\\.? ?" + VOL_NUMBERS_LOOSER, Pattern.CASE_INSENSITIVE);
+	private static Pattern volPatLetters = Pattern.compile(PUNCT_PREFIX + NS_PREFIX + VOL_LETTERS + "[\\/\\. ]" + VOL_NUM_AS_LETTERS , Pattern.CASE_INSENSITIVE);
+	
+	
+	/**
+	 * remove volume information from LC call number if it is present as a 
+	 *   suffix
+	 * @param rawLCcallnum
+	 * @return call number without the volume information, or full call number
+	 *   if no volume information was present.
+	 */
+	public static String removeLCVolSuffix(String rawLCcallnum)
+	{
+		// get suffix to last occurring cutter, if there is one
+		String cut2suffix = getSecondLCcutterSuffix(rawLCcallnum);
+		String lastSuffix = cut2suffix;
+		if (lastSuffix == null) {
+			String cut1suffix = getFirstLCcutterSuffix(rawLCcallnum);
+			if (cut1suffix != null) {
+				// first cutter suffix may contain second cutter
+				String cut2 = getSecondLCcutter(rawLCcallnum);
+				if (cut2 != null) {
+					int ix = cut1suffix.indexOf(cut2);
+					if (ix != -1)
+						lastSuffix = cut1suffix.substring(0, ix);
+					else
+						lastSuffix = cut1suffix;
+				}
+				else
+					lastSuffix = cut1suffix;
+			}
+		}
+		if (lastSuffix == null)
+			// could put last ditch effort with tightest pattern, but don't want to take out too much		
+			return rawLCcallnum;
 
+		Matcher matcher = volPattern.matcher(lastSuffix);
+		if (!matcher.find()) {
+			matcher = volPatternLoose.matcher(lastSuffix);
+			if (!matcher.find()) {
+				matcher = volPatLetters.matcher(lastSuffix);
+			}
+		}
+// look for first / last match, not any match (subroutine?)?
+		if (matcher.find(0)) {
+			// return orig call number with matcher part lopped off.
+			int ix = rawLCcallnum.indexOf(lastSuffix) + matcher.start();
+			if (ix != -1 && ix < rawLCcallnum.length()) {
+				return rawLCcallnum.substring(0, ix).trim();
+			}
+		}				
+		return rawLCcallnum;
+	}
+
+	
+	/**
+	 * remove volume information from Dewey call number if it is present as a 
+	 *   suffix
+	 * @param rawDeweyCallnum
+	 * @return call number without the volume information, or full call number
+	 *   if no volume information was present.
+	 */
+	public static String removeDeweyVolSuffix(String rawDeweyCallnum)
+	{
+		String cutSuffix = getDeweyCutterSuffix(rawDeweyCallnum);
+
+		if (cutSuffix == null)
+			return rawDeweyCallnum;
+		
+		Matcher matcher = volPattern.matcher(cutSuffix);
+		if (!matcher.find()) {
+			matcher = volPatternLoose.matcher(cutSuffix);
+			if (!matcher.find()) {
+				matcher = volPatLetters.matcher(cutSuffix);
+			}
+		}
+		
+		if (matcher.find(0)) {
+			// return orig call number with matcher part lopped off.
+			int ix = rawDeweyCallnum.indexOf(cutSuffix) + matcher.start();
+			if (ix != -1 && ix < rawDeweyCallnum.length()) {
+				return rawDeweyCallnum.substring(0, ix).trim();
+			}
+		}				
+		return rawDeweyCallnum;
+	}
+
+	
 	/**
 	 * return a format string corresponding to the number of digits specified
 	 * @param numDigits - the number of characters the result should have (to be padded
