@@ -1105,7 +1105,8 @@ public class SolrIndexer
     }
     
     /**
-     * extract all the subfields requested in requested marc fields
+     * extract all the subfields requested in requested marc fields.  Each 
+     * instance of each marc field will be put in a separate result.
      * @param record
      * @param fieldSpec - the desired marc fields and subfields as given in 
      *   the xxx_index.properties file
@@ -1117,26 +1118,24 @@ public class SolrIndexer
     {
         Set<String> result = new LinkedHashSet<String>();
 
-        String[] tags = fieldSpec.split(":");
-        for (int i = 0; i < tags.length; i++)
+        String[] fldTags = fieldSpec.split(":");
+        for (int i = 0; i < fldTags.length; i++)
         {
             // Check to ensure tag length is at least 3 characters
-            if (tags[i].length() < 3)
+            if (fldTags[i].length() < 3)
             {
-                System.err.println("Invalid tag specified: " + tags[i]);
+                System.err.println("Invalid tag specified: " + fldTags[i]);
                 continue;
             }
             
-            // Get Field Tag
-            String tag = tags[i].substring(0, 3);
+            String fldTag = fldTags[i].substring(0, 3);
 
-            // Process Subfields
-            String subfieldtags = tags[i].substring(3);
+            String subfldTags = fldTags[i].substring(3);
 
-            List<?> marcFieldList =  record.getVariableFields(tag);
+            List<?> marcFieldList =  record.getVariableFields(fldTag);
             if (!marcFieldList.isEmpty()) 
             {
-                Pattern subfieldPattern = Pattern.compile(subfieldtags.length() == 0 ? "." : subfieldtags);
+                Pattern subfieldPattern = Pattern.compile(subfldTags.length() == 0 ? "." : subfldTags);
                 Iterator<?> fieldIter = marcFieldList.iterator();
                 while (fieldIter.hasNext())
                 {
@@ -1168,6 +1167,161 @@ public class SolrIndexer
         return result;
     }
     
+	/**
+     * For each occurrence of a marc field in the fieldSpec list, extract the
+     * contents of all alphabetical subfields, concatenate them with a space 
+     * separator and add the string to the result set.  Each instance of 
+     * each marc field will be put in a separate result.
+     * @param record - the marc record
+     * @param fieldSpec - the marc fields (e.g. 600:655) in which we will grab
+     *  the alphabetic subfield contents for the result set.  The field may not
+     *  be a control field (must be 010 or greater)
+     * @param multOccurs - "first", "join" or "all" indicating how to handle
+     *  multiple occurrences of field values
+     * @return a set of strings, where each string is the concatenated values
+     *  of all the alphabetic subfields.
+     */
+    @SuppressWarnings("unchecked")
+	public Set<String> getAllAlphaSubfields(final Record record, String fieldSpec) 
+    {
+		Set<String> resultSet = new LinkedHashSet<String>();
+
+		String[] fldTags = fieldSpec.split(":");
+        for (int i = 0; i < fldTags.length; i++)
+        {
+        	String fldTag = fldTags[i];
+            if (fldTag.length() < 3 || Integer.parseInt(fldTag) < 10 )
+            {
+                System.err.println("Invalid marc field specified for getAllAlphaSubfields: " + fldTag);
+                continue;
+            }
+
+	        List<VariableField> varFlds = record.getVariableFields(fldTag);
+	        for (VariableField vf : varFlds) {
+	        	
+	            StringBuffer buffer = new StringBuffer(500);
+	
+	            DataField df = (DataField) vf;
+	    		if (df != null) {
+	    			List<Subfield> subfields = df.getSubfields();
+	    	        for (Subfield sf : subfields) {
+	    	        	if (Character.isLetter(sf.getCode()))
+	    	        	{
+	                        if (buffer.length() > 0) {
+	                            buffer.append(" " + sf.getData());
+	                        } else {
+	                            buffer.append(sf.getData());
+	        				}
+	    	        	}
+	    	        }
+	    		}
+	    		if (buffer.length() > 0)
+	                resultSet.add(buffer.toString());
+	        }
+        }
+
+        return resultSet;
+    }
+
+	/**
+     * For each occurrence of a marc field in the fieldSpec list, extract the
+     * contents of all alphabetical subfields, concatenate them with a space 
+     * separator and add the string to the result set, handling multiple 
+     * occurrences as indicated 
+     * @param record - the marc record
+     * @param fieldSpec - the marc fields (e.g. 600:655) in which we will grab
+     *  the alphabetic subfield contents for the result set.  The field may not
+     *  be a control field (must be 010 or greater)
+     * @param multOccurs - "first", "join" or "all" indicating how to handle
+     *  multiple occurrences of field values
+     * @return a set of strings, where each string is the concatenated values
+     *  of all the alphabetic subfields.
+     */
+	@SuppressWarnings("unchecked")
+	public final Set<String> getAllAlphaSubfields(final Record record, String fieldSpec, String multOccurs) 
+	{
+        Set<String> result = getAllAlphaSubfields(record, fieldSpec);
+        
+        if (multOccurs.equals("first")) {
+        	Set<String> first = new HashSet<String>();
+        	for (String r : result) {
+        		first.add(r);
+        		return first;
+        	}
+        } else if (multOccurs.equals("join")) {
+        	StringBuffer resultBuf = new StringBuffer(); 
+        	for (String r : result) {
+        		if (resultBuf.length() > 0)
+        			resultBuf.append(' ');
+        		resultBuf.append(r);
+        	}
+        	Set<String> resultAsSet = new HashSet<String>();
+        	resultAsSet.add(resultBuf.toString());
+        	return resultAsSet;
+        }
+        // "all" is default
+        
+        return result;
+	}
+
+
+	/**
+     * For each occurrence of a marc field in the fieldSpec list, extract the
+     * contents of all subfields except the ones specified, concatenate the 
+     * subfield contents with a space separator and add the string to the result
+     * set.
+     * @param record - the marc record
+     * @param fieldSpec - the marc fields (e.g. 600:655) in which we will grab
+     *  the alphabetic subfield contents for the result set.  The field may not
+     *  be a control field (must be 010 or greater)
+     * @return a set of strings, where each string is the concatenated values
+     *  of all the alphabetic subfields.
+     */
+    @SuppressWarnings("unchecked")
+	public Set<String> getAllAlphaExcept(final Record record, String fieldSpec) 
+    {
+		Set<String> resultSet = new LinkedHashSet<String>();
+		String[] fldTags = fieldSpec.split(":");
+        for (int i = 0; i < fldTags.length; i++)
+        {
+        	String fldTag = fldTags[i].substring(0, 3);
+            if (fldTag.length() < 3 || Integer.parseInt(fldTag) < 10 )
+            {
+                System.err.println("Invalid marc field specified for getAllAlphaExcept: " + fldTag);
+                continue;
+            }
+
+            String tabooSubfldTags = fldTags[i].substring(3);
+
+            List<VariableField> varFlds = record.getVariableFields(fldTag);
+            for (VariableField vf : varFlds) {
+            	
+                StringBuffer buffer = new StringBuffer(500);
+                DataField df = (DataField) vf;
+        		if (df != null) {
+                
+                    List<Subfield> subfields = df.getSubfields();
+                    
+                    for (Subfield sf: subfields) {
+                        if (Character.isLetter(sf.getCode()) &&
+                        		tabooSubfldTags.indexOf(sf.getCode()) == -1)
+                        {
+                            if (buffer.length() > 0)  
+                            	buffer.append(' ' + sf.getData());
+                            else
+                            	buffer.append(sf.getData());
+                        }
+                    }
+                    if (buffer.length() > 0) 
+                    	resultSet.add(buffer.toString());
+            	}
+            }
+        }
+
+        return resultSet;
+    }
+	
+	
     /**
      * Extract the info from an 880 linked field from a record
      * @param record
