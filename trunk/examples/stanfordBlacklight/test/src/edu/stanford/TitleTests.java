@@ -15,117 +15,6 @@ import org.xml.sax.SAXException;
 public class TitleTests extends BibIndexTest {
 	
 	/**
-	 * Test title_245a_search field
-	 */
-@Test
-	public final void testTitle245aSearch() 
-			throws ParserConfigurationException, IOException, SAXException 
-	{
-		String fldName = "title_245a_search";
-		createIxInitVars("titleTests.mrc");
-		assertSingleValFieldProps(fldName);
-		assertFieldNotStored(fldName, solrCore);
-		
-		assertZeroResults(fldName, "electronic", sis);  // subfield h
-		assertZeroResults(fldName, "john", sis);  // subfield c
-		assertZeroResults(fldName, "one", sis);  // subfield n
-		assertZeroResults(fldName, "handbook", sis);  // in subfield p
-	}
-
-	/**
-	 * Test population of title_search field.
-	 */
-@Test
-	public final void testTitleSearch() 
-			throws ParserConfigurationException, IOException, SAXException 
-	{
-		String fldName = "title_search";
-		createIxInitVars("titleTests.mrc");
-		assertSingleValFieldProps(fldName);
-		assertFieldNotStored(fldName, solrCore);
-
-// not sure what is up with diacritics
-//		assertDocHasFieldValue("245pThenn", fldName, "245 p then n W�chentliches Verzeichnis Reihe B", sis); 
-
-		Set<String> docIds = new HashSet<String>();
-		docIds.add("245NoNorP");
-		docIds.add("245nNotp");
-		docIds.add("245pNotn");
-		docIds.add("245nAndp");
-		docIds.add("245pThenn");
-		docIds.add("245multpn");
-		// default operator is OR, since dismax will make it effectively AND
-		docIds.add("2458");
-		assertSearchResults(fldName, "245 n", docIds, sis);
-		assertSingleResult("245nNotp", fldName, "one", sis);
-		assertSingleResult("245pNotn", fldName, "handbook", sis);
-		assertSingleResult("245pThenn", fldName, "Verzeichnis", sis);
-		assertSingleResult("245nAndp", fldName, "humanities", sis);
-	}
-
-
-	/**
-	 * Test population of title_addl_search field
-	 */
-@Test
-	public final void testTitleAddlSearch() throws ParserConfigurationException, IOException, SAXException 
-	{
-		String fldName = "title_addl_search";
-		createIxInitVars("titleTests.mrc");
-		assertMultiValFieldProps(fldName);
-		assertFieldNotStored(fldName, solrCore);
-	
-		Set<String> docIds = new HashSet<String>();
-		docIds.add("246aNo740");
-		docIds.add("246aAnd740");
-		assertSearchResults(fldName, "740 subfield a", docIds, sis);
-		docIds.clear();
-		docIds.add("246aNo740");
-		docIds.add("246aAnd740");
-		assertSearchResults(fldName, "field 246 subfield a", docIds, sis);
-	}
-
-
-	/**
-	 * Test population of title_old_search field
-	 */
-@Test
-	public final void testOldTitleSearch() throws ParserConfigurationException, IOException, SAXException 
-	{
-		String fldName = "title_old_search";
-		createIxInitVars("titleTests.mrc");
-		assertMultiValFieldProps(fldName);
-		assertFieldNotStored(fldName, solrCore);
-	
-		assertZeroResults(fldName, "780aNott", sis);
-		Set<String> docIds = new HashSet<String>();
-		docIds.add("780tNota");
-		docIds.add("780aAndt");
-		docIds.add("780tNota");
-		assertSearchResults(fldName, "780 subfield t", docIds, sis);
-	}
-	
-	/**
-	 * Test population of title_new_search field
-	 */
-@Test
-	public final void testNewTitleSearch() throws ParserConfigurationException, IOException, SAXException 
-	{
-		String fldName = "title_new_search";
-		createIxInitVars("titleTests.mrc");
-		assertMultiValFieldProps(fldName);
-		assertFieldNotStored(fldName, solrCore);
-	
-		assertZeroResults(fldName, "785aNott", sis);
-		Set<String> docIds = new HashSet<String>();
-		docIds.add("785tNota");
-		docIds.add("785aAndt");
-		assertSearchResults(fldName, "785 subfield t", docIds, sis);
-		assertSingleResult("785tNota", fldName, "only", sis);
-	}
-
-
-	/**
 	 * Test title_245a_display field;  trailing punctuation is removed
 	 */
 @Test
@@ -266,6 +155,7 @@ public class TitleTests extends BibIndexTest {
 
 	/**
 	 * Test uniform title display - it uses 130 when there is one.
+	 *   as of 2009-03-26  first of 130, 240 
 	 *   as of 2008-12-10  only uses 130, not 240 (to mirror title_sort field)
 	 *  Non-filing characters are included.
 	 */
@@ -287,12 +177,12 @@ public class TitleTests extends BibIndexTest {
 		
 		// 240 only
 		String s240 = "De incertitudine et vanitate scientiarum. German";
-		assertDocHasNoFieldValue("575946", fldName, s240, sis);
-		assertDocHasNoFieldValue("666", fldName, s240, sis); 
-		assertDocHasNoFieldValue("2400", fldName, "Wacky", sis); 
-		assertDocHasNoFieldValue("2402", fldName, "A Wacky", sis); 
+		assertDocHasFieldValue("575946", fldName, s240, sis);
+		assertDocHasFieldValue("666", fldName, s240, sis); 
+		assertDocHasFieldValue("2400", fldName, "Wacky", sis); 
+		assertDocHasFieldValue("2402", fldName, "A Wacky", sis); 
 		assertDocHasNoFieldValue("2402", fldName, "Wacky", sis); 
-		assertDocHasNoFieldValue("2407", fldName, "A Wacky Tacky", sis); 
+		assertDocHasFieldValue("2407", fldName, "A Wacky Tacky", sis); 
 		assertDocHasNoFieldValue("2407", fldName, "Tacky", sis); 
 
 		// uniform title 130 if exists, 240 if not.
@@ -305,19 +195,79 @@ public class TitleTests extends BibIndexTest {
 		// numeric subfields
 		assertDocHasFieldValue("1306", fldName, "Sox on Fox", sis);
 		assertDocHasNoFieldValue("1306", fldName, "880-01 Sox on Fox", sis);
-		assertDocHasNoFieldValue("0240", fldName, "sleep little fishies", sis);
+		assertDocHasFieldValue("0240", fldName, "sleep little fishies", sis);
 		assertDocHasNoFieldValue("0240", fldName, "(DE-101c)310008891 sleep little fishies", sis);
-		assertDocHasNoFieldValue("24025", fldName, "la di dah", sis);
+		assertDocHasFieldValue("24025", fldName, "la di dah", sis);
 		assertDocHasNoFieldValue("24025", fldName, "ignore me la di dah", sis);
 		
 		tearDown();
 		createIxInitVars("displayFieldsTests.mrc");
-		assertDocHasNoFieldValue("2401", fldName, "Variations, piano, 4 hands, K. 501, G major", sis); 
-		assertDocHasNoFieldValue("2402", fldName, "Treaties, etc. Poland, 1948 Mar. 2. Protocols, etc., 1951 Mar. 6", sis); 
+		assertDocHasFieldValue("2401", fldName, "Variations, piano, 4 hands, K. 501, G major", sis); 
+		assertDocHasFieldValue("2402", fldName, "Treaties, etc. Poland, 1948 Mar. 2. Protocols, etc., 1951 Mar. 6", sis); 
 		assertDocHasFieldValue("130", fldName, "Bible. O.T. Five Scrolls. Hebrew. Biblioteca apostolica vaticana. Manuscript. Urbiniti Hebraicus 1. 1980.", sis); 
 		assertDocHasFieldValue("11332244", fldName, "Bodkin Van Horn", sis); 
 	}
 
+	/**
+	 * Test multiple occurrences of same field uniform_title_display =
+	 * 130abcdefghijklmnopqrstuvwxyz:240abcdefghijklmnopqrstuvwxyz, first
+	 */
+@Test
+	public final void testUniformTitle() 
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		createIxInitVars("vernacularNonSearchTests.mrc");
+		String fldName = "title_uniform_display";
+		assertDocHasFieldValue("130only", fldName, "main entry uniform title", sis);
+		fldName = "vern_title_uniform_display";
+		assertDocHasFieldValue("130only", fldName, "vernacular main entry uniform title", sis);		
+	
+		// 240 is back in uniform title (despite title_sort being 130 245)
+		fldName = "title_uniform_display";
+		assertDocHasFieldValue("240only", fldName, "uniform title", sis);
+		fldName = "vern_title_uniform_display";
+		assertDocHasFieldValue("240only", fldName, "vernacular uniform title", sis);		
+	}
+
+	/**
+	 * Test series_title_display field 
+	 */
+@Test
+	public final void testSeriesTitleDisplay() 
+			throws IOException, ParserConfigurationException, SAXException 
+	{
+		String fldName = "series_title_display";
+		createIxInitVars("displayFieldsTests.mrc");
+		assertDisplayFldProps(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName, solrCore);
+		
+		assertDocHasFieldValue("4401", fldName, "This American life", sis); 
+		assertDocHasFieldValue("4402", fldName, "The Rare book tapes. Series 1 ; 5", sis); 
+		assertDocHasFieldValue("4403", fldName, "Janua linguarum. Series maior, 100", sis); 
+	}
+	
+	/**
+	 * Test series_display field 
+	 */
+@Test
+	public final void testSeriesDisplay() 
+			throws IOException, ParserConfigurationException, SAXException 
+	{
+		String fldName = "series_display";
+		createIxInitVars("displayFieldsTests.mrc");
+		assertDisplayFldProps(fldName, solrCore, sis);
+		assertFieldMultiValued(fldName, solrCore);
+		
+		assertDocHasFieldValue("4901", fldName, "Education for living series.", sis); 
+		assertDocHasFieldValue("4902", fldName, "Policy series / CES ; 1", sis); 
+		assertDocHasFieldValue("4903", fldName, "Department of State publication ; 7846. Department and Foreign Service series ; 128", sis); 
+		assertDocHasFieldValue("4904", fldName, "Memoire du BRGM, no 123", sis); 
+		assertDocHasFieldValue("4905", fldName, "Annual census of manufactures = Recensement des manufactures,", sis); 
+		assertDocHasFieldValue("4906", fldName, "Bulletin / Engineering Experiment Station ; no. 50", sis); 
+		assertDocHasFieldValue("4907", fldName, "first 490 a first 490 v", sis); 
+		assertDocHasFieldValue("4907", fldName, "second 490 a only", sis); 
+		assertDocHasFieldValue("4907", fldName, "third 490 a third 490 v", sis); 
+	}
 
 	/**
 	 * Test that title sort field uses the correct fields in the correct order
@@ -328,6 +278,7 @@ public class TitleTests extends BibIndexTest {
 	{
 		String fldName = "title_sort";
 		createIxInitVars("titleTests.mrc");
+        assertSortFldProps(fldName, solrCore, sis);
 		
 		// 130 (with non-filing)
 		assertSingleResult("130", fldName, "\"Snimm 130 4 nonfiling\"", sis); 
@@ -357,6 +308,7 @@ public class TitleTests extends BibIndexTest {
 	{
 		String fldName = "title_sort";
 		createIxInitVars("titleTests.mrc");
+        assertSortFldProps(fldName, solrCore, sis);
 		
 		// field is not string; rather tokenized with single term
 		assertTextFieldProperties(fldName, solrCore, sis);
@@ -424,6 +376,7 @@ public class TitleTests extends BibIndexTest {
 	{
 		String fldName = "title_sort";
 		createIxInitVars("titleTests.mrc");
+        assertSortFldProps(fldName, solrCore, sis);
 
 		assertSingleResult("2458", fldName, "\"245 has sub 8\"", sis);
 		assertZeroResults(fldName, "\"1.5\\a 245 has sub 8\"", sis);	
@@ -450,6 +403,7 @@ public class TitleTests extends BibIndexTest {
 	{
 		String fldName = "title_sort";
 		createIxInitVars("titleTests.mrc");
+        assertSortFldProps(fldName, solrCore, sis);
 	
 		assertSingleResult("111", fldName, "\"ind 0 leading quotes\"", sis);
 		assertZeroResults(fldName, "\"\"ind 0 leading quotes\"\"", sis);
@@ -471,33 +425,6 @@ public class TitleTests extends BibIndexTest {
 		assertSingleResult("999", fldName, "everything", sis);
 		// lucene special chars:  + - && || ! ( ) { } [ ] ^ " ~ * ? : \
 		assertZeroResults(fldName, "every!\\\"#$%\\&'\\(\\)\\*\\+,\\-./\\:;<=>\\?@\\[\\\\\\]\\^_`\\{|\\}\\~thing", sis);
-	}
-
-
-	/**
-	 * assert field is indexed, tokenized, has norms, does not have term vectors
-	 *   and is multivalued.  (says nothing about stored)
-	 */
-	private final void assertSingleValFieldProps(String fldName) 
-			throws ParserConfigurationException, IOException, SAXException
-	{
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldIndexed(fldName, solrCore);
-		assertFieldHasNorms(fldName, solrCore);
-		assertFieldNotMultiValued(fldName, solrCore);
-	}
-
-	/**
-	 * assert field is indexed, tokenized, has norms, does not have term vectors
-	 *   and is multivalued.  (says nothing about stored)
-	 */
-	private final void assertMultiValFieldProps(String fldName) 
-			throws ParserConfigurationException, IOException, SAXException
-	{
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldIndexed(fldName, solrCore);
-		assertFieldHasNorms(fldName, solrCore);
-		assertFieldMultiValued(fldName, solrCore);
 	}
 
 }

@@ -216,4 +216,233 @@
       <subfield code="a">pubDate 23xx: 008/7-10 23uu</subfield>
     </datafield>
   </record>
+ 
+<!-- publish_date_sort sorting fun! -->
+  
+  <!-- pubDate 2009 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">az2009</controlfield>
+    <controlfield tag="008">041202s2009    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 2009</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 2008 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ab2008</controlfield>
+    <controlfield tag="008">041202s2008    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 2008</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 2007 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">av2007</controlfield>
+    <controlfield tag="008">041202s2007    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 2007</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 2006 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">az2006</controlfield>
+    <controlfield tag="008">041202s2006    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 2006</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 2005 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">aj2005</controlfield>
+    <controlfield tag="008">041202s2005    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 2005</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 2001 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">aq2001</controlfield>
+    <controlfield tag="008">041202s2001    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 2001</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 2000 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">af2000</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 2000</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 200u -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ax200u</controlfield>
+    <controlfield tag="008">041202s200u    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 200u</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 20uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ao20uu</controlfield>
+    <controlfield tag="008">041202s20uu    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 20uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1999 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">aw1999</controlfield>
+    <controlfield tag="008">041202s1999    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1999</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1998 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ac1998</controlfield>
+    <controlfield tag="008">041202s1998    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1998</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1997 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ae1997</controlfield>
+    <controlfield tag="008">041202s1997    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1997</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1991 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">am1991</controlfield>
+    <controlfield tag="008">041202s1991    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1991</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1990 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ak1990</controlfield>
+    <controlfield tag="008">041202s1990    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1990</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 199u -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ab199u</controlfield>
+    <controlfield tag="008">041202s199u    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 199u</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 19uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ap19uu</controlfield>
+    <controlfield tag="008">041202s19uu    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 19uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1989 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ay1989</controlfield>
+    <controlfield tag="008">041202s1989    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1989</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1959 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">aw1959</controlfield>
+    <controlfield tag="008">041202s1959    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1959</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1958 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ag1958</controlfield>
+    <controlfield tag="008">041202s1958    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1958</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 195u -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">as195u</controlfield>
+    <controlfield tag="008">041202s195u    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 195u</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1899 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ab1899</controlfield>
+    <controlfield tag="008">041202s1899    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1899</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1900 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ar1900</controlfield>
+    <controlfield tag="008">041202s1900    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1900</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 190u -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">as190u</controlfield>
+    <controlfield tag="008">041202s190u    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 190u</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1uuu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">af1uuu</controlfield>
+    <controlfield tag="008">041202s1uuu    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 1uuu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 1uuu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">ah2uuu</controlfield>
+    <controlfield tag="008">041202s2uuu    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 2uuu</subfield>
+    </datafield>
+  </record>
+  
 </collection>

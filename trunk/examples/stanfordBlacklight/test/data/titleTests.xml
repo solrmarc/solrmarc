@@ -73,6 +73,593 @@
     </datafield>
   </record>
 
+  <!-- title 245 all subfields -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a245allSubs</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">245a</subfield>
+      <subfield code="b">245b</subfield>
+      <subfield code="p">245p1</subfield>
+      <subfield code="c">245c</subfield>
+      <subfield code="s">245s</subfield>
+      <subfield code="k">245k1</subfield>
+      <subfield code="f">245f</subfield>
+      <subfield code="n">245n1</subfield>
+      <subfield code="g">245g</subfield>
+      <subfield code="h">245h</subfield>
+      <subfield code="p">245p2</subfield>
+      <subfield code="k">245k2</subfield>
+      <subfield code="n">245n2</subfield>
+    </datafield>
+  </record>
+  
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a2xx</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">2xx fields</subfield>
+    </datafield>
+    <datafield tag="210" ind1=" " ind2=" ">
+      <subfield code="a">210a</subfield>
+      <subfield code="b">210b</subfield>
+      <subfield code="z">nope</subfield>
+    </datafield>
+    <datafield tag="222" ind1=" " ind2=" ">
+      <subfield code="a">222a</subfield>
+      <subfield code="b">222b</subfield>
+      <subfield code="z">nope</subfield>
+    </datafield>
+    <datafield tag="242" ind1=" " ind2=" ">
+      <subfield code="a">242a</subfield>
+      <subfield code="b">242b</subfield>
+      <subfield code="c">nope</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="n">242n</subfield>
+      <subfield code="p">242p</subfield>
+      <subfield code="y">nope</subfield>
+    </datafield>
+    <datafield tag="243" ind1=" " ind2=" ">
+      <subfield code="a">243a</subfield>
+      <subfield code="d">243d</subfield>
+      <subfield code="f">243f</subfield>
+      <subfield code="g">243g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="k">243k</subfield>
+      <subfield code="l">243l</subfield>
+      <subfield code="m">243m</subfield>
+      <subfield code="n">243n</subfield>
+      <subfield code="o">243o</subfield>
+      <subfield code="p">243p</subfield>
+      <subfield code="r">243r</subfield>
+      <subfield code="s">243s</subfield>
+    </datafield>
+    <datafield tag="246" ind1=" " ind2=" ">
+      <subfield code="a">246a</subfield>
+      <subfield code="b">246b</subfield>
+      <subfield code="f">246f</subfield>
+      <subfield code="g">246g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="i">nope</subfield>
+      <subfield code="n">246n</subfield>
+      <subfield code="p">246p</subfield>
+    </datafield>
+    <datafield tag="247" ind1=" " ind2=" ">
+      <subfield code="a">247a</subfield>
+      <subfield code="b">247b</subfield>
+      <subfield code="f">247f</subfield>
+      <subfield code="g">247g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="i">nope</subfield>
+      <subfield code="n">247n</subfield>
+      <subfield code="p">247p</subfield>
+    </datafield>
+  </record>
+  
+<!-- related and analytic titles:  7xx and 505t -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a505</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">five-oh-five</subfield>
+    </datafield>
+    <datafield tag="505" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="g">nope</subfield>
+      <subfield code="r">nope</subfield>
+      <subfield code="t">505t</subfield>
+      <subfield code="u">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a700</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-oh-oh</subfield>
+    </datafield>
+    <datafield tag="700" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="b">nope</subfield>
+      <subfield code="c">nope</subfield>
+      <subfield code="d">700d</subfield>
+      <subfield code="e">nope</subfield>
+      <subfield code="f">700f</subfield>
+      <subfield code="g">700g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="j">700j</subfield>
+      <subfield code="k">700k</subfield>
+      <subfield code="l">700l</subfield>
+      <subfield code="m">700m</subfield>
+      <subfield code="n">700n</subfield>
+      <subfield code="o">700o</subfield>
+      <subfield code="p">700p</subfield>
+      <subfield code="q">nope</subfield>
+      <subfield code="r">700r</subfield>
+      <subfield code="s">700s</subfield>
+      <subfield code="t">700t</subfield>
+      <subfield code="u">nope</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a710</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-one-oh</subfield>
+    </datafield>
+    <datafield tag="710" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="b">nope</subfield>
+      <subfield code="c">nope</subfield>
+      <subfield code="d">710d</subfield>
+      <subfield code="e">nope</subfield>
+      <subfield code="f">710f</subfield>
+      <subfield code="g">710g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="k">710k</subfield>
+      <subfield code="l">710l</subfield>
+      <subfield code="m">710m</subfield>
+      <subfield code="n">710n</subfield>
+      <subfield code="o">710o</subfield>
+      <subfield code="p">710p</subfield>
+      <subfield code="r">710r</subfield>
+      <subfield code="s">710s</subfield>
+      <subfield code="t">710t</subfield>
+      <subfield code="u">nope</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>  
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a711</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-one-one</subfield>
+    </datafield>
+    <datafield tag="711" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="c">nope</subfield>
+      <subfield code="d">nope</subfield>
+      <subfield code="e">nope</subfield>
+      <subfield code="f">711f</subfield>
+      <subfield code="g">711g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="j">nope</subfield>
+      <subfield code="k">711k</subfield>
+      <subfield code="l">711l</subfield>
+      <subfield code="n">711n</subfield>
+      <subfield code="p">711p</subfield>
+      <subfield code="q">nope</subfield>
+      <subfield code="s">711s</subfield>
+      <subfield code="t">711t</subfield>
+      <subfield code="u">nope</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a730</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-thirty</subfield>
+    </datafield>
+    <datafield tag="730" ind1=" " ind2=" ">
+      <subfield code="a">730a</subfield>
+      <subfield code="d">730d</subfield>
+      <subfield code="f">730f</subfield>
+      <subfield code="g">730g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="k">730k</subfield>
+      <subfield code="l">730l</subfield>
+      <subfield code="m">730m</subfield>
+      <subfield code="n">730n</subfield>
+      <subfield code="o">730o</subfield>
+      <subfield code="p">730p</subfield>
+      <subfield code="r">730r</subfield>
+      <subfield code="s">730s</subfield>
+      <subfield code="t">730t</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a740</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-fourty</subfield>
+    </datafield>
+    <datafield tag="740" ind1=" " ind2=" ">
+      <subfield code="a">740a</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="n">740n</subfield>
+      <subfield code="p">740p</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a76x</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-six-something</subfield>
+    </datafield>
+    <datafield tag="760" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="i">nope</subfield>
+      <subfield code="s">760s</subfield>
+      <subfield code="t">760t</subfield>
+    </datafield>
+    <datafield tag="762" ind1=" " ind2=" ">
+      <subfield code="b">nope</subfield>
+      <subfield code="d">nope</subfield>
+      <subfield code="s">762s</subfield>
+      <subfield code="t">762t</subfield>
+    </datafield>
+    <datafield tag="765" ind1=" " ind2=" ">
+      <subfield code="e">nope</subfield>
+      <subfield code="n">nope</subfield>
+      <subfield code="s">765s</subfield>
+      <subfield code="t">765t</subfield>
+    </datafield>
+    <datafield tag="767" ind1=" " ind2=" ">
+      <subfield code="g">nope</subfield>
+      <subfield code="m">nope</subfield>
+      <subfield code="s">767s</subfield>
+      <subfield code="t">767t</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a77x</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-seven-something</subfield>
+    </datafield>
+    <datafield tag="770" ind1=" " ind2=" ">
+      <subfield code="i">nope</subfield>
+      <subfield code="s">770s</subfield>
+      <subfield code="t">770t</subfield>
+    </datafield>
+    <datafield tag="772" ind1=" " ind2=" ">
+      <subfield code="d">nope</subfield>
+      <subfield code="s">772s</subfield>
+      <subfield code="t">772t</subfield>
+    </datafield>
+    <datafield tag="773" ind1=" " ind2=" ">
+      <subfield code="n">nope</subfield>
+      <subfield code="s">773s</subfield>
+      <subfield code="t">773t</subfield>
+    </datafield>
+    <datafield tag="774" ind1=" " ind2=" ">
+      <subfield code="n">nope</subfield>
+      <subfield code="s">774s</subfield>
+      <subfield code="t">774t</subfield>
+    </datafield>
+    <datafield tag="775" ind1=" " ind2=" ">
+      <subfield code="n">nope</subfield>
+      <subfield code="s">775s</subfield>
+      <subfield code="t">775t</subfield>
+    </datafield>
+    <datafield tag="776" ind1=" " ind2=" ">
+      <subfield code="q">nope</subfield>
+      <subfield code="s">776s</subfield>
+      <subfield code="t">776t</subfield>
+    </datafield>
+    <datafield tag="777" ind1=" " ind2=" ">
+      <subfield code="n">nope</subfield>
+      <subfield code="s">777s</subfield>
+      <subfield code="t">777t</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a78x</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-eight-something</subfield>
+    </datafield>
+    <datafield tag="780" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="s">780s</subfield>
+      <subfield code="t">780t</subfield>
+    </datafield>
+    <datafield tag="785" ind1=" " ind2=" ">
+      <subfield code="b">nope</subfield>
+      <subfield code="s">785s</subfield>
+      <subfield code="t">785t</subfield>
+    </datafield>
+    <datafield tag="786" ind1=" " ind2=" ">
+      <subfield code="c">nope</subfield>
+      <subfield code="s">786s</subfield>
+      <subfield code="t">786t</subfield>
+    </datafield>
+    <datafield tag="787" ind1=" " ind2=" ">
+      <subfield code="d">nope</subfield>
+      <subfield code="s">787s</subfield>
+      <subfield code="t">787t</subfield>
+    </datafield>
+  </record>  
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a796</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-nine-six</subfield>
+    </datafield>
+    <datafield tag="796" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="b">nope</subfield>
+      <subfield code="c">nope</subfield>
+      <subfield code="d">797d</subfield>
+      <subfield code="e">nope</subfield>
+      <subfield code="f">796f</subfield>
+      <subfield code="g">796g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="j">796j</subfield>
+      <subfield code="k">796k</subfield>
+      <subfield code="l">796l</subfield>
+      <subfield code="m">796m</subfield>
+      <subfield code="n">796n</subfield>
+      <subfield code="o">796o</subfield>
+      <subfield code="p">796p</subfield>
+      <subfield code="q">nope</subfield>
+      <subfield code="r">796r</subfield>
+      <subfield code="s">796s</subfield>
+      <subfield code="t">796t</subfield>
+      <subfield code="u">nope</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a797</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-nine-seven</subfield>
+    </datafield>
+    <datafield tag="797" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="b">nope</subfield>
+      <subfield code="c">nope</subfield>
+      <subfield code="d">797d</subfield>
+      <subfield code="e">nope</subfield>
+      <subfield code="f">797f</subfield>
+      <subfield code="g">797g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="k">797k</subfield>
+      <subfield code="l">797l</subfield>
+      <subfield code="m">797m</subfield>
+      <subfield code="n">797n</subfield>
+      <subfield code="o">797o</subfield>
+      <subfield code="p">797p</subfield>
+      <subfield code="r">797r</subfield>
+      <subfield code="s">797s</subfield>
+      <subfield code="t">797t</subfield>
+      <subfield code="u">nope</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>  
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a798</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-nine-eight</subfield>
+    </datafield>
+    <datafield tag="798" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="c">nope</subfield>
+      <subfield code="d">nope</subfield>
+      <subfield code="e">nope</subfield>
+      <subfield code="f">798f</subfield>
+      <subfield code="g">798g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="j">nope</subfield>
+      <subfield code="k">798k</subfield>
+      <subfield code="l">798l</subfield>
+      <subfield code="n">798n</subfield>
+      <subfield code="p">798p</subfield>
+      <subfield code="q">nope</subfield>
+      <subfield code="s">798s</subfield>
+      <subfield code="t">798t</subfield>
+      <subfield code="u">nope</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a799</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">seven-nine-nine</subfield>
+    </datafield>
+    <datafield tag="799" ind1=" " ind2=" ">
+      <subfield code="a">799a</subfield>
+      <subfield code="d">799d</subfield>
+      <subfield code="f">799f</subfield>
+      <subfield code="g">799g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="k">799k</subfield>
+      <subfield code="l">799l</subfield>
+      <subfield code="m">799m</subfield>
+      <subfield code="n">799n</subfield>
+      <subfield code="o">799o</subfield>
+      <subfield code="p">799p</subfield>
+      <subfield code="r">799r</subfield>
+      <subfield code="s">799s</subfield>
+      <subfield code="t">799t</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <!-- series title: 4xx and 8xx -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a4x0</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">two-fourty and two-ninety</subfield>
+    </datafield>
+    <datafield tag="440" ind1=" " ind2=" ">
+      <subfield code="a">440a</subfield>
+      <subfield code="n">440n</subfield>
+      <subfield code="p">440p</subfield>
+      <subfield code="v">440v</subfield>
+      <subfield code="w">nope</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+    <datafield tag="490" ind1=" " ind2=" ">
+      <subfield code="a">490a</subfield>
+      <subfield code="l">nope</subfield>
+      <subfield code="v">490v</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a800</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">eight hundred</subfield>
+    </datafield>
+    <datafield tag="800" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="d">800d</subfield>
+      <subfield code="f">800f</subfield>
+      <subfield code="g">800g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="j">800j</subfield>
+      <subfield code="k">800k</subfield>
+      <subfield code="l">800l</subfield>
+      <subfield code="m">800m</subfield>
+      <subfield code="n">800n</subfield>
+      <subfield code="o">800o</subfield>
+      <subfield code="p">800p</subfield>
+      <subfield code="r">800r</subfield>
+      <subfield code="s">800s</subfield>
+      <subfield code="t">800t</subfield>
+      <subfield code="v">800v</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a810</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">eight ten</subfield>
+    </datafield>
+    <datafield tag="810" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="d">810d</subfield>
+      <subfield code="f">810f</subfield>
+      <subfield code="g">810g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="j">nope</subfield>
+      <subfield code="k">810k</subfield>
+      <subfield code="l">810l</subfield>
+      <subfield code="m">810m</subfield>
+      <subfield code="n">810n</subfield>
+      <subfield code="o">810o</subfield>
+      <subfield code="p">810p</subfield>
+      <subfield code="r">810r</subfield>
+      <subfield code="s">810s</subfield>
+      <subfield code="t">810t</subfield>
+      <subfield code="v">810v</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a811</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">eight eleven</subfield>
+    </datafield>
+    <datafield tag="811" ind1=" " ind2=" ">
+      <subfield code="a">nope</subfield>
+      <subfield code="d">nope</subfield>
+      <subfield code="f">811f</subfield>
+      <subfield code="g">811g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="j">nope</subfield>
+      <subfield code="k">811k</subfield>
+      <subfield code="l">811l</subfield>
+      <subfield code="m">nope</subfield>
+      <subfield code="n">811n</subfield>
+      <subfield code="o">nope</subfield>
+      <subfield code="p">811p</subfield>
+      <subfield code="r">nope</subfield>
+      <subfield code="s">811s</subfield>
+      <subfield code="t">811t</subfield>
+      <subfield code="v">811v</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a830</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">eight thirty</subfield>
+    </datafield>
+    <datafield tag="830" ind1=" " ind2=" ">
+      <subfield code="a">830a</subfield>
+      <subfield code="d">830d</subfield>
+      <subfield code="f">830f</subfield>
+      <subfield code="g">830g</subfield>
+      <subfield code="h">nope</subfield>
+      <subfield code="j">nope</subfield>
+      <subfield code="k">830k</subfield>
+      <subfield code="l">830l</subfield>
+      <subfield code="m">830m</subfield>
+      <subfield code="n">830n</subfield>
+      <subfield code="o">830o</subfield>
+      <subfield code="p">830p</subfield>
+      <subfield code="r">830r</subfield>
+      <subfield code="s">830s</subfield>
+      <subfield code="t">830t</subfield>
+      <subfield code="v">830v</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a840</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2="0">
+      <subfield code="a">eight fourty</subfield>
+    </datafield>
+    <datafield tag="840" ind1=" " ind2=" ">
+      <subfield code="a">840a</subfield>
+      <subfield code="v">840v</subfield>
+      <subfield code="x">nope</subfield>
+    </datafield>
+  </record>
+  
   <!-- title2: 246 a but no 740 -->
   <record>
     <leader>66662cim  2200457Ia 45í0</leader>

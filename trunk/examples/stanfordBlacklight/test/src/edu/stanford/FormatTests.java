@@ -10,6 +10,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import org.junit.*;
+
+import edu.stanford.StanfordIndexer.Format;
 import static org.junit.Assert.*;
 
 
@@ -20,31 +22,35 @@ import static org.junit.Assert.*;
 public class FormatTests extends BibIndexTest {
 	
 	private final String testDataFname = "formatTests.mrc";
-	String displayFldName = "format_display";
-	String facetFldName = "format_facet";
+	String displayFldName = "format";
+	String facetFldName = "format";
 
 @Test
-	public final void testFacetFldProperties() 
+	public final void testFormatFieldProperties() 
 		throws ParserConfigurationException, IOException, SAXException
 	{
         createIxInitVars(testDataFname);
-        assertFacetFldProps(facetFldName, solrCore, sis);
+        assertStringFieldProperties(facetFldName, solrCore, sis);
+        assertFieldIndexed(facetFldName, solrCore);
+        assertFieldStored(facetFldName, solrCore);
 		assertFieldMultiValued(facetFldName, solrCore);
-		assertDisplayFldProps(displayFldName, solrCore, sis);
 		
 		// are values as expected?
 		assertEquals("format string incorrect: ", "Book", Format.BOOK.toString());
 		assertEquals("format string incorrect: ", "Computer File", Format.COMPUTER_FILE.toString());
 		assertEquals("format string incorrect: ", "Conference Proceedings", Format.CONFERENCE_PROCEEDINGS.toString());
-		assertEquals("format string incorrect: ", "Journal", Format.JOURNAL.toString());
+	    assertEquals("format string incorrect: ", "Image", Format.IMAGE.toString());
 		assertEquals("format string incorrect: ", "Journal/Periodical", Format.JOURNAL_PERIODICAL.toString());
 		assertEquals("format string incorrect: ", "Manuscript/Archive", Format.MANUSCRIPT_ARCHIVE.toString());
+	    assertEquals("format string incorrect: ", "Microformat", Format.MICROFORMAT.toString());
 		assertEquals("format string incorrect: ", "Map/Globe", Format.MAP_GLOBE.toString());
 		assertEquals("format string incorrect: ", "Music - Recording", Format.MUSIC_RECORDING.toString());
 		assertEquals("format string incorrect: ", "Music - Score", Format.MUSIC_SCORE.toString());
+	    assertEquals("format string incorrect: ", "Newspaper", Format.NEWSPAPER.toString());
 		assertEquals("format string incorrect: ", "Other", Format.OTHER.toString());
-		assertEquals("format string incorrect: ", "Serial Publication", Format.SERIAL_PUBLICATION.toString());
 		assertEquals("format string incorrect: ", "Sound Recording", Format.SOUND_RECORDING.toString());
+	    assertEquals("format string incorrect: ", "Thesis", Format.THESIS.toString());
+	    assertEquals("format string incorrect: ", "Video", Format.VIDEO.toString());
 	}
 
 	/**

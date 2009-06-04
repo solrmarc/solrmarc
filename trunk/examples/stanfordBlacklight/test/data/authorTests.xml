@@ -840,7 +840,6 @@
         </datafield>
     </record>
     
-    
 <!-- 111 mtg name -->
     <record>
         <leader>01260cam a2200349 a 4500</leader>
@@ -865,6 +864,246 @@
         </datafield>
         <datafield tag="245" ind1="0" ind2="0">
             <subfield code="a">mtg name facet from 711 should be: European Conference on Computer Vision  (2006 : Graz, Austria)</subfield>
+        </datafield>
+    </record>
+    
+<!-- author search fields -->
+    <!-- 100 search subfields-->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a100search</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="a">100a</subfield>
+            <subfield code="b">100b</subfield>
+            <subfield code="c">100c</subfield>
+            <subfield code="d">100d</subfield>
+            <subfield code="e">100e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">100g</subfield>
+            <subfield code="j">100j</subfield>
+            <subfield code="q">100q</subfield>
+            <subfield code="u">100u</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">100 search subfields</subfield>
+        </datafield>
+    </record>
+    <!-- 110 search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a110search</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="110" ind1="1" ind2=" ">
+            <subfield code="a">110a</subfield>
+            <subfield code="b">110b</subfield>
+            <subfield code="c">110c</subfield>
+            <subfield code="d">110d</subfield>
+            <subfield code="e">110e</subfield>
+            <subfield code="f">110f</subfield>
+            <subfield code="g">110g</subfield>
+            <subfield code="k">110k</subfield>
+            <subfield code="n">110n</subfield>
+            <subfield code="q">none</subfield>
+            <subfield code="u">110u</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">110 search subfields</subfield>
+        </datafield>
+    </record>
+    <!-- 111 search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a111search</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="111" ind1="1" ind2=" ">
+            <subfield code="a">111a</subfield>
+            <subfield code="b">none</subfield>
+            <subfield code="c">111c</subfield>
+            <subfield code="d">111d</subfield>
+            <subfield code="e">111e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">111g</subfield>
+            <subfield code="j">111j</subfield>
+            <subfield code="n">111n</subfield>
+            <subfield code="q">111q</subfield>
+            <subfield code="u">111u</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">111 search subfields</subfield>
+        </datafield>
+    </record>
+    <!-- 7xx personal name search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a7xxPersonSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="700" ind1="1" ind2=" ">
+            <subfield code="a">700a</subfield>
+            <subfield code="b">700b</subfield>
+            <subfield code="c">700c</subfield>
+            <subfield code="d">700d</subfield>
+            <subfield code="e">700e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">700g</subfield>
+            <subfield code="j">700j</subfield>
+            <subfield code="q">700q</subfield>
+            <subfield code="u">700u</subfield>
+        </datafield>
+        <datafield tag="720" ind1="1" ind2=" ">
+            <subfield code="a">720a</subfield>
+            <subfield code="b">none</subfield>
+            <subfield code="e">720e</subfield>
+        </datafield>
+        <datafield tag="796" ind1="1" ind2=" ">
+            <subfield code="a">796a</subfield>
+            <subfield code="b">796b</subfield>
+            <subfield code="c">796c</subfield>
+            <subfield code="d">796d</subfield>
+            <subfield code="e">796e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">796g</subfield>
+            <subfield code="j">796j</subfield>
+            <subfield code="q">796q</subfield>
+            <subfield code="u">796u</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">7xx personal name search subfields</subfield>
+        </datafield>
+    </record>
+    <!-- 7xx corp name search subfields-->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a7xxCorpSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="710" ind1="1" ind2=" ">
+            <subfield code="a">710a</subfield>
+            <subfield code="b">710b</subfield>
+            <subfield code="c">710c</subfield>
+            <subfield code="d">710d</subfield>
+            <subfield code="e">710e</subfield>
+            <subfield code="f">710f</subfield>
+            <subfield code="g">710g</subfield>
+            <subfield code="k">710k</subfield>
+            <subfield code="n">710n</subfield>
+            <subfield code="q">none</subfield>
+            <subfield code="u">710u</subfield>
+        </datafield>
+        <datafield tag="797" ind1="1" ind2=" ">
+            <subfield code="a">797a</subfield>
+            <subfield code="b">797b</subfield>
+            <subfield code="c">797c</subfield>
+            <subfield code="d">797d</subfield>
+            <subfield code="e">797e</subfield>
+            <subfield code="f">797f</subfield>
+            <subfield code="g">797g</subfield>
+            <subfield code="k">797k</subfield>
+            <subfield code="n">797n</subfield>
+            <subfield code="q">none</subfield>
+            <subfield code="u">797u</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">7xx corporate name search subfields</subfield>
+        </datafield>
+    </record>
+    <!-- 7xx meeting name search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a7xxMeetingSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="711" ind1="1" ind2=" ">
+            <subfield code="a">711a</subfield>
+            <subfield code="b">none</subfield>
+            <subfield code="c">711c</subfield>
+            <subfield code="d">711d</subfield>
+            <subfield code="e">711e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">711g</subfield>
+            <subfield code="j">711j</subfield>
+            <subfield code="n">711n</subfield>
+            <subfield code="q">711q</subfield>
+            <subfield code="u">711u</subfield>
+        </datafield>
+        <datafield tag="798" ind1="1" ind2=" ">
+            <subfield code="a">798a</subfield>
+            <subfield code="b">none</subfield>
+            <subfield code="c">798c</subfield>
+            <subfield code="d">798d</subfield>
+            <subfield code="e">798e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">798g</subfield>
+            <subfield code="j">798j</subfield>
+            <subfield code="n">798n</subfield>
+            <subfield code="q">798q</subfield>
+            <subfield code="u">798u</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">7xx meeting name search subfields</subfield>
+        </datafield>
+    </record>
+    <!-- 800 -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a800search</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="800" ind1="1" ind2=" ">
+            <subfield code="a">800a</subfield>
+            <subfield code="b">800b</subfield>
+            <subfield code="c">800c</subfield>
+            <subfield code="d">800d</subfield>
+            <subfield code="e">800e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">800g</subfield>
+            <subfield code="j">800j</subfield>
+            <subfield code="q">800q</subfield>
+            <subfield code="u">800u</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">800 search subfields</subfield>
+        </datafield>
+    </record>
+    <!-- 810 -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a810search</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="810" ind1="1" ind2=" ">
+            <subfield code="a">810a</subfield>
+            <subfield code="b">810b</subfield>
+            <subfield code="c">810c</subfield>
+            <subfield code="d">810d</subfield>
+            <subfield code="e">810e</subfield>
+            <subfield code="f">810f</subfield>
+            <subfield code="g">810g</subfield>
+            <subfield code="k">810k</subfield>
+            <subfield code="n">810n</subfield>
+            <subfield code="q">none</subfield>
+            <subfield code="u">810u</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">810 search subfields</subfield>
+        </datafield>
+    </record>
+    <!-- 811 search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a811search</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="811" ind1="1" ind2=" ">
+            <subfield code="a">811a</subfield>
+            <subfield code="b">none</subfield>
+            <subfield code="c">811c</subfield>
+            <subfield code="d">811d</subfield>
+            <subfield code="e">811e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">811g</subfield>
+            <subfield code="j">811j</subfield>
+            <subfield code="n">811n</subfield>
+            <subfield code="q">811q</subfield>
+            <subfield code="u">811u</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">811 search subfields</subfield>
         </datafield>
     </record>
     

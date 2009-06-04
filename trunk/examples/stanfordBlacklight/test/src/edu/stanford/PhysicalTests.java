@@ -15,15 +15,18 @@ import org.junit.*;
 public class PhysicalTests extends BibIndexTest {
 	
 	/**
-	 * Test physical_display field
+	 * physical:  test population of field for search and display
 	 */
 @Test
-	public final void testPhysicalDisplay() 
+	public final void testPhysical() 
 			throws IOException, ParserConfigurationException, SAXException 
 	{
-		String fldName = "physical_display";
+		String fldName = "physical";
 		createIxInitVars("physicalTests.mrc");
-		assertDisplayFldProps(fldName, solrCore, sis);
+		assertTextFieldProperties(fldName, solrCore, sis);
+		assertFieldHasNorms(fldName, solrCore);
+		assertFieldStored(fldName, solrCore);
+		assertFieldIndexed(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 
 		// 300abc
@@ -34,6 +37,13 @@ public class PhysicalTests extends BibIndexTest {
 	    assertDocHasFieldValue("300333", fldName, "1 box 2 x 4 x 3 1/2 ft.", sis); 
 	    // 300aafafc - in order ...
 	    assertDocHasFieldValue("300444", fldName, "diary 1 volume (463 pages) ; 17 cm. x 34.5 cm.", sis); 
+	    
+		assertSingleResult("300111", fldName, "sound disc", sis);
+		assertSingleResult("300111", fldName, "\"1 sound disc (20 min.); analog, 33 1/3 rpm, stereo. ; 12 in.\"", sis);
+		assertSingleResult("300222", fldName, "answer", sis);
+		assertSingleResult("300222", fldName, "\"271 p. : ill. ; 21 cm. + answer book.\"", sis);
+		assertSingleResult("300333", fldName, "\"1 box 2 x 4 x 3 1/2 ft.\"", sis);
+		assertSingleResult("300444", fldName, "\"diary 1 volume (463 pages) ; 17 cm. x 34.5 cm.\"", sis);	    
 
 	    tearDown();
 		createIxInitVars("displayFieldsTests.mrc");
@@ -46,25 +56,30 @@ public class PhysicalTests extends BibIndexTest {
 	}
 
 	/**
-	 * Test physical_search field population
+	 * vern_physical:  test population of field for search and display
 	 */
 @Test
-	public final void testPhysicalSearch() 
+	public final void testVernPhysical()
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "physical_search";
-		createIxInitVars("physicalTests.mrc");
+		String fldName = "vern_physical";
+		createIxInitVars("vernacularSearchTests.mrc");
 		assertTextFieldProperties(fldName, solrCore, sis);
+		assertFieldHasNorms(fldName, solrCore);
+		assertFieldStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
-	
-		assertSingleResult("300111", fldName, "sound disc", sis);
-		assertSingleResult("300111", fldName, "\"1 sound disc (20 min.); analog, 33 1/3 rpm, stereo. ; 12 in.\"", sis);
-		assertSingleResult("300222", fldName, "answer", sis);
-		assertSingleResult("300222", fldName, "\"271 p. : ill. ; 21 cm. + answer book.\"", sis);
-		assertSingleResult("300333", fldName, "\"1 box 2 x 4 x 3 1/2 ft.\"", sis);
-		assertSingleResult("300444", fldName, "\"diary 1 volume (463 pages) ; 17 cm. x 34.5 cm.\"", sis);
+		
+		assertDocHasFieldValue("300VernSearch", fldName, "vern300a vern300b vern300c vern300e vern300f vern300g", sis);		
+		assertDocHasNoFieldValue("300VernSearch", fldName, "none", sis);
+		
+		assertSingleResult("300VernSearch", fldName, "vern300a", sis);
+		assertSingleResult("300VernSearch", fldName, "vern300b", sis);
+		assertSingleResult("300VernSearch", fldName, "vern300c", sis);
+		assertSingleResult("300VernSearch", fldName, "vern300e", sis);
+		assertSingleResult("300VernSearch", fldName, "vern300f", sis);
+		assertSingleResult("300VernSearch", fldName, "vern300g", sis);		
+		assertZeroResults(fldName, "none", sis);
 	}
 
 }

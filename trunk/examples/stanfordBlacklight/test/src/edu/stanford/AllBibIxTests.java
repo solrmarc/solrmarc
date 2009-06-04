@@ -9,23 +9,22 @@ import org.junit.runners.Suite;
         AuthorTests.class,
         CallNumberTests.class,
         DiacriticTests.class,
-        DisplayFieldsPropsTests.class,
         EditionTests.class,
-        FacetFieldsPropsTests.class,
         FormatTests.class,
+        ItemInfoTests.class,
         LanguageTests.class,
-        LocationTests.class,
+        MiscellaneousFieldTests.class,
         PhysicalTests.class,
         PublicationTests.class,
-        SearchFieldsPropsTests.class,
-        SeriesTests.class,
-        SortFieldsPropsTests.class,
+        TableOfContentsTests.class,
         StandardNumberTests.class,
-        MiscellaneousFieldTests.class,
         SubjectTests.class,
+        TableOfContentsTests.class,
+        TitleSearchTests.class,
         TitleTests.class,
         UrlTests.class,
-        VernacularTests.class
+        VernFieldsTests.class,
+        TitleSearchVernTests.class
         })
 
         

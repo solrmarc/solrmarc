@@ -5,7 +5,7 @@ import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-//import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Document;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -17,15 +17,17 @@ import org.xml.sax.SAXException;
 public class StandardNumberTests extends BibIndexTest {
 
 	/**
-	 * Test population of oclc_display field
+	 * Test population of oclc field
 	 */
 @Test
-	public final void testOCLCDisplay() 
+	public final void testOCLC() 
 		throws IOException, ParserConfigurationException, SAXException 
 	{
-		String fldName = "oclc_display";
+		String fldName = "oclc";
 		createIxInitVars("oclcNumTests.mrc");
-		assertDisplayFldProps(fldName, solrCore, sis);
+        assertStringFieldProperties(fldName, solrCore, sis);
+        assertFieldIndexed(fldName, solrCore);
+        assertFieldStored(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 	
 		assertDocHasFieldValue("035withOCoLC-M", fldName, "656729", sis); 
@@ -65,25 +67,8 @@ public class StandardNumberTests extends BibIndexTest {
 		assertDocHasFieldValue("MultOclcNums", fldName, "38052115", sis); 
 		assertDocHasFieldValue("MultOclcNums", fldName, "38403775", sis); 
 		assertDocHasNoFieldValue("MultOclcNums", fldName, "180776170", sis); 
-		assertDocHasNoFieldValue("MultOclcNums", fldName, "00666000", sis); 
-	}
-
-
-// TODO: there is not currently an oclc_search field
-	/**
-	 * Test searching of oclc_search field
-	 */
-//@Test
-	public final void testOCLCsearch() 
-		throws IOException, ParserConfigurationException, SAXException 
-	{
-		String fldName = "oclc_search";
-		createIxInitVars("oclcNumTests.mrc");
-		assertStringFieldProperties(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
-	
+		assertDocHasNoFieldValue("MultOclcNums", fldName, "00666000", sis);
+		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("035withOCoLC-M");
 		docIds.add("Mult035onlyOneGood");
@@ -116,7 +101,6 @@ public class StandardNumberTests extends BibIndexTest {
 		assertZeroResults(fldName, "38158328", sis); 
 		assertZeroResults(fldName, "\"bad 079\"", sis); 
 	}
-
 
 	/**
 	 * Test population of isbn_display: the ISBNs used for external 
@@ -197,7 +181,11 @@ public class StandardNumberTests extends BibIndexTest {
 	{
 		String fldName = "isbn_search";
 		createIxInitVars("isbnTests.mrc");
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldPresent(fldName, sis);
+		// single token, but tokenized nevertheless
+		assertFieldTokenized(fldName, solrCore);
+		assertFieldHasNoTermVectors(fldName, solrCore);
+		assertFieldOmitsNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -205,25 +193,38 @@ public class StandardNumberTests extends BibIndexTest {
 		// searches are not exhaustive  (b/c programmer is exhausted)
 	
 		// isbn search with sub a value from record with mult a and z
-		String value = "052185668X";
-		assertResultSize(fldName, value, 2, sis);
-		String docList[] = getDocIDList(fldName, value);
-		String msg = "isbn search \""+ value + "\": ";
-		assertDocInList(docList, "020suba10trailingText", msg, sis);
-		assertDocInList(docList, "020SubaAndz", msg, sis);
+		Set<String> docIds = new HashSet<String>();
+		docIds.add("020suba10trailingText");
+		docIds.add("020SubaAndz");
+		assertSearchResults(fldName, "052185668X", docIds, sis);
 	
 		// isbn search with sub z value from record with mult a and z
-		value = "9780809424887";
-		assertResultSize(fldName, value, 7, sis);
-		docList = getDocIDList(fldName, value);
-		msg = fldName + " search \""+ value + "\": ";
-		assertDocInList(docList, "020suba13", msg, sis);
-		assertDocInList(docList, "020suba13trailingText", msg, sis);
-		assertDocInList(docList, "020subaMult", msg, sis);
-		assertDocInList(docList, "020subz13digit", msg, sis);
-		assertDocInList(docList, "020subz13trailingText", msg, sis);
-		assertDocInList(docList, "020multSubz", msg, sis);
-		assertDocInList(docList, "020SubaAndz", msg, sis);
+		String value = "9780809424887";
+		docIds.clear();
+		docIds.add("020suba13");
+		docIds.add("020suba13trailingText");
+		docIds.add("020subaMult");
+		docIds.add("020subz13digit");
+		docIds.add("020subz13trailingText");
+		docIds.add("020multSubz");
+		docIds.add("020SubaAndz");
+	}
+
+	/**
+	 * isbn_search should be case insensitive
+	 */
+@Test
+	public final void testISBNCaseInsensitive() 
+		throws IOException, ParserConfigurationException, SAXException 
+	{
+		String fldName = "isbn_search";
+		createIxInitVars("isbnTests.mrc");
+
+		Set<String> docIds = new HashSet<String>();
+		docIds.add("020suba10trailingText");
+		docIds.add("020SubaAndz");
+		assertSearchResults(fldName, "052185668X", docIds, sis);
+		assertSearchResults(fldName, "052185668x", docIds, sis);
 	}
 
 	/**
@@ -271,7 +272,12 @@ public class StandardNumberTests extends BibIndexTest {
 	{
 		String fldName = "issn_search";
 		createIxInitVars("issnTests.mrc");
-		assertStringFieldProperties(fldName, solrCore, sis);
+		// issn is now textTight, not string, to accommodate the hyphen
+		assertFieldPresent(fldName, sis);
+		// single token, but tokenized nevertheless
+		assertFieldTokenized(fldName, solrCore);
+		assertFieldHasNoTermVectors(fldName, solrCore);
+		assertFieldOmitsNorms(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
@@ -279,12 +285,12 @@ public class StandardNumberTests extends BibIndexTest {
 		assertSingleResult("022suba", fldName, "1047-2010", sis);
 		assertSingleResult("022subaX", fldName, "1047-201X", sis);
 	
-		assertResultSize(fldName, "0796-5621", 3, sis);
-		String docList[] = getDocIDList(fldName, "0796-5621");
-		assertDocInList(docList, "022subL", fldName + " search \"0796-5621\": ", sis);
-		assertDocInList(docList, "022subAandL", fldName + " search \"0796-5621\": ", sis);
-		assertDocInList(docList, "022subLandM", fldName + " search \"0796-5621\": ", sis);
-
+		Set<String> docIds = new HashSet<String>();
+		docIds.add("022subL");
+		docIds.add("022subAandL");
+		docIds.add("022subLandM");
+		assertSearchResults(fldName, "0796-5621", docIds, sis);
+		
 		assertSingleResult("022subM", fldName, "0863-4564", sis);
 		assertSingleResult("022subY", fldName, "0813-1964", sis);
 		assertSingleResult("022subMandZ", fldName, "1144-5858", sis);
@@ -294,18 +300,56 @@ public class StandardNumberTests extends BibIndexTest {
 		assertSingleResult("022subAandL", fldName, "0945-2419", sis);
 		assertSingleResult("Two022a", fldName, "0666-7770", sis);
 		assertSingleResult("Two022a", fldName, "1221-2112", sis);
+		
+		// without hyphen:
+		assertSingleResult("022subM", fldName, "08634564", sis);
+		assertSingleResult("022subZ", fldName, "1144585X", sis);
 	}
 
 	/**
-	 * Test population of lccn_display field
+	 * ISSNs should be searchable with or without the hyphen
 	 */
 @Test
-	public final void testLCCNdisplay() 
+	public final void testISSNhyphens() 
+		throws IOException, ParserConfigurationException, SAXException 
+	{
+		String fldName = "issn_search";
+		createIxInitVars("issnTests.mrc");
+	
+		assertSingleResult("022subM", fldName, "0863-4564", sis);
+		assertSingleResult("022subM", fldName, "08634564", sis);
+		assertSingleResult("022subZ", fldName, "1144-585X", sis);
+		assertSingleResult("022subZ", fldName, "1144585X", sis);
+	}
+
+
+	/**
+	 * issn_search should be case insensitive
+	 */
+@Test
+	public final void testISSNCaseInsensitive() 
+		throws IOException, ParserConfigurationException, SAXException 
+	{
+		String fldName = "issn_search";
+		createIxInitVars("issnTests.mrc");
+	
+		assertSingleResult("022subZ", fldName, "1144-585X", sis);
+		assertSingleResult("022subZ", fldName, "1144-585x", sis);
+	}
+	
+
+	/**
+	 * Test population of lccn field
+	 */
+@Test
+	public final void testLCCN() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "lccn_display";
+		String fldName = "lccn";
 		createIxInitVars("lccnTests.mrc");
-		assertDisplayFldProps(fldName, solrCore, sis);
+        assertStringFieldProperties(fldName, solrCore, sis);
+        assertFieldIndexed(fldName, solrCore);
+        assertFieldStored(fldName, solrCore);
 		assertFieldNotMultiValued(fldName, solrCore);		
 
 		// no lccn
@@ -334,7 +378,6 @@ public class StandardNumberTests extends BibIndexTest {
 		assertDocHasFieldValue("010multSubZ", fldName, "76647633", sis); 
 		assertDocHasNoFieldValue("010multSubZ", fldName, "2000123456", sis); 
 
-/* not searchable		
 		// search for them
 		// 010 sub a only 
 		assertSingleResult("010suba8digit", fldName, "85153773", sis); 
@@ -359,7 +402,6 @@ public class StandardNumberTests extends BibIndexTest {
 		assertSearchResults(fldName, "76647633", docIds, sis);
 		assertZeroResults(fldName, "76000587", sis);
 		assertZeroResults(fldName, "2000123456", sis);
-*/		
 	}
 
 }

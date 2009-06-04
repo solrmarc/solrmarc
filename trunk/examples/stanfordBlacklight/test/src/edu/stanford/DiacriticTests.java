@@ -19,8 +19,8 @@ import org.xml.sax.SAXException;
  */
 public class DiacriticTests extends BibIndexTest {
 
-	// contains the diacritics in our test data
-	private String fldName = "author_person_search";
+	// 100 field contains the diacritics in our test data
+	private String fldName = "author_1xx_search";
 	
 	@SuppressWarnings("unused")
 @Before

@@ -7,8 +7,8 @@ import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-//import org.apache.lucene.document.Document;
-//import org.apache.lucene.document.Field;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
@@ -269,10 +269,72 @@ public class AuthorTests extends BibIndexTest {
 
 
 	/**
+	 * Other (meeting and corporate, not person) name facet tests, including 
+	 *  removal of trailing punctuation
+	 */
+@Test
+	public final void testAuthorOtherFacet()
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		String fldName = "author_other_facet";
+		assertFacetFldProps(fldName, solrCore, sis);
+		assertFieldOmitsNorms(fldName, solrCore);
+		assertFieldMultiValued(fldName, solrCore);
+	
+		// 110 - trailing period to remove
+		assertSingleResult("110foo", fldName, "\"SAFE Association (U.S.). Symposium\"", sis);
+		assertZeroResults(fldName, "\"SAFE Association (U.S.). Symposium.\"", sis);
+		assertSingleResult("NYPL", fldName, "\"New York Public Library\"", sis);
+		assertZeroResults(fldName, "\"New York Public Library.\"", sis);
+		// 111
+		assertSingleResult("111faim", fldName, "\"FAIM (Forum)\"", sis);
+		assertZeroResults(fldName, "\"FAIM (Forum).\"", sis);
+		assertZeroResults(fldName, "\"FAIM (Forum\"", sis);
+		// 111 sub a n d c  - last char paren
+		assertSingleResult("5666387", fldName, "\"International Jean Sibelius Conference (3rd : 2000 : Helsinki, Finland)\"", sis);
+		assertZeroResults(fldName, "\"International Jean Sibelius Conference (3rd : 2000 : Helsinki, Finland\"", sis);
+		
+    	// 710 - trailing period to leave in
+		assertSingleResult("6280316", fldName, "\"Julius Bien & Co.\"", sis);
+		assertZeroResults(fldName, "\"Julius Bien & Co\"", sis);
+		assertSingleResult("57136914", fldName, "\"NetLibrary, Inc.\"", sis);
+		assertZeroResults(fldName, "\"NetLibrary, Inc\"", sis);
+    	// 710 - last char paren
+		assertSingleResult("987666", fldName, "\"(this was a value in a non-latin script)\"", sis);
+		assertZeroResults(fldName, "\"(this was a value in a non-latin script\"", sis);
+		assertSingleResult("710corpname", fldName, "\"Warner Bros. Pictures (1969- )\"", sis);
+		assertZeroResults(fldName, "\"Warner Bros. Pictures (1969- \"", sis);
+		assertZeroResults(fldName, "\"Warner Bros. Pictures (1969-\"", sis);
+		// 710 - leading space
+		assertSingleResult("710corpname", fldName, "\"Heyday Films\"", sis);
+		assertZeroResults(fldName, "\" Heyday Films.\"", sis);
+		assertZeroResults(fldName, "\"Heyday Films.\"", sis);
+		// 711
+		assertSingleResult("711", fldName, "\"European Conference on Computer Vision (2006 : Graz, Austria)\"", sis);
+		assertZeroResults(fldName, "\"European Conference on Computer Vision (2006 : Graz, Austria\"", sis);
+		
+		// 110 and 710
+		assertSingleResult("110710corpname", fldName, "\"Thelma\"", sis);
+		assertZeroResults(fldName, "\"Thelma.\"", sis);
+		assertSingleResult("110710corpname", fldName, "\"Roaring Woman, Louise. 2000-2001\"", sis);
+		assertZeroResults(fldName, "\"Roaring Woman, Louise\"", sis);
+		assertZeroResults(fldName, "\"Roaring Woman, Louise. 2000-2001.\"", sis);
+
+		// 810 not included
+		assertZeroResults(fldName, "\"American Academy in Rome\"", sis);
+		// 811 not included
+		assertZeroResults(fldName, "\"Delaware Symposium on Language Studies\"", sis);
+	}
+
+
+
+
+	/**
 	 * Combined author facet (contains personal name, corporate name and 
 	 *  meeting name facet values) tests.  Removal of trailing punctuation.
 	 */
-@Test
+// no longer in index 2009-05-14
+//@Test
 	public final void testAuthorCombinedFacet() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -300,171 +362,440 @@ public class AuthorTests extends BibIndexTest {
 		assertZeroResults(fldName, "\"European Conference on Computer Vision (2006 : Graz, Austria\"", sis);
 	}
 
+	/**
+	 * author_1xx_search:  check all search subfields for 100, 110, 111
+	 */
+@Test
+	public final void test1xxSearchAllSubfields()
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		String fldName = "author_1xx_search";
+		assertSearchFldOneValProps(fldName, solrCore, sis);
+		assertSingleResult("100search", fldName, "100a", sis);
+		assertSingleResult("100search", fldName, "100b", sis);
+		assertSingleResult("100search", fldName, "100c", sis);
+		assertSingleResult("100search", fldName, "100d", sis);
+		assertSingleResult("100search", fldName, "100e", sis);
+		assertSingleResult("100search", fldName, "100g", sis);
+		assertSingleResult("100search", fldName, "100j", sis);
+		assertSingleResult("100search", fldName, "100q", sis);
+		assertSingleResult("100search", fldName, "100u", sis);
 
+		assertSingleResult("110search", fldName, "110a", sis);
+		assertSingleResult("110search", fldName, "110b", sis);
+		assertSingleResult("110search", fldName, "110c", sis);
+		assertSingleResult("110search", fldName, "110d", sis);
+		assertSingleResult("110search", fldName, "110e", sis);
+		assertSingleResult("110search", fldName, "110g", sis);
+		assertSingleResult("110search", fldName, "110n", sis);
+		assertSingleResult("110search", fldName, "110u", sis);
+
+		assertSingleResult("111search", fldName, "111a", sis);
+		assertSingleResult("111search", fldName, "111c", sis);
+		assertSingleResult("111search", fldName, "111d", sis);
+		assertSingleResult("111search", fldName, "111e", sis);
+		assertSingleResult("111search", fldName, "111g", sis);
+		assertSingleResult("111search", fldName, "111j", sis);
+		assertSingleResult("111search", fldName, "111n", sis);
+		assertSingleResult("111search", fldName, "111q", sis);
+		assertSingleResult("111search", fldName, "111u", sis);
+		
+		assertZeroResults(fldName, "110f", sis);
+		assertZeroResults(fldName, "110k", sis);
+		assertZeroResults(fldName, "none", sis);
+	}
+
+	/**
+	 * vern_author_1xx_search:  check all search subfields for 100, 110, 111
+	 */
+@Test
+	public final void vern1xxSearchAllSubfields()
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		String fldName = "vern_author_1xx_search";
+		createIxInitVars("vernacularSearchTests.mrc");
+		assertSearchFldOneValProps(fldName, solrCore, sis);
+		
+		assertSingleResult("100VernSearch", fldName, "vern100a", sis);
+		assertSingleResult("100VernSearch", fldName, "vern100b", sis);
+		assertSingleResult("100VernSearch", fldName, "vern100c", sis);
+		assertSingleResult("100VernSearch", fldName, "vern100d", sis);
+		assertSingleResult("100VernSearch", fldName, "vern100e", sis);
+		assertSingleResult("100VernSearch", fldName, "vern100g", sis);
+		assertSingleResult("100VernSearch", fldName, "vern100j", sis);
+		assertSingleResult("100VernSearch", fldName, "vern100q", sis);
+		assertSingleResult("100VernSearch", fldName, "vern100u", sis);
+	
+		assertSingleResult("110VernSearch", fldName, "vern110a", sis);
+		assertSingleResult("110VernSearch", fldName, "vern110b", sis);
+		assertSingleResult("110VernSearch", fldName, "vern110c", sis);
+		assertSingleResult("110VernSearch", fldName, "vern110d", sis);
+		assertSingleResult("110VernSearch", fldName, "vern110e", sis);
+		assertSingleResult("110VernSearch", fldName, "vern110g", sis);
+		assertSingleResult("110VernSearch", fldName, "vern110n", sis);
+		assertSingleResult("110VernSearch", fldName, "vern110u", sis);
+	
+		assertSingleResult("111VernSearch", fldName, "vern111a", sis);
+		assertSingleResult("111VernSearch", fldName, "vern111c", sis);
+		assertSingleResult("111VernSearch", fldName, "vern111d", sis);
+		assertSingleResult("111VernSearch", fldName, "vern111e", sis);
+		assertSingleResult("111VernSearch", fldName, "vern111g", sis);
+		assertSingleResult("111VernSearch", fldName, "vern111j", sis);
+		assertSingleResult("111VernSearch", fldName, "vern111n", sis);
+		assertSingleResult("111VernSearch", fldName, "vern111q", sis);
+		assertSingleResult("111VernSearch", fldName, "vern111u", sis);
+	
+		assertZeroResults(fldName, "vern110f", sis);
+		assertZeroResults(fldName, "vern110k", sis);
+		assertZeroResults(fldName, "none", sis);
+	}
+
+	/**
+	 * author_7xx_search: personal name fields 
+	 *  check all search subfields for 700, 720, 796
+	 */
+@Test
+	public final void test7xxPersonSearchAllSubfields()
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		String fldName = "author_7xx_search";
+		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSingleResult("7xxPersonSearch", fldName, "700a", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "700b", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "700c", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "700d", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "700e", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "700g", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "700j", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "700q", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "700u", sis);
+			
+		assertSingleResult("7xxPersonSearch", fldName, "720a", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "720e", sis);
+
+		assertSingleResult("7xxPersonSearch", fldName, "796a", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "796b", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "796c", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "796d", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "796e", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "796g", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "796j", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "796q", sis);
+		assertSingleResult("7xxPersonSearch", fldName, "796u", sis);
+
+		assertZeroResults(fldName, "none", sis);
+	}
+
+	/**
+	 * vern_author_7xx_search: personal name fields 
+	 *  check all search subfields for 700, 720, 796
+	 */
+@Test
+	public final void vern7xxPersonSearchAllSubfields()
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		String fldName = "vern_author_7xx_search";
+		createIxInitVars("vernacularSearchTests.mrc");
+		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern700a", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern700b", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern700c", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern700d", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern700e", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern700q", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern700u", sis);
+			
+		Set<String> docIds = new HashSet<String>();
+		docIds.add("7xxLowVernSearch");
+		docIds.add("7xxVernPersonSearch");
+		// overlap title
+		assertSearchResults(fldName, "vern700g", docIds, sis); 
+		// used to be in title
+		assertSearchResults(fldName, "vern700j", docIds, sis);
+	
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern720a", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern720e", sis);
+	
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern796a", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern796b", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern796c", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern796d", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern796e", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern796q", sis);
+		assertSingleResult("7xxVernPersonSearch", fldName, "vern796u", sis);
+		
+		docIds.remove("7xxLowVernSearch");
+		docIds.add("79xVernSearch");
+		// overlap title
+		assertSearchResults(fldName, "vern796g", docIds, sis); 
+		// used to be in title
+		assertSearchResults(fldName, "vern796j", docIds, sis);
+		
+		assertZeroResults(fldName, "none", sis);
+	}
+
+	/**
+	 * author_7xx_search: corporate name fields 
+	 *  check all search subfields for 710, 797
+	 */
+@Test
+	public final void test7xxCorpSearchAllSubfields()
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		String fldName = "author_7xx_search";
+		assertSearchFldMultValProps(fldName, solrCore, sis);
+	
+		assertSingleResult("7xxCorpSearch", fldName, "710a", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "710b", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "710c", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "710d", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "710e", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "710g", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "710n", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "710u", sis);
+
+		assertSingleResult("7xxCorpSearch", fldName, "797a", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "797b", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "797c", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "797d", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "797e", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "797g", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "797n", sis);
+		assertSingleResult("7xxCorpSearch", fldName, "797u", sis);
+		
+		assertZeroResults(fldName, "710f", sis);
+		assertZeroResults(fldName, "710k", sis);
+		assertZeroResults(fldName, "797f", sis);
+		assertZeroResults(fldName, "797k", sis);
+		assertZeroResults(fldName, "none", sis);
+	}
+
+	/**
+	 * vern_author_7xx_search: corporate name fields 
+	 *  check all search subfields for 710, 797
+	 */
+@Test
+	public final void vern7xxCorpSearchAllSubfields()
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		String fldName = "vern_author_7xx_search";
+		createIxInitVars("vernacularSearchTests.mrc");
+		assertSearchFldMultValProps(fldName, solrCore, sis);
+	
+		assertSingleResult("7xxVernCorpSearch", fldName, "vern710a", sis);
+		assertSingleResult("7xxVernCorpSearch", fldName, "vern710b", sis);
+		assertSingleResult("7xxVernCorpSearch", fldName, "vern710c", sis);
+		assertSingleResult("7xxVernCorpSearch", fldName, "vern710e", sis);
+		assertSingleResult("7xxVernCorpSearch", fldName, "vern710u", sis);
+	
+		Set<String> docIds = new HashSet<String>();
+		docIds.add("7xxLowVernSearch");
+		docIds.add("7xxVernCorpSearch");
+		// overlap title
+		assertSearchResults(fldName, "vern710d", docIds, sis); 
+		assertSearchResults(fldName, "vern710g", docIds, sis); 
+		assertSearchResults(fldName, "vern710n", docIds, sis);
+	
+		assertSingleResult("7xxVernCorpSearch", fldName, "vern797a", sis);
+		assertSingleResult("7xxVernCorpSearch", fldName, "vern797b", sis);
+		assertSingleResult("7xxVernCorpSearch", fldName, "vern797c", sis);
+		assertSingleResult("7xxVernCorpSearch", fldName, "vern797e", sis);
+		assertSingleResult("7xxVernCorpSearch", fldName, "vern797u", sis);
+		
+		docIds.remove("7xxLowVernSearch");
+		docIds.add("79xVernSearch");
+		// overlap title
+		assertSearchResults(fldName, "vern797d", docIds, sis); 
+		assertSearchResults(fldName, "vern797g", docIds, sis); 
+		assertSearchResults(fldName, "vern797n", docIds, sis);
+		
+		assertZeroResults(fldName, "vern710f", sis);
+		assertZeroResults(fldName, "vern710k", sis);
+		assertZeroResults(fldName, "vern797f", sis);
+		assertZeroResults(fldName, "vern797k", sis);
+		assertZeroResults(fldName, "none", sis);
+	}
 
 
 	/**
-	 * Personal author name search field tests.  Personal name is NOT stemmed
+	 * author_7xx_search: meeting name fields 
+	 *  check all search subfields for 711, 798
 	 */
 @Test
-	public final void testPersonalNameSearch() 
+	public final void test7xxMeetingSearchAllSubfields()
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "author_person_search";
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldHasNorms(fldName, solrCore);
-		assertFieldMultiValued(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		String fldName = "author_7xx_search";
+		assertSearchFldMultValProps(fldName, solrCore, sis);
 	
-		// 100
-		assertSingleResult("690002", fldName, "wallace", sis);
-		assertSingleResult("690002", fldName, "Wallace", sis);
-		// assert not stemmed
-		assertZeroResults(fldName, "wallac", sis);
-		assertSingleResult("919006", fldName, "oeftering", sis);
-		assertSingleResult("919006", fldName, "Oeftering", sis);
-		// assert not stemmed
-		assertZeroResults(fldName, "oefter", sis);
-
-		// 700
-		assertSingleResult("6280316", fldName, "cowles", sis);
-		assertSingleResult("6280316", fldName, "Cowles", sis);
-		// assert not stemmed
-		assertZeroResults(fldName, "cowl", sis);
-		assertSingleResult("4578538", fldName, "mikulsky", sis);
-		// assert not stemmed
-		assertZeroResults(fldName, "mikulski", sis);
-
-		// 100 and 700
-		assertSingleResult("700sayers", fldName, "whimsey", sis);
-		assertSingleResult("700sayers", fldName, "sayers", sis);
-		// assert not stemmed
-		assertZeroResults(fldName, "sayer", sis);
-
-		// 800
-		assertSingleResult("800", fldName, "darnell", sis);
-
+		assertSingleResult("7xxMeetingSearch", fldName, "711a", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "711c", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "711d", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "711e", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "711g", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "711j", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "711n", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "711q", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "711u", sis);
 		
-		assertSingleResult("345228", fldName, "Bashkov", sis);
-		assertSingleResult("919006", fldName, "oeftering", sis);
-		assertSingleResult("7651581", fldName, "coutinho", sis);
-		assertSingleResult("1261173", fldName, "johnson", sis);
-		
-		assertSingleResult("100240", fldName, "foos", sis);
-		// assert not stemmed
-		assertZeroResults(fldName, "foo", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "798a", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "798c", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "798d", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "798e", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "798g", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "798j", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "798n", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "798q", sis);
+		assertSingleResult("7xxMeetingSearch", fldName, "798u", sis);
+
+		assertZeroResults(fldName, "none", sis);
 	}
-	
-	
+
 	/**
-	 * Corporate author search field tests
+	 * vern_author_7xx_search: meeting name fields 
+	 *  check all search subfields for 711, 798
 	 */
 @Test
-	public final void testCorporateNameSearch() 
+	public final void vern7xxMeetingSearchAllSubfields()
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "author_corp_search";
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldHasNorms(fldName, solrCore);
-		assertFieldMultiValued(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		String fldName = "vern_author_7xx_search";
+		createIxInitVars("vernacularSearchTests.mrc");
+		assertSearchFldMultValProps(fldName, solrCore, sis);
 	
-		// 110
-		assertSingleResult("110710corpname", fldName, "thelma", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern711a", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern711c", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern711d", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern711e", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern711j", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern711q", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern711u", sis);
 		
-		// 710
-		assertSingleResult("6280316", fldName, "julius", sis);
-		assertSingleResult("987666", fldName, "latin", sis);
+		Set<String> docIds = new HashSet<String>();
+		docIds.add("7xxLowVernSearch");
+		docIds.add("7xxVernMeetingSearch");
+		// overlap title
+		assertSearchResults(fldName, "vern711g", docIds, sis); 
+		assertSearchResults(fldName, "vern711n", docIds, sis);
+	
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern798a", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern798c", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern798d", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern798e", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern798j", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern798q", sis);
+		assertSingleResult("7xxVernMeetingSearch", fldName, "vern798u", sis);
+	
+		docIds.remove("7xxLowVernSearch");
+		docIds.add("79xVernSearch");
+		// overlap title
+		assertSearchResults(fldName, "vern798g", docIds, sis); 
+		assertSearchResults(fldName, "vern798n", docIds, sis);
 		
-		// 810
-		assertSingleResult("810", fldName, "rome", sis);
-		
-		// not stemmed, and more than one (see 110 thelma above)
-		assertSingleResult("110710corpname", fldName, "roaring", sis);
-		assertZeroResults(fldName, "roar", sis);
+		assertZeroResults(fldName, "none", sis);
 	}
-	
+
 	/**
-	 * Meeting author name search field tests
+	 * author_8xx_search:  check all search subfields for 800, 810, 811
 	 */
 @Test
-	public final void testMeetingNameSearch() 
+	public final void test8xxSearchAllSubfields()
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "author_meeting_search";
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldHasNorms(fldName, solrCore);
-		assertFieldMultiValued(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		String fldName = "author_8xx_search";
+		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSingleResult("800search", fldName, "800a", sis);
+		assertSingleResult("800search", fldName, "800b", sis);
+		assertSingleResult("800search", fldName, "800c", sis);
+		assertSingleResult("800search", fldName, "800d", sis);
+		assertSingleResult("800search", fldName, "800e", sis);
+		assertSingleResult("800search", fldName, "800g", sis);
+		assertSingleResult("800search", fldName, "800j", sis);
+		assertSingleResult("800search", fldName, "800q", sis);
+		assertSingleResult("800search", fldName, "800u", sis);
 	
-		// 111
-		assertSingleResult("111faim", fldName, "Forum", sis);
-		assertSingleResult("111faim", fldName, "forum", sis);
-		// 111 not sub a
-		assertSingleResult("5666387", fldName, "Helsinki", sis);
+		assertSingleResult("810search", fldName, "810a", sis);
+		assertSingleResult("810search", fldName, "810b", sis);
+		assertSingleResult("810search", fldName, "810c", sis);
+		assertSingleResult("810search", fldName, "810d", sis);
+		assertSingleResult("810search", fldName, "810e", sis);
+		assertSingleResult("810search", fldName, "810g", sis);
+		assertSingleResult("810search", fldName, "810n", sis);
+		assertSingleResult("810search", fldName, "810u", sis);
+	
+		assertSingleResult("811search", fldName, "811a", sis);
+		assertSingleResult("811search", fldName, "811c", sis);
+		assertSingleResult("811search", fldName, "811d", sis);
+		assertSingleResult("811search", fldName, "811e", sis);
+		assertSingleResult("811search", fldName, "811g", sis);
+		assertSingleResult("811search", fldName, "811j", sis);
+		assertSingleResult("811search", fldName, "811n", sis);
+		assertSingleResult("811search", fldName, "811q", sis);
+		assertSingleResult("811search", fldName, "811u", sis);
 		
-		// 711
-		assertSingleResult("711", fldName, "computer", sis);
-		
-		// 811
-		assertSingleResult("811", fldName, "delaware", sis);
-		// not stemmed
-		assertZeroResults(fldName, "delawar", sis);
+		assertZeroResults(fldName, "810f", sis);
+		assertZeroResults(fldName, "810k", sis);
+		assertZeroResults(fldName, "none", sis);
 	}
-	
-	
+
 	/**
-	 * Combined author (contains personal name, corporate name and 
-	 *  meeting name) search field tests
+	 * vern_author_8xx_search:  check all search subfields for 800, 810, 811
 	 */
 @Test
-	public final void testAuthorCombinedSearch() 
+	public final void vern8xxSearchAllSubfields()
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "author_combined_search";
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldHasNorms(fldName, solrCore);
-		assertFieldMultiValued(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		String fldName = "vern_author_8xx_search";
+		createIxInitVars("vernacularSearchTests.mrc");
+		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSingleResult("800VernSearch", fldName, "vern800a", sis);
+		assertSingleResult("800VernSearch", fldName, "vern800b", sis);
+		assertSingleResult("800VernSearch", fldName, "vern800c", sis);
+		assertSingleResult("800VernSearch", fldName, "vern800d", sis);
+		assertSingleResult("800VernSearch", fldName, "vern800e", sis);
+		assertSingleResult("800VernSearch", fldName, "vern800q", sis);
+		assertSingleResult("800VernSearch", fldName, "vern800u", sis);
 	
-		// 100
-		assertSingleResult("919006", fldName, "oeftering", sis);
-		// assert not stemmed
-		assertZeroResults(fldName, "oefter", sis);
+		Set<String> docIds = new HashSet<String>();
+		docIds.add("800VernSearch");
+		docIds.add("8xxVernSearch");
+		// overlap title
+		assertSearchResults(fldName, "vern800g", docIds, sis); 
+		// used to be in title
+		assertSearchResults(fldName, "vern800j", docIds, sis);
+	
+		assertSingleResult("810VernSearch", fldName, "vern810a", sis);
+		assertSingleResult("810VernSearch", fldName, "vern810b", sis);
+		assertSingleResult("810VernSearch", fldName, "vern810c", sis);
+		assertSingleResult("810VernSearch", fldName, "vern810e", sis);
+		assertSingleResult("810VernSearch", fldName, "vern810u", sis);
+	
+		docIds.remove("800VernSearch");
+		docIds.add("810VernSearch");
+		// overlap title
+		assertSearchResults(fldName, "vern810d", docIds, sis); 
+		assertSearchResults(fldName, "vern810g", docIds, sis); 
+		assertSearchResults(fldName, "vern810n", docIds, sis); 
 		
-		// 700
-		assertSingleResult("6280316", fldName, "cowles", sis);
-
-		// 800
-		assertSingleResult("800", fldName, "darnell", sis);
-
-		// 110
-		assertSingleResult("110710corpname", fldName, "thelma", sis);
+		assertSingleResult("811VernSearch", fldName, "vern811a", sis);
+		assertSingleResult("811VernSearch", fldName, "vern811c", sis);
+		assertSingleResult("811VernSearch", fldName, "vern811d", sis);
+		assertSingleResult("811VernSearch", fldName, "vern811e", sis);
+		assertSingleResult("811VernSearch", fldName, "vern811j", sis);
+		assertSingleResult("811VernSearch", fldName, "vern811q", sis);
+		assertSingleResult("811VernSearch", fldName, "vern811u", sis);
+	
+		docIds.remove("810VernSearch");
+		docIds.add("811VernSearch");
+		// overlap title
+		assertSearchResults(fldName, "vern811g", docIds, sis); 
+		assertSearchResults(fldName, "vern811n", docIds, sis); 
 		
-		// 710
-		assertSingleResult("6280316", fldName, "julius", sis);
 		
-		// 810
-		assertSingleResult("810", fldName, "rome", sis);
-
-		// 111
-		assertSingleResult("111faim", fldName, "forum", sis);
-		// 111 not sub a
-		assertSingleResult("5666387", fldName, "Helsinki", sis);
-		
-		// 711
-		assertSingleResult("711", fldName, "computer", sis);
-		
-		// 811
-		assertSingleResult("811", fldName, "delaware", sis);
-		// not stemmed
-		assertZeroResults(fldName, "delawar", sis);
+		assertZeroResults(fldName, "vern810f", sis);
+		assertZeroResults(fldName, "vern810k", sis);
+		assertZeroResults(fldName, "none", sis);
 	}
-
 
 	String sortLastPrefixStr = String.valueOf(Character.toChars(Character.MAX_CODE_POINT)) + " ";
 
@@ -477,6 +808,7 @@ public class AuthorTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException
 	{
 		String fldName = "author_sort";
+	    assertSortFldProps(fldName, solrCore, sis);
 	
 		// 100 (then 240) then 245
 		assertSingleResult("345228", fldName, "\"Bashkov Vladimir 100a only\"", sis); 
@@ -522,6 +854,7 @@ public class AuthorTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException
 	{
 		String fldName = "author_sort";
+	    assertSortFldProps(fldName, solrCore, sis);
 		
 		// NOTE: 100 does not allow non-filing chars
 		
@@ -560,6 +893,7 @@ public class AuthorTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException
 	{
 		String fldName = "author_sort";
+	    assertSortFldProps(fldName, solrCore, sis);
 	
 		// 100 
 		assertSingleResult("1006", fldName, "\"Sox on Fox 100 has sub 6\"", sis);
@@ -588,6 +922,7 @@ public class AuthorTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException
 	{
 		String fldName = "author_sort";
+	    assertSortFldProps(fldName, solrCore, sis);
 	
 		assertSingleResult("111", fldName, "\"ind 0 leading quotes in 100\"", sis);
 		assertZeroResults(fldName, "\"\"ind 0 leading quotes\" in 100\"", sis);
@@ -612,63 +947,61 @@ public class AuthorTests extends BibIndexTest {
 	/**
 	 * Author sort order must be correct
 	 */
-//@Test
-//	public final void testAuthorSortOrder() 
-//		throws ParserConfigurationException, IOException, SAXException
-//	{
-//		// list of doc ids in correct author sort order
-//		List<String> expectedOrderList = new ArrayList<String>(10);
-//		expectedOrderList.add("345228");  // Bashkov Vladimir 100a only
-//		expectedOrderList.add("999");  // everything in 100
-//		expectedOrderList.add("111faim");  // FAIM Forum mtg name facet from 111 should be FAIM Forum
-//		expectedOrderList.add("100240");  // Hoos Foos Marvin OGravel Balloon Face 100 and 240
-//		expectedOrderList.add("555");  // ind 0 leading quote elipsis in 100
-//		expectedOrderList.add("111");  // ind 0 leading quotes in 100
-//		expectedOrderList.add("888");  // interspersed punctuation here
-//		expectedOrderList.add("1006");  // Sox on Fox 100 has sub 6
-//		expectedOrderList.add("110710corpname");  // Thelma facets from 110 and 710
-//// 100 / 110 / 111 is missing;  sort last, THEN sort by title		
-//		expectedOrderList.add("2458");  // 245 has sub 8
-//		expectedOrderList.add("245only");  // 245 no 100 or 240
-//		expectedOrderList.add("575946");  // De incertitudine et vanitate scientiarum German Ruckzug der biblischen Prophetie von der neueren Geschichte
-//		expectedOrderList.add("666");  // De incertitudine et vanitate scientiarum German ZZZZ
-//		expectedOrderList.add("444");  // ind 0 leading elipsis in 240
-//		expectedOrderList.add("333");  // ind 0 leading hyphens in 240
-//		expectedOrderList.add("777");  // ind 4 leading quote elipsis in 240
-//		expectedOrderList.add("24025");  // la di dah 240 has sub 2 and 5
-//		expectedOrderList.add("1261174");  // second part of the Confutation of the Ballancing letter
-//		expectedOrderList.add("0240");  // sleep little fishies 240 has sub 0
-//		expectedOrderList.add("2407");  // Tacky 240 7 nonfiling
-//		expectedOrderList.add("2400");  // Wacky 240 0 nonfiling
-//		expectedOrderList.add("2402");  // Wacky 240 2 nonfiling
-//		expectedOrderList.add("892452");  // Wacky 240 245 nonfiling
-//		
-//		// get search results sorted by author_sort field
-//		List<Document> results = getSortedDocs("collection", "Catalog", "author_sort", sis);
-//		
-//		// we know we have documents that are not in the expected order list
-//		int expDocIx = 0;
-//		for (Document doc : results) {
-//			if (expDocIx < expectedOrderList.size() - 1) {
-//				// we haven't found all docs in the expected list yet
-//				Field f = doc.getField("id");  // author_sort isn't stored
-//				if (f != null) {
-//					String docId = f.stringValue();
-//					if (docId.equals(expectedOrderList.get(expDocIx + 1))) {
-//						
-//						expDocIx++;
-//					}
-//					
-//					
-//				}
-//			}
-//			else break;  // we found all the documents in the expected order list
-//		}
-//		
-//		if (expDocIx != expectedOrderList.size() - 1) {
-//			String lastCorrDocId = expectedOrderList.get(expDocIx);
-//			fail("Author Sort Order is incorrect.  Last correct document was " + lastCorrDocId);
-//		}
-//	}
+@Test
+	public final void testAuthorSortOrder() 
+		throws ParserConfigurationException, IOException, SAXException
+	{
+		// list of doc ids in correct author sort order
+		List<String> expectedOrderList = new ArrayList<String>(30);
+		expectedOrderList.add("345228");  // Bashkov Vladimir 100a only
+		expectedOrderList.add("999");  // everything in 100
+		expectedOrderList.add("111faim");  // FAIM Forum mtg name facet from 111 should be FAIM Forum
+		expectedOrderList.add("100240");  // Hoos Foos Marvin OGravel Balloon Face 100 and 240
+		expectedOrderList.add("555");  // ind 0 leading quote elipsis in 100
+		expectedOrderList.add("111");  // ind 0 leading quotes in 100
+		expectedOrderList.add("888");  // interspersed punctuation here
+		expectedOrderList.add("1006");  // Sox on Fox 100 has sub 6
+		expectedOrderList.add("110710corpname");  // Thelma facets from 110 and 710
+// 100 / 110 / 111 is missing;  sort last, THEN sort by title		
+		expectedOrderList.add("2458");  // 245 has sub 8
+		expectedOrderList.add("245only");  // 245 no 100 or 240
+		expectedOrderList.add("575946");  // De incertitudine et vanitate scientiarum German Ruckzug der biblischen Prophetie von der neueren Geschichte
+		expectedOrderList.add("666");  // De incertitudine et vanitate scientiarum German ZZZZ
+		expectedOrderList.add("444");  // ind 0 leading elipsis in 240
+		expectedOrderList.add("333");  // ind 0 leading hyphens in 240
+		expectedOrderList.add("777");  // ind 4 leading quote elipsis in 240
+		expectedOrderList.add("24025");  // la di dah 240 has sub 2 and 5
+		expectedOrderList.add("1261174");  // second part of the Confutation of the Ballancing letter
+		expectedOrderList.add("0240");  // sleep little fishies 240 has sub 0
+		expectedOrderList.add("2407");  // Tacky 240 7 nonfiling
+		expectedOrderList.add("2400");  // Wacky 240 0 nonfiling
+		expectedOrderList.add("2402");  // Wacky 240 2 nonfiling
+		expectedOrderList.add("892452");  // Wacky 240 245 nonfiling
+		
+		// get search results sorted by author_sort field
+		List<Document> results = getSortedDocs("collection", "Catalog", "author_sort", sis);
+		
+		// we know we have documents that are not in the expected order list
+		int expDocIx = 0;
+		for (Document doc : results) {
+			if (expDocIx < expectedOrderList.size() - 1) {
+				// we haven't found all docs in the expected list yet
+				Field f = doc.getField("id");  // author_sort isn't stored
+				if (f != null) {
+					String docId = f.stringValue();
+					if (docId.equals(expectedOrderList.get(expDocIx + 1))) {
+						
+						expDocIx++;
+					}
+				}
+			}
+			else break;  // we found all the documents in the expected order list
+		}
+		
+		if (expDocIx != expectedOrderList.size() - 1) {
+			String lastCorrDocId = expectedOrderList.get(expDocIx);
+			fail("Author Sort Order is incorrect.  Last correct document was " + lastCorrDocId);
+		}
+	}
 
 }
