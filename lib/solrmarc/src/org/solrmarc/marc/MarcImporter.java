@@ -250,12 +250,15 @@ public class MarcImporter extends MarcHandler
                 if (solrCoreProxy.isSolrException(e) &&
                 		e.getMessage().contains("missing required fields"))
                 {
+                	// this is caused by a bad record - one missing required fields (duh)
                	   logger.error(e.getMessage() +  " at record count = " + recsReadCounter);
                	   logger.error("Control Number " + record.getControlNumber(), e);
                 }
                 else
                 {
             	    logger.error("Error indexing record: " + record.getControlNumber() + " -- " + e.getMessage(), e);
+            	    // this error should (might?) only be thrown if we can't write to the index
+            	    //   therefore, continuing to index would be pointless.
             	    if (e instanceof SolrRuntimeException) throw ((SolrRuntimeException)e);
                 }
             }
