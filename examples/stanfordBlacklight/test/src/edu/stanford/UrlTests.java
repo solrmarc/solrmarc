@@ -122,4 +122,22 @@ public class UrlTests extends BibIndexTest {
 		assertDocHasNoField("mult856and956", fldName, sis); 
 	}
 
+	/**
+	 * url display fields should have appropriate properties.
+	 */
+@Test
+	public final void testUrlDisplayFields() 
+	    throws ParserConfigurationException, IOException, SAXException
+	{
+	    String fldName = "url_display";
+	    assertDisplayFldProps(fldName, solrCore, sis);
+	    assertFieldMultiValued(fldName, solrCore);
+	    fldName = "url_sfx_display";
+	    assertDisplayFldProps(fldName, solrCore, sis);
+	    assertFieldMultiValued(fldName, solrCore);
+	    fldName = "url_suppl_display";
+	    assertDisplayFldProps(fldName, solrCore, sis);
+	    assertFieldMultiValued(fldName, solrCore);
+	}
+
 }

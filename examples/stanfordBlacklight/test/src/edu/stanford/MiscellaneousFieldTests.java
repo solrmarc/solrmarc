@@ -1,6 +1,8 @@
 package edu.stanford;
 
 import java.io.IOException;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -31,8 +33,8 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 		assertFieldStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);
 		
- //       int numDocs = sis.getReader().numDocs();
- //       assertEquals("Number of documents in index incorrect: ", 3, numDocs);
+        int numDocs = sis.getReader().numDocs();
+        assertEquals("Number of documents in index incorrect: ", 3, numDocs);
         assertDocNotPresent("001noSubNo004", sis);
         assertDocPresent("001suba", sis);
         assertDocNotPresent("001and004nosub", sis);
@@ -56,7 +58,7 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 	public final void testMapMissingValue() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "language_facet";
+		String fldName = "language";
 		createIxInitVars("langTests.mrc");
 	
 		assertZeroResults(fldName, "null", sis);
@@ -79,11 +81,7 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 	{
 		String fldName = "all_search";
 		createIxInitVars("allfieldsTests.mrc");
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldIndexed(fldName, solrCore);
-		assertFieldHasNorms(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldNotMultiValued(fldName, solrCore);
+		assertSearchFldOneValProps(fldName, solrCore, sis);
 		
 		String docId = "allfields1";
 
@@ -115,15 +113,66 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 	}
 
 
+	/**
+	 * raw marc display field should have appropriate properties.
+	 */
+@Test
+	public final void testMarc21Field() 
+	    throws ParserConfigurationException, IOException, SAXException
+	{
+		createIxInitVars("allfieldsTests.mrc");
+	    String fldName = "marc21";
+	    assertDisplayFldProps(fldName, solrCore, sis);
+	    assertFieldNotMultiValued(fldName, solrCore);
+	}
+
+
+	/**
+	 * open search field should be stored, not indexed
+	 */
+@Test
+	public final void testOpenSearch() 
+	    throws ParserConfigurationException, IOException, SAXException
+	{
+		createIxInitVars("allfieldsTests.mrc");
+	    String fldName = "open_search";
+	    assertDisplayFldProps(fldName, solrCore, sis);
+	}
+
+	/**
+	 * spell fields should be stored and indexed
+	 */
+@Test
+	public final void testSpellFields() 
+	    throws ParserConfigurationException, IOException, SAXException
+	{
+		createIxInitVars("allfieldsTests.mrc");
+		Set<String> fields = new HashSet<String>(3);
+		fields.add("spell");
+		fields.add("spell_title");
+		fields.add("spell_author");
+		for (String fldName : fields) {
+		    assertTextFieldProperties(fldName, solrCore, sis);
+		    assertFieldOmitsNorms(fldName, solrCore);
+		    assertFieldIndexed(fldName, solrCore);
+		    assertFieldStored(fldName, solrCore);
+		}
+		assertFieldNotMultiValued("spell", solrCore);
+		assertFieldMultiValued("spell_title", solrCore);
+		assertFieldMultiValued("spell_author", solrCore);
+	}
+
 
 	/**
 	 * Hokey horrible way to create a test index.
 	 */
+/*
 //@Test
     public final void makeBLIndex() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		createIxInitVars("unicornWHoldings.mrc");
 	}
+*/
 
 }

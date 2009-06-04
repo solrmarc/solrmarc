@@ -1,24 +1,6 @@
 package edu.stanford;
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -29,7 +11,7 @@ import org.solrmarc.tools.Utils;
 import org.solrmarc.tools.CallNumUtils;
 
 /**
- * Stanford localizations for VuFind load
+ * Stanford custom methods
  * @author Naomi Dushay
  */
 public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
@@ -63,8 +45,6 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 		COMPUTER_FILE,
 		CONFERENCE_PROCEEDINGS,
 		IMAGE,
-//no longer using Journal, as of 2008-12-02
-		JOURNAL,
 		JOURNAL_PERIODICAL,
 		MANUSCRIPT_ARCHIVE,
 		MAP_GLOBE,
@@ -72,8 +52,6 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 		MUSIC_RECORDING,
 		MUSIC_SCORE,
 		NEWSPAPER,
-//no longer using Serial Publication, as of 2008-12-02
-		SERIAL_PUBLICATION,
 		SOUND_RECORDING,
 		THESIS,
 		VIDEO,
@@ -99,8 +77,6 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 					return "Music - Recording";
 				case MUSIC_SCORE:
 					return "Music - Score";
-				case SERIAL_PUBLICATION:
-					return "Serial Publication";
 				case SOUND_RECORDING:
 					return "Sound Recording";
 			}
@@ -126,7 +102,8 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     {
         super(indexingPropsFile, propertyDirs);
     }
-        
+
+// Id Method  -------------------- Begin ----------------------------- Id Method
     
      /**
      * We have our ckeys in 001 subfield a.  Marc4j is unhappy with subfields 
@@ -146,58 +123,10 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         return null;
     }
     
-    /**
-     * Removes trailing periods or commas at the ends of the value strings 
-     *  indicated by the fieldSpec argument
-     * @param record
-     * @param fieldSpec - which marc fields / subfields to use as values
-     * @return Set of strings containing values without trailing commas or periods
-     */
-    public Set<String> removeTrailingPunct(final Record record, final String fieldSpec) 
-    {
-    	Set<String> resultSet = new HashSet<String>();
-    	for (String val : getFieldList(record, fieldSpec)) {
-    		if (val.endsWith(",") || val.endsWith(".") || val.endsWith("/")&& val.length() > 1)
-    			resultSet.add(val.substring(0, val.length() - 1).trim());
-    		else
-    			resultSet.add(val.trim());
-    	}
 
-    	return resultSet;
-    }
-        
+// Id Method  --------------------  End  ----------------------------- Id Method
     
-    /**
-    * Removes trailing characters indicated in regular expression, PLUS
-     *  trailing period if it is preceded by its regular expression.
-     *
-     * @param record
-     * @param fieldSpec - which marc fields / subfields to use as values
-     * @param trailingCharsRegEx a regular expression of trailing chars to be
-     *   replaced (see java Pattern class).  Note that the regular expression
-     *   should NOT have '$' at the end.
-     *   (e.g. " *[,/;:]" replaces any commas, slashes, semicolons or colons
-     *     at the end of the string, and these chars may optionally be preceded
-     *     by a space)
-     * @param charsB4periodRegEx a regular expression that must immediately 
-     *  precede a trailing period IN ORDER FOR THE PERIOD TO BE REMOVED. 
-     *  Note that the regular expression will NOT have the period or '$' at 
-     *  the end. 
-     *   (e.g. "[a-zA-Z]{3,}" means at least three letters must immediately 
-     *   precede the period for it to be removed.) 
-     * 
-     * @return Set of strings containing values without trailing characters
-     */
-    public Set<String> removeTrailingPunct(final Record record, final String fieldSpec, String charsToReplaceRegEx, String charsB4periodRegEx) 
-    {
-    	Set<String> resultSet = new HashSet<String>();
-    	for (String val : getFieldList(record, fieldSpec)) {
-    		String result = Utils.removeAllTrailingCharAndPeriod(val, "(" + charsToReplaceRegEx + ")+", charsB4periodRegEx);
-   			resultSet.add(result);
-    	}
-
-    	return resultSet;
-    }
+// Format Method  --------------- Begin -------------------------- Format Method
     
     /**
      * Returns the formats of the resource as described by a marc bib record
@@ -294,10 +223,6 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	        				break;
 	        			case 'w':   // web site
 	        				break;
-	        			// Note: assign serial publication below if nothing from 006
-//	        			case ' ':
-//	        				// b4 2008-12-02 was: resultSet.add(Format.SERIAL_PUBLICATION.toString());
-//	        				resultSet.add(Format.JOURNAL_PERIODICAL.toString());
         			}
         		}
         	}
@@ -320,13 +245,11 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     					resultSet.add(Format.NEWSPAPER.toString());
     					break;
         			case 'p':
-                		// b4 2008-12-02 was: resultSet.add(Format.JOURNAL.toString());
                 		resultSet.add(Format.JOURNAL_PERIODICAL.toString());
         				break;
         			case 'w':   // web site
         				break;
         			case ' ':
-        				// b4 2008-12-02 was: resultSet.add(Format.SERIAL_PUBLICATION.toString());
                 		resultSet.add(Format.JOURNAL_PERIODICAL.toString());
         		}
         	}
@@ -358,7 +281,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 				subList.addAll(Utils.getSubfieldStrings(df, 'v'));
 				for (String s : subList) {
 					if (s.toLowerCase().contains("congresses")) {
-						resultSet.remove(Format.SERIAL_PUBLICATION.toString());
+                		resultSet.remove(Format.JOURNAL_PERIODICAL.toString());
 						resultSet.add(Format.CONFERENCE_PROCEEDINGS.toString());
 					}
 				}
@@ -402,6 +325,11 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         return resultSet;
     }
     
+// Format Method  --------------- End   -------------------------- Format Method
+
+    
+// Standard Number Methods --------- Begin ------------- Standard Number Methods    
+    
     /**
      * returns the ISBN(s) from a record for external lookups (such as Google 
      *  Book Search)  (rather than the potentially larger set of ISBNs for the 
@@ -411,8 +339,6 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
      */
     public Set<String> getISBNs(final Record record)
     {
-		// TODO: change this fieldname to isbn_store
- 
     	//ISBN algorithm 
 		// 1. all 020 subfield a starting with 10 or 13 digits (last "digit" may be X). Ignore following text.
 		// 2. if no ISBN from any 020 subfield a "yields a search result", use all 020 subfield z starting with 10 or 13 digits (last "digit" may be X). Ignore following text.
@@ -534,6 +460,11 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     	return oclcSet;
     }
 
+// Standard Number Methods --------- End --------------- Standard Number Methods    
+    
+    
+// Title Methods ------------------- Begin ----------------------- Title Methods    
+    
     /**
      * returns the 245 a + b + h, without the trailing slash before the last 
      *  subfield c
@@ -598,6 +529,10 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     	return resultBuf.toString().trim();
     }
     
+// Title Methods -------------------- End ------------------------ Title Methods    
+    
+
+// Author Methods ----------------- Begin ----------------------- Author Methods    
     
     /**
      * returns string for author sort:  a string containing
@@ -646,52 +581,71 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     	return resultBuf.toString().trim();
     }
     
-    
+// Author Methods ------------------ End ------------------------ Author Methods    
+
+// Subject Methods ----------------- Begin --------------------- Subject Methods    
+
     /**
-     * @param DataField with ind2 containing # non-filing chars, or has value ' '
-     * @param skipSubFldc true if subfield c contents should be skipped
-     * @return StringBuffer of the contents of the subfields - with a trailing 
-     *  space
+     * Gets the value strings, but skips over 655a values when Lane is one of
+     *  the locations.  Also ignores 650a with value "nomesh".
+     * @param record
+     * @param fieldSpec - which marc fields / subfields to use as values
+     * @return Set of strings containing values without Lane 655a or 650a nomesh
      */
- 	@SuppressWarnings("unchecked")
-	private StringBuffer getAlphaSubfldsAsSortStr(DataField df, boolean skipSubFldc)
+    public Set<String> getTopicAllAlphaExcept(final Record record, final String fieldSpec) 
     {
-    	StringBuffer result = new StringBuffer();
-       	int nonFilingInt = getInd2AsInt(df);
-    	boolean firstSubfld = true;
-    	
-    	List<Subfield> subList = df.getSubfields();
-		for (Subfield sub : subList) {
-			char subcode = sub.getCode();
-			if (Character.isLetter(subcode) && (!skipSubFldc || subcode != 'c'))
-			{
-				String data = sub.getData();
-				if (firstSubfld) {
-					if (nonFilingInt < data.length() -1)
-						data = data.substring(nonFilingInt);
-					firstSubfld = false;
-				}
-				// eliminate ascii punctuation marks from sorting as well
-				result.append(data.replaceAll("\\p{Punct}*", "").trim() + ' ');
-			}
-		}
-    	return result;
+    	Set<String> resultSet = getAllAlphaExcept(record, fieldSpec);
+    	if (getBuildings(record).contains("LANE-MED"))
+    	{
+    		Set<String> skipSet = getFieldList(record, "655a");
+    		resultSet.removeAll(skipSet);
+    	}
+
+		resultSet.remove("nomesh");
+    	return resultSet;
+    }
+        
+    /**
+     * Gets the value strings, but skips over 655a values when Lane is one of
+     *  the locations.  Also ignores 650a with value "nomesh". Removes trailing 
+     *  characters indicated in regular expression, PLUS trailing period if it 
+     *  is preceded by its regular expression.
+     *
+     * @param record
+     * @param fieldSpec - which marc fields / subfields to use as values
+     * @param trailingCharsRegEx a regular expression of trailing chars to be
+     *   replaced (see java Pattern class).  Note that the regular expression
+     *   should NOT have '$' at the end.
+     *   (e.g. " *[,/;:]" replaces any commas, slashes, semicolons or colons
+     *     at the end of the string, and these chars may optionally be preceded
+     *     by a space)
+     * @param charsB4periodRegEx a regular expression that must immediately 
+     *  precede a trailing period IN ORDER FOR THE PERIOD TO BE REMOVED. 
+     *  Note that the regular expression will NOT have the period or '$' at 
+     *  the end. 
+     *   (e.g. "[a-zA-Z]{3,}" means at least three letters must immediately 
+     *   precede the period for it to be removed.) 
+     * @return Set of strings containing values without trailing characters and 
+     * without Lane 655a or 650a nomesh
+     */
+    public Set<String> getTopicWithoutTrailingPunct(final Record record, final String fieldSpec, String charsToReplaceRegEx, String charsB4periodRegEx) 
+    {
+    	Set<String> resultSet = removeTrailingPunct(record, fieldSpec, charsToReplaceRegEx, charsB4periodRegEx);
+    	if (getBuildings(record).contains((String) "LANE-MED"))
+    	{
+    		Set<String> skipSet = getFieldList(record, "655a");
+    		resultSet.removeAll(skipSet);
+    	}
+
+		resultSet.remove("nomesh");
+    	return resultSet;
     }
 
- 	
-    /**
-     * @param df a DataField
-     * @return the integer (0-9, 0 if blank) in the 2nd indicator
-     */
-    private int getInd2AsInt(DataField df) {
-    	char int2char = df.getIndicator2();
-       	int result = 0;
-       	if (Character.isDigit(int2char))
-       		result = Integer.valueOf(String.valueOf(int2char));
-       	return result;
-    }
     
-    
+// Subject Methods ----------------- End ----------------------- Subject Methods    
+
+// Access Methods ----------------- Begin ----------------------- Access Methods    
+
     /**
      * returns the access facet values for a record.  A record can have multiple
      *  values: online, on campus and upon request are not mutually exclusive.
@@ -722,6 +676,10 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 
     	return resultSet;
     }
+
+// Access Methods -----------------  End  ----------------------- Access Methods    
+    
+// URL Methods -------------------- Begin -------------------------- URL Methods    
     
     /**
      * retruns a set of strings containing the sfx urls in a record.  Returns
@@ -836,6 +794,11 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 		return supplmntl;
     }
 
+// URL Methods --------------------  End  -------------------------- URL Methods    
+    
+
+// Pub Date Methods  -------------- Begin --------------------- Pub Date Methods    
+    
     /**
      * returns the publication date from a record, if it is present
      * @param record
@@ -843,9 +806,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
      */
     public String getPubDate(final Record record)
     {
-// TODO: should publishDate be multiValued?
-
-// TODO: document publishDate algorithm here
+// TODO: should pubDate be multiValued?
 
     	// date1 is bytes 7-10 (0 based index) in 008 field
     	ControlField cf = (ControlField) record.getVariableField("008");
@@ -855,15 +816,181 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         	
         	if (isdddd(date1Str))
         		return date1Str;
-        	if (isdddu(date1Str))
+        	else if (isdddu(date1Str))
         		return date1Str.substring(0, 3) + "0s";
-        	if (isdduu(date1Str)) 
+        	else if (isdduu(date1Str)) 
         		return getCenturyString(date1Str.substring(0,2));
     	}
      		
     	return null;
     }
 
+    /**
+     * returns the sortable publication date from a record, if it is present
+     * @param record
+     * @return String containing publication date, or null if none
+     */
+    public String getPubDateSort(final Record record)
+    {
+    	// date1 is bytes 7-10 (0 based index) in 008 field
+    	ControlField cf = (ControlField) record.getVariableField("008");
+    	if (cf != null)
+    	{
+        	String dateStr = cf.getData().substring(7,11);
+        	// hyphens sort before 0, so the lexical sorting will be correct.  I think.
+        	if (isdddd(dateStr))
+        		return dateStr;
+        	else if (isdddu(dateStr))
+        		return dateStr.substring(0, 3) + "-";
+        	else if (isdduu(dateStr)) 
+        		return dateStr.substring(0, 2) + "--";
+        	else if (isduuu(dateStr)) 
+        		return dateStr.substring(0, 1) + "---";
+    	}
+     		
+    	return null;
+    }
+    
+ 
+    /** access facet values */
+	public static enum PubDateGroup {
+		THIS_YEAR,
+		LAST_3_YEARS,
+		LAST_10_YEARS,
+		LAST_50_YEARS,
+		MORE_THAN_50_YEARS_AGO,
+		;
+		
+		/**
+		 * need to override for text of multiple words
+		 */
+		@Override 
+		public String toString() {
+			switch(this) {
+				case THIS_YEAR:
+					return "This year";
+				case LAST_3_YEARS:
+					return "Last 3 years";
+				case LAST_10_YEARS:
+					return "Last 10 years";
+				case LAST_50_YEARS:
+					return "Last 50 years";
+				case MORE_THAN_50_YEARS_AGO:
+					return "More than 50 years ago";
+			}
+			String lc = super.toString().toLowerCase();
+			String firstchar = lc.substring(0, 1).toUpperCase();
+			return lc.replaceFirst(".{1}", firstchar);
+		}
+
+	}
+    
+	private int cYearInt = Calendar.getInstance().get(Calendar.YEAR);
+	private String cYearStr = Integer.toString(cYearInt);
+	
+    /**
+     * returns the publication date groupings from a record, if it is present
+     * @param record
+     * @return Set of Strings containing the publication date groupings associated
+     *   with the publish date
+     */
+    public Set<String> getPubDateGroups(final Record record)
+    {
+        Set<String> resultSet = new HashSet<String>();
+        
+       	// get the pub date, with decimals assigned for inclusion in ranges
+       	ControlField cf = (ControlField) record.getVariableField("008");
+       	if (cf != null)
+       	{
+           	String dateStr = cf.getData().substring(7,11);
+           	if (isdddd(dateStr))  // exact year
+           	{
+           		int year = Integer.parseInt(dateStr);
+           		// "this year" and "last three years" are for 4 digits only
+                if ( year >= (cYearInt - 1) )
+               		resultSet.add(PubDateGroup.THIS_YEAR.toString());
+               	if ( year >= (cYearInt - 3) )
+               		resultSet.add(PubDateGroup.LAST_3_YEARS.toString());
+
+               	resultSet.addAll(getPubDateGroupsForYear(year));
+           	}
+           	else if (isdddu(dateStr))  // decade
+           	{
+           		String first3Str = dateStr.substring(0, 3);
+           		int first3int = Integer.parseInt(first3Str);
+           		
+           		if (first3Str.equals(cYearStr.substring(0, 3)))  // this decade?
+           		{  
+               		resultSet.add(PubDateGroup.LAST_50_YEARS.toString());
+           			resultSet.add(PubDateGroup.LAST_10_YEARS.toString());
+               		if (cYearInt %10 <= 3)
+               			resultSet.add(PubDateGroup.LAST_3_YEARS.toString());
+           		}
+           		else {  // not current decade
+           			if (cYearInt % 10 <= 4)  // which half of decade?
+               		{
+               			// first half of decade - current year ends in 0-4
+               			if (first3int == (cYearInt / 10) - 1)
+                   			resultSet.add(PubDateGroup.LAST_10_YEARS.toString());
+
+               			if (first3int >= (cYearInt / 10) - 6)
+                   			resultSet.add(PubDateGroup.LAST_50_YEARS.toString());
+               			else
+               				resultSet.add(PubDateGroup.MORE_THAN_50_YEARS_AGO.toString());
+               		}
+               		else { 
+               			// second half of decade - currend year ends in 5-9
+               			if (first3int > (cYearInt / 10) - 5)
+                   			resultSet.add(PubDateGroup.LAST_50_YEARS.toString());
+               			else
+               				resultSet.add(PubDateGroup.MORE_THAN_50_YEARS_AGO.toString());
+               		}
+           		}
+           	}
+           	else if (isdduu(dateStr)) {   // century
+           		String first2Str = dateStr.substring(0, 2);
+           		int first2int = Integer.parseInt(first2Str);
+           		
+           		if (first2Str.equals(cYearStr.substring(0, 2))) {
+           			// current century
+           			resultSet.add(PubDateGroup.LAST_50_YEARS.toString());
+
+           			if (cYearInt % 100 <= 19) 
+               			resultSet.add(PubDateGroup.LAST_10_YEARS.toString());
+           		}
+           		else {
+           			if ( first2int == (cYearInt / 100) - 1) 
+           			{
+           				// previous century
+       					if (cYearInt % 100 <= 25)
+       						resultSet.add(PubDateGroup.LAST_50_YEARS.toString());
+       					else
+               				resultSet.add(PubDateGroup.MORE_THAN_50_YEARS_AGO.toString());
+           			}
+           			else
+           				resultSet.add(PubDateGroup.MORE_THAN_50_YEARS_AGO.toString());
+           		}
+           	}
+           	// we don't work with duuu or uuuu or other date strings
+       	}
+       	
+    	return resultSet;
+    }
+    
+    
+    private Set<String> getPubDateGroupsForYear(int year) 
+    {
+        Set<String> resultSet = new HashSet<String>();
+
+       	if ( year >= (cYearInt - 10) )
+       		resultSet.add(PubDateGroup.LAST_10_YEARS.toString());
+       	if ( year >= (cYearInt - 50))
+       		resultSet.add(PubDateGroup.LAST_50_YEARS.toString());
+       	if (year < (cYearInt - 50) && (year > -1.0))
+       		resultSet.add(PubDateGroup.MORE_THAN_50_YEARS_AGO.toString());
+    	return resultSet;	
+    }
+    
     
     /**
      * given a string containing two digits representing the year, return
@@ -926,30 +1053,12 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     	return false;
     }
 
-
-    /**
-     * Extract all topics from a record (600, 610, 630, 650, 655 all subfields)
-     */
-    @SuppressWarnings("unchecked")
-	public Set<String> getFullTopics(final Record record) 
-    {
-		String[] tags = {"600", "610", "630", "650", "655"};
-		return org.solrmarc.tools.Utils.getAllSubfields(record, tags);
-    }
-
-    /**
-     * Extract all 651 subfields
-     */
-/*
-    @SuppressWarnings("unchecked")
-	public Set<String> getFullGeographics(final Record record) 
-    {
-		String[] tags = {"651"};
-		return org.solrmarc.tools.Utils.getAllSubfields(record, tags);
-    }
-*/
+// Pub Date Methods  --------------  End  --------------------- Pub Date Methods    
     
-	/**
+
+// Subject Methods  ---------------- Begin --------------------- Subject Methods    
+
+    /**
 	 * returns era strings derived from 650y and 651y, or 045a if no 650 or 651
 	 * @param record Marc record to extract data from
 	 */
@@ -966,30 +1075,12 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         	result.add("other");
         return result;
 	}
-
-
-// Fields currently used in search results or record display, making them
-//  the candidates for vernacular fields.
-
-//full_title_display = 245abcdefghijklmnopqrstuvwxyz
-//brief_title_display = custom, removeTrailingPunct(245abdefghijklmnopqrstuvwxyz)
-//uniform_title_display = 130abcdefghijklmnopqrstuvwxyz:240abcdefghijklmnopqrstuvwxyz, first
-//variant_title_display = 246abcdefghijklmnopqrstuvwxyz
-
-//author = custom, removeTrailingPunct(100abcdq, [\\\\,/;:], ([A-Za-z]{4}|[0-9]{3}|\\)|\\,) )
-//creator_display = 100abcdefghijklmnopqrstuvwxyz
-//corp_author_display = 110abcdefghijklmnopqrstuvwxyz
-//meeting_display = 111abcdefghijklmnopqrstuvwxyz
-
-//edition = 250ab
-//publication_display = 260abcefg
-//   would be publishDate if we took it from the 260?
-//physical = 300abcefg
-
-//series_title_display = 440anpv
-//series_display = 490av
 	
+// Subject Methods  ----------------  End  --------------------- Subject Methods    
+
 	
+// AllFields Methods  --------------- Begin ------------------ AllFields Methods    
+		
 	/**
 	 * fields in the 0xx range (not including control fields) that should be
 	 *  indexed in allfields
@@ -1025,7 +1116,12 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 		return result.toString().trim();
 	}
 
-    
+// AllFields Methods  ---------------  End  ------------------ AllFields Methods    
+
+	
+// Item Related Methods ------------- Begin --------------- Item Related Methods    
+	
+	
 	// 999 scheme:
 	// a - call num
 	// w - call num scheme
@@ -1046,7 +1142,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	}
 	
 	/**
-	 * return the building from the 999 for non-ignored item
+	 * return the building from the 999m for non-ignored item
 	 */
 	private String getBuildingFrom999(DataField f999) 
 	{
@@ -1060,233 +1156,103 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 		return null;
 	}
 	
+	/**
+	 * return the barcode from the 999i for non-ignored item
+	 */
+	private String getBarcodeFrom999(DataField f999) 
+	{
+		if (ignoreItem(f999))
+			return null;
+
+		String subi = Utils.getSubfieldData(f999, 'i');
+		if (subi != null)
+			return subi.trim();
+
+		return null;
+	}
 	
 	/**
-	 * Get the vernacular (880) field based which corresponds to the fieldSpec
-	 *  in the subfield 6 linkage 
-     * @param fieldSpec - which marc fields / subfields need to be sought in 
-     *  880 fields (via linkages)
+	 * return the location from the 999l (that's L) for non-ignored item
 	 */
-	@SuppressWarnings("unchecked")
-	public final Set<String> getVernacular(final Record record, String fieldSpec) 
+	private String getLocationFrom999(DataField f999) 
 	{
-        Set<String> result = new LinkedHashSet<String>();
-		// find the right 880 field
-		//  then do the regular thing
-        
-        List<VariableField> list880s = record.getVariableFields("880");
-        if (list880s == null || list880s.size() == 0)
-        	return result;
-		
-        // is this a right to left language?
-        VariableField vf8 = record.getVariableField("008");
-        ControlField f008 = (ControlField) vf8;
-        String langcode = f008.getData().substring(35, 38);
-        boolean rightToLeft = Utils.isRightToLeftLanguage(langcode);
-        
-        // we know which 880s we're looking for by the fieldSpec and 
-        //  subfield 6 (linkage info) in the 880
-        String[] linkPieces = fieldSpec.split(":");
-        
-        for (int i = 0; i < linkPieces.length; i++)
+		if (ignoreItem(f999))
+			return null;
+
+		String subl = Utils.getSubfieldData(f999, 'l');
+		if (subl != null)
+			return subl.trim();
+
+		return null;
+	}
+
+	// load translation maps for building and location
+	private String bldgMapName = "";
+	private String locationMapName = "";
+	{
+        try
         {
-            // marc field must be least 3 characters
-            if (linkPieces[i].length() < 3)
-            {
-                System.err.println("Invalid tag specified: " + linkPieces[i]);
-                continue;
-            }
-            
-            String linkTOfield = linkPieces[i].substring(0, 3);
-            
-            // look for 880s that link to the right field
-            for (VariableField vf : list880s) {
-             	DataField df880 = (DataField) vf;
-            	List<String> linkages = Utils.getSubfieldStrings(df880, '6');
-            	// should be only one, but what the heck
-            	for (String linkage : linkages) {
-            		int dashIx = linkage.indexOf('-');
-            		if (dashIx == 3 && linkTOfield.equals(linkage.substring(0, dashIx)) ) {
-            			// we have right 880
-                        // Process Subfields
-                        String subfldStr = linkPieces[i].substring(3);
-                        int bracket = linkPieces[i].indexOf('[');
-                        if (bracket != -1)
-                        {
-                            String sub[] = linkPieces[i].substring(bracket+1).split("[\\]\\[\\-, ]+");
-                            int substart = Integer.parseInt(sub[0]);
-                            int subend = (sub.length > 1 ) ? Integer.parseInt(sub[1])+1 : substart+1;
-                            result.addAll(getSubfieldsAsSet(df880, subfldStr, substart, subend, rightToLeft));
-                        } else 
-                            result.addAll(getSubfieldsAsSet(df880, subfldStr, rightToLeft));
-              		}
-            	}
-            }        
+            bldgMapName = loadTranslationMap(null, "library_short_map.properties");
+            locationMapName = loadTranslationMap(null, "location_map.properties");
         }
-        return (result);
+        catch (IllegalArgumentException e)
+        {
+            e.printStackTrace();
+        }
 	}
 	
-
 	/**
-	 * Get the vernacular (880) field based which corresponds to the fieldSpec
-	 *  in the subfield 6 linkage, handling multiple occurrences as indicated 
-     * @param fieldSpec - which marc fields / subfields need to be sought in 
-     *  880 fields (via linkages)
-     * @param multOccurs - "first", "join" or "all" indicating how to handle
-     *  multiple occurrences of field values
+	 * for search result display:
+	 * @return set of barcode - lib - location - callnum fields from 999s
 	 */
 	@SuppressWarnings("unchecked")
-	public final Set<String> getVernacular(final Record record, String fieldSpec, String multOccurs) 
-	{
-        Set<String> result = getVernacular(record, fieldSpec);
-        
-        if (multOccurs.equals("first")) {
-        	Set<String> first = new HashSet<String>();
-        	for (String r : result) {
-        		first.add(r);
-        		return first;
-        	}
-        } else if (multOccurs.equals("join")) {
-        	StringBuffer resultBuf = new StringBuffer(); 
-        	for (String r : result) {
-        		if (resultBuf.length() > 0)
-        			resultBuf.append(' ');
-        		resultBuf.append(r);
-        	}
-        	Set<String> resultAsSet = new HashSet<String>();
-        	resultAsSet.add(resultBuf.toString());
-        	return resultAsSet;
-        }
-        // "all" is default
-        
-        return result;
-	}
+	public final Set<String> getItemDisplay(final Record record) {
+		Set<String> result = new HashSet<String>();
+// FIXME: sep should be globally avail constant (for tests also?)
+		String sep = " -|- ";
+		List<VariableField> list999 = record.getVariableFields("999");
+		for (VariableField vf: list999) {
+			DataField df = (DataField) vf;
+			if (!onlineItem(df)) {
+	        	String barcode = getBarcodeFrom999(df); 
 
+	        	// building --> short name from mapping
+	        	String building = "";
+	        	String origBldg = getBuildingFrom999(df);
+	        	if (origBldg != null && origBldg.length() > 0) 
+	        		building = Utils.remap(origBldg, findMap(bldgMapName), true);
+	        	
+	        	// location --> mapped
+	        	String location = "";
+	        	String origLoc = getLocationFrom999(df);
+	        	if (origLoc != null && origLoc.length() > 0) 
+	        		location = Utils.remap(origLoc, findMap(locationMapName), true);
 
-	/**
-	 * Get the vernacular (880) field based which corresponds to the fieldSpec
-	 *  in the subfield 6 linkage, handling trailing punctuation as incidated 
-     * @param fieldSpec - which marc fields / subfields need to be sought in 
-     *  880 fields (via linkages)
-     * @param trailingCharsRegEx a regular expression of trailing chars to be
-     *   replaced (see java Pattern class).  Note that the regular expression
-     *   should NOT have '$' at the end.
-     *   (e.g. " *[,/;:]" replaces any commas, slashes, semicolons or colons
-     *     at the end of the string, and these chars may optionally be preceded
-     *     by a space)
-     * @param charsB4periodRegEx a regular expression that must immediately 
-     *  precede a trailing period IN ORDER FOR THE PERIOD TO BE REMOVED. 
-     *  Note that the regular expression will NOT have the period or '$' at 
-     *  the end. 
-     *   (e.g. "[a-zA-Z]{3,}" means at least three letters must immediately 
-     *   precede the period for it to be removed.) 
-	 */
-	@SuppressWarnings("unchecked")
-	public final Set<String> getVernacular(final Record record, String fieldSpec, String charsToReplaceRegEx, String charsB4periodRegEx) 
-	{
-        Set<String> origVals = getVernacular(record, fieldSpec);
-        Set<String> result = new LinkedHashSet<String>();
-        
-    	for (String val : origVals) {
-    		result.add(Utils.removeAllTrailingCharAndPeriod(val, "(" + charsToReplaceRegEx + ")+", charsB4periodRegEx));
-    	}
-        return result;
+// FIXME:  need to get all call numbers, except a few (shelve-by, internet, etc)        	
+	        	String callnum = getLCCallNumberFrom999(df);
+	        	if (callnum != null)
+	        		callnum = CallNumUtils.removeLCVolSuffix(callnum);
+	        	else {
+	        		callnum = getDeweyCallNumberFrom999((DataField) vf);
+	            	if (callnum != null)
+	            		callnum = CallNumUtils.removeDeweyVolSuffix(callnum);
+	        	}
+	        	if (barcode != null && barcode.length() > 0 &&
+	        			building.length() > 0 &&
+	        			location != null && location.length() > 0 &&
+	        			callnum != null && callnum.length() > 0)
+	        		result.add(barcode + sep + building + sep + location + sep + callnum);
+System.out.println("adding result: " + barcode + sep + building + sep + location + sep + callnum);
+				
+			}  // end physical item (not online)
+		} // end loop through 999s
+		return result;
 	}
 	
+// Item Related Methods -------------  End  --------------- Item Related Methods    
 
-    /**
-     * Get the specified subfields from the MARC data field, returned as
-     *  a string
-     * @param df - DataField from which to get the subfields
-     * @param subfldsStr - the string containing the desired subfields
-     * @param RTL - true if this is a right to left language.  In this case, 
-     *  each subfield is prepended due to LTR and MARC end-of-subfield punctuation
-     *  is moved from the last character to the first.
-     * @returns a set of strings of desired subfields concatenated with space separator
-     */
-    @SuppressWarnings("unchecked")
-	protected static Set<String> getSubfieldsAsSet(DataField df, String subfldsStr, boolean RTL) 
-    {
-    	Set<String> resultSet = new LinkedHashSet<String>();
-
-    	if (subfldsStr.length() > 1) {
-            // concatenate desired subfields with space separator
-            StringBuffer buffer = new StringBuffer();
-            List<Subfield> subFlds = df.getSubfields();
-            for (Subfield sf : subFlds) {
-            	if (subfldsStr.contains(String.valueOf(sf.getCode()))) {
-// TODO:  clean this up, if this works, or find a way to test it            		
-//            		if (RTL) { // right to left language, but this is LTR field+
-//	                    if (buffer.length() > 0)
-//	                        buffer.insert(0, ' ');
-//	                    buffer.insert(0, sf.getData().trim());
-//            		} else { // left to right language
-	                    if (buffer.length() > 0)
-	                        buffer.append(' ');
-	                    buffer.append(sf.getData().trim());
-//            		}
-            	}
-            } 
-            resultSet.add(buffer.toString());
-        } else {
-        	// for single subfield, each occurrence is separate field in lucene doc
-        	List<Subfield> subFlds = df.getSubfields(subfldsStr.charAt(0));
-        	for (Subfield sf : subFlds) {
-        		resultSet.add(sf.getData().trim());
-        	}
-        } 
-    	return resultSet;
-    }
-
-    
-    /**
-     * Get the specified subfields from the MARC data field, returned as
-     *  a string
-     * @param df - DataField from which to get the subfields
-     * @param subfldsStr - the string containing the desired subfields
-     * @param beginIx - the beginning index of the substring of the subfield value
-     * @param endIx - the endind index of the substring of the subfield value
-     * @param RTL - true if this is a right to left language.  In this case, 
-     *  each subfield is prepended due to LTR and MARC end-of-subfield punctuation
-     *  is moved from the last character to the first.
-     * @returns a set of strings of desired subfields concatenated with space separator
-     */
-    @SuppressWarnings("unchecked")
-	protected static Set<String> getSubfieldsAsSet(DataField df, String subfldsStr, int beginIx, int endIx, boolean RTL) 
-    {
-    	Set<String> resultSet = new LinkedHashSet<String>();
-        if (subfldsStr.length() > 1) {
-            // concatenate desired subfields with space separator
-            StringBuffer buffer = new StringBuffer();
-            List<Subfield> subFlds = df.getSubfields();
-            for (Subfield sf : subFlds) {
-            	if (subfldsStr.contains(String.valueOf(sf.getCode()))) {
-            		if (sf.getData().length() >= endIx) {
-// TODO:  clean this up, if this works, or find a way to test it            		
-//            			if (RTL) { // right to left language
-//                            if (buffer.length() > 0) 
-//                                buffer.insert(0, ' ');
-//                            buffer.insert(0, sf.getData().trim().substring(beginIx, endIx));
-//            			} else { // left to right language
-                            if (buffer.length() > 0) 
-                                buffer.append(' ');
-                            buffer.append(sf.getData().trim().substring(beginIx, endIx));
-//            			}
-            		}
-                }
-            }
-            resultSet.add(buffer.toString());
-        } else {
-        	// for single subfield, each occurrence is separate field in lucene doc
-        	List<Subfield> subFlds = df.getSubfields(subfldsStr.charAt(0));
-        	for (Subfield sf : subFlds) {
-        		if (sf.getData().length() >= endIx) 
-            		resultSet.add(sf.getData().trim().substring(beginIx, endIx));
-        	}
-        }
-        return resultSet;
-    }
-    
+	
+// Call Number Methods -------------- Begin ---------------- Call Number Methods    
     
 	/**
 	 * This field only gets call numbers from 999, where our local
@@ -1638,8 +1604,6 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	}
 
 	
-	
-	
 // TODO:  this should be read in from a config file
 	/**
 	 * location codes implying call numbers should be ignored
@@ -1666,6 +1630,8 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 		return false;
 	}
 
+// Call Number Methods --------------  End  ---------------- Call Number Methods    
+	
 
 // TODO:  this should be read in from a config file
 	/**
@@ -1705,37 +1671,33 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 */
 	Set<String> ignoredLocs = new HashSet<String>();
 	{
-//		ignoredLocList.addAll(onlineLocList);
-		
-		ignoredLocs.add("DISCARD-NS"); // obsolete location
-		ignoredLocs.add("WITHDRAWN");
-		ignoredLocs.add("SUPERSEDED");
-		ignoredLocs.add("SEL-NOTIFY");
-		
-		// shadow locations
-		ignoredLocs.add("FED-DOCS-S"); //Shadowed location for loading Marcive SLS records
+		ignoredLocs.add("3FL-REF-S"); //meyer 3rd floor reference shadowed
+		ignoredLocs.add("BENDER-S"); //temporary shadowed location for the Bender Reading Room
 		ignoredLocs.add("CDPSHADOW"); //All items in CDP which are shadowed
-		ignoredLocs.add("TECHSHADOW"); //Technical Services Shadowed
-		ignoredLocs.add("STAFSHADOW"); //All staff items which are shadowed
-		ignoredLocs.add("SHADOW"); //Use for all items which are to be shadowed
-		ignoredLocs.add("LOST"); //LOST shadowed
-		ignoredLocs.add("SSRC-FIC-S"); //Shadowed location for loading Marcive SLS records
-		ignoredLocs.add("SSRC-SLS"); //Shadowed location for loading Marcive SLS records
+		ignoredLocs.add("DISCARD"); //discard shadowed
+		ignoredLocs.add("DISCARD-NS"); // obsolete location
+		ignoredLocs.add("EAL-TEMP-S"); //East Asia Library Temporary Shadowed
+		ignoredLocs.add("FED-DOCS-S"); //Shadowed location for loading Marcive SLS records
 		ignoredLocs.add("MAPCASES-S"); //Shadowed location for loading Marcive SLS records
 		ignoredLocs.add("MAPFILE-S"); //Shadowed location for loading Marcive SLS records
-		ignoredLocs.add("BENDER-S"); //temporary shadowed location for the Bender Reading Room
-		ignoredLocs.add("DISCARD"); //discard shadowed
-		ignoredLocs.add("3FL-REF-S"); //meyer 3rd floor reference shadowed
-		ignoredLocs.add("SPECM-S"); //Special Collections-- Shadowed Manuscripts
-		ignoredLocs.add("SPECA-S"); //Special Collections-- Shadowed Archives
-		ignoredLocs.add("SPECB-S"); //Special Collections-- Shadowed Books
-		ignoredLocs.add("SPECAX-S"); //Special Collections-- Shadowed Archives, Restricted Access
-		ignoredLocs.add("SPECBX-S"); //Special Collections-- Shadowed Books Restricted Access
-		ignoredLocs.add("SPECMX-S"); //Special Collections-- Shadowed Manuscripts, Restricted Acces
-		ignoredLocs.add("SPECMEDX-S"); //Special Collections-- Shadowed Media, Restricted Access
-		ignoredLocs.add("SPECMED-S"); //Special Collections-- Shadowed Media
-		ignoredLocs.add("EAL-TEMP-S"); //East Asia Library Temporary Shadowed
 		ignoredLocs.add("LOCKSS"); // Locks shadowed copy
+		ignoredLocs.add("LOST"); //LOST shadowed
+		ignoredLocs.add("SEL-NOTIFY");
+		ignoredLocs.add("SHADOW"); //Use for all items which are to be shadowed
+		ignoredLocs.add("SPECA-S"); //Special Collections-- Shadowed Archives
+		ignoredLocs.add("SPECAX-S"); //Special Collections-- Shadowed Archives, Restricted Access
+		ignoredLocs.add("SPECB-S"); //Special Collections-- Shadowed Books
+		ignoredLocs.add("SPECBX-S"); //Special Collections-- Shadowed Books Restricted Access
+		ignoredLocs.add("SPECM-S"); //Special Collections-- Shadowed Manuscripts
+		ignoredLocs.add("SPECMED-S"); //Special Collections-- Shadowed Media
+		ignoredLocs.add("SPECMEDX-S"); //Special Collections-- Shadowed Media, Restricted Access
+		ignoredLocs.add("SPECMX-S"); //Special Collections-- Shadowed Manuscripts, Restricted Acces
+		ignoredLocs.add("SSRC-FIC-S"); //Shadowed location for loading Marcive SLS records
+		ignoredLocs.add("SSRC-SLS"); //Shadowed location for loading Marcive SLS records
+		ignoredLocs.add("STAFSHADOW"); //All staff items which are shadowed
+		ignoredLocs.add("SUPERSEDED");
+		ignoredLocs.add("TECHSHADOW"); //Technical Services Shadowed
+		ignoredLocs.add("WITHDRAWN");
 	}
 	
 	
@@ -1801,5 +1763,408 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 		
 		return false;
 	}
+	
+
+// Utility Methods ---------------- Begin ---------------------- Utility Methods    
+    
+    /**
+     * @param DataField with ind2 containing # non-filing chars, or has value ' '
+     * @param skipSubFldc true if subfield c contents should be skipped
+     * @return StringBuffer of the contents of the subfields - with a trailing 
+     *  space
+     */
+ 	@SuppressWarnings("unchecked")
+	private StringBuffer getAlphaSubfldsAsSortStr(DataField df, boolean skipSubFldc)
+    {
+    	StringBuffer result = new StringBuffer();
+       	int nonFilingInt = getInd2AsInt(df);
+    	boolean firstSubfld = true;
+    	
+    	List<Subfield> subList = df.getSubfields();
+		for (Subfield sub : subList) {
+			char subcode = sub.getCode();
+			if (Character.isLetter(subcode) && (!skipSubFldc || subcode != 'c'))
+			{
+				String data = sub.getData();
+				if (firstSubfld) {
+					if (nonFilingInt < data.length() -1)
+						data = data.substring(nonFilingInt);
+					firstSubfld = false;
+				}
+				// eliminate ascii punctuation marks from sorting as well
+				result.append(data.replaceAll("\\p{Punct}*", "").trim() + ' ');
+			}
+		}
+    	return result;
+    }
+ 	
+    /**
+     * @param df a DataField
+     * @return the integer (0-9, 0 if blank) in the 2nd indicator
+     */
+    private int getInd2AsInt(DataField df) {
+    	char int2char = df.getIndicator2();
+       	int result = 0;
+       	if (Character.isDigit(int2char))
+       		result = Integer.valueOf(String.valueOf(int2char));
+       	return result;
+    }
+    
+    /**
+     * Removes trailing periods or commas at the ends of the value strings 
+     *  indicated by the fieldSpec argument
+     * @param record
+     * @param fieldSpec - which marc fields / subfields to use as values
+     * @return Set of strings containing values without trailing commas or periods
+     */
+    public Set<String> removeTrailingPunct(final Record record, final String fieldSpec) 
+    {
+    	Set<String> resultSet = new HashSet<String>();
+    	for (String val : getFieldList(record, fieldSpec)) {
+    		if (val.endsWith(",") || val.endsWith(".") || val.endsWith("/")&& val.length() > 1)
+    			resultSet.add(val.substring(0, val.length() - 1).trim());
+    		else
+    			resultSet.add(val.trim());
+    	}
+
+    	return resultSet;
+    }
+        
+    
+    /**
+    * Removes trailing characters indicated in regular expression, PLUS
+     *  trailing period if it is preceded by its regular expression.
+     *
+     * @param record
+     * @param fieldSpec - which marc fields / subfields to use as values
+     * @param trailingCharsRegEx a regular expression of trailing chars to be
+     *   replaced (see java Pattern class).  Note that the regular expression
+     *   should NOT have '$' at the end.
+     *   (e.g. " *[,/;:]" replaces any commas, slashes, semicolons or colons
+     *     at the end of the string, and these chars may optionally be preceded
+     *     by a space)
+     * @param charsB4periodRegEx a regular expression that must immediately 
+     *  precede a trailing period IN ORDER FOR THE PERIOD TO BE REMOVED. 
+     *  Note that the regular expression will NOT have the period or '$' at 
+     *  the end. 
+     *   (e.g. "[a-zA-Z]{3,}" means at least three letters must immediately 
+     *   precede the period for it to be removed.) 
+     * 
+     * @return Set of strings containing values without trailing characters
+     */
+    public Set<String> removeTrailingPunct(final Record record, final String fieldSpec, String charsToReplaceRegEx, String charsB4periodRegEx) 
+    {
+    	Set<String> resultSet = new HashSet<String>();
+    	for (String val : getFieldList(record, fieldSpec)) {
+    		String result = Utils.removeAllTrailingCharAndPeriod(val, "(" + charsToReplaceRegEx + ")+", charsB4periodRegEx);
+   			resultSet.add(result);
+    	}
+
+    	return resultSet;
+    }
+
+// Vernacular Methods --------------- Begin ----------------- Vernacular Methods    
+	
+	/**
+	 * Get the vernacular (880) fields which corresponds to the marc field
+	 *  in the 880 subfield 6 linkage 
+     * @param marc field - which marc field to seek in 880 fields (via linkages)
+	 */
+	@SuppressWarnings("unchecked")
+	protected final Set<VariableField> getVernacularFields(final Record record, String marcField) 
+	{
+        if (marcField.length() != 3)
+            System.err.println("marc field tag must be three characters: " + marcField);
+        
+        Set<VariableField> resultSet = new LinkedHashSet<VariableField>();
+        
+        List<VariableField> list880s = record.getVariableFields("880");
+        if (list880s == null || list880s.size() == 0)
+        	return resultSet;
+		
+        // we know which 880s we're looking for by matching the marc field and 
+        //  subfield 6 (linkage info) in the 880
+        for (VariableField vf : list880s) {
+         	DataField df880 = (DataField) vf;
+        	String linkage = Utils.getSubfieldData(df880, '6');
+       		int dashIx = linkage.indexOf('-');
+        	if (dashIx == 3 && marcField.equals(linkage.substring(0, dashIx)) ) {
+        		resultSet.add(df880);
+          	}
+        }        
+        return (resultSet);
+	}
+	
+
+	/**
+	 * Get the vernacular (880) field based which corresponds to the fieldSpec
+	 *  in the subfield 6 linkage 
+     * @param fieldSpec - which marc fields / subfields need to be sought in 
+     *  880 fields (via linkages)
+	 */
+	@SuppressWarnings("unchecked")
+	public final Set<String> getVernacular(final Record record, String fieldSpec) 
+	{
+        Set<String> result = new LinkedHashSet<String>();
+		// find the right 880 field
+		//  then do the regular thing
+        
+        List<VariableField> list880s = record.getVariableFields("880");
+        if (list880s == null || list880s.size() == 0)
+        	return result;
+		
+        // is this a right to left language? - determine at record level
+        // TODO: it would be more appropriate to autodetect script of 880 field
+        VariableField vf8 = record.getVariableField("008");
+        ControlField f008 = (ControlField) vf8;
+        String langcode = f008.getData().substring(35, 38);
+        boolean rightToLeft = Utils.isRightToLeftLanguage(langcode);
+        
+        // we know which 880s we're looking for by the fieldSpec and 
+        //  subfield 6 (linkage info) in the 880
+        String[] linkPieces = fieldSpec.split(":");
+        
+        for (int i = 0; i < linkPieces.length; i++)
+        {
+        	String linkTOspec = linkPieces[i];
+            String linkTOfield = linkTOspec.substring(0, 3);
+        	Set<VariableField> matching880s = getVernacularFields(record, linkTOfield);
+            
+            // look for 880s that link to the right field
+            for (VariableField vf : matching880s) {
+             	DataField df880 = (DataField) vf;
+                String subfldStr = linkTOspec.substring(3);
+                result.addAll(getSubfieldsAsSet(df880, subfldStr, rightToLeft));
+            }        
+        }
+        return (result);
+	}
+	
+
+	/**
+	 * Get the vernacular (880) field based which corresponds to the fieldSpec
+	 *  in the subfield 6 linkage, handling multiple occurrences as indicated 
+     * @param fieldSpec - which marc fields / subfields need to be sought in 
+     *  880 fields (via linkages)
+     * @param multOccurs - "first", "join" or "all" indicating how to handle
+     *  multiple occurrences of field values
+	 */
+	@SuppressWarnings("unchecked")
+	public final Set<String> getVernacular(final Record record, String fieldSpec, String multOccurs) 
+	{
+        Set<String> result = getVernacular(record, fieldSpec);
+        
+        if (multOccurs.equals("first")) {
+        	Set<String> first = new HashSet<String>();
+        	for (String r : result) {
+        		first.add(r);
+        		return first;
+        	}
+        } else if (multOccurs.equals("join")) {
+        	StringBuffer resultBuf = new StringBuffer(); 
+        	for (String r : result) {
+        		if (resultBuf.length() > 0)
+        			resultBuf.append(' ');
+        		resultBuf.append(r);
+        	}
+        	Set<String> resultAsSet = new HashSet<String>();
+        	resultAsSet.add(resultBuf.toString());
+        	return resultAsSet;
+        }
+        // "all" is default
+        
+        return result;
+	}
+
+	
+	
+	/**
+	 *  
+     * For each occurrence of a marc field in the fieldSpec list, get the 
+     * matching vernacular (880) field (per subfield 6) and extract the
+     * contents of all subfields except the ones specified, concatenate the 
+     * subfield contents with a space separator and add the string to the result
+     * set.
+     * @param record - the marc record
+     * @param fieldSpec - the marc fields (e.g. 600:655) for which we will grab
+     *  the corresponding 880 field containing subfields other than the ones
+     *  indicated.  
+     * @return a set of strings, where each string is the concatenated values
+     *  of all the alphabetic subfields in the 880s except those specified.
+     */
+	public final Set<String> getVernAllAlphaExcept(final Record record, String fieldSpec)
+	{
+        Set<String> resultSet = new LinkedHashSet<String>();
+        
+		String[] fldTags = fieldSpec.split(":");
+        for (int i = 0; i < fldTags.length; i++)
+        {
+        	String fldTag = fldTags[i].substring(0, 3);
+            if (fldTag.length() < 3 || Integer.parseInt(fldTag) < 10 )
+            {
+                System.err.println("Invalid marc field specified for getAllAlphaExcept: " + fldTag);
+                continue;
+            }
+    		
+            String tabooSubfldTags = fldTags[i].substring(3);
+
+            Set<VariableField> vernFlds = getVernacularFields(record, fldTag);
+    		
+            for (VariableField vf : vernFlds) 
+            {
+                StringBuffer buffer = new StringBuffer(500);
+                DataField df = (DataField) vf;
+        		if (df != null) 
+        		{
+                    List<Subfield> subfields = df.getSubfields();
+                    for (Subfield sf: subfields) 
+                    {
+                    	if (Character.isLetter(sf.getCode()) &&
+                        		tabooSubfldTags.indexOf(sf.getCode()) == -1)
+                        {
+                            if (buffer.length() > 0)  
+                            	buffer.append(' ' + sf.getData());
+                            else
+                            	buffer.append(sf.getData());
+                        }
+                    }
+                    if (buffer.length() > 0) 
+                    	resultSet.add(buffer.toString());
+            	}
+            }
+        }
+        
+		return resultSet;
+	}
+
+	
+	/**
+	 * Get the vernacular (880) field based which corresponds to the fieldSpec
+	 *  in the subfield 6 linkage, handling trailing punctuation as incidated 
+     * @param fieldSpec - which marc fields / subfields need to be sought in 
+     *  880 fields (via linkages)
+     * @param trailingCharsRegEx a regular expression of trailing chars to be
+     *   replaced (see java Pattern class).  Note that the regular expression
+     *   should NOT have '$' at the end.
+     *   (e.g. " *[,/;:]" replaces any commas, slashes, semicolons or colons
+     *     at the end of the string, and these chars may optionally be preceded
+     *     by a space)
+     * @param charsB4periodRegEx a regular expression that must immediately 
+     *  precede a trailing period IN ORDER FOR THE PERIOD TO BE REMOVED. 
+     *  Note that the regular expression will NOT have the period or '$' at 
+     *  the end. 
+     *   (e.g. "[a-zA-Z]{3,}" means at least three letters must immediately 
+     *   precede the period for it to be removed.) 
+	 */
+	@SuppressWarnings("unchecked")
+	public final Set<String> vernRemoveTrailingPunc(final Record record, String fieldSpec, String charsToReplaceRegEx, String charsB4periodRegEx) 
+	{
+        Set<String> origVals = getVernacular(record, fieldSpec);
+        Set<String> result = new LinkedHashSet<String>();
+        
+    	for (String val : origVals) {
+    		result.add(Utils.removeAllTrailingCharAndPeriod(val, "(" + charsToReplaceRegEx + ")+", charsB4periodRegEx));
+    	}
+        return result;
+	}
+	
+// Vernacular Methods ---------------  End  ----------------- Vernacular Methods    
+
+    /**
+     * Get the specified subfields from the MARC data field, returned as
+     *  a string
+     * @param df - DataField from which to get the subfields
+     * @param subfldsStr - the string containing the desired subfields
+     * @param RTL - true if this is a right to left language.  In this case, 
+     *  each subfield is prepended due to LTR and MARC end-of-subfield punctuation
+     *  is moved from the last character to the first.
+     * @returns a set of strings of desired subfields concatenated with space separator
+     */
+    @SuppressWarnings("unchecked")
+	protected static Set<String> getSubfieldsAsSet(DataField df, String subfldsStr, boolean RTL) 
+    {
+    	Set<String> resultSet = new LinkedHashSet<String>();
+
+    	if (subfldsStr.length() > 1) {
+            // concatenate desired subfields with space separator
+            StringBuffer buffer = new StringBuffer();
+            List<Subfield> subFlds = df.getSubfields();
+            for (Subfield sf : subFlds) {
+            	if (subfldsStr.contains(String.valueOf(sf.getCode()))) {
+// TODO:  clean this up, if this works, or find a way to test it            		
+//            		if (RTL) { // right to left language, but this is LTR field+
+//	                    if (buffer.length() > 0)
+//	                        buffer.insert(0, ' ');
+//	                    buffer.insert(0, sf.getData().trim());
+//            		} else { // left to right language
+	                    if (buffer.length() > 0)
+	                        buffer.append(' ');
+	                    buffer.append(sf.getData().trim());
+//            		}
+            	}
+            } 
+            resultSet.add(buffer.toString());
+        } else {
+        	// for single subfield, each occurrence is separate field in lucene doc
+        	List<Subfield> subFlds = df.getSubfields(subfldsStr.charAt(0));
+        	for (Subfield sf : subFlds) {
+        		resultSet.add(sf.getData().trim());
+        	}
+        } 
+    	return resultSet;
+    }
+
+    
+    /**
+     * Get the specified subfields from the MARC data field, returned as
+     *  a string
+     * @param df - DataField from which to get the subfields
+     * @param subfldsStr - the string containing the desired subfields
+     * @param beginIx - the beginning index of the substring of the subfield value
+     * @param endIx - the endind index of the substring of the subfield value
+     * @param RTL - true if this is a right to left language.  In this case, 
+     *  each subfield is prepended due to LTR and MARC end-of-subfield punctuation
+     *  is moved from the last character to the first.
+     * @returns a set of strings of desired subfields concatenated with space separator
+     */
+    @SuppressWarnings("unchecked")
+	protected static Set<String> getSubfieldsAsSet(DataField df, String subfldsStr, int beginIx, int endIx, boolean RTL) 
+    {
+    	Set<String> resultSet = new LinkedHashSet<String>();
+        if (subfldsStr.length() > 1) {
+            // concatenate desired subfields with space separator
+            StringBuffer buffer = new StringBuffer();
+            List<Subfield> subFlds = df.getSubfields();
+            for (Subfield sf : subFlds) {
+            	if (subfldsStr.contains(String.valueOf(sf.getCode()))) {
+            		if (sf.getData().length() >= endIx) {
+// TODO:  clean this up, if this works, or find a way to test it            		
+//            			if (RTL) { // right to left language
+//                            if (buffer.length() > 0) 
+//                                buffer.insert(0, ' ');
+//                            buffer.insert(0, sf.getData().trim().substring(beginIx, endIx));
+//            			} else { // left to right language
+                            if (buffer.length() > 0) 
+                                buffer.append(' ');
+                            buffer.append(sf.getData().trim().substring(beginIx, endIx));
+//            			}
+            		}
+                }
+            }
+            resultSet.add(buffer.toString());
+        } else {
+        	// for single subfield, each occurrence is separate field in lucene doc
+        	List<Subfield> subFlds = df.getSubfields(subfldsStr.charAt(0));
+        	for (Subfield sf : subFlds) {
+        		if (sf.getData().length() >= endIx) 
+            		resultSet.add(sf.getData().trim().substring(beginIx, endIx));
+        	}
+        }
+        return resultSet;
+    }
+    
+    
+// Utility Methods ----------------- End ----------------------- Utility Methods    
+    
 	
 }

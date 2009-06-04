@@ -11,125 +11,17 @@ import org.xml.sax.SAXException;
 
 /**
  * junit4 tests for Stanford University's handling of vernacular fields (880s)
+ *  (non-search vernacular fields, that is)
  * 
  * @author Naomi Dushay
  */
-public class VernacularTests extends BibIndexTest {
+public class VernFieldsTests extends BibIndexTest {
 
 @Before
 	public final void setup() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		createIxInitVars("vernacularTests.mrc");
-	}
-
-
-	/**
-	 * vernacular display fields should have appropriate properties.
-	 */
-@Test
-	public final void testVernacularDisplayFields() 
-	    throws ParserConfigurationException, IOException, SAXException
-	{
-	    String fldName = "vern_author_person_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldNotMultiValued(fldName, solrCore);	
-	    fldName = "vern_author_person_full_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldNotMultiValued(fldName, solrCore);
-	    fldName = "vern_author_corp_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldNotMultiValued(fldName, solrCore);
-	    fldName = "vern_author_meeting_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldNotMultiValued(fldName, solrCore);
-	    fldName = "vern_edition_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldNotMultiValued(fldName, solrCore);
-	    fldName = "vern_physical_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldMultiValued(fldName, solrCore);
-	    fldName = "vern_publication_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldMultiValued(fldName, solrCore);
-	    fldName = "vern_title_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldNotMultiValued(fldName, solrCore);
-	    fldName = "vern_title_full_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldNotMultiValued(fldName, solrCore);
-	    fldName = "vern_title_uniform_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldNotMultiValued(fldName, solrCore);
-	    fldName = "vern_title_variant_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldMultiValued(fldName, solrCore);
-	    fldName = "vern_series_title_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldMultiValued(fldName, solrCore);
-	    fldName = "vern_series_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldMultiValued(fldName, solrCore);
-	}
-
-
-	/**
-	 * basic test of the 880 fields needed for display
-	 */
-@Test
-	public final void testBasicMapping() 
-			throws ParserConfigurationException, IOException, SAXException 
-	{
-		String fldName = "author_person_display";
-		assertDocHasFieldValue("allVern", fldName, "personal name author", sis);
-		fldName = "vern_author_person_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular personal name author", sis);
-		fldName = "author_person_full_display";
-		assertDocHasFieldValue("allVern", fldName, "personal name author miscellaneous author info", sis);
-		fldName = "vern_author_person_full_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular personal name author vernacular miscellaneous author info", sis);
-		fldName = "author_corp_display";
-		assertDocHasFieldValue("allVern", fldName, "corp name author", sis);
-		fldName = "vern_author_corp_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular corp name author", sis);
-		fldName = "author_meeting_display";
-		assertDocHasFieldValue("allVern", fldName, "mtg name author", sis);
-		fldName = "vern_author_meeting_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular mtg name author", sis);
-	
-		fldName = "title_display";
-		assertDocHasFieldValue("allVern", fldName, "title 245", sis);
-		fldName = "vern_title_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular title 245", sis);
-		fldName = "title_full_display";
-		assertDocHasFieldValue("allVern", fldName, "title 245 [subfield c].", sis);
-		fldName = "vern_title_full_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular title 245 [vernacular subfield c].", sis);
-		fldName = "title_variant_display";
-		assertDocHasFieldValue("allVern", fldName, "variant title", sis);
-		fldName = "vern_title_variant_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular variant title", sis);
-
-		fldName = "edition_display";
-		assertDocHasFieldValue("allVern", fldName, "edition", sis);
-		fldName = "vern_edition_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular edition", sis);
-		fldName = "publication_display";
-		assertDocHasFieldValue("allVern", fldName, "publication", sis);
-		fldName = "vern_publication_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular publication", sis);
-		fldName = "physical_display";
-		assertDocHasFieldValue("allVern", fldName, "Let's get physical, physical!", sis);
-		fldName = "vern_physical_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular Let's get physical, physical!", sis);
-		fldName = "series_title_display";
-		assertDocHasFieldValue("allVern", fldName, "series title", sis);
-		fldName = "vern_series_title_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular series title", sis);
-		fldName = "series_display";
-		assertDocHasFieldValue("allVern", fldName, "just the series, ma'am", sis);
-		fldName = "vern_series_display";
-		assertDocHasFieldValue("allVern", fldName, "vernacular just the series, ma'am", sis);
+		createIxInitVars("vernacularNonSearchTests.mrc");
 	}
 
 
@@ -140,34 +32,13 @@ public class VernacularTests extends BibIndexTest {
 	public final void testIgnored880() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "toc_search";
-		assertSingleResult("allVern", fldName, "contents", sis);
+		assertSingleResult("allVern", "toc_search", "contents", sis);
 		assertDocHasNoField("allVern", "vern_toc_search", sis);
 		assertDocHasNoField("allVern", "vern_toc_display", sis);
 	}
 
 	/**
-	 * Test multiple occurences of same field uniform_title_display =
-	 * 130abcdefghijklmnopqrstuvwxyz:240abcdefghijklmnopqrstuvwxyz, first
-	 */
-@Test
-	public final void testUniformTitle() 
-			throws ParserConfigurationException, IOException, SAXException 
-	{
-		String fldName = "title_uniform_display";
-		assertDocHasFieldValue("130only", fldName, "main entry uniform title", sis);
-		fldName = "vern_title_uniform_display";
-		assertDocHasFieldValue("130only", fldName, "vernacular main entry uniform title", sis);		
-
-		// 240 is no longer in uniform title (due to title_sort being 130 245)
-		fldName = "title_uniform_display";
-		assertDocHasNoFieldValue("240only", fldName, "uniform title", sis);
-		fldName = "vern_title_uniform_display";
-		assertDocHasNoFieldValue("240only", fldName, "vernacular uniform title", sis);		
-	}
-	
-	/**
-	 * Test multiple occurences of same field
+	 * Test multiple occurrences of same field
 	 */
 @Test
 	public final void testFieldDups() 
@@ -182,7 +53,7 @@ public class VernacularTests extends BibIndexTest {
 	}
 	
 	/**
-	 * Test multiple occurences of same subfield
+	 * Test multiple occurrences of same subfield
 	 */
 @Test
 	public final void testSubFieldDups() 

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 
-//import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Document;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
@@ -33,10 +33,8 @@ public class AccessTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException
 	{
 		// facets are indexed, not stored
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFacetFldProps(fldName, solrCore, sis);
 		assertFieldMultiValued(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
 		assertEquals("accessMethod string incorrect: ", "Online", Access.ONLINE.toString());
 		assertEquals("accessMethod string incorrect: ", "At the Library", Access.AT_LIBRARY.toString());
 	}
@@ -127,7 +125,7 @@ public class AccessTests extends BibIndexTest {
 	 	// "At the Library"
 	 	String fldVal = "\"" + Access.AT_LIBRARY.toString() + "\"";
 	 	// don't want to check *all* of them ...
-	 	String docList[] = getDocIDList(fldName, fldVal);
+	 	List<Document> docList = getAllMatchingDocs(fldName, fldVal, sis);
 	 	String msg = fldName + " " + Access.AT_LIBRARY.toString() + ": ";
 	 	// formerly "On campus"
 	 	assertDocInList(docList, "115472", msg, sis); 

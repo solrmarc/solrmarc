@@ -15,7 +15,10 @@ import org.junit.*;
  * @author Naomi Dushay
  */
 public class LanguageTests extends BibIndexTest {
-		
+	
+	String fldName = "language";
+
+	
 	/**
 	 * Test population of language field
 	 */
@@ -23,9 +26,10 @@ public class LanguageTests extends BibIndexTest {
 	public final void testLanguages() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "language_facet";
 		createIxInitVars("langTests.mrc");
-		assertFacetFldProps(fldName, solrCore, sis);
+        assertStringFieldProperties(fldName, solrCore, sis);
+        assertFieldIndexed(fldName, solrCore);
+        assertFieldStored(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
 
 		assertSingleResult("008mul041atha", fldName, "Thai", sis); 
@@ -56,7 +60,6 @@ public class LanguageTests extends BibIndexTest {
 	public final void testMapMissingValue() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "language_facet";
 		createIxInitVars("langTests.mrc");
 	
 		assertZeroResults(fldName, "null", sis);
@@ -68,5 +71,5 @@ public class LanguageTests extends BibIndexTest {
 		assertZeroResults(fldName, "und", sis);
 		assertZeroResults(fldName, "zxx", sis);
 	}
-	
+
 }
