@@ -53,12 +53,7 @@ public abstract class MarcHandler {
                 {
                     configProperties = arg;
                 }
-                else if (arg.endsWith(".mrc"))
-                {
-                    System.setProperty("marc.path", arg);
-                    System.setProperty("marc.source", "FILE");
-                }
-                else if (arg.endsWith(".marc"))
+                else if (arg.endsWith(".mrc") || arg.endsWith("marc"))
                 {
                     System.setProperty("marc.path", arg);
                     System.setProperty("marc.source", "FILE");
@@ -97,7 +92,7 @@ public abstract class MarcHandler {
 	}
 		
 	/**
-	 * Load the properties file and initials class variables
+	 * Load the properties file and initialize class variables
 	 * @param configProperties _config.properties file
 	 */
 	public void loadProperties(String configProperties)
