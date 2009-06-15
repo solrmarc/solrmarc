@@ -796,7 +796,9 @@ public class SolrIndexer
     }
 
     /**
-     * Get the first field value, which is mapped to another value
+     * Get the first field value, which is mapped to another value.  If there is
+     *  no mapping for the value, use the mapping for the empty key, if it 
+     *  exists, o.w., use the mapping for the __DEFAULT key, if it exists.
      * @param record
      * @param mapName - name of translation map to use to xform values
      * @param tagStr - which field(s)/subfield(s) to use

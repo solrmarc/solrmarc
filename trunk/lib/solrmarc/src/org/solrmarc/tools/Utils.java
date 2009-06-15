@@ -500,11 +500,25 @@ public final class Utils {
 	}
 
 	/**
-	 * Remap a field
-	 * @param fieldVal
-	 * @param map
-	 * @param copyEntryIfNotInMap
-	 * @return
+	 * Remap a field value.  If the field value is not present in the map, then:
+	 *   if "displayRawIfMissing" is a key in the map, then the raw field value
+	 *   is used.
+	 *   if "displayRawIfMissing" is not a key in the map, and the allowDefault
+	 *   param is set to true, then if the map contains "__DEFAULT" as a key, 
+	 *   the value of "__DEFAULT" in the map is used;  if allowDefault is true
+	 *   and there is neither "displayRawIfMissing" nor "__DEFAULT", as a key
+	 *   in the map, then if the map contains an empty key, the map value of the
+	 *   empty key is used.
+	 *     NOTE:  If the spec for a field is supposed to contain all matching 
+	 *      values, then the default lookup needs to be done here.  If the spec
+	 *      for a field is only supposed to return the first matching mappable 
+	 *      value, then the default mapping should be done in the calling method 
+	 * @param fieldVal - the raw value to be mapped
+	 * @param map - the map to be used
+	 * @param allowDefault - if "displayRawIfMissing" is not a key in the map, 
+	 *   and this is to true, then if the map contains "__DEFAULT" as a key, 
+	 *   the value of "__DEFAULT" in the map is used.  
+	 * @return the new value, as determined by the mapping.
 	 */
     public static String remap(String fieldVal, Map<String, String> map, boolean allowDefault)
     {
@@ -531,6 +545,10 @@ public final class Utils {
         {
             result = map.get(fieldVal);
         }
+        else if (map.containsKey("displayRawIfMissing")) 
+        {
+        	result = fieldVal;
+        }
         else if (allowDefault && map.containsKey("__DEFAULT"))
         {
             result = map.get("__DEFAULT");
@@ -544,12 +562,27 @@ public final class Utils {
     }
 
     /**
-     * 
-     * @param set
-     * @param map
-     * @param copyEntryIfNotInMap
-     * @return
-     */
+	 * Remap a set of field values.  If a field value is not present in the map, 
+	 * then:
+	 *   if "displayRawIfMissing" is a key in the map, then the raw field value
+	 *   is used.
+	 *   if "displayRawIfMissing" is not a key in the map, and the allowDefault
+	 *   param is set to true, then if the map contains "__DEFAULT" as a key, 
+	 *   the value of "__DEFAULT" in the map is used;  if allowDefault is true
+	 *   and there is neither "displayRawIfMissing" nor "__DEFAULT", as a key
+	 *   in the map, then if the map contains an empty key, the map value of the
+	 *   empty key is used.
+	 *     NOTE:  If the spec for a field is supposed to contain all matching 
+	 *      values, then the default lookup needs to be done here.  If the spec
+	 *      for a field is only supposed to return the first matching mappable 
+	 *      value, then the default mapping should be done in the calling method 
+	 * @param fieldVal - the raw value to be mapped
+	 * @param map - the map to be used
+	 * @param allowDefault - if "displayRawIfMissing" is not a key in the map, 
+	 *   and this is to true, then if the map contains "__DEFAULT" as a key, 
+	 *   the value of "__DEFAULT" in the map is used.  
+	 * @return the new value, as determined by the mapping.
+	 */
     public static Set<String> remap(Set<String> set, Map<String, String> map, boolean allowDefault)
     {
         if (map == null)  return(set);
