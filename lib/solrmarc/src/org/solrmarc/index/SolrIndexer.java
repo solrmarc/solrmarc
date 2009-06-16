@@ -586,6 +586,10 @@ public class SolrIndexer
         return(false);
     }
 
+    /**
+     * if the first and last characters of the string are quote marks ("), then
+     * delete them.
+     */
     private String dequote(String str)
     {
         if (str.length() > 2 && str.charAt(0) == '"' && str.charAt(str.length()-1) == '"')
@@ -668,6 +672,11 @@ public class SolrIndexer
         return result;
     }
 
+    /**
+     * get the two eras indicated by the four passed characters, and add them
+     *  to the result parameter (which is a set).  The characters passed in are
+     *  from the 041a.
+     */
     public static Set<String> getEra(Set<String> result, char eraStart1, char eraStart2, char eraEnd1, char eraEnd2)
     {
         if (eraStart1 >= 'a' && eraStart1 <= 'y' && eraEnd1 >= 'a' && eraEnd1 <= 'y')
@@ -689,42 +698,70 @@ public class SolrIndexer
         return result;
     }
 
-    protected void addField(Map<String, Object> indexMap, String indexField, String mapName, String fieldVal)
+    /**
+     * Add a field-value pair to the indexMap representation of a solr doc.
+     *  The value will be "translated" per the translation map indicated.
+     * @param indexMap - the mapping of solr doc field names to values
+     * @param ixFldName - the name of the field to add to the solr doc
+     * @param mapName - the name of a translation map for the field value, or null
+     * @param fieldVal - the (untranslated) field value to add to the solr doc field
+     */
+    protected void addField(Map<String, Object> indexMap, String ixFldName, String mapName, String fieldVal)
     {
         if (mapName != null && findMap(mapName) != null)
             fieldVal = Utils.remap(fieldVal, findMap(mapName), true);
 
         if (fieldVal != null && fieldVal.length() > 0)
-            indexMap.put(indexField, fieldVal);
+            indexMap.put(ixFldName, fieldVal);
     }
 
-    protected void addField(Map<String, Object> indexMap, String indexField, String fieldVal)
+    /**
+     * Add a field-value pair to the indexMap representation of a solr doc.
+     * @param indexMap - the mapping of solr doc field names to values
+     * @param ixFldName - the name of the field to add to the solr doc
+     * @param mapName - the name of a translation map for the field value, or null
+     * @param fieldVal - the (untranslated) field value to add to the solr doc field
+     */
+    protected void addField(Map<String, Object> indexMap, String ixFldName, String fieldVal)
     {
-        addField(indexMap, indexField, null, fieldVal);
+        addField(indexMap, ixFldName, null, fieldVal);
     }
 
-    protected void addFields(Map<String, Object> indexMap, String indexField, String mapName, Set<String> fields)
+    /**
+     * Add a field-value pair to the indexMap representation of a solr doc for
+     *  each value present in the "fieldVals" parameter.
+     *  The values will be "translated" per the translation map indicated.
+     * @param indexMap - the mapping of solr doc field names to values
+     * @param ixFldName - the name of the field to add to the solr doc
+     * @param mapName - the name of a translation map for the field value, or null
+     * @param fieldVals - a set of (untranslated) field values to be assigned to the solr doc field
+     */
+    protected void addFields(Map<String, Object> indexMap, String ixFldName, String mapName, Set<String> fieldVals)
     {
         if (mapName != null && findMap(mapName) != null)
-            fields = Utils.remap(fields, findMap(mapName), true);
+            fieldVals = Utils.remap(fieldVals, findMap(mapName), true);
 
-        if (!fields.isEmpty())
+        if (!fieldVals.isEmpty())
         {
-            if (fields.size() == 1)
+            if (fieldVals.size() == 1)
             {
-                String value = fields.iterator().next();
-                indexMap.put(indexField, value);
+                String value = fieldVals.iterator().next();
+                indexMap.put(ixFldName, value);
             }
             else
-                indexMap.put(indexField, fields);
+                indexMap.put(ixFldName, fieldVals);
         }
     }
 
     /**
-     * Get Set of Strings as indicated by tagStr
-     * @param record
-     * @param tagStr which field(s)/subfield(s) to use
-     * @return
+     * Get Set of Strings as indicated by tagStr.  
+     * @param record - the marc record object
+     * @param tagStr string containing which field(s)/subfield(s) to use. This 
+     *  is a series of: marc "tag" string (3 chars identifying a marc field, 
+     *  e.g. 245) optionally followed by characters identifying which subfields 
+     *  to use.
+     * @return the contents of the indicated marc field(s)/subfield(s), as a
+     *  set of Strings.
      */
     public static Set<String> getFieldList(Record record, String tagStr)
     {
@@ -767,11 +804,15 @@ public class SolrIndexer
     }
 
     /**
-     * Get all field values joined as a single string.
-     * @param record
-     * @param tagStr which field(s)/subfield(s) to use
+     * Get all field values specified by tagStr, joined as a single string.
+     * @param record - the marc record object
+     * @param tagStr string containing which field(s)/subfield(s) to use. This 
+     *  is a series of: marc "tag" string (3 chars identifying a marc field, 
+     *  e.g. 245) optionally followed by characters identifying which subfields 
+     *  to use.
      * @param separator string separating values in the result string
-     * @return single string containing all values joined with separator string
+     * @return single string containing all values of the indicated marc 
+     *  field(s)/subfield(s) concatenated with separator string
      */
     public String getFieldVals(Record record, String tagStr, String separator)
     {
@@ -780,10 +821,13 @@ public class SolrIndexer
     }
 
     /**
-     * Get the first value according to the tagStr
-     * @param record
-     * @param tagStr which field(s)/subfield(s) to use
-     * @return first value as a string
+     * Get the first value specified by the tagStr
+     * @param record - the marc record object
+     * @param tagStr string containing which field(s)/subfield(s) to use. This 
+     *  is a series of: marc "tag" string (3 chars identifying a marc field, 
+     *  e.g. 245) optionally followed by characters identifying which subfields 
+     *  to use.
+     * @return first value of the indicated marc field(s)/subfield(s) as a string
      */
     public static String getFirstFieldVal(Record record, String tagStr)
     {
@@ -799,7 +843,7 @@ public class SolrIndexer
      * Get the first field value, which is mapped to another value.  If there is
      *  no mapping for the value, use the mapping for the empty key, if it 
      *  exists, o.w., use the mapping for the __DEFAULT key, if it exists.
-     * @param record
+     * @param record - the marc record object
      * @param mapName - name of translation map to use to xform values
      * @param tagStr - which field(s)/subfield(s) to use
      * @return first value as a string
@@ -827,9 +871,12 @@ public class SolrIndexer
     }
 
     /**
-     * Get the title from a record
-     * @param record
-     * @return Recrod's title (245a and 245b)
+     * Get the 245a (and 245b, if it exists, concatenated with a space between
+     *  the two subfield values), with trailing punctuation removed.
+     *    See org.solrmarc.tools.Utils.cleanData() for details on the 
+     *     punctuation removal
+     * @param record - the marc record object
+     * @return 245a and 245b values concatenated, with trailing punct removed.
      */
     public String getTitle(Record record)
     {
@@ -850,8 +897,9 @@ public class SolrIndexer
     /**
      * Get the title from a record, without non-filing chars as specified
      *   in 245 2nd indicator
-     * @param record
-     * @return Recrod's title (245a and 245b)
+     * @param record - the marc record object
+     * @return 245a and 245b values concatenated, with trailing punct removed,
+     *  and with non-filing characters omitted
      */
     public String getSortableTitle(Record record)
     {
@@ -868,6 +916,8 @@ public class SolrIndexer
 
     /**
      * Return the date in 260c as a string
+     * @param record - the marc record object
+     * @return 260c, "cleaned" per org.solrmarc.tools.Uitls.cleanDate()
      */
     public String getDate(Record record)
     {
@@ -887,7 +937,7 @@ public class SolrIndexer
 
     /**
      * Get the appropriate Map object from populated transMapMap 
-     * @param mapName the translation map to find
+     * @param mapName the name of the translation map to find
      * @return populated Map object
      */
     protected Map<String, String> findMap(String mapName)
@@ -904,10 +954,11 @@ public class SolrIndexer
     /**
      * Get the specified subfields from the specified MARC field, returned as
      *  a set of strings to become lucene document field values
-     * @param record
+     * @param record - the marc record object
      * @param fldTag - the field name, e.g. 245
      * @param subfldsStr - the string containing the desired subfields
-     * @returns the result set of strings 
+     * @returns a Set of String, where each string is the contents of all the
+     *  desired subfield values from a single instance of the fldTag 
      */
     @SuppressWarnings("unchecked")
     protected static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldsStr, String separator)
@@ -968,9 +1019,9 @@ public class SolrIndexer
     }
 
     /**
-     * Get the specified substring of subfield values from the specified MARC field, returned as
-     *  a set of strings to become lucene document field values
-     * @param record
+     * Get the specified substring of subfield values from the specified MARC 
+     * field, returned as  a set of strings to become lucene document field values
+     * @param record - the marc record object
      * @param fldTag - the field name, e.g. 245
      * @param subfldsStr - the string containing the desired subfields
      * @param beginIx - the beginning index of the substring of the subfield value
@@ -1037,9 +1088,10 @@ public class SolrIndexer
     }
 
     /**
-     * Write a marc record as a binary string
-     * @param record record to write
-     * @return Binary marc output
+     * Write a marc record as a binary string to the 
+     * @param record marc record object to be written
+     * @return string containing binary (UTF-8 encoded) representation of marc 
+     *  record object.
      */
     protected String writeRaw(Record record)
     {
@@ -1062,9 +1114,9 @@ public class SolrIndexer
     }
 
     /**
-     * Write a MarcXML formated file to index
-     * @param record record to output as XML
-     * @return String of MarcXML
+     * Write a marc record as a string containing MarcXML 
+     * @param record marc record object to be written
+     * @return String containing MarcXML representation of marc record object
      */
     protected String writeXml(Record record)
     {
@@ -1090,7 +1142,9 @@ public class SolrIndexer
     
     /**
      * remove trailing punctuation (default trailing characters to be removed)
-     * @param record
+     *    See org.solrmarc.tools.Utils.cleanData() for details on the 
+     *     punctuation removal
+     * @param record marc record object
      * @param fieldSpec - the field to have trailing punctuation removed
      * @return Set of strings containing the field values with trailing 
      *   punctuation removed
@@ -1109,7 +1163,7 @@ public class SolrIndexer
     /**
      * extract all the subfields requested in requested marc fields.  Each 
      * instance of each marc field will be put in a separate result.
-     * @param record
+     * @param record marc record object
      * @param fieldSpec - the desired marc fields and subfields as given in 
      *   the xxx_index.properties file
      * @param separator - the character to use between subfield values in the 
@@ -1325,9 +1379,14 @@ public class SolrIndexer
 	
 	
     /**
-     * Extract the info from an 880 linked field from a record
-     * @param record
-     * @return linked field
+     * Given a fieldSpec, get any linked 880 fields and include the appropriate
+     *  subfields as a String value in the result set. 
+     * 
+     * @param record marc record object
+     * @param fieldSpec - the marc field(s)/subfield(s) for which 880s are
+     *  sought
+     * @return set of Strings containing the values of the designated 880
+     *  field(s)/subfield(s)
      */
     public Set<String> getLinkedField(final Record record, String fieldSpec)
     {
@@ -1380,9 +1439,12 @@ public class SolrIndexer
     }
 
     /**
-     * Extract the info from an 880 linked field from a record
-     * @param record
-     * @return linked field
+     * Given a fieldSpec, get the field(s)/subfield(s) values, PLUS any linked 
+     *  880 fields and return these values as a set.
+     * @param record marc record object
+     * @param fieldSpec - the marc field(s)/subfield(s) 
+     * @return set of Strings containing the values of the indicated field(s)/
+     *  subfields(s) plus linked 880 field(s)/subfield(s)
      */
     public Set<String> getLinkedFieldCombined(final Record record, String fieldSpec)
     {
@@ -1394,6 +1456,11 @@ public class SolrIndexer
         return result2;
     }
     
+    /**
+     * return an int for the passed string
+     * @param str 
+     * @param defValue - default value, if string doesn't parse into int
+     */
     private int localParseInt(String str, int defValue)
     {
         int value = defValue;
@@ -1412,7 +1479,14 @@ public class SolrIndexer
      * Loops through all datafields and creates a field for "all fields"
      * searching.  Shameless stolen from Vufind Indexer Custom Code
      *
-     * @param record Marc record to extract data from
+     * @param record marc record object
+     * @param lowerBoundStr - the "lowest" marc field to include (e.g. 100).
+     *   defaults to 100 if value passed doesn't parse as an integer
+     * @param upperBoundStr - one more than the "highest" marc field to include
+     *   (e.g. 900 will include up to 899). Defaults to 900 if value passed 
+     *   doesn't parse as an integer
+     * @return a string containing ALL subfields of ALL marc fields within the
+     *   range indicated by the bound string arguments.
      */
     public String getAllSearchableFields(final Record record, String lowerBoundStr, String upperBoundStr)
     {
