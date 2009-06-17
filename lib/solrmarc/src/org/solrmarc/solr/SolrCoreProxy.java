@@ -274,7 +274,7 @@ public class SolrCoreProxy
         {
             String errmsg = "Error: Problem invoking addField in SolrCoreProxy";
             System.err.println(errmsg);  
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new SolrRuntimeException(errmsg, e);
         }
     }
