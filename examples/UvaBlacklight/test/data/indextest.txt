@@ -25,7 +25,7 @@ blacklight_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
 
 blacklight_config.properties, u4495584.mrc, format_facet, Online|Journal/Magazine
 blacklight_config.properties, u20563.mrc, year_multisort_i, 1982
-blacklight_config.properties, u3412403.mrc, year_multisort_i, 1980
+blacklight_config.properties, u3412403.mrc, year_multisort_i, 1986
 blacklight_config.properties, u8692.mrc, year_multisort_i, 1974
  
 blacklight_sas_config.properties, u3344744.mrc, location_facet, Semester at Sea Collection
