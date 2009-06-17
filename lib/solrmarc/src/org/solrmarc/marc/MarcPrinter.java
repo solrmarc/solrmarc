@@ -128,7 +128,7 @@ public class MarcPrinter extends MarcHandler
                     String recStr = record.toString();
                         
                     if (verbose) out.println(recStr);
-                    Map<String,Object> indexMap = indexer.map(record);
+                    Map<String,Object> indexMap = indexer.map(record, errors);
                     if (errors != null && includeErrors)
                     {
                         if (errors.hasErrors())

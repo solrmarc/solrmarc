@@ -40,10 +40,12 @@ public final class Utils {
 	
     private final static Pattern FOUR_DIGIT_PATTERN_BRACES = Pattern.compile("\\[[12]\\d{3,3}\\]");
     private final static Pattern FOUR_DIGIT_PATTERN_ONE_BRACE = Pattern.compile("\\[[12]\\d{3,3}");
-    private final static Pattern FOUR_DIGIT_PATTERN_STARTING_WITH_1_2 = Pattern.compile("[12]\\d{3,3}");
+    private final static Pattern FOUR_DIGIT_PATTERN_STARTING_WITH_1_2 = Pattern.compile("(200|1[98765][0-9])[0-9]");
     private final static Pattern FOUR_DIGIT_PATTERN_OTHER_1 = Pattern.compile("l\\d{3,3}");
     private final static Pattern FOUR_DIGIT_PATTERN_OTHER_2 = Pattern.compile("\\[19\\]\\d{2,2}");
-    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_3 = Pattern.compile("[12][7890][0-9][-?0-9]");
+    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_3 = Pattern.compile("(200|1[98765][0-9])[-?0-9]");
+    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_4 = Pattern.compile("i.e. (200|1[98765][0-9])[0-9]");
+    private final static Pattern BC_DATE_PATTERN = Pattern.compile("[0-9]+ [Bb][.]?[Cc][.]?");
     private final static Pattern FOUR_DIGIT_PATTERN = Pattern.compile("\\d{4,4}");
     private static Matcher matcher;
     private static Matcher matcher_braces;
@@ -51,6 +53,8 @@ public final class Utils {
     private static Matcher matcher_start_with_1_2;
     private static Matcher matcher_l_plus_three_digits;
     private static Matcher matcher_bracket_19_plus_two_digits;
+    private static Matcher matcher_ie_date;
+    private static Matcher matcher_bc_date;
     private static Matcher matcher_three_digits_plus_unk;
 	private final static DecimalFormat timeFormat = new DecimalFormat("00.00");
     protected static Logger logger = Logger.getLogger(Utils.class.getName());	
@@ -198,8 +202,10 @@ public final class Utils {
         matcher_l_plus_three_digits = FOUR_DIGIT_PATTERN_OTHER_1.matcher(date);
         matcher_bracket_19_plus_two_digits = FOUR_DIGIT_PATTERN_OTHER_2.matcher(date);
         matcher_three_digits_plus_unk = FOUR_DIGIT_PATTERN_OTHER_3.matcher(date);
+        matcher_ie_date = FOUR_DIGIT_PATTERN_OTHER_4.matcher(date);
         matcher = FOUR_DIGIT_PATTERN.matcher(date);
-		
+        matcher_bc_date = BC_DATE_PATTERN.matcher(date);
+        
 		String cleanDate = null; // raises DD-anomaly
 		
         if(matcher_braces.find())
@@ -215,6 +221,10 @@ public final class Utils {
                 }
             }
         } 
+        else if (matcher_ie_date.find())
+        {
+            cleanDate = matcher_ie_date.group().replaceAll("i.e. ", "");
+        }
         else if(matcher_one_brace.find())
         {   
             cleanDate = matcher_one_brace.group();
@@ -227,6 +237,10 @@ public final class Utils {
                     tmp = "" + tmp;
                 }
             }
+        }
+        else if(matcher_bc_date.find())
+        {   
+            cleanDate = null;
         } 
         else if(matcher_start_with_1_2.find())
         {   

@@ -18,6 +18,7 @@ package org.solrmarc.marc;
 
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -246,13 +247,32 @@ public class MarcImporter extends MarcHandler
             }
             catch (Exception e)
             {
-                // check for missing fields
-                if (solrCoreProxy.isSolrException(e) &&
-                		e.getMessage().contains("missing required fields"))
+                Throwable cause = null;
+                if (e instanceof SolrRuntimeException) 
                 {
-                	// this is caused by a bad record - one missing required fields (duh)
-               	   logger.error(e.getMessage() +  " at record count = " + recsReadCounter);
-               	   logger.error("Control Number " + record.getControlNumber(), e);
+                    cause = e.getCause();
+                }
+                if (cause != null && cause instanceof InvocationTargetException)
+                {
+                    cause = ((InvocationTargetException)cause).getTargetException();
+                }
+                if (cause instanceof Exception && solrCoreProxy.isSolrException((Exception)cause) &&
+                        cause.getMessage().contains("missing required fields"))
+                {
+                   // this is caused by a bad record - one missing required fields (duh)
+                   logger.error(cause.getMessage() +  " at record count = " + recsReadCounter);
+                   logger.error("Control Number " + record.getControlNumber());
+                }
+                else if (cause instanceof Exception && solrCoreProxy.isSolrException((Exception)cause) &&
+                        cause.getMessage().contains("multiple values encountered for non multiValued field"))
+                {
+                   logger.error(cause.getMessage() +  " at record count = " + recsReadCounter);
+                   logger.error("Control Number " + record.getControlNumber());
+                }
+                else if (cause instanceof Exception && solrCoreProxy.isSolrException((Exception)cause) )
+                {
+                    logger.error("Error indexing record: " + record.getControlNumber() + " -- " + cause.getMessage());
+                    if (e instanceof SolrRuntimeException) throw (new SolrRuntimeException(cause.getMessage(), (Exception)cause));
                 }
                 else
                 {
@@ -260,6 +280,7 @@ public class MarcImporter extends MarcHandler
             	    // this error should (might?) only be thrown if we can't write to the index
             	    //   therefore, continuing to index would be pointless.
             	    if (e instanceof SolrRuntimeException) throw ((SolrRuntimeException)e);
+
                 }
             }
         }
@@ -274,7 +295,7 @@ public class MarcImporter extends MarcHandler
     private boolean addToIndex(Record record)
     	throws IOException
     {
-        Map<String, Object> fieldsMap = indexer.map(record); 
+        Map<String, Object> fieldsMap = indexer.map(record, errors); 
         // test whether some indexing specification determined that this record should be omitted entirely
         if (fieldsMap.size() == 0) 
         {

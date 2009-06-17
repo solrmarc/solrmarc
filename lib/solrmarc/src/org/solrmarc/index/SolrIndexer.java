@@ -49,6 +49,9 @@ public class SolrIndexer
 
     /** list of path to look for property files in */
     private String propertyFilePaths[];
+    
+    /** Error Handler used for reporting errors */
+    private ErrorHandler errors;
         
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
@@ -437,8 +440,18 @@ public class SolrIndexer
      * Given a record, return a Map of solr fields (keys are field names, values
      *  are an Object containing the values (a Set or a String)
      */
-    public Map<String, Object> map(Record record)
+    public Map<String, Object> map(Record record)    
     {
+        return( map(record, null));
+    }
+    
+    /**
+     * Given a record, return a Map of solr fields (keys are field names, values
+     *  are an Object containing the values (a Set or a String)
+     */
+    public Map<String, Object> map(Record record, ErrorHandler errors)
+    {
+        this.errors = errors;
         Map<String, Object> indexMap = new HashMap<String, Object>();
         
         for (String key : fieldMap.keySet())
@@ -487,6 +500,7 @@ public class SolrIndexer
                     return new HashMap<String, Object>();
             }
         }
+        this.errors = null;
         return indexMap;
     }
 
@@ -951,6 +965,15 @@ public class SolrIndexer
         return null;
     }
 
+    protected static boolean isControlField(String fieldTag)
+    {
+        if (fieldTag.matches("00[0-9]"))
+        {
+            return(true);
+        }
+        return(false);
+    }
+    
     /**
      * Get the specified subfields from the specified MARC field, returned as
      *  a set of strings to become lucene document field values
@@ -973,11 +996,11 @@ public class SolrIndexer
         }
         
         // Loop through Data and Control Fields
-        int iTag = new Integer(fldTag).intValue();
+        // int iTag = new Integer(fldTag).intValue();
         List<VariableField> varFlds = record.getVariableFields(fldTag);
         for (VariableField vf : varFlds)
         {
-            if (iTag > 9 && subfldsStr != null) 
+            if (!isControlField(fldTag) && subfldsStr != null) 
             {
                 // DataField
                 DataField dfield = (DataField) vf;
@@ -1041,11 +1064,11 @@ public class SolrIndexer
         }
         
         // Loop through Data and Control Fields
-        int iTag = new Integer(fldTag).intValue();
+        //int iTag = new Integer(fldTag).intValue();
         List<VariableField> varFlds = record.getVariableFields(fldTag);
         for (VariableField vf : varFlds) 
         {
-            if (iTag > 9 && subfield != null) 
+            if (!isControlField(fldTag) && subfield != null) 
             {
                 // Data Field
                 DataField dfield = (DataField) vf;
@@ -1513,5 +1536,41 @@ public class SolrIndexer
          }
         return buffer.toString();
     }
-
+    
+    public String getSingleIndexEntry(final Record record, String fieldSpec, String flagExtraEntries)
+    {
+        Set<String> set = getFieldList(record, fieldSpec);
+        if (set.size() == 0)
+        {
+            return(null);
+        }
+        else if (set.size() == 1)
+        {
+            return(set.toArray(new String[0])[0]);
+        }
+        else 
+        {
+            String longest = "";
+            for (String item : set)
+            {
+                if (item.length() > longest.length())
+                {
+                    longest = item;
+                }
+            }
+            if (flagExtraEntries.equalsIgnoreCase("true") && errors != null)
+            {
+                for (String item : set)
+                {
+                    if (!item.equals(longest))
+                    {
+                        errors.addError(record.getControlNumber(), fieldSpec.substring(0,3), fieldSpec.substring(3), 
+                                        ErrorHandler.MINOR_ERROR, "Multiple fields found for Field that expects only one occurance");
+                    }
+                }
+            }
+            return(longest);
+        }
+    }
+    
 }
