@@ -568,4 +568,28 @@ public class BlacklightIndexer extends SolrIndexer
         }
         return(result);
     }
+    
+    public String getPublicationDate(final Record record)
+    {
+        String field008 = getFirstFieldVal(record, "008");
+        String pubDateFull = getFieldVals(record, "260c", ", ");
+        String pubDateJustDigits = pubDateFull.replaceAll("[^0-9]", "");       
+        String pubDate260c = getDate(record);
+        String field008_d1 = field008.substring(7, 11);
+        String field008_d2 = field008.substring(11, 15);
+        String retVal;
+        char dateType = field008.charAt(6);
+        if (dateType == 'r' && field008_d2.equals(pubDate260c)) retVal = field008_d2;
+        else if (field008_d1.equals(pubDate260c))               retVal = field008_d1;
+        else if (field008_d2.equals(pubDate260c))               retVal = field008_d2;
+        else if (pubDateJustDigits.length() == 4 && pubDate260c != null &&
+                 pubDate260c.matches("(20|19|18|17|16|15)[0-9][0-9]"))
+                                                                retVal = pubDate260c;
+        else if (field008_d1.matches("(20|1[98765432])[0-9][0-9]"))        
+                                                                retVal = field008_d1;
+        else if (field008_d2.matches("(20|1[98765432])[0-9][0-9]"))        
+                                                                retVal = field008_d2;
+        else                                                    retVal = pubDate260c;
+        return(retVal);
+    }
 }
