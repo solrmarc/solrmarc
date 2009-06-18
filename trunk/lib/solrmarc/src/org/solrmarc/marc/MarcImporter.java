@@ -269,6 +269,12 @@ public class MarcImporter extends MarcHandler
                    logger.error(cause.getMessage() +  " at record count = " + recsReadCounter);
                    logger.error("Control Number " + record.getControlNumber());
                 }
+                else if (cause instanceof Exception && solrCoreProxy.isSolrException((Exception)cause) &&
+                        cause.getMessage().contains("unknown field"))
+                {
+                   logger.error(cause.getMessage() +  " at record count = " + recsReadCounter);
+                   logger.error("Control Number " + record.getControlNumber());
+                }
                 else if (cause instanceof Exception && solrCoreProxy.isSolrException((Exception)cause) )
                 {
                     logger.error("Error indexing record: " + record.getControlNumber() + " -- " + cause.getMessage());
