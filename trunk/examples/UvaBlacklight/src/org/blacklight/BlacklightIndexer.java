@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 import java.text.Collator;
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Locale;
@@ -19,6 +21,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 
+import org.marc4j.marc.ControlField;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.tools.Utils;
@@ -592,4 +595,37 @@ public class BlacklightIndexer extends SolrIndexer
         else                                                    retVal = pubDate260c;
         return(retVal);
     }
+    
+    /**
+     * returns the publication date groupings from a record, if it is present
+     * @param record
+     * @return Set of Strings containing the publication date groupings associated
+     *   with the publish date
+     */
+    public Set<String> getPubDateGroups(final Record record, String Mapfilename)
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+        int cYearInt = Calendar.getInstance().get(Calendar.YEAR); 
+        String mapName = loadTranslationMap(null, Mapfilename);
+        
+        // get the pub date, with decimals assigned for inclusion in ranges
+        String publicationDate =  getPublicationDate(record);
+        if (publicationDate != null)
+        {
+            int year = Integer.parseInt(publicationDate);
+            // "this year" and "last three years" are for 4 digits only
+            if ( year >= (cYearInt - 1))   resultSet.add("thisyear");
+            if ( year >= (cYearInt - 2))   resultSet.add("lasttwoyears");
+            if ( year >= (cYearInt - 3))   resultSet.add("lastthreeyears");
+            if ( year >= (cYearInt - 5))   resultSet.add("lastfiveyears");
+            if ( year >= (cYearInt - 10))  resultSet.add("lasttenyears");
+            if ( year >= (cYearInt - 20))  resultSet.add("lasttwentyyears");
+            if ( year >= (cYearInt - 50))  resultSet.add("last50years");
+            if (year < (cYearInt - 50) && (year > -1.0))
+                resultSet.add("morethan50years");
+        }
+        resultSet = Utils.remap(resultSet, findMap(mapName), true);
+        return resultSet;   
+    }
+
 }
