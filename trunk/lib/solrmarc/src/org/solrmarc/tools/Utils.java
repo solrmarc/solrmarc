@@ -550,8 +550,9 @@ public final class Utils {
                     if (parts[1].contains("$"))
                     {
                         newVal = fieldVal.replaceAll(parts[0], parts[1]);
+                        fieldVal = newVal;
                     }
-                    result = newVal;             
+                    result = newVal;                    
                 }
             }
         }
@@ -608,6 +609,7 @@ public final class Utils {
             String val = iter.next();
             if (map.keySet().contains("pattern_0"))
             {
+                String tmpResult = null;
                 for (int i = 0; i < map.keySet().size(); i++)
                 {
                     String patternStr = map.get("pattern_"+i);
@@ -618,10 +620,16 @@ public final class Utils {
                     	if (parts[1].contains("$"))
                     	{
                     		newVal = val.replaceAll(parts[0], parts[1]);
+                    		val = newVal;
                     	}
-                    	result.add(newVal);                    	
+                    	else
+                    	{
+                    	    result.add(newVal); 
+                    	}
+                    	tmpResult = newVal;
                     }
                 }
+                if (tmpResult != null) result.add(tmpResult); 
             }
             else
             {            
