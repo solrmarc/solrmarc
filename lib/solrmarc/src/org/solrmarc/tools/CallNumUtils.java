@@ -132,12 +132,13 @@ public final class CallNumUtils {
     
     /** this character will sort first */
     public static char SORT_FIRST_CHAR = Character.MIN_VALUE;
-	private static StringBuffer reverseDefault = new StringBuffer(75);
+	public static StringBuffer reverseDefault = new StringBuffer(75);
 	static {
 		for (int i = 0; i < 75; i++) 
-			// this char is hard to use in URLs
-			reverseDefault.append(Character.toChars(Character.MAX_CODE_POINT));
-//			reverseDefault.append(Character.toChars('~'));  // not working properly ???
+// N.B.:  this char is tough to deal with in a variety of contexts.  
+// Hopefully diacritics and non-latin won't bite us in the butt.
+//			reverseDefault.append(Character.toChars(Character.MAX_CODE_POINT));
+			reverseDefault.append(Character.toChars('~'));
 	}
 
 //------ public methods --------	
@@ -654,7 +655,7 @@ public final class CallNumUtils {
 	 * normalize a suffix for shelf list sorting by changing all digit 
 	 *  substrings to a constant length (left padding with zeros).
 	 */
-	private static String normalizeSuffix(String suffix) {
+	public static String normalizeSuffix(String suffix) {
 		if (suffix != null && suffix.length() > 0) {
 			StringBuffer resultBuf = new StringBuffer(suffix.length());
 			// get digit substrings
@@ -699,7 +700,7 @@ public final class CallNumUtils {
 
 	/**
      * return the reverse String value, mapping A --> 9, B --> 8, ...
-     *   9 --> A
+     *   9 --> A and also non-alphanum to sort properly (before or after alphanum)
      */
     private static String reverseAlphanum(String orig) {
 
@@ -769,9 +770,13 @@ public final class CallNumUtils {
 			case '|':
 			case '}':
 			case '~':
-				return Character.toChars(Character.MIN_CODE_POINT);
+// N.B.:  these are tough to deal with in a variety of contexts.  
+// Hopefully diacritics and non-latin won't bite us in the butt.
+//				return Character.toChars(Character.MIN_CODE_POINT);
+				return Character.toChars(' ');
 			default:
-				return Character.toChars(Character.MAX_CODE_POINT);
+//				return Character.toChars(Character.MAX_CODE_POINT);
+				return Character.toChars('~');
 		}  	
 	}
 
