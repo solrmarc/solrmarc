@@ -54,7 +54,7 @@ public class SolrIndexer
     private ErrorHandler errors;
         
     // Initialize logging category
-    static Logger logger = Logger.getLogger(MarcImporter.class.getName());
+    protected static Logger logger = Logger.getLogger(MarcImporter.class.getName());
 
     /**
      * private constructor; initializes fieldMap, transMapMap and indexDate to empty
