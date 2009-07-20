@@ -28,7 +28,7 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 	{
 		String fldName = "id";
 		createIxInitVars("idTests.mrc");
-		assertStringFieldProperties(fldName, solrCore, sis);
+		assertTextFieldProperties(fldName, solrCore, sis);
 		assertFieldNotMultiValued(fldName, solrCore);		
 		assertFieldStored(fldName, solrCore);
 		assertFieldIndexed(fldName, solrCore);

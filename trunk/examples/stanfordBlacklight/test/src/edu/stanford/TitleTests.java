@@ -1,7 +1,6 @@
 package edu.stanford;
 
 import java.io.IOException;
-import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -138,22 +137,6 @@ public class TitleTests extends BibIndexTest {
 	}
 
 	/**
-	 * Test title_variant_display field 
-	 */
-	@Test
-	public final void testVariantTitleDisplay() 
-			throws IOException, ParserConfigurationException, SAXException 
-	{
-		String fldName = "title_variant_display";
-		createIxInitVars("displayFieldsTests.mrc");
-		assertDisplayFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
-		
-		assertDocHasFieldValue("2461", fldName, "Latino Institute research digest", sis); 
-		assertDocHasFieldValue("2462", fldName, "At head of title: Science and public affairs Jan. 1970-Apr. 1974", sis); 
-	}
-
-	/**
 	 * Test uniform title display - it uses 130 when there is one.
 	 *   as of 2009-03-26  first of 130, 240 
 	 *   as of 2008-12-10  only uses 130, not 240 (to mirror title_sort field)
@@ -227,46 +210,6 @@ public class TitleTests extends BibIndexTest {
 		assertDocHasFieldValue("240only", fldName, "uniform title", sis);
 		fldName = "vern_title_uniform_display";
 		assertDocHasFieldValue("240only", fldName, "vernacular uniform title", sis);		
-	}
-
-	/**
-	 * Test series_title_display field 
-	 */
-@Test
-	public final void testSeriesTitleDisplay() 
-			throws IOException, ParserConfigurationException, SAXException 
-	{
-		String fldName = "series_title_display";
-		createIxInitVars("displayFieldsTests.mrc");
-		assertDisplayFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
-		
-		assertDocHasFieldValue("4401", fldName, "This American life", sis); 
-		assertDocHasFieldValue("4402", fldName, "The Rare book tapes. Series 1 ; 5", sis); 
-		assertDocHasFieldValue("4403", fldName, "Janua linguarum. Series maior, 100", sis); 
-	}
-	
-	/**
-	 * Test series_display field 
-	 */
-@Test
-	public final void testSeriesDisplay() 
-			throws IOException, ParserConfigurationException, SAXException 
-	{
-		String fldName = "series_display";
-		createIxInitVars("displayFieldsTests.mrc");
-		assertDisplayFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
-		
-		assertDocHasFieldValue("4901", fldName, "Education for living series.", sis); 
-		assertDocHasFieldValue("4902", fldName, "Policy series / CES ; 1", sis); 
-		assertDocHasFieldValue("4903", fldName, "Department of State publication ; 7846. Department and Foreign Service series ; 128", sis); 
-		assertDocHasFieldValue("4904", fldName, "Memoire du BRGM, no 123", sis); 
-		assertDocHasFieldValue("4905", fldName, "Annual census of manufactures = Recensement des manufactures,", sis); 
-		assertDocHasFieldValue("4906", fldName, "Bulletin / Engineering Experiment Station ; no. 50", sis); 
-		assertDocHasFieldValue("4907", fldName, "first 490 a first 490 v", sis); 
-		assertDocHasFieldValue("4907", fldName, "second 490 a only", sis); 
-		assertDocHasFieldValue("4907", fldName, "third 490 a third 490 v", sis); 
 	}
 
 	/**

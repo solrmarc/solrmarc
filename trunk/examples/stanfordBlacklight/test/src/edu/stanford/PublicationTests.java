@@ -1,6 +1,6 @@
 package edu.stanford;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -30,7 +30,6 @@ public class PublicationTests extends BibIndexTest
 	{
 		String fldName = "pub_date_search";
 		createIxInitVars("pubDateTests.mrc");
-		// may become multivalued eventually 
 		assertTextFieldProperties(fldName, solrCore, sis);
 		assertFieldNotMultiValued(fldName, solrCore);
 		assertFieldNotStored(fldName, solrCore);
@@ -51,8 +50,6 @@ public class PublicationTests extends BibIndexTest
 		String fldName = "pub_date_sort";
 		createIxInitVars("pubDateTests.mrc");
 		assertSortFldProps(fldName, solrCore, sis);
-	
-// FIXME:  need secondary sort, and need to know how to deal with docs without a pub date assigned
 	
 		// list of doc ids in correct publish date sort order
 		List<String> expectedOrderList = new ArrayList<String>(50);
@@ -94,14 +91,20 @@ public class PublicationTests extends BibIndexTest
 		expectedOrderList.add("z2006");   // "2006"
 		expectedOrderList.add("v2007");   // "2007"
 		expectedOrderList.add("b2008");   // "2008"
-		expectedOrderList.add("z2009");   // "2009"		
-		expectedOrderList.add("pubDate21uu");   // "22nd century" 
-		expectedOrderList.add("pubDate22uu");   // "23rd century" 
-		expectedOrderList.add("pubDate23uu");   // "24th century" 
+		expectedOrderList.add("z2009");   // "2009"
+		expectedOrderList.add("pubDate2010");   // "2010"
 		
+		// too high should be sorted as "missing" which should be last
+		// but for some reason it's first here, while not in situ in solr
+//		expectedOrderList.add("pubDate6666");   // ignored, not 6666
 		
 		// get search results sorted by pub_date_sort field
 		List<Document> results = getSortedDocs("collection", "Catalog", "pub_date_sort", sis);
+		Document firstDoc = results.get(0);
+		if (firstDoc.getField("id") != null) {
+			String firstDocId = firstDoc.getField("id").stringValue();
+			assertTrue("9999 pub date should not sort first", firstDocId != "pubDate9999");
+		}		
 		
 		// we know we have documents that are not in the expected order list
 		int expDocIx = 0;
@@ -119,8 +122,8 @@ public class PublicationTests extends BibIndexTest
 				}
 			}
 			else break;  // we found all the documents in the expected order list
-		}
-		
+		}		
+
 		if (expDocIx != expectedOrderList.size() - 1) 
 		{
 			String lastCorrDocId = expectedOrderList.get(expDocIx);
@@ -141,6 +144,7 @@ public class PublicationTests extends BibIndexTest
 		assertFacetFldProps(fldName, solrCore, sis);
 		
 		Set<String> docIds = new HashSet<String>();
+		docIds.add("pubDate2010");
 		docIds.add("z2009");
 		docIds.add("b2008");
 		assertSearchResults(fldName, "\"" + PubDateGroup.THIS_YEAR.toString() + "\"", docIds, sis);
@@ -187,12 +191,6 @@ public class PublicationTests extends BibIndexTest
 		docIds.add("pubDate195u");   // "1950s"
 		docIds.add("s195u");   // "1950s"
 		docIds.add("g1958");
-
-		// put future dates somewhere for error spotting
-		docIds.add("pubDate21uu");   // "21st century"
-		docIds.add("pubDate22uu");   // "22nd century" 
-		docIds.add("pubDate23uu");   // "23rd century" 
-				
 		assertSearchResults(fldName, "\"" + PubDateGroup.MORE_THAN_50_YEARS_AGO.toString() + "\"", docIds, sis);
 	}
 
@@ -226,7 +224,6 @@ public class PublicationTests extends BibIndexTest
         assertStringFieldProperties(fldName, solrCore, sis);
         assertFieldIndexed(fldName, solrCore);
         assertFieldStored(fldName, solrCore);
-		// may become multivalued eventually 
 		assertFieldNotMultiValued(fldName, solrCore);		
 
 		assertDocHasFieldValue("firstDateOnly008", fldName, "2000", sis); 
@@ -246,31 +243,22 @@ public class PublicationTests extends BibIndexTest
 		assertDocHasFieldValue("pubDate16uu", fldName, "17th century", sis); 
 		assertDocHasFieldValue("pubDate19uu", fldName, "20th century", sis); 
 		assertDocHasFieldValue("pubDate20uu", fldName, "21st century", sis); 
-		assertDocHasFieldValue("pubDate21uu", fldName, "22nd century", sis); 
-		assertDocHasFieldValue("pubDate22uu", fldName, "23rd century", sis); 
-		assertDocHasFieldValue("pubDate23uu", fldName, "24th century", sis); 
-// TODO:  No pub date when unknown?  or "unknown"?
+
+		// No pub date when unknown
 		assertDocHasNoField("bothDatesBlank", fldName, sis); 
 		assertDocHasNoField("pubDateuuuu", fldName, sis); 
-		// decided to make xuuu also unassigned
+		// xuuu is unassigned
 		assertDocHasNoFieldValue("pubDate1uuu", fldName, "after 1000", sis); 
 		assertDocHasNoField("pubDate1uuu", fldName, sis); 
-	}
-
-
-	/**
-	 * Test publication_display field 
-	 */
-@Test
-	public final void testPublicationDisplay() 
-			throws IOException, ParserConfigurationException, SAXException 
-	{
-		String fldName = "publication_display";
-		createIxInitVars("displayFieldsTests.mrc");
-		assertDisplayFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
 		
-		assertDocHasFieldValue("2601", fldName, "Paris : Impr. Vincent, 1798 [i.e. Bruxelles : Moens, 1883]", sis); 
+		// future dates are ignored
+		assertDocHasNoField("pubDate21uu", fldName, sis);   // ignored, not "22nd century" 
+		assertDocHasNoField("pubDate22uu", fldName, sis);   // ignored, not "23rd century" 
+		assertDocHasNoField("pubDate23uu", fldName, sis);   // ignored, not "24th century" 
+		assertDocHasNoField("pubDate9999", fldName, sis);   // ignored, not 9999
+		assertDocHasNoField("pubDate99uu", fldName, sis);   // ignored, not "100th century' 
+		assertDocHasNoField("pubDate6666", fldName, sis);   // ignored, not 6666
+		assertDocHasNoField("pubDate861u", fldName, sis);   // ignored, not 8610s
 	}
 
 
@@ -280,6 +268,7 @@ public class PublicationTests extends BibIndexTest
 		// field is indexed - search for values
 		assertSingleResult("bothDates008", fldName, "\"1964\"", sis);
 		assertSingleResult("pubDate01uu", fldName, "\"2nd century\"", sis);
+		assertSingleResult("pubDate2010", fldName, "\"2010\"", sis);
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("s195u");
 		docIds.add("pubDate195u");
@@ -290,6 +279,12 @@ public class PublicationTests extends BibIndexTest
 		assertSearchResults(fldName, "\"20th century\"", docIds, sis);
 
 		assertZeroResults(fldName, "\"after 1000\"", sis);
+		// future dates are ignored/skipped
+		assertZeroResults(fldName, "\"6666\"", sis);
+		assertZeroResults(fldName, "\"8610s\"", sis);
+		assertZeroResults(fldName, "\"9999\"", sis);
+		assertZeroResults(fldName, "\"23rd century\"", sis);
+		assertZeroResults(fldName, "\"22nd century\"", sis);
 	}
 
 }

@@ -1,6 +1,8 @@
 package edu.stanford;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -24,12 +26,36 @@ public class UrlTests extends BibIndexTest {
 	}
 
 	/**
+	 * test url_sfx_display field
+	 */
+@Test
+	public final void testSFXUrls() 
+			throws ParserConfigurationException, IOException, SAXException
+	{
+		String fldName = "url_sfx";
+		assertFieldMultiValued(fldName, solrCore);
+		assertStringFieldProperties(fldName, solrCore, sis);
+		assertFieldNotIndexed(fldName, solrCore);
+		assertFieldStored(fldName, solrCore);
+			
+		// 956 SFX fields
+		assertDocHasFieldValue("mult856and956", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?superLongURL", sis); 
+		assertDocHasFieldValue("7117119", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&ctx_enc=info:ofi/enc:UTF-8&rfr_id=info:sid/sfxit.com:opac_856&url_ctx_fmt=info:ofi/fmt:kev:mtx:ctx&sfx.ignore_date_threshold=1&rft.object_id=110978984448763&svc_val_fmt=info:ofi/fmt:kev:mtx:sch_svc&", sis); 
+		
+		// 956 non-SFX fields (a representative few of them)
+		assertDocHasNoField("956BlankIndicators", fldName, sis);
+		assertDocHasNoField("956ind2is0", fldName, sis);
+	}
+	
+	
+	
+	/**
 	 * Test method for {@link edu.stanford.StanfordIndexer#getFullTextUrl(org.marc4j.marc.Record)}.
 	 */
 @Test
 	public final void testFullTextUrls() throws IOException, ParserConfigurationException, SAXException 
 	{
-		String fldName = "url_display";
+		String fldName = "url_fulltext";
 		assertFieldMultiValued(fldName, solrCore);
 		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotIndexed(fldName, solrCore);
@@ -60,29 +86,7 @@ public class UrlTests extends BibIndexTest {
 		assertDocHasNoField("856tocAnd856SupplNoFulltext", fldName, sis);
 	}
 	
-	/**
-	 * test url_sfx_display field
-	 */
-@Test
-	public final void testSFXUrls() 
-			throws ParserConfigurationException, IOException, SAXException
-	{
-		String fldName = "url_sfx_display";
-		assertFieldMultiValued(fldName, solrCore);
-		assertStringFieldProperties(fldName, solrCore, sis);
-		assertFieldNotIndexed(fldName, solrCore);
-		assertFieldStored(fldName, solrCore);
-			
-		// 956 SFX fields
-		assertDocHasFieldValue("mult856and956", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?superLongURL", sis); 
-		assertDocHasFieldValue("7117119", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&ctx_enc=info:ofi/enc:UTF-8&rfr_id=info:sid/sfxit.com:opac_856&url_ctx_fmt=info:ofi/fmt:kev:mtx:ctx&sfx.ignore_date_threshold=1&rft.object_id=110978984448763&svc_val_fmt=info:ofi/fmt:kev:mtx:sch_svc&", sis); 
-		
-		// 956 non-SFX fields (a representative few of them)
-		assertDocHasNoField("956BlankIndicators", fldName, sis);
-		assertDocHasNoField("956ind2is0", fldName, sis);
-	}
-	
-	
+
 	/**
 	 * Test url_suppl_display field contents
 	 * Test method for {@link edu.stanford.StanfordIndexer#getSupplUrls(org.marc4j.marc.Record)}.
@@ -91,7 +95,7 @@ public class UrlTests extends BibIndexTest {
 	public final void testSupplmentaryUrls() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "url_suppl_display";
+		String fldName = "url_suppl";
 		assertFieldMultiValued(fldName, solrCore);
 		assertStringFieldProperties(fldName, solrCore, sis);
 		assertFieldNotIndexed(fldName, solrCore);
@@ -129,15 +133,15 @@ public class UrlTests extends BibIndexTest {
 	public final void testUrlDisplayFields() 
 	    throws ParserConfigurationException, IOException, SAXException
 	{
-	    String fldName = "url_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldMultiValued(fldName, solrCore);
-	    fldName = "url_sfx_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldMultiValued(fldName, solrCore);
-	    fldName = "url_suppl_display";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldMultiValued(fldName, solrCore);
+		Set<String> urlFields = new HashSet<String>(3);
+		urlFields.add("url_fulltext"); 
+		urlFields.add("url_suppl"); 
+		urlFields.add("url_sfx"); 
+		for (String fldName : urlFields) 
+		{
+		    assertDisplayFldProps(fldName, solrCore, sis);
+		    assertFieldMultiValued(fldName, solrCore);
+		}
 	}
 
 }

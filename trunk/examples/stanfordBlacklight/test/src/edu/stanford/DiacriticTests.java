@@ -1,6 +1,8 @@
 package edu.stanford;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -236,16 +238,67 @@ public class DiacriticTests extends BibIndexTest {
 		assertSingleResult("6676531", fldName, "kaiso", sis);
 	}
 
-// Tests below this line have incorrect raw data.  The data looks okay here
-//   but when it looks like this in oxygen (or in xml editor here) it is not
-//   indexed correctly.  Not sure why.  Best guesses: some char set 
-//   incompatibility and/or composed vs. decomposed unicode.
+//TODO: Tests below this line don't work.  The data looks okay here
+//but when it looks like this in oxygen (or in xml editor here) it is not
+//indexed correctly.  Not sure why.  Best guesses: some char set 
+//incompatibility on my mac, b/c these work on sw-dev, -test and -prod. 
+
+	/**
+	 * Test searching of chars with ae ligature
+	 */
+//@Test
+	public final void testAeLigature() 
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		tearDown();
+		createIxInitVars("aeoeLigatureTests.mrc");
+		String fldName = "title_245a_search";
+
+		// upper case
+		Set<String> docIds = new HashSet<String>();
+		docIds.add("Ae1");
+		docIds.add("Ae2");
+		assertSearchResults(fldName, "Æon", docIds, sis);
+		assertSearchResults(fldName, "Aeon", docIds, sis);
+
+		// lower case
+		docIds.clear();
+		docIds.add("ae1");
+		docIds.add("ae2");
+		assertSearchResults(fldName, "Encyclopædia", docIds, sis);
+		assertSearchResults(fldName, "Encyclopaedia", docIds, sis);
+	}
+
+	/**
+	 * Test searching of chars with oe ligature
+	 */
+//@Test
+	public final void testOeLigature() 
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		tearDown();
+		createIxInitVars("aeoeLigatureTests.mrc");
+		String fldName = "title_245a_search";
+
+		// upper case
+		Set<String> docIds = new HashSet<String>();
+		docIds.add("Oe1");
+		docIds.add("Oe2");
+		assertSearchResults(fldName, "Œlalala", docIds, sis);
+		assertSearchResults(fldName, "Oelalala", docIds, sis);
+
+		// lower case
+		docIds.clear();
+		docIds.add("oe1");
+		docIds.add("oe2");
+		assertSearchResults(fldName, "Cœurdevey", docIds, sis);
+		assertSearchResults(fldName, "Coeurdevey", docIds, sis);
+	}
 
 
 	/**
 	 * Test searching of chars with kreska - (Polish)
 	 */
-//incorrect raw data
 //@Test
 	public final void testKreska() 
 			throws ParserConfigurationException, IOException, SAXException 
@@ -257,7 +310,6 @@ public class DiacriticTests extends BibIndexTest {
 	/**
 	 * Test searching of chars with slash - (Scandanavian)
 	 */
-// incorrect raw data
 //@Test
 	public final void testSlash() 
 			throws ParserConfigurationException, IOException, SAXException 
@@ -270,7 +322,6 @@ public class DiacriticTests extends BibIndexTest {
 	/**
 	 * Test searching of chars with caron - (Latvian)
 	 */
-// incorrect raw data
 //@Test
 	public final void testCaron2() 
 			throws ParserConfigurationException, IOException, SAXException 
@@ -282,7 +333,6 @@ public class DiacriticTests extends BibIndexTest {
 	/**
 	 * Test searching of chars with ogonek - (Lithuanian)
 	 */
-// incorrect raw data
 //@Test
 	public final void testOgonek() 
 			throws ParserConfigurationException, IOException, SAXException 
@@ -295,7 +345,6 @@ public class DiacriticTests extends BibIndexTest {
 	/**
 	 * Test searching of chars with overdot - (Lithuanian)
 	 */
-// incorrect raw data
 //@Test
 	public final void testOverdot() 
 			throws ParserConfigurationException, IOException, SAXException 
@@ -307,7 +356,6 @@ public class DiacriticTests extends BibIndexTest {
 	/**
 	 * Test searching of unknown vietnamese char
 	 */
-// incorrect raw data
 //@Test
 	public final void testVietnamese() 
 			throws ParserConfigurationException, IOException, SAXException 
