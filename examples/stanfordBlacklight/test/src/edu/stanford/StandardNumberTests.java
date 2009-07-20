@@ -5,7 +5,6 @@ import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.lucene.document.Document;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -25,7 +24,7 @@ public class StandardNumberTests extends BibIndexTest {
 	{
 		String fldName = "oclc";
 		createIxInitVars("oclcNumTests.mrc");
-        assertStringFieldProperties(fldName, solrCore, sis);
+        assertTextFieldProperties(fldName, solrCore, sis);
         assertFieldIndexed(fldName, solrCore);
         assertFieldStored(fldName, solrCore);
 		assertFieldMultiValued(fldName, solrCore);
@@ -199,7 +198,6 @@ public class StandardNumberTests extends BibIndexTest {
 		assertSearchResults(fldName, "052185668X", docIds, sis);
 	
 		// isbn search with sub z value from record with mult a and z
-		String value = "9780809424887";
 		docIds.clear();
 		docIds.add("020suba13");
 		docIds.add("020suba13trailingText");
@@ -208,6 +206,7 @@ public class StandardNumberTests extends BibIndexTest {
 		docIds.add("020subz13trailingText");
 		docIds.add("020multSubz");
 		docIds.add("020SubaAndz");
+		assertSearchResults(fldName, "9780809424887", docIds, sis);
 	}
 
 	/**
@@ -348,7 +347,7 @@ public class StandardNumberTests extends BibIndexTest {
 		String fldName = "lccn";
 		createIxInitVars("lccnTests.mrc");
         assertStringFieldProperties(fldName, solrCore, sis);
-        assertFieldIndexed(fldName, solrCore);
+        assertFieldNotIndexed(fldName, solrCore);
         assertFieldStored(fldName, solrCore);
 		assertFieldNotMultiValued(fldName, solrCore);		
 
@@ -378,6 +377,7 @@ public class StandardNumberTests extends BibIndexTest {
 		assertDocHasFieldValue("010multSubZ", fldName, "76647633", sis); 
 		assertDocHasNoFieldValue("010multSubZ", fldName, "2000123456", sis); 
 
+/*		
 		// search for them
 		// 010 sub a only 
 		assertSingleResult("010suba8digit", fldName, "85153773", sis); 
@@ -402,6 +402,7 @@ public class StandardNumberTests extends BibIndexTest {
 		assertSearchResults(fldName, "76647633", docIds, sis);
 		assertZeroResults(fldName, "76000587", sis);
 		assertZeroResults(fldName, "2000123456", sis);
+*/
 	}
 
 }

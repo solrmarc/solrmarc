@@ -144,12 +144,10 @@
           <str name="facet.limit">30</str>
           <str name="facet.field">access_facet</str>
           <str name="facet.field">building_facet</str>
+          <str name="facet.field">callnum_1_facet</str>
+          <str name="f.callnum_1_facet.facet.sort">false</str>
           <str name="facet.field">format</str>
           <str name="facet.field">language</str>
-          <str name="facet.field">lc_1letter_facet</str>
-          <str name="f.lc_1letter_facet.facet.sort">false</str>
-          <str name="facet.field">dewey_1digit_facet</str>
-          <str name="f.dewey_1digit_facet.facet.sort">false</str>
         </lst>
         <!-- single object query to populate filter cache -->
         <lst>
@@ -164,16 +162,16 @@
           <str name="facet.field">author_person_facet</str>
           <str name="facet.field">author_other_facet</str>
    	      <str name="facet.field">building_facet</str>
-          <str name="facet.field">dewey_1digit_facet</str>
+          <str name="facet.field">callnum_1_facet</str>
           <str name="facet.field">era_facet</str>
           <str name="facet.field">format</str>
           <str name="facet.field">geographic_facet</str>
           <str name="facet.field">language</str>
-          <str name="facet.field">lc_1letter_facet</str>
           <str name="facet.field">pub_date_group_facet</str>
           <str name="facet.field">topic_facet</str>
         </lst>
         <!-- build spellcheck dictionaries  -->
+<!-- build on optimate may be sufficient, if all is copied.  2009-07-02
         <lst>
           <str name="qt">search</str>
           <str name="spellcheck.build">true</str>
@@ -186,6 +184,7 @@
           <str name="qt">search_author</str>
           <str name="spellcheck.build">true</str>
         </lst>
+-->
       </arr>
     </listener>
 
@@ -203,12 +202,10 @@
           <str name="facet.limit">30</str>
           <str name="facet.field">access_facet</str>
           <str name="facet.field">building_facet</str>
+          <str name="facet.field">callnum_1_facet</str>
+          <str name="f.callnum_1_facet.facet.sort">false</str>
           <str name="facet.field">format</str>
           <str name="facet.field">language</str>
-          <str name="facet.field">lc_1letter_facet</str>
-          <str name="f.lc_1letter_facet.facet.sort">false</str>
-          <str name="facet.field">dewey_1digit_facet</str>
-          <str name="f.dewey_1digit_facet.facet.sort">false</str>
         </lst>
         <!-- single object query to populate filter cache -->
         <lst> 
@@ -223,16 +220,16 @@
           <str name="facet.field">author_person_facet</str>
           <str name="facet.field">author_other_facet</str>
           <str name="facet.field">building_facet</str>
-          <str name="facet.field">dewey_1digit_facet</str>
+          <str name="facet.field">callnum_1_facet</str>
           <str name="facet.field">era_facet</str>
           <str name="facet.field">format</str>
           <str name="facet.field">geographic_facet</str>
           <str name="facet.field">language</str>
-          <str name="facet.field">lc_1letter_facet</str>
           <str name="facet.field">pub_date_group_facet</str>
           <str name="facet.field">topic_facet</str>
         </lst>
         <!-- build spellcheck dictionaries  -->
+<!-- build on optimate may be sufficient, if all is copied.  2009-07-02
         <lst>
           <str name="qt">search</str>
           <str name="spellcheck.build">true</str>
@@ -245,6 +242,7 @@
           <str name="qt">search_author</str>
           <str name="spellcheck.build">true</str>
         </lst>
+-->
       </arr>
     </listener>
     
@@ -264,7 +262,8 @@
      <lst name="defaults">
        <str name="echoParams">explicit</str>
        <str name="rows">10</str> 
-       <str name="fl">*</str>   
+       <str name="fl">*</str>
+       <str name="sort">score desc, pub_date_sort desc, title_sort asc</str>   
        <str name="facet">true</str>
        <str name="facet.mincount">1</str>
        <str name="facet.limit">30</str> 
@@ -272,12 +271,11 @@
        <str name="facet.field">author_person_facet</str>
        <str name="facet.field">author_other_facet</str>
        <str name="facet.field">building_facet</str>
-       <str name="facet.field">dewey_1digit_facet</str>
+       <str name="facet.field">callnum_1_facet</str>
        <str name="facet.field">era_facet</str>
        <str name="facet.field">format</str>
        <str name="facet.field">geographic_facet</str>
        <str name="facet.field">language</str>
-       <str name="facet.field">lc_1letter_facet</str>
        <str name="facet.field">pub_date_group_facet</str>
        <str name="facet.field">topic_facet</str>
      </lst>
@@ -288,62 +286,93 @@
     <lst name="defaults">
       <str name="defType">dismax</str>
       <str name="echoParams">explicit</str>
+      <str name="sort">score desc, pub_date_sort desc, title_sort asc</str>   
       <str name="q.alt">*:*</str>
       <str name="mm">4&lt;-1 4&lt;90%</str>
       <str name="qf">
-        title_245a_search^37500        vern_title_245a_search^37500
+        title_245a_unstem_search^100000
+        title_245a_search^75000        vern_title_245a_search^75000
+        title_245_unstem_search^50000
         title_245_search^30000         vern_title_245_search^30000
+        title_uniform_unstem_search^10000
         title_uniform_search^2500      vern_title_uniform_search^2500
+        title_variant_unstem_search^2225
         title_variant_search^2000      vern_title_variant_search^2000
+        title_related_unstem_search^1750
         title_related_search^1250      vern_title_related_search^1250
 
+        topic_unstem_search^1200
         topic_search^1000              vern_topic_search^1000
+        geographic_unstem_search^900
         geographic_search^750          vern_geographic_search^750
 
-        author_person_facet^700     <!-- string field 100:700, currently fewer subfields -->
-        author_corp_facet^700       <!-- string field 110:710, currently fewer subfields -->
-        author_meeting_facet^700    <!-- string field 111:711, currently fewer subfields-->
+        author_1xx_unstem_search^700
+        author_7xx_unstem_search^700
+        author_8xx_unstem_search^700
         author_1xx_search^500          vern_author_1xx_search^500
 
+        subject_other_unstem_search^650
         subject_other_search^500       vern_subject_other_search^500
 
         author_7xx_search^125          vern_author_7xx_search^125
 
+        toc_unstem_search^120
         toc_search^100                 vern_toc_search^100
 
         author_8xx_search^50           vern_author_8xx_search^50
 
+        title_series_unstem_search^45
         title_series_search^30         vern_title_series_search^30
 
+        topic_subx_unstem_search^29
+        geographic_subz_unstem_search^29
+        subject_other_subvy_unstem_search^29
         topic_subx_search^25           vern_topic_subx_search^25
         geographic_subz_search^25      vern_geographic_subz_search^25
         subject_other_subvy_search^25  vern_subject_other_subvy_search^25
 
         pub_date_search^10
-        <!-- ensure that regular isbn/issn sort above "related" isbn/issn -->
         isbn_search^2
         issn_search^2
         physical                       vern_physical
         all_search
         id
         oclc
-        lccn
         barcode_search
+        callnum_search
       </str>
       <str name="pf">
-        title_245a_search^75000        vern_title_245a_search^75000
+        title_245a_unstem_search^300000
+        title_245a_search^250000        vern_title_245a_search^250000
+        title_245_unstem_search^100000
         title_245_search^70000         vern_title_245_search^70000
+        title_uniform_unstem_search^65000
+        title_variant_unstem_search^64000
         title_uniform_search^60000     vern_title_uniform_search^60000
         title_variant_search^40000     vern_title_variant_search^40000
+        title_related_unstem_search^7500
         title_related_search^2500      vern_title_related_search^2500
+        
+        topic_unstem_search^2400
         topic_search^2000              vern_topic_search^2000
+        geographic_unstem_search^1750
         geographic_search^1500         vern_geographic_search^1500
+        
+        author_1xx_unstem_search^1400
+        subject_other_unstem_search^1400
         author_1xx_search^1000         vern_author_1xx_search^1000
         subject_other_search^1000      vern_subject_other_search^1000
+        author_7xx_unstem_search^900
         author_7xx_search^750          vern_author_7xx_search^750
+        toc_unstem_search^500
         toc_search^250                 vern_toc_search^250
+        author_8xx_unstem_search^200
         author_8xx_search^100          vern_author_8xx_search^100
+        title_series_unstem_search^90
         title_series_search^75         vern_title_series_search^75
+        topic_subx_unstem_search^50
+        geographic_subz_unstem_search^50
+        subject_other_subvy_unstem_search^50
         topic_subx_search^25           vern_topic_subx_search^25
         geographic_subz_search^25      vern_geographic_subz_search^25
         subject_other_subvy_search^25  vern_subject_other_subvy_search^25
@@ -361,12 +390,11 @@
   	  <str name="facet.field">author_person_facet</str>
   	  <str name="facet.field">author_other_facet</str>
       <str name="facet.field">building_facet</str>
-      <str name="facet.field">dewey_1digit_facet</str>
+      <str name="facet.field">callnum_1_facet</str>
       <str name="facet.field">era_facet</str>
       <str name="facet.field">format</str>
       <str name="facet.field">geographic_facet</str>
       <str name="facet.field">language</str>
-      <str name="facet.field">lc_1letter_facet</str>
       <str name="facet.field">pub_date_group_facet</str>
       <str name="facet.field">topic_facet</str>
       
@@ -378,26 +406,25 @@
         author_person_display,
         author_person_full_display,
         format,
-        edition_display,
         isbn_display,
+        item_display,
         lccn,
         oclc,
         physical,
-        publication_display,
         pub_date,
-        title_display,
         title_245a_display,
+        title_display,
+        title_full_display,
         title_uniform_display,
-        url_display,
         url_sfx_display,
         vern_author_corp_display,
         vern_author_meeting_display,
         vern_author_person_display,
         vern_author_person_full_display,
-        vern_edition_display,
-        vern_publication_display
+        vern_physical,
+        vern_title_245a_display,
         vern_title_display,
-        vern_title_uniform_display,
+        vern_title_uniform_display
       </str>
       
       <str name="spellcheck">true</str>
@@ -405,7 +432,7 @@
       <str name="spellcheck.onlyMorePopular">true</str>
       <str name="spellcheck.extendedResults">true</str>
       <str name="spellcheck.collate">true</str>
-      <str name="spellcheck.count">1</str>
+      <str name="spellcheck.count">5</str>
     </lst>
     <arr name="last-components">
       <str>spellcheck</str>
@@ -417,22 +444,35 @@
     <lst name="defaults">
       <str name="defType">dismax</str>
       <str name="echoParams">explicit</str>
+      <str name="sort">score desc, pub_date_sort desc, title_sort asc</str>   
       <str name="q.alt">*:*</str>
       <str name="mm">4&lt;-1 4&lt;90%</str>
       <str name="qf">
-        title_245a_search^2500      vern_title_245a_search^2500
+        title_245a_unstem_search^50000
+        title_245_unstem_search^25000
+        title_uniform_unstem_search^10000
+        title_245a_search^5000      vern_title_245a_search^5000
 				title_245_search^1000				vern_title_245_search^1000
 				title_uniform_search^250		vern_title_uniform_search^250
+				title_variant_unstem_search^150
 				title_variant_search^50			vern_title_variant_search^50
+				title_related_unstem_search^45
 				title_related_search^5			vern_title_related_search^5
+				title_series_unstem_search^4
 				title_series_search  				vern_title_series_search
       </str>
       <str name="pf">
-        title_245a_search^10000       vern_title_245a_search^10000
+        title_245a_unstem_search^200000
+        title_245_unstem_search^75000
+        title_uniform_unstem_search^60000
+        title_245a_search^75000       vern_title_245a_search^75000
         title_245_search^7500         vern_title_245_search^7500
         title_uniform_search^6000     vern_title_uniform_search^6000
+        title_variant_unstem_search^3000
         title_variant_search^200      vern_title_variant_search^200
+        title_related_unstem_search^175
         title_related_search^150      vern_title_related_search^150
+        title_series_unstem_search^100
         title_series_search^75        vern_title_series_search^75
       </str>
       <int name="ps">3</int>
@@ -445,12 +485,11 @@
   	  <str name="facet.field">author_person_facet</str>
   	  <str name="facet.field">author_other_facet</str>
       <str name="facet.field">building_facet</str>
-      <str name="facet.field">dewey_1digit_facet</str>
+      <str name="facet.field">callnum_1_facet</str>
       <str name="facet.field">era_facet</str>
       <str name="facet.field">format</str>
       <str name="facet.field">geographic_facet</str>
       <str name="facet.field">language</str>
-      <str name="facet.field">lc_1letter_facet</str>
       <str name="facet.field">pub_date_group_facet</str>
       <str name="facet.field">topic_facet</str>
       
@@ -462,26 +501,25 @@
         author_person_display,
         author_person_full_display,
         format,
-        edition_display,
         isbn_display,
+        item_display,
         lccn,
         oclc,
         physical,
-        publication_display,
         pub_date,
-        title_display,
         title_245a_display,
+        title_display,
+        title_full_display,
         title_uniform_display,
-        url_display,
         url_sfx_display,
         vern_author_corp_display,
         vern_author_meeting_display,
         vern_author_person_display,
         vern_author_person_full_display,
-        vern_edition_display,
-        vern_publication_display
+        vern_physical,
+        vern_title_245a_display,
         vern_title_display,
-        vern_title_uniform_display,
+        vern_title_uniform_display
       </str>
       
       <str name="spellcheck">true</str>
@@ -489,7 +527,7 @@
       <str name="spellcheck.onlyMorePopular">true</str>
       <str name="spellcheck.extendedResults">true</str>
       <str name="spellcheck.collate">true</str>
-      <str name="spellcheck.count">1</str>  
+      <str name="spellcheck.count">5</str>  
     </lst>
     <arr name="last-components">
       <str>spellcheck</str>
@@ -501,21 +539,23 @@
     <lst name="defaults">
       <str name="defType">dismax</str>
       <str name="echoParams">explicit</str>
+      <str name="sort">score desc, pub_date_sort desc, title_sort asc</str>   
       <str name="q.alt">*:*</str>
       <str name="mm">4&lt;-1 4&lt;90%</str>
       <str name="qf">
-        <!-- would string fields even match? isn't query stemmed? -->
-        author_person_facet^50     <!-- string field 100:700, currently fewer subfields -->
-        author_corp_facet^50       <!-- string field 110:710, currently fewer subfields -->
-        author_meeting_facet^50    <!-- string field 111:711, currently fewer subfields-->
+        author_1xx_unstem_search^200
+        author_7xx_unstem_search^50
+        author_8xx_unstem_search^10
         author_1xx_search^20       vern_author_1xx_search^20
         author_7xx_search^5        vern_author_7xx_search^5
         author_8xx_search          vern_author_8xx_search
       </str>
       <str name="pf">
-        <!-- string fields have only one token, so not included -->
+        author_1xx_unstem_search^5000
+        author_7xx_unstem_search^3000
         author_1xx_search^500        vern_author_1xx_search^500
         author_7xx_search^300        vern_author_7xx_search^300
+        author_8xx_unstem_search^250
         author_8xx_search^200        vern_author_8xx_search^200
       </str>
       <int name="ps">3</int>
@@ -528,12 +568,11 @@
       <str name="facet.field">author_person_facet</str>
       <str name="facet.field">author_other_facet</str>
       <str name="facet.field">building_facet</str>
-      <str name="facet.field">dewey_1digit_facet</str>
+      <str name="facet.field">callnum_1_facet</str>
       <str name="facet.field">era_facet</str>
       <str name="facet.field">format</str>
       <str name="facet.field">geographic_facet</str>
       <str name="facet.field">language</str>
-      <str name="facet.field">lc_1letter_facet</str>
       <str name="facet.field">pub_date_group_facet</str>
       <str name="facet.field">topic_facet</str>
       
@@ -545,26 +584,25 @@
         author_person_display,
         author_person_full_display,
         format,
-        edition_display,
         isbn_display,
+        item_display,
         lccn,
         oclc,
         physical,
-        publication_display,
         pub_date,
-        title_display,
         title_245a_display,
+        title_display,
+        title_full_display,
         title_uniform_display,
-        url_display,
         url_sfx_display,
         vern_author_corp_display,
         vern_author_meeting_display,
         vern_author_person_display,
         vern_author_person_full_display,
-        vern_edition_display,
-        vern_publication_display
+        vern_physical,
+        vern_title_245a_display,
         vern_title_display,
-        vern_title_uniform_display,
+        vern_title_uniform_display
       </str>
             
       <str name="spellcheck">true</str>
@@ -572,11 +610,103 @@
       <str name="spellcheck.onlyMorePopular">true</str>
       <str name="spellcheck.extendedResults">true</str>
       <str name="spellcheck.collate">true</str>
-      <str name="spellcheck.count">1</str>  
+      <str name="spellcheck.count">5</str>  
     </lst>
     <arr name="last-components">
       <str>spellcheck</str>
     </arr>
+  </requestHandler>    
+  
+  <!-- subject search request handler -->  
+  <requestHandler name="search_subject" class="solr.SearchHandler" >
+    <lst name="defaults">
+      <str name="defType">dismax</str>
+      <str name="echoParams">explicit</str>
+      <str name="sort">score desc, pub_date_sort desc, title_sort asc</str>   
+      <str name="q.alt">*:*</str>
+      <str name="mm">4&lt;-1 4&lt;90%</str>
+
+      <str name="qf">
+        topic_unstem_search^500
+        geographic_unstem_search^500
+        topic_search^100               vern_topic_search^100
+        geographic_search^100          vern_geographic_search^100
+        subject_other_unstem_search^75
+        subject_other_search^50        vern_subject_other_search^50
+        
+        topic_subx_unstem_search^10
+        geographic_subz_unstem_search^10
+        subject_other_subvy_unstem_search^10
+        topic_subx_search              vern_topic_subx_search
+        geographic_subz_search         vern_geographic_subz_search
+        subject_other_subvy_search     vern_subject_other_subvy_search
+      </str>
+      <str name="pf">
+        topic_unstem_search^5000
+        geographic_unstem_search^5000
+        topic_search^1000              vern_topic_search^1000
+        geographic_search^1000         vern_geographic_search^1000
+        subject_other_unstem_search^750
+        subject_other_search^500       vern_subject_other_search^500
+        
+        topic_subx_unstem_search^25
+        geographic_subz_unstem_search^25
+        subject_other_subvy_unstem_search^25
+        topic_subx_search^20           vern_topic_subx_search^20
+        geographic_subz_search^20      vern_geographic_subz_search^20
+        subject_other_subvy_search^20  vern_subject_other_subvy_search^20
+      </str>
+      
+      <int name="ps">3</int>
+      <float name="tie">0.01</float>
+      
+      <str name="facet">true</str>
+      <str name="facet.mincount">1</str>
+      <str name="facet.limit">30</str> 
+      <str name="facet.field">access_facet</str>
+      <str name="facet.field">author_person_facet</str>
+      <str name="facet.field">author_other_facet</str>
+      <str name="facet.field">building_facet</str>
+      <str name="facet.field">callnum_1_facet</str>
+      <str name="facet.field">era_facet</str>
+      <str name="facet.field">format</str>
+      <str name="facet.field">geographic_facet</str>
+      <str name="facet.field">language</str>
+      <str name="facet.field">pub_date_group_facet</str>
+      <str name="facet.field">topic_facet</str>
+      
+      <str name="fl">
+        score,
+        id,
+        author_corp_display,
+        author_meeting_display,
+        author_person_display,
+        author_person_full_display,
+        format,
+        isbn_display,
+        item_display,
+        lccn,
+        oclc,
+        physical,
+        pub_date,
+        title_245a_display,
+        title_display,
+        title_full_display,
+        title_uniform_display,
+        url_sfx_display,
+        vern_author_corp_display,
+        vern_author_meeting_display,
+        vern_author_person_display,
+        vern_author_person_full_display,
+        vern_physical,
+        vern_title_245a_display,
+        vern_title_display,
+        vern_title_uniform_display
+      </str>
+      
+      <!-- NOTE:  subject search is from links, no end user, so no spellcheck -->
+
+    </lst>
   </requestHandler>    
   
   <!-- single document requests; use id=666 instead of q=id:666 -->
@@ -589,6 +719,29 @@
     </lst>
   </requestHandler>
 
+  <!-- barcode requests; use /barcode?q=1234567890 -->
+  <requestHandler name="/barcode" class="solr.SearchHandler" >
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <str name="fl">id</str>
+      <str name="q">{!field f=barcode_search}</str> 
+    </lst>
+  </requestHandler>
+  
+  <searchComponent name="termsComp" class="solr.TermsComponent"/>
+  
+  <requestHandler name="/alphaTerms" class="solr.SearchHandler">
+    <lst name="defaults">
+      <str name="echoParams">explicit</str>
+      <str name="terms">true</str>
+      <str name="terms.lower.incl">true</str> 
+    </lst>
+    <arr name="components">
+      <str>termsComp</str>
+    </arr>
+  </requestHandler>
+  
+  
   <searchComponent name="spellcheck" class="solr.SpellCheckComponent">
     <lst name="spellchecker">
       <str name="name">default</str>
@@ -659,6 +812,7 @@
     <lst name="defaults">
       <str name="echoParams">explicit</str> <!-- for all params (including the default etc) use: 'all' -->
       <str name="echoHandler">true</str>
+      <str name="debugQuery">true</str>
     </lst>
   </requestHandler>
     

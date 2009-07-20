@@ -1,7 +1,5 @@
 package edu.stanford;
 
-import static edu.stanford.StanfordIndexer.*;
-
 import java.io.IOException;
 import java.util.*;
 

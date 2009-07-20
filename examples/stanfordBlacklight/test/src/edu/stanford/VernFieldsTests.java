@@ -44,12 +44,12 @@ public class VernFieldsTests extends BibIndexTest {
 	public final void testFieldDups() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "title_variant_display";
-		assertDocHasFieldValue("two246", fldName, "first 246", sis);
-		assertDocHasFieldValue("two246", fldName, "second 246", sis);
-		fldName = "vern_title_variant_display";
-		assertDocHasFieldValue("two246", fldName, "vernacular first 246", sis);
-		assertDocHasFieldValue("two246", fldName, "vernacular second 246", sis);
+		String fldName = "author_7xx_search";
+		assertSingleResult("two700", fldName, "\"first 700\"", sis);
+
+		fldName = "vern_author_7xx_search";
+		assertSingleResult("two700", fldName, "\"vernacular first 700\"", sis);
+		assertSingleResult("two700", fldName, "\"vernacular second 700\"", sis);
 	}
 	
 	/**
@@ -59,10 +59,10 @@ public class VernFieldsTests extends BibIndexTest {
 	public final void testSubFieldDups() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		String fldName = "publication_display";
-		assertDocHasFieldValue("DupSubflds", fldName, "Wellington, New Zealand", sis);
-		fldName = "vern_publication_display";
-		assertDocHasFieldValue("DupSubflds", fldName, "Naomi in Wellington, in New Zealand", sis);
+		String fldName = "author_8xx_search";
+		assertSingleResult("DupSubflds", fldName, "\"Wellington, New Zealand\"", sis);
+		fldName = "vern_author_8xx_search";
+		assertSingleResult("DupSubflds", fldName, "\"Naomi in Wellington, in New Zealand\"", sis);
 	}
 
 /**
