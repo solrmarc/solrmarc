@@ -614,7 +614,8 @@ public final class CallNumUtils {
    	    	}
    		} catch (NumberFormatException e) {
    			System.err.println("Problem creating shelfkey for record " + recid + "; call number: " + rawLCcallnum);
-   			e.printStackTrace();
+   			//e.printStackTrace();
+   			resultBuf = new StringBuffer();
    		}
     	
     	if (resultBuf.length() == 0)
@@ -694,7 +695,8 @@ public final class CallNumUtils {
 	 */
 	public static String getReverseShelfKey(String shelfkey) {
 		StringBuffer resultBuf = new StringBuffer(reverseDefault);
-		resultBuf.replace(0, shelfkey.length(), reverseAlphanum(shelfkey));
+		if (shelfkey != null)
+			resultBuf.replace(0, shelfkey.length(), reverseAlphanum(shelfkey));
 		return resultBuf.toString();
 	}
 
