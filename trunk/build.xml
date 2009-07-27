@@ -293,7 +293,7 @@
                     </and>
                     <then>
                         <union id="nonuptodatecopies">
-                            <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties" >
+                            <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties,extra_data/*.txt" >
                                 <depend targetdir="${site.dir}" />
                                 <different targetdir="${site.dir}" />
                             </fileset>
