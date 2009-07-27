@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class BlacklightIndexer extends SolrIndexer
      * @throws FileNotFoundException 
      * @throws Exception
      */
-    Set<String> addnlShadowedIds = null;
+    Map<String, String> addnlShadowedIds = null;
     
     public BlacklightIndexer(final String propertiesMapFile, final String propertyPaths[])
     {
@@ -519,15 +520,26 @@ public class BlacklightIndexer extends SolrIndexer
         {
             if (addnlShadowedIds == null)
             {
-                addnlShadowedIds = new LinkedHashSet<String>();
+                addnlShadowedIds = new LinkedHashMap<String, String>();
                 InputStream addnlIdsStream = Utils.getPropertyFileInputStream(null, "extra_data/AllShadowedIds.txt");
                 BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
-                String id;
+                String line;
                 try
                 {
-                    while ((id = addnlIdsReader.readLine()) != null)
+                    while ((line = addnlIdsReader.readLine()) != null)
                     {
-                        if (!id.startsWith("#"))  addnlShadowedIds.add(id);
+                        String linepts[] = line.split("\\|");
+                        if (linepts.length == 1) 
+                        {
+                            addnlShadowedIds.put(linepts[0], "");
+                        }
+                        else
+                        {
+                            String existing = addnlShadowedIds.get(linepts[0]);
+                            if (existing == null) addnlShadowedIds.put(linepts[0], "|" + linepts[1] + "|"); 
+                            else if (existing.equals("")) continue;
+                            else addnlShadowedIds.put(linepts[0], existing + linepts[1] + "|");
+                        }
                     }
                 }
                 catch (IOException e)
@@ -540,31 +552,43 @@ public class BlacklightIndexer extends SolrIndexer
         boolean returnHiddenRecs = returnHidden.startsWith("return");
         String mapName = loadTranslationMap(null, propertiesMap);
         
-        Set<String> fields = getFieldList(record, "999kl';'");
+        Set<String> fields = getFieldList(record, "999ikl';'");
         boolean visible = false;
-        for (String field : fields)
+        String extraString = null;
+        if (processExtraShadowedIds && addnlShadowedIds.containsKey(record.getControlNumber()))
         {
-            String fparts[] = field.split(";");
-            if (fparts.length == 1)
-            {
-                String mappedFpart = Utils.remap(fparts[0], findMap(mapName), true);
-                if (mappedFpart.equals("VISIBLE"))  visible = true;
-            }
-            else if (fparts.length == 2)
-            {
-                String mappedFpart1 = Utils.remap(fparts[0], findMap(mapName), true);
-                String mappedFpart2 = Utils.remap(fparts[1], findMap(mapName), true);
-                if (mappedFpart1.equals("VISIBLE") && mappedFpart2.equals("VISIBLE"))
+            extraString = addnlShadowedIds.get(record.getControlNumber());
+        }  
+        if ("".equals(extraString))  visible = false;
+        else
+        {
+            for (String field : fields)
                 {
-                    visible = true;
+                    String fparts[] = field.split(";");
+                    if (extraString != null && extraString.contains("|" + fparts[0] + "|"))
+                    {
+                        // this holding is marked as Hidden via the addnlShadowedIds data file
+                        // so simply continue, and unless another non-Hidden holding is found the 
+                        // record will be not visible.
+                        continue;
+                    }
+                    else if (fparts.length == 2)
+                    {
+                        String mappedFpart = Utils.remap(fparts[1], findMap(mapName), true);
+                        if (mappedFpart.equals("VISIBLE"))  visible = true;
+                    }
+                    else if (fparts.length == 3)
+                    {
+                        String mappedFpart1 = Utils.remap(fparts[1], findMap(mapName), true);
+                        String mappedFpart2 = Utils.remap(fparts[2], findMap(mapName), true);
+                        if (mappedFpart1.equals("VISIBLE") && mappedFpart2.equals("VISIBLE"))
+                        {
+                            visible = true;
+                        }
+                    }
                 }
-            }
         }
         String result = (visible ? "VISIBLE" : "HIDDEN"); 
-        if (processExtraShadowedIds && visible && addnlShadowedIds.contains(record.getControlNumber()))
-        {
-            result = "HIDDEN";
-        }  
         if (!visible && !returnHiddenRecs)
         {
             return(null);
