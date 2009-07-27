@@ -602,7 +602,7 @@ public class BlacklightIndexer extends SolrIndexer
         String pubDateFull = getFieldVals(record, "260c", ", ");
         String pubDateJustDigits = pubDateFull.replaceAll("[^0-9]", "");       
         String pubDate260c = getDate(record);
-        if (field008.length() < 16) 
+        if (field008 == null || field008.length() < 16) 
         {
             return(pubDate260c);
         }
