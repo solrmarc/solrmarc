@@ -54,6 +54,7 @@ blacklight_shadowed_config.properties, u642.mrc, call_number_display, ML5.G654 (
 blacklight_shadowed_config.properties, u200.mrc, shadowed_location_facet, HIDDEN
 blacklight_shadowed_config.properties, u210.mrc, shadowed_location_facet, VISIBLE
 blacklight_shadowed_config.properties, u63.mrc, shadowed_location_facet, HIDDEN
+blacklight_shadowed_config.properties, u2312095.mrc, shadowed_location_facet, HIDDEN
 
 blacklight_shadowed_config.properties, u3344744.mrc, location_facet, Semester at Sea Collection
 blacklight_shadowed_config.properties, u3344744.mrc, library_facet, Semester at Sea
@@ -62,6 +63,8 @@ blacklight_shadowed_config.properties, u3344744.mrc, shadowed_location_facet, VI
 blacklight_shadowed_config.properties, u2956.mrc, location_facet, Fine Arts Regular Stacks|Semester at Sea Collection|Ivy Annex
 blacklight_shadowed_config.properties, u2956.mrc, library_facet, Fine Arts|Semester at Sea|Ivy Annex
 blacklight_shadowed_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
+
+
 
 
 
