@@ -50,6 +50,7 @@ blacklight_shadowed_config.properties, u55.mrc, call_number_display, PR4231.A43 
 blacklight_shadowed_config.properties, u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
 blacklight_shadowed_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (23 volumes)
 blacklight_shadowed_config.properties, u642.mrc, call_number_display, ML5.G654 (43 volumes)
+blacklight_shadowed_config.properties, u696140.mrc, call_number_display, ND1489.G4713 1986
 
 blacklight_shadowed_config.properties, u200.mrc, shadowed_location_facet, HIDDEN
 blacklight_shadowed_config.properties, u210.mrc, shadowed_location_facet, VISIBLE
