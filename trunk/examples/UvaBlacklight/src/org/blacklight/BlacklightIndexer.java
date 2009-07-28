@@ -52,6 +52,7 @@ public class BlacklightIndexer extends SolrIndexer
      * @throws Exception
      */
     Map<String, String> addnlShadowedIds = null;
+    String extraIdsFilename = "extra_data/AllShadowedIds.txt";
     
     public BlacklightIndexer(final String propertiesMapFile, final String propertyPaths[])
     {
@@ -304,12 +305,30 @@ public class BlacklightIndexer extends SolrIndexer
                 return s1Norm.compareToIgnoreCase(s2Norm);
             }
         };
+        boolean processExtraShadowedIds = fieldSpec.contains("';'");
 
         boolean conflate = !conflatePrefixes.equalsIgnoreCase("false");
         //int conflateThreshhold = conflate ? Integer.parseInt(conflatePrefixes) : 0;
         Set<String> fieldList = getFieldList(record, fieldSpec);
         if (fieldList.isEmpty())  {
             return(null);
+        }
+        if (processExtraShadowedIds)
+        {
+            loadExtraShadowedIds(extraIdsFilename);
+            Set<String> newFieldList = new LinkedHashSet<String>();
+            String extraString = addnlShadowedIds.get(record.getControlNumber());
+          
+            for (String field : fieldList)
+            {
+                String fieldparts[] = field.split(";");
+                if (fieldparts.length != 2) continue;
+                if (extraString == null || extraString.equals("") || !extraString.contains("|" + fieldparts[1] + "|"))
+                {
+                    newFieldList.add(fieldparts[0]);
+                }
+            }
+            fieldList = newFieldList;
         }
         if (conflate)
         {
@@ -512,42 +531,46 @@ public class BlacklightIndexer extends SolrIndexer
 //        }
 //        return(result);        
 //    }
+    private void loadExtraShadowedIds(String filename)
+    {
+        if (addnlShadowedIds == null)
+        {
+            addnlShadowedIds = new LinkedHashMap<String, String>();
+            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(null, filename);
+            BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
+            String line;
+            try
+            {
+                while ((line = addnlIdsReader.readLine()) != null)
+                {
+                    String linepts[] = line.split("\\|");
+                    if (linepts.length == 1) 
+                    {
+                        addnlShadowedIds.put(linepts[0], "");
+                    }
+                    else
+                    {
+                        String existing = addnlShadowedIds.get(linepts[0]);
+                        if (existing == null) addnlShadowedIds.put(linepts[0], "|" + linepts[1] + "|"); 
+                        else if (existing.equals("")) continue;
+                        else addnlShadowedIds.put(linepts[0], existing + linepts[1] + "|");
+                    }
+                }
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
     
     public String getShadowedLocation(final Record record, String propertiesMap, String returnHidden, String processExtra)
     {
         boolean processExtraShadowedIds = processExtra.startsWith("extraIds");
         if (processExtraShadowedIds)
         {
-            if (addnlShadowedIds == null)
-            {
-                addnlShadowedIds = new LinkedHashMap<String, String>();
-                InputStream addnlIdsStream = Utils.getPropertyFileInputStream(null, "extra_data/AllShadowedIds.txt");
-                BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
-                String line;
-                try
-                {
-                    while ((line = addnlIdsReader.readLine()) != null)
-                    {
-                        String linepts[] = line.split("\\|");
-                        if (linepts.length == 1) 
-                        {
-                            addnlShadowedIds.put(linepts[0], "");
-                        }
-                        else
-                        {
-                            String existing = addnlShadowedIds.get(linepts[0]);
-                            if (existing == null) addnlShadowedIds.put(linepts[0], "|" + linepts[1] + "|"); 
-                            else if (existing.equals("")) continue;
-                            else addnlShadowedIds.put(linepts[0], existing + linepts[1] + "|");
-                        }
-                    }
-                }
-                catch (IOException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
+            loadExtraShadowedIds(extraIdsFilename);
         }
         boolean returnHiddenRecs = returnHidden.startsWith("return");
         String mapName = loadTranslationMap(null, propertiesMap);
