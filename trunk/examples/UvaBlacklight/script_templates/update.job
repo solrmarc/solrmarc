@@ -18,7 +18,6 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
     delfname=$froot.del
     delfile=$dir/$delfname
     output=$RESULTSDIR/results_$froot
-    output_sas=$RESULTSDIR/results_sas_$froot
     output_shadowed=$RESULTSDIR/results_shadowed_$froot
 
     #check whether the mrc file has already been processed
@@ -30,8 +29,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
             mv $PROCESSEDDIR/$fname $PROCESSEDDIR/$fname-`date +%Y%m%e`
             cp $file $PROCESSEDDIR
             indexfile $file > $output 2>&1
-            indexfile blacklight_sas_config.properties $file > $output_sas 2>&1
-            indexfile blacklight_shadowed_config.properties $file > $output_shadowed 2>&1
+            indexfile blacklight_dev_config.properties $file > $output_dev 2>&1
             let "num += 1"
         else
             # incoming file already processed, just delete it
@@ -41,8 +39,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
         # file doesnt exist in processed dir, index it normally
         cp $file $PROCESSEDDIR
         indexfile $file  > $output 2>&1
-        indexfile blacklight_sas_config.properties $file > $output_sas 2>&1
-        indexfile blacklight_shadowed_config.properties $file > $output_shadowed 2>&1
+        indexfile blacklight_devd_config.properties $file > $output_dev 2>&1
         let "num += 1"
         fi
 
@@ -56,8 +53,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
                 mv $PROCESSEDDIR/$delfname $PROCESSEDDIR/$delfname-`date +%Y%m%e`
                 cp $delfile $PROCESSEDDIR
                 indexfile NONE $delfile >> $output 2>&1
-                indexfile blacklight_sas_config.properties NONE $delfile >> $output_sas 2>&1
-                indexfile blacklight_shadowed_config.properties NONE $delfile >> $output_shadowed 2>&1
+                indexfile blacklight_dev_config.properties NONE $delfile >> $output_dev 2>&1
                 let "num += 1"
             else
                 # incoming file already processed, just delete it
@@ -67,8 +63,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
             # file doesnt exist in processed dir, index it normally
             cp $delfile $PROCESSEDDIR
             indexfile NONE $delfile >> $output 2>&1
-            indexfile blacklight_sas_config.properties NONE $delfile >> $output_sas 2>&1
-            indexfile blacklight_shadowed_config.properties NONE $delfile >> $output_shadowed 2>&1
+            indexfile blacklight_dev_config.properties NONE $delfile >> $output_dev 2>&1
             let "num += 1"
             fi
     else
@@ -79,15 +74,6 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
 
     done
 
-# for now due to some wonkyness pertaining to "shadowed" items  then following two statements need 
-# to be run to remove some items that need to be hidden 
-# this is not needed for the blacklight_shadowed index, it handles them differently internally.
-
-if [ "$num" -ne 0 ] ; then
-    indexfile $DATADIR/shadowed/modifiedShadowedRecs.mrc $DATADIR/shadowed/shadowedTitles.del > $RESULTSDIR/results_shadowed 2>&1
-    indexfile blacklight_sas_config.properties $DATADIR/shadowed/modifiedShadowedRecs.mrc $DATADIR/shadowed/shadowedTitles.del > $RESULTSDIR/results_sas_shadowed 2>&1
-fi
-
 # now move auth files to another directory
 for file in `find $INPUTDIR -name '*.auth*' -print`
     do
@@ -96,13 +82,12 @@ for file in `find $INPUTDIR -name '*.auth*' -print`
 
 # run booklist daily update
 runbooklist daily > $RESULTSDIR/results_booklists_$froot 2>&1
-runbooklist daily blacklight_shadowed_config.properties > $RESULTSDIR/results_booklists_$froot 2>&1
+runbooklist daily blacklight_dev_config.properties > $RESULTSDIR/results_booklists_$froot 2>&1
 
 # if any files were indexed, optimize solr index
 if [ "$num" -ne 0 ] 
     then
     optimizesolr > $RESULTSDIR/results_optimize 2>&1
-    optimizesolr blacklight_sas_config.properties > $RESULTSDIR/results_sas_optimize 2>&1
-    optimizesolr blacklight_shadowed_config.properties > $RESULTSDIR/results_shadowed_optimize 2>&1
+    optimizesolr blacklight_dev_config.properties > $RESULTSDIR/results_dev_optimize 2>&1
 fi
 
