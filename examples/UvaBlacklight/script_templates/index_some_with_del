@@ -11,12 +11,17 @@ if [ $# -eq 0 ]
     exit $E_BADARGS
 fi
 
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+case $1 in
+*config.properties) config=$1 ; shift;;
+esac
+
+
 fpath=$1
 marcpattern=$2
 fpattern=$3
 marcpattern2=`echo $2 | sed -e 's:/:_:g'`
-
-scriptdir=$( (cd -P $(dirname $0) && pwd) )
 
 for file in `find $fpath -name '*.mrc' -print | sort | egrep "$fpattern"`
     do

@@ -3,14 +3,19 @@ JAVA_HOME=/usr/java/latest
 export JAVA_HOME
 if [ $# -eq 0 ]
   then
-    echo "    Usage: `basename $0` /directory/containing/marc/files  'regexForFileNameMacthing' "
-    echo "      or : `basename $0` /directory/containing/marc/files "
+    echo "    Usage: `basename $0` [config.properties] /directory/containing/marc/files  'regexForFileNameMacthing' "
+    echo "      or : `basename $0` [config.properties] /directory/containing/marc/files "
     exit $E_BADARGS
 fi
 
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+case $1 in
+*config.properties) config=$1 ; shift;;
+esac
+
 fpath=$1
 fpattern=$2
-scriptdir=$( (cd -P $(dirname $0) && pwd) )
 
 for file in `find $fpath -name '*.mrc' -print | sort | egrep "$fpattern"`
     do
