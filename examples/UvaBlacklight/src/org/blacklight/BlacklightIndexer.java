@@ -25,6 +25,7 @@ import java.util.TreeSet;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
 
 
