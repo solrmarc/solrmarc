@@ -157,9 +157,20 @@ public class MarcMerger
                 e.printStackTrace();
                 return;
             }
-            input2 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[1+argoffset]+".mrc"))));
+            String modfile = args[1+argoffset];
+            String delfile = null;
+            if (modfile.endsWith(".mrc"))
+            {
+                delfile = modfile.substring(0, modfile.length()-4) + ".del";
+            }
+            else if (!modfile.substring(modfile.lastIndexOf('/')).contains("."))
+            {
+                delfile = modfile + ".del";
+                modfile = modfile + ".mrc";
+            }
+            input2 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(modfile))));
             try {
-                input3 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[1+argoffset]+".del"))));
+                input3 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(delfile))));
             }
             catch (FileNotFoundException e)
             {
