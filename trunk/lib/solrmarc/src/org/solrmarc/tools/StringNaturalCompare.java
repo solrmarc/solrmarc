@@ -1,4 +1,4 @@
-package org.blacklight;
+package org.solrmarc.tools;
 
 import java.util.Comparator;
 
