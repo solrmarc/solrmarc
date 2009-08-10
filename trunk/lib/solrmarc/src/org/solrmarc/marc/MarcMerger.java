@@ -24,6 +24,7 @@ import org.solrmarc.tools.StringNaturalCompare;
  */
 public class MarcMerger
 {
+    public final static String minRecordID = "u0";
     public final static String maxRecordID = "u99999999999";
     public static boolean verbose = false;
 
@@ -210,12 +211,21 @@ public class MarcMerger
         try
         {
             SimpleRecord mainrec = new SimpleRecord(mainFile);
+            String segmentMinRecordID = mainrec.id;
             SimpleRecord newOrModrec = new SimpleRecord(newOrModified);
             String deletedId = maxRecordID;
             BufferedReader delReader = null;
             if (deleted != null)
             {
                 delReader = new BufferedReader(new InputStreamReader(deleted));
+                deletedId = getNextDelId(delReader);
+            }
+            while (compare.compare(newOrModrec.id, segmentMinRecordID) < 0)
+            {
+                newOrModrec.next();
+            }
+            while (compare.compare(deletedId, segmentMinRecordID) < 0)
+            {
                 deletedId = getNextDelId(delReader);
             }
             
@@ -284,8 +294,6 @@ public class MarcMerger
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-       
     }
 
 
