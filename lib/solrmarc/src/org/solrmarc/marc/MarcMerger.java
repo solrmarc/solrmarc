@@ -163,7 +163,7 @@ public class MarcMerger
             {
                 delfile = modfile.substring(0, modfile.length()-4) + ".del";
             }
-            else if (!modfile.substring(modfile.lastIndexOf('/')).contains("."))
+            else if (!modfile.substring(Math.max(modfile.lastIndexOf('\\'), modfile.lastIndexOf('/'))).contains("."))
             {
                 delfile = modfile + ".del";
                 modfile = modfile + ".mrc";
