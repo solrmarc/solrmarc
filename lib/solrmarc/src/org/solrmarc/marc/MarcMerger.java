@@ -144,9 +144,12 @@ public class MarcMerger
         {
             input0 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[0+argoffset]))));
             String nextFile = getNextFile(args[0+argoffset]);
+            if (verbose)  System.err.println("Name of \"next\" file to get MaxRecordID = " + nextFile);
+
             try {
                 input1 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(nextFile))));
                 segmentMaxRecordID = new SimpleRecord(input1).id;
+                if (verbose)  System.err.println("value for MaxRecordID = " + segmentMaxRecordID);
             }
             catch (FileNotFoundException e)
             {
@@ -197,7 +200,7 @@ public class MarcMerger
         int nameVal = 100000000 + Integer.parseInt(name2);
         String newName2 = String.valueOf(nameVal + 1);
         newName2 = newName2.substring(newName2.length() - name2.length());
-        String newName = filePrefix + File.separator + name1 + newName2 + name3;
+        String newName = ((filePrefix == null) ? "" : filePrefix + File.separator) + name1 + newName2 + name3;
         return(newName);
     }
 
