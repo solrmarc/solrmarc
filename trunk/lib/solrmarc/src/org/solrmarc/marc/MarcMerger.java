@@ -297,7 +297,7 @@ public class MarcMerger
             String line = delReader.readLine();
             if (line != null) 
             {
-                id = line.replaceAll("u([0-9]*).*", "u$1");
+                id = line.replaceFirst("u?([0-9]*).*", "u$1");
             }
         }
         catch (IOException e)
