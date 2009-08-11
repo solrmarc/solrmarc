@@ -388,7 +388,7 @@ public class MarcMerger
         {
             // deletedId is the id of a newly deleted record,  Write out that record id.
             if (verbose) System.err.println("Writing record "+ newOrModrec.id + " from mod file");
-            out.println(mainDelete);
+            out.println(deletedId);
             deletedId = getNextDelId(delReader);
         }
     }
