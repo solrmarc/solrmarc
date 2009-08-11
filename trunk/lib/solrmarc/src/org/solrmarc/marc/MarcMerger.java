@@ -378,7 +378,7 @@ public class MarcMerger
                     if (compare.compare(mainDelete, deletedId)> 0)
                     {    
                         // Trying to delete a record that's already not there.  Be Happy.
-                        out.println(mainDelete);
+                        out.println(deletedId);
                         deletedId = getNextDelId(delReader);
                     }
                 }
