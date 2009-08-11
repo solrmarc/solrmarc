@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
 
@@ -136,10 +137,16 @@ public class MarcMerger
         DataInputStream input3 = null;
         String segmentMaxRecordID = maxRecordID;
         int argoffset = 0;
+        boolean mergeRecords = true;
         if (args[0].equals("-v"))
         {
             verbose = true;
             argoffset = 1;
+        }
+        if (args[0+argoffset].endsWith(".del"))
+        {
+            // merging deletes, not merging records.
+            mergeRecords = false;
         }
         try
         {
@@ -147,19 +154,22 @@ public class MarcMerger
             String nextFile = getNextFile(args[0+argoffset]);
             if (verbose)  System.err.println("Name of \"next\" file to get MaxRecordID = " + nextFile);
 
-            try {
-                input1 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(nextFile))));
-                segmentMaxRecordID = new SimpleRecord(input1).id;
-                if (verbose)  System.err.println("value for MaxRecordID = " + segmentMaxRecordID);
-            }
-            catch (FileNotFoundException e)
+            if (nextFile != null)
             {
-                // no next file,  ignore it be happy
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                return;
+                try {
+                    input1 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(nextFile))));
+                    segmentMaxRecordID = new SimpleRecord(input1).id;
+                    if (verbose)  System.err.println("value for MaxRecordID = " + segmentMaxRecordID);
+                }
+                catch (FileNotFoundException e)
+                {
+                    // no next file,  ignore it be happy
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                    return;
+                }
             }
             String modfile = args[1+argoffset];
             String delfile = null;
@@ -180,7 +190,14 @@ public class MarcMerger
             {
                 // no del file,  ignore it be happy
             }
-            processInput(input0, segmentMaxRecordID, input2, input3, System.out);
+            if (mergeRecords) 
+            {
+                processMergeRecords(input0, segmentMaxRecordID, input2, input3, System.out);
+            }
+            else
+            {
+                processMergeDeletes(input0, input2, input3, System.out);
+            }
         }
         catch (FileNotFoundException e)
         {
@@ -205,7 +222,7 @@ public class MarcMerger
         return(newName);
     }
 
-    static void processInput(DataInputStream mainFile, String maxID, DataInputStream newOrModified, DataInputStream deleted, OutputStream out) 
+    static void processMergeRecords(DataInputStream mainFile, String maxID, DataInputStream newOrModified, DataInputStream deleted, OutputStream out) 
     {
         Comparator<String> compare = new StringNaturalCompare();
         try
@@ -293,6 +310,86 @@ public class MarcMerger
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        }
+    }
+    
+    static void processMergeDeletes(DataInputStream mainFile, DataInputStream newOrModified, DataInputStream deleted, PrintStream out) 
+    {
+        Comparator<String> compare = new StringNaturalCompare();
+        BufferedReader mainReader = new BufferedReader(new InputStreamReader(mainFile));
+        String mainDelete = getNextDelId(mainReader);
+        
+        SimpleRecord newOrModrec = new SimpleRecord(newOrModified);
+        String deletedId = maxRecordID;
+        BufferedReader delReader = null;
+        if (deleted != null)
+        {
+            delReader = new BufferedReader(new InputStreamReader(deleted));
+            deletedId = getNextDelId(delReader);
+        }
+        while (compare.compare(mainDelete, maxRecordID)< 0)
+        {
+            if (compare.compare(mainDelete, newOrModrec.id)< 0  && compare.compare(mainDelete, deletedId) < 0)
+            {
+                // mainDeleted rec ID unchanged, just write it out to delete file.
+                //if (verbose) System.err.println("Writing original record "+ mainrec.id + " from input file");
+                out.println(mainDelete);
+                mainDelete = getNextDelId(mainReader);
+            }
+            else if (compare.compare(mainDelete, newOrModrec.id)== 0  && compare.compare(mainDelete, deletedId)== 0)
+            {   
+                // mainrec equals deleteID  AND it equals modifiedRecId,  Delete record.  Although this should not happen.
+                if (verbose) System.err.println("Deleting record "+ deletedId);
+                deletedId = getNextDelId(delReader);
+                newOrModrec.next();
+                out.println(mainDelete);
+                mainDelete = getNextDelId(mainReader);
+            }
+            else if (compare.compare(mainDelete, newOrModrec.id)< 0  && compare.compare(mainDelete, deletedId)== 0)
+            {    
+                // mainrec equals deleteID,   Delete record.  
+                if (verbose) System.err.println("Deleting record "+ deletedId);
+                deletedId = getNextDelId(delReader);
+                out.println(mainDelete);
+                mainDelete = getNextDelId(mainReader);
+            }
+            else if (compare.compare(mainDelete, newOrModrec.id)== 0  && compare.compare(mainDelete, deletedId)< 0)
+            {    
+                // mainrec equals modifiedRecId,  Write out modified record.
+                if (verbose) System.err.println("Record added, removing id from  "+ newOrModrec.id + " from Mod file");
+                newOrModrec.next();
+                mainDelete = getNextDelId(mainReader);
+            }
+            else // mainrec.id is greater than either newOrModrec.id or deletedId
+            {
+                if (compare.compare(mainDelete, newOrModrec.id)> 0 && compare.compare(newOrModrec.id, deletedId)== 0)
+                {    
+                    //  Update contains a new 
+                    out.println(mainDelete);
+                }
+                else
+                {
+                    if (compare.compare(mainDelete, newOrModrec.id)> 0)
+                    {    
+                        // newOrModrec is a new record,  Write out new record.
+                        if (verbose) System.err.println("New record in mod file "+ newOrModrec.id + " skipping it.");
+                        newOrModrec.next();
+                    }
+                    if (compare.compare(mainDelete, deletedId)> 0)
+                    {    
+                        // Trying to delete a record that's already not there.  Be Happy.
+                        out.println(mainDelete);
+                        deletedId = getNextDelId(delReader);
+                    }
+                }
+            }
+        }
+        while (compare.compare(deletedId, maxRecordID)< 0 )
+        {
+            // deletedId is the id of a newly deleted record,  Write out that record id.
+            if (verbose) System.err.println("Writing record "+ newOrModrec.id + " from mod file");
+            out.println(mainDelete);
+            deletedId = getNextDelId(delReader);
         }
     }
 
