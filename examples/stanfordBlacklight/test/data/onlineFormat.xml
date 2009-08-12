@@ -283,6 +283,31 @@
             <subfield code="u">5/17/2008</subfield>
         </datafield>
     </record>
+    <!-- 856 http url is for a request form for SAL3  GSB -->
+    <record>
+        <leader>00988nas a2200193z  4500</leader>
+        <controlfield tag="001">a124http</controlfield>
+        <controlfield tag="008">071214uuuuuuuuuxx uu |ss    u|    |||| d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">856 http url is for a request form for SAL3 GSB  from 7948108</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2=" ">
+            <subfield code="u">http://www.gsb.stanford.edu/jacksonlibrary/services/offsite_material.html</subfield>
+            <subfield code="z">Request offsite item</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">HG3266 .U64A</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">J81S99</subfield>
+            <subfield code="l">ASK@GSB</subfield>
+            <subfield code="m">JACKSON</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">BUSINESS</subfield>
+            <subfield code="u">5/17/2008</subfield>
+        </datafield>
+    </record>
     <!-- 856 https url is for a request form for SAL3  GSB -->
     <record>
         <leader>00988nas a2200193z  4500</leader>
@@ -341,4 +366,32 @@
             <subfield code="u">5/17/2008</subfield>
         </datafield>
     </record>     
+    <!-- 956 SFX url: fulltext -->
+    <record>
+        <leader>00988nas a2200193z  4500</leader>
+        <controlfield tag="001">anewSfx</controlfield>
+        <controlfield tag="008">071214uuuuuuuuuxx uu |ss    u|    |||| d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">new sfx in 956</subfield>
+        </datafield>
+        <datafield tag="956" ind1="4" ind2="0">
+            <subfield code="u">http://library.stanford.edu/sfx?reallyLongLotsOfArgs</subfield>
+            <subfield code="x">eLoaderURL</subfield>
+            <subfield code="x">mr4</subfield>
+            <subfield code="x">mr1000000000717824</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">INTERNET RESOURCE</subfield>
+            <subfield code="w">ASIS</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">7117119-1001</subfield>
+            <subfield code="l">INTERNET</subfield>
+            <subfield code="m">SUL</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">SUL</subfield>
+            <subfield code="u">12/15/2007</subfield>
+            <subfield code="z">TAX=8.25</subfield>
+        </datafield>
+    </record>
 </collection>

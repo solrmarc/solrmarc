@@ -444,5 +444,219 @@
       <subfield code="a">pubDate 2uuu</subfield>
     </datafield>
   </record>
+  <!-- pubDate 9999: 008/7-10 9999 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate9999</controlfield>
+    <controlfield tag="008">780930c99999999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 9999: 008/7-10 9999</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 100th century: 008/7-10 99uu -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate99uu</controlfield>
+    <controlfield tag="008">780930c99uu99uunyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 99uu: 008/7-10 99uu</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate too high (6666): 008/7-10 6666 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate6666</controlfield>
+    <controlfield tag="008">780930c66666666nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate too high: 008/7-10 6666</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate too high (8610s): 008/7-10 861u -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate861u</controlfield>
+    <controlfield tag="008">780930c861u861unyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate too high: 008/7-10 861u</subfield>
+    </datafield>
+  </record>  
+  <!-- pubDate this year + 1 (2010) -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate2010</controlfield>
+    <controlfield tag="008">780930c20102010nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 2010</subfield>
+    </datafield>
+  </record>  
+  
+  <!-- pubDate 0000 -->
+  <record>
+    <leader>00514nam a22001575Z 4500</leader>
+    <controlfield tag="001">apubDate0000</controlfield>
+    <controlfield tag="008">890816s0000    cau           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 0000</subfield>
+    </datafield>
+  </record>
+  <!-- bad pubDate of 0019 ... see 260c -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0019</controlfield>
+    <controlfield tag="008">780930c0019    nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">pubDate 0019</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="c">19--</subfield>
+    </datafield>
+  </record>
+  <!-- bad pubDate of 0059 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0059</controlfield>
+    <controlfield tag="008">780930c0059    nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">pubDate 0059</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="c">2005.</subfield>
+    </datafield>
+  </record>
+  <!-- bad pubDate of 0197 ... see 260c -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0197-1</controlfield>
+    <controlfield tag="008">780930c0197    nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="2">
+      <subfield code="a">pubDate 0197</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">Washington :</subfield>
+      <subfield code="b">National Aeronautics and Space Administration,</subfield>
+      <subfield code="c">[197?]</subfield>
+    </datafield>
+  </record>
+  <!-- bad pubDate of 0197 ... see 260c -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0197-2</controlfield>
+    <controlfield tag="008">780930c0197    nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 0197</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">Washington :</subfield>
+      <subfield code="b">Energy Research and Development Administration,</subfield>
+      <subfield code="c">197?</subfield>
+    </datafield>
+  </record>
+  <!-- legit pubdate of 0500 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0500</controlfield>
+    <controlfield tag="008">780930c05001963nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">Special Collections&apos; general artifact collection,</subfield>
+      <subfield code="f">ca. 500-1963.</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 0204 should be 2004 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0204</controlfield>
+    <controlfield tag="008">780930c0204    nyu           000 0 fre d</controlfield>
+    <datafield tag="245" ind1="1" ind2="3">
+      <subfield code="a">pubDate 0204 should be 2004</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="c">[2004]</subfield>
+    </datafield>
+  </record>
+  <!-- legit first 1/2 of 9th century -->  
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0801</controlfield>
+    <controlfield tag="008">780930c08010850nyu           000 0 lat d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 0801 legit</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="c">[first half of the 9th century]</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 0960 legit -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0960</controlfield>
+    <controlfield tag="008">780930c09601279nyu           000 0 chi d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate 0960 legit</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">[China :</subfield>
+      <subfield code="b">s.n.],</subfield>
+      <subfield code="c">Song [between 960 and 1279]</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 0965 should be 1965 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0965</controlfield>
+    <controlfield tag="008">780930c0965    nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">pubDate 0965 should be 1965</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">Paris,</subfield>
+      <subfield code="b">R. Laffont</subfield>
+      <subfield code="c">[1965]</subfield>
+    </datafield>
+  </record>
+  <!-- pubdate 0980 should be 1980 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0980</controlfield>
+    <controlfield tag="008">780930c0980    nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubdate 0980 should be 1980</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">New York :</subfield>
+      <subfield code="b">Holt, Rinehart, and Winston,</subfield>
+      <subfield code="c">c1980.</subfield>
+    </datafield>
+  </record>
+  <!-- pubdate 0999 should be 1999 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0999</controlfield>
+    <controlfield tag="008">780930c0999    nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">pubdate 0999 should be 1999</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="c">1999</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate 0963 legit -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">apubDate0963</controlfield>
+    <controlfield tag="008">780930c0963    nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1=" " ind2=" ">
+      <subfield code="a">Catalonian Parchment.</subfield>
+      <subfield code="b">18 April 963.</subfield>
+    </datafield>
+  </record>
+  <!-- pubDate missing correctly -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a410024</controlfield>
+    <controlfield tag="008">780930c1uuu9999nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">pubDate missing correctly</subfield>
+    </datafield>
+  </record>
   
 </collection>
