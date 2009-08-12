@@ -231,7 +231,7 @@ For documentation on using SolrMarc to index your marc records, please see the C
 === Batch Files/Shell Scripts ===
 
 *filterrecords:* could be called “marcgrep,” selects only those records that contain certain fields or certain values in certain fields. The user specifies the pattern they are seeking in the file on the command line.
-  * cat /path/to/big/marcfile.mrc | filterrecords '245a/Jefferson' -- gets the records in the file that have subfield a in a 245 field containing "Jefferson"
+  * cat /path/to/big/marcfile.mrc | filterrecords '245a/Jefferson' -- gets the records in the file that have 245 field with subfield a containing "Jefferson"
 
 *getfromsolr:* extracts complete MARC records from the records stored in the Solr index.
   * getfromsolr http://myremotemachine:8080/solr id_to_extract
