@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import org.marc4j.marc.*;
 //could import static, but this seems clearer
 import org.solrmarc.tools.Utils;  
-import org.solrmarc.tools.CallNumUtils;
 
 /**
  * Stanford custom methods
@@ -36,7 +35,6 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 			String firstchar = lc.substring(0, 1).toUpperCase();
 			return lc.replaceFirst(".{1}", firstchar);
 		}
-
 	}
 
 	/** format facet values */
@@ -310,8 +308,8 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         List<VariableField> list999 = record.getVariableFields("999");
         for (VariableField vf : list999) {
         	DataField df = (DataField) vf;
-        	String subw = Utils.getSubfieldData(df, 'w');
-        	if (subw != null && subw.trim().equalsIgnoreCase("ALPHANUM")) {
+        	String scheme = getCallNumberSchemeFrom999(df);
+        	if (scheme != null && scheme.equalsIgnoreCase("ALPHANUM")) {
     			String suba = Utils.getSubfieldData(df, 'a');
     			if (suba != null) {
     				suba = suba.trim();
@@ -666,7 +664,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         for (VariableField vf : list999) {
         	DataField f999 = (DataField) vf;
         	if (!skipItem(f999)) {
-        		if (onlineItem(f999))
+        		if (onlineItemPerLocation(f999))
         			resultSet.add(Access.ONLINE.toString());
         		else 
         			resultSet.add(Access.AT_LIBRARY.toString());
@@ -674,7 +672,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         }
 		
         if (getFullTextUrls(record).size() > 0)
-        	resultSet.add(Access.ONLINE.toString());
+          	resultSet.add(Access.ONLINE.toString());
 
         if (getSFXUrls(record).size() > 0)
         	resultSet.add(Access.ONLINE.toString());
@@ -687,7 +685,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 // URL Methods -------------------- Begin -------------------------- URL Methods    
     
     /**
-     * retruns a set of strings containing the sfx urls in a record.  Returns
+     * returns a set of strings containing the sfx urls in a record.  Returns
      *   empty set if none
      * @param record
      */
@@ -713,7 +711,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     {
         Set<String> resultSet = new HashSet<String>();
 
-        // all 956 subfield u containing fulltext urls that aren't SFX
+        // get all 956 subfield u containing fulltext urls that aren't SFX
         Set<String> f956urls = getFieldList(record, "956u");
         for (String url: f956urls) {
         	if (!isSFXUrl(url))
@@ -724,20 +722,27 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         for (VariableField vf : list856) {
         	DataField df = (DataField) vf;
         	List<String> possUrls = Utils.getSubfieldStrings(df, 'u');
-        	// the next two are for a GSB request form for offsite materials
-        	possUrls.remove("http://www.gsb.stanford.edu/jacksonlibrary/services/sal3_request.html");
-        	possUrls.remove("https://www.gsb.stanford.edu/jacksonlibrary/services/sal3_request.html");
-        	char ind2 = df.getIndicator2();
-        	switch (ind2) {
-    	    	case '0':
-    	    		resultSet.addAll(possUrls);
-    	    		break;
-    	    	case '2':
-    	    		break;
-    	    	default:
-    	    		if (!isSupplementalUrl(df))
-    	    			resultSet.addAll(possUrls);
-    	    		break;
+        	// need possUrls to be thread safe or get concurrent exceptions
+        	Vector<String> possUrlsV = new Vector(possUrls);
+        	// don't use GSB request form for offsite materials
+           	for (String possUrl : possUrlsV) {
+           		if (possUrl.startsWith("http://www.gsb.stanford.edu/jacksonlibrary/services/") ||
+              		     possUrl.startsWith("https://www.gsb.stanford.edu/jacksonlibrary/services/"))
+           			possUrls.remove(possUrl);
+           	}
+        	if (possUrls.size() > 0) {
+            	char ind2 = df.getIndicator2();
+            	switch (ind2) {
+        	    	case '0':
+        	    		resultSet.addAll(possUrls);
+        	    		break;
+        	    	case '2':
+        	    		break;
+        	    	default:
+        	    		if (!isSupplementalUrl(df))
+        	    			resultSet.addAll(possUrls);
+        	    		break;
+            	}
         	}
         }        
         
@@ -775,7 +780,8 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     }
     
     private boolean isSFXUrl(String urlStr) {
-    	if (urlStr.startsWith("http://caslon.stanford.edu:3210/sfxlcl3?") )
+    	if (urlStr.startsWith("http://caslon.stanford.edu:3210/sfxlcl3?") ||
+        	 urlStr.startsWith("http://library.stanford.edu/sfx?") )
     		return true;
     	else return false;
     }
@@ -806,7 +812,9 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     
     /**
      * returns the publication date from a record, if it is present and not
-     *  beyond the current year + 1
+     *  beyond the current year + 1 (and not earlier than 0500 if it is a 
+     *  4 digit year
+     *   four digit years < 0500 trigger an attempt to get a 4 digit date from 260c
      * Side Effects:  errors in pub date are logged 
      * @param record
      * @return String containing publication date, or null if none
@@ -819,11 +827,11 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     	{
         	String date1Str = cf.getData().substring(7,11);
         	if (isdddd(date1Str)) {
-        		if (Integer.parseInt(date1Str) <= (cYearInt + 1))
-        			return date1Str;
-        		else
-                    logger.error("Bad Publication Date in record " + getId(record) + " from 008/07-10: " + date1Str);
-
+        		String result = getValidPubDate(date1Str, cYearInt + 1, 500, record);
+        		if (result != null)
+        			return result;
+        		else 
+        			logger.error("Bad Publication Date in record " + getId(record) + " from 008/07-10: " + date1Str);
         	}
         	else if (isdddu(date1Str)) {
         		int myFirst3 = Integer.parseInt(date1Str.substring(0,3));
@@ -848,7 +856,9 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 
     /**
      * returns the sortable publication date from a record, if it is present
-     *  and not beyond the current year + 1
+     *  and not beyond the current year + 1, and not earlier than 0500 if
+     *   a four digit year
+     *   four digit years < 0500 trigger an attempt to get a 4 digit date from 260c
      *  NOTE: errors in pub date are not logged;  that is done in getPubDate()
      * @param record
      * @return String containing publication date, or null if none
@@ -861,8 +871,8 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     	{
         	String dateStr = cf.getData().substring(7,11);
         	// hyphens sort before 0, so the lexical sorting will be correct.  I think.
-        	if (isdddd(dateStr) && (Integer.parseInt(dateStr) <= (cYearInt + 1)) )
-        		return dateStr;
+        	if (isdddd(dateStr))
+        		return getValidPubDate(dateStr, cYearInt + 1, 500, record);
         	else if (isdddu(dateStr)) {
         		int myFirst3 = Integer.parseInt(dateStr.substring(0,3));
         		int currFirst3 = Integer.parseInt(cYearStr.substring(0,3));
@@ -875,17 +885,39 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         		if (myFirst2 <= currFirst2)
             		return dateStr.substring(0, 2) + "--";
         	}
-        	else if (isduuu(dateStr)) {
-        		int myFirst = Integer.parseInt(dateStr.substring(0,1));
-        		int currFirst = Integer.parseInt(cYearStr.substring(0,1));
-        		if (myFirst <= currFirst)
-        			return dateStr.substring(0, 1) + "---";
-        	}
     	}
      		
     	return null;
     }
     
+    
+    /**
+     * check if a 4 digit year for a pub date is within the range.  If not, 
+     *  check for a 4 digit date in the 260c that is in range
+     * @param dateToCheck - String containing 4 digit date to check
+     * @param upperLimit - highest valid year (inclusive)
+     * @param lowerLimit - lowest valid year (inclusive)
+     * @param record - the marc record
+     * @return String containing a 4 digit valid publication date, or null
+     */
+    private String getValidPubDate(String dateToCheck, int upperLimit, int lowerLimit, Record record) {
+    	int dateInt = Integer.parseInt(dateToCheck);
+		if (dateInt <= upperLimit) {
+			if (dateInt >= lowerLimit)
+    			return dateToCheck;
+			else {
+				// try to correct year < lowerLimit
+            	String date260c = getDate(record);
+            	if (date260c != null) {
+            		int date260int = Integer.parseInt(date260c);
+    				if (date260int != 0 &&
+    					date260int <= upperLimit && date260int >= lowerLimit)
+   						return date260c;
+            	}
+			}
+		}
+		return null;
+    }
  
     /** access facet values */
 	public static enum PubDateGroup {
@@ -925,7 +957,9 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	
     /**
      * returns the publication date groupings from a record, if pub date is
-     *  given and is no later than the current year + 1
+     *  given and is no later than the current year + 1, and is not earlier 
+     *  than 0500 if it is a 4 digit year.
+     *   four digit years < 0500 trigger an attempt to get a 4 digit date from 260c
      *  NOTE: errors in pub date are not logged;  that is done in getPubDate()
      * @param record
      * @return Set of Strings containing the publication date groupings associated
@@ -942,16 +976,16 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
            	String dateStr = cf.getData().substring(7,11);
            	if (isdddd(dateStr))  // exact year
            	{
-           		int year = Integer.parseInt(dateStr);
-           		// "this year" and "last three years" are for 4 digits only
-           		if (year <= (cYearInt + 1)) {
-                    if ( year >= (cYearInt - 1) )
-                   		resultSet.add(PubDateGroup.THIS_YEAR.toString());
-                   	if ( year >= (cYearInt - 3) )
-                   		resultSet.add(PubDateGroup.LAST_3_YEARS.toString());
-           			
+        		String myDate = getValidPubDate(dateStr, cYearInt + 1, 500, record);
+        		if (myDate != null) {
+        			int year = Integer.parseInt(myDate);
+        			// "this year" and "last three years" are for 4 digits only
+           			if ( year >= (cYearInt - 1) )
+                    	resultSet.add(PubDateGroup.THIS_YEAR.toString());
+                    if ( year >= (cYearInt - 3) )
+                    	resultSet.add(PubDateGroup.LAST_3_YEARS.toString());
                    	resultSet.addAll(getPubDateGroupsForYear(year));
-           		}
+        		}
            	}
            	else if (isdddu(dateStr))  // decade
            	{
@@ -1186,6 +1220,13 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 		Set<String> result = new HashSet<String>();
 // FIXME: sep should be globally avail constant (for tests also?)
 		String sep = " -|- ";
+
+		// is it a serial?
+		Set<String> formats = getFormats(record);
+		boolean isSerial = false;
+		if (formats.contains(Format.JOURNAL_PERIODICAL.toString()))
+			isSerial = true;
+    	
 		List<VariableField> list999 = record.getVariableFields("999");
 		for (VariableField vf: list999) {
 			DataField df = (DataField) vf;
@@ -1195,12 +1236,10 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	        	String building = null;
 	        	String location = null;
             	String rawLoc = getLocationFrom999(df);
-	        	String fullCallnum = getLCCallNumberFrom999(df);
-
-	        	if (onlineItem(df)) {
+	        	
+	        	if (onlineItemPerLocation(df)) {
 	        		building = "Online";
 	        		location = "Online";
-	        		fullCallnum = getRawCallNumEvenOnline(df);
 	        	}
 	        	else {
 	            	// building --> short name from mapping
@@ -1215,58 +1254,68 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	        	}
 	        	
 	        	// full call number & lopped call number
-	        	String loppedCallnum = null;
-	        	if (fullCallnum != null)
-	        		loppedCallnum = CallNumUtils.removeLCVolSuffix(fullCallnum);
-	        	else {
-	        		fullCallnum = getDeweyCallNumberFrom999(df);
-	            	if (fullCallnum != null)
-	            		loppedCallnum = CallNumUtils.removeDeweyVolSuffix(fullCallnum);
-	        	}
-	        	if (fullCallnum == null) {
-	        		fullCallnum = getRawCallNumberFrom999(df);
-	        		loppedCallnum = fullCallnum;
-	        	}
+				String callnumScheme = getCallNumberSchemeFrom999(df);
+            	String fullCallnum = getRawCallNumEvenOnline(df);
+				String loppedCallnum = null;
+				if (fullCallnum != null) {
+					if (callnumScheme != null && callnumScheme.startsWith("LC")) {
+		        		if (isSerial)
+		        			loppedCallnum = CallNumUtils.removeLCSerialVolSuffix(fullCallnum);
+		        		else
+			        		loppedCallnum = CallNumUtils.removeLCVolSuffix(fullCallnum);
+					}
+					else if (callnumScheme != null && callnumScheme.startsWith("DEWEY")) 
+	            		if (isSerial)
+		            		loppedCallnum = CallNumUtils.removeDeweySerialVolSuffix(fullCallnum);
+	            		else
+	            			loppedCallnum = CallNumUtils.removeDeweyVolSuffix(fullCallnum);
+					else 
+		        		if (isSerial)
+		        			loppedCallnum = CallNumUtils.removeSerialVolSuffix(fullCallnum);
+		        		else
+		        			loppedCallnum = CallNumUtils.removeVolSuffix(fullCallnum);
+				}
+
 	        	// deal with shelved by title locations
+				String volSuffix = null;
+				if (loppedCallnum != null)
+					volSuffix = fullCallnum.substring(loppedCallnum.length()).trim();
+        		if ((volSuffix == null || volSuffix.length() == 0) && CallNumUtils.callNumIsVolSuffix(fullCallnum))
+        			volSuffix = fullCallnum;
 				if (rawLoc != null) {
 		        	if (rawLoc.equals("SHELBYTITL")) {
+						isSerial = true;
 		        		location = "Serials";
-		        		String volSuffix = fullCallnum.substring(loppedCallnum.length());
 		        		loppedCallnum = "Shelved by title";
-		        		fullCallnum = loppedCallnum + volSuffix;
+		        		fullCallnum = loppedCallnum + " " + volSuffix;
 		        	}
 		        	if (rawLoc.equals("SHELBYSER")) {
+						isSerial = true;
 		        		location = "Serials";
-		        		String volSuffix = fullCallnum.substring(loppedCallnum.length());
 		        		loppedCallnum = "Shelved by Series title";
-		        		fullCallnum = loppedCallnum + volSuffix;
+		        		fullCallnum = loppedCallnum + " " + volSuffix;
 		        	}
 		        	else if (rawLoc.equals("STORBYTITL")) {
+						isSerial = true;
 		        		location = "Storage area";
-		        		String volSuffix = fullCallnum.substring(loppedCallnum.length());
 		        		loppedCallnum = "Shelved by title";
-		        		fullCallnum = loppedCallnum + volSuffix;
+		        		fullCallnum = loppedCallnum + " " + volSuffix;
 		        	}
 				}
 	        	
 	        	// shelfkey for lopped callnumber
 	        	String recId = getId(record);
-	        	String callnumType = Utils.getSubfieldData(df, 'w');
 	        	String shelfkey = null;
-	        	if (callnumType != null)
-	        		shelfkey = edu.stanford.Utils.getShelfKey(loppedCallnum, callnumType, recId);
+	        	if (callnumScheme != null) 
+	        		shelfkey = edu.stanford.CallNumUtils.getShelfKey(loppedCallnum, callnumScheme, recId);
 	        	else
-	        		shelfkey = edu.stanford.Utils.getShelfKey(loppedCallnum, recId);
+	        		shelfkey = edu.stanford.CallNumUtils.getShelfKey(loppedCallnum, recId);
 
 	        	// reversekey for lopped callnumber
-	    		String reversekey = CallNumUtils.getReverseShelfKey(shelfkey);
-	    		Set<String> formats = getFormats(record);
-	    		boolean isSerial = false;
-	    		if (formats.contains(Format.JOURNAL_PERIODICAL))
-	    			isSerial = true;
+	    		String reversekey = org.solrmarc.tools.CallNumUtils.getReverseShelfKey(shelfkey);
 	    		
 	    		// sortable call number for show view
-	    		String volSort = edu.stanford.Utils.getVolumeSortCallnum(fullCallnum, loppedCallnum, isSerial, recId);
+	    		String volSort = edu.stanford.CallNumUtils.getVolumeSortCallnum(fullCallnum, loppedCallnum, isSerial, recId);
 
 				// create field
 	    		if (loppedCallnum != null) 
@@ -1381,7 +1430,8 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 *   for Gov Doc, GOV_DOC_FACET_VAL
 	 */
 	@SuppressWarnings("unchecked")
-	public final Set<String> getCallNumsLevel1(final Record record) {
+	public Set<String> getCallNumsLevel1(final Record record) {
+		// LC
         Set<String> result = getLCCallNumBroadCats(record);
 
         // check for Dewey or Government docs
@@ -1407,7 +1457,8 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 *   for Dewey, the hundreds digit + description
 	 *   for Gov Doc, the type based on location (e.g. british, calif, federal)
 	 */
-	public final Set<String> getCallNumsLevel2(final Record record) {
+	@Deprecated  // no longer used
+	private Set<String> getCallNumsLevel2(final Record record) {
 
 		Set<String> result = getLCCallNumCats(record);
     	result.addAll(getDeweyCallNumBroadCats(record));
@@ -1421,7 +1472,8 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 *   for LC, the portion before the cutter
 	 *   for Dewey, the tens + description
 	 */
-	public final Set<String> getCallNumsLevel3(final Record record) {
+	@Deprecated  // no longer used
+	private Set<String> getCallNumsLevel3(final Record record) {
 
 		Set<String> result = getLCCallNumsB4Cutter(record);
        	result.addAll(getDeweyCallNumCats(record));
@@ -1433,7 +1485,8 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 * Get values for fourthlevel call number facet:  
 	 *   for Dewey, the portion before the cutter
 	 */
-	public final Set<String> getCallNumsLevel4(final Record record) {
+	@Deprecated  // no longer used
+	private Set<String> getCallNumsLevel4(final Record record) {
         return getDeweyCallNumsB4Cutter(record);
 	}
 	
@@ -1450,27 +1503,27 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 		for (VariableField vf: list999) {
 			DataField df = (DataField) vf;
 	    	// make sure it's not ignored
-			if (skipItem(df) || ignoreCallNumPerLocation(df) || onlineItem(df))
+			if (skipItem(df) || ignoreCallNumPerLocation(df) || onlineItemPerLocation(df))
 				continue;
 			
 	    	String callnum = getSubfieldTrimmed(df, 'a');
 	    	if (callnum == null)
 	    		continue;
-	    	String callnumScheme = getSubfieldTrimmed(df, 'w');
+			String callnumScheme = getCallNumberSchemeFrom999(df);
 	    	
 	    	String shelfkey = null;
 	       	if (callnumScheme != null && callnumScheme.startsWith("LC")) {
        			String lopped = CallNumUtils.removeLCVolSuffix(callnum);
-       			shelfkey = CallNumUtils.getLCShelfkey(lopped, getId(record));
+       			shelfkey = edu.stanford.CallNumUtils.getShelfKey(lopped, "LC", getId(record));
 	       	}
 	       	else if (callnumScheme != null && callnumScheme.startsWith("DEWEY")) {
        			String lopped = CallNumUtils.removeDeweyVolSuffix(callnum);
-           		shelfkey = CallNumUtils.getDeweyShelfKey(lopped);
+           		shelfkey = edu.stanford.CallNumUtils.getShelfKey(lopped, "DEWEY", getId(record));
        			if (shelfkey.equals(callnum.toUpperCase()))
        				System.err.println("Problem creating shelfkey for record " + getId(record) + ": " + callnum);
 	       	}
 	       	else {
-        		shelfkey = CallNumUtils.normalizeSuffix(callnum);
+        		shelfkey = org.solrmarc.tools.CallNumUtils.normalizeSuffix(callnum);
 	       	}
 
 	       	if (shelfkey != null)
@@ -1490,7 +1543,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 		
         Set<String> shelfkeys = getCallNumsSort(record);
         for (String shelfkey: shelfkeys) {
-        	String reversekey = CallNumUtils.getReverseShelfKey(shelfkey);
+        	String reversekey = org.solrmarc.tools.CallNumUtils.getReverseShelfKey(shelfkey);
 	       	if (reversekey != null)
 	       		result.add(reversekey);
         }
@@ -1503,6 +1556,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 *   call numbers are, and only selects the Dewey call numbers.
 	 */
 	@SuppressWarnings("unchecked")
+	@Deprecated  // no longer used
 	private Set<String> getLocalDeweyCallNums(final Record record) {
         Set<String> result = new HashSet<String>();
         
@@ -1543,7 +1597,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 *  the broad category strings (for Dewey, "x00s";
 	 */
 	@SuppressWarnings("unchecked")
-	private Set<String> getDeweyCallNumBroadCats(final Record record) {
+	public Set<String> getDeweyCallNumBroadCats(final Record record) {
         Set<String> result = new HashSet<String>();
         
         Set<String> deweySet = getDeweyforClassification(record);
@@ -1561,12 +1615,12 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 *  the secondary level category strings (for LC, the 1-3 letters at the 
 	 *  beginning)
 	 */
-	private Set<String> getLCCallNumCats(final Record record) {
+	public Set<String> getLCCallNumCats(final Record record) {
         Set<String> result = new HashSet<String>();
 
         Set<String> lcSet = getLCforClassification(record);
         for (String lc : lcSet) {
-        	String letters = CallNumUtils.getLCstartLetters(lc);
+        	String letters = org.solrmarc.tools.CallNumUtils.getLCstartLetters(lc);
         	if (letters != null)
         		result.add(letters);
         }
@@ -1578,7 +1632,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 * Determine what type of government doc based on location in 999.
 	 */
 	@SuppressWarnings("unchecked")
-	private Set<String> getGovDocCats(final Record record) {
+	public Set<String> getGovDocCats(final Record record) {
         Set<String> result = new HashSet<String>();
         
         // is it a gov doc?
@@ -1595,13 +1649,13 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         List<VariableField> list999 = record.getVariableFields("999");
         for (VariableField vf : list999) {
         	DataField df999 = (DataField) vf;
-        	if (!skipItem(df999) && !ignoreCallNumPerLocation(df999) && !onlineItem(df999)) {
+        	if (!skipItem(df999) && !ignoreCallNumPerLocation(df999) && !onlineItemPerLocation(df999)) {
         		String rawLoc = getLocationFrom999(df999);
         		if (govDocLocs.contains(rawLoc) || has086)
         			result.add(getGovDocTypeFromLocCode(rawLoc));
         		else {  // is it SUDOC call number?
-            		String subw = Utils.getSubfieldData(df999, 'w');
-            		if (subw != null && subw.trim().equalsIgnoreCase("SUDOC"))
+        			String scheme = getCallNumberSchemeFrom999(df999);
+            		if (scheme != null && scheme.equalsIgnoreCase("SUDOC"))
             			result.add(getGovDocTypeFromLocCode(rawLoc));
         		}
         	}
@@ -1659,7 +1713,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 *  call number.  It looks at our local values in the 999, and returns
 	 *  the secondary level category strings (for Dewey, "xx0s")
 	 */
-	private Set<String> getDeweyCallNumCats(final Record record) {
+	public Set<String> getDeweyCallNumCats(final Record record) {
         Set<String> result = new HashSet<String>();
 
         Set<String> deweySet = getDeweyforClassification(record);
@@ -1676,12 +1730,12 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 *  call number.  It looks at our local LC values in the 999 and returns 
 	 *  the Strings before the Cutters in the call numbers (LC only)
 	 */
-	private Set<String> getLCCallNumsB4Cutter(final Record record) {
+	public Set<String> getLCCallNumsB4Cutter(final Record record) {
         Set<String> result = new HashSet<String>();
 
         Set<String> lcSet = getLCforClassification(record);
         for (String lc : lcSet) {
-        	result.add(CallNumUtils.getPortionBeforeCutter(lc));
+        	result.add(org.solrmarc.tools.CallNumUtils.getPortionBeforeCutter(lc));
         }
         
 		return result;
@@ -1692,12 +1746,12 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 *  call number.  It looks at our local Dewey values in the 999 and returns 
 	 *  the Strings before the Cutters in the call numbers (Dewey only)
 	 */
-	private Set<String> getDeweyCallNumsB4Cutter(final Record record) {
+	public Set<String> getDeweyCallNumsB4Cutter(final Record record) {
         Set<String> result = new HashSet<String>();
 
         Set<String> deweySet = getDeweyforClassification(record);
         for (String dewey: deweySet) {
-        	result.add(CallNumUtils.getPortionBeforeCutter(addLeadingZeros(dewey)));
+        	result.add(org.solrmarc.tools.CallNumUtils.getPortionBeforeCutter(addLeadingZeros(dewey)));
         }
 		return result;
 	}
@@ -1781,12 +1835,20 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	}
 	
 	/**
+	 * return the call number type from the 999 (subfield w).
+	 */
+	private String getCallNumberSchemeFrom999(DataField f999) 
+	{
+		return Utils.getSubfieldData(f999, 'w').trim();
+	}
+
+	/**
 	 * return the call number from the 999 if it is not to be skipped, or for an
 	 * online item.  Otherwise, return null.
 	 */
 	private String getRawCallNumberFrom999(DataField f999) 
 	{
-		if (onlineItem(f999))
+		if (onlineItemPerLocation(f999))
 			return null;
 		return getRawCallNumEvenOnline(f999);
 	}
@@ -1818,15 +1880,14 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 */
 	private String getLCCallNumberFrom999(DataField f999)
 	{
-		if (skipItem(f999) || onlineItem(f999) || ignoreCallNumPerLocation(f999))
+		if (skipItem(f999) || onlineItemPerLocation(f999) || ignoreCallNumPerLocation(f999))
 			return null;
 
 		String suba = Utils.getSubfieldData(f999, 'a');
-		String subw = Utils.getSubfieldData(f999, 'w');
-		if (suba != null && subw != null) {
-			subw = subw.trim();
-			if ( (subw.equalsIgnoreCase("LC") || subw.equalsIgnoreCase("LCPER")) 
-					&& CallNumUtils.isValidLC(suba.trim()))
+		String scheme = getCallNumberSchemeFrom999(f999);
+		if (suba != null && scheme != null) {
+			if ( (scheme.equalsIgnoreCase("LC") || scheme.equalsIgnoreCase("LCPER")) 
+					&& org.solrmarc.tools.CallNumUtils.isValidLC(suba.trim()) )
 				return suba.trim();
 		}
 
@@ -1839,16 +1900,15 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 */
 	private String getDeweyCallNumberFrom999(DataField f999)
 	{
-		if (skipItem(f999) || onlineItem(f999) || ignoreCallNumPerLocation(f999))
+		if (skipItem(f999) || onlineItemPerLocation(f999) || ignoreCallNumPerLocation(f999))
 			return null;
 
 		String suba = Utils.getSubfieldData(f999, 'a');
 		if (suba != null) {
-			String subw = Utils.getSubfieldData(f999, 'w');
-			if (subw != null) {
-				subw = subw.trim();
-				if ( (subw.equalsIgnoreCase("DEWEY") || subw.equalsIgnoreCase("DEWEYPER")) 
-						&& CallNumUtils.isValidDewey(suba.trim()))
+			String scheme = getCallNumberSchemeFrom999(f999);
+			if (scheme != null) {
+				if ( (scheme.equalsIgnoreCase("DEWEY") || scheme.equalsIgnoreCase("DEWEYPER")) 
+						&& org.solrmarc.tools.CallNumUtils.isValidDewey(suba.trim()) )
 						return addLeadingZeros(suba.trim());
 			}
 		}
@@ -1861,20 +1921,20 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 * if there is a call number in the 999 that is not Dewey or LC, return it. 
 	 * Otherwise, return null
 	 */
+	@Deprecated  // no longer used
 	private String getOtherCallNumberFrom999(DataField f999)
 	{
-		if (skipItem(f999) || onlineItem(f999))
+		if (skipItem(f999) || onlineItemPerLocation(f999))
 			return null;
 
 		String suba = Utils.getSubfieldData(f999, 'a');
 		if (suba != null) {
-			String subw = Utils.getSubfieldData(f999, 'w');
-			if (subw != null) {
-				subw = subw.trim();
-				if (!subw.equalsIgnoreCase("LC") && 
-						!subw.equalsIgnoreCase("LCPER") && 
-						!subw.equalsIgnoreCase("DEWEY") && 
-						!subw.equalsIgnoreCase("DEWEYPER"))
+			String scheme = getCallNumberSchemeFrom999(f999);
+			if (scheme != null) {
+				if (!scheme.equalsIgnoreCase("LC") && 
+						!scheme.equalsIgnoreCase("LCPER") && 
+						!scheme.equalsIgnoreCase("DEWEY") && 
+						!scheme.equalsIgnoreCase("DEWEYPER"))
 					return suba.trim();
 			}
 		}
@@ -1891,7 +1951,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	private String addLeadingZeros(String deweyCallNum)
 	{
 		String result = deweyCallNum;
-		String b4Cutter = CallNumUtils.getPortionBeforeCutter(deweyCallNum);
+		String b4Cutter = org.solrmarc.tools.CallNumUtils.getPortionBeforeCutter(deweyCallNum);
 
 		// TODO: could call Utils.normalizeFloat(b4Cutter.trim(), 3, -1);
 		//  but still need to add back part after cutter
@@ -1965,7 +2025,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	/**
 	 * return true if 999 field has a location code indicating it is online
 	 */
-	private boolean onlineItem(DataField f999) {
+	private boolean onlineItemPerLocation(DataField f999) {
 		String sub = Utils.getSubfieldData(f999, 'l');
 		if (sub != null && onlineLocs.contains(sub.trim().toUpperCase()))
 			return true;
@@ -2061,6 +2121,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	 *  request form (for materials at SAL3)
 	 */
 	@SuppressWarnings("unchecked")
+	@Deprecated  // no longer used
 	private boolean gsbOffsiteItemByRequest(Record record) {
 		
         List<VariableField> list856 = record.getVariableFields("856");
