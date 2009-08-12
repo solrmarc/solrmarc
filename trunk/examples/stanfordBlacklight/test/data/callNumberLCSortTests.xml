@@ -580,7 +580,7 @@
             <subfield code="a">SHELBYTITL - ignore call number</subfield>
         </datafield>
         <datafield tag="999" ind1=" " ind2=" ">
-            <subfield code="a">PQ9661 .P31 C6 1946</subfield>
+            <subfield code="a">PQ9661 .P31 C6 VOL 1 1946</subfield>
             <subfield code="w">LC</subfield>
             <subfield code="c">1</subfield>
             <subfield code="i">36105129694373</subfield>
@@ -601,7 +601,7 @@
             <subfield code="a">SHELBYSER - ignore call number</subfield>
         </datafield>
         <datafield tag="999" ind1=" " ind2=" ">
-            <subfield code="a">PQ9661 .P31 C6 1946</subfield>
+            <subfield code="a">PQ9661 .P31 C6 1946 VOL 1 1946</subfield>
             <subfield code="w">LC</subfield>
             <subfield code="c">1</subfield>
             <subfield code="i">36105129694374</subfield>
@@ -623,7 +623,7 @@
             <subfield code="a">STORBYTITL - ignore call number</subfield>
         </datafield>
         <datafield tag="999" ind1=" " ind2=" ">
-            <subfield code="a">PQ9661 .P31 C6 1946</subfield>
+            <subfield code="a">PQ9661 .P31 C6 VOL 1 1946</subfield>
             <subfield code="w">LC</subfield>
             <subfield code="c">1</subfield>
             <subfield code="i">36105129694375</subfield>

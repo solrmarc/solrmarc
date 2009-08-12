@@ -1187,6 +1187,34 @@
             <subfield code="o">.TECHSTAFF. i:skc 12/17/2003</subfield>
         </datafield>
     </record>
+    <!-- dewey with volume info -->
+    <record>
+        <leader>01123cam a2200289Ia 4500</leader>
+        <controlfield tag="001">aDeweyVol</controlfield>
+        <controlfield tag="008">970424s1996    fr       b    000 0 fre d</controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">Dewey with volume information to lop off</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">666 .F67 VOL. 5</subfield>
+            <subfield code="w">DEWEY</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">36105020376998</subfield>
+            <subfield code="d">3/12/1998</subfield>
+            <subfield code="e">11/12/1997</subfield>
+            <subfield code="l">STACKS</subfield>
+            <subfield code="m">HOOVER</subfield>
+            <subfield code="n">1</subfield>
+            <subfield code="p">$13.15</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">STKS-MONO</subfield>
+            <subfield code="u">4/29/1997</subfield>
+            <subfield code="z">TAX=8.25</subfield>
+            <subfield code="o">.TECHSTAFF. FLOW, CLASS [5/8/97]/.COMMENT.DIOG/i:rsp</subfield>
+            <subfield code="o">.TECHSTAFF. i:skc 12/17/2003</subfield>
+        </datafield>
+    </record>
     <!-- SHELBYTITL location: ignore call number -->
     <record>
         <leader>00880cam a2200229K  45 0</leader>
