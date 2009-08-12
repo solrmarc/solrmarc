@@ -1,7 +1,7 @@
 #! /bin/bash
-# printrecord.sh
-# Diagnostic program to display marc records.
-# $Id: printrecord.sh 
+# getrecord
+# Get specific record(s) from larger file of marc records.
+# $Id: getrecord
 
 E_BADARGS=65
 
@@ -11,8 +11,10 @@ if ! [ -p /dev/stdin ]
 then  
   if [ $# -eq 0 ]
   then
-    echo "    Usage: `basename $0` ./path/to/marc.mrc id_to_extract"
-    echo "    Usage: `basename $0` ./path/to/marc.mrc first_id_to_extract  last_id_to_extract"
+    echo "    Usage: `basename $0` ./path/to/marcfile.mrc id_to_extract"
+    echo "    Usage: `basename $0` ./path/to/marcfile.mrc first_id_to_extract last_id_to_extract"
+    echo "    Usage: `basename $0` ./path/to/marcfile.mrc file_with_list_of_ids.txt"
+    
     exit $E_BADARGS
   fi
   arg1=$1
