@@ -1,6 +1,6 @@
 #! /bin/bash
 # getfromsolr.sh
-# Diagnostic program to display marc records.
+# extracts complete MARC records from Solr index documents.
 # $Id: getfromsolr.sh 
 
 E_BADARGS=65
