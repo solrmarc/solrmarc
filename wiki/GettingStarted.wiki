@@ -231,19 +231,16 @@ For documentation on using SolrMarc to index your marc records, please see the C
 === Batch Files/Shell Scripts ===
 
 *filterrecords:* could be called “marcgrep,” selects only those records that contain certain fields or certain values in certain fields. The user specifies the pattern they are seeking in the file on the command line.
-**  cat /path/to/big/marcfile.mrc | filterrecords '245a/Jefferson'  would get the records in the file that have subfield a in a 245 field containing "Jefferson"
+  * cat /path/to/big/marcfile.mrc | filterrecords '245a/Jefferson'  would get the records in the file that have subfield a in a 245 field containing "Jefferson"
 
 *getfromsolr:* extracts complete MARC records from the records stored in the Solr index.
-** getfromsolr http://myremotemachine:8080/solr id_to_extract
-** getfromsolr xxxx_config.properties id_to_extract
-*** retrieves record from marc_display field of the solr document.
+  * getfromsolr http://myremotemachine:8080/solr id_to_extract
+  * getfromsolr xxxx_config.properties id_to_extract   retrieves record from marc_display field of the solr document.
 
 *getrecord:* extracts specific record(s) from a larger file of MARC records
-** getrecord /path/to/big/marcfile.mrc id_to_extract
-** getrecord /path/to/big/marcfile.mrc first_id_to_extract  last_id_to_extract
-** getrecord /path/to/big/marcfile.mrc file_with_list_of_ids.txt
-
-
+  * getrecord /path/to/big/marcfile.mrc id_to_extract
+  * getrecord /path/to/big/marcfile.mrc first_id_to_extract last_id_to_extract
+  * getrecord /path/to/big/marcfile.mrc file_with_list_of_ids.txt
 
 *indexfile:* indexes file of MARC records, adding all data from those records to the Solr index.
 
