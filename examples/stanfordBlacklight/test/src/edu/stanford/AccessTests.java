@@ -62,6 +62,7 @@ public class AccessTests extends BibIndexTest {
 		docIds.add("mult856and956"); 
 		docIds.add("956and856TOCand856suppl"); 
 		docIds.add("7117119"); 
+		docIds.add("newSfx"); 
 
 		assertSearchResults(fldName, fldVal, docIds, sis);
 	}
@@ -78,11 +79,8 @@ public class AccessTests extends BibIndexTest {
 	
     	String fldVal =  Access.ONLINE.toString();
 
-		Set<String> docIds = new HashSet<String>();
 		// has SFX url in 956
-		docIds.add("7117119"); 
-    	
-		assertSearchResults(fldName, fldVal, docIds, sis);
+		assertSingleResult("7117119", fldName, fldVal, sis);
 	}
 
 
@@ -98,12 +96,14 @@ public class AccessTests extends BibIndexTest {
 	
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("123http"); 
+		docIds.add("124http"); 
 		docIds.add("1234https"); 
 		docIds.add("7423084"); 
 		assertSearchResults(fldName, fldVal, docIds, sis);
 		
 		String urlFldName = "url";
 		assertDocHasNoField("123http", urlFldName, sis);
+		assertDocHasNoField("124http", urlFldName, sis);
 		assertDocHasNoField("1234https", urlFldName, sis);
 	}
 
@@ -120,6 +120,7 @@ public class AccessTests extends BibIndexTest {
 		createIxInitVars("buildingTests.mrc");
 
 	 	// "Online"
+		// has SFX url in 956
 	 	assertSingleResult("7117119", fldName, Access.ONLINE.toString(), sis);
 
 	 	// "At the Library"
