@@ -41,9 +41,9 @@ public final class CallNumUtils {
 	 */	
 	private CallNumUtils(){ }
 	
-    public final static Pattern DEWEY_PATTERN = Pattern.compile("^\\d{1,3}(\\.\\d+)?.*");
+    public static final Pattern DEWEY_PATTERN = Pattern.compile("^\\d{1,3}(\\.\\d+)?.*");
 	/** LC call numbers can't begin with I, O, W, X, or Y */
-    public final static Pattern LC_PATTERN = Pattern.compile("^[A-Za-z&&[^IOWXYiowxy]]{1}[A-Za-z]{0,2} *\\d+(\\.\\d+)?.*");
+    public static final Pattern LC_PATTERN = Pattern.compile("^[A-Za-z&&[^IOWXYiowxy]]{1}[A-Za-z]{0,2} *\\d+(\\.\\d+)?.*");
 
 	/**
 	 * regular expression string for the required portion of the LC classification
@@ -52,42 +52,44 @@ public final class CallNumUtils {
 	 *    optionally followed by a space and then a year or other number, 
 	 *      e.g. "1987" "15th"
 	 */
-	public static String LC_CLASS_REQ_REGEX = "[A-Z]{1,3}\\d+(\\.\\d+)?";
+	public static final String LC_CLASS_REQ_REGEX = "[A-Z]{1,3}\\d+(\\.\\d+)?";
 
 	/**
 	 * non-cutter text that can appear before or after cutters
 	 */
-	public static String NOT_CUTTER = "([\\da-z]\\w*)|([A-Z]\\D+[\\w]*)";
+	public static final String NOT_CUTTER = "([\\da-z]\\w*)|([A-Z]\\D+[\\w]*)";
 	
 	/**
 	 * the full LC classification string
 	 */
-	public static String LC_CLASS = "(" + LC_CLASS_REQ_REGEX + "( +" + NOT_CUTTER + ")?)";
+	public static final String LC_CLASS = "(" + LC_CLASS_REQ_REGEX + "( +" + NOT_CUTTER + ")?)";
 	
 	/**
 	 * regular expression string for the cutter, without preceding characters 
 	 * (such as the "required" period, which is sometimes missing, or spaces).
 	 * A Cutter is a single letter followed by digits.  
 	 */
-	public static String CUTTER_REGEX = "[A-Z]\\d+";
+	public static final String CUTTER_REGEX = "[A-Z]\\d+";
 	
 	/**
 	 * the full LC classification string, followed by the first cutter
 	 */
-	public static String LC_CLASS_N_CUTTER = LC_CLASS + " *\\.?" + CUTTER_REGEX;
+	public static final String LC_CLASS_N_CUTTER = LC_CLASS + " *\\.?" + CUTTER_REGEX;
 		
 	/**
 	 * regular expression for Dewey classification.
 	 *  Dewey classification is a three digit number (possibly missing leading
 	 *   zeros) with an optional fraction portion.
 	 */
-	public static String DEWEY_CLASS_REGEX = "\\d{1,3}(\\.\\d+)?";
+	public static final String DEWEY_CLASS_REGEX = "\\d{1,3}(\\.\\d+)?";
 	
 	/**
 	 * Dewey cutters can have following letters, preceded by space or not
 	 */
-	public static String DEWEY_CUTTER_REGEX = CUTTER_REGEX + " *[A-Z]*";
-	
+	public static final String DEWEY_CUTTER_REGEX = CUTTER_REGEX + " *[A-Z]*+";
+	public static final String DEWEY_CUTTER_NO_TRAILING_LETTERS_REGEX = CUTTER_REGEX;
+	public static final String DEWEY_CUTTER_TRAILING_LETTERS_REGEX = CUTTER_REGEX + "[A-Z]++";
+	public static final String DEWEY_CUTTER_SPACE_TRAILING_LETTERS_REGEX = CUTTER_REGEX + " +[A-Z]++";
 
 	private static Map<Character, Character> alphanumReverseMap = new HashMap<Character, Character>();
 	static {
@@ -457,7 +459,6 @@ public final class CallNumUtils {
         return result;
     }
 
-	// DEWEY    
 	/**
 	 * return the portion of the Dewey call number string that occurs before the 
 	 *  Cutter.
@@ -480,14 +481,30 @@ public final class CallNumUtils {
 	 * or spaces).
      * @param rawCallnum - the entire call number, as a string
      */
-// TODO:  need to allow weird suffixes for Dewey, and not see next thing as cutter
     public static String getDeweyCutter(String rawCallnum) {
     	String result = null;
 
     	// dewey cutters can have trailing letters, preceded by a space or not
-		String regex = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_REGEX + ")(.*)";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(rawCallnum);
+		String regex1 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_TRAILING_LETTERS_REGEX + ")( +" + NOT_CUTTER + ".*)";
+		String regex2 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_NO_TRAILING_LETTERS_REGEX + ")( +" + NOT_CUTTER + ".*)";
+		String regex3 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_SPACE_TRAILING_LETTERS_REGEX + ")( +" + NOT_CUTTER + ".*)";
+		String regex4 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_TRAILING_LETTERS_REGEX + ")(.*)";
+		String regex5 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_NO_TRAILING_LETTERS_REGEX + ")(.*)";
+		String regex6 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_SPACE_TRAILING_LETTERS_REGEX + ")(.*)";
+        Pattern pat1 = Pattern.compile(regex1);
+		Pattern pat2 = Pattern.compile(regex2);
+		Pattern pat3 = Pattern.compile(regex3);
+        Pattern pat4 = Pattern.compile(regex4);
+		Pattern pat5 = Pattern.compile(regex5);
+		Pattern pat6 = Pattern.compile(regex6);
+
+        Matcher matcher = pat1.matcher(rawCallnum);
+		if (!matcher.find()) {
+			matcher = pat2.matcher(rawCallnum);
+			if (!matcher.find()) {
+				matcher = pat3.matcher(rawCallnum);
+			}
+		}
 
         if (matcher.find()) {
         	String cutter = matcher.group(2);
@@ -509,12 +526,19 @@ public final class CallNumUtils {
         	}
         }
         else {
-        	regex = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_REGEX + ").*";
-            pattern = Pattern.compile(regex);
-            matcher = pattern.matcher(rawCallnum);
-            
+            matcher = pat4.matcher(rawCallnum);
             if (matcher.find())
-            	result = matcher.group(2).trim();
+            	result = matcher.group(2);
+            else {
+            	matcher = pat5.matcher(rawCallnum);
+                if (matcher.find())
+                	result = matcher.group(2);
+                else {
+                	matcher = pat6.matcher(rawCallnum);
+                    if (matcher.find())
+                    	result = matcher.group(2);
+                }
+            }
         }
         if (result != null)
         	return result.trim();
@@ -527,36 +551,74 @@ public final class CallNumUtils {
 	 * or spaces).
      * @param rawCallnum - the entire call number, as a string
      */
-// TODO:  need to allow weird suffixes for Dewey, and not see next thing as cutter
-// TODO: need to normalize this suffix
     public static String getDeweyCutterSuffix(String rawCallnum) {
+    	if (rawCallnum == null || rawCallnum.length() == 0)
+    		return null;
     	String result = null;
-    	// dewey cutters can have trailing letters, preceded by a space or not
-		String regex = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_REGEX + ")(.*)";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(rawCallnum);
 
-        if (matcher.find()) {
-        	String cutter = matcher.group(2);
-        	String suffix = matcher.group(3);
-			if (suffix.length() > 0) {
-	        	// check if there are letters in the cutter that should be assigned
-	        	//  to the suffix
-	        	if (suffix.startsWith(" ") || cutter.endsWith(" "))
-	        		result = suffix;
-	        	else {
-	        		int ix = cutter.lastIndexOf(' ');
-	        		if (ix != -1)
-	        			result = cutter.substring(ix) + suffix;
-	        		else
-	        			result = suffix;
-	        	}
+    	String cutter = getDeweyCutter(rawCallnum);
+    	if (cutter != null) {
+    		int ix = rawCallnum.indexOf(cutter) + cutter.length();
+    		result = rawCallnum.substring(ix).trim();
+    	}
+    	
+    	if (result == null || result.length() == 0) 
+    	{
+	    	// dewey cutters can have trailing letters, preceded by a space or not
+			String regex1 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_TRAILING_LETTERS_REGEX + ")( +" + NOT_CUTTER + ".*)";
+			String regex2 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_NO_TRAILING_LETTERS_REGEX + ")( +" + NOT_CUTTER + ".*)";
+			String regex3 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_SPACE_TRAILING_LETTERS_REGEX + ")( +" + NOT_CUTTER + ".*)";
+			String regex4 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_TRAILING_LETTERS_REGEX + ")(.*)";
+			String regex5 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_NO_TRAILING_LETTERS_REGEX + ")(.*)";
+			String regex6 = DEWEY_CLASS_REGEX +  " *\\.?(" + DEWEY_CUTTER_SPACE_TRAILING_LETTERS_REGEX + ")(.*)";
+	        Pattern pat1 = Pattern.compile(regex1);
+			Pattern pat2 = Pattern.compile(regex2);
+			Pattern pat3 = Pattern.compile(regex3);
+	        Pattern pat4 = Pattern.compile(regex4);
+			Pattern pat5 = Pattern.compile(regex5);
+			Pattern pat6 = Pattern.compile(regex6);
+	
+			Matcher matcher = pat1.matcher(rawCallnum);
+			if (!matcher.find()) {
+				matcher = pat2.matcher(rawCallnum);
+				if (!matcher.find()) {
+					matcher = pat3.matcher(rawCallnum);
+					if (!matcher.find()) {
+						matcher = pat4.matcher(rawCallnum);
+						if (!matcher.find()) {
+							matcher = pat5.matcher(rawCallnum);
+							if (!matcher.find()) {
+								matcher = pat6.matcher(rawCallnum);
+							}
+						}
+					}
+				}
 			}
-        }
-
+	
+	        if (matcher.find(0)) {
+	        	cutter = matcher.group(2);
+	        	String suffix = matcher.group(3);
+				if (suffix.trim().length() > 0) {
+		        	// check if there are letters in the cutter that should be assigned
+		        	//  to the suffix
+		        	if (suffix.startsWith(" ") || cutter.endsWith(" "))
+		        		result = suffix;
+		        	else {
+		        		int ix = cutter.lastIndexOf(' ');
+		        		if (ix != -1)
+		        			result = cutter.substring(ix) + suffix;
+		        		else
+		        			result = suffix;
+		        	}
+				}
+	        }
+    	}
         if (result != null)
-        	return result.trim();
-        return result;
+        	result = result.trim();
+        if (result == null || result.trim().length() == 0)
+        	return null;
+        else
+        	return result;
     }
 
 // TODO:  method to normalize year and immediate following chars (no space)?   <-- stupid?
@@ -847,7 +909,8 @@ public final class CallNumUtils {
 		
 	private static String PUNCT_PREFIX = "([\\.:\\/])?";
 	private static String NS_PREFIX = "(n\\.s\\.?\\,? ?)?";
-	private static String VOL_LETTERS = "[\\:\\/]?(bd|jahrg|new ser|no|pts?|ser|t|v|vols?|vyp)";
+	private static String MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec";
+	private static String VOL_LETTERS = "[\\:\\/]?(bd|jahrg|new ser|no|pts?|ser|t|v|vols?|vyp" + "|" + MONTHS + ")";
 	private static String VOL_NUMBERS = "\\d+([\\/-]\\d+)?( \\d{4}([\\/-]\\d{4})?)?( ?suppl\\.?)?";
 	private static String VOL_NUMBERS_LOOSER = "\\d+.*";
 	private static String VOL_NUM_AS_LETTERS = "[A-Z]([\\/-]\\[A-Z]+)?.*";
@@ -855,8 +918,7 @@ public final class CallNumUtils {
 	private static Pattern volPattern = Pattern.compile(PUNCT_PREFIX + NS_PREFIX + VOL_LETTERS + "\\.? ?" + VOL_NUMBERS, Pattern.CASE_INSENSITIVE);
 	private static Pattern volPatternLoose = Pattern.compile(PUNCT_PREFIX + NS_PREFIX + VOL_LETTERS + "\\.? ?" + VOL_NUMBERS_LOOSER, Pattern.CASE_INSENSITIVE);
 	private static Pattern volPatLetters = Pattern.compile(PUNCT_PREFIX + NS_PREFIX + VOL_LETTERS + "[\\/\\. ]" + VOL_NUM_AS_LETTERS , Pattern.CASE_INSENSITIVE);
-	
-	
+
 	/**
 	 * remove volume information from LC call number if it is present as a 
 	 *   suffix
@@ -885,25 +947,25 @@ public final class CallNumUtils {
 					lastSuffix = cut1suffix;
 			}
 		}
-		if (lastSuffix == null)
-			// could put last ditch effort with tightest pattern, but don't want to take out too much		
-			return rawLCcallnum;
 
-		Matcher matcher = volPattern.matcher(lastSuffix);
-		if (!matcher.find()) {
-			matcher = volPatternLoose.matcher(lastSuffix);
+		// could put last ditch effort with tightest pattern, but don't want to take out too much		
+		if (lastSuffix != null) {
+			Matcher matcher = volPattern.matcher(lastSuffix);
 			if (!matcher.find()) {
-				matcher = volPatLetters.matcher(lastSuffix);
+				matcher = volPatternLoose.matcher(lastSuffix);
+				if (!matcher.find()) {
+					matcher = volPatLetters.matcher(lastSuffix);
+				}
 			}
-		}
 // look for first / last match, not any match (subroutine?)?
-		if (matcher.find(0)) {
-			// return orig call number with matcher part lopped off.
-			int ix = rawLCcallnum.indexOf(lastSuffix) + matcher.start();
-			if (ix != -1 && ix < rawLCcallnum.length()) {
-				return rawLCcallnum.substring(0, ix).trim();
-			}
-		}				
+			if (matcher.find(0)) {
+				// return orig call number with matcher part lopped off.
+				int ix = rawLCcallnum.indexOf(lastSuffix) + matcher.start();
+				if (ix != -1 && ix < rawLCcallnum.length()) {
+					return rawLCcallnum.substring(0, ix).trim();
+				}
+			}				
+		}
 		return rawLCcallnum;
 	}
 
@@ -936,10 +998,10 @@ public final class CallNumUtils {
 			if (ix != -1 && ix < rawDeweyCallnum.length()) {
 				return rawDeweyCallnum.substring(0, ix).trim();
 			}
-		}				
+		}
 		return rawDeweyCallnum;
 	}
-
+	
 	
 	/**
 	 * return a format string corresponding to the number of digits specified
