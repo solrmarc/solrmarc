@@ -30,6 +30,7 @@ public abstract class MarcHandler {
 	protected boolean permissiveReader;
 	protected String defaultEncoding;
     protected boolean to_utf_8;
+    protected String combineConsecutiveRecordsFields = null;
 	
 	private String solrmarcPath;
 	private String siteSpecificPath;
@@ -109,7 +110,10 @@ public abstract class MarcHandler {
         // _index.properties file
         indexerProps = Utils.getProperty(configProps, "solr.indexer.properties");
 
-
+        combineConsecutiveRecordsFields = Utils.getProperty(configProps, "marc.combine_records");
+        if (combineConsecutiveRecordsFields != null && combineConsecutiveRecordsFields.length() == 0) 
+            combineConsecutiveRecordsFields = null;
+        
         permissiveReader = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.permissive"));
         if (Utils.getProperty(configProps, "marc.default_encoding") != null)
         {
@@ -191,6 +195,10 @@ public abstract class MarcHandler {
         {
         	logger.warn("Error: Z3950 not yet implemented");
             reader = null;
+        }
+        if (combineConsecutiveRecordsFields != null)
+        {
+            reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields);
         }
         String marcIncludeIfPresent = Utils.getProperty(configProps, "marc.include_if_present");
         String marcIncludeIfMissing = Utils.getProperty(configProps, "marc.include_if_missing");

@@ -110,7 +110,18 @@ public class MarcSorter
                 byte[] fullBuf = new byte[recordLength];
                 System.arraycopy(byteArray, 0, fullBuf, 0, byteArray.length);
                 System.arraycopy(recordBuf, 0, fullBuf, byteArray.length, recordBuf.length);
-                recordMap.put(field001, fullBuf);
+                if (recordMap.containsKey(field001))
+                {
+                    byte existingRec[] = recordMap.get(field001);
+                    byte newRec[] = new byte[existingRec.length + fullBuf.length];
+                    System.arraycopy(existingRec, 0, newRec, 0, existingRec.length);
+                    System.arraycopy(fullBuf, 0, newRec, existingRec.length, fullBuf.length);
+                    recordMap.put(field001, newRec);
+                }
+                else
+                {
+                    recordMap.put(field001, fullBuf);
+                }
             }
         }
         catch (EOFException e)

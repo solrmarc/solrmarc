@@ -50,7 +50,7 @@ public class MarcPrinter extends MarcHandler
      // Initialize logging category
     static Logger logger = Logger.getLogger(MarcPrinter.class.getName());
     private String mode;
-    private String indexkeyprefix = ".*";
+    private String indexkeyprefix = null;
     private MarcWriter writer = null;
     private PrintWriter out;
     
@@ -71,6 +71,10 @@ public class MarcPrinter extends MarcHandler
                 mode = arg;
             }
             else if (mode.equals("index"))
+            {
+                indexkeyprefix = arg.replaceAll("\\*", ".*").replaceAll("\\?", ".?");
+            }
+            else if (mode.equals("print"))
             {
                 indexkeyprefix = arg.replaceAll("\\*", ".*").replaceAll("\\?", ".?");
             }
@@ -104,8 +108,21 @@ public class MarcPrinter extends MarcHandler
                 if (mode.equals("print"))
                 {
                     String recStr = record.toString();
-                    
-                    out.println(recStr);
+                    if (indexkeyprefix != null)
+                    {
+                        String lines[] = recStr.split("\r?\n");
+                        for (String line : lines)
+                        {
+                            if (line.substring(0,3).matches(indexkeyprefix))
+                            {
+                                out.println(line);
+                            }         
+                        }
+                    }
+                    else
+                    {
+                        out.println(recStr);
+                    }
                 }
                 else if (mode.equals("to_xml"))
                 {
@@ -147,7 +164,7 @@ public class MarcPrinter extends MarcHandler
                         key = keys.next();
                         Object value = indexMap.get(key);
                         if (key.equals("id")) continue;
-                        if (key.matches(indexkeyprefix))
+                        if (indexkeyprefix == null || key.matches(indexkeyprefix))
                         {
                             if (value instanceof String)
                             {
