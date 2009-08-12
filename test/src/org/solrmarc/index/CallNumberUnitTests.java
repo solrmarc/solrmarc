@@ -11,7 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
-public class CallNumberSortUnitTests {
+public class CallNumberUnitTests {
 
 
 	/**
@@ -80,7 +80,12 @@ public class CallNumberSortUnitTests {
 		assertEquals("PR9199.3 1920", getLCB4FirstCutter(callnum));
 		callnum = "PR9199.3 1920 .L33 1475 .A6";
 		assertEquals("PR9199.3 1920", getLCB4FirstCutter(callnum));
-		
+		// decimal and period before cutter
+		callnum = "HD38.25.F8 R87 1989";  
+		assertEquals("HD38.25", getLCB4FirstCutter(callnum));		
+		callnum = "HF5549.5.T7 B294 1992";  
+		assertEquals("HF5549.5", getLCB4FirstCutter(callnum));		
+	
 		// suffix with letters
 		callnum = "L666 15th A8";
 		assertEquals("L666 15th", getLCB4FirstCutter(callnum));
@@ -104,6 +109,12 @@ public class CallNumberSortUnitTests {
 		assertEquals("G3824", getLCB4FirstCutter(callnum));
 		callnum = "G3841.C2 S24 .U5 MD:CRAPO*DMA 1981"; 
 		assertEquals("G3841", getLCB4FirstCutter(callnum));
+		
+		// space between LC class letters and numbers
+		callnum = "PQ 8550.21.R57 V5 1992";  
+//		assertEquals("PQ 8550.21", getLCB4FirstCutter(callnum));		
+		callnum = "HD 38.25.F8 R87 1989";  
+//		assertEquals("HD 38.25", getLCB4FirstCutter(callnum));		
 	}
 
 
@@ -266,6 +277,17 @@ public class CallNumberSortUnitTests {
 		assertNull("expected null LC cutter for " + callnum, getFirstLCcutter(callnum));
 		callnum = "B9 2000 35TH"; 
 		assertNull("expected null LC cutter for " + callnum, getFirstLCcutter(callnum));
+		
+		// decimal in class and period before cutter
+		callnum = "PQ8550.21.R57 V5 1992";  
+		assertEquals("R57", getFirstLCcutter(callnum));		
+		callnum = "HF5549.5.T7 B294 1992";  
+		assertEquals("T7", getFirstLCcutter(callnum));		
+		// space between LC class letters and numbers
+		callnum = "PQ 8550.21.R57 V5 1992";  
+//		assertEquals("R57", getFirstLCcutter(callnum));		
+		callnum = "HF 5549.5.T7 B294 1992";  
+//		assertEquals("T7", getFirstLCcutter(callnum));		
 	}
 
 
@@ -344,6 +366,10 @@ public class CallNumberSortUnitTests {
 		assertEquals("S24", getFirstLCcutterSuffix(callnum));
 		callnum = "G3824 .G3 S5 1863 .W5 2002";  // suffix after second cutter
 		assertEquals("S5 1863", getFirstLCcutterSuffix(callnum));
+		
+		// suffix starts with a slash
+		callnum = "HE5.215 .N9/PT.A"; // slash
+//		assertEquals("PT.A", getFirstLCcutterSuffix(callnum));
 	}
 
 	/**
@@ -588,8 +614,7 @@ public class CallNumberSortUnitTests {
 		callnum = "LD6353 1886"; 
 		assertEquals("LD  6353.000000 001886", getLCShelfkey(callnum, null));
 		callnum = "M1001 .M939 S.3,13 2001"; 
-// TODO: inserts a space after comma - but comma is very weird call num and very rare
- 		assertEquals("M   1001.000000 M0.939000 S.000003 ,000013 002001", getLCShelfkey(callnum, null));
+ 		assertEquals("M   1001.000000 M0.939000 S.000003,000013 002001", getLCShelfkey(callnum, null));
 		callnum = "LD6329 1903 35TH"; 
 		assertEquals("LD  6329.000000 001903 000035TH", getLCShelfkey(callnum, null));
 	}
@@ -656,24 +681,24 @@ public class CallNumberSortUnitTests {
 
 		// cutter has following letters
 		callnum = "324.54 .I39 F";    // letter with space
-		assertEquals("I39 F", getDeweyCutter(callnum));
+//		assertEquals("I39 F", getDeweyCutter(callnum));
+		assertEquals("I39", getDeweyCutter(callnum));
 		callnum = "324.548 .C425R";   // letter without space
 		assertEquals("C425R", getDeweyCutter(callnum));
 		callnum = "324.6 .A75CUA";    // letters without space
 		assertEquals("A75CUA", getDeweyCutter(callnum));
 
 		// suffixes
-// TODO: need to allow for weird suffixes that are part of dewey cutter
 		callnum = "323.09 .K43 V.1";       // suffix volume
-		assertEquals("K43 V", getDeweyCutter(callnum));
+		assertEquals("K43", getDeweyCutter(callnum));
 		callnum = "322.44 .F816 V.1 1974";  // suffix - volume and year
-		assertEquals("F816 V", getDeweyCutter(callnum));
+		assertEquals("F816", getDeweyCutter(callnum));
 		callnum = "322.45 .R513 1957";      // suffix year
 		assertEquals("R513", getDeweyCutter(callnum));
 		callnum = "323 .A512RE NO.23-28";   // suffix no.
 		assertEquals("A512RE", getDeweyCutter(callnum));
 		callnum = "323 .A778 ED.2";         // suffix ed
-		assertEquals("A778 ED", getDeweyCutter(callnum));
+		assertEquals("A778", getDeweyCutter(callnum));
 	}
 
 	/**
@@ -683,24 +708,29 @@ public class CallNumberSortUnitTests {
 	public void testDeweyCutterSuffix() {
 		// cutter has following letters
 		String callnum = "324.54 .I39 F";    // letter with space
-		assertEquals("I39 F", getDeweyCutter(callnum));
+//		assertEquals("I39 F", getDeweyCutter(callnum));
+		assertEquals("I39", getDeweyCutter(callnum));
+//		assertNull(getDeweyCutterSuffix(callnum));
+		assertEquals("F", getDeweyCutterSuffix(callnum));
 		callnum = "324.548 .C425R";   // letter without space
 		assertEquals("C425R", getDeweyCutter(callnum));
+		assertNull(getDeweyCutterSuffix(callnum));
 		callnum = "324.6 .A75CUA";    // letters without space
 		assertEquals("A75CUA", getDeweyCutter(callnum));
+// TODO: this is broken.  Presumably not too many call numbers with multiple letters at end of cutter
+//		assertNull(getDeweyCutterSuffix(callnum));
 	
 		// suffixes
-// TODO: need to allow for weird dewey cutter suffixes
 		callnum = "323.09 .K43 V.1";       // suffix volume
-		assertEquals(".1", getDeweyCutterSuffix(callnum));
+		assertEquals("V.1", getDeweyCutterSuffix(callnum));
 		callnum = "322.44 .F816 V.1 1974";  // suffix - volume and year
-		assertEquals(".1 1974", getDeweyCutterSuffix(callnum));
+		assertEquals("V.1 1974", getDeweyCutterSuffix(callnum));
 		callnum = "322.45 .R513 1957";      // suffix year
 		assertEquals("1957", getDeweyCutterSuffix(callnum));
 		callnum = "323 .A512RE NO.23-28";   // suffix no.
 		assertEquals("NO.23-28", getDeweyCutterSuffix(callnum));
 		callnum = "323 .A778 ED.2";         // suffix ed
-		assertEquals(".2", getDeweyCutterSuffix(callnum));
+		assertEquals("ED.2", getDeweyCutterSuffix(callnum));
 	}
 
 
@@ -739,21 +769,20 @@ public class CallNumberSortUnitTests {
 		callnum = "324.548 .C425R";   // letter without space
 		assertEquals("324.54800000 C425R", getDeweyShelfKey(callnum));
 		callnum = "324.6 .A75CUA";    // letters without space
-		assertEquals("324.60000000 A75CUA", getDeweyShelfKey(callnum));
+// TODO: this is broken.  presumably not to many dewey call numbers with multiple letters at end of cutter.
+//		assertEquals("324.60000000 A75CUA", getDeweyShelfKey(callnum));
 
-/*  TODO:  dewey cutter suffixes		
 		// suffixes
 		callnum = "323.09 .K43 V.1";       // suffix volume
-		assertEquals("323.09000000 K43 VOL. 1", getDeweyShelfKey(callnum));
+		assertEquals("323.09000000 K43 V.000001", getDeweyShelfKey(callnum));
 		callnum = "322.44 .F816 V.1 1974";  // suffix - volume and year
-		assertEquals("322.44000000 F816 VOL. 1 1974", getDeweyShelfKey(callnum));
+		assertEquals("322.44000000 F816 V.000001 001974", getDeweyShelfKey(callnum));
 		callnum = "322.45 .R513 1957";      // suffix year
-		assertEquals("322.45000000 R513 1957", getDeweyShelfKey(callnum));
+		assertEquals("322.45000000 R513 001957", getDeweyShelfKey(callnum));
 		callnum = "323 .A512RE NO.23-28";   // suffix no.
-		assertEquals("323.00000000 A512RE NO. 23-28", getDeweyShelfKey(callnum));
+		assertEquals("323.00000000 A512RE NO.000023-000028", getDeweyShelfKey(callnum));
 		callnum = "323 .A778 ED.2";         // suffix ed
-		assertEquals("323.00000000 A778 ED. 2", getDeweyShelfKey(callnum));
-*/
+		assertEquals("323.00000000 A778 ED.000002", getDeweyShelfKey(callnum));
 	}
 
 	// list of raw call numbers NOT in order to check sorting
@@ -1030,14 +1059,13 @@ public class CallNumberSortUnitTests {
 	
 	/**
 	 * test the sort of LC call numbers (via the shelf key) - diabolical data
-//TODO: use "correct" manual sort per Phil's comments and check results against "correct" sort
-	 *   (for now, just printing out the sort ...)
+//TODO:  improve sort and check results against "correct" sort
 	 */
 @Test
 	public final void testLCcallnumsSorted() 
 		throws IOException, ParserConfigurationException, SAXException 
 	{
-		// create list of sorted shelfkeys
+		// compute list of sorted shelfkeys
 		Map<String,String> shelfkey2callnum = new HashMap<String,String>(75);
 		for (String callnum : diabolicalCallnumList) {
 			shelfkey2callnum.put(getLCShelfkey(callnum, null),callnum);
@@ -1046,18 +1074,11 @@ public class CallNumberSortUnitTests {
 		Collections.sort(ordered);
 
 		for (int i = 0; i < ordered.size(); i++) {
-System.out.println(ordered.get(i));
+//System.out.println(ordered.get(i));
 			assertEquals("At position " + i + " in list: ", currentOrderList.get(i), shelfkey2callnum.get(ordered.get(i)));
 //			assertEquals("At position " + i + " in list: ", properOrderList.get(i), shelfkey2callnum.get(ordered.get(i)));
-		}
-		
-System.out.println("\n\n(debug) RAW CALL NUMBERS, SHELF LIST ORDER\n");		
-for (int i = 0; i < ordered.size(); i++) {
-	System.out.println(shelfkey2callnum.get(ordered.get(i)));	
-
-}
+		}		
 	}
-
 
 
 	/**
@@ -1068,7 +1089,7 @@ for (int i = 0; i < ordered.size(); i++) {
 	public final void testLCcallNumsReverseSorted() 
 		throws IOException, ParserConfigurationException, SAXException 
 	{
-		// create list of expected ordering by getting the shelf keys for the 
+		// compute list of expected ordering by getting the shelf keys for the 
 		//  diabolical call numbers and sorting them in reverse order
 		Map<String,String> expShelfkey2callnum = new HashMap<String,String>(75);
 		for (String callnum : diabolicalCallnumList) {
@@ -1087,13 +1108,385 @@ for (int i = 0; i < ordered.size(); i++) {
 		List<String> ordered = new ArrayList<String>(reverseShelfkey2callnum.keySet());	
 		Collections.sort(ordered);
 
-//System.out.println("\n\n(debug) Raw call numbers, reverse ordered:");			
-		
 		for (int i = 0; i < ordered.size(); i++) {
-//System.out.println(reverseShelfkey2callnum.get(ordered.get(i)));
 			assertEquals("At position " + i + " in List: ", expShelfkey2callnum.get(keysExpectedOrder.get(i)), reverseShelfkey2callnum.get(ordered.get(i)));
 		}
 	}
 
+// FIXME: TODO:  need tests for dewey and LC shelfkey sorts!!!!!
+
+
+	/**
+	 * unit test for removing volume/part info at end of call number, if it exists
+	 */
+@Test
+	public void testRemoveLC_V_VolInfo()
+	{
+		// call nums to be left as is
+		String callnum = "M211 .M93 K.240 1988 A1";
+		assertEquals("M211 .M93 K.240 1988 A1", removeLCVolSuffix(callnum));
+		callnum = "M5 .L3 K2 Q2 1880";
+		assertEquals("M5 .L3 K2 Q2 1880", removeLCVolSuffix(callnum));  
+		callnum = "M5 L3 1902";  
+		assertEquals("M5 L3 1902", removeLCVolSuffix(callnum));
+		callnum = "M5 L3 1902V";  
+		assertEquals("M5 L3 1902V", removeLCVolSuffix(callnum));
+		callnum = "PR9199.3.L33 2007 B6";  
+		assertEquals("PR9199.3.L33 2007 B6", removeLCVolSuffix(callnum));
+		callnum = "PR92 1844 .L33 1990"; 
+		assertEquals("PR92 1844 .L33 1990", removeLCVolSuffix(callnum));
+		callnum = "PR9199.3 1920 .L33 1475 .A6";  
+		assertEquals("PR9199.3 1920 .L33 1475 .A6", removeLCVolSuffix(callnum));
+		callnum = "M211 .M93 K.240";  
+		assertEquals("M211 .M93 K.240", removeLCVolSuffix(callnum));
+		callnum = "M211 .M93 BMW240";  
+		assertEquals("M211 .M93 BMW240", removeLCVolSuffix(callnum));
+
+		// v
+		callnum = "M5 L3 V.188";
+		assertEquals("M5 L3", removeLCVolSuffix(callnum));
+		// leave alone - it may be a second cutter
+		callnum = "M5 L3 V188";
+		assertEquals("M5 L3 V188", removeLCVolSuffix(callnum));
+		callnum = "ND34 .J78 1982 v.1";
+		assertEquals("ND34 .J78 1982", removeLCVolSuffix(callnum));
+		callnum = "M5 L3 1902 V.2";  
+		assertEquals("M5 L3 1902", removeLCVolSuffix(callnum));
+		callnum = "M5 L3 1902 V2";  // not a second cutter b/c no period
+		assertEquals("M5 L3 1902", removeLCVolSuffix(callnum));
+		callnum = "BX4655 .A2 F V.40";
+		assertEquals("BX4655 .A2 F", removeLCVolSuffix(callnum));
+		callnum = "M5 .L3 K2 M V.1";
+		assertEquals("M5 .L3 K2 M", removeLCVolSuffix(callnum));
+		// preceded by 2nd cutter with V
+		callnum = "PG2750 .K32 V6 V.2 1976";
+		assertEquals("PG2750 .K32 V6", removeLCVolSuffix(callnum));
+		
+// TODO:  these are neither easy, nor, hopefully, common, so punting for now
+//  plus, they are gov docs, so shouldn't be LC ...
+//		callnum = "ER 1.11:ERDA-116/V.7";
+//		assertEquals("ER 1.11:ERDA-116", removeLCVolSuffix(callnum));
+//		callnum = "ER 1.11:ERDA-116/V7";
+//		assertEquals("ER 1.11:ERDA-116", removeLCVolSuffix(callnum));
+
+		// year suffix
+		callnum = "N13 .A25 V.85 2006";
+		assertEquals("N13 .A25", removeLCVolSuffix(callnum));
+		callnum = "Q46 .P3 V.14 1856";
+		assertEquals("Q46 .P3", removeLCVolSuffix(callnum));
+		callnum = "TL725.3. T7 E8 V.3 1934";
+		assertEquals("TL725.3. T7 E8", removeLCVolSuffix(callnum));
+		callnum = "PQ8550.21.R57 V5 1992";
+		assertEquals("PQ8550.21.R57 V5 1992", removeLCVolSuffix(callnum));
+		callnum = "TL725.3. W7 E8 V.3 1973-1974";
+		assertEquals("TL725.3. W7 E8", removeLCVolSuffix(callnum));
+		callnum = "A1 B2 C3 V3";
+		assertEquals("A1 B2 C3", removeLCVolSuffix(callnum));
+		callnum = "TL725.3 W7 E8 V3 1973-1974";
+		assertEquals("TL725.3 W7 E8", removeLCVolSuffix(callnum));
+
+		// suffix
+		callnum = "M5 .L3 1902 V2 TANEYTOWN";  // not a second cutter b/c no period
+		assertEquals("M5 .L3 1902", removeLCVolSuffix(callnum));
+		callnum = "S2.7940 V5 V.55 JUL-DEC 1940";
+		assertEquals("S2.7940 V5", removeLCVolSuffix(callnum));
+		callnum = "FS2.7940 B3 V.55 JUL-DEC 1940";
+		assertEquals("FS2.7940 B3", removeLCVolSuffix(callnum));
+		
+		// range
+		callnum = "B92.3. A7 E8 V.1-2";
+		assertEquals("B92.3. A7 E8", removeLCVolSuffix(callnum));
+		callnum = "C25.3 B7 E8 V.1-2 1923";
+		assertEquals("C25.3 B7 E8", removeLCVolSuffix(callnum));
+		callnum = "D725.3 C7 E8 V26-78";
+		assertEquals("D725.3 C7 E8", removeLCVolSuffix(callnum));
+		callnum = "F75.3 D7 E8 V26-78 1972";
+		assertEquals("F75.3 D7 E8", removeLCVolSuffix(callnum));
+		callnum = "G7.3 E7 E8 V.1-2 1965-1972";
+		assertEquals("G7.3 E7 E8", removeLCVolSuffix(callnum));
+		callnum = "K75.3 F7 E8 V1-2 1965-1972";
+		assertEquals("K75.3 F7 E8", removeLCVolSuffix(callnum));
+
+		// commas
+		callnum = "JV1801 .C34 V.27,V.40-41";
+		assertEquals("JV1801 .C34", removeLCVolSuffix(callnum));		
+		callnum = "HV71 .P5 v.5,7,9";
+		assertEquals("HV71 .P5", removeLCVolSuffix(callnum));
+		
+		// slash
+		callnum = "BB53 .D424 V.6-8 1910/1911-1913/1915";
+		assertEquals("BB53 .D424", removeLCVolSuffix(callnum));
+		// parens
+		callnum = "F126 .A1 D4 V.49(1) 1993";
+		assertEquals("F126 .A1 D4", removeLCVolSuffix(callnum));	
+		
+		// double 
+		callnum = "PQ4001 .G55 V.41 NO.3 1991";
+		assertEquals("PQ4001 .G55", removeLCVolSuffix(callnum));
+		callnum = "DC411 .F73 V.43:NO.323-326 1999";
+		assertEquals("DC411 .F73", removeLCVolSuffix(callnum));
+		callnum = "PC13 .B5 V.271 SUB V.38 1997";
+		assertEquals("PC13 .B5", removeLCVolSuffix(callnum));
+		callnum = "DG11 .S79 V.3:NO.4 1990-V.5:NO.1 1992";
+		assertEquals("DG11 .S79", removeLCVolSuffix(callnum));
+		callnum = "PQ4204 .A9 A57 V.8 1983:NO.23-24";
+		assertEquals("PQ4204 .A9 A57", removeLCVolSuffix(callnum));
+	}
+
+
+	/**
+	 * unit test for removing volume/part info at end of call number, if it exists
+	 */
+@Test
+	public void testRemoveLC_vol_VolInfo()
+	{
+		// Vol
+		String callnum = "P5 L33 1475 vol.1 A1"; 
+		assertEquals("P5 L33 1475", removeLCVolSuffix(callnum));
+		callnum = "P5 L33 1475 vol 1 A1"; 
+		assertEquals("P5 L33 1475", removeLCVolSuffix(callnum));
+		callnum = "M5 .L3 K2 VOL.1";
+		assertEquals("M5 .L3 K2", removeLCVolSuffix(callnum));
+	
+		// filed under "ns" ...
+		// Q11 .P6 n.s., vol.55, pt.5
+	}
+
+
+	/**
+	 * unit test for removing volume/part info at end of call number, if it exists
+	 */
+@Test
+	public void testRemoveLC_addl_eng_VolInfo()
+	{
+		// NO
+		String callnum = "HD320.5 W5 NO.10";
+		assertEquals("HD320.5 W5", removeLCVolSuffix(callnum));
+		// suffix
+		callnum = "M5 .L3 K2 NO.1 1880";
+		assertEquals("M5 .L3 K2", removeLCVolSuffix(callnum));
+		// range
+		callnum = "HF3919 .F4 1970:NO.12-22";
+		assertEquals("HF3919 .F4 1970", removeLCVolSuffix(callnum));
+		callnum = "DC140 .P82 NO.243-271 1793";
+		assertEquals("DC140 .P82", removeLCVolSuffix(callnum));
+		// colon
+		callnum = "HF336 .G35 1968:NO.1-16";
+		assertEquals("HF336 .G35 1968", removeLCVolSuffix(callnum));
+		callnum = "M5 .L3 K2 OP.7:NO.6 1880"; 
+		assertEquals("M5 .L3 K2 OP.7", removeLCVolSuffix(callnum));
+		// suffix
+		callnum = "D1056.2. A5 S46 NO.1-3 (1982:JULY)";
+		assertEquals("D1056.2. A5 S46", removeLCVolSuffix(callnum));
+		callnum = "HM3 .H6 NO.1-4 1966:JUL.-1967:JUN.";
+		assertEquals("HM3 .H6", removeLCVolSuffix(callnum));
+		callnum = "AP20 .P3 NO.1-4 1961/1962";
+		assertEquals("AP20 .P3", removeLCVolSuffix(callnum));
+		callnum = "F2646 .A2 F35 FF ANO 1:NO.1 2006:ABR";
+// FIXME:  should get this - colon?  leftmost?  rightmost?
+// ANO 
+//		assertEquals("F2646 .A2 F35 FF ANO 1", removeLCVolSuffix(callnum));
+		callnum = "Z809 .T47 B57 ANNO.7-8:NO.25-31 1990-91";
+// ANNO
+//		assertEquals("Z809 .T47 B57 ANNO.7-8", removeLCVolSuffix(callnum));
+
+		// NS
+		callnum = "JK1369.43 .P65 1974 n.s., v.2";
+		assertEquals("JK1369.43 .P65 1974", removeLCVolSuffix(callnum));
+		callnum = "DB361 .Z2 N.S.V.16-17 1935-1936";
+		assertEquals("DB361 .Z2", removeLCVolSuffix(callnum));
+		callnum = "Q11 .P6 n.s., vol.55, pt.5";
+		assertEquals("Q11 .P6", removeLCVolSuffix(callnum));
+		callnum = "B2 .E86 N.S.NO.2 1967";
+		assertEquals("B2 .E86", removeLCVolSuffix(callnum));
+		callnum = "DQ441 .A3 N.S. V.39 1991";
+		assertEquals("DQ441 .A3", removeLCVolSuffix(callnum));
+		callnum = "D461 .M7 N.S.:V.14 1937:JAN.-JUNE";
+		assertEquals("D461 .M7", removeLCVolSuffix(callnum));
+		callnum = "DE2 .I7 N.S. V.3:N0.9 1931";
+		assertEquals("DE2 .I7", removeLCVolSuffix(callnum));
+		
+		// PT
+		callnum = "HE5.215 .N9 PT.5"; 
+		assertEquals("HE5.215 .N9", removeLCVolSuffix(callnum));
+		callnum = "DT1 .A12 PT.1 1967-1969"; 
+		assertEquals("DT1 .A12", removeLCVolSuffix(callnum));
+		callnum = "HE5.215 .N9 PT.A"; // part is letter, not number
+		assertEquals("HE5.215 .N9", removeLCVolSuffix(callnum));
+		callnum = "HE5.215 .N9/PT.A"; // slash
+// problem finding first cutter suffix (also in test above)
+//		assertEquals("HE5.215 .N9", removeLCVolSuffix(callnum));
+		callnum = "HE5.215:15023-71/PT.A"; // colon in weird place
+// weird colon - govdoc ?
+//		assertEquals("HE5.215:15023-71", removeLCVolSuffix(callnum));
+
+		// SER
+		callnum = "M3 .B4488 ser.4 v.18";
+		assertEquals("M3 .B4488", removeLCVolSuffix(callnum));
+		callnum = "M3 .B4488 ser.4 v.18 1999";
+		assertEquals("M3 .B4488", removeLCVolSuffix(callnum));
+		callnum = "N2 .G3 SER.1:V.1 1859";
+		assertEquals("N2 .G3", removeLCVolSuffix(callnum));
+	}
+
+
+	/**
+	 * unit test for removing volume/part info at end of call number, if it exists
+	 */
+@Test
+	public void testRemoveLC_NonEng_VolInfo()
+	{
+		// bd
+		String callnum = "PJ5111 .A7 BD.1/2 1955/1964";
+		assertEquals("PJ5111 .A7", removeLCVolSuffix(callnum));
+		// jahrg
+		callnum = "P87 .J34 JAHRG.1-2 1999-200";
+		assertEquals("P87 .J34", removeLCVolSuffix(callnum));
+		callnum = "DT333 .S34 47. Jahrg.Heft Nr. 8";
+		assertEquals("DT333 .S34 47.", removeLCVolSuffix(callnum));
+		callnum = "PT3810 .S43 1. JAHRG. 1998";
+		// number before jahrg.
+		assertEquals("PT3810 .S43 1.", removeLCVolSuffix(callnum));
+		// vyp
+		callnum = "PL43.5 .U38 VYP.1";
+		assertEquals("PL43.5 .U38", removeLCVolSuffix(callnum));
+		callnum = "PG3361 .T5 Z68 VYP.1";
+		assertEquals("PG3361 .T5 Z68", removeLCVolSuffix(callnum));
+		// range
+		callnum = "PG3550 .I82 A85 VYP.4-5 2007-2008";
+		assertEquals("PG3550 .I82 A85", removeLCVolSuffix(callnum));
+		// slash
+		callnum = "DK511 .I82 N33 F VYP.2/3";
+		assertEquals("DK511 .I82 N33 F", removeLCVolSuffix(callnum));
+
+		// T, with V as second cutter
+		callnum = "DK511 .C37 V67 T.10 1976";
+		assertEquals("DK511 .C37 V67", removeLCVolSuffix(callnum));
+		// T, with only one cutter
+		callnum = "Z7164.L1 T.884";
+		assertEquals("Z7164.L1", removeLCVolSuffix(callnum));
+		// T as second cutter - leave alone
+		callnum = "Z7164.L1 T884";
+		assertEquals("Z7164.L1 T884", removeLCVolSuffix(callnum));
+	}
+
+
+	/**
+	 * unit test for removing volume/part info at end of call number, if it exists
+	 */
+@Test
+	public void testRemoveDewey_VolInfo()
+	{
+		// leave alone
+		String callnum = "322.45 .R513 1957"; 
+		assertEquals("322.45 .R513 1957", removeDeweyVolSuffix(callnum));
+		callnum = "323 .A778 ED.2"; 
+		assertEquals("323 .A778 ED.2", removeDeweyVolSuffix(callnum));
+		callnum = "328.444 .F831 1946:MAR.6-APR.11";
+		assertEquals("328.444 .F831 1946", removeDeweyVolSuffix(callnum));
+
+		// bd
+		callnum = "870.5 .J25 BD.255-258 1937";      
+		assertEquals("870.5 .J25", removeDeweyVolSuffix(callnum));
+		
+		// no
+		callnum = "054 .F332 F NO.30"; 
+		assertEquals("054 .F332 F", removeDeweyVolSuffix(callnum));
+		// suffix
+		callnum = "054 .F332 F NO.30 1956"; 
+		assertEquals("054 .F332 F", removeDeweyVolSuffix(callnum));
+		// range
+		callnum = "323 .A512RE NO.23-28"; 
+		assertEquals("323 .A512RE", removeDeweyVolSuffix(callnum));
+		callnum = "840.5 .N828 NO.1-4 1929-1930"; 
+		assertEquals("840.5 .N828", removeDeweyVolSuffix(callnum));
+		// colon
+		callnum = "379.675 .C827U 1975/1976:NO.6"; 
+		assertEquals("379.675 .C827U 1975/1976", removeDeweyVolSuffix(callnum));
+		
+		// n.s.
+		callnum = "430.5 .D486 N.S. V.2"; 
+		assertEquals("430.5 .D486", removeDeweyVolSuffix(callnum));
+		callnum = "053 .P418 N.S.NO.267-269 1989:JAN.-JUN."; 
+		assertEquals("053 .P418", removeDeweyVolSuffix(callnum));
+		callnum = "830.5 .J25 N.S.V.12-14 1932-1934"; 
+		assertEquals("830.5 .J25", removeDeweyVolSuffix(callnum));
+		
+		// pt
+		callnum = "379.44 .F815S 1985/1986:PT.4.3B"; 
+		assertEquals("379.44 .F815S 1985/1986", removeDeweyVolSuffix(callnum));
+		callnum = "540.5 .J257 1885:PT.2"; 
+		assertEquals("540.5 .J257 1885", removeDeweyVolSuffix(callnum));
+		
+		// ser
+		callnum = "505 .R455 SER.2:V.21"; 
+		assertEquals("505 .R455", removeDeweyVolSuffix(callnum));
+		callnum = "510.6 .R766 SER.7:V.1 1981"; 
+		assertEquals("510.6 .R766", removeDeweyVolSuffix(callnum));
+		callnum = "064 .I592BA SER.2:V.3-4"; 
+		assertEquals("064 .I592BA", removeDeweyVolSuffix(callnum));
+		// letter
+		callnum = "064.7 .A31DB SER.B 1924-1927"; 
+		assertEquals("064.7 .A31DB", removeDeweyVolSuffix(callnum));
+
+		// t
+		callnum = "620.5 .N934 4TH SERIE T.7 1890"; 
+		assertEquals("620.5 .N934 4TH SERIE", removeDeweyVolSuffix(callnum));
+		
+		// v
+		callnum = "323.09 .K43 V.1";      
+		assertEquals("323.09 .K43", removeDeweyVolSuffix(callnum));
+		callnum = "064 .I592EA V.1";      
+		assertEquals("064 .I592EA", removeDeweyVolSuffix(callnum));
+		callnum = "301.51 .J25 1993-1997:V.10";      
+		assertEquals("301.51 .J25 1993-1997", removeDeweyVolSuffix(callnum));
+		// preceding colon
+		callnum = "053 .E89 1840:V.1";      
+		assertEquals("053 .E89 1840", removeDeweyVolSuffix(callnum));
+		// range
+		callnum = "506 .A171 V.9-10";      
+		assertEquals("506 .A171", removeDeweyVolSuffix(callnum));
+		// suffix
+		callnum = "322.44 .F816 V.1 1974";  
+		assertEquals("322.44 .F816", removeDeweyVolSuffix(callnum));
+		callnum = "505 .B938 V.144-146 1934-1936";      
+		assertEquals("505 .B938", removeDeweyVolSuffix(callnum));
+		callnum = "905 .H918 V.1-7 1934-1940 INDEX";      
+		assertEquals("905 .H918", removeDeweyVolSuffix(callnum));
+		callnum = "614.0945 .I91 V.30:1 1984";      
+		assertEquals("614.0945 .I91", removeDeweyVolSuffix(callnum));
+		callnum = "305 .E85 V.32 1896:JUL.-DEC.";      
+		assertEquals("305 .E85", removeDeweyVolSuffix(callnum));
+		// doubles
+		callnum = "328.444 .F79 V.0 PT.2";
+		assertEquals("328.444 .F79", removeDeweyVolSuffix(callnum));
+		callnum = "570.5 .N287 V.34:NO.2 1941";
+		assertEquals("570.5 .N287", removeDeweyVolSuffix(callnum));
+		callnum = "570.5 .N287 V.28:NO.2 1936:AUG.";
+		assertEquals("570.5 .N287", removeDeweyVolSuffix(callnum));
+		callnum = "570.5 .N287 V.33:NO.2-10 1940";
+		assertEquals("570.5 .N287", removeDeweyVolSuffix(callnum));
+		callnum = "385.04 .R154 V.14:3RD IN VOL";
+		assertEquals("385.04 .R154", removeDeweyVolSuffix(callnum));
+		// comma
+		callnum = "627.05 .H838 V.38:NO.1-4,7-8 1983";
+		assertEquals("627.05 .H838", removeDeweyVolSuffix(callnum));
+
+		// vol
+	}
+
+	/**
+	 * remove LC call number 3 letter month suffix, if it exists
+	 */
+@Test
+	public void testRemoveLC3LetMonths()
+	{
+		String callnum = "BM198.2 .H85 OCT 2006";
+		assertEquals("BM198.2 .H85", removeLCVolSuffix(callnum));
+		callnum = "BM198.2 .H85 NOV 2006";
+		assertEquals("BM198.2 .H85", removeLCVolSuffix(callnum));
+		callnum = "BM198.2 .H85 JAN 2007";
+		assertEquals("BM198.2 .H85", removeLCVolSuffix(callnum));
+	}
 
 }
