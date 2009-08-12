@@ -41,6 +41,7 @@ public class UrlTests extends BibIndexTest {
 		// 956 SFX fields
 		assertDocHasFieldValue("mult856and956", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?superLongURL", sis); 
 		assertDocHasFieldValue("7117119", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&ctx_enc=info:ofi/enc:UTF-8&rfr_id=info:sid/sfxit.com:opac_856&url_ctx_fmt=info:ofi/fmt:kev:mtx:ctx&sfx.ignore_date_threshold=1&rft.object_id=110978984448763&svc_val_fmt=info:ofi/fmt:kev:mtx:sch_svc&", sis); 
+		assertDocHasFieldValue("newSfx", fldName, "http://library.stanford.edu/sfx?reallyLongLotsOfArgs", sis); 
 		
 		// 956 non-SFX fields (a representative few of them)
 		assertDocHasNoField("956BlankIndicators", fldName, sis);
@@ -84,6 +85,10 @@ public class UrlTests extends BibIndexTest {
 		assertDocHasNoField("856ind2isBlankTocSubZ", fldName, sis); 
 		assertDocHasNoField("856ind2isBlankTocSub3", fldName, sis); 
 		assertDocHasNoField("856tocAnd856SupplNoFulltext", fldName, sis);
+		
+		// don't get jackson forms for off-site paging requests
+		assertDocHasNoField("123http", fldName, sis);
+		assertDocHasNoField("124http", fldName, sis);
 	}
 	
 

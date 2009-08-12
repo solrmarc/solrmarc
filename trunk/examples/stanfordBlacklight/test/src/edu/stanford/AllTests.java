@@ -7,27 +7,27 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
     	AccessTests.class,
         AuthorTests.class,
+        CallNumberLoppingTests.class,
         CallNumberTests.class,
+        CallNumberUnitTests.class,
         DiacriticTests.class,
-        EditionTests.class,
         FormatTests.class,
         ItemInfoTests.class,
         LanguageTests.class,
         MiscellaneousFieldTests.class,
         PhysicalTests.class,
         PublicationTests.class,
-        TableOfContentsTests.class,
         StandardNumberTests.class,
         SubjectTests.class,
         TableOfContentsTests.class,
         TitleSearchTests.class,
+        TitleSearchVernTests.class,
         TitleTests.class,
         UrlTests.class,
-        VernFieldsTests.class,
-        TitleSearchVernTests.class
+        VernFieldsTests.class
         })
 
         
-public class AllBibIxTests 
+public class AllTests 
 {
 }

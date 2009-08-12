@@ -151,6 +151,7 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 		fields.add("spell");
 		fields.add("spell_title");
 		fields.add("spell_author");
+		fields.add("spell_subject");
 		for (String fldName : fields) {
 		    assertTextFieldProperties(fldName, solrCore, sis);
 		    assertFieldOmitsNorms(fldName, solrCore);
@@ -160,6 +161,7 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 		assertFieldNotMultiValued("spell", solrCore);
 		assertFieldMultiValued("spell_title", solrCore);
 		assertFieldMultiValued("spell_author", solrCore);
+		assertFieldMultiValued("spell_subject", solrCore);
 	}
 
 
