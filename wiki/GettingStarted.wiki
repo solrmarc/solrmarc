@@ -4,29 +4,32 @@
 
 === About This Guide ===
 
-This getting started guide describes SolrMarc, defines its software dependencies, steps the user through configuring and building the importer program, and gives basic information about some helpful scripts that are included in the SolrMarc program’s tools.
+This getting started guide describes !SolrMarc, defines its software dependencies, steps the user through configuring and building the importer program, and gives basic information about some helpful scripts that are included in the !SolrMarc program’s tools.
 
-<br />
 === About !SolrMarc ===
 
-SolrMarc is a utility that reads in MARC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified SOLR index.
+!SolrMarc is a utility that reads in MaRC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified Solr index.
 
-SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your SOLR index record, but it also allows the creation of custom index functions if you cannot achieve what you require using the predefined mapping techniques.
+!SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your Solr index record, but it also allows the creation of custom index functions if you cannot achieve what you require using the predefined mapping techniques.
 
-Currently, SolrMarc is configured to work with:
+Currently, !SolrMarc is configured to work with:
   * [http://blacklightopac.org/ Blacklight]
   * [VufindHowTo Vufind]
 
-If you do not anticipate a need for writing your own custom indexing functions, the binary distribution of SolrMarc is a simpler option. The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run SolrMarc. 
+If you do not anticipate a need for writing your own custom indexing functions, the binary distribution of !SolrMarc is a simpler option. The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run !SolrMarc. 
 
-For information on using binary distributions, go to [http://code.google.com/p/solrmarc/wiki/SolrMarcBinaryDistribution]
+For information on using binary distributions, see SolrMarcBinaryDistribution
 
-To get the binary distribution, go to [http://code.google.com/p/solrmarc/downloads/list this project's downloads page] and download {{{Binary_Generic_Blacklight_SolrMarc_Unix.tar.gz}}}, {{{Binary_Generic_VuFind_SolrMarc_Unix.tar.gz}}}, {{{Binary_Generic_VuFind_SolrMarc_PC.tar.gz}}}, or {{{Binary_Generic_Blacklight_SolrMarc_PC.tar.gz}}}. 
+To get the binary distribution, go to [http://code.google.com/p/solrmarc/downloads/list this project's downloads page] and download one of:  
+  * {{{Binary_Generic_Blacklight_SolrMarc_Unix.tar.gz}}}
+  * {{{Binary_Generic_VuFind_SolrMarc_Unix.tar.gz}}}
+  * {{{Binary_Generic_VuFind_SolrMarc_PC.tar.gz}}} 
+  * {{{Binary_Generic_Blacklight_SolrMarc_PC.tar.gz}}}
 
 <br />
 === Software Dependencies ===
 
-SolrMarc requires the java development kit (JDK) version 1.5 or newer and ant version 1.7 or newer.
+!SolrMarc requires the java development kit (JDK) version 1.5 or newer and ant version 1.7 or newer.
 
 ==== Java ====
 
@@ -38,7 +41,7 @@ To download the proper version of the java development kit, go to http://java.su
 
 ==== Solr ====
 
-While SolrMarc can build a Solr index on its own, you probably already have Solr installed on your system. If not, you will want to install Solr. SolrMarc 2.0 has been tested with 1.2, 1.3, and several versions of 1.4 (still in beta).
+While !SolrMarc can build a Solr index on its own, you probably already have Solr installed on your system. If not, you will want to install Solr. !SolrMarc 2.0 has been tested with 1.2, 1.3, and several versions of 1.4 (still in beta).
 
 To download Solr, go to http://lucene.apache.org/solr/
 
@@ -52,105 +55,120 @@ To download the proper version of ant, go to http://ant.apache.org/
 
 ==== Subversion Client ====
 
-You will need a subversion client to get SolrMarc if you're not using a [http://code.google.com/p/solrmarc/wiki/SolrMarcBinaryDistribution binary distribution].
+You will need a subversion client to get !SolrMarc if you're not using a [http://code.google.com/p/solrmarc/wiki/SolrMarcBinaryDistribution binary distribution].
 
-For information about Subversion, go to http://subversion.tigris.org/.  It has information about a variety of clients.
+For information about Subversion, go to http://subversion.tigris.org/.  It has information about a variety of subversion clients.
 
+<br />
 === Get !SolrMarc 2.0 ===
 
 Download the !SolrMarc software via a subversion checkout:
 
-{{{ svn checkout http://solrmarc.googlecode.com/svn/trunk  solrmarc }}}
-
+   _svn checkout http://solrmarc.googlecode.com/svn/trunk solrmarc_
 
 <br />
-=== Configuring the Importer Program ===
+== Configuring the Importer Program ==
 
-From the directory into which you checked out the !SolrMarc software, run the command 
+The default ant target will build the whole program and will query the user for correct settings, but we suggest you do the initialization step separately from the build step. 
+
+From the top level directory of the checked out !SolrMarc software, run the command 
 
    _ant init_
 
-By default, ant builds the whole program and will query user for correct settings.
+=== Installation Questions ===
 
-==== Installation Questions ====
+_"Default answers are shown in square brackets by the ant script."_
 
-*_1.Enter the name of a directory to contain all site specific modifications, including the configuration and index files_*
+*_1. Enter the name of a directory to contain all site specific files,_* including the configuration files and indexing code
 
-   ex. test, demo, uva
+   e.g. test, demo, uva
 
-*_2. Enter the name of example configuration to start from: (!GenericVuFind, !UvaBlacklight, !VanillaBlacklightDemo, !StanfordBlacklight, !StanfordVuFind, none)
+*_2. Enter the name of example configuration to start from: (!GenericVuFind, !GenericBlacklight, !UvaBlacklight, !StanfordBlacklight, !StanfordVuFind, none)
 
-Define which of the example directories you wish you use as a template for your SolrMarc installation.
+Define which of the example directories you wish you use as a template for your !SolrMarc installation.  The default is _none_, meaning you will start from a blank slate, without any site-specific files/code.
 
-Once you've chosen, the builder creates the directory and subdirectories based on this template to prepare the structure to be filled in with rest of setup information.
+The selected example is used as a template to create the directory structure that will be populated by the rest of the configuration script.
 
-*_3. Enter the name of the Jar file containing custom indexing functions._*
+*_3. Enter the name of the Jar file to contain site-specific custom indexing code_*
 
-If you require custom indexing functions, provide the jar file name that contains that code.
+Enter _"none"_ if you expect not to have any site-specific custom indexing code. If you require custom indexing functions beyond what is provided, enter a name for the jar file that will contain your site-specific code.  Omit _".jar"_ from the end of the name.
 
-   ex. custom.jar
+   e.g. demo, uvaCustom
 
-Enter _"none"_ if you expect not to have any custom indexing functions.
+_"Custom"_ is the default value.
 
 *_4. Enter prefix of the properties files for config and index files for custom modifications._*
 
-Enter the name to be used to identify this instance of SolrMarc.
+Enter the name to be used to identify this instance of !SolrMarc.
 
-   ex. my_config.properties; my_index.properties
+   e.g. for uva_config.properties and uva_index.properties, enter _"uva"_
 
-*_5. Enter name of the final resulting Jar file that will contain all the code, libraries, and properties for running SolrMarc._*
+_"demo"_ is the default value.
 
-   Default suggestion customprefix_solrmarc.jar
+Because it is sometimes useful to have multiple site-specific configurations of !SolrMarc, the prefix helps distinguish the configuration files for each site-specific instance.
 
-*_6. Enter java heap size memory argument to put in generated scripts for site-specific SolrMarc indexer._*
+*_5. Enter name of the final resulting Jar file that will contain all the needed code, libraries, and properties for running !SolrMarc._*  
 
-   Default value=256MB
+Omit _".jar"_ from the end of the name.
 
-Note: While 256MB is sufficient to load the demo, a real-world indexing job requires a much larger java heap size. The developer uses 1024MB on his desktop and at least 2048MB on the server where the indexing job will include millions of records.
+Default value will be (yourPrefix)_!SolrMarc.jar
 
-Custom settings are now written out to a file so that they are preserved for future updates.
+*_6. Enter java heap size memory argument to put in generated scripts for site-specific !SolrMarc indexer._*
 
-*_7. Enter URL where solr server will be located.
+Default value is _512MB_.  While 512MB is sufficient to load a small amount of data (think demo), a real-world indexing job requires a much larger java heap size. The developer uses 1024MB on his desktop and at least 2048MB on the server where the indexing job will include millions of records.
 
-   ex. http://localhost:8983/solr
+The value specified here is preserved in a file for future updates.
 
-*_8. Enter the full path of the Solr home directory. (Note: directory should contain {{{conf}}} directory, containing {{{solrconfig.xml}}} and {{{schema.xml}}}.)
+*_7. Enter URL where solr server will be located._*
 
-   ex. c:\solr\solr
+   e.g. http://your.host.org:8983/solr
 
-*_9. Enter encoding used in MARC records to be read in: MARC8, UNIMARC, UTF8, BESTGUESS
+_"http://localhost:8983/solr"_ is the default value.
 
-MARC8 - Longstanding standard encoding scheme used by U.S. libraries<br />
-UNIMARC - Encoding scheme used by many European libraries<br />
-UTF8 - Unicode character encoding scheme, used in some newer systems<br />
-BESTGUESS - You have no idea what encoding your records are in and want the program to try to determine it.
+*_8. Enter the full path of the Solr home directory._*
 
-*_10.Enter the version of SOLR you will be running in your local environment._*
+This directory should contain a _conf_ directory which contains _schema.xml_ and _solrconfig.xml_ Solr configuration files.
 
-(SolrMarc has been tested with 1.2, 1.3, and several versions of 1.4(still in beta))
+   e.g. c:\solr\solr, /usr/local/me/solr
 
-Best practice is to specify _“war”_ as the answer to this question, and then give the full path to the current solr.war file which will be used by the jetty or tomcat web server for searching the solr index. This will ensure that you won’t create an index that is out of sync with what the webserver code expects.
+*_9. Enter encoding used in MARC records to be read in:_* MARC8, UNIMARC, UTF8, BESTGUESS
 
-*_11. Enter full path where solr.war file is located.
+_MARC8_ - Longstanding standard encoding scheme used by U.S. libraries<br />
+_UNIMARC_ - Encoding scheme used by many European libraries<br />
+_UTF8_ - Unicode character encoding scheme, used in some newer systems<br />
+_BESTGUESS_ - You want the program to try to determine the encoding
 
-   ex. c:\solr\webapps\solr.war
+*_10. Enter instance of Solr code to use for your site:_* war, 1.2, 1.3, 1.4, external
+
+_war_ - a particular solr.war file used by the web server hosting your solr application.  You will then be prompted for the full path of the location of the solr.war file, e.g. c:\solr\webapps\solr.war, /usr/local/me/jetty/webapps/solr.war<br />
+
+_1.2_ - a distribution of Solr version 1.2 included in !SolrMarc project<br />
+_1.3_ - a distribution of Solr version 1.3 included in !SolrMarc project<br />
+_1.4_ - a distribution of Solr version 1.4 included in !SolrMarc project<br />
+
+_external_ - like war, but also allows for a directory containing Solr jar files. You will then be prompted for the full path of the location of the solr.war file, or the full path of the directory containing the Solr jar files.
+
+Be careful!  It can cause problems if you create a Solr index with different Solr code than that used by the Solr application on your web server.  Best practice is to specify _“war”_ (or _"external"_), and then give the full path to the solr.war file used by the web server hosting your Solr application. 
+
+!SolrMarc has been tested with Solr 1.2, 1.3, and several versions of 1.4 (still in beta)
 
 <br />
-==== Configuration files: ====
+=== Configuration Files ===
 
-Fill in the xxxx_config and xxxx_index files in the site specific directory that you've just created using the template files that were created in the build.
+You may need to edit the _"xxxx_config.properties"_ and _"xxxx_index.properties"_ files present in your site-specific directory (as created by _ant init_).
 
- xxxx_config.properties: controls overall operation of the program
+ xxx_config.properties: controls overall operation of the program, and may be okay as is.
 
- xxxx_index.properties: where the mapping from MARC tags to SOLR fields is specified
+ xxx_index.properties: where the mapping from MARC fields/subfields to SOLR fields is specified.
 
-Because it is possible to have multiple instances of SolrMarc running on a server, the prefix helps the system administrator know to which instance the configuration files refer.
+Detailed documentation about settings in these files is available at ConfiguringSolrMarc
 
-===== Config file =====
+
+===== Example xxx_config.properties File =====
 
 {{{
 # Properties for the Java import program
-# $Id: importSamples.properties 17 2008-06-20 14:40:13Z wayne.graham $
+# $Id: importSamples.properties 17 2008-06-20 14:40:13Z marc.solr $
 
 # Path to your solr instance
 solr.path = /usr/local/projects/bl-demo/bl-demo/jetty/solr
@@ -167,7 +185,7 @@ marc.default_encoding = MARC8
 marc.include_errors = true 
 }}}
 
-===== Index file =====
+===== Example xxx_index.properties File =====
 
 {{{
 id = 001, first
@@ -221,20 +239,20 @@ pattern_map.isbn_clean.pattern_0 = ([- 0-9]*[0-9]).*=>$1
 }}}
 
 <br />
-=== Building the Importer Program ===
+== Building the Importer Program ==
 
-Once you have finished editing the xxxx_config.properties file and the xxxx_index.properties file located in your site specific directory, 
+Once you have finished editing the xxx_config.properties file and the xxx_index.properties file located in your site specific directory, 
 
  # Change back to the top level directory where you first ran _ant init_
  # Run _ant build_   
 
-This action compiles all of the standard source code for the importer, compiles any custom source code that you have created in your site specific directory, and creates a large jar file containing all of the compiled code, any jar files needed by the code, and the properties files that control how the program runs, including your xxxx_ config.properties, and your  xxxx_index.properties.  
+This action compiles all of the standard source code for the importer, compiles any custom source code that you have created in your site specific directory, and creates a single jar file containing all of the compiled code, any jar files needed by the compiled code, and the properties files that control how the program runs, including your _xxx_config.properties_, and your _xxx_index.properties_.  
 
-A directory called {{{.dist/}}} is created by the build process. The builder places the jar file that contains all the code and libraries for SolrMarc to run in this directory.   Additionally, several shell scripts/batch files that make using the indexing program and its associated utilities much easier to run are placed in this {{{.dist/}}} directory.
+A directory called {{{.dist/}}} is created by the build process. The ant build places the single jar file containing everything !SolrMarc needs to run in this directory.   Additionally, several shell scripts/batch files that make using the indexing program and its associated utilities much easier to run are placed in this {{{.dist/}}} directory.
 
 Assuming no errors are encountered in the build process, the build is now complete.
 
-For documentation on using SolrMarc to index your marc records, please see the ConfiguringSolrMarc document.
+For documentation on using !SolrMarc to index your marc records, please see the ConfiguringSolrMarc document.
 
 <br />
 === Batch Files/Shell Scripts ===
