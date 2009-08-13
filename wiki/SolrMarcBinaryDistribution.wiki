@@ -2,7 +2,7 @@
 
 === About This Document ===
 
-This getting started guide describes the !SolrMarc binary distribution for Blacklight and VuFind, defines its software dependencies, guides the user through using the !SolrMarc binary to index a file of MARC records.
+This getting started guide describes the !SolrMarc binary distribution for Blacklight and !VuFind, defines its software dependencies, guides the user through using the !SolrMarc binary to index a file of MARC records.
 
 <br/>
 === About !SolrMarc ===
