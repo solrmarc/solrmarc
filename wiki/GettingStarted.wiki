@@ -17,7 +17,9 @@ Currently, SolrMarc is configured to work with:
   * [http://blacklightopac.org/ Blacklight]
   * [VufindHowTo Vufind]
 
-If you do not anticipate a need for custom indexing functions, the binary distribution of SolrMarc is a simpler option. The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run SolrMarc. 
+If you do not anticipate a need for writing your own custom indexing functions, the binary distribution of SolrMarc is a simpler option. The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run SolrMarc. 
+
+For information on using binary distributions, go to [http://code.google.com/p/solrmarc/wiki/SolrMarcBinaryDistribution]
 
 To get the binary distribution, go to [http://code.google.com/p/solrmarc/downloads/list this project's downloads page] and download {{{Binary_Generic_Blacklight_SolrMarc_Unix.tar.gz}}}, {{{Binary_Generic_VuFind_SolrMarc_Unix.tar.gz}}}, {{{Binary_Generic_VuFind_SolrMarc_PC.tar.gz}}}, or {{{Binary_Generic_Blacklight_SolrMarc_PC.tar.gz}}}. 
 
@@ -34,6 +36,12 @@ To check the version of the java development kit (JDK), at the command prompt ty
 
 To download the proper version of the java development kit, go to http://java.sun.com/javase/downloads/index.jsp
 
+==== Solr ====
+
+While SolrMarc can build a Solr index on its own, you probably already have Solr installed on your system. If not, you will want to install Solr. SolrMarc 2.0 has been tested with 1.2, 1.3, and several versions of 1.4 (still in beta).
+
+To download Solr, go to http://lucene.apache.org/solr/
+
 ==== Ant ====
 
 To check the ant version, at the command prompt type
@@ -42,22 +50,23 @@ To check the ant version, at the command prompt type
 
 To download the proper version of ant, go to http://ant.apache.org/
 
-==== Solr ====
+==== Subversion Client ====
 
-While SolrMarc can build a Solr index on its own, you probably already have Solr installed on your system. If not, you will want to install Solr. SolrMarc 2.0 has been tested with 1.2, 1.3, and several versions of 1.4 (still in beta).
+You will need a subversion client to get SolrMarc if you're not using a [http://code.google.com/p/solrmarc/wiki/SolrMarcBinaryDistribution binary distribution].
 
-To download Solr, go to http://lucene.apache.org/solr/
+For information about Subversion, go to http://subversion.tigris.org/.  It has information about a variety of clients.
 
-==== !SolrMarc 2.0 ====
+=== Get !SolrMarc 2.0 ===
 
-Download the software via a subversion checkout:
+Download the !SolrMarc software via a subversion checkout:
 
 {{{ svn checkout http://solrmarc.googlecode.com/svn/trunk  solrmarc }}}
+
 
 <br />
 === Configuring the Importer Program ===
 
-At the command prompt, run 
+From the directory into which you checked out the !SolrMarc software, run the command 
 
    _ant init_
 
