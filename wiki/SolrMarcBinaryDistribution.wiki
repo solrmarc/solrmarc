@@ -56,7 +56,7 @@ then run:
 
 <br />
 === Running !SolrMarc ===
-You will then be ready index MARC records into the solr index that will be used by your implementation of Blacklight or VuFind via the following command:
+You will then be ready index MARC records into the solr index that will be used by your implementation of Blacklight or !VuFind via the following command:
  
    {{{indexer/indexfile /path/to/marcrecords.mrc}}}
 
