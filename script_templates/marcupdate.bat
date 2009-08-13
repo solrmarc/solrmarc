@@ -8,4 +8,4 @@ for %%x in (%0) do set scriptdir=%%~dpsx
 for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
 
 
-java -Done-jar.main.class="org.solrmarc.marc.MarcMerger" -jar %scriptdir%@CUSTOM_JAR_NAME@ %1 %2 %3
+java -Done-jar.main.class="org.solrmarc.marc.MarcMerger" -jar %scriptdir%@CUSTOM_JAR_NAME@ %1 %2 %3 %4 %5 %6 %7 

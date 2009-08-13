@@ -28,6 +28,7 @@ public class MarcMerger
     public final static String minRecordID = "u0";
     public final static String maxRecordID = "u99999999999";
     public static boolean verbose = false;
+    public static boolean veryverbose = false;
 
     static class SimpleRecord
     {
@@ -135,6 +136,7 @@ public class MarcMerger
         DataInputStream input1;
         DataInputStream input2;
         DataInputStream input3 = null;
+        String segmentMinRecordID = minRecordID;        
         String segmentMaxRecordID = maxRecordID;
         int argoffset = 0;
         boolean mergeRecords = true;
@@ -142,6 +144,22 @@ public class MarcMerger
         {
             verbose = true;
             argoffset = 1;
+        }
+        if (args[0].equals("-vv"))
+        {
+            verbose = true;
+            veryverbose = true;
+            argoffset = 1;
+        }
+        if (args[0+argoffset].equals("-min"))
+        {
+            segmentMinRecordID = args[1+argoffset];
+            argoffset += 2;
+        }
+        if (args[0+argoffset].equals("-max"))
+        {
+            segmentMaxRecordID = args[1+argoffset];
+            argoffset += 2;
         }
         if (args[0+argoffset].endsWith(".del"))
         {
@@ -151,26 +169,26 @@ public class MarcMerger
         try
         {
             input0 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[0+argoffset]))));
-            String nextFile = getNextFile(args[0+argoffset]);
-            if (verbose)  System.err.println("Name of \"next\" file to get MaxRecordID = " + nextFile);
-
-            if (nextFile != null)
-            {
-                try {
-                    input1 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(nextFile))));
-                    segmentMaxRecordID = new SimpleRecord(input1).id;
-                    if (verbose)  System.err.println("value for MaxRecordID = " + segmentMaxRecordID);
-                }
-                catch (FileNotFoundException e)
-                {
-                    // no next file,  ignore it be happy
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                    return;
-                }
-            }
+//            String nextFile = getNextFile(args[0+argoffset]);
+//            if (verbose)  System.err.println("Name of \"next\" file to get MaxRecordID = " + nextFile);
+//
+//            if (nextFile != null)
+//            {
+//                try {
+//                    input1 = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(nextFile))));
+//                    segmentMaxRecordID = new SimpleRecord(input1).id;
+//                    if (verbose)  System.err.println("value for MaxRecordID = " + segmentMaxRecordID);
+//                }
+//                catch (FileNotFoundException e)
+//                {
+//                    // no next file,  ignore it be happy
+//                }
+//                catch (IOException e)
+//                {
+//                    e.printStackTrace();
+//                    return;
+//                }
+//            }
             String modfile = args[1+argoffset];
             String delfile = null;
             if (modfile.endsWith(".mrc"))
@@ -207,20 +225,20 @@ public class MarcMerger
 
     }
  
-    private static String getNextFile(String filename)
-    {
-        File filepath = new File(filename);
-        String filePrefix = filepath.getParent();
-        String name = filepath.getName();
-        String name1 = name.replaceAll("([^0-9]*)[0-9]*.*", "$1");
-        String name2 = name.replaceAll("[^0-9]*([0-9]*).*", "$1");
-        String name3 = name.replaceAll("[^0-9]*[0-9]*(.*)", "$1");
-        int nameVal = 100000000 + Integer.parseInt(name2);
-        String newName2 = String.valueOf(nameVal + 1);
-        newName2 = newName2.substring(newName2.length() - name2.length());
-        String newName = ((filePrefix == null) ? "" : filePrefix + File.separator) + name1 + newName2 + name3;
-        return(newName);
-    }
+//    private static String getNextFile(String filename)
+//    {
+//        File filepath = new File(filename);
+//        String filePrefix = filepath.getParent();
+//        String name = filepath.getName();
+//        String name1 = name.replaceAll("([^0-9]*)[0-9]*.*", "$1");
+//        String name2 = name.replaceAll("[^0-9]*([0-9]*).*", "$1");
+//        String name3 = name.replaceAll("[^0-9]*[0-9]*(.*)", "$1");
+//        int nameVal = 100000000 + Integer.parseInt(name2);
+//        String newName2 = String.valueOf(nameVal + 1);
+//        newName2 = newName2.substring(newName2.length() - name2.length());
+//        String newName = ((filePrefix == null) ? "" : filePrefix + File.separator) + name1 + newName2 + name3;
+//        return(newName);
+//    }
 
     static void processMergeRecords(DataInputStream mainFile, String maxID, DataInputStream newOrModified, DataInputStream deleted, OutputStream out) 
     {
@@ -229,6 +247,7 @@ public class MarcMerger
         {
             SimpleRecord mainrec = new SimpleRecord(mainFile);
             String segmentMinRecordID = mainrec.id;
+            if (segmentMinRecordID == maxRecordID)  segmentMinRecordID = "u0";
             SimpleRecord newOrModrec = new SimpleRecord(newOrModified);
             String deletedId = maxRecordID;
             BufferedReader delReader = null;
@@ -251,7 +270,7 @@ public class MarcMerger
                 if (compare.compare(mainrec.id, newOrModrec.id)< 0  && compare.compare(mainrec.id, deletedId) < 0)
                 {
                     // mainrec unchanged, just write it out.
-                    //if (verbose) System.err.println("Writing original record "+ mainrec.id + " from input file");
+                    if (veryverbose) System.err.println("Writing original record "+ mainrec.id + " from input file");
                     out.write(mainrec.fullrecord);
                     out.flush();
                     mainrec.next();
