@@ -13,8 +13,8 @@ This getting started guide describes !SolrMarc, defines its software dependencie
 !SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your Solr index record, but it also allows the creation of custom indexing functions if you cannot achieve what you require using the predefined mapping techniques.
 
 Currently, !SolrMarc is configured to work with:
-  * [BlacklightHowTo Blacklight]  (http://projectblacklight.org/)
-  * [VufindHowTo Vufind] (http://vufind.org/)
+  * [http://projectblacklight.org/ Blacklight] -- BlacklightHowTo 
+  * [http://vufind.org/ Vufind] -- VufindHowTo
 
 If you do not anticipate a need for writing your own custom indexing functions, the binary distribution of !SolrMarc is a simpler option. The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run !SolrMarc. 
 
