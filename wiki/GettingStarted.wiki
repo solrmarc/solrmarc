@@ -8,12 +8,12 @@ This getting started guide describes !SolrMarc, defines its software dependencie
 
 === About !SolrMarc ===
 
-!SolrMarc is a utility that reads in MaRC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified Solr index.
+!SolrMarc is a utility that reads in MaRC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified Apache Solr index.
 
-!SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your Solr index record, but it also allows the creation of custom index functions if you cannot achieve what you require using the predefined mapping techniques.
+!SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your Solr index record, but it also allows the creation of custom indexing functions if you cannot achieve what you require using the predefined mapping techniques.
 
 Currently, !SolrMarc is configured to work with:
-  * [http://blacklightopac.org/ Blacklight]
+  * [http://projectblacklight.org/ Blacklight]
   * [VufindHowTo Vufind]
 
 If you do not anticipate a need for writing your own custom indexing functions, the binary distribution of !SolrMarc is a simpler option. The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run !SolrMarc. 
