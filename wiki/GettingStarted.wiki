@@ -14,7 +14,7 @@ This getting started guide describes !SolrMarc, defines its software dependencie
 
 Currently, !SolrMarc is configured to work with:
   * Blacklight (http://projectblacklight.org/) -- see !SolrMarc BlacklightHowTo 
-  * VuFind (http://vufind.org/) -- see !SolrMarc VufindHowTo
+  * !VuFind (http://vufind.org/) -- see !SolrMarc VufindHowTo
 
 If you do not anticipate a need for writing your own custom indexing functions, the binary distribution of !SolrMarc is a simpler option. The binary distribution consists of a single large jar file containing all of the code, libraries and data files to configure and run !SolrMarc. 
 
