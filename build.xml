@@ -157,7 +157,7 @@
     <macrodef name="get_properties_for_config_file">
         <sequential>
             <property name="example.default.solr.hosturl" value="http://localhost:8983/solr" />
-            <input-save message="Enter URL of where solr server will be located:" addproperty="solr.hosturl"  
+            <input-save message="Enter URL of your Solr server:" addproperty="solr.hosturl"  
                 defaultvalue="${example.default.solr.hosturl}"  propertyfile="${site.dir}/build_override.properties" />
             <if> 
                 <and>
@@ -199,7 +199,7 @@
             <property name="solr.indexer" value="${custom.indexer.class}" />
             <property name="solr.indexer.properties" value="${custom.config.file.prefix}_index.properties" />
             <property name="example.default.marc.default_encoding" value="MARC8" />
-            <input-save message="Enter encoding used in MARC records to be read in:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You have no idea what encoding your records are in, and want the program to try to determine it." 
+            <input-save message="Enter encoding of MARC records:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You want the program to try to determine the encoding${line.separator}" 
                 addproperty="marc.default_encoding"  validargs="MARC8,UNIMARC,UTF-8,BESTGUESS" 
                 defaultvalue="${example.default.marc.default_encoding}" propertyfile="${site.dir}/build_override.properties" />
         </sequential>
@@ -208,21 +208,21 @@
     <macrodef name="get_site_specific_settings">
         <sequential>
             <property name="example.default.custom.jar.name" value="Custom" />
-            <input-save message="Enter name to use for Jar File containing custom indexing functions${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
+            <input-save message="Enter name for Jar file to contain site-specific custom indexing code, or 'none' if you do not expect to have any: ${line.separator}(Note: omit &quot;.jar&quot; from end of the name) "
                 addproperty="custom.jar.name" defaultvalue="${example.default.custom.jar.name}"  propertyfile="${site.dir}/build_override.properties" />
             
             <lowercase property="custom.jar.name.lc" value="${custom.jar.name}" />
             <echo message="lowercase = ${custom.jar.name.lc}" level="verbose" />
             <property name="example.default.custom.config.file.prefix" value="${custom.jar.name.lc}" />
-            <input-save message="Enter prefix of properties files for config and index for custom modifications ${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
+            <input-save message="Enter prefix for site-specific config and index properties file names:${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
                 addproperty="custom.config.file.prefix" defaultvalue="${example.default.custom.config.file.prefix}"  propertyfile="${site.dir}/build_override.properties" />
             
             <property name="example.default.distribution.jar.name" value="${custom.jar.name}_SolrMarc" />            
-            <input-save message="Enter name to use for final resulting Jar File containing all code, libraries, and properties${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
+            <input-save message="Enter name to use for final resulting Jar file containing all code, libraries, and properties:${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
                 addproperty="distribution.jar.name" defaultvalue="${example.default.distribution.jar.name}"  propertyfile="${site.dir}/build_override.properties" />
             
             <property name="example.default.exe.mem.args" value="-Xmx256m" />            
-            <input-save message="Enter java heap size memory argument to put in generated scripts for running site-specific SolrMarc Indexer "
+            <input-save message="Enter java heap size to use in generated scripts for running site-specific SolrMarc Indexer:"
                 addproperty="exe.mem.args" defaultvalue="${example.default.exe.mem.args}" propertyfile="${site.dir}/build_override.properties" />
 
         </sequential>
@@ -269,7 +269,10 @@
     </macrodef>
 
     <target name="init_site" description="Create the src, lib, bin, test directories for a custom site" unless="init_site.already.run">
-        <input-save message="Enter name of directory to contain all site-specific modifications:"       
+        <echo message=" " />
+        <echo message="See http://code.google.com/p/solrmarc/wiki/GettingStarted for more detailed instructions" />
+        <echo message=" " />
+        <input-save message="Enter name of directory to contain all site-specific files:"       
             addproperty="site.dir" propertyfile="site.dir.properties" />
         <init_site_props />
 
@@ -341,7 +344,7 @@
                     </path>
                     <flattenmapper />
                 </pathconvert>
-                <input-save message="Enter name of example configuration to start from:"  addproperty="example.configuration"
+                <input-save message="Enter name of example configuration to start from (or 'none'):"  addproperty="example.configuration"
                         validargs="${example.dir.list},none" defaultvalue="none" propertyfile="${site.dir}/build_override.properties" />
                 <if>
                     <equals arg1="${example.configuration}" arg2="none" />
@@ -390,8 +393,8 @@
 
     <!-- Solr Version Properties Targets -->
     <target name="solrversion" description="Set the version of Solr to use" unless="solrversion.already.run">
-        <input-save message="solr.version must be defined as either 1.2, 1.3, or 1.4 (or war)(or external)" 
-            validargs="1.2,1.3,1.4,war,external" 
+        <input-save message="Enter the instance of Solr code to use for your site:${line.separator}war - a particular solr.war file used by the web server hosting your solr application${line.separator}external - like war, but also allows for a directory containing Solr jar files${line.separator}1.2,1.3,1.4 - a distribution of Solr provided by SolrMarc${line.separator}" 
+            validargs="war,1.2,1.3,1.4,external" 
             addproperty="solr.version" defaultvalue="war"  propertyfile="${site.dir}/build_override.properties" />
         <if>
             <equals arg1="${solr.version}" arg2="war" />
@@ -559,7 +562,7 @@
                     </then>
                     <else>
 		                <property name="example.default.default.config" value="" />
-                        <input-save message="Select the default config file to use if no such file is specified on the command line" 
+                        <input-save message="Select the default config file to use if no such file is specified on the command line:" 
 		                    validargs="${config.file.list}" defaultvalue="${example.default.default.config}" 
                             addproperty="default.config" propertyfile="${site.dir}/build_override.properties" />
                     </else>
@@ -754,7 +757,7 @@
                 <include name="examples/GenericVuFind/src/**"/>
                 <include name="examples/GenericVuFind/translation_maps/*"/>
                 <include name="examples/GenericVuFind/*.properties"/>
-                <include name="examples/VanillaBlacklightDemo/*.properties"/>
+                <include name="examples/GenericBlacklight/*.properties"/>
                 <include name="examples/UvaBlacklight/script_templates/*"/>
                 <include name="examples/UvaBlacklight/src/**"/>
                 <include name="examples/UvaBlacklight/translation_maps/*"/>
@@ -831,7 +834,7 @@
     <target name="package" description="Create both prebuilt binary distributions and a source distribution" >
         <antcall target="package-src" inheritAll="false" />
         <antcall target="package-prebuilt" inheritAll="false">
-            <param name="example.configuration" value="VanillaBlacklightDemo" />
+            <param name="example.configuration" value="GenericBlacklight" />
             <param name="accept.default.for.input" value="true" />
         </antcall>
         <antcall target="package-prebuilt" inheritAll="false">
