@@ -79,13 +79,13 @@ From the top level directory of the checked out !SolrMarc software, run the comm
 
 _"Default answers are shown in square brackets by the ant script."_
 
-*_1. Enter the name of a directory to contain all site specific files,_* including the configuration files and indexing code
+*_1. Enter the name of directory to contain all site specific files,_* including the configuration files and indexing code.
 
    e.g. test, demo, uva
 
-*_2. Enter the name of example configuration to start from: (!GenericVuFind, !GenericBlacklight, !UvaBlacklight, !StanfordBlacklight, !StanfordVuFind, none)
+*_2. Enter the name of example configuration to start from:_* (!GenericVuFind, !GenericBlacklight, !UvaBlacklight, !StanfordBlacklight, !StanfordVuFind, none)
 
-Define which of the example directories you wish you use as a template for your !SolrMarc installation.  The default is _none_, meaning you will start from a blank slate, without any site-specific files/code.
+Choose an example implementation you wish you use as a template for your !SolrMarc installation.  The default is _none_, meaning you will start from a blank slate, without any site-specific files or code (except for properties files required to run !SolrMarc).
 
 The selected example is used as a template to create the directory structure that will be populated by the rest of the configuration script.
 
@@ -97,9 +97,9 @@ Enter _"none"_ if you expect not to have any site-specific custom indexing code.
 
 _"Custom"_ is the default value.
 
-*_4. Enter prefix of the properties files for config and index files for custom modifications._*
+*_4. Enter prefix for site-specific config and index properties file names._*
 
-Enter the name to be used to identify this instance of !SolrMarc.
+Enter the prefix to be used to identify this instance of !SolrMarc.
 
    e.g. for uva_config.properties and uva_index.properties, enter _"uva"_
 
@@ -107,13 +107,13 @@ _"demo"_ is the default value.
 
 Because it is sometimes useful to have multiple site-specific configurations of !SolrMarc, the prefix helps distinguish the configuration files for each site-specific instance.
 
-*_5. Enter name of the final resulting Jar file that will contain all the needed code, libraries, and properties for running !SolrMarc._*  
+*_5. Enter name of the final resulting Jar file that will contain all needed code, libraries, and properties for running !SolrMarc._*  
 
 Omit _".jar"_ from the end of the name.
 
 Default value will be (yourPrefix)_!SolrMarc.jar
 
-*_6. Enter java heap size memory argument to put in generated scripts for site-specific !SolrMarc indexer._*
+*_6. Enter java heap size to use in generated scripts for site-specific !SolrMarc indexer._*
 
 Default value is _512MB_.  While 512MB is sufficient to load a small amount of data (think demo), a real-world indexing job requires a much larger java heap size. The developer uses 1024MB on his desktop and at least 2048MB on the server where the indexing job will include millions of records.
 
@@ -125,20 +125,20 @@ The value specified here is preserved in a file for future updates.
 
 _"http://localhost:8983/solr"_ is the default value.
 
-*_8. Enter the full path of the Solr home directory._*
+*_8. Enter the full path of Solr home directory._*
 
 This directory should contain a _conf_ directory which contains _schema.xml_ and _solrconfig.xml_ Solr configuration files.
 
    e.g. c:\solr\solr, /usr/local/me/solr
 
-*_9. Enter encoding used in MARC records to be read in:_* MARC8, UNIMARC, UTF8, BESTGUESS
+*_9. Enter encoding of MARC records:_* MARC8, UNIMARC, UTF8, BESTGUESS
 
 _MARC8_ - Longstanding standard encoding scheme used by U.S. libraries<br />
 _UNIMARC_ - Encoding scheme used by many European libraries<br />
 _UTF8_ - Unicode character encoding scheme, used in some newer systems<br />
 _BESTGUESS_ - You want the program to try to determine the encoding
 
-*_10. Enter instance of Solr code to use for your site:_* war, 1.2, 1.3, 1.4, external
+*_10. Enter the instance of Solr code to use for your site:_* war, 1.2, 1.3, 1.4, external
 
 _war_ - a particular solr.war file used by the web server hosting your solr application.  You will then be prompted for the full path of the location of the solr.war file, e.g. c:\solr\webapps\solr.war, /usr/local/me/jetty/webapps/solr.war<br />
 
