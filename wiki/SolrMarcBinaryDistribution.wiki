@@ -42,7 +42,7 @@ Create a directory and copy the !SolrMarc distribution you just made into it. Yo
 
 <br />
 === Configuring !SolrMarc ===
-!SolrMarc uses a series of Java properties files for its configuration, and these are stored inside the single large jar file that is included in the binary distribution. Some of the values in these properties files need to be set before you will be able to run !SolrMarc to produce an index for your VuFind or Blacklight installation.
+!SolrMarc uses a series of Java properties files for its configuration, and these are stored inside the single large jar file that is included in the binary distribution. Some of the values in these properties files need to be set before you will be able to run !SolrMarc to produce an index for your !VuFind or Blacklight installation.
  
 If you unpack the binary distribution into a directory named {{{indexer}}} inside your chosen demo distribution, all you need to do is run two shell scripts to configure the !SolrMarc indexer.
 
