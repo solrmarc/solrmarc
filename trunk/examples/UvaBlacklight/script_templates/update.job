@@ -41,6 +41,12 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
         indexfile $file  > $output 2>&1
         indexfile blacklight_devd_config.properties $file > $output_dev 2>&1
         let "num += 1"
+        marcsort $file > $DATA_DIR/processed_sorted/$fname
+        sort -n $delfile > $DATA_DIR/processed_sorted/$delfname
+        marcupdate $DATA_DIR/processed_combined/all_mods_00.mrc $DATA_DIR/processed_sorted/$fname
+        marcupdate $DATA_DIR/processed_combined/all_mods_00.del $DATA_DIR/processed_sorted/$fname
+        process_full_dump $DATA_DIR/processed_sorted/$fname
+        echo "Last File Merged Into full_dump: $DATA_DIR/processed_sorted/$fname" >> $DATA_DIR/full_dump_updated/updates.txt
         fi
 
     #check whether the del file has already been processed
