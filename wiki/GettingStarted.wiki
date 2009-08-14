@@ -119,7 +119,7 @@ Default value is _512MB_.  While 512MB is sufficient to load a small amount of d
 
 The value specified here is preserved in a file for future updates.
 
-*_7. Enter URL where solr server will be located._*
+*_7. Enter URL of your Solr server_*
 
    e.g. http://your.host.org:8983/solr
 
