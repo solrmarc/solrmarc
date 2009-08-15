@@ -154,7 +154,7 @@ public final class Utils {
                 {
                     propertyFile = new File(propertyPaths[pathCnt++], propertyFileName);
                 }
-            } while (propertyPaths != null && pathCnt < propertyPaths.length);
+            } while (propertyPaths != null && pathCnt <= propertyPaths.length);
         }
         // if we didn't find it as a file, look for it as a URL
         String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
