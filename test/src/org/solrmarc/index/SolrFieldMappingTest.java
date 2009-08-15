@@ -16,16 +16,14 @@ import org.apache.log4j.Logger;
 public class SolrFieldMappingTest 
 {
      // Initialize logging category
-    static Logger logger = Logger.getLogger(SolrFieldMappingTest.class.getName());
+//    static Logger logger = Logger.getLogger(SolrFieldMappingTest.class.getName());
 
 
     /** marcMappingTest instance used to do the field mapping */
 	private MarcMappingTest marcMappingTest = null;
 
-    
-// FIXME:  move mrcFileName to assert method !!!!
-	
-    /**
+
+	/**
      *  Constructor
      * @param configPropsName - name of xxx _config.properties file
      * @param idFldName - name of unique key field in solr document
