@@ -39,7 +39,14 @@ import org.solrmarc.marc.MarcFilteredReader;
 import org.solrmarc.tools.Utils;
 
 /**
- * 
+ * A Utility class that writes to the PrintWriter passed in.
+ *   print - prints out the record (?)
+ *   index - given a solr field name, will output a line containing
+ *     the solr record id, solr field name and solr field value
+ *       for each value of that solr field for each marc record in the file.
+ *   to_xml - prints out the record as xml
+ *   translate - ??
+ *   
  * @author Robert Haschart
  * @version $Id$
  *
@@ -163,7 +170,7 @@ public class MarcPrinter extends MarcHandler
                     {
                         key = keys.next();
                         Object value = indexMap.get(key);
-                        if (key.equals("id")) continue;
+//                        if (key.equals("id")) continue;
                         if (indexkeyprefix == null || key.matches(indexkeyprefix))
                         {
                             if (value instanceof String)
