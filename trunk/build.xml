@@ -418,7 +418,7 @@
                                 <property name="solr.war.location.default" value="" />
                             </else>
                         </if>
-                        <input-filepath message="Enter full path of where solr.war file is located:" addproperty="solr.war.location" 
+                        <input-filepath message="Enter full path of where solr.war file is located (include solr.war at end):" addproperty="solr.war.location" 
                              defaultValue="${solr.war.location.default}" />
                         <condition property="war.exists">
                             <available file="${solr.war.location}" />
@@ -942,10 +942,10 @@
 
     <target name="testCompile" depends="testInit,compile" description="Compile test source code into test build dir">
         <path id="test.classpath.jars" description="Jars for classpath for building/running Test code">
-            <fileset dir="${lib.dir}" includes="*.jar" />
-            <fileset dir="${lib.dir}/solrmarc/${solrmarc.core.build.dir}" includes="*.jar" />
             <fileset dir="${site.lib.dir}" includes="*.jar" />
             <fileset file="${site.build.dir}/${custom.jar.name}.jar" />
+            <fileset dir="${lib.dir}" includes="*.jar" />
+            <fileset dir="${lib.dir}/solrmarc/${solrmarc.core.build.dir}" includes="*.jar" />
             <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
         </path>
 
@@ -993,7 +993,7 @@
         <echo message="using solr version: ${solr.version}" />
         <echo message="solr.path: ${solr.path}" />
         <echo message="solr.path being used for testing: ${site.test.solr.dir}" />
-        
+
         <path id="test.run.classpath.jars">
             <path refid="test.classpath.jars" />
             <fileset file="${site.test.build.dir}/${site.test.jar}" />
@@ -1005,6 +1005,7 @@
         --> 
         
         <echo message="test class = ${test.class} " />
+        <echo message="solr.data.dir = ${site.test.solr.dir}/data " />
       
         <if >
             <and> 
