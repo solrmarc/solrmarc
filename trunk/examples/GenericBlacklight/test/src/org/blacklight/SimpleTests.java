@@ -17,24 +17,23 @@ public class SimpleTests {
 	private String marcFileDir = siteDir + File.separator + 
 									"test" + File.separator +
 									"data" + File.separator;
-	// needed to get through initialization; overridden in individual tests
-	private String marcTestFile = marcFileDir + "00282214.mrc";
-	
 @Before
 	public final void setup() 
 	{
 		// these properties must be set or MarcHandler can't initialize properly
-    	System.setProperty("marc.path", marcTestFile);
         System.setProperty("solrmarc.path", "lib" + File.separator + "solrmarc");
 		System.setProperty("solrmarc.site.path", siteDir); 
     	System.setProperty("marc.source", "FILE");
+
+    	// needed to get through initialization; overridden in individual tests
+    	System.setProperty("marc.path", marcFileDir + "00282214.mrc");
 
     	solrFldMapTest = new SolrFieldMappingTest(siteDir + File.separator + "demo_config.properties", "id");
 	}
 	
 
 @Test
-	public final void testTest()
+	public final void smokeTest()
 	{
 		solrFldMapTest.assertSolrFldHasValue(marcFileDir + "00282214.mrc", "00282214", "id", "00282214");
 	}
