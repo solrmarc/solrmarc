@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">a111</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">111 first</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">Z3871.Z8 V.1</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">item1</subfield>
+            <subfield code="d">8/7/1996</subfield>
+            <subfield code="l">STACKS</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="p">$40.00</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">STKS-MONO</subfield>
+            <subfield code="u">2/20/1979</subfield>
+            <subfield code="o">.TECHSTAFF. tf:HOOVER 06/29/05 batch</subfield>
+            <subfield code="o">.TECHSTAFF. 911019</subfield>
+        </datafield>
+    </record>
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">a111</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">111 second rec - two item recs</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">Z3871.Z8 V.2</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">item2</subfield>
+            <subfield code="d">8/7/1996</subfield>
+            <subfield code="l">STACKS</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="p">$40.00</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">STKS-MONO</subfield>
+            <subfield code="u">2/20/1979</subfield>
+            <subfield code="o">.TECHSTAFF. tf:HOOVER 06/29/05 batch</subfield>
+            <subfield code="o">.TECHSTAFF. 911019</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">Z3871.Z8 V.3</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">item3</subfield>
+            <subfield code="d">8/7/1996</subfield>
+            <subfield code="l">STACKS</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="p">$40.00</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">STKS-MONO</subfield>
+            <subfield code="u">2/20/1979</subfield>
+            <subfield code="o">.TECHSTAFF. tf:HOOVER 06/29/05 batch</subfield>
+            <subfield code="o">.TECHSTAFF. 911019</subfield>
+        </datafield>
+    </record>
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">a111</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">111 third rec</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">Z3871.Z8 V.4</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">item4</subfield>
+            <subfield code="d">8/7/1996</subfield>
+            <subfield code="l">STACKS</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="p">$40.00</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">STKS-MONO</subfield>
+            <subfield code="u">2/20/1979</subfield>
+            <subfield code="o">.TECHSTAFF. tf:HOOVER 06/29/05 batch</subfield>
+            <subfield code="o">.TECHSTAFF. 911019</subfield>
+        </datafield>
+    </record>
+</collection>

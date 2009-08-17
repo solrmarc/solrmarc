@@ -1,0 +1,19 @@
+#! /bin/bash
+# marcupdate.sh
+# Program to copy a marc record file, merging in updates and deletions
+# $Id: marcupdate.sh 
+
+E_BADARGS=65
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+if [ $# -eq 0 ]
+  then
+    echo "    Usage: `basename $0` ./path/to/marc.mrc ./path/to/update"
+    exit $E_BADARGS
+  fi
+
+java -Done-jar.main.class="org.solrmarc.marc.MarcMerger" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3 $4 $5 $6 $7
+
+exit 0
+

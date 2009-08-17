@@ -1,0 +1,1 @@
+demo_config.properties, 00282214.mrc, id, 00282214
