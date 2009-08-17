@@ -14,7 +14,7 @@ import org.solrmarc.marc.MarcHandler;
  *  values per configuration files.  Only creates the mapping;  does not
  *  write out to file or to index.
  *  
- * based on org.solrmarc.marc.MarcPrinter
+ * based on org.solrmarc.marc.MarcPrinter by Bob Haschart
  *   
  * @author Naomi Dushay
  * @version $Id$
