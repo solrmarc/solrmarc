@@ -5,10 +5,15 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
+/**
+ * Unit tests for methods in org.solrmarc.tools.Utils
+ * @author naomi
+ *
+ */
 public class UtilUnitTests {
 
 	/**
-	 * unit test for Utils.getIxUnescapedOpenParen
+	 * unit test for org.solrmarc.tools.Utils.getIxUnescapedOpenParen
 	 */
 @Test
 	public void testGetIxUnescapedOpenParen()
@@ -31,7 +36,7 @@ public class UtilUnitTests {
 	}
 
 	/**
-	 * unit test for Utils.getIxUnescapedComma
+	 * unit test for org.solrmarc.tools.Utils.getIxUnescapedComma
 	 */
 @Test
 	public void testGetIxUnescapedComma()
@@ -55,7 +60,7 @@ public class UtilUnitTests {
 
 
 	/**
-	 * unit test for Utils.removeTrailingPeriod
+	 * unit test for org.solrmarc.tools.Utils.removeTrailingPeriod
 	 */
 @Test
 	public void testRemoveTrailingPeriod()
@@ -85,7 +90,7 @@ public class UtilUnitTests {
 	
 	
 	/**
-	 * unit test for Utils.removeOuterBrackets
+	 * unit test for org.solrmarc.tools.Utils.removeOuterBrackets
 	 */
 @Test
 	public void testRemoveOuterBrackets()
@@ -109,7 +114,7 @@ public class UtilUnitTests {
 	}
 	
 	/**
-	 * unit test for Utils.removeTrailingChars
+	 * unit test for org.solrmarc.tools.Utils.removeTrailingChars
 	 */
 @Test
 	public void testRemoveTrailingChars()
@@ -127,7 +132,7 @@ public class UtilUnitTests {
 	}
 	
 	/**
-	 * unit test for Utils.removeTrailingCharsAndPerod
+	 * unit test for org.solrmarc.tools.Utils.removeTrailingCharsAndPerod
 	 */
 @Test
 	public void testRemoveTrailingCharsAndPeriod()
