@@ -9,13 +9,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import org.solrmarc.index.IndexTest;
-import org.solrmarc.index.OldIndexTest;
 
 /**
- * Site Specific code used for testing the stanford Bibliographic index
+ * Site Specific code used for testing the Generic Blacklight example
  * @author Naomi Dushay
  */
-public abstract class DemoIxTest extends OldIndexTest {
+public abstract class DemoIxTest extends IndexTest {
 
 	// Note:  the hardcodings below are only used when the tests are
 	//  invoked without the properties set
@@ -27,7 +26,7 @@ public abstract class DemoIxTest extends OldIndexTest {
 		
 		siteSpecificPath = System.getProperty("solrmarc.site.path");
 		if (siteSpecificPath == null)
-			siteSpecificPath = new File("examples" + File.separator + "stanfordBlacklight").getAbsolutePath(); 
+			siteSpecificPath = new File("examples" + File.separator + "GenericBlacklight").getAbsolutePath(); 
 		
         String configPropDir = System.getProperty("test.config.dir");
         if (configPropDir == null)
@@ -37,21 +36,30 @@ public abstract class DemoIxTest extends OldIndexTest {
 		if (configPropFile == null)
 		    configPropFile = configPropDir + File.separator + "bibix_config.properties";
 		
+		String ngdeDir = File.separator + "Users" + File.separator + "naomi" + 
+        					File.separator + "NGDE";
 		solrPath = System.getProperty("solr.path");
 		if (solrPath == null)
 //			solrPath = siteSpecificPath + File.separator + "solr";
-		    solrPath = File.separator + "Users" + File.separator + "naomi" + 
-		                File.separator + "NGDE" + File.separator + "solr" +
-		                File.separator + "solr1.4";
-
-//		testDir = solrmarcPath + File.separator + "test";
-        testDir = "test";
-//		testDir = ".." + File.separator + ".." + File.separator + "test";
-        testDataParentPath = testDir + File.separator + "data";
-		testDataPath = testDataParentPath + File.separator + "allfieldsTests.mrc";
+		    solrPath = ngdeDir + File.separator + "blacklight" + 
+		    			File.separator + "bl-demo" + File.separator + "jetty" +
+		                File.separator + "solr";
+		
+		
+		testDataParentPath = System.getProperty("test.data.parent.path");
+		if (testDataParentPath == null)
+			testDataParentPath = "examples" + 
+						File.separator + "GenericBlacklight" + 
+        				File.separator + "test" + File.separator + "data";
+		
+//        testDir = "test";
+//        testDataParentPath = testDir + File.separator + "data";
+        testDataPath = testDataParentPath + File.separator + "test_data.utf8.mrc";
+		
 		solrDataDir = System.getProperty("solr.data.dir");
 		if (solrDataDir == null)
 			solrDataDir = solrPath + File.separator + "data";
+		
 	}
 
 	
@@ -61,15 +69,15 @@ public abstract class DemoIxTest extends OldIndexTest {
         String solrPath = System.getProperty("solr.path");
         if (solrPath == null)
         {
-            fail("property solr.path  must be defined for the tests to run" );
+            fail("property solr.path must be defined for the tests to run" );
         }
 
         String testDataParentPath = System.getProperty("test.data.path");
         if (testDataParentPath == null)
         {
-            fail("property test.data.path  must be defined for the tests to run" );
+            fail("property test.data.path must be defined for the tests to run" );
         }
         createIxInitVars(null, solrPath, null, testDataParentPath, testDataFname);
 	}
-
+	
 }

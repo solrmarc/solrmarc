@@ -10,7 +10,7 @@ import org.junit.After;
 import org.solrmarc.index.IndexTest;
 
 /**
- * Site Specific code used for testing the stanford Bibliographic index
+ * Site Specific code used for testing the stanford Blacklight example
  * @author Naomi Dushay
  */
 public abstract class BibIndexTest extends IndexTest {
