@@ -18,7 +18,8 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
     delfname=$froot.del
     delfile=$dir/$delfname
     output=$RESULTSDIR/results_$froot
-    output_shadowed=$RESULTSDIR/results_shadowed_$froot
+    output_dev=$RESULTSDIR/results_dev_$froot
+    output_merge=$RESULTSDIR/results_merge_$froot
 
     #check whether the mrc file has already been processed
     if [ -e "$PROCESSEDDIR/$fname" ] ; then
@@ -39,13 +40,15 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
         # file doesnt exist in processed dir, index it normally
         cp $file $PROCESSEDDIR
         indexfile $file  > $output 2>&1
-        indexfile blacklight_devd_config.properties $file > $output_dev 2>&1
+        indexfile blacklight_dev_config.properties $file > $output_dev 2>&1
         let "num += 1"
         marcsort $file > $DATA_DIR/processed_sorted/$fname
         sort -n $delfile > $DATA_DIR/processed_sorted/$delfname
-        marcupdate $DATA_DIR/processed_combined/all_mods_00.mrc $DATA_DIR/processed_sorted/$fname
-        marcupdate $DATA_DIR/processed_combined/all_mods_00.del $DATA_DIR/processed_sorted/$fname
-        process_full_dump $DATA_DIR/processed_sorted/$fname
+        marcupdate $DATA_DIR/processed_combined/all_mods_00.mrc $DATA_DIR/processed_sorted/$fname > $DATA_DIR/processed_combined/all_mods_01.mrc
+        mv $DATA_DIR/processed_combined/all_mods_01.mrc $DATA_DIR/processed_combined/all_mods_00.mrc
+        marcupdate $DATA_DIR/processed_combined/all_mods_00.del $DATA_DIR/processed_sorted/$fname > $DATA_DIR/processed_combined/all_mods_01.del
+        mv $DATA_DIR/processed_combined/all_mods_01.del $DATA_DIR/processed_combined/all_mods_00.del
+        process_full_dump $DATA_DIR/processed_sorted/$fname  >& $output_merge
         echo "Last File Merged Into full_dump: $DATA_DIR/processed_sorted/$fname" >> $DATA_DIR/full_dump_updated/updates.txt
         fi
 
