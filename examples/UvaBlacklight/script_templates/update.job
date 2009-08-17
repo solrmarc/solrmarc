@@ -42,14 +42,14 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
         indexfile $file  > $output 2>&1
         indexfile blacklight_dev_config.properties $file > $output_dev 2>&1
         let "num += 1"
-        marcsort $file > $DATA_DIR/processed_sorted/$fname
-        sort -n $delfile > $DATA_DIR/processed_sorted/$delfname
-        marcupdate $DATA_DIR/processed_combined/all_mods_00.mrc $DATA_DIR/processed_sorted/$fname > $DATA_DIR/processed_combined/all_mods_01.mrc
-        mv $DATA_DIR/processed_combined/all_mods_01.mrc $DATA_DIR/processed_combined/all_mods_00.mrc
-        marcupdate $DATA_DIR/processed_combined/all_mods_00.del $DATA_DIR/processed_sorted/$fname > $DATA_DIR/processed_combined/all_mods_01.del
-        mv $DATA_DIR/processed_combined/all_mods_01.del $DATA_DIR/processed_combined/all_mods_00.del
-        process_full_dump $DATA_DIR/processed_sorted/$fname  >& $output_merge
-        echo "Last File Merged Into full_dump: $DATA_DIR/processed_sorted/$fname" >> $DATA_DIR/full_dump_updated/updates.txt
+        marcsort $file > $DATADIR/processed_sorted/$fname
+        sort -n $delfile > $DATADIR/processed_sorted/$delfname
+        marcupdate $DATADIR/processed_combined/all_mods_00.mrc $DATADIR/processed_sorted/$fname > $DATADIR/processed_combined/all_mods_01.mrc
+        mv $DATADIR/processed_combined/all_mods_01.mrc $DATADIR/processed_combined/all_mods_00.mrc
+        marcupdate $DATADIR/processed_combined/all_mods_00.del $DATADIR/processed_sorted/$fname > $DATADIR/processed_combined/all_mods_01.del
+        mv $DATADIR/processed_combined/all_mods_01.del $DATADIR/processed_combined/all_mods_00.del
+        process_full_dump $DATADIR/processed_sorted/$fname  >& $output_merge
+        echo "Last File Merged Into full_dump: $DATADIR/processed_sorted/$fname" >> $DATADIR/full_dump_updated/updates.txt
         fi
 
     #check whether the del file has already been processed
