@@ -1,0 +1,65 @@
+#summary Running and Writing Tests for SolrMarc code.
+
+= Introduction =
+
+This page will show you some ways to use existing tests and how to write your own tests for your site specific version of Blacklight.
+
+We recommend a Test-First Development approach:  
+
+  # write a test for what you would like to have happen. (e.g. what value you would like a Solr field to get when you index particular MARC data.
+  # run the test - it should fail.  If you will be using any customizations, (e.g. new mappings in your xxx_index.properties file, or your own custom methods), then the test should fail.  
+    If the test doesn't fail, you should make sure it *will* fail if the data/result pairing is incorrect -- you don't want any false positives in your tests!
+  # manipulate configurations and customized methods as needed until the test passes.
+  # passing test - Yay!
+
+For more on test first development ...
+
+
+= Details =
+
+!SolrMarc comes with two different testing infrastructures.  Both test whether the mappings from a MARC record to the intended contents of a Solr field are correct.  (Testing whether searching on Solr field contents returns the expected results is planned for some future date.  Stanford has some code for this, but it does not yet work for the generalized case.)
+
+== Method I:  Tests in .txt File (Run from ant Task) ==
+
+This approach may be more convenient when your site's customizations are all done in the xxx_index.properties configuration file.  This approach may also be more convenient if you intend to have single MARC records in your test files.  (Note: !SolrMarc provides scripts to extract individual MARC records from files containing multiple MARC records, as well as from Solr directly.  See the "Batch File / Shell Scripts" section at the bottom of the GettingStarted wiki page.)
+
+  * The tests and expected results are in a file called indextest.txt that lives in your site's test/data folder.
+  * When you run these tests with the provided ant task, a full build of your code is always performed before the tests are run.
+  * These test do NOT indicate *which* Solr document will be checked, so it is recommended that you use test files with a single MARC record for each test.
+
+Steps:
+
+  # Configure the SolrMarc program for your site.  (See GettingStarted)
+  # Make sure you have known !MaRC records in your created test/data folder.
+    # you can use any of the test data provided in the !SolrMarc project, or provide your own.
+  # Create an indextest.txt file in your test folder.
+    # each line looks for a value in a field in a Solr document that would be created by indexing the specified MARC data. 
+    # format of each line:
+      # name of your site's xxx_config.properties file
+      # name of the file containing MARC test data (relative to your site's SolrMarc folder)
+      # name of the Solr field to check
+      # value expected for the Solr field
+    # example:
+      demo_config.properties, 00282214.mrc, title_t, Shodede-yam Yehudiyim
+  # Run the tests with the ant "test" target. Two ways you can do this:
+    * From the command line, from the top level directory of the !SolrMarc project, type
+      {{{ant test}}}
+       * Note: the site.dir.properties file at the top level directory is how this ant task knows where to find YOUR test file.  It must be in your site's test/data directory.
+    * From your IDE, run the ant test target in the top level build.xml ant file. 
+
+Bob Haschart wrote the code for this approach.
+
+== Method II: Tests in Java Code (Can Run within Your IDE) ==
+
+These tests are "closer" to the java code, so if you are writing customized java methods for indexing, this approach may be more convenient.  This approach may also be more convenient if you intend to have multiple MaRC records in your test files.
+
+
+It allows tests to be run from Eclipse or other IDEs.  Because it is just java code, it can also be run from an ant task.  
+  * The tests and expected results are in the java code.
+  * When you run these tests, a full build of your code will not happen (unless you configure your IDE for a full build before you run JUnit tests).
+  * These tests indicate which Solr document is to be tested, so you can use a test data file with multiple MaRC records. 
+
+blah blah blah
+
+
+Naomi Dushay wrote the code for this approach.  
