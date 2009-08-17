@@ -137,7 +137,6 @@ public final class Utils {
             int pathCnt = 0;
             do 
             {
-                System.err.println("propertyFile = " + propertyFile.getAbsoluteFile());
                 if (propertyFile.exists() && propertyFile.isFile() && propertyFile.canRead())
                 {
                     try
