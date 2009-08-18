@@ -795,6 +795,7 @@ public class SolrIndexer
 
             // Process Subfields
             String subfield = tags[i].substring(3);
+            //  brackets indicate parsing for individual characters
             int bracket;
             if ((bracket = tags[i].indexOf('[')) != -1)
             {
@@ -909,25 +910,72 @@ public class SolrIndexer
     }
     
     /**
-     * Get the title from a record, without non-filing chars as specified
-     *   in 245 2nd indicator
+     * Get the title (245ab) from a record, without non-filing chars as 
+     *  specified in 245 2nd indicator
      * @param record - the marc record object
      * @return 245a and 245b values concatenated, with trailing punct removed,
      *  and with non-filing characters omitted
+     *  
+     * @see org.solrmarc.index.SolrIndexer.getTitle()
      */
     public String getSortableTitle(Record record)
     {
         DataField titleField = (DataField) record.getVariableField("245");
-        String thisTitle = getTitle(record);
-        
-        if (titleField != null && 
-        		titleField.getIndicator2() > '0' && 
-        		titleField.getIndicator2() <= '9')
-            thisTitle = thisTitle.substring(((int)(titleField.getIndicator2() - '0')));
-
+        if (titleField == null)
+        	return null;
+        int nonFilingInt = getInd2AsInt(titleField);
+        String thisTitle = getTitle(record).substring(nonFilingInt);
         return thisTitle.toLowerCase();
     }
 
+    
+    /**
+     * returns string for author sort:  a string containing
+     *  1. the main entry author, if there is one 
+     *  2. the main entry uniform title (240), if there is one - not including 
+     *    non-filing chars as noted in 2nd indicator
+     * followed by
+     *  3.  the 245 title, not including non-filing chars as noted in ind 2
+     */
+    @SuppressWarnings("unchecked")
+	public String getSortableAuthor(final Record record) 
+    {
+    	StringBuffer resultBuf = new StringBuffer();
+
+    	DataField df = (DataField) record.getVariableField("100");
+    	// main entry personal name
+    	if (df != null) 
+        	resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+
+    	df = (DataField) record.getVariableField("110");
+    	// main entry corporate name
+    	if (df != null) 
+        	resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+
+    	df = (DataField) record.getVariableField("111");
+    	// main entry meeting name
+    	if (df != null) 
+        	resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+
+    	// need to sort fields missing 100/110/111 last
+    	if (resultBuf.length() == 0) {
+    		resultBuf.append(Character.toChars(Character.MAX_CODE_POINT)); 
+    		resultBuf.append(' '); // for legibility in luke
+    	}
+    	
+    	// uniform title, main entry
+      	df = (DataField) record.getVariableField("240");
+       	if (df != null)
+           	resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+    	
+    	// 245 (required) title statement
+       	df = (DataField) record.getVariableField("245");
+       	if (df != null)
+       		resultBuf.append(getAlphaSubfldsAsSortStr(df, true));
+
+    	return resultBuf.toString().trim().toLowerCase();
+    }
+    
     /**
      * Return the date in 260c as a string
      * @param record - the marc record object
@@ -1537,6 +1585,9 @@ public class SolrIndexer
         return buffer.toString();
     }
     
+    /**
+     * TODO: Bob - comment here
+     */
     public String getSingleIndexEntry(final Record record, String fieldSpec, String flagExtraEntries)
     {
         Set<String> set = getFieldList(record, fieldSpec);
@@ -1572,5 +1623,82 @@ public class SolrIndexer
             return(longest);
         }
     }
+    
+    /**
+     * given a field spec that is assured to be for a single marc tag, return 
+     *  the marc tag (the three character designation, such as 245, 650, etc.)  
+     *  and the designated subfields string
+     * @param singleFieldSpec - a field spec for a single tag only
+     * @return a 2 element array of Strings, where the first element is the 
+     *  field tag and the second element is the list of subfields.  Either 
+     *  element may be null:  in the first element, null means the field tag
+     *  was not 3 chars;  in the second element, null means there were no
+     *  subfields indicated.
+     */
+    private String[] parseSinglefieldSpec(String singleFieldSpec) 
+    {
+    	String[] result = new String[2];
+        // Check to ensure tag length is at least 3 characters
+        if (singleFieldSpec.length() < 3)
+        {
+            System.err.println("Invalid tag specified: " + singleFieldSpec);
+            result[0] = null;
+        }
+        else 
+        	result[0] = singleFieldSpec.substring(0, 3);
+
+        // subfields
+        if (singleFieldSpec.length() >= 3)
+        	result[1] = singleFieldSpec.substring(3);
+        else
+        	result[1] = null;
+        return result;
+    }
+    
+    /**
+     * treats indicator 2 as the number of non-filing indicators to exclude,
+     *  removes ascii punctuation
+     * @param DataField with ind2 containing # non-filing chars, or has value ' '
+     * @param skipSubFldc true if subfield c contents should be skipped
+     * @return StringBuffer of the contents of the subfields - with a trailing 
+     *  space
+     */
+ 	@SuppressWarnings("unchecked")
+	protected StringBuffer getAlphaSubfldsAsSortStr(DataField df, boolean skipSubFldc)
+    {
+    	StringBuffer result = new StringBuffer();
+       	int nonFilingInt = getInd2AsInt(df);
+    	boolean firstSubfld = true;
+    	
+    	List<Subfield> subList = df.getSubfields();
+		for (Subfield sub : subList) {
+			char subcode = sub.getCode();
+			if (Character.isLetter(subcode) && (!skipSubFldc || subcode != 'c'))
+			{
+				String data = sub.getData();
+				if (firstSubfld) {
+					if (nonFilingInt < data.length() -1)
+						data = data.substring(nonFilingInt);
+					firstSubfld = false;
+				}
+				// eliminate ascii punctuation marks from sorting as well
+				result.append(data.replaceAll("\\p{Punct}*", "").trim() + ' ');
+			}
+		}
+    	return result;
+    }
+ 	
+    /**
+     * @param df a DataField
+     * @return the integer (0-9, 0 if blank or other) in the 2nd indicator
+     */
+    protected int getInd2AsInt(DataField df) {
+    	char ind2char = df.getIndicator2();
+       	int result = 0;
+       	if (Character.isDigit(ind2char))
+       		result = Integer.valueOf(String.valueOf(ind2char));
+       	return result;
+    }
+
     
 }
