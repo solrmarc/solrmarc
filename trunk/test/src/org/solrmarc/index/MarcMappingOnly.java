@@ -19,7 +19,7 @@ import org.solrmarc.marc.MarcHandler;
  * @author Naomi Dushay
  * @version $Id$
  */
-public class MarcMappingTest extends MarcHandler
+public class MarcMappingOnly extends MarcHandler
 {
 //    static Logger logger = Logger.getLogger(MarcMappingTest.class.getName());
     
@@ -32,7 +32,7 @@ public class MarcMappingTest extends MarcHandler
      *    arg[0] - name of xxx_config.properties file
      *    arg[1] - name of unique key field in solr document
      */
-    public MarcMappingTest(String args[])
+    public MarcMappingOnly(String args[])
     {
         super(args);
         if (args.length < 2) {
