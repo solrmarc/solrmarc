@@ -1,39 +1,14 @@
 package org.blacklight;
 
-import java.io.File;
-
 import org.junit.*;
-
-import org.solrmarc.index.SolrFieldMappingTest;
 
 /**
  * junit4 tests for generic Blacklight example - title fields
  * @author Naomi Dushay
  */
-public class TitleMappingTests {
+public class TitleMappingTests extends AbstractMappingTests {
 	
-	private SolrFieldMappingTest solrFldMapTest = null;
-	private String siteDir = "bldemo";
-	private String marcFileDir = siteDir + File.separator + 
-									"test" + File.separator +
-									"data" + File.separator;
-	private String marc30recTestFile = marcFileDir + "test_data.utf8.mrc";
-@Before
-	public final void setup() 
-	{
-		// these properties must be set or MarcHandler can't initialize properly
-        System.setProperty("solrmarc.path", "lib" + File.separator + "solrmarc");
-		System.setProperty("solrmarc.site.path", siteDir); 
-    	System.setProperty("marc.source", "FILE");
-
-    	// needed to get through initialization; overridden in individual tests
-    	System.setProperty("marc.path", marcFileDir + "00282214.mrc");
-
-    	solrFldMapTest = new SolrFieldMappingTest(siteDir + File.separator + "demo_config.properties", "id");
-	}
-
 // TODO:  test right-to-left scripts ... oy!
-
 
 // 245a "main title" fields
 
@@ -74,9 +49,7 @@ public class TitleMappingTests {
 
 	/**
 	 * title display field - vernacular (linked 880)
-// FIXME: remove trailing punct this way?
-	 * title_vern_display = custom, getLinkedRemoveTrailingPunc(245a, [\\\\,/;:], ([A-Za-z]{4}|[0-9]{3}|\\)|\\,))
-	 *   no trailing backslash, comma, slash, semicolon or colon
+	 * title_vern_display = custom, getLinkedField(245a)
 	 */
 @Test
 	public final void TitleVernDisplayTest()
@@ -130,9 +103,6 @@ public class TitleMappingTests {
 	/**
 	 * subtitle display field - vernacular (linked 880)
 	 * subtitle_vern_display = custom, getLinkedField(245b)
-// FIXME: remove punct this way!
-	 * subtitle_vern_display = custom, getLinkedRemoveTrailingPunct(245b, [\\\\,;:], ([A-Za-z0-9]{4}|\\)) )
-	 *    test for trailing punct removal ...
 	 */
 @Test
 	public final void SubtitleVernDisplayTest()
@@ -214,7 +184,7 @@ public class TitleMappingTests {
 // title sort field
 
 	/**
-	 * title_sort = custom, getSubfldsAsSortStr(245ab)
+	 * title_sort = custom, getSortableTitle
 	 */
 @Test
 	public final void TitleSortTest()
