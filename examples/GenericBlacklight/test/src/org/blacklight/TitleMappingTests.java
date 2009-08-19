@@ -29,8 +29,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008543486", "title_t", "Kubo Sakae 'Kazanbaichi' o yomu /");
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008543486", "title_t", "久保栄「火山灰地」を読む");
 		// trailing colon - korean
-// FIXME: can't get this to work - diacritic issues?
-//		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "94120425", "title_t", "Ajikto kŭrŏk chŏrŏk sasimnikka :");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "94120425", "title_t", "Ajikto kŭrŏk chŏrŏk sasimnikka :");
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "94120425", "title_t", "아직도　그럭　저럭　사십니까");
 	}
 	
@@ -78,8 +77,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2007020969", "subtitle_t", "a Native American elder has her say : an oral history /");
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "90142413", "subtitle_t", "tʻeoriul-metʻoduri narkvevi /");
 
-// FIXME:  can't get next line right.  UTF-8 issues?		
-//		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2005461726", "subtitle_t", "min jald al-dhāt ilá ṣidq al-sharḥ.");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2005461726", "subtitle_t", "min jald al-dhāt ilá ṣidq al-sharḥ.");
 								solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2005461726", "subtitle_t", "من جلد الذات إلى صدق الشرح");
 
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "94120425", "subtitle_t", "kangnam yŏin kwa sin pʻalbulchʻul : Kim Hong-sin setʻae rŭpʻo.");
@@ -125,13 +123,11 @@ public class TitleMappingTests extends AbstractMappingTests {
 	{
 		// no 245 subfields other than a, b, c, h in small test file
 		// 130
-// FIXME:  can't get these to work;  it's the only 130 in the small test file
-//		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "77826928", "addl_titles_t", "Koryŏsa.  Yŏlchŏn.   Selections.");
-//		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "77826928", "addl_titles_t", "高麗史. 列傅.   Selections.");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "77826928", "addl_titles_t", "Koryŏsa. Yŏlchŏn. Selections");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "77826928", "addl_titles_t", "高麗史. 列傅. Selections");
 		// 240
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "addl_titles_t", "Mishnah berurah");
-// FIXME:  can't get this one to work;  it's the only 240 vernacular in the small test file
-//		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "addl_titles_t", "משנה ברורה");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "addl_titles_t", "‏משנה ברורה");
 
 		// 246
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "90142413", "addl_titles_t", "Obraz zhizni rabotnika promyshlennosti");
@@ -150,10 +146,8 @@ public class TitleMappingTests extends AbstractMappingTests {
 	{
 // FIXME:  inconsistent trailing punct:  linked fields, pattern vs. string of chars for subfields
 		// 700
-//		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "title_added_entry_t", "Oraḥ ḥayim.");
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "title_added_entry_t", "Oraḥ ḥayim");
-// FIXME:  can't get this one to work;  it's the only 700t vernacular in the small test file
-//       	solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "title_added_entry_t", "‏‏אורח חיים");
+       	solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "title_added_entry_t", "‏אורח חיים");
 		// 710
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "53029833", "title_added_entry_t", "Constitution");
 		// 711, 730 - none in small test file
@@ -172,8 +166,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	{
 		// 440
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "96933325", "title_series_t", "Sipihr-i farhang va jāmiʻah ; 1");
-// FIXME:  can't get this one to work;  it's the only 440 vernacular in the small test file
-//		      solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00313831", "title_series_t", "‏‏فرهنگ  عمومى");
+		      solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00313831", "title_series_t", "‏فرهنگ  عمومى");
 		      
 		// 490
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2009373513", "title_series_t", "Lin Xingzhi zuo pin ji ; 51");
