@@ -48,8 +48,7 @@ public class AuthorMappingTests extends AbstractMappingTests
 		//      subfields ad
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2007020969", "author_addl_t", "Strong Medicine,");
 		//      subfields acdtf
-// FIXME:  can't get this line to work.  utf-8 issues?
-//		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008308175", "author_addl_t", "Ṅag-dbaṅ-blo-bzaṅ-rgya-mtsho,     Dalai Lama V,");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008308175", "author_addl_t", "Ṅag-dbaṅ-blo-bzaṅ-rgya-mtsho, Dalai Lama V,");
 //FIXME: getLinkedCombined  removes trailing punct for 880s	
 		// 700 linked
 		//     subfield a - trailing comma
