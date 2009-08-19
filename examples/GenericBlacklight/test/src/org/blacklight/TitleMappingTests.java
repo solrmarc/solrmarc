@@ -116,7 +116,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 // additional title searching fields
 
 	/**
-	 * addl_titles_t = custom, getLinkedFieldCombined(245abfgknps:130adfgklmnoprst:240adfgklmnoprs:210ab:222ab:242abnp:243adfgklmnoprs:246abfgnp:247abfgnp)
+	 * addl_titles_t = custom, getLinkedFieldCombined(245abnps:130[a-z]:240[a-gk-s]:210ab:222ab:242abnp:243[a-gk-s]:246[a-gnp]:247[a-gnp])
 	 *   should have both latin and vernacular 
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
@@ -141,31 +141,32 @@ public class TitleMappingTests extends AbstractMappingTests {
 	}
 
 	/**
-	 * title_added_entry_t = custom, getLinkedFieldCombined(700fgklmnoprst:710dfgklmnoprst:711fgklnpst:730adfgklmnoprst:740anp:760st:762st:765st:767st:770st:772st:773st:774st:775st:776st:777st:780st:785st:786st:787st)
+	 * title_added_entry_t = custom, getLinkedFieldCombined(700[gk-pr-t]:710[fgk-t]:711fgklnpst:730[a-gk-t]:740anp)
 	 *   should have both latin and vernacular 
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
 @Test
 	public final void TitleAddedEntrySearchTest()
 	{
+// FIXME:  inconsistent trailing punct:  linked fields, pattern vs. string of chars for subfields
 		// 700
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "title_added_entry_t", "Oraḥ ḥayim.");
+//		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "title_added_entry_t", "Oraḥ ḥayim.");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "title_added_entry_t", "Oraḥ ḥayim");
 // FIXME:  can't get this one to work;  it's the only 700t vernacular in the small test file
 //       	solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "title_added_entry_t", "‏‏אורח חיים");
 		// 710
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "53029833", "title_added_entry_t", "Constitution.");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "53029833", "title_added_entry_t", "Constitution");
 		// 711, 730 - none in small test file
 		// 740
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "86207417", "title_added_entry_t", "Jewish pirates.");
 		//  no linked 740 other than subfield a
 // FIXME:  trailing period ...
 			     solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2005553155", "title_added_entry_t", "ביטוח זקנה");
-		// no 76x, 77x, 78x fields in small test file
 	}
 
 @Test
 	/**
-	 * title_series_t = custom, getLinkedFieldCombined(440anpv:490av:800fgklmnoprstv:810dfgklmnoprstv:811fgklnpstv:830adfgklmnoprstv:840av)
+	 * title_series_t = custom, getLinkedFieldCombined(440anpv:490av)
 	 */
 	public final void TitleSeriesSearchTest()
 	{
@@ -177,7 +178,6 @@ public class TitleMappingTests extends AbstractMappingTests {
 		// 490
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2009373513", "title_series_t", "Lin Xingzhi zuo pin ji ; 51");
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2009373513", "title_series_t", "林行止作品集 ; 51");
-		// 800, 810, 811, 830, 840 not present in small test file
 	}
 
 
