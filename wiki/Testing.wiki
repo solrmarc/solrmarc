@@ -32,7 +32,7 @@ The tests and expected results are in a file called indextest.txt that lives in 
 Steps:
 
   # Configure the SolrMarc program for your site.  (See GettingStarted)
-  # Make sure you have known !MaRC records in your created test/data folder.
+  # Make sure you have known MaRC records in your created test/data folder.
     # you can use any of the test data provided in the !SolrMarc project, or provide your own.
   # Create an indextest.txt file in your test folder.  Each test is a line in the file; for an example, see !UvaBlacklight/test/data/indextest.txt.
     
@@ -43,6 +43,9 @@ Steps:
       # name of the Solr field to test
       # value expected for the Solr field
       * example: {{{demo_config.properties, 00282214.mrc, title_t, Shodede-yam Yehudiyim}}}
+      * for an array, list the values separated by a vertical bar.  Order matters.
+      * example: {{{demo_config.properties, 2009373513.mrc, title_t, Ci an zhou bian /|次按驟變}}}
+
   # Run the tests with the ant "test" target. Two ways you can do this:
     * From the command line, from the top level directory of the !SolrMarc project, type
       {{{ant test}}}
