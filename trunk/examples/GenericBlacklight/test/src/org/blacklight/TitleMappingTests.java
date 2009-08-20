@@ -19,7 +19,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
 @Test
-	public final void TitleSearchTest()
+	public final void titleSearchTest()
 	{
 // FIXME: getLinkedCombined  removes trailing punct for 880s	
 		// trailing slash - chinese
@@ -38,7 +38,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	 * title_display = custom, removeTrailingPunct(245a)
 	 */
 @Test
-	public final void TitleDisplayTest()
+	public final void titleDisplayTest()
 	{
 		// trailing slash 
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00314247", "title_display", "Kubo Sakae \"Kazanbaichi\" o yomu");
@@ -51,7 +51,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	 * title_vern_display = custom, getLinkedField(245a)
 	 */
 @Test
-	public final void TitleVernDisplayTest()
+	public final void titleVernDisplayTest()
 	{
 		// trailing slash - chinese
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2009373513", "title_vern_display", "次按驟變");
@@ -71,7 +71,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
 @Test
-	public final void SubtitleSearchTest()
+	public final void subtitleSearchTest()
 	{
 		// trailing slash
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2007020969", "subtitle_t", "a Native American elder has her say : an oral history /");
@@ -89,7 +89,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	 * subtitle_display = custom, removeTrailingPunct(245b)
 	 */
 @Test
-	public final void SubtitleDisplayTest()
+	public final void subtitleDisplayTest()
 	{
 		// trailing slash
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2007020969", "subtitle_display", "a Native American elder has her say : an oral history");
@@ -103,7 +103,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	 * subtitle_vern_display = custom, getLinkedField(245b)
 	 */
 @Test
-	public final void SubtitleVernDisplayTest()
+	public final void subtitleVernDisplayTest()
 	{
 		// trailing period
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "94120425", "subtitle_vern_display", "강남　여인　과　신　팔불출 : 金　洪信　세태　르포");
@@ -119,7 +119,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
 @Test
-	public final void AdditionalTitleSearchTest()
+	public final void additionalTitleSearchTest()
 	{
 		// no 245 subfields other than a, b, c, h in small test file
 		// 130
@@ -142,7 +142,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
 @Test
-	public final void TitleAddedEntrySearchTest()
+	public final void addedEntrySearchTest()
 	{
 // FIXME:  inconsistent trailing punct:  linked fields, pattern vs. string of chars for subfields
 		// 700
@@ -162,7 +162,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	/**
 	 * title_series_t = custom, getLinkedFieldCombined(440anpv:490av)
 	 */
-	public final void TitleSeriesSearchTest()
+	public final void seriesSearchTest()
 	{
 		// 440
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "96933325", "title_series_t", "Sipihr-i farhang va jāmiʻah ; 1");
@@ -180,7 +180,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 	 * title_sort = custom, getSortableTitle
 	 */
 @Test
-	public final void TitleSortTest()
+	public final void titleSortTest()
 	{	
 		// ignore first three chars
 		solrFldMapTest.assertSolrFldHasNoValue(marc30recTestFile, "2003546302", "title_sort", "al-ḥarb fī al-alfīyah al-thālithah");

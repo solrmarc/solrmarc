@@ -15,7 +15,7 @@ public class AuthorMappingTests extends AbstractMappingTests
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
 @Test
-	public final void AuthorSearchTest()
+	public final void authorSearchTest()
 	{
 		// 100 
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00282371", "author_t", "Ayaz, Shaikh,");
@@ -40,7 +40,7 @@ public class AuthorMappingTests extends AbstractMappingTests
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
 @Test
-	public final void AddlAuthorSearchTest()
+	public final void addlAuthorSearchTest()
 	{
 		// 700 
 		//      subfields a
@@ -69,7 +69,7 @@ public class AuthorMappingTests extends AbstractMappingTests
 	 * author_display = custom, removeTrailingPunct(100abcdq:110:111)
 	 */
 @Test
-	public final void AuthorDisplayTest()
+	public final void authorDisplayTest()
 	{
 		// 100
 		//   a subfields
@@ -87,7 +87,7 @@ public class AuthorMappingTests extends AbstractMappingTests
 	 * author_vern_display = custom, getLinkedField(100abcdq:110:111)
 	 */
 @Test
-	public final void VernAuthorDisplayTest()
+	public final void vernAuthorDisplayTest()
 	{
 		// 100 linked
 		//  subfield a
@@ -112,7 +112,7 @@ public class AuthorMappingTests extends AbstractMappingTests
 	 * with ascii punctuation stripped
 	 */
 @Test
-	public final void AuthorSortTest()
+	public final void authorSortTest()
 	{	
 		// note:  small test file has no 100, 110 or 111 with non-filing chars
 		// 100 then 240
