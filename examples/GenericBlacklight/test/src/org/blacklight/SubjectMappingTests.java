@@ -18,7 +18,7 @@ public class SubjectMappingTests extends AbstractMappingTests
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
 @Test
-	public final void SubjectSearchTest()
+	public final void subjectSearchTest()
 	{
 		// 600 a
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "78908283", "subject_t", "Gautama Buddha");
@@ -47,7 +47,7 @@ public class SubjectMappingTests extends AbstractMappingTests
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
 @Test
-	public final void AddlSubjectSearchTest()
+	public final void addlSubjectSearchTest()
 	{
 		// 600v
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "78908283", "subject_additional_t", "Poetry");
@@ -85,7 +85,7 @@ public class SubjectMappingTests extends AbstractMappingTests
 	 * subject_topic_facet = custom, removeTrailingPunct(600abcdq:610ab:630a:650a:653a:654ab:655ab)
 	 */
 @Test
-	public final void TopicFacetTest()
+	public final void topicFacetTest()
 	{
 		// 600 a
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "78908283", "subject_topic_facet", "Gautama Buddha");
@@ -106,7 +106,7 @@ public class SubjectMappingTests extends AbstractMappingTests
 	 * subject_era_facet = custom, removeTrailingPunct(650y:651y:654y:655y)
 	 */
 @Test
-	public final void EraFacetTest()
+	public final void eraFacetTest()
 	{
 		// 650y
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008543486", "subject_era_facet", "20th century");
@@ -120,7 +120,7 @@ public class SubjectMappingTests extends AbstractMappingTests
 	 * subject_geo_facet = custom, removeTrailingPunct(651a:650z)
 	 */
 @Test
-	public final void GeographicFacetTest()
+	public final void geographicFacetTest()
 	{
 		// 651a
 		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2004310986", "subject_geo_facet", "Bon-brgya (China)");
