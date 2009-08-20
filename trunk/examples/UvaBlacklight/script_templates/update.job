@@ -10,7 +10,7 @@ INPUTDIR=$DATADIR/incoming
 PROCESSEDDIR=$DATADIR/processed
 RESULTSDIR=$DATADIR/results
 
-for file in `find $INPUTDIR -name '*.mrc' -print`
+for file in `find $INPUTDIR -name '*.mrc' -print | sort`
     do
     fname=`basename $file`
     froot=`basename $file .mrc`
@@ -36,21 +36,13 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
             # incoming file already processed, just delete it
             rm $file
         fi
-        else
+    else
         # file doesnt exist in processed dir, index it normally
         cp $file $PROCESSEDDIR
         indexfile $file  > $output 2>&1
         indexfile blacklight_dev_config.properties $file > $output_dev 2>&1
         let "num += 1"
-        marcsort $file > $DATADIR/processed_sorted/$fname
-        sort -n $delfile > $DATADIR/processed_sorted/$delfname
-        marcupdate $DATADIR/processed_combined/all_mods_00.mrc $DATADIR/processed_sorted/$fname > $DATADIR/processed_combined/all_mods_01.mrc
-        mv $DATADIR/processed_combined/all_mods_01.mrc $DATADIR/processed_combined/all_mods_00.mrc
-        marcupdate $DATADIR/processed_combined/all_mods_00.del $DATADIR/processed_sorted/$fname > $DATADIR/processed_combined/all_mods_01.del
-        mv $DATADIR/processed_combined/all_mods_01.del $DATADIR/processed_combined/all_mods_00.del
-        process_full_dump $DATADIR/processed_sorted/$fname  >& $output_merge
-        echo "Last File Merged Into full_dump: $DATADIR/processed_sorted/$fname" >> $DATADIR/full_dump_updated/updates.txt
-        fi
+    fi
 
     #check whether the del file has already been processed
     if [ -e "$delfile" ] ; then
@@ -68,13 +60,13 @@ for file in `find $INPUTDIR -name '*.mrc' -print`
                 # incoming file already processed, just delete it
                 rm $delfile
             fi
-            else
+        else
             # file doesnt exist in processed dir, index it normally
             cp $delfile $PROCESSEDDIR
             indexfile NONE $delfile >> $output 2>&1
             indexfile blacklight_dev_config.properties NONE $delfile >> $output_dev 2>&1
             let "num += 1"
-            fi
+        fi
     else
         # no .del file exists corresponding to the .mrc file found in the incoming directory
         # do nothing, be happy
@@ -99,4 +91,28 @@ if [ "$num" -ne 0 ]
     optimizesolr > $RESULTSDIR/results_optimize 2>&1
     optimizesolr blacklight_dev_config.properties > $RESULTSDIR/results_dev_optimize 2>&1
 fi
+
+
+PROCESSED_SORTED_DIR=$DATADIR/processed_sorted 
+PROCESSED_COMBINED_DIR=$DATADIR/processed_combined
+
+for file in `find $INPUTDIR -name '*.mrc' -print | sort`
+    do
+    fname=`basename $file`
+    froot=`basename $file .mrc`
+    dir=`dirname $file`
+    delfname=$froot.del
+    delfile=$dir/$delfname
+    output_merge=$RESULTSDIR/results_merge_$froot
+    if [ ! -f "$PROCESSED_SORTED_DIR/$fname" ] ; then
+        marcsort $file > $PROCESSED_SORTED_DIR/$fname 2> $output_merge
+        sort -n $delfile > $PROCESSED_SORTED_DIR/$delfname
+        marcupdate $PROCESSED_COMBINED_DIR/all_mods_00.mrc $PROCESSED_SORTED_DIR/$fname > $PROCESSED_COMBINED_DIR/all_mods_01.mrc
+        mv $PROCESSED_COMBINED_DIR/all_mods_01.mrc $PROCESSED_COMBINED_DIR/all_mods_00.mrc
+        marcupdate $PROCESSED_COMBINED_DIR/all_mods_00.del $PROCESSED_SORTED_DIR/$fname > $PROCESSED_COMBINED_DIR/all_mods_01.del
+        mv $PROCESSED_COMBINED_DIR/all_mods_01.del $PROCESSED_COMBINED_DIR/all_mods_00.del
+        process_full_dump $PROCESSED_SORTED_DIR/$fname  >>& $output_merge
+        echo "Last File Merged Into full_dump: $PROCESSED_SORTED_DIR/$fname" >> $DATADIR/full_dump_updated/updates.txt
+    fi
+done
 
