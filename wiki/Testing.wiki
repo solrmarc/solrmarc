@@ -20,10 +20,12 @@ For more on test first development ...
 
 == Method I:  Tests in .txt File (Run from ant Task) ==
 
-This approach may be more convenient when your site's customizations are all done in the xxx_index.properties configuration file.  This approach may also be more convenient if you intend to have single MARC records in your test files.  (Note: !SolrMarc provides scripts to extract individual MARC records from files containing multiple MARC records, as well as from Solr directly.  See the "Batch File / Shell Scripts" section at the bottom of the GettingStarted wiki page.)
+This approach may be more convenient when your site's customizations are all done in the xxx_index.properties configuration file.  This approach may also be more convenient if you intend to have single MARC records in your test files.  (Note: !SolrMarc provides scripts to extract individual MARC records from files containing multiple MARC records, as well as from Solr directly.  See the "Batch File / Shell Scripts" section at the bottom of the GettingStarted wiki page.)  This approach will be less convenient when there are many values to be assigned to a particular solr field (e.g. a record with a lot of 650 subject fields).
 
   * When you run these tests with the provided ant task, a full build of your code is always performed before the tests are run.
   * These test do NOT indicate _which_ Solr document will be checked, so it is recommended that you use test files with a single MARC record for each test.
+  * These tests require ALL the values for a field to be specified, in order.
+  * These tests ONLY check for particular value(s) in a field.  They do not check to ensure a value is NOT present, or that the field is not present, etc.
 
 The tests and expected results are in a file called indextest.txt that lives in your site's test/data folder.  The tests are run via an ant target "test" which looks for the indextest.txt file in your site's test/data directory.
 
@@ -51,13 +53,15 @@ The JUnit code that is used for these tests is org.solrmarc.test.!ParameterizedI
 
 == Method II: Tests in Java Code (Can Run within Your IDE) ==
 
-These tests are "closer" to the java code, so if you are writing customized java methods for indexing, this approach may be more convenient.  This approach may also be more convenient if you intend to have multiple MaRC records in your test files.
+These tests are "closer" to the java code, so if you are writing customized java methods for indexing, this approach may be more convenient.  This approach may also be more convenient if you intend to have multiple MaRC records in your test files.  This approach allows checking for the presence or absence of a single value for a solr field, so it may be more convenient when there are many values to be assigned to a particular solr field (e.g. a record with a lot of 650 subject fields).
 
 
 It allows tests to be run from Eclipse or other IDEs.  Because it is just java code, it can also be run from an ant task.  
   * The tests and expected results are in the java code.
   * When you run these tests, a full build of your code will not happen (unless you configure your IDE for a full build before you run JUnit tests).
   * These tests indicate which Solr document is to be tested, so you can use a test data file with multiple MaRC records. 
+  * These tests allow any individual value for a field to be specified, without having to specify all the other values.
+  * These tests can check for the absence of a value from a Solr field.
 
 blah blah blah
 
