@@ -196,7 +196,7 @@ public abstract class MarcHandler {
         	logger.warn("Error: Z3950 not yet implemented");
             reader = null;
         }
-        if (combineConsecutiveRecordsFields != null)
+        if (reader != null && combineConsecutiveRecordsFields != null)
         {
             reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields);
         }
