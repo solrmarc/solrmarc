@@ -7,6 +7,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
     	AuthorMappingTests.class,
     	CallnumMappingTests.class,
+    	OtherMappingTests.class,
     	PublicationMappingTests.class,
         SubjectMappingTests.class,
         TitleMappingTests.class

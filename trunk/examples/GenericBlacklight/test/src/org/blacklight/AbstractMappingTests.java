@@ -16,7 +16,7 @@ public class AbstractMappingTests {
 	protected SolrFieldMappingTest solrFldMapTest = null;
 	
 	private String siteDir = "bldemo";
-	private String marcFileDir = siteDir + File.separator + 
+	protected String marcFileDir = siteDir + File.separator + 
 									"test" + File.separator +
 									"data" + File.separator;
 	protected String marc30recTestFile = marcFileDir + "test_data.utf8.mrc";
