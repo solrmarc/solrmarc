@@ -1385,7 +1385,7 @@ public class SolrIndexer
      *            contents
      * @return Set of values (as strings) for solr field
      */
-    public Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
+    public static Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
     {
         Set<String> result = new LinkedHashSet<String>();
 
