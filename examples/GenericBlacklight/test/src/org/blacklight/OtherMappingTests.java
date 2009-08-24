@@ -31,39 +31,21 @@ public class OtherMappingTests extends AbstractMappingTests {
 
 
 	/**
-	 * format_facet = 007[0-1]:000[6-7]:000[6], (map.format), first
+	 * format = 007[0-1]:000[6-7]:000[6], (map.format), first
 	 */
 @Test
 	public final void formatFacetTest()
 	{
 		// 007[0-1] - he ... not in table, so move on
 		//   he
-		solrFldMapTest.assertSolrFldHasNoValue(marc30recTestFile, "85910001", "format_facet", "he");
-		solrFldMapTest.assertSolrFldHasNoValue(marc30recTestFile, "85910001", "format_facet", "Unknown");
+		solrFldMapTest.assertSolrFldHasNoValue(marc30recTestFile, "85910001", "format", "he");
+		solrFldMapTest.assertSolrFldHasNoValue(marc30recTestFile, "85910001", "format", "Unknown");
 		
 		// NOTE: all records in small test file are 006[6-7] am
 		// 006[6-7] - am  ... which is not found, so  006[6] "a" matches Book
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "85910001", "format_facet", "Book");
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00282214", "format_facet", "Book");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "85910001", "format", "Book");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00282214", "format", "Book");
 	}
-
-	/**
-	 * format_code_t = 007[0-1]:000[6-7]:000[6], (map.format_code), first
-	 */
-@Test
-	public final void formatCodeTest()
-	{
-		// 007[0-1] - he ... not in table, so move on
-		//   he
-		solrFldMapTest.assertSolrFldHasNoValue(marc30recTestFile, "85910001", "format_code_t", "he");
-		solrFldMapTest.assertSolrFldHasNoValue(marc30recTestFile, "85910001", "format_code_t", "unknown");
-
-		// NOTE: all records in small test file are 006[6-7] am
-		// 006[6-7] - am  ... which is not found, so  006[6] "a" matches Book
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "85910001", "format_code_t", "book");
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00282214", "format_code_t", "book");
-	}
-
 
 
 	/**
