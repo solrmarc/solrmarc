@@ -67,8 +67,8 @@ demo_config.properties, 2005553155.mrc, pub_date, 1962
 demo_config.properties, 92117465.mrc, subject_t, Law
 demo_config.properties, 2004310986.mrc, subject_t, Bon-brgya (China)
 demo_config.properties, 90142413.mrc, subject_t, Industrial workers; life style
-demo_config.properties, 78908283.mrc, subject_additional_t, Poetry
-demo_config.properties, 2008308202.mrc, subject_additional_t, History Miscellanea
+demo_config.properties, 78908283.mrc, subject_addl_t, Poetry
+demo_config.properties, 2008308202.mrc, subject_addl_t, History Miscellanea
 demo_config.properties, 92117465.mrc, subject_topic_facet, Law
 demo_config.properties, 90142413.mrc, subject_topic_facet, Industrial workers; life style
 demo_config.properties, 2008543486.mrc, subject_era_facet, 20th century
@@ -94,10 +94,8 @@ demo_config.properties, 2009373513.mrc, title_series_t, Lin Xingzhi zuo pin ji ;
 
 # other fields
 demo_config.properties, 00282214.mrc, id, 00282214
-demo_config.properties, 85910001.mrc, format_facet, Book
-demo_config.properties, 00282214.mrc, format_facet, Book
-demo_config.properties, 85910001.mrc, format_code_t, book
-demo_config.properties, 00282214.mrc, format_code_t, book
+demo_config.properties, 85910001.mrc, format, Book
+demo_config.properties, 00282214.mrc, format, Book
 demo_config.properties, 2001417245.mrc, language_facet, Sanskrit
 demo_config.properties, 2007020969.mrc, url_suppl_display, http://www.loc.gov/catdir/toc/ecip0719/2007020969.html|http://www.loc.gov/catdir/enhancements/fy0808/2007020969-s.html|http://www.loc.gov/catdir/enhancements/fy0808/2007020969-d.html
 demo_config.properties, 00282214.mrc, material_type_display, 375 p.
