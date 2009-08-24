@@ -114,7 +114,7 @@ public class TitleMappingTests extends AbstractMappingTests {
 // additional title searching fields
 
 	/**
-	 * addl_titles_t = custom, getLinkedFieldCombined(245abnps:130[a-z]:240[a-gk-s]:210ab:222ab:242abnp:243[a-gk-s]:246[a-gnp]:247[a-gnp])
+	 * title_addl_t = custom, getLinkedFieldCombined(245abnps:130[a-z]:240[a-gk-s]:210ab:222ab:242abnp:243[a-gk-s]:246[a-gnp]:247[a-gnp])
 	 *   should have both latin and vernacular 
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
@@ -123,16 +123,16 @@ public class TitleMappingTests extends AbstractMappingTests {
 	{
 		// no 245 subfields other than a, b, c, h in small test file
 		// 130
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "77826928", "addl_titles_t", "Koryŏsa. Yŏlchŏn. Selections");
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "77826928", "addl_titles_t", "高麗史. 列傅. Selections");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "77826928", "title_addl_t", "Koryŏsa. Yŏlchŏn. Selections");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "77826928", "title_addl_t", "高麗史. 列傅. Selections");
 		// 240
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "addl_titles_t", "Mishnah berurah");
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "addl_titles_t", "‏משנה ברורה");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "title_addl_t", "Mishnah berurah");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "title_addl_t", "‏משנה ברורה");
 
 		// 246
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "90142413", "addl_titles_t", "Obraz zhizni rabotnika promyshlennosti");
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00313831", "addl_titles_t", "Critique for all seasons : Akbar Ganji's conversation with Abdullah Nuri");
-		      solrFldMapTest.assertSolrFldValue(marc30recTestFile, "87931798", "addl_titles_t", "‏اشنايى با حوزه‌هاى علميۀ شيعه در طول تاريخ");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "90142413", "title_addl_t", "Obraz zhizni rabotnika promyshlennosti");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00313831", "title_addl_t", "Critique for all seasons : Akbar Ganji's conversation with Abdullah Nuri");
+		      solrFldMapTest.assertSolrFldValue(marc30recTestFile, "87931798", "title_addl_t", "‏اشنايى با حوزه‌هاى علميۀ شيعه در طول تاريخ");
 		// 210, 222, 242, 243, 247 - none in small test file
 	}
 

@@ -42,7 +42,7 @@ public class SubjectMappingTests extends AbstractMappingTests
 	
 	/**
 	 * additional subject search field: subject_addl_t
-	 * subject_additional_t = custom, getLinkedFieldCombined(600[v-z]:610[v-z]:611[v-z]:630[v-z]:650[v-z]:651[v-z]:654[v-z]:655[v-z])
+	 * subject_addl_t = custom, getLinkedFieldCombined(600[v-z]:610[v-z]:611[v-z]:630[v-z]:650[v-z]:651[v-z]:654[v-z]:655[v-z])
 	 *   should have both latin and vernacular 
 	 *   tokenized by Solr when written to index, so trailing punct can stay
 	 */
@@ -50,26 +50,26 @@ public class SubjectMappingTests extends AbstractMappingTests
 	public final void addlSubjectSearchTest()
 	{
 		// 600v
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "78908283", "subject_additional_t", "Poetry");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "78908283", "subject_addl_t", "Poetry");
 		// 610xv
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00313831", "subject_additional_t", "Officials and employees Interviews");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00313831", "subject_addl_t", "Officials and employees Interviews");
 		//   610v
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00313831", "subject_additional_t", "Interviews");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00313831", "subject_addl_t", "Interviews");
 		// 611, 630 - none in small test file
 		// 650 zzv
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2007020969", "subject_additional_t", "New Jersey Bridgeton Biography");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2007020969", "subject_addl_t", "New Jersey Bridgeton Biography");
 		//   650x
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "96933325", "subject_additional_t", "Ethnic identity");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "96933325", "subject_addl_t", "Ethnic identity");
 		//   650yx
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008543486", "subject_additional_t", "20th century History and criticism");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008543486", "subject_addl_t", "20th century History and criticism");
 		//   650zx
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008543486", "subject_additional_t", "Japan History");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008543486", "subject_addl_t", "Japan History");
 		// 651xv
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008308202", "subject_additional_t", "History Miscellanea");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2008308202", "subject_addl_t", "History Miscellanea");
 		//   651xy
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2009373513", "subject_additional_t", "Economic conditions 1997-");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2009373513", "subject_addl_t", "Economic conditions 1997-");
 		//   651y
-		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2009373513", "subject_additional_t", "2005-2015");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "2009373513", "subject_addl_t", "2005-2015");
 		// no 654, 655 in small test file
 		
 		// no linked versions of any of these
