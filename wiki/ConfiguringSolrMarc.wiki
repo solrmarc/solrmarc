@@ -145,7 +145,7 @@ If the value after the equals sign is {{{FullRecordAsMARC}}}, {{{FullRecordAsXML
 
  * *FullRecordAsXML:* specifies that the entire MARC record should be added encoded using the MARCXML standard.
 
- * *FullRecordAsText:* specifies that the entire MARC record should be translated to a readable format, and stored, (with {{{<br/>}}} tags being inserted in place of newline characters.
+ * *!FullRecordAsText:* specifies that the entire MARC record should be translated to a readable format, and stored, (with {{{<br/>}}} tags being inserted in place of newline characters.
 
  * *date:* extracts the 260 c subfield from the MARC record, and then extracts a four digit year from that subfield.
 
