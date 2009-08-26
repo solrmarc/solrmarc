@@ -10,12 +10,12 @@ NUM_UPDATES_EXPECTED=1
 NUM_UPDATES=`ls -l /usr/local/projects/marc/incoming/*.mrc | wc -l`
 
 # $NUM_UPDATES_EXPECTED  should equal $NUM_UPDATES
-if [ $NUM_UPDATES -le $NUM_UPDATES_EXPECTED ] 
+if [ $NUM_UPDATES -lt $NUM_UPDATES_EXPECTED ] 
   then
     echo "No Daily Updates Copied to the Incoming Directory"
     STATUS=1
     exit $STATUS
-elif [ $NUM_UPDATES -ge $NUM_UPDATES_EXPECTED ]
+elif [ $NUM_UPDATES -gt $NUM_UPDATES_EXPECTED ]
   then
     echo "Multiple Daily Updates were Copied to the Incoming Directory"
     STATUS=1
