@@ -20,7 +20,7 @@ elif [ $NUM_UPDATES -gt $NUM_UPDATES_EXPECTED ]
     AUTH_NAME=`ls -1 /usr/local/projects/marc/incoming/*.auth_mrc | head -1`
     AUTH_ROOT=`basename $AUTH_NAME .auth_mrc`
     NUM_UPDATES_NOT_NEW=`ls -1 *.mrc | egrep -v "$AUTH_ROOT" | wc -l`
-    if [ $NUM_UPDATES_NOT_NEW -gt $NUM_UPDATES_EXPECTED ] 
+    if [ $NUM_UPDATES_NOT_NEW -eq $NUM_UPDATES_EXPECTED ] 
       then
          echo "New Daily Update Available, Not Yet Processed"
          STATUS=0
