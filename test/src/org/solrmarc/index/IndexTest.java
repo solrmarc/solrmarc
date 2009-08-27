@@ -3,24 +3,13 @@ package org.solrmarc.index;
 import static org.junit.Assert.*;
 import org.junit.After;
 import java.io.*;
-import java.nio.channels.FileChannel;
 import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.log4j.*;
-//import org.apache.lucene.document.Document;
-//import org.apache.lucene.index.IndexReader;
-//import org.apache.lucene.search.*;
-//import org.apache.solr.core.*;
-//import org.apache.solr.schema.*;
-//import org.apache.solr.search.*;
-import org.solrmarc.marc.MarcHandler;
 import org.solrmarc.marc.MarcImporter;
-import org.solrmarc.solr.DocumentProxy;
-import org.solrmarc.solr.SolrCoreLoader;
-import org.solrmarc.solr.SolrCoreProxy;
-import org.solrmarc.solr.SolrSearcherProxy;
+import org.solrmarc.solr.*;
 import org.solrmarc.tools.Utils;
 import org.xml.sax.SAXException;
 
