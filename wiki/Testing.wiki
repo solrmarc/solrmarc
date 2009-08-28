@@ -46,7 +46,7 @@ Steps:
         * for an array, list the values separated by a vertical bar.  Order matters.
           * example: {{{demo_config.properties, 2009373513.mrc, title_t, Ci an zhou bian /|次按驟變}}}
 
-  # Run the tests with the ant "test" target. Two ways you can do this:
+  Run the tests with the ant "test" target. Two ways you can do this:
     * From the command line, from the top level directory of the !SolrMarc project, type
       {{{ant test}}}
        * Note: the site.dir.properties file at the top level directory is how this ant task knows where to find YOUR test file.  It must be in your site's test/data directory.
@@ -66,7 +66,7 @@ It allows tests to be run from Eclipse or other IDEs.  Because it is just java c
   * These tests allow any individual value for a field to be specified, without having to specify all the other values.
   * These tests can check for the absence of a value from a Solr field.
 
-=== Method II.A.
+=== Method II.A. - Mapping Tests ===
 
 This approach tests what values _would_ be written to a Solr document, if one were actually being created.  As with Method I, test data is run through the !SolrMarc indexing code up to the point where the Solr document is about to be created.
 
@@ -74,20 +74,120 @@ The tests and expected results will be in java code in your site's test/src dire
 
 Steps:
 
- # Configure the SolrMarc program for your site. (See GettingStarted)
- # Make sure you have known MaRC records in your created test/data folder.
-   * you can use any of the test data provided in the SolrMarc project, or provide your own. 
- # Create an abstract class that will accommodate configuration settings for running the tests from your IDE.
+ # Configure the !SolrMarc program for your site. (See GettingStarted)
+ # Make sure you have known MARC records in your created test/data folder.
+   * you can use any of the test data provided in the !SolrMarc project, or provide your own. 
+ # Create an abstract class that will accommodate configuration settings for running the tests for your site.
+   * an example is in the examples/!GenericBlacklight/test/src directory, called !AbstractMappingTests.java.  The code looks like this:
 
-Naomi Dushay wrote the code for this approach.  
+   {{{
+package org.blacklight;
+
+import java.io.File;
+
+import org.junit.*;
+
+import org.solrmarc.index.SolrFieldMappingTest;
+
+/**
+ * Abstract class for junit4 tests for generic Blacklight mapping tests
+ * @author Naomi Dushay
+ */
+public class AbstractMappingTests {
+	
+	/** SolrFieldMappingTest object to be used in specific tests */
+	protected SolrFieldMappingTest solrFldMapTest = null;
+	
+        // your site's directory, per GettingStarted configurations
+	private String siteDir = "bldemo";  
+
+        // parent directory for MARC record files
+	protected String marcFileDir = siteDir + File.separator + "test" + File.separator + "data" + File.separator; 
+
+        // a default test file.
+	protected String marc30recTestFile = marcFileDir + "test_data.utf8.mrc";
 
 
-=== Method II.B.
+@Before
+	public void setup() 
+	{
+		// these properties must be set or MarcHandler can't initialize properly
+        System.setProperty("solrmarc.path", "lib" + File.separator + "solrmarc");
+		System.setProperty("solrmarc.site.path", siteDir); 
+    	System.setProperty("marc.source", "FILE");
+
+    	// needed to get through initialization; overridden in individual tests
+    	System.setProperty("marc.path", marc30recTestFile);
+
+    	solrFldMapTest = new SolrFieldMappingTest(siteDir + File.separator + "demo_config.properties", "id");
+	}
+
+}
+}}}
+    * you will need to change the values for {{{siteDir}}}, for {{{marcFileDir}}}, and for {{{marc30recTestFile}}}, and for the variables assigned in the setup() method.
+ # Create instances of the subclass that run actual tests.
+   * examples are in the examples/!GenericBlacklight/test/src directory, called (blah)!MappingTests.java  Code looks like this:
+
+   {{{
+package org.blacklight;
+
+import org.junit.*;
+
+/**
+ * junit4 tests for generic Blacklight example - call number fields
+ * @author Naomi Dushay
+ */
+public class CallnumMappingTests extends AbstractMappingTests
+{
+	
+	/**
+	 * call number display field: lc_callnum_display
+	 * lc_callnum_display = 050ab, first
+	 */
+@Test
+	public final void lcDisplayTest()
+	{
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00282214", "lc_callnum_display", "PK2788.9.A9 F55 1998");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "86207417", "lc_callnum_display", "G535 .F54 1984");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92117465", "lc_callnum_display", "KPC13 .K67 1990");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "92828023", "lc_callnum_display", "BM520.88.A53 I88 1992b");
+
+		// odd ones -- check for valid LC in custom method??
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "00282371", "lc_callnum_display", "MLCME 2002/02660 (D)");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "85910001", "lc_callnum_display", "Microfiche 90/61328 (P)");
+		solrFldMapTest.assertSolrFldValue(marc30recTestFile, "90142413", "lc_callnum_display", "MLCSN 96/3906 (H)");
+	}
+}
+}}}
+
+
+The workhorse class for these tests is !SolrFieldMappingTest.  It currently contains two methods allowing assertions about field mappings:
+
+  # *assertSolrFldValue(String mrcFileName, String solrDocId, String expectedFldName, String expectedFldVal)*
+  assert that when the file of marc records is processed, there will be a Solr document with the given id containing at least one instance of the expected Solr field with the expected value
+     * mrcFileName - absolute path of file of marc records (name must end in .mrc or .marc or .xml)
+     * solrDocId - value of Solr unique key field for the Solr document to check
+     * expectedFldName - the name of the Solr field to be checked
+     * expectedFldVal - the value expected to be in at least one instance of the Solr field for the indicated Solr document
+
+  # *assertSolrFldHasNoValue(String mrcFileName, String solrDocId, String expectedFldName, String expectedFldVal)*
+  assert that when the file of marc records is processed, the Solr document with the given id does NOT contain an instance of the indicated field with the indicated value
+     * mrcFileName - absolute path of file of marc records (name must end in .mrc or .marc or .xml)
+     * solrDocId - value of Solr unique key field for the Solr document to check
+     * expectedFldName - the name of the Solr field to be checked
+     * expectedFldVal - the value that should be in NO instance of the Solr field for the indicated Solr document
+
+You can group all of your mapping tests into a single java class so they can all be run in one shot.  Then you can configure the ant script to run this test.  An example is in the examples/!GenericBlacklight/test/src directory, called !AllMappingTests.java
+
+
+=== Method II.B. - Indexing Tests ===
 
 This approach actually creates an index, which allows for additional types of testing:
   # Ensure that all Solr configuration files are consistent (e.g. there isn't a field in solrconfig.xml that is not defined, either explicitly or dynamically, in schema.xml).
   # Smoke test to ensure you can write data to a Solr index with your site's code.
   # Searching tests for Solr indexed fields.
+
+Running tests with this approach can take longer, since you are building an index, possibly for each test.  This is especially true for large sets of test records.
 
 The tests and expected results will be in java code in your site's test/src directory. You can run these tests from within your IDE;  you could also easily adapt the ant "test" target to run these tests.
 
