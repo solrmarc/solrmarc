@@ -27,17 +27,17 @@ This approach may be more convenient when your site's customizations are all don
   * These tests require ALL the values for a field to be specified, in order.
   * These tests ONLY check for particular value(s) in a field.  They do not check to ensure a value is NOT present, or that the field is not present, etc.
 
-The tests and expected results are in a file called indextest.txt that lives in your site's test/data folder.  The tests are run via an ant target "test" which looks for the indextest.txt file in your site's test/data directory.
+The tests and expected results are in a file called indextest.txt that lives in your site's test/data folder.  The tests are run via an ant target "test" which looks for the indextest.txt file in your site's test/data directory.  Test data is run through the !SolrMarc indexing code up to the point where the Solr document is about to be created.
 
 Steps:
 
   # Configure the SolrMarc program for your site.  (See GettingStarted)
   # Make sure you have known MaRC records in your created test/data folder.
-    # you can use any of the test data provided in the !SolrMarc project, or provide your own.
+    * you can use any of the test data provided in the !SolrMarc project, or provide your own.
   # Create an indextest.txt file in your test folder.  Each test is a line in the file; for an example, see !UvaBlacklight/test/data/indextest.txt.
     
-    # each line looks for a value in a field in a Solr document that would be created by indexing the specified MARC data. 
-    # format of each line:
+    * each line looks for a value in a field in a Solr document that would be created by indexing the specified MARC data. 
+    * format of each line:
       # name of your site's xxx_config.properties file
       # name of the file containing MARC test data (relative to your site's !SolrMarc folder).  It is recommended that you use test files with a single MARC record for each test
       # name of the Solr field to test
@@ -66,7 +66,36 @@ It allows tests to be run from Eclipse or other IDEs.  Because it is just java c
   * These tests allow any individual value for a field to be specified, without having to specify all the other values.
   * These tests can check for the absence of a value from a Solr field.
 
-blah blah blah
+=== Method II.A.
+
+This approach tests what values _would_ be written to a Solr document, if one were actually being created.  As with Method I, test data is run through the !SolrMarc indexing code up to the point where the Solr document is about to be created.
+
+The tests and expected results will be in java code in your site's test/src directory. You can run these tests from within your IDE;  you could also easily adapt the ant "test" target to run these tests.
+
+Steps:
+
+ # Configure the SolrMarc program for your site. (See GettingStarted)
+ # Make sure you have known MaRC records in your created test/data folder.
+   * you can use any of the test data provided in the SolrMarc project, or provide your own. 
+ # Create an abstract class that will accommodate configuration settings for running the tests from your IDE.
+
+Naomi Dushay wrote the code for this approach.  
+
+
+=== Method II.B.
+
+This approach actually creates an index, which allows for additional types of testing:
+  # Ensure that all Solr configuration files are consistent (e.g. there isn't a field in solrconfig.xml that is not defined, either explicitly or dynamically, in schema.xml).
+  # Smoke test to ensure you can write data to a Solr index with your site's code.
+  # Searching tests for Solr indexed fields.
+
+The tests and expected results will be in java code in your site's test/src directory. You can run these tests from within your IDE;  you could also easily adapt the ant "test" target to run these tests.
+
+Steps:
+
+  # Configure the SolrMarc program for your site. (See GettingStarted)
+  # Make sure you have known MaRC records in your created test/data folder.
+    * you can use any of the test data provided in the SolrMarc project, or provide your own. 
 
 
 Naomi Dushay wrote the code for this approach.  
