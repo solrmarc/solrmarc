@@ -16,7 +16,7 @@ The SolrMarc program reads in MARC records stored in standard binary format (ISO
 
 <br />
 
-=== config.properties File ===
+= config.properties File =
 
 The main configuration of the program is currently done via a properties file that is created and stored in the jar file produced by the build process. The name of this file can be passed in as the first parameter on the command line, however if only one config.properties file is stored in the jar file, that one will be used by default.  An example config.properties file is below:
 
@@ -39,7 +39,7 @@ marc.include_errors = true
 
 <br />
 
-==== config.properties File Entries ====
+== config.properties File Entries ==
 
  * *solr.path:* lists the full path to the Solr home directory, which should contain the directories {{{etc}}}, {{{conf}}} and {{{data}}}.  The directory {{{conf}}} should contain a file named _schema.xml_ which describes the different indexing fields that the instance of the Solr search engine is expecting, and the data directory is where the Solr index files will be placed.
 
@@ -61,7 +61,7 @@ marc.include_errors = true
 
 <br />
 
-==== Special Purpose config.properties File Entries ====
+== Special Purpose config.properties File Entries ==
 
 Lastly, there are several special purpose entries that will not be used in general, and usually won’t appear in the config.properties file.
 
@@ -83,9 +83,13 @@ Lastly, there are several special purpose entries that will not be used in gener
 
 <br />
 
-===The Index Configuration Properties File ===
+= index.properties File =
 
-The specification of which MARC fields and sub-fields are to be mapped to which Solr index fields is handled via the index configuration properties file, the name of which is specified in the {{{solr.indexer.properties}}} entry in the main properties file as described above. Since this configuration file is a properties file, there are certain constraints of how the file is structured. Basically all properties files consist of a number of pairs of values separated by an equals sign. The key values represent the name of the field that will be added to the Solr index record. All of these must either match a field definition that occurs in the _schema.xml_ file for the Solr search engine, or they must match a dynamicField definition in that file.   If any index entries are listed here that do not match either a field definition or a dynamicField definition from the _schema.xml_ file, the indexing will fail.
+The specification of which MARC fields and subfields are to be mapped to which Solr index fields is handled via an index.properties configuration file, the exact name of which is specified by the {{{solr.indexer.properties}}} entry in the config.properties file as described above. Since the field specification configuration file is a properties file, there are certain constraints of how the file is structured. Basically all properties files consist of a number of pairs of values separated by an equals sign. The key values represent the name of the field that will be added to the Solr document. All of these must either match a field definition that occurs in the _schema.xml_ file for the Solr search engine, or they must match a !dynamicField definition in that file.   
+
+If any Solr field entries are listed here that do not match either a field definition or a !dynamicField definition from the _schema.xml_ file, the indexing will fail.
+
+Other indexing errors can occur that will not prevent the creation of a Solr index.  For example, if a MARC record cannot be read due to a munged leader field, an error message is printed and the record is skipped.  Another example:  a Solr field is not defined as !multiValued in the Solr schema.xml file, but multiple values are created by !SolrMarc (e.g. because the MARC record has multiple 245 fields).
 
  {{{
 id = 001, first
@@ -161,7 +165,7 @@ If the value after the equals sign is not one of these special cases entries, it
 
 <br />
 
-=== Specifying Which Fields and Subfields to Use ===
+== Specifying Which Fields and Subfields to Use ==
 
 The syntax for specifying what fields/subfields (or what portion of a field or subfield) is to be looked-at to create the Solr index field(s) consists of one or more field specifications separated by colons (:).  
 
@@ -180,7 +184,7 @@ A field specification consists of a three-digit string (000 – 999) optionally 
    NOTE: as of 2009-08-27, the distinction is letters vs. digits.  This intended to change to allow numeric subfields in the future.
 
 <br />
-==== Example Field Specifications ====
+=== Example Field Specifications ===
 
 {{{full_title_display = 245}}}
 
@@ -223,7 +227,7 @@ Aside:  since the MARC specification states that there can only be a single 245 
 Or to put it more succinctly, look up character 6 of the 000 field in the map {{{broad_format}}}, if the map contains a mapping for that character, use that value; otherwise, look up character 0 of the 007 field in the map {{{broad_format}}}, if the map contains a mapping for that character use that value. If neither extracted value matches an entry in the translation map, check to see whether the map defines a default value, if so use that default value, otherwise leave the {{{broad_format_facet}}} index entry unassigned.
 
 <br />
-=== Mapping "Raw" Values to New Values ===
+== Mapping "Raw" Values to New Values ==
 
 The process of creating a translation map to translate from the cryptic entries found in the MARC record to more human-readable strings to make searching and faceting more useful to the end-user of the system, is fairly straightforward.  The first thing that you must do is add a second parameter on the field specification entry in the properties file, as shown in the last two of the examples shown above. This parameter specifies either the name of a separate property file that contains the map or the name of a separate property file plus the name of the property key prefix that should be looked for in that file.  For the last example above, a map named {{{broad_format}}} is referenced in the properties file {{{format_maps.properties}}}. Those entries in that file that start with the string {{{broad_format}}} will be used to define the map. The definition for that map:
 
@@ -325,7 +329,7 @@ This makes the creation and maintaining of translation map properties files much
 
 <br />
 
-==== Defining a Pattern-Based Translation Map ====
+=== Defining a Pattern-Based Translation Map ===
 
 The previous section described how to define a translation map for a field.  However, one limitation of it is that it can only map from a fixed, pre-specified set of values.  If the value in the field doesn’t exactly match one of the translation keys, that value will not be mapped to any other value, and usually would then be discarded.  
 
@@ -407,30 +411,22 @@ Similarly, if you want to trim off everything following the initial letters of a
 
 <br />
 
-=== Custom Indexing Routines ===
+== Custom Indexing Routines ==
 
 If special processing is required for a given Solr index field that cannot be handled by the any of the above indexing specification commands, you can reference a custom-created indexing function, by specifying {{{custom}}} as the second value in the field specification entry as shown in the example below:
 
  {{{recordings_and_scores_facet = custom, getRecordingAndScore}}}
 
-In this case the third value of the {{{field_list}}} entry specifies the name of the custom-written java function to handle this particular bit of indexing.
+In this case the value after _custom_ specifies the name of a java method to handle this particular bit of indexing.
 
 <br />
 
-==== Pre-Defined Custom Indexing Routines ====
+=== Pre-Defined Custom Indexing Routines ===
 
-Because there are many indexing tasks that commonly occur for almost any site that is indexing MARC records, there are several pre-defined "custom" indexing routines that can be referenced from your index specification without requiring you to write any custom code. These pre-defined indexing routines are listed below with a short description of what each of them does.
+Because there are many "special processing" indexing tasks that commonly occur when indexing MARC records, there are several pre-defined "custom" indexing routines that can be referenced from your index specification file without requiring you to write any java code. These pre-defined indexing routines are listed below with a short description of what each of them does.
 
- * <b>removeTrailingPunct(fieldSpec):</b> creates a list of entries extracted from the fields/subfields specified by the {{{fieldSpec}}} parameter, and then post-processes all of the entries in the list to remove any trailing punctuation from the entries.  So if you were defining a index entry like this
-
- {{{title_display = 245a}}}
-
- but you were unhappy with the colons, commas, and slashes which appear on the entries that end up being stored in the index, you could change the index specification to be:
-
- {{{title_display = custom, removeTrailingPunct(245a)}}}
-
-<br />
- * *getAllSubfields(fieldSpec, separator):* operates similarly to the standard indexing specification, but it provides a little more power. If your author field specification was as follows:
+*getAllAlpha(fieldSpec, separator)*:
+  operates similarly to the standard indexing specification, but it provides a little more power. If your author field specification was as follows:
 
  {{{author_person_search = 100abcdefghijklmnopqrstuvwxyz:700abcdefghijklmnopqrstuvwxyz}}}
 
@@ -442,16 +438,43 @@ Because there are many indexing tasks that commonly occur for almost any site th
 
  {{{ author_person_search = custom, getAllSubfields(100[a-z]:700[a-z],  " ") }}}
 
-<br />
- * *getSortableTitle:* retrieves the value from the 245a subfield, and then strips off any "non-sorting characters" at the beginning of the string, according to the MARC records indicators at the head of the field.
+*getAllAlphaExcept(fieldSpec, separator)*:
+  operates similarly to the standard indexing specification, but it provides a little more power. If your author field specification was as follows:
 
-<br />
- * *getAllSearchableFields(lowerBound, upperBound):* retrieves the contents of all fields/subfields where the field tag is greater or equal to the lower bound parameter, and less than the upper bound parameter. This is useful for grabbing all data from all fields to put into a default, catch-all search field.  Usually you would want to specify 100 as the lower bound and 900 as the upper bound thusly:
+*getAllAlphaExcept(fieldSpec)*:
+ As above, with separator set to space.
+
+*getAllSubfields(fieldSpec, separator)*:
+ operates similarly to the standard indexing specification, but it provides a little more power. If your author field specification was as follows:
+
+ {{{author_person_search = 100abcdefghijklmnopqrstuvwxyz:700abcdefghijklmnopqrstuvwxyz}}}
+
+ You could shorten it and make it easier to read thusly:
+
+ {{{author_person_search = custom, getAllSubfields(100:700,  " ")}}} 
+
+ Or, if you needed to be sure that only alphabetic subfields would be included:
+
+ {{{ author_person_search = custom, getAllSubfields(100[a-z]:700[a-z],  " ") }}}
+
+*getAllSubfields(fieldSpec, separator, multOccur)*:
+ operates similarly to the standard indexing specification, but it provides a little more power. If your author field specification was as follows:
+
+*getAllSearchableFields(lowerBound, upperBound)*: 
+  retrieves the contents of all fields/subfields where the field tag is greater or equal to the lower bound parameter, and less than the upper bound parameter. This is useful for grabbing all data from all fields to put into a default, catch-all search field.  Usually you would want to specify 100 as the lower bound and 900 as the upper bound thusly:
 
  {{{marc_text = custom, getAllSearchableFields(100, 900)}}}
 
-<br />
- * *getLinkedField(fieldSpec):* – allows you to retrieve the linked original-language version of a given field, if such an original language version exists, a 880 field. For example, items that are originally in Chinese, Japanese, Korean, Arabic, Hebrew, or Russian, the cataloger usually transliterates the title and author fields from their original language into a latin-alphabet, phonic representation of the original title or author string, placing the original title or author in a 880 field with a tag indicating that that entry is linked to the transliterated title or author string in the main body of the MARC record.  For the example record below, if you wanted to extract the original version of the title, you could use the following specification: 
+*getCurrentDate()*: 
+ doc needed??  is this meant to be used?
+*getDate()*:
+ doc needed
+*getEra()*:
+ doc needed
+*getFullTextUrls()*:
+ doc needed
+*getLinkedField(fieldSpec)*:
+ allows you to retrieve the linked original-language version of a given field, if such an original language version exists, a 880 field. For example, items that are originally in Chinese, Japanese, Korean, Arabic, Hebrew, or Russian, the cataloger usually transliterates the title and author fields from their original language into a latin-alphabet, phonic representation of the original title or author string, placing the original title or author in a 880 field with a tag indicating that that entry is linked to the transliterated title or author string in the main body of the MARC record.  For the example record below, if you wanted to extract the original version of the title, you could use the following specification: 
 
  {{{linked_title_display = custom, getLinkedField(245abc)}}}
 
@@ -493,14 +516,33 @@ LEADER 01584cam a2200397 a 4500
 987   $c20010620$dc$e06.12.2001$f500-a /
 }}}
 
-<br />
- * *getLinkedFieldCombined(fieldSpec):* operates similarly to {{{getLinkedField}}}, including not only the original language version of the specified field, but also the cataloger created transliterated version. This would be done for fields used for searching so that a user could search by title by specifying either the transliterated version or the original language version. For the example record, if you wanted to extract the original and the transliterated versions of the title, you could use the following specification: 
+*getLinkedFieldCombined(fieldSpec)*: 
+ operates similarly to {{{getLinkedField}}}, including not only the original language version of the specified field, but also the cataloger created transliterated version. This would be done for fields used for searching so that a user could search by title by specifying either the transliterated version or the original language version. For the example record, if you wanted to extract the original and the transliterated versions of the title, you could use the following specification: 
 
  {{{title_text = custom, getLinkedFieldCombined(245a)}}}
 
  Which would extract {{{“紫禁城宮殿”}}} and “Zi jin cheng gong dian” for the field {{{title_text}}}.
 
-<br />
+*getSortableAuthor*: 
+ doc needed
+*getSortableTitle*: 
+ retrieves the value from the 245a subfield, and then strips off any "non-sorting characters" at the beginning of the string, according to the MARC records indicators at the head of the field.
+
+*getSupplUrls()*:
+ doc needed
+*getTitle()*:
+ doc needed
+*removeTrailingPunct(fieldSpec)*:
+ creates a list of entries extracted from the fields/subfields specified by the {{{fieldSpec}}} parameter, and then post-processes all of the entries in the list to remove any trailing punctuation from the entries.  So if you were defining a index entry like this
+
+ {{{title_display = 245a}}}
+
+ but you were unhappy with the colons, commas, and slashes which appear on the entries that end up being stored in the index, you could change the index specification to be:
+
+ {{{title_display = custom, removeTrailingPunct(245a)}}}
+
+ The specific characters that are removed are: space, comma, slash, semicolon, colon, trailing period if it is preceded by at least three letters, and single square bracket characters if they are the start and/or end chars of the cleaned string.
+
 
 ==== Creating Custom Indexing Routines ====
 
