@@ -177,11 +177,15 @@ A field specification consists of a three-digit string (000 – 999) optionally 
 
  * *multiple letters after the field*, e.g. {{{100abcdq}}} - for each occurrence of the field, all the indicated subfields, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
 
- * for a fixed length field (i.e. leader, 001-009), *square brackets containing digit pattern*, e.g. {{{008[35-37]}}} or {{{000[5]}}} - the digits in the brackets indicate the characters to be used as a value. The counting is 0-based: the first byte in the fixed field is 0.  {{{008[35-37]}}} will return the three character sequence at bytes 35,36,37 in the 008 field.  Each instance of the Marc field (e.g. for an 007, which is repeatable) will create a separate instance of the Solr field in the Solr document.
+ * *square brackets containing digit pattern* for a fixed length field (i.e. leader, 001-009), , e.g. {{{008[35-37]}}} or {{{000[5]}}} - the digits in the brackets indicate the characters to be used as a value. The counting is 0-based: the first byte in the fixed field is 0.  {{{008[35-37]}}} will return the three character sequence at bytes 35,36,37 in the 008 field.  Each instance of the Marc field (e.g. for an 007, which is repeatable) will create a separate instance of the Solr field in the Solr document.
    NOTE: as of 2009-08-27, numbers will grab bytes for all fields, not just fixed fields.  This is intended to change to the behavior described.
  
- * for a variable length field, *square brackets indicating a regular expression describing subfields*, e.g. {{{110[a-z]}}} or {{{243[a-gk-s]}}}. for each occurrence of the field, all the indicated subfields, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
+ * *square brackets indicating a regular expression describing subfields* for a variable length field, , e.g. {{{110[a-z]}}} or {{{243[a-gk-s]}}}. for each occurrence of the field, all the indicated subfields, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
    NOTE: as of 2009-08-27, the distinction is letters vs. digits.  This intended to change to allow numeric subfields in the future.
+
+TODO: document specification of separator.
+
+There are additional ways to generate Solr fields from your MARC data explained below.
 
 <br />
 === Example Field Specifications ===
@@ -425,24 +429,28 @@ In this case the value after _custom_ specifies the name of a java method to han
 
 Because there are many "special processing" indexing tasks that commonly occur when indexing MARC records, there are several pre-defined "custom" indexing routines that can be referenced from your index specification file without requiring you to write any java code. These pre-defined indexing routines are listed below with a short description of what each of them does.
 
-*getAllAlpha(fieldSpec, separator)*:
-  operates similarly to the standard indexing specification, but it provides a little more power. If your author field specification was as follows:
-
- {{{author_person_search = 100abcdefghijklmnopqrstuvwxyz:700abcdefghijklmnopqrstuvwxyz}}}
-
- You could shorten it and make it easier to read thusly:
-
- {{{author_person_search = custom, getAllSubfields(100:700,  " ")}}} 
-
- Or, if you needed to be sure that only alphabetic subfields would be included:
-
- {{{ author_person_search = custom, getAllSubfields(100[a-z]:700[a-z],  " ") }}}
-
-*getAllAlphaExcept(fieldSpec, separator)*:
-  operates similarly to the standard indexing specification, but it provides a little more power. If your author field specification was as follows:
-
 *getAllAlphaExcept(fieldSpec)*:
- As above, with separator set to space.
+  For _each_ occurrence of a MARC field in the !fieldSpec list, concatenate the alphabetic subfield contents _except_ the ones specified, using a space separator.
+
+  {{{geographic_search = custom, getAllAlphaExcept(651vxyz:691vxyz)}}}
+
+   For each MARC 651 and 691 field, concatenate all the subfields from a to u, in order of occurrence, and add a field to the Solr document named geographic_search with the concatenated value. 
+
+*getAllAlphaSubfields(fieldSpec)*:
+   For _each_ occurrence of a MARC field in the !fieldSpec list, concatenate all alphabetic subfield contents, using a space separator.
+
+  {{{title_full_display = custom, getAllAlphaSubfields(245)}}}
+ 
+    For each MARC 245 field, concatenate all alphabetic subfield values, then add a field named full_title_display to the Solr document with the concatenated value.
+
+*getAllAlphaSubfields(fieldSpec, first|join|all)*:
+ As above, but using "first" "join" or "all" to indicate handling of multiple occurrences of field values
+
+  {{{title_uniform_display = custom, getAllAlphaSubfields(130:240, first)}}}
+
+    If the MARC record has a 130 field, concatenate all alphabetic subfield values, then add a field named title_uniform_display to the Solr document with the concatenated value.  If there is no 130 field in the MARC record, look for a 240 field, concatenate all alphabetic subfield values, then add a field named title_uniform_display to the Solr document with the concatenated value.
+   "join" - all the values indicated by the !fieldSpec will be concatenated into a single value.
+   "all" - each value indicated by the fieldSpec will be a separate field in the Solr document.
 
 *getAllSubfields(fieldSpec, separator)*:
  operates similarly to the standard indexing specification, but it provides a little more power. If your author field specification was as follows:
@@ -457,22 +465,27 @@ Because there are many "special processing" indexing tasks that commonly occur w
 
  {{{ author_person_search = custom, getAllSubfields(100[a-z]:700[a-z],  " ") }}}
 
-*getAllSubfields(fieldSpec, separator, multOccur)*:
- operates similarly to the standard indexing specification, but it provides a little more power. If your author field specification was as follows:
-
 *getAllSearchableFields(lowerBound, upperBound)*: 
   retrieves the contents of all fields/subfields where the field tag is greater or equal to the lower bound parameter, and less than the upper bound parameter. This is useful for grabbing all data from all fields to put into a default, catch-all search field.  Usually you would want to specify 100 as the lower bound and 900 as the upper bound thusly:
 
  {{{marc_text = custom, getAllSearchableFields(100, 900)}}}
 
-*getCurrentDate()*: 
- doc needed??  is this meant to be used?
-*getDate()*:
- doc needed
-*getEra()*:
- doc needed
-*getFullTextUrls()*:
- doc needed
+*getEra*:
+ gets the era field values from 045a, which contains a coded time period (see http://www.loc.gov/marc/bibliographic/bd045.html ).  When combined with a translation map provided by the !SolrMarc code, values are end-user friendly.  For example:
+  {{{composition_era_facet = custom, getEra, composition_era_map.properties}}}
+
+*getFullTextUrls*:
+ gets the URLs for the full text of a resource described by the MARC record.  
+ For each MARC 856 field, 
+   if the second indicator is 0, _each_ subfield u is added to the Solr document.  
+   if the second indicator is 2, no value is added to the Solr document.
+   otherwise, subfields 3 and z are examined.  If _none_ of the following text is present, then subfield u is added to the Solr document
+    * abstract
+    * description
+    * sample text
+    * table of contents
+  {{{url_fulltext = custom, getFullTextUrls}}}
+
 *getLinkedField(fieldSpec)*:
  allows you to retrieve the linked original-language version of a given field, if such an original language version exists, a 880 field. For example, items that are originally in Chinese, Japanese, Korean, Arabic, Hebrew, or Russian, the cataloger usually transliterates the title and author fields from their original language into a latin-alphabet, phonic representation of the original title or author string, placing the original title or author in a 880 field with a tag indicating that that entry is linked to the transliterated title or author string in the main body of the MARC record.  For the example record below, if you wanted to extract the original version of the title, you could use the following specification: 
 
@@ -524,14 +537,34 @@ LEADER 01584cam a2200397 a 4500
  Which would extract {{{“紫禁城宮殿”}}} and “Zi jin cheng gong dian” for the field {{{title_text}}}.
 
 *getSortableAuthor*: 
- doc needed
+ A sortable author value is added to the Solr document.  This value is a string containing the concatenated values of:
+  1. the main entry author, if there is one (fields 100, 110 or 111)
+  2. the main entry uniform title (240), if there is one - not including non-filing chars as noted in 2nd indicator of the 240
+  followed by
+  3. the 245 title, not including non-filing chars as noted in ind 2 of the 245
+
+  NOTE: in your Solr schema.xml file, you'll want to ensure this field as the desired properties.  Do you want sorting to be case sensitive?  Do you want it to normalize diacritics?  Do you want it to remove preceding or trailing whitespace?  You may want to use the alphaOnlySort field type provided in the standard Solr schema.xml file.
+
 *getSortableTitle*: 
  retrieves the value from the 245a subfield, and then strips off any "non-sorting characters" at the beginning of the string, according to the MARC records indicators at the head of the field.
 
-*getSupplUrls()*:
- doc needed
-*getTitle()*:
- doc needed
+  NOTE: in your Solr schema.xml file, you'll want to ensure this field as the desired properties.  Do you want sorting to be case sensitive?  Do you want it to normalize diacritics?  Do you want it to remove preceding or trailing whitespace?  You may want to use the alphaOnlySort field type provided in the standard Solr schema.xml file.
+
+*getSupplUrls*:
+ gets the URLs for the full text of a resource described by the MARC record.  
+ For each MARC 856 field, 
+   if the second indicator is 0, no value is added to the Solr document.
+   if the second indicator is 2, _each_ subfield u is added to the Solr document.  
+   otherwise, subfields 3 and z are examined.  If _any_ of the following text is present, then subfield u is added to the Solr document
+    * abstract
+    * description
+    * sample text
+    * table of contents
+  {{{url_suppl = custom, getSupplUrls}}}
+
+*getTitle*:
+ Create a Solr field containing the 245a (and 245b, if it exists, concatenated with a space between the two subfield values), with trailing punctuation removed.  Removed punctuation includes space, comma, slash, semicolon, colon, trailing period if it is preceded by at least three letters, and single square bracket characters if they are the start and/or end chars of the cleaned string
+
 *removeTrailingPunct(fieldSpec)*:
  creates a list of entries extracted from the fields/subfields specified by the {{{fieldSpec}}} parameter, and then post-processes all of the entries in the list to remove any trailing punctuation from the entries.  So if you were defining a index entry like this
 
