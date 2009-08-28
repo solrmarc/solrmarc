@@ -161,46 +161,69 @@ If the value after the equals sign is not one of these special cases entries, it
 
 <br />
 
-==== Specifying Which Fields and Subfields to Use ====
+=== Specifying Which Fields and Subfields to Use ===
 
 The syntax for specifying what fields/subfields (or what portion of a field or subfield) is to be looked-at to create the Solr index field(s) consists of one or more field specifications separated by colons (:).  
 
 A field specification consists of a three-digit string (000 – 999) optionally followed by characters indicating which subfields and/or bytes to use. 
- * no subfields specified, e.g {{{100}}} - all subfields of the specific Marc field, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
- * single letter after the field, e.g. {{{041a}}} - for each occurrence of the Marc field, each occurrence of the subfield will create a Solr field instance of the contents of the subfield.  Note: if you want the subfield values to be concatenated, repeat the letter, e.g. {{{650aa}}}
- * multiple letters after the field, e.g. {{{100abcdq}}} - for each occurrence of the field, all the indicated subfields, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
- * for a fixed field, square brackets containing digit pattern, e.g. {{{008[35-37]}}} or {{{000[5]}}} - the digits in the brackets indicate the characters to be used as a value. The counting is 0-based: the first byte in the fixed field is 0.  {{{008[35-37]}}} will return the three character sequence at bytes 35,36,37 in the 008 field.  Each instance of the Marc field (e.g. for an 007, which is repeatable) will create a separate instance of the Solr field in the Solr document.
+
+ * *no subfields specified*, e.g {{{100}}} - all subfields of the specific Marc field, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
+
+ * *single letter after the field*, e.g. {{{041a}}} - for each occurrence of the Marc field, each occurrence of the subfield will create a Solr field instance of the contents of the subfield.  Note: if you want the subfield values to be concatenated, repeat the letter, e.g. {{{650aa}}}
+
+ * *multiple letters after the field*, e.g. {{{100abcdq}}} - for each occurrence of the field, all the indicated subfields, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
+
+ * for a fixed length field (i.e. leader, 001-009), *square brackets containing digit pattern*, e.g. {{{008[35-37]}}} or {{{000[5]}}} - the digits in the brackets indicate the characters to be used as a value. The counting is 0-based: the first byte in the fixed field is 0.  {{{008[35-37]}}} will return the three character sequence at bytes 35,36,37 in the 008 field.  Each instance of the Marc field (e.g. for an 007, which is repeatable) will create a separate instance of the Solr field in the Solr document.
    NOTE: as of 2009-08-27, numbers will grab bytes for all fields, not just fixed fields.  This is intended to change to the behavior described.
- * square brackets indicating a regular expression describing letter subfields, e.g. {{{110[a-z]}}} or {{{243[a-gk-s]}}}. for each occurrence of the field, all the indicated subfields, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
+ 
+ * for a variable length field, *square brackets indicating a regular expression describing subfields*, e.g. {{{110[a-z]}}} or {{{243[a-gk-s]}}}. for each occurrence of the field, all the indicated subfields, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
+   NOTE: as of 2009-08-27, the distinction is letters vs. digits.  This intended to change to allow numeric subfields in the future.
 
 <br />
-===== Example Field Specifications =====
+==== Example Field Specifications ====
 
- {{{title_display = 245a}}}
+{{{full_title_display = 245}}}
 
-This field specification gathers will extract all of the subfield _a_ for all of the 245 fields in the MARC and add a separate index record entry labeled {{{title_display}}}, for each of them.  Although in this case since the MARC record specification states that there can only be a single 245 field and only a single subfield _a_, the results of this specification will be identical to what they would be if the field specification was{{{title_display = 245a, first}}} 
+  for _each_ MARC 245 field, concatenate _all subfield_ values, separated by a space, then add a field named full_title_display to the Solr document with the concatenated value.  Note that there is a single Solr field occurrence for each specified MARC _field_.
 
-<br />
- {{{author_text = 100a:110a:111a:130a}}}
+{{{brief_title_display = 245a}}} 
 
-This field specification gathers all of the entries from the _a_ subfields of the fields 100, 110, 111 and 130.  Each of these entries is added as a separate index record entry for current documents in the Solr search engine.
+  for _each_ subfield _a_ in each of the 245 fields in the MARC record, add a field to the Solr document named brief_title_display, with the value in from the MARC 245 subfield a.  Note that there is a single Solr field occurrence for each specified MARC _subfield_ in the MARC _field_.
+Aside:  since the MARC specification states that there can only be a single 245 field and only a single subfield _a_, the results of this specification will be identical to what they would be if the field specification was{{{brief_title_display = 245a, first}}}. 
 
-<br />
- {{{language_facet = 008[35-37]:041a:041d, language_map.properties}}}
+{{{author_text = 100a:110a:111a:130a}}}
 
-This field specification states that characters 35 through 37 should be selected from the 008 control field of the MARC record (which is where a three-letter encoding of the primary language of a bibliographic work is found.) Additionally, all occurrences of the _a_ and _d_ subfields of all 041 fields in the MARC record are added to the set of strings.
+  for _each_ 1) subfield a in each of the 100 fields 2) subfield a in each of the 110 fields 3) each subfield a in each of the 111 fields 4) subfield a in each of the 130 fields in the MARC record, add a field to the Solr document named author_text with the value from the MARC subfield specified.  Note that each of these values is added as a separate Solr field in the Solr document.  
 
-Note that you CANNOT specify 041ad in the field specification, each colon separated item can only reference a single field and subfield.  Also note that a second parameter is present on the field specification entry: {{{language_map.properties}}}.  If this optional parameter is present, once the set of strings is created for all of the fields and subfields specified in the first parameter, the entire set is translated using the translation map that is defined in the separate property file named {{{language_map.properties}}}, (which maps the three-letter abbreviations for languages to the full name of that language; Hence "eng" becomes "English," "fre" becomes "French," "chp" becomes "Chipewyan," and "peo" becomes the ever-popular "Old Persian (ca. 600-400 B.C.)."  The details of how to define a translation map is covered in the next section.
+{{{author_addl_t = 700abcegqu:710abcdegnu:711acdegjnqu}}}
 
-<br />
- {{{broad_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first}}}
+  for _each_ occurrence of a specified MARC field (700, 710 and 711), concatenate the values of the specified subfields, with a space separator, then add a field named author_addl_t to the Solr document with the concatenated value.  Note that there is a single Solr field occurrence for each specified MARC _field_.
 
-This field specification states that the value of character 6 (counting from 0) of field 000 (which stands for the leader of the MARC record) and character 0 of field 007 are to be extracted.  Both of these values are to then be translated using the translation map that is defined in the separate property file named {{{format_maps.properties}}}, by loading all the entries there that start with the string {{{broad_format}}}. The first translated value is to be used as the value for the Solr index entry.  
+{{{material_type_display = 300aa}}}
+
+  for _each_ MARC 300 field, concatenate all subfield _a_ values, separated by a space, then add a field named material_type_display to the Solr document with the concatenated value.  Note that there is a single Solr field occurrence for each MARC _field_, not each MARC _subfield_.  
+
+{{{title_added_entry_t = 700[gk-pr-t]:710[fgk-t]:711fgklnpst:730[a-gk-t]:740anp}}}
+
+  The subfields specified here are regular expressions.  This field spec is equivalent to
+ {{{title_added_entry_t = 700gklmnoprst:710fgklmnopqrst:711fgklnpst:730abcdefgklmnopqrst]:740anp}}}
+
+{{{language_facet = 008[35-37]:041a:041d, language_map.properties}}}
+
+  This field specification states that characters 35 through 37 should be selected from _each_ 008 control field of the MARC record (which is where a three-letter encoding of the primary language of a bibliographic work is found.)  Additionally, _each_ occurrence of the _a_ and _d_ subfields of all 041 fields in the MARC record become individual Solr fields named language_facet in the Solr document.
+
+  Note that a second parameter is present on the field specification entry: {{{language_map.properties}}}.  If this optional parameter is present, once the set of strings is created for all of the fields and subfields specified in the first parameter, the entire set is translated using the translation map that is defined in the separate property file named {{{language_map.properties}}}, (which maps the three-letter abbreviations for languages to the full name of that language; Hence "eng" becomes "English," "fre" becomes "French," "chp" becomes "Chipewyan," and "peo" becomes the ever-popular "Old Persian (ca. 600-400 B.C.)."  The details of how to define a translation map is covered in the next section.
+
+  (Naomi doesn't believe this is true anymore - 2009-08-28:  you CANNOT specify 041ad in the field specification, each colon separated item can only reference a single field and subfield.)  
+
+{{{broad_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first}}}
+
+  This field specification states that the value of character 6 (counting from 0) of field 000 (which stands for the leader of the MARC record) and character 0 of field 007 are to be extracted.  Both of these values are to then be translated using the translation map that is defined in the separate property file named {{{format_maps.properties}}}, by loading all the entries there that start with the string {{{broad_format}}}. The first translated value is to be used as the value for the Solr index entry.  
 
 Or to put it more succinctly, look up character 6 of the 000 field in the map {{{broad_format}}}, if the map contains a mapping for that character, use that value; otherwise, look up character 0 of the 007 field in the map {{{broad_format}}}, if the map contains a mapping for that character use that value. If neither extracted value matches an entry in the translation map, check to see whether the map defines a default value, if so use that default value, otherwise leave the {{{broad_format_facet}}} index entry unassigned.
 
 <br />
-==== Handling Mapping to New Values ====
+=== Mapping "Raw" Values to New Values ===
 
 The process of creating a translation map to translate from the cryptic entries found in the MARC record to more human-readable strings to make searching and faceting more useful to the end-user of the system, is fairly straightforward.  The first thing that you must do is add a second parameter on the field specification entry in the properties file, as shown in the last two of the examples shown above. This parameter specifies either the name of a separate property file that contains the map or the name of a separate property file plus the name of the property key prefix that should be looked for in that file.  For the last example above, a map named {{{broad_format}}} is referenced in the properties file {{{format_maps.properties}}}. Those entries in that file that start with the string {{{broad_format}}} will be used to define the map. The definition for that map:
 
