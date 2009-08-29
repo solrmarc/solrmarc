@@ -699,7 +699,7 @@ public class SolrIndexer
     /**
      * get the two eras indicated by the four passed characters, and add them
      *  to the result parameter (which is a set).  The characters passed in are
-     *  from the 041a.
+     *  from the 045a.
      */
     public static Set<String> getEra(Set<String> result, char eraStart1, char eraStart2, char eraEnd1, char eraEnd2)
     {
@@ -794,7 +794,7 @@ public class SolrIndexer
      *            denotes the bracket pattern is a regular expression indicating
      *            which subfields to include. Note: if the characters in the
      *            brackets are digits, it will be interpreted as particular
-     *            bytes, NOT a pattern 100abcd denotes subfields a, b, c, d are
+     *            bytes, NOT a pattern. 100abcd denotes subfields a, b, c, d are
      *            desired.
      * @return the contents of the indicated marc field(s)/subfield(s), as a set
      *         of Strings.
