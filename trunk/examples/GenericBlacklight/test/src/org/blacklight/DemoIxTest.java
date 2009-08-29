@@ -95,7 +95,7 @@ public abstract class DemoIxTest extends IndexTest
             fail("property test.data.path must be defined for the tests to run");
         }
         String testConfigFname = System.getProperty("test.config.file");
-        if (testDataParentPath == null)
+        if (testConfigFname == null)
         {
             fail("property test.config.file must be defined for the tests to run");
         }
