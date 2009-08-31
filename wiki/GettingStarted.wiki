@@ -27,7 +27,7 @@ To get the binary distribution, go to [http://code.google.com/p/solrmarc/downloa
   * {{{Binary_Generic_Blacklight_SolrMarc_PC.tar.gz}}}
 
 <br />
-=== Software Dependencies ===
+== Software Dependencies ==
 
 !SolrMarc requires the java development kit (JDK) version 1.5 or newer and ant version 1.7 or newer.
 
