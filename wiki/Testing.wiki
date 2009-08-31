@@ -54,7 +54,7 @@ Steps:
 
 The JUnit code that is used for these tests is org.solrmarc.test.!ParameterizedIndexTest, written by Bob Haschart.
 
-== Method II and III: Tests in Java Code ==
+== Methods II and III: Tests in Java Code ==
 
 These tests are "closer" to the java indexing code, so if you are writing customized java methods for indexing, this approach may be more convenient.  
 
