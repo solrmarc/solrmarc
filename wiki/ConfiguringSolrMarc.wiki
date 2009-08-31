@@ -434,14 +434,15 @@ Because there are many "special processing" indexing tasks that commonly occur w
 
   {{{geographic_search = custom, getAllAlphaExcept(651vxyz:691vxyz)}}}
 
-   For each MARC 651 and 691 field, concatenate all the subfields from a to u, in order of occurrence, and add a field to the Solr document named geographic_search with the concatenated value. 
+   For each MARC 651 and 691 field, concatenate all the subfields from a to u, in order of occurrence, and add a field to the Solr document named geographic_search with the concatenated value.
+ Currently, the !fieldSpec may be one or more letters: it will not recognize regular expressions and it will include all alpha if there are no subfields specified.
 
 *getAllAlphaSubfields(fieldSpec)*:
    For _each_ occurrence of a MARC field in the !fieldSpec list, concatenate all alphabetic subfield contents, using a space separator.
 
   {{{title_full_display = custom, getAllAlphaSubfields(245)}}}
  
-    For each MARC 245 field, concatenate all alphabetic subfield values, then add a field named full_title_display to the Solr document with the concatenated value.
+    For each MARC 245 field, concatenate all alphabetic subfield values, then add a field named full_title_display to the Solr document with the concatenated value.  
 
 *getAllAlphaSubfields(fieldSpec, first|join|all)*:
  As above, but using "first" "join" or "all" to indicate handling of multiple occurrences of field values
@@ -529,12 +530,16 @@ LEADER 01584cam a2200397 a 4500
 987   $c20010620$dc$e06.12.2001$f500-a /
 }}}
 
+ The !fieldSpec will be treated in the standard fashion, except _any_ !fieldSpec containing square brackets, such as {{{245[a-c7]}}} will be treated as a regular expression of desired subfields. 
+
 *getLinkedFieldCombined(fieldSpec)*: 
  operates similarly to {{{getLinkedField}}}, including not only the original language version of the specified field, but also the cataloger created transliterated version. This would be done for fields used for searching so that a user could search by title by specifying either the transliterated version or the original language version. For the example record, if you wanted to extract the original and the transliterated versions of the title, you could use the following specification: 
 
  {{{title_text = custom, getLinkedFieldCombined(245a)}}}
 
  Which would extract {{{“紫禁城宮殿”}}} and “Zi jin cheng gong dian” for the field {{{title_text}}}.
+
+ The !fieldSpec will be treated in the standard fashion, except _any_ !fieldSpec containing square brackets, such as {{{245[a-c7]}}} will be treated as a regular expression of desired subfields. 
 
 *getSortableAuthor*: 
  A sortable author value is added to the Solr document.  This value is a string containing the concatenated values of:
@@ -576,8 +581,9 @@ LEADER 01584cam a2200397 a 4500
 
  The specific characters that are removed are: space, comma, slash, semicolon, colon, trailing period if it is preceded by at least three letters, and single square bracket characters if they are the start and/or end chars of the cleaned string.
 
+ The !fieldSpec will be treated in the standard fashion, except _any_ !fieldSpec containing square brackets, such as {{{245[a-c7]}}} will be treated as a regular expression of desired subfields.
 
-==== Creating Custom Indexing Routines ====
+=== Creating Custom Indexing Routines ===
 
 If you are still unable to accomplish what you want to do using any of the provided indexing techniques, there is the option to create your own custom indexing functions.
 
