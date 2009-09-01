@@ -3,8 +3,7 @@
 MESSAGE="Daily Update Completed Successfully"
 STATUS=0
 
-DATE=`date +%Y%m%d`
-let DATERUN=$DATE-1
+DATERUN=`date +%Y%m%d --date='1 day ago'`
 
 NUM_UPDATES_EXPECTED=1
 NUM_UPDATES=`ls -l /usr/local/projects/marc/incoming/*.mrc | wc -l`
