@@ -20,7 +20,7 @@ then
   fi
 fi
 
-java -Done-jar.main.class="org.solrmarc.marc.MarcPrinter" -Dmarc.include_if_present="$1" -jar $scriptdir/@CUSTOM_JAR_NAME@ translate $2 $3 
+java -Done-jar.main.class="org.solrmarc.marc.MarcPrinter" -Dmarc.include_if_present="$1" -Dmarc.combine_records="" -jar $scriptdir/@CUSTOM_JAR_NAME@ translate $2 $3 
 
 exit 0
 
