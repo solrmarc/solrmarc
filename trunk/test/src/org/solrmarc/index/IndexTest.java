@@ -480,26 +480,26 @@ public abstract class IndexTest {
 	    return docList;
 	}
 
-//	/**
-//	 * Given an index field name and value, return a list of Lucene Documents
-//	 *  that match the term query sent to the index, sorted as indicated
-//	 * @param fld - the name of the field to be searched in the lucene index
-//	 * @param text - the string to be searched in the given field
-//	 * @param sortfld - name of the field results should be sorted by
-//	 * @param sis - SolrIndexSearcher for relevant index
-//	 * @return a list of Lucene Documents sorted (ascending) per indicated field
-//	 */
-//	public static final List<DocumentProxy> getSortedDocs(String fld, String text, String sortfld, SolrIndexSearcher sis) 
-//			throws ParserConfigurationException, SAXException, IOException {
-//		List<Document> docList = new ArrayList<Document>();
-//
-//		Query query = QueryParsing.parseQuery(text, fld, sis.getSchema());
-//		Hits hits = sis.search(query, new Sort(sortfld));
-//		for (int i = 0; i < hits.length(); i++) {
-//			docList.add(hits.doc(i));
-//		}
-//	    return docList;
-//	}
+	/**
+	 * Given an index field name and value, return a list of Lucene Documents
+	 *  that match the term query sent to the index, sorted as indicated
+	 * @param fld - the name of the field to be searched in the lucene index
+	 * @param text - the string to be searched in the given field
+	 * @param sortfld - name of the field results should be sorted by
+	 * @param sis - SolrIndexSearcher for relevant index
+	 * @return a list of Lucene Documents sorted (ascending) per indicated field
+	 */
+	public final List<DocumentProxy> getSortedDocs(String fld, String text, String sortfld) 
+			throws ParserConfigurationException, SAXException, IOException {
+        List<DocumentProxy> docList = new ArrayList<DocumentProxy>();
+        int solrDocNums[] = getSearcherProxy().getSortedDocList(fld, text, sortfld);
+        
+        for (int solrDocNum : solrDocNums)          
+        {
+            docList.add( getSearcherProxy().getDocumentBySolrDocNum(solrDocNum) );
+        }
+        return docList;
+	}
 	
 //	public static final SolrIndexSearcher getSolrIndexSearcher(String solrPath, String solrDataDir)
 //			throws ParserConfigurationException, IOException, SAXException {
