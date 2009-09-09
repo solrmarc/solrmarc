@@ -123,6 +123,34 @@ public class SolrSearcherProxy
         return(resultSet);
     }
     
+    public int[] getSortedDocList(String field, String term, String sortfld) throws IOException
+    {
+        int resultSet[] = null;
+        try
+        {
+            Object docList = getSortedSolrDocList(field, term, sortfld);
+            int totalSize = (Integer)docList.getClass().getMethod("size").invoke(docList);
+            resultSet = new int[totalSize];
+            //System. out.println("Searching for :" + field +" : "+ term+ "    Num found = " + totalSize);
+            Object docIterator = docList.getClass().getMethod("iterator").invoke(docList);
+            int i = 0;
+            while (iteratorHasNext(docIterator))
+            {
+                resultSet[i++] = iteratorGetNextSolrId(docIterator);
+            }
+        }
+        catch (Exception e)
+        {
+            if (e instanceof InvocationTargetException)
+            {
+                Throwable cause = e.getCause();
+                if (cause instanceof IOException) throw (IOException)cause;                
+            }
+            e.printStackTrace();
+        }
+        return(resultSet);    
+    }
+    
     public Object getDocSetIterator(String field, String term) throws IOException
     {
         try
@@ -174,6 +202,22 @@ public class SolrSearcherProxy
 
         Object docSet = solrSearcher.getClass().getMethod("getDocSet", Class.forName("org.apache.lucene.search.Query")).invoke(solrSearcher, query);
         return(docSet);
+    }
+    
+    private Object getSortedSolrDocList(String field, String term, String sortfld) throws IllegalArgumentException, SecurityException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException 
+    {
+        Object schema = solrSearcher.getClass().getMethod("getSchema").invoke(solrSearcher);
+        Class sortClass = Class.forName("org.apache.lucene.search.Sort");
+        Object sort = sortClass.getConstructor(String.class).newInstance(sortfld);
+        Class parser = Class.forName("org.apache.solr.search.QueryParsing");
+        Object query = parser.getMethod("parseQuery", String.class, String.class, schema.getClass())
+                             .invoke(null, term, field, schema);
+        Class queryClass = Class.forName("org.apache.lucene.search.Query");
+        Object docSet = solrSearcher.getClass().getMethod("getDocSet", queryClass).invoke(solrSearcher, query);
+        int size = (Integer)docSet.getClass().getMethod("size").invoke(docSet);
+        Object docList = solrSearcher.getClass().getMethod("getDocList", queryClass, queryClass, sortClass, Integer.class, Integer.class).
+                                      invoke(query, null, sort, 0, size);
+        return(docList);
     }
     
     public boolean iteratorHasNext(Object docSetIterator)
