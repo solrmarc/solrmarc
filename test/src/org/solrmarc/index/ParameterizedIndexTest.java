@@ -1,6 +1,8 @@
 package org.solrmarc.index;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,6 +13,7 @@ import java.io.StringWriter;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,39 +43,65 @@ public class ParameterizedIndexTest
     /**
      * for each line specified in the test file 
      *    (see org.solrmarc.index.indexValues javadoc below)
-     * run the indicated test data file through MarcPrinter, which will get the
+     * run the indicated test data file through MarcMappingOnly, which will get the
      * marc to solr mappings specified in yourSite_index.properties file, and
      * look for the indicated solr field value in the indicated solr field.
      */
     public void verifyIndexingResults() throws Exception 
     {
-        StringWriter strOut = new StringWriter();
-        PrintWriter pOut = new PrintWriter(strOut);
+        MarcMappingOnly marcMappingTest = new MarcMappingOnly(config);
         String fullRecordFilename = dataDirectory + File.separator + recordFilename;
-        // calls utility class which will output a line to the passed PrintWriter
-        //  for each value of the specified solr field for each marc record in
-        //  the indicated file
-        MarcPrinter indexTest = new MarcPrinter(new String[]{config, fullRecordFilename, "index", fieldToCheck}, pOut );
-        indexTest.handleAll();
-        
-        // compare the output from MarcPrinter with the expected results
-        StringBuffer buffer = strOut.getBuffer();
-        //System.out.println(buffer.toString());
-        String resultLines[] = buffer.toString().split("\r?\n");
-        
-        String results[] = new String[resultLines.length];
-        for (int i = 0; i < resultLines.length; i++)
-        {
-            results[i] = resultLines[i].replaceAll(".* : .* = ", "");
-            //System.out.println("" + i + ":  " + resultLines[i] + "   -->  " + results[i] );
-        }
+        Map<String, Object> solrFldName2ValMap = marcMappingTest.getIndexMapForRecord(null, fullRecordFilename);
         String expected[] = expectedValue.split("[|]");
-        assertEquals("For test: " + config + " : " + recordFilename + " : " + fieldToCheck + "\n" +
-                     "    Array lengths should be equal;", expected.length, results.length);
-        for (int i = 0; i < results.length; i++)
+        Object solrFldValObj = solrFldName2ValMap.get(fieldToCheck);
+        String received[] = null;
+        if (solrFldValObj == null)
         {
-        	assertEquals("For test: " + config + " : " + recordFilename + " : " + fieldToCheck + "\n" +
-                         "    Array entries should be equal;", expected[i], results[i]);
+            if (expected.length != 0)
+                fail("No value assigned for Solr field " + fieldToCheck + " in Solr document " + recordFilename);
+        }
+        if (solrFldValObj instanceof String)
+        {
+            received = new String[1];
+            received[0] = solrFldValObj.toString();
+        }
+        else if (solrFldValObj instanceof Collection)
+        {
+            received = new String[((Collection<String>)solrFldValObj).size()];
+            int i = 0;
+            for (String fldVal : (Collection<String>) solrFldValObj)
+            {
+                received[i++] = fldVal;
+            }
+        }
+        
+        for (String expect : expected)
+        {
+            boolean foundIt = false;
+            for (String receive : received)
+            {
+                if (expect.equals(receive))
+                {    
+                    foundIt = true;
+                    break;
+                }
+                // System.out.println("DEBUG: value is [" + fldVal + "]");
+            }
+            assertTrue("Solr field " + fieldToCheck + " did not have any value matching " + expect, foundIt);
+        }
+        for (String receive : received)
+        {
+            boolean foundIt = false;
+            for (String expect : expected)
+            {
+                if (expect.equals(receive))
+                {    
+                    foundIt = true;
+                    break;
+                }
+                // System.out.println("DEBUG: value is [" + fldVal + "]");
+            }
+            assertTrue("Solr field " + fieldToCheck + " had extra unexpected value " + receive, foundIt);
         }
         System.out.println(config + " : " + recordFilename + " : " + fieldToCheck + " --> " + expectedValue);
     }
