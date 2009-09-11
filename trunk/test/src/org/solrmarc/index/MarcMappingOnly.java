@@ -42,13 +42,24 @@ public class MarcMappingOnly extends MarcHandler
         }
         idFldName = args[1];
     }
+    
+    /**
+     * Constructor
+     * @param arg - String :  name of xxx_config.properties file
+     */
+    public MarcMappingOnly(String arg)
+    {
+        super(new String[]{arg});
+        idFldName = null;
+    }
 
     /**
      * read in the file of marc records indicated, looking for the desired
      * record, and returning the mapping of solr field names to values.
      * 
      * @param desiredRecId -
-     *            value for solr id field
+     *            value for solr id field, or pass in a value of null to simply accept 
+     *            the first record that occurs in the specified marc file
      * @param mrcFileName -
      *            absolute path of file of marc records (name must end in .mrc
      *            or .marc or .xml)
@@ -68,6 +79,8 @@ public class MarcMappingOnly extends MarcHandler
                 if (errors != null && includeErrors && errors.hasErrors())
                     solrFldName2ValMap.put("marc_error", errors.getErrors());
                 // FIXME:
+                if (desiredRecId == null || idFldName == null) return(solrFldName2ValMap);
+                
                 Object thisRecId = solrFldName2ValMap.get(idFldName);
                 if (thisRecId.equals(desiredRecId))
                     return solrFldName2ValMap;
