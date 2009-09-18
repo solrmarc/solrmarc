@@ -2,32 +2,24 @@ package org.blacklight;
 
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.Collator;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-
-import org.marc4j.marc.ControlField;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
-
 
 
 /**
@@ -53,7 +45,7 @@ public class BlacklightIndexer extends SolrIndexer
      * @throws Exception
      */
     Map<String, String> addnlShadowedIds = null;
-    String extraIdsFilename = "extra_data/AllShadowedIds.txt";
+    String extraIdsFilename = "AllShadowedIds.txt";
     
     public BlacklightIndexer(final String propertiesMapFile, final String propertyPaths[])
     {
