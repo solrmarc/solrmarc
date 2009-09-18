@@ -189,7 +189,29 @@ public final class Utils {
         }
         return(in);
     }
+    
+    
+    /**
+     * Takes an InputStream, reads the entire contents into a String
+     * @param stream - the stream to read in.
+     * @return String containing entire contents of stream.
+     */
+    public static String readStreamIntoString(InputStream stream) throws IOException 
+    {
+        Reader in = new BufferedReader(new InputStreamReader(stream));
 
+        StringBuilder sb = new StringBuilder();
+        char[] chars = new char[4096];
+        int length;
+        
+        while ((length = in.read(chars)) > 0) {
+          sb.append(chars, 0, length);
+        }
+
+        return sb.toString();
+     }
+    
+    
     /**
      * Cleans non-digits from a String
      * @param date String to parse
