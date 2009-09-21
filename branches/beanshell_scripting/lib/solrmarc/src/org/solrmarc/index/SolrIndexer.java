@@ -725,8 +725,8 @@ public class SolrIndexer
     private boolean finishCustomOrScript(Map<String, Object> indexMap, String indexField, String mapName,
                                          Class<?> returnType, Object retval, boolean deleteIfEmpty)
     {
-        if ((returnType == null || retval == null) &&  deleteIfEmpty )
-            return(true);
+        if (returnType == null || retval == null)
+            return(deleteIfEmpty);
         else if (returnType.isAssignableFrom(Map.class))
         {
             if (deleteIfEmpty && ((Map<String, String>) retval).size() == 0) return (true);
