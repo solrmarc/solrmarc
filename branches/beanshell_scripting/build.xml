@@ -1,0 +1,1036 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="build" name="SolrMarc Custom">
+
+    <!-- property files -->
+    <!-- the following properties file is expected to define a single property site.dir
+         which defines the directory that will contain all of the site specific source code
+         properties, etc for a given sites customization of SolrMarc.   Note that if you don't 
+         manually define that property in this file, the build process will prompt you for the
+         correct value and store the value in this file for future builds  -->
+    <property file="site.dir.properties" />
+    <property file="build.properties" />
+
+    <property name="buildtools.path" value="buildtools" />
+
+    <!-- import other ant scripts -->
+    <property name="one-jar.dist.dir" value="${buildtools.path}" />
+    <import file="${buildtools.path}/one-jar-ant-task.xml" />
+    <property name="ant_extras.dist.dir" value="${buildtools.path}" />
+    <import file="${buildtools.path}/ant_extras.xml" />
+    <!-- <import file="test_def.xml" /> -->
+
+    <tstamp>
+        <format property="year" pattern="yyyy" />
+        <format property="DSTAMP" pattern="yyyy-MM-dd" />
+        <format property="TSTAMP" pattern="HH:mm:ss" />
+        <format property="dateversion" pattern="yyyy.MM.dd.HH.mm.ss" />
+    </tstamp>
+
+    <target name="clean" description="clean the generated directories">
+        <delete dir="${build.dir}" />
+        <delete dir="${dist.dir}" />
+        <ant dir="${lib.dir}/solrmarc" target="clean" inheritAll="false" />
+        <if>
+            <isset property="site.dir" />
+            <then>
+                <init_site_props />
+                <delete dir="${site.build.dir}" /> 
+                <delete dir="${site.test.build.dir}" />
+                <delete dir="${site.test.solr.dir}" />
+            </then>
+        </if>
+    </target>
+
+    <target name="veryclean" depends="clean" 
+        description="clean any generated files and restore the 
+                     project as near as possible to a just-downloaded state">
+        <delete file="${site.dir.properties}" />
+        <!-- delete properties file generated in site.dir in response to prompts  -->
+        <delete file="${site.dir}/build_override.properties" />
+    </target>
+
+    <target name="init" depends="init_site,solrversion" unless="init.already.run"
+        description="create (empty) generated directories">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${dist.dir}" />
+        <property name="init.already.run" value="true" />
+    </target>
+
+    <target name="dependencies" depends="solrversion" description="Build the core SolrMarc code">
+        <ant dir="${lib.dir}/solrmarc" target="build" inheritAll="false" />
+        <loadproperties srcfile="${lib.dir}/solrmarc/build.properties">
+            <filterchain>
+                <tokenfilter>
+                    <containsregex pattern="(build.dir|jar.name)" />
+                </tokenfilter>
+                <prefixlines prefix="solrmarc.core." />
+            </filterchain>
+        </loadproperties>
+        <path id="classpath.jars" description="Jars for classpath for building custom code (but not solr jars)">
+            <fileset dir="${lib.dir}">
+                <include name="*.jar" />
+                <exclude name="junit*.jar" />
+            </fileset>
+            <fileset dir="${lib.dir}/solrmarc/${solrmarc.core.build.dir}" includes="*.jar" />
+            <fileset dir="${site.lib.dir}" >
+                <include name="*.jar" />
+                <exclude name="jzkit_client.jar" />
+            </fileset>
+        </path>
+    </target>
+
+    <macrodef name="init_site_props">
+        <sequential>
+            <property file="${site.dir}/build_override.properties" />
+            <property file="${site.dir}/build.properties" />
+
+            <property name="site.src.dir" value="${site.dir}/${src.dir}" />
+            <property name="site.lib.dir" value="${site.dir}/${lib.dir}" />
+            <property name="site.build.dir" value="${site.dir}/${build.dir}" />
+            <property name="site.test.dir" value="${site.dir}/${test.dir}" />
+            <property name="site.test.src.dir" value="${site.test.dir}/${src.dir}" />
+            <property name="site.test.build.dir" value="${site.test.dir}/${build.dir}" />
+            <property name="site.test.data.dir" value="${site.test.dir}/data" />
+            <property name="site.test.solr.dir" value="${site.test.dir}/solr" />
+            <property name="site.map.dir" value="${site.dir}/${trans.map.path}" />
+            <property name="site.script.dir" value="${site.dir}/${script.template.dir}" />
+        </sequential>
+    </macrodef>
+
+    <macrodef name="make_site_dirs">
+        <sequential>
+            <mkdir dir="${site.src.dir}" />
+            <mkdir dir="${site.build.dir}" />
+            <mkdir dir="${site.lib.dir}" />
+            <mkdir dir="${site.test.dir}" />
+            <mkdir dir="${site.test.src.dir}" />
+            <mkdir dir="${site.test.solr.dir}" />
+            <mkdir dir="${site.map.dir}" />
+            <mkdir dir="${site.script.dir}" />
+        </sequential>
+    </macrodef>
+
+    <macrodef name="get_indexer_class">
+        <sequential>
+            <fileset id="custom_indexer_source" dir="${site.dir}" includes="${src.dir}/**/*.java">
+                <or>
+                    <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+SolrIndexer" />
+                    <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+org[.]solrmarc[.]index[.]SolrIndexer" />
+                </or>
+            </fileset>
+
+            <condition property="custom.index.source.exists">
+                <or>
+                    <resourcecount count="0" when="gt" refid="custom_indexer_source" />
+                    <isset property="solr.indexer" />
+                </or>
+            </condition>
+
+            <property name="custom.indexer.source" refid="custom_indexer_source" />
+
+            <if>
+                <isset property="solr.indexer" />
+                <then>
+                    <property name="custom.indexer.class" value="${solr.indexer}" />
+                </then>
+                <elseif>
+                    <resourcecount count="0" when="gt" refid="custom_indexer_source" />
+                    <then>
+                        <pathconvert property="custom.indexer.class" refid="custom_indexer_source">
+                            <chainedmapper>
+                                <regexpmapper from="^.*src[/\\](.*java)$$" to="\1" />
+                                <packagemapper from="*.java" to="*" />
+                            </chainedmapper>
+                        </pathconvert>
+                    </then>
+                </elseif>
+                <else>
+                    <property name="custom.indexer.class" value="org.solrmarc.index.SolrIndexer" />
+                </else>
+            </if>
+
+            <echo message="custom.indexer.source = ${custom.indexer.source}" />
+            <echo message="custom.indexer.class = ${custom.indexer.class}" />
+        </sequential>
+    </macrodef>
+
+    <macrodef name="get_properties_for_config_file">
+        <sequential>
+            <property name="example.default.solr.hosturl" value="http://localhost:8983/solr" />
+            <input-save message="Enter URL of your Solr server:" addproperty="solr.hosturl"  
+                defaultvalue="${example.default.solr.hosturl}"  propertyfile="${site.dir}/build_override.properties" />
+            <if> 
+                <and>
+                    <available file="../jetty" />
+                    <available file="../jetty/solr" />
+                    <available file="../jetty/solr/conf" />
+                </and>
+                <then>
+                    <property name="solr.path.default" location="../jetty/solr" />
+                </then>
+                <else>
+                    <property name="solr.path.default" value="" />
+                </else>
+            </if>
+            <input-filepath message="Enter full path of Solr home directory:${line.separator}(Note: directory should contain 'conf' directory containing solrconfig.xml and schema.xml) " 
+                addproperty="solr.path" defaultvalue="${solr.path.default}" />        	
+
+            <echo message="solr path = ${solr.path} " />
+            <condition property="solr.path.available">
+                <or>
+                    <and>
+                        <available file="${solr.path}/conf/solrconfig.xml" />
+                        <available file="${solr.path}/conf/schema.xml" />
+                    </and>
+                    <available file="${solr.path}/solr.xml" />
+                </or>
+            </condition>
+            <if>
+                <not> <isset property="solr.path.available" /> </not>
+                <then>
+                    <echo level="error" message="Warning: Unable to find solr.xml in specified solr home  AND  " />
+                    <echo level="error" message="Warning: Unable to find both solrconfig.xml and schema.xml in conf directory under specified solr home." />
+                    <echo level="error" message="Warning: solr.home will have to be defined before you can run SolrMarc" />
+                    <propertyregex property="solr.path" override="true" input="" regexp="noneSuch" replace="nothing" defaultValue="@SOLR_PATH@" />
+                </then>
+            </if>
+            <get_indexer_class />
+
+            <property name="solr.indexer" value="${custom.indexer.class}" />
+            <property name="solr.indexer.properties" value="${custom.config.file.prefix}_index.properties" />
+            <property name="example.default.marc.default_encoding" value="MARC8" />
+            <input-save message="Enter encoding of MARC records:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You want the program to try to determine the encoding${line.separator}" 
+                addproperty="marc.default_encoding"  validargs="MARC8,UNIMARC,UTF-8,BESTGUESS" 
+                defaultvalue="${example.default.marc.default_encoding}" propertyfile="${site.dir}/build_override.properties" />
+        </sequential>
+    </macrodef>
+
+    <macrodef name="get_site_specific_settings">
+        <sequential>
+            <property name="example.default.custom.jar.name" value="Custom" />
+            <input-save message="Enter name for Jar file to contain site-specific custom indexing code, or 'none' if you do not expect to have any: ${line.separator}(Note: omit &quot;.jar&quot; from end of the name) "
+                addproperty="custom.jar.name" defaultvalue="${example.default.custom.jar.name}"  propertyfile="${site.dir}/build_override.properties" />
+            
+            <lowercase property="custom.jar.name.lc" value="${custom.jar.name}" />
+            <echo message="lowercase = ${custom.jar.name.lc}" level="verbose" />
+            <property name="example.default.custom.config.file.prefix" value="${custom.jar.name.lc}" />
+            <input-save message="Enter prefix for site-specific config and index properties file names:${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
+                addproperty="custom.config.file.prefix" defaultvalue="${example.default.custom.config.file.prefix}"  propertyfile="${site.dir}/build_override.properties" />
+            
+            <property name="example.default.distribution.jar.name" value="${custom.jar.name}_SolrMarc" />            
+            <input-save message="Enter name to use for final resulting Jar file containing all code, libraries, and properties:${line.separator}(Note: omit &quot;.jar&quot; from end of Jar Name) "
+                addproperty="distribution.jar.name" defaultvalue="${example.default.distribution.jar.name}"  propertyfile="${site.dir}/build_override.properties" />
+            
+            <property name="example.default.exe.mem.args" value="-Xmx256m" />            
+            <input-save message="Enter java heap size to use in generated scripts for running site-specific SolrMarc Indexer:"
+                addproperty="exe.mem.args" defaultvalue="${example.default.exe.mem.args}" propertyfile="${site.dir}/build_override.properties" />
+
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="copy_files_from_example_directory_1">
+        <sequential>
+            <copy todir="${site.dir}" preservelastmodified="true">
+                <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties,extra_data/**" >
+                    <depend targetdir="${site.dir}" />
+                </fileset>
+            </copy>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="copy_files_from_example_directory_2">
+        <sequential>
+            <copy todir="${site.dir}" filtering="false" preservelastmodified="true">
+                 <fileset dir="examples/${example.configuration}" includes="*_config.properties,*_index.properties" >
+                     <depend targetdir="${site.dir}" >
+                         <mapper type="regexp" from="^[^_]*(.*)" to="${custom.config.file.prefix}\1" />
+                     </depend>
+                 </fileset>
+                 <regexpmapper from="^[^_]*(.*)" to="${custom.config.file.prefix}\1" />
+              </copy>
+             <!-- <copy todir="${site.dir}" filtering="true" preservelastmodified="true">
+                 <fileset dir="examples/${example.configuration}" includes="*_config.properties,*_index.properties">
+                     <depend targetdir="${site.dir}" >
+                         <mapper type="regexp" from="^[^_]*(.*)" to="${custom.config.file.prefix}\1" />
+                     </depend>
+                 </fileset>
+                 <regexpmapper from="^[^_]*(.*)" to="${custom.config.file.prefix}\1" />
+                 <filterchain>
+                     <tokenfilter>
+                         <linetokenizer />
+                         <replaceregex pattern="(solr.path *=).*" replace="\1 ${solr.path}" />
+                         <replaceregex pattern="(solr.hosturl *=).*" replace="\1 ${solr.hosturl}/update" />
+                         <replaceregex pattern="(marc.default_encoding *=).*" replace="\1 ${marc.default_encoding}" />
+                     </tokenfilter>
+                     <fixcrlf />
+                 </filterchain>
+             </copy> -->
+        </sequential>
+    </macrodef>
+
+    <target name="init_site" description="Create the src, lib, bin, test directories for a custom site" unless="init_site.already.run">
+        <echo message=" " />
+        <echo message="See http://code.google.com/p/solrmarc/wiki/GettingStarted for more detailed instructions" />
+        <echo message=" " />
+        <input-save message="Enter name of directory to contain all site-specific files:"       
+            addproperty="site.dir" propertyfile="site.dir.properties" />
+        <init_site_props />
+
+        <echo message="site.test.solr.dir = ${site.test.solr.dir}" />
+        <if>
+            <and>
+                <available file="${site.dir}" />
+                <resourcecount count="2" when="ge">
+                    <fileset dir="${site.dir}" includes="*_config.properties,*_index.properties" />
+                </resourcecount>
+            </and>
+            <then>
+                <echo message="site_dir ${site.dir} already inited skipping forward. " />
+                <get_indexer_class />
+                <make_site_dirs />
+                <get_site_specific_settings />
+                <if>
+                    <and> 
+                        <isset property="example.configuration" />
+                        <not> <equals arg1="${example.configuration}" arg2="none" /> </not>
+                    </and>
+                    <then>
+                        <union id="nonuptodatecopies">
+                            <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties,extra_data/*.txt" >
+                                <depend targetdir="${site.dir}" />
+                                <different targetdir="${site.dir}" />
+                            </fileset>
+                            <fileset dir="examples/${example.configuration}" includes="*_config.properties,*_index.properties" >
+                                <depend targetdir="${site.dir}" >
+                                    <mapper type="regexp" from="^[^_]*(.*)" to="${custom.config.file.prefix}\1" />
+                                </depend>
+                                <different targetdir="${site.dir}" >
+                                    <mapper type="regexp" from="^[^_]*(.*)" to="${custom.config.file.prefix}\1" />
+                                </different>
+                            </fileset>
+                        </union>
+                        <if>
+                            <resourcecount refid="nonuptodatecopies" when="greater" count="0" /> 
+                            <then>
+                                <echo level="warning" message="Warning: One or more of the example files your site is based on have changed:" />
+                                <pathconvert pathsep="${line.separator}" property="filelist.nonuptodatecopies" refid="nonuptodatecopies">
+                                    <map from="${basedir}/examples/${example.configuration}/" to="    Changed example file:  " />
+                                </pathconvert>
+                                <echo message="${filelist.nonuptodatecopies}" /> 
+                                <input message="[C]opy changed files, [I]gnore changes and continue, [S]top build (c, i, s)?" defaultvalue="s" validargs="c,i,s" addproperty="input.continue.processing.with.not.uptodate"/>
+                                <if >
+                                    <equals arg1="s" arg2="${input.continue.processing.with.not.uptodate}"/>
+                                    <then>
+                                        <fail unless="input.continue" message="Build aborted by user." />
+                                    </then>
+                                    <elseif>
+                                        <equals arg1="c" arg2="${input.continue.processing.with.not.uptodate}"/>
+                                        <then>
+                                            <copy_files_from_example_directory_1 />
+                                            <copy_files_from_example_directory_2 />
+                                        </then>
+                                    </elseif>
+                                </if>
+                            </then>
+                        </if>
+                    </then>
+                </if>
+            </then>
+            <else>
+                <mkdir dir="${site.dir}" />
+                <pathconvert property="example.dir.list" pathsep=",">
+                    <path>
+                        <dirset dir="examples" includes="*" />
+                    </path>
+                    <flattenmapper />
+                </pathconvert>
+                <input-save message="Enter name of example configuration to start from (or 'none'):"  addproperty="example.configuration"
+                        validargs="${example.dir.list},none" defaultvalue="none" propertyfile="${site.dir}/build_override.properties" />
+                <if>
+                    <equals arg1="${example.configuration}" arg2="none" />
+                    <then>
+                        <make_site_dirs />
+                        <get_site_specific_settings />
+
+                        <echo message="custom.jar.name = ${custom.jar.name}" />
+                        <antcall target="create_config" />
+                        <touch file="${site.dir}/${custom.config.file.prefix}_index.properties" />
+                        <echo message="Directory created for site specific code in directory: ${site.dir}" />
+                        <echo message="------------------------------------------------------------------------------------" />
+                        <echo message="A configuration file (named ${custom.config.file.prefix}_config.properties)  and " />
+                        <echo message="an empty index specification file (named ${custom.config.file.prefix}_index.properties  were  "/>
+                        <echo message="created for you in that directory, as well as a number of directories, "/>
+                        <echo message="most of which are currently empty. These directories are:"/>
+                        <echo message="    ${src.dir} - where you should place the source code for any custom indexing functions needed by your index specification"/>
+                        <echo message="    ${trans.map.path} - where you should place any translation map properties files needed by your index specification"/>
+                        <echo message="    ${lib.dir} - where you should place any jar files needed by your custom indexing functions"/>
+                        <echo message="    ${script.template.dir} - where you should place any shell scripts and/or batch files to be copied to the ${dist.dir} "/>
+                        <echo message="Note: you must create the index specification file before you will be able to "/>
+                        <echo message="      finish the build process or successfully index any MARC files." />                        
+                    </then>
+                    <else>
+                        <loadproperties srcfile="examples/${example.configuration}/build.properties">
+                            <filterchain>
+                                <tokenfilter>
+                                    <containsregex pattern="(custom.config.file.prefix|custom.jar.name|distribution.jar.name|exe.mem.args|solr.hosturl|marc.default_encoding|default.config)" />
+                                </tokenfilter>
+                                <prefixlines prefix="example.default." />
+                            </filterchain>
+                        </loadproperties>
+
+                        <make_site_dirs />
+                        <get_site_specific_settings />
+                        <copy_files_from_example_directory_1 />
+                        <get_properties_for_config_file />
+                        <copy_files_from_example_directory_2 />
+                    </else>
+                </if>
+            </else>
+        </if>
+        <property name="init_site.already.run" value="true" />
+    </target>
+
+
+    <!-- Solr Version Properties Targets -->
+    <target name="solrversion" description="Set the version of Solr to use" unless="solrversion.already.run">
+        <input-save message="Enter the instance of Solr code to use for your site:${line.separator}war - a particular solr.war file used by the web server hosting your solr application${line.separator}external - like war, but also allows for a directory containing Solr jar files${line.separator}1.2,1.3,1.4 - a distribution of Solr provided by SolrMarc${line.separator}" 
+            validargs="war,1.2,1.3,1.4,external" 
+            addproperty="solr.version" defaultvalue="war"  propertyfile="${site.dir}/build_override.properties" />
+        <if>
+            <equals arg1="${solr.version}" arg2="war" />
+            <then>
+                <property name="solr.version.war" value="true" />
+                <if>
+                    <not>
+                        <isset property="${solr.war.location}" />
+                    </not>
+                    <then>
+                        <if> 
+                            <and>
+                                <available file="../jetty" />
+                                <available file="../jetty/webapps" />
+                                <available file="../jetty/webapps/solr.war" />
+                            </and>
+                            <then>
+                                <property name="solr.war.location.default" location="../jetty/webapps/solr.war" />
+                            </then>
+                            <else>
+                                <property name="solr.war.location.default" value="" />
+                            </else>
+                        </if>
+                        <input-filepath message="Enter full path of where solr.war file is located (include solr.war at end):" addproperty="solr.war.location" 
+                             defaultValue="${solr.war.location.default}" />
+                        <condition property="war.exists">
+                            <available file="${solr.war.location}" />
+                        </condition>
+                        <fail unless="war.exists">Solr.war file ${solr.war.location} does not exist</fail>
+                        <propertyfile file="${site.dir}/build_override.properties">
+                            <entry key="solr.war.location" value="${solr.war.location}" />
+                        </propertyfile>
+                    </then>
+                </if>
+                <delete dir="${lib.dir}/solr_war" />
+                <mkdir dir="${lib.dir}/solr_war" />
+                <unwar src="${solr.war.location}" dest="${lib.dir}/solr_war" overwrite="true">
+                    <patternset>
+                        <include name="**/*.jar" />
+                    </patternset>
+                    <mapper type="flatten" />
+                </unwar>
+            </then>
+            <elseif>
+                <equals arg1="${solr.version}" arg2="external" />
+                <then>
+                    <property name="solr.version.external" value="true" />
+                    <if>
+                        <or>
+                            <not> <isset property="solr.external.location" /> </not>
+                            <equals arg1="${solr.external.location}" arg2="" />
+                        </or>
+                        <then>
+                            <if> 
+                                <and>
+                                    <available file="../jetty" />
+                                    <available file="../jetty/webapps" />
+                                    <available file="../jetty/webapps/solr.war" />
+                                </and>
+                                <then>
+                                    <property name="solr.external.location.default" location="../jetty/webapps/solr.war" />
+                                </then>
+                                <else>
+                                    <property name="solr.external.location.default" value="" />
+                                </else>
+                            </if>
+                            <input-filepath message="Enter full path of where either solr.war file is located (including name of war file) ${line.separator} or full path of directory containing solr jar files:" 
+                                 addproperty="solr.external.location"  defaultValue="${solr.external.location.default}" />
+                        </then>
+                    </if>
+                    <condition property="solr.external.exists">
+                        <and>
+                            <not> <equals arg1="${solr.external.location}" arg2="" /> </not>
+                            <available file="${solr.external.location}" />
+                        </and>
+                    </condition>
+                    <if>
+                        <not> <isset property="solr.external.exists" /> </not>
+                        <then>
+                            <echo level="error" message="Warning: Solr.war file or Solr jar directory ${solr.external.location} does not exist  " />
+                            <echo level="error" message="Warning: Path to solr jars will have to be defined before you can run SolrMarc" />
+                            <propertyregex property="solr.external.location" override="true" input="" regexp="noneSuch" replace="nothing" defaultValue="@SOLREXTERNALLOCATIONOVERRIDE@" />
+                            <property name="solr.external.exists" value="true" />
+                            <echo message="solr.external.exists = ${solr.external.exists}" />
+                        </then>
+                        <else>
+                            <propertyfile file="${site.dir}/build_override.properties">
+                                <entry key="solr.external.location" value="${solr.external.location}" />
+                            </propertyfile>
+                        </else>
+                    </if>
+                </then>
+            </elseif>
+        </if>
+        <echo message="solr version: ${solr.version}" />
+        <property name="solrversion.already.run" value="true" />
+    </target>
+
+    <target name="check_config_exists">
+        <condition property="config.exists">
+            <available file="${site.dir}/${custom.config.file.prefix}_config.properties" />
+        </condition>
+        <condition property="index.exists">
+            <available file="${site.dir}/${custom.config.file.prefix}_index.properties" />
+        </condition>
+
+    </target>
+
+    <target name="create_config" depends="check_config_exists" unless="config.exists">
+        <get_properties_for_config_file />
+        <property name="marc.to_utf_8" value="true" />
+        <property name="marc.permissive" value="true" />
+        <property name="marc.include_errors" value="false" />
+        <copy file="${buildtools.path}/template_config.properties" tofile="${site.dir}/${custom.config.file.prefix}_config.properties">
+            <filterset>
+                <filter token="SOLR_PATH" value="${solr.path}" />
+                <filter token="SOLR_INDEXER" value="${solr.indexer}" />
+                <filter token="SOLR_INDEXER_PROPERTIES" value="${solr.indexer.properties}" />
+                <filter token="SOLR_HOSTURL" value="${solr.hosturl}/update" />
+                <filter token="MARC_TO_UTF_8" value="${marc.to_utf_8}" />
+                <filter token="MARC_PERMISSIVE" value="${marc.permissive}" />
+                <filter token="MARC_DEFAULT_ENCODING" value="${marc.default_encoding}" />
+                <filter token="MARC_INCLUDE_ERRORS" value="${marc.include_errors}" />
+            </filterset>
+        </copy>
+    </target>
+
+    <target name="compile" depends="init,dependencies" 
+            description="Compile custom source code into the build directory"
+            if="custom.index.source.exists">
+        <javac destdir="${site.build.dir}" srcdir="${site.src.dir}" 
+                target="${java.compat.version}" 
+                source="${java.compat.version}" 
+                debug="true" debuglevel="lines,vars,source" 
+                encoding="utf-8">
+            <include name="**/*.java" />
+            <exclude name="**/z3950/*.java" />
+            <classpath refid="classpath.jars" />
+        </javac>
+
+        <jar destfile="${site.build.dir}/${custom.jar.name}.jar">
+            <fileset dir="${site.build.dir}" includes="**/*.class" />
+        </jar>
+    </target>
+
+    <target name="defaultconfig" unless="default.config">
+        <path id="config.file.set">
+            <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*_config.properties" />
+        </path>
+        <resourcecount property="config.file.cnt" refid="config.file.set" />
+        <if>
+            <equals arg1="${config.file.cnt}" arg2="0" />
+            <then>
+                <property name="default.config" value="" />
+            </then>
+            <else>
+                <pathconvert property="config.file.list" pathsep=",">
+                    <path refid="config.file.set" />
+                    <flattenmapper />
+                </pathconvert>
+                <if>
+                    <equals arg1="${config.file.cnt}" arg2="1" />
+                    <then>
+                        <property name="default.config" value="${config.file.list}" />
+                    </then>
+                    <else>
+		                <property name="example.default.default.config" value="" />
+                        <input-save message="Select the default config file to use if no such file is specified on the command line:" 
+		                    validargs="${config.file.list}" defaultvalue="${example.default.default.config}" 
+                            addproperty="default.config" propertyfile="${site.dir}/build_override.properties" />
+                    </else>
+                </if>
+            </else>
+        </if>
+        <echo message="default.config = ${default.config} " />
+    </target>
+
+    <target name="scripts" depends="init" description="Copy scripts or batch files from script_templates directory to the dist directory">
+        <if>
+            <equals arg1="${solr.external.exists}" arg2="true"/>
+            <then>
+                <property name="solr.jar.def.string" value="-Done-jar.class.path=&quot;${solr.external.location}&quot;" />
+            </then>
+            <else>
+                <property name="solr.jar.def.string" value="" />
+            </else>
+        </if>
+        <if>
+            <or> 
+                <os family="windows" />
+                <equals arg1="${package-prebuilt.allscripts.batch}" arg2="true"/>
+            </or>
+            <then>
+                <copy todir="${dist.dir}" overwrite="true">
+                    <fileset dir="${script.template.dir}" includes="*.bat" />
+                    <fileset dir="${site.script.dir}" includes="*.bat" />
+                    <filterchain>
+                        <fixcrlf eol="dos"/>
+                    </filterchain>
+                    <filterset>
+                        <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
+                        <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
+                        <filter token="MEM_ARGS" value="${exe.mem.args}" />
+                        <filter token="SOLR_JAR_DEF" value="${solr.jar.def.string}" />
+                        <filter token="SOLREXTERNALLOCATIONOVERRIDE" value="%SOLRWARLOCATIONORJARDIR%" />
+                    </filterset>
+                </copy>
+            </then>
+        </if>
+        <if> 
+            <or> 
+                <not> <os family="windows" /> </not>
+                <equals arg1="${package-prebuilt.allscripts.shell}" arg2="true"/>
+            </or>
+            <then>
+                <copy todir="${dist.dir}" overwrite="true">
+                    <fileset dir="${script.template.dir}" includes="*" excludes="*.bat" />
+                    <fileset dir="${site.script.dir}" includes="*" excludes="*.bat" />
+                    <filterchain>
+                        <fixcrlf eol="unix"/>
+                    </filterchain>
+                    <filterset>
+                        <filter token="CUSTOM_JAR_NAME" value="${distribution.jar.name}.jar" />
+                        <filter token="DEFAULT_CONFIG_FILE" value="${default.config}" />
+                        <filter token="MEM_ARGS" value="${exe.mem.args}" />
+                        <filter token="SOLR_JAR_DEF" value="${solr.jar.def.string}" />
+                        <filter token="SOLREXTERNALLOCATIONOVERRIDE" value="$$SOLRWARLOCATIONORJARDIR" />
+                    </filterset>
+                </copy>
+
+                <chmod perm="u+x">
+                    <fileset dir="${dist.dir}" excludes="*.jar,*.bat" />
+                </chmod>
+            </then>
+        </if>
+    </target>
+
+    <macrodef name="merge_maps"  description="copy and merge translation maps" >
+        <sequential>
+            <delete_merged_maps />
+            <!-- copy standard translation maps and site-specific translation maps to the same 
+                 temporary directory.  If there are files with duplicate names only keep the 
+                 site-specific version, but warn the user that duplicates are present. -->
+            <copy todir="${build.dir}/tmp_map_dir" >
+                <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
+                <fileset dir="${basedir}" includes="log4j.properties" />
+            </copy>
+            
+            <copy todir="${build.dir}/tmp_map_dir" overwrite="true">
+                <fileset dir="${site.map.dir}" includes="*.properties" />
+                <fileset dir="${site.dir}" includes="log4j.properties" />
+            </copy>
+            
+            <pathconvert pathsep=" "  property="std_maps" >
+                <fileset dir="${lib.dir}/solrmarc/${trans.map.path}" includes="*.properties" />
+                <fileset dir="${basedir}" includes="log4j.properties" />
+                <flattenmapper />
+            </pathconvert>
+            
+            <pathconvert pathsep=" "  property="site_maps" >
+                <fileset dir="${site.map.dir}" includes="*.properties" />
+                <fileset dir="${site.dir}" includes="log4j.properties" />
+                <flattenmapper />
+            </pathconvert>
+            
+            <resources id="intersect_std_maps_with_site_maps" >
+                <intersect>
+                    <resources>
+                        <tokens>
+                            <string value="${std_maps}" />
+                            <stringtokenizer />
+                        </tokens>
+                    </resources>
+                    <resources>
+                        <tokens>
+                            <string value="${site_maps}" />
+                            <stringtokenizer />
+                        </tokens>
+                  </resources>
+                </intersect>
+            </resources>
+    
+            <pathconvert pathsep=", "  property="both_maps" refid="intersect_std_maps_with_site_maps" />
+    
+            <if >
+                <resourcecount refid="intersect_std_maps_with_site_maps" when="greater" count="0" />
+                <then>
+                    <echo level="error" message="-----------------------------------------------------------------------------------------" />
+                    <echo level="error" message="Warning: Site specific translation map replaces standard translation map of the same name" />
+                    <echo level="error" message="         Duplicate map names = ${both_maps} " />
+                    <echo level="error" message="-----------------------------------------------------------------------------------------" />
+                </then>
+            </if>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="delete_merged_maps" >
+        <sequential>
+            <delete dir="${build.dir}/tmp_map_dir" />
+        </sequential>
+    </macrodef>
+    
+    <target name="build" depends="compile,defaultconfig" 
+            description="create ${jar.name} in the build directory">
+        <copy tofile="${buildtools.path}/manifest.mf" 
+              file="${buildtools.path}/manifest_template.mf" overwrite="true">
+            <filterset>
+                <filter token="NAMEOFMAINCLASS" value="org.solrmarc.marc.MarcImporter" />
+                <filter token="NAMEOFDEFAULTCONFIGFILE" value="${default.config}" />
+            </filterset>
+        </copy>
+        
+        <merge_maps />
+                
+        <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
+               manifest="${buildtools.path}/manifest.mf">
+            <main jar="${lib.dir}/solrmarc/${solrmarc.core.build.dir}/${solrmarc.core.jar.name}" />
+            <lib>
+                <fileset dir="${lib.dir}" includes="*.jar" excludes="junit*.jar,jzkit_client.jar" />
+                <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
+                <fileset dir="${site.build.dir}" includes="*.jar" />
+                <fileset dir="${site.lib.dir}" includes="*.jar" />
+            </lib>
+            <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
+            <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
+            <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
+            <fileset dir="${site.dir}" includes="extra_data/**" />
+        </one-jar>
+        
+        <delete_merged_maps />
+        
+        <antcall target="scripts" >
+            <param name="solr.external.location" value="${solr.external.location}" />
+        </antcall>
+
+    </target>
+
+    <target name="package-src" description="Create a gzipped src tarball for distribution" >
+        <tar destfile="SolrMarc_Distribution.tar.gz" compression="gzip" >
+            <tarfileset dir=".">
+                <include name="build.xml" />
+                <include name="build.properties" />
+                <include name="log4j.properties" />
+                <include name="test/**" />
+                <include name="script_templates/*" />
+                <include name="lib/*.jar" />
+                <exclude name="lib/jzkit_client.jar" /> 
+                <include name="lib/solrmarc/**" />
+                <exclude name="lib/solrmarc/**/*.class" /> 
+                <exclude name="lib/solrmarc/**/z3950/*.java" />
+                <exclude name="lib/solrmarc/**/*.jar" />
+                <include name="lib/solr_1.2/**" />
+                <include name="lib/solr_1.3/**" />
+                <include name="lib/solr_1.4/**" />
+                <include name="lib/solr_external" />
+                <include name="docs/*" />
+                <include name="buildtools/**" />
+                <exclude name="buildtools/manifest.mf"/>
+                <include name="examples/GenericVuFind/script_templates/*"/>
+                <include name="examples/GenericVuFind/src/**"/>
+                <include name="examples/GenericVuFind/translation_maps/*"/>
+                <include name="examples/GenericVuFind/*.properties"/>
+                <include name="examples/GenericBlacklight/*.properties"/>
+                <include name="examples/UvaBlacklight/script_templates/*"/>
+                <include name="examples/UvaBlacklight/src/**"/>
+                <include name="examples/UvaBlacklight/translation_maps/*"/>
+                <include name="examples/UvaBlacklight/*.properties"/>
+                <include name="examples/stanfordBlacklight/scripts/*"/>
+                <include name="examples/stanfordBlacklight/src/**"/>
+                <include name="examples/stanfordBlacklight/translation_maps/*"/>
+                <include name="examples/stanfordBlacklight/*.properties"/>
+                <include name="examples/stanfordBlacklight/test/src/**"/>
+                <include name="examples/stanfordBlacklight/bibixSolrConf/*"/>
+            </tarfileset>
+        </tar>
+    </target>
+        
+    <target name="package-prebuilt" description="Create a gzipped pre-built version for distribution" >
+        <antcall target="build" inheritAll="false" >
+            <param name="site.dir" value="tmpexternal" />
+            <param name="dist.dir" value="external" />
+            <param name="solr.path" value="" />
+            <param name="solr.version" value="external" />
+            <param name="solr.external.location" value="" />
+            <param name="package-prebuilt.allscripts.batch" value="true" />
+            <param name="package-prebuilt.allscripts.shell" value="true" />
+        </antcall>
+        <if>
+            <available file="tmpexternal/build_override.properties" />
+            <then>
+                <loadproperties srcfile="tmpexternal/build_override.properties">
+                    <filterchain>
+                        <tokenfilter>
+                            <containsregex pattern="distribution.jar.name" />
+                        </tokenfilter>
+                        <prefixlines prefix="external." />
+                    </filterchain>
+                </loadproperties>
+            </then>
+        </if>
+        <if>
+            <available file="tmpexternal/build.properties" />
+            <then>
+                <loadproperties srcfile="tmpexternal/build.properties">
+                    <filterchain>
+                        <tokenfilter>
+                            <containsregex pattern="distribution.jar.name" />
+                        </tokenfilter>
+                        <prefixlines prefix="external." />
+                    </filterchain>
+                </loadproperties>
+            </then>
+        </if>
+        <property name="external.distribution.jar.name" value="SolrMarc" />
+        <tar destfile="Binary_${external.distribution.jar.name}_Unix.tar.gz" compression="gzip">
+            <tarfileset dir="external" filemode="755">
+                <include name="*" />
+                <exclude name="*.bat" />
+            </tarfileset>
+            <tarfileset dir="${buildtools.path}">
+                <include name="README_UNIX" />
+            </tarfileset>
+        </tar> 
+        <zip destfile="Binary_${external.distribution.jar.name}_PC.zip" compress="true">
+            <zipfileset dir="external" >
+                <include name="*.bat" />
+                <include name="*.jar" />
+            </zipfileset>
+            <zipfileset dir="${buildtools.path}" >
+                 <include name="README_PC.txt" />
+            </zipfileset>
+        </zip> 
+        <delete dir="tmpexternal" />
+        <delete dir="external" />
+    </target>
+        
+    <target name="package" description="Create both prebuilt binary distributions and a source distribution" >
+        <antcall target="package-src" inheritAll="false" />
+        <antcall target="package-prebuilt" inheritAll="false">
+            <param name="example.configuration" value="GenericBlacklight" />
+            <param name="accept.default.for.input" value="true" />
+        </antcall>
+        <antcall target="package-prebuilt" inheritAll="false">
+            <param name="example.configuration" value="GenericVuFind" />
+            <param name="accept.default.for.input" value="true" />
+        </antcall>
+    </target>
+        
+    <target name="usage" description="Prints usage instructions">
+        <echo message="Welcome to the Solrmarc indexing project" />
+        <echo message="Use 'ant' to build the latest code" />
+        <echo message="For developers" />
+        <echo message="Use 'ant clean' to clean the compiled source directory" />
+        <echo message="Use 'ant package-src' to build a gzipped tarball of the source code for distribution" />
+        <echo message="Use 'ant package-prebuilt' to build a gzipped tarball of a pre-built, pre-configured, binary release" />
+        <echo message="Use 'ant test' to run unit tests" />
+    </target>
+
+
+    <!-- Site Testing Targets -->
+
+    <target name="testClean" depends="init" description="clean generated test directories">
+        <delete dir="${site.test.dir}/${build.dir}" />
+    </target>
+
+    <target name="testInit" depends="testClean,defaultconfig" description="create (empty) generated test directories">
+        <mkdir dir="${site.test.dir}/${build.dir}" />
+        <property file="${site.test.dir}/test.properties" />
+        <property name="site.test.jar" value="${custom.jar.name}Test.jar" />
+        <mkdir dir="${site.test.solr.dir}" />
+        <mkdir dir="${site.test.solr.dir}/conf" />
+		<!-- Note:  Although default values are created here for the following 
+		     three properties, you should really define values for these 
+		     in your site specific build.properties file or in your site
+		     specific test/test.properties file.  If you define these values
+		     there, those values will be used, and the following three lines
+		     will have no effect -->
+        <property name="test.solr.dir" value="${test.dir}/solr" />
+        <property name="test.data.dir" value="${site.test.data.dir}" />
+        <property name="test.data.file" value="indextest.txt" />
+ 
+        <if>
+            <not>
+                <isset property="solr.path" />
+            </not>
+            <then>
+                <loadproperties srcfile="${site.dir}/${default.config}">
+                    <filterchain>
+                        <linecontains>
+                            <contains value="solr.path" />
+                        </linecontains>
+                    </filterchain>
+                </loadproperties>
+            </then>
+        </if>
+        <property name="site.test.solr.conf.override" value="${solr.path}/conf" />
+        <property name="site.test.solr.lib.override" value="${solr.path}/lib" />
+
+        <!-- create a solr directory for testing by copying a boilerplate solr directory -->
+        <copy overwrite="false" todir="${site.test.solr.dir}">
+            <fileset dir="${test.solr.dir}" includes="lib/*.jar,conf/*.*,conf/xslt/*,data" excludes="data/**" />
+        </copy>
+        
+        <!-- now copy files from the conf directory and lib directory from the solr.path/conf  and /lib directories
+             if they exist, otherwise copy files from the conf directory and lib directory as specified by the 
+             properties ${site.test.solr.conf.override} and  ${site.test.solr.lib.override}   -->
+        <if>
+            <available file="${solr.path}/conf" />
+            <then>
+                <copy overwrite="true" todir="${site.test.solr.dir}/conf" failonerror="false">
+                    <fileset dir="${solr.path}/conf" includes="*" />
+                </copy>
+            </then>
+            <else>
+                <copy overwrite="true" todir="${site.test.solr.dir}/conf" failonerror="false">
+                    <fileset dir="${site.test.solr.conf.override}" includes="*" />
+                </copy>
+            </else>
+        </if>
+            
+        <if>
+            <available file="${solr.path}/lib" />
+            <then>
+                <copy overwrite="true" todir="${site.test.solr.dir}/lib" failonerror="false">
+                    <fileset dir="${solr.path}/lib" includes="*.jar" />
+                </copy>
+            </then>
+            <else>
+                 <copy overwrite="true" todir="${site.test.solr.dir}/lib" failonerror="false">
+                     <fileset dir="${site.test.solr.lib.override}" includes="*.jar" />
+                 </copy>
+             </else>
+        </if>
+        
+		<!--  
+		      Note: the following property specifies the name of the class containing the tests
+		      that are to be run.  If you want to run anything more than the simplest low level tests
+		      you need to define the property test.class in your site specific build.properties file
+		      or in your site specific test/test.properties file.
+		      If you don't the following default value will be used, which only does simple low-level tests.
+		  -->
+        <property name="test.class" value="org.solrmarc.index.ParameterizedIndexTest" />
+
+    </target>
+
+    <target name="testCompile" depends="testInit,compile" description="Compile test source code into test build dir">
+        <path id="test.classpath.jars" description="Jars for classpath for building/running Test code">
+            <fileset dir="${site.lib.dir}" includes="*.jar" />
+            <fileset file="${site.build.dir}/${custom.jar.name}.jar" />
+            <fileset dir="${lib.dir}" includes="*.jar" />
+            <fileset dir="${lib.dir}/solrmarc/${solrmarc.core.build.dir}" includes="*.jar" />
+            <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
+        </path>
+
+        <javac destdir="${site.test.build.dir}" 
+               srcdir="${site.test.dir}/${src.dir}:${test.dir}/${src.dir}" 
+               target="${java.compat.version}" source="${java.compat.version}" 
+               debug="on" encoding="utf-8">
+            <include name="org/**/*.java" />
+            <include name="edu/**/*.java" />
+            <exclude name="solr/**/*.java" />
+            <classpath>
+                <path refid="test.classpath.jars" />
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="testJar" depends="testCompile" description="jar up test class files">
+        <echo message=" creating test jar :  ${site.test.build.dir}/${site.test.jar}" />
+        <copy tofile="${buildtools.path}/manifest.mf" 
+              file="${buildtools.path}/manifest_template.mf" overwrite="true">
+            <filterset>
+                <filter token="NAMEOFMAINCLASS" value="org.solrmarc.marc.MarcImporter" />
+                <filter token="NAMEOFDEFAULTCONFIGFILE" value="${default.config}" />
+            </filterset>
+        </copy>
+        
+        <merge_maps />
+        
+        <!-- This task builds a one jar containing all of the properties files needed to run the tests so that the 
+             property file loading as jar resources works correctly in the tests.  Note we need to include a main 
+             jar attribute to make the one-jar task happy, the jar defined there doesnt have to exist for it to work. -->
+        <one-jar destfile="${site.test.build.dir}/${site.test.jar}" 
+               manifest="${buildtools.path}/manifest.mf">
+            <main jar="${buildtools.path}/doesntexist.jar" />
+            <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
+            <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
+            <fileset dir="${site.dir}" includes="extra_data/**" />
+            <fileset dir="${site.test.build.dir}" includes="**/*.class" />
+        </one-jar>
+        
+        <delete_merged_maps />
+    </target>
+
+    <target name="test" depends="testJar" description="run junit tests for bib index">
+        <echo message="using solr version: ${solr.version}" />
+        <echo message="solr.path: ${solr.path}" />
+        <echo message="solr.path being used for testing: ${site.test.solr.dir}" />
+
+        <path id="test.run.classpath.jars">
+            <path refid="test.classpath.jars" />
+            <fileset file="${site.test.build.dir}/${site.test.jar}" />
+        </path>
+
+        <!--
+        <test-index-rec file="u17922.mrc" lookfor="oclc_text" expect="10072685" />
+        <test-index-rec file="u470059.mrc" lookfor="ports_of_call" expect="Penang|Malaysia" />
+        --> 
+        
+        <echo message="test class = ${test.class} " />
+        <echo message="solr.data.dir = ${site.test.solr.dir}/data " />
+      
+        <if >
+            <and> 
+                <isset property="test.class" />
+                <available classname="${test.class}" classpathref="test.run.classpath.jars" />
+            </and>
+            <then>
+                <junit showoutput="yes" printsummary="yes" fork="yes">
+                    <formatter type="plain" usefile="no" />
+        
+                    <classpath>
+                        <path refid="test.run.classpath.jars" />
+                    </classpath>
+        
+                    <sysproperty key="test.data.path" path="${test.data.dir}" />
+                    <sysproperty key="test.data.file" value="${test.data.file}" />
+                    <sysproperty key="solr.path" path="${site.test.solr.dir}" />
+                    <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
+                    <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
+                    <test name="${test.class}" />
+                </junit>
+            </then>
+            <else>
+                <echo message="test class ${test.class} not defined or not available" />
+            </else>
+        </if>  
+    </target>
+</project>

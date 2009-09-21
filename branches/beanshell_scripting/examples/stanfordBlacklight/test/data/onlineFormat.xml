@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+    <!-- 856 ind2 0 - fulltext online AND book -->
+    <record>
+        <leader>01952cam  2200457Ia 45í0</leader>
+        <controlfield tag="001">a856ind2is0</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">856 ind2 0 - fulltext online AND book</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="0">
+            <subfield code="3">Bibliographic record display</subfield>
+            <subfield code="u">http://www.netLibrary.com/urlapi.asp?action=summary&amp;v=1&amp;bookid=122436</subfield>
+            <subfield code="z">A downloadable audio book accessible through the World Wide Web; click for information</subfield>
+            <subfield code="y">/uPortal/media/com/dynix/hip/uportal/layout/tab-column/dynix-nest-tables/default/ebook_button_netlib.jpg</subfield>
+            <subfield code="9">http://206.245.157.132:80/rpa/default/webauth.htm?rs=NetLibAudioHIP&amp;op=122436</subfield>
+        </datafield>
+    </record>
+    <!-- 856 ind2 0 simpler - fulltext online AND journal -->
+    <record>
+        <leader>01952cas  2200457Ia 45í0</leader>
+        <controlfield tag="001">a856ind2is0Again</controlfield>
+        <controlfield tag="008">780930m19391944nyu   p       000 v eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">856 ind2 0 simpler - fulltext online AND journal</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="0">
+            <subfield code="u">http://www.url856.com/fulltext/ind2_0</subfield>
+        </datafield>
+    </record>
+    <!-- 856 ind2 1 no toc - fulltext online AND other -->
+    <record>
+        <leader>01952cab  2200457Ia 45í0</leader>
+        <controlfield tag="001">a856ind2is1NotToc</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">856 ind1 1 no toc - fulltext online AND other</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="1">
+            <subfield code="3">FullText online</subfield>
+            <subfield code="u">http://www.url856.com/fulltext/ind2_1/not_toc</subfield>
+            <subfield code="z">A downloadable audio book accessible through the World Wide Web; click for information</subfield>
+        </datafield>
+    </record>
+    <!-- 856 ind2 1 toc in sub z - TOC (not fulltext) online AND journal -->
+    <record>
+        <leader>01952cas  2200457Ia 45í0</leader>
+        <controlfield tag="001">a856ind2is1TocSubz</controlfield>
+        <controlfield tag="008">780930m19391944nyu   p       000 v eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">856 ind2 1 toc in sub z - TOC (not fulltext) online AND journal</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="1">
+            <subfield code="3">coverage: blah</subfield>
+            <subfield code="u">http://www.url856.com/ind2_1/toc_subz</subfield>
+            <subfield code="z">Online table of contents from PCI available to Stanford-affiliated users</subfield>    
+        </datafield>
+     </record>
+    <!-- 856 ind2 1 toc in sub 3 - TOC (not fulltext) online AND journal -->
+    <record>
+        <leader>01952cas  2200457Ia 45í0</leader>
+        <controlfield tag="001">a856ind2is1TocSub3</controlfield>
+        <controlfield tag="008">780930m19391944nyu   p       000 v eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">856 ind2 1 toc in sub 3 - TOC (not fulltext) online AND journal</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="1">
+            <subfield code="3">coverage: Table of Contents</subfield>
+            <subfield code="u">http://www.url856.com/ind2_1/toc_sub3</subfield>
+        </datafield>
+    </record>
+    <!-- 856 ind2 2 - supplementary (not fulltext) online AND book -->
+    <record>
+        <leader>01952cam  2200457Ia 45í0</leader>
+        <controlfield tag="001">a856ind2is2suppl</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">856 ind2 2 - supplementary (not fulltext) online AND book</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="2">
+            <subfield code="3">not fulltext</subfield>
+            <subfield code="u">http://www.url856.com/ind2_2/supplementaryMaterial</subfield>
+        </datafield>
+    </record>
+    <!-- 856 ind2 blank, toc in subz - toc (not fulltext) online AND book -->
+    <record>
+        <leader>01952cam  2200457Ia 45í0</leader>
+        <controlfield tag="001">a856ind2isBlankTocSubZ</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">856 ind2 blank, toc in subz - toc (not fulltext) online AND book</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2=" ">
+            <subfield code="u">http://www.url856.com/ind2_blank/toc_subz</subfield>
+            <subfield code="z">Online table of contents from PCI available to Stanford-affiliated users</subfield>    
+        </datafield>
+    </record>
+    <!-- 856 ind2 blank, toc in sub3 - toc (not fulltext) online AND book -->
+    <record>
+        <leader>01952cam  2200457Ia 45í0</leader>
+        <controlfield tag="001">a856ind2isBlankTocSub3</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">856 ind2 blank, toc in sub3 - toc (not fulltext) online AND book</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2=" ">
+            <subfield code="3">coverage: Table of Contents</subfield>
+            <subfield code="u">http://www.url856.com/ind2_blank/toc_sub3</subfield>
+        </datafield>
+    </record>
+    <!-- 856 ind2 blank - fulltext online AND journal -->
+    <record>
+        <leader>01952cas  2200457Ia 45í0</leader>
+        <controlfield tag="001">a856ind2isBlankFulltext</controlfield>
+        <controlfield tag="008">780930m19391944nyu   p       000 v eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">856 ind2 blank - fulltext online AND journal</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2=" ">
+            <subfield code="u">http://www.url856.com/fulltext/ind2_blank/not_toc</subfield>
+        </datafield>
+    </record>
+    <!-- 956 blank indicators - fulltext online AND book -->
+    <record>
+        <leader>01952cam  2200457Ia 45í0</leader>
+        <controlfield tag="001">a956BlankIndicators</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">956 blank indicators - fulltext online AND book</subfield>
+        </datafield>
+        <datafield tag="956" ind1=" " ind2=" ">
+            <subfield code="u">http://www.url956.com/fulltext/blankIndicators</subfield>
+        </datafield>
+    </record>
+    <!-- 956 ind2 0 - fulltext online AND book -->
+    <record>
+        <leader>01952cam  2200457Ia 45í0</leader>
+        <controlfield tag="001">a956ind2is0</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">956 ind2 0 - fulltext online AND book</subfield>
+        </datafield>
+        <datafield tag="956" ind1="4" ind2="0">
+            <subfield code="u">http://www.url956.com/fulltext/ind2_is_0</subfield>
+        </datafield>
+    </record>
+    <!-- 956 with toc 856 - fulltext and TOC online AND book -->    
+    <record>
+        <leader>01952cam  2200457Ia 45í0</leader>
+        <controlfield tag="001">a956and856TOC</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">956 with toc 856 - fulltext and TOC online AND book</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="2">
+            <subfield code="u">http://www.url856.com/toc</subfield>
+            <subfield code="z">Online table of contents from PCI available to Stanford-affiliated users:</subfield>
+        </datafield>
+        <datafield tag="956" ind1="4" ind2=" ">
+            <subfield code="u">http://www.url956.com/fulltext/ind2_is_blank</subfield>
+            <subfield code="x">eLoaderURL</subfield>
+            <subfield code="x">mc4</subfield>
+            <subfield code="x">mc954921357406</subfield>
+        </datafield>
+    </record>
+    <!-- mult 856 and 956 - fulltext (4) online AND book -->    
+    <record>
+        <leader>01952cam  2200457Ia 45í0</leader>
+        <controlfield tag="001">amult856and956</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">mult 856 and 956 - fulltext (4) online AND book</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="1">
+            <subfield code="3">Recent issues available to Stanford-affiliated users at:</subfield>
+            <subfield code="u">http://www.sciencemag.org/</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="1">
+            <subfield code="3">Back issues available to Stanford-affiliated users at:</subfield>
+            <subfield code="u">http://www.jstor.org/journals/00368075.html</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="1">
+            <subfield code="3">Back issues available to Stanford-affiliated users at:</subfield>
+            <subfield code="u">http://www.sciencemag.org/archive/</subfield>
+        </datafield>
+        <datafield tag="956" ind1="4" ind2=" ">
+            <subfield code="u">http://caslon.stanford.edu:3210/sfxlcl3?superLongURL</subfield>
+            <subfield code="x">eLoaderURL</subfield>
+            <subfield code="x">mc4</subfield>
+            <subfield code="x">mc954925443632</subfield>
+        </datafield>
+    </record>
+    <!-- 956 with toc 856 and suppl 856 - fulltext and TOC and suppl online AND book -->    
+    <record>
+        <leader>01952cam  2200457Ia 45í0</leader>
+        <controlfield tag="001">a956and856TOCand856suppl</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">956 with toc 856 and suppl 856 - fulltext and TOC and suppl online AND book</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="2">
+            <subfield code="u">http://www.url856.com/toc</subfield>
+            <subfield code="z">Online table of contents from PCI available to Stanford-affiliated users:</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="2">
+            <subfield code="3">supplementary</subfield>
+            <subfield code="u">http://www.url856.com/ind2_2/supplMaterial</subfield>
+        </datafield>
+        <datafield tag="956" ind1="4" ind2=" ">
+            <subfield code="u">http://www.url956.com/fulltext/ind2_is_blank</subfield>
+            <subfield code="x">eLoaderURL</subfield>
+            <subfield code="x">mc4</subfield>
+            <subfield code="x">mc954921357406</subfield>
+        </datafield>
+    </record>
+    <!-- 856 toc and suppl, no fulltext AND book -->    
+    <record>
+        <leader>01952cam  2200457Ia 45í0</leader>
+        <controlfield tag="001">a856tocAnd856SupplNoFulltext</controlfield>
+        <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">856 toc and suppl, no fulltext AND book</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="2">
+            <subfield code="u">http://www.url856.com/toc</subfield>
+            <subfield code="z">Online table of contents from PCI available to Stanford-affiliated users:</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="2">
+            <subfield code="3">supplementary</subfield>
+            <subfield code="u">http://www.url856.com/ind2_2/supplMaterial</subfield>
+        </datafield>
+    </record>
+    <!-- 956 SFX url: fulltext -->
+    <record>
+        <leader>00988nas a2200193z  4500</leader>
+        <controlfield tag="001">a7117119</controlfield>
+        <controlfield tag="008">071214uuuuuuuuuxx uu |ss    u|    |||| d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">sfx in 956</subfield>
+        </datafield>
+        <datafield tag="956" ind1="4" ind2="0">
+            <subfield code="u">http://caslon.stanford.edu:3210/sfxlcl3?url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;ctx_enc=info:ofi/enc:UTF-8&amp;rfr_id=info:sid/sfxit.com:opac_856&amp;url_ctx_fmt=info:ofi/fmt:kev:mtx:ctx&amp;sfx.ignore_date_threshold=1&amp;rft.object_id=110978984448763&amp;svc_val_fmt=info:ofi/fmt:kev:mtx:sch_svc&amp;</subfield>
+            <subfield code="x">eLoaderURL</subfield>
+            <subfield code="x">mb4</subfield>
+            <subfield code="x">mb110978984448763</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">INTERNET RESOURCE</subfield>
+            <subfield code="w">ASIS</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">7117119-1001</subfield>
+            <subfield code="l">INTERNET</subfield>
+            <subfield code="m">SUL</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">SUL</subfield>
+            <subfield code="u">12/15/2007</subfield>
+            <subfield code="z">TAX=8.25</subfield>
+        </datafield>
+    </record>
+    <!-- 856 http url is for a request form for SAL3  GSB -->
+    <record>
+        <leader>00988nas a2200193z  4500</leader>
+        <controlfield tag="001">a123http</controlfield>
+        <controlfield tag="008">071214uuuuuuuuuxx uu |ss    u|    |||| d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">856 http url is for a request form for SAL3  GSB</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2=" ">
+            <subfield code="u">http://www.gsb.stanford.edu/jacksonlibrary/services/sal3_request.html</subfield>
+            <subfield code="z">Request offsite item</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">HG3266 .U64A</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">J81S99</subfield>
+            <subfield code="l">ASK@GSB</subfield>
+            <subfield code="m">JACKSON</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">BUSINESS</subfield>
+            <subfield code="u">5/17/2008</subfield>
+        </datafield>
+    </record>
+    <!-- 856 http url is for a request form for SAL3  GSB -->
+    <record>
+        <leader>00988nas a2200193z  4500</leader>
+        <controlfield tag="001">a124http</controlfield>
+        <controlfield tag="008">071214uuuuuuuuuxx uu |ss    u|    |||| d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">856 http url is for a request form for SAL3 GSB  from 7948108</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2=" ">
+            <subfield code="u">http://www.gsb.stanford.edu/jacksonlibrary/services/offsite_material.html</subfield>
+            <subfield code="z">Request offsite item</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">HG3266 .U64A</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">J81S99</subfield>
+            <subfield code="l">ASK@GSB</subfield>
+            <subfield code="m">JACKSON</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">BUSINESS</subfield>
+            <subfield code="u">5/17/2008</subfield>
+        </datafield>
+    </record>
+    <!-- 856 https url is for a request form for SAL3  GSB -->
+    <record>
+        <leader>00988nas a2200193z  4500</leader>
+        <controlfield tag="001">a1234https</controlfield>
+        <controlfield tag="008">071214uuuuuuuuuxx uu |ss    u|    |||| d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">856 https url is for a request form for SAL3  GSB</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2=" ">
+            <subfield code="u">https://www.gsb.stanford.edu/jacksonlibrary/services/sal3_request.html</subfield>
+            <subfield code="z">Request offsite item</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">HG4521.R36</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">J81S99</subfield>
+            <subfield code="l">ASK@GSB</subfield>
+            <subfield code="m">JACKSON</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">BUSINESS</subfield>
+            <subfield code="u">5/17/2008</subfield>
+        </datafield>
+    </record>
+    <!-- 856 LoC sample text url -->
+    <record>
+        <leader>00988nas a2200193z  4500</leader>
+        <controlfield tag="001">a7423084</controlfield>
+        <controlfield tag="008">071214uuuuuuuuuxx uu |ss    u|    |||| d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">sample test url from LOC (856 41)</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="1">
+            <subfield code="3">Sample text</subfield>
+            <subfield code="u">http://www.loc.gov/catdir/samples/prin031/2001032103.html</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="1">
+            <subfield code="3">Table of contents</subfield>
+            <subfield code="u">http://www.loc.gov/catdir/toc/prin031/2001032103.html</subfield>
+        </datafield>
+        <datafield tag="856" ind1="4" ind2="2">
+            <subfield code="3">Publisher description</subfield>
+            <subfield code="u">http://www.loc.gov/catdir/description/prin022/2001032103.html</subfield>
+        </datafield>
+            <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">HG4521.R36</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">J81S99</subfield>
+            <subfield code="l">STAFF</subfield>
+            <subfield code="m">ARS</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">BUSINESS</subfield>
+            <subfield code="u">5/17/2008</subfield>
+        </datafield>
+    </record>     
+    <!-- 956 SFX url: fulltext -->
+    <record>
+        <leader>00988nas a2200193z  4500</leader>
+        <controlfield tag="001">anewSfx</controlfield>
+        <controlfield tag="008">071214uuuuuuuuuxx uu |ss    u|    |||| d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">new sfx in 956</subfield>
+        </datafield>
+        <datafield tag="956" ind1="4" ind2="0">
+            <subfield code="u">http://library.stanford.edu/sfx?reallyLongLotsOfArgs</subfield>
+            <subfield code="x">eLoaderURL</subfield>
+            <subfield code="x">mr4</subfield>
+            <subfield code="x">mr1000000000717824</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">INTERNET RESOURCE</subfield>
+            <subfield code="w">ASIS</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">7117119-1001</subfield>
+            <subfield code="l">INTERNET</subfield>
+            <subfield code="m">SUL</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">SUL</subfield>
+            <subfield code="u">12/15/2007</subfield>
+            <subfield code="z">TAX=8.25</subfield>
+        </datafield>
+    </record>
+</collection>

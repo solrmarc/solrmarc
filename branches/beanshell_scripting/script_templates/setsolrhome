@@ -1,0 +1,133 @@
+#! /bin/bash
+
+E_BADARGS=65
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+showconfig=0
+
+case $1 in
+*config.properties) config=$1 ;;
+http*) url=$1 ;;
+*\.jar) jar=$1 ;;
+/*) solrpath=$1 ;;
+\./*) solrpath=$1 ;;
+\../*) solrpath=$1 
+esac
+
+case $2 in
+*config.properties) config=$2 ;;
+http*) url=$2 ;;
+*\.jar) jar=$2 ;;
+/*) solrpath=$2 ;;
+\./*) solrpath=$2 ;;
+\../*) solrpath=$2 
+esac
+
+case $3 in
+*config.properties) config=$3 ;;
+http*) url=$3 ;;
+*\.jar) jar=$3 ;;
+/*) solrpath=$3 ;;
+\./*) solrpath=$3 ;;
+\../*) solrpath=$3 
+esac
+
+case $4 in
+*config.properties) config=$4 ;;
+http*) url=$4 ;;
+*\.jar) jar=$4 ;;
+/*) solrpath=$4 ;;
+\./*) solrpath=$4 ;;
+\../*) solrpath=$4 
+esac
+
+#echo "url = $url"
+#echo "solrpath = $solrpath"
+#echo "config = $config"
+#echo "jar = $jar"
+
+case $url in 
+*/update) url=`echo $url | sed -e 's%/update$%%'` ;;
+esac
+ 
+if [[ "$jar" = "" ]] 
+then
+    jar="$scriptdir/@CUSTOM_JAR_NAME@"
+fi
+
+if [[ "$config" = "" && jar != "" ]]
+then
+    config=`java -Done-jar.main.class="org.solrmarc.tools.GetDefaultConfig" -jar "$jar"`
+fi
+
+if [[ `echo $solrpath | cut -c1` = "." ]]
+then
+    path=$( (cd -P $(dirname $1) && pwd) )
+    file=$(basename $1)
+    solrpath=$path/$file
+fi
+
+if [[ "$solrpath" = "" && "$url" = "" ]]
+then
+    solrpath=`$scriptdir/showconfig $jar $config | egrep '^solr\.path' | sed -e 's%.*= *%%'`
+    url=`$scriptdir/showconfig $jar $config | egrep '^solr\.hosturl' | sed -e 's%.*= *%%'`
+    echo "jar = $jar"
+    echo "config = $config"
+    echo "solrpath = $solrpath"
+    echo "url = $url"
+    exit 0
+fi
+
+if [[ "$solrpath" = "" && "$url" != "" ]]
+then
+    echo "no solrpath, hitting URL"
+
+    solrpath=`java -Done-jar.main.class="org.solrmarc.tools.GetSolrHomeFromServer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $url`
+    
+    if [[ "$solrpath" = "" ]]
+    then
+        echo "Error: no Solr server currently running at URL: $url"
+        exit $E_BADARGS
+    fi
+fi
+
+if [[ ! -d "$solrpath" ]]
+then
+    echo "Error: unable to access directory designated as Solr home: $solrpath"
+    exit $E_BAD_ARGS
+fi
+
+if [[ ! -d "$solrpath"/conf ]]
+then
+    echo "Error: no 'conf' directory in directory designated as Solr home: $solrpath"
+    exit $E_BAD_ARGS
+fi
+
+echo "jar = $jar"
+echo "config = $config"
+echo "solrpath = $solrpath"
+echo "url = $url/update"
+
+tmp=tmp"$RANDOM""$$"
+mkdir $tmp
+solrpathdef="solr.path=$solrpath"
+urldef=
+if [[ "$url" != "" ]]
+then 
+   urldef="solr.hosturl=$url/update"
+fi
+
+java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar $jar $config% | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar $jar "$solrpathdef" "$urldef" > $tmp/$config
+
+pushd $tmp > /dev/null
+
+# jar uf "$jar" $config
+java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "$jar" JarUtils.jar $scriptdir
+java -classpath $scriptdir/JarUtils.jar JarUpdate "$jar" $config > /dev/null
+rm -f $scriptdir/JarUtils.jar
+
+#cat "$config" 
+
+popd > /dev/null
+rm -rf "$tmp"
+

@@ -1,0 +1,98 @@
+#!/bin/bash
+
+MESSAGE="Daily Update Completed Successfully"
+STATUS=0
+
+DATERUN=`date +%Y%m%d --date='1 day ago'`
+
+NUM_UPDATES_EXPECTED=1
+NUM_UPDATES=`ls -l /usr/local/projects/marc/incoming/*.mrc | wc -l`
+
+# $NUM_UPDATES_EXPECTED  should equal $NUM_UPDATES
+if [ $NUM_UPDATES -lt $NUM_UPDATES_EXPECTED ] 
+  then
+    echo "No Daily Updates Copied to the Incoming Directory"
+    STATUS=1
+    exit $STATUS
+elif [ $NUM_UPDATES -gt $NUM_UPDATES_EXPECTED ]
+  then
+    AUTH_NAME=`ls -1 /usr/local/projects/marc/incoming/*.auth_mrc | head -1`
+    AUTH_ROOT=`basename $AUTH_NAME .auth_mrc`
+    NUM_UPDATES_NOT_NEW=`ls -1 *.mrc | egrep -v "$AUTH_ROOT" | wc -l`
+    if [ $NUM_UPDATES_NOT_NEW -eq $NUM_UPDATES_EXPECTED ] 
+      then
+         echo "New Daily Update Available, Not Yet Processed"
+         STATUS=0
+         exit $STATUS
+    fi
+    echo "Multiple Daily Updates were Copied to the Incoming Directory"
+    STATUS=1
+    exit $STATUS
+fi
+    
+CURRENT_HOUR=`date +%H`
+if [ $CURRENT_HOUR -eq 2 ]
+  then
+    echo "Daily Update Currently Being Run"
+    STATUS=0
+    exit $STATUS
+fi
+    
+RECENT_UPDATE_FILE=`ls -1 /usr/local/projects/marc/incoming/*.mrc | head -1`
+RECENT_UPDATE_BASE=`basename $RECENT_UPDATE_FILE`
+RECENT_UPDATE_ROOT=`basename $RECENT_UPDATE_FILE .mrc`
+
+#  $RECENT_UPDATE_ROOT  should equal $DATERUN
+if [ $RECENT_UPDATE_ROOT -ne $DATERUN ] 
+  then
+    echo "Date of Daily Update Incorrect"
+    STATUS=1
+    exit $STATUS
+fi
+
+NUM_PROCESSED_EXPECTED=1
+NUM_PROCESSED=`ls -1 /usr/local/projects/marc/processed/$RECENT_UPDATE_ROOT.mrc 2> /dev/null | wc -l`
+
+# $NUM_PROCESSED_EXPECTED  should equal $NUM_PROCESSED
+if [ $NUM_PROCESSED -ne $NUM_PROCESSED_EXPECTED ] 
+  then
+    echo "Daily Update File NOT copied to Processed Directory (Update Likely Failed or Hung)"
+    STATUS=2
+    exit $STATUS
+fi
+
+NUM_INDEX_FILES_EXPECTED=10
+NUM_INDEX_FILES=`ls -1 /usr/local/projects/blacklight/solr_prod/data/index | egrep 'fdt$|fdx$|fnm$|frq$|nrm$|prx$|tii$|tis$|del$|^segment' | wc -l`
+
+# $NUM_INDEX_FILES_EXPECTED  should equal $NUM_INDEX_FILES
+#if [ $NUM_INDEX_FILES -gt $NUM_INDEX_FILES_EXPECTED ] 
+# then
+#    echo "Too many Index files in Solr/data/index directory (Optimize Index did not finish)"
+#    STATUS=2
+#    exit $STATUS
+#fi
+
+NUM_SORTED_EXPECTED=1
+NUM_SORTED=`ls -1 /usr/local/projects/marc/processed_sorted/$RECENT_UPDATE_ROOT.mrc 2> /dev/null | wc -l`
+
+# $NUM_SORTED_EXPECTED  should equal  $NUM_SORTED
+if [ $NUM_SORTED -lt $NUM_SORTED_EXPECTED ] 
+  then
+    echo "Daily Update File NOT sorted and copied "
+    STATUS=1
+    exit $STATUS
+fi
+
+NAME_SORTED=`ls -1 /usr/local/projects/marc/processed/$RECENT_UPDATE_ROOT.mrc`
+LAST_UPDATE_MERGED=`tail -1 /usr/local/projects/marc/full_dump_updated/updates.txt | sed -e 's/[^:]*: //'`
+
+# $NAME_SORTED  should equal  $LAST_UPDATE_MERGED
+if [ $NAME_SORTED == $LAST_UPDATE_MERGED ] 
+  then
+    echo "Daily Update NOT merged into Updated Full Dump Directory"
+    STATUS=1
+    exit $STATUS
+fi
+
+echo $MESSAGE
+exit 0
