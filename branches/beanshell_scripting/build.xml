@@ -93,7 +93,8 @@
             <property name="site.test.data.dir" value="${site.test.dir}/data" />
             <property name="site.test.solr.dir" value="${site.test.dir}/solr" />
             <property name="site.map.dir" value="${site.dir}/${trans.map.path}" />
-            <property name="site.script.dir" value="${site.dir}/${script.template.dir}" />
+            <property name="site.script.template.dir" value="${site.dir}/${script.template.dir}" />
+            <property name="site.scripts.dir" value="${site.dir}/${scripts.dir}" />
         </sequential>
     </macrodef>
 
@@ -106,7 +107,8 @@
             <mkdir dir="${site.test.src.dir}" />
             <mkdir dir="${site.test.solr.dir}" />
             <mkdir dir="${site.map.dir}" />
-            <mkdir dir="${site.script.dir}" />
+            <mkdir dir="${site.script.template.dir}" />
+            <mkdir dir="${site.scripts.dir}" />
         </sequential>
     </macrodef>
 
@@ -296,7 +298,7 @@
                     </and>
                     <then>
                         <union id="nonuptodatecopies">
-                            <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties,extra_data/*.txt" >
+                            <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties,extra_data/**" excludes="test/bin/**" >
                                 <depend targetdir="${site.dir}" />
                                 <different targetdir="${site.dir}" />
                             </fileset>
@@ -590,7 +592,7 @@
             <then>
                 <copy todir="${dist.dir}" overwrite="true">
                     <fileset dir="${script.template.dir}" includes="*.bat" />
-                    <fileset dir="${site.script.dir}" includes="*.bat" />
+                    <fileset dir="${site.script.template.dir}" includes="*.bat" />
                     <filterchain>
                         <fixcrlf eol="dos"/>
                     </filterchain>
@@ -612,7 +614,7 @@
             <then>
                 <copy todir="${dist.dir}" overwrite="true">
                     <fileset dir="${script.template.dir}" includes="*" excludes="*.bat" />
-                    <fileset dir="${site.script.dir}" includes="*" excludes="*.bat" />
+                    <fileset dir="${site.script.template.dir}" includes="*" excludes="*.bat" />
                     <filterchain>
                         <fixcrlf eol="unix"/>
                     </filterchain>
@@ -708,7 +710,12 @@
         </copy>
         
         <merge_maps />
-                
+        
+        <copy todir="${build.dir}/tmp_map_dir" >
+            <flattenmapper/>
+            <fileset dir="${site.dir}" includes="extra_data/**" />
+        </copy>
+            
         <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
                manifest="${buildtools.path}/manifest.mf">
             <main jar="${lib.dir}/solrmarc/${solrmarc.core.build.dir}/${solrmarc.core.jar.name}" />
@@ -719,9 +726,9 @@
                 <fileset dir="${site.lib.dir}" includes="*.jar" />
             </lib>
             <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
-            <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
+            <fileset dir="${build.dir}/tmp_map_dir" includes="**" />
             <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
-            <fileset dir="${site.dir}" includes="extra_data/**" />
+            <!-- <fileset dir="${site.dir}" includes="extra_data/**" /> -->   
         </one-jar>
         
         <delete_merged_maps />
@@ -760,6 +767,7 @@
                 <include name="examples/GenericBlacklight/*.properties"/>
                 <include name="examples/UvaBlacklight/script_templates/*"/>
                 <include name="examples/UvaBlacklight/src/**"/>
+                <include name="examples/UvaBlacklight/extra_data/**"/>
                 <include name="examples/UvaBlacklight/translation_maps/*"/>
                 <include name="examples/UvaBlacklight/*.properties"/>
                 <include name="examples/stanfordBlacklight/scripts/*"/>
@@ -782,6 +790,10 @@
             <param name="package-prebuilt.allscripts.batch" value="true" />
             <param name="package-prebuilt.allscripts.shell" value="true" />
         </antcall>
+        <mkdir dir="external/${scripts.dir}" />
+        <mkdir dir="external/${trans.map.path}" />
+        <copy todir="external/${scripts.dir}" file="${buildtools.path}/README_SCRIPTS" />
+        <copy todir="external/${trans.map.path}" file="${buildtools.path}/README_MAPS" />
         <if>
             <available file="tmpexternal/build_override.properties" />
             <then>
@@ -817,8 +829,12 @@
             <tarfileset dir="${buildtools.path}">
                 <include name="README_UNIX" />
             </tarfileset>
+            <tarfileset dir="external">
+                <include name="${scripts.dir}/**" />
+                <include name="${trans.map.path}/**" />
+            </tarfileset>
         </tar> 
-        <zip destfile="Binary_${external.distribution.jar.name}_PC.zip" compress="true">
+        <zip destfile="Binary_${external.distribution.jar.name}_PC.zip" compress="true" whenempty="create">
             <zipfileset dir="external" >
                 <include name="*.bat" />
                 <include name="*.jar" />
@@ -826,9 +842,13 @@
             <zipfileset dir="${buildtools.path}" >
                  <include name="README_PC.txt" />
             </zipfileset>
+            <zipfileset dir="external">
+                <include name="${scripts.dir}/**" />
+                <include name="${trans.map.path}/**" />
+            </zipfileset>
         </zip> 
         <delete dir="tmpexternal" />
-        <delete dir="external" />
+        <delete dir="external" /> 
     </target>
         
     <target name="package" description="Create both prebuilt binary distributions and a source distribution" >
@@ -840,7 +860,7 @@
         <antcall target="package-prebuilt" inheritAll="false">
             <param name="example.configuration" value="GenericVuFind" />
             <param name="accept.default.for.input" value="true" />
-        </antcall>
+        </antcall> 
     </target>
         
     <target name="usage" description="Prints usage instructions">
@@ -982,7 +1002,7 @@
             <main jar="${buildtools.path}/doesntexist.jar" />
             <fileset dir="${build.dir}/tmp_map_dir" includes="*.properties" />
             <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
-            <fileset dir="${site.dir}" includes="extra_data/**" />
+            <fileset dir="${site.dir}/extra_data" includes="**" />
             <fileset dir="${site.test.build.dir}" includes="**/*.class" />
         </one-jar>
         
