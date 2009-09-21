@@ -215,7 +215,7 @@ public class SolrSearcherProxy
         Class queryClass = Class.forName("org.apache.lucene.search.Query");
         Object docSet = solrSearcher.getClass().getMethod("getDocSet", queryClass).invoke(solrSearcher, query);
         int size = (Integer)docSet.getClass().getMethod("size").invoke(docSet);
-        Object docList = solrSearcher.getClass().getMethod("getDocList", queryClass, queryClass, sortClass, Integer.class, Integer.class).
+        Object docList = solrSearcher.getClass().getMethod("getDocList", queryClass, queryClass, sortClass, int.class, int.class).
                                       invoke(query, null, sort, 0, size);
         return(docList);
     }
