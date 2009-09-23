@@ -237,7 +237,16 @@ public abstract class MarcHandler {
         }
         if (reader != null && combineConsecutiveRecordsFields != null)
         {
-            reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields);
+            if (errors == null)
+            {
+                reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields);
+            }
+            else
+            {
+                ErrorHandler errors2 = errors;
+                errors = new ErrorHandler();
+                reader = new MarcCombiningReader(reader, errors, errors2, combineConsecutiveRecordsFields);
+            }
         }
         String marcIncludeIfPresent = Utils.getProperty(configProps, "marc.include_if_present");
         String marcIncludeIfMissing = Utils.getProperty(configProps, "marc.include_if_missing");
