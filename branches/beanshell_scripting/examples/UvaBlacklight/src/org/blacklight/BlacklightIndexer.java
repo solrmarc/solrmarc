@@ -594,7 +594,7 @@ public class BlacklightIndexer extends SolrIndexer
                     if (mappedCurLoc.contains("$m"))
                     {
           //              mappedCurLoc.replaceAll("$l", mappedHomeLoc);
-                        mappedCurLoc.replaceAll("$m", mappedLib);
+                        mappedCurLoc = mappedCurLoc.replaceAll("[$]m", mappedLib);
                     }
                     resultSet.add(mappedCurLoc);
                     continue;   // Used
