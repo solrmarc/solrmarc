@@ -11,12 +11,15 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.Subfield;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
@@ -556,6 +559,55 @@ public class BlacklightIndexer extends SolrIndexer
                 e.printStackTrace();
             }
         }
+    }
+    
+    public Set<String>getCustomLocation(final Record record, String locationMap, String visibilityMap, String libraryMap)
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+        List<?> fields999 = record.getVariableFields("999");
+        String locMapName = loadTranslationMap(null, locationMap);
+        String visMapName = loadTranslationMap(null, visibilityMap);
+        String libMapName = loadTranslationMap(null, libraryMap);
+        for ( DataField field : (List<DataField>)fields999 )
+        {
+            Subfield curLocF = field.getSubfield('k');
+            Subfield homeLocF = field.getSubfield('l');
+            Subfield libF = field.getSubfield('m');
+            String curLoc = (curLocF != null ? curLocF.getData() : null);
+            String homeLoc = (homeLocF != null ? homeLocF.getData() : null);
+            String lib = (libF != null ? libF.getData() : null);
+            String mappedHomeVis = Utils.remap(homeLoc, findMap(visMapName), true);
+            String mappedHomeLoc = Utils.remap(homeLoc, findMap(locMapName), true);
+            if (mappedHomeVis.equals("VISIBLE") && mappedHomeLoc == null)
+            {
+                String combinedLocMapped = Utils.remap(homeLoc + "__" + lib, findMap(locMapName), true);
+                if (combinedLocMapped != null) mappedHomeLoc = combinedLocMapped;
+            }
+            String mappedLib = Utils.remap(lib, findMap(libMapName), true);
+            if (curLoc != null)
+            {
+                String mappedCurLoc = Utils.remap(curLoc, findMap(locMapName), true);
+                String mappedCurVis = Utils.remap(curLoc, findMap(visMapName), true);
+                if (mappedCurVis.equals("HIDDEN")) continue; // this copy of the item is Hidden, go no further
+                if (mappedCurLoc != null) 
+                {
+                    if (mappedCurLoc.contains("$m"))
+                    {
+          //              mappedCurLoc.replaceAll("$l", mappedHomeLoc);
+                        mappedCurLoc.replaceAll("$m", mappedLib);
+                    }
+                    resultSet.add(mappedCurLoc);
+                    continue;   // Used
+                }
+            }
+            if (mappedHomeVis.equals("HIDDEN"))  continue; // this copy of the item is Hidden, go no further
+            if (mappedHomeLoc.contains("$"))
+            {
+                mappedHomeLoc.replaceAll("$m", mappedLib);
+            }
+            resultSet.add(mappedHomeLoc);
+        }
+        return(resultSet);
     }
     
     public String getShadowedLocation(final Record record, String propertiesMap, String returnHidden, String processExtra)
