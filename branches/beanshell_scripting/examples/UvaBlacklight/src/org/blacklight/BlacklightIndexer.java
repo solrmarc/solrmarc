@@ -624,7 +624,10 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> format = getCombinedFormat(record);
         boolean isBook = Utils.setItemContains(format, "Book");
         resultSet.add(primaryLanguage);
-        copySetWithSuffix(resultSet, otherLanguages, " (also in)");
+        if (!(otherLanguages.size() == 1 && Utils.setItemContains(otherLanguages, primaryLanguage)))
+        {
+            copySetWithSuffix(resultSet, otherLanguages, " (also in)");
+        }
         copySetWithSuffix(resultSet, translatedFrom, " (translated from)");
         copySetWithSuffix(resultSet, subtitleLanguage, (isBook ? " (summary in)" : " (subtitles in)") );
         return(resultSet);
