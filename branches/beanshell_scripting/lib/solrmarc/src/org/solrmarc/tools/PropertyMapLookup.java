@@ -117,13 +117,16 @@ public class PropertyMapLookup
         }
     }
     
-    static String locMapName = loadTranslationMap("location_map.properties");
-    static String visMapName = loadTranslationMap("shadowed_location_map.properties");
-    static String libMapName = loadTranslationMap("library_map.properties");
+    static String locMapName = null;
+    static String visMapName = null;
+    static String libMapName = null;
     
     public static String getCustomLocation(String curLoc, String homeLoc, String library)
     {
         String result = null;
+        if (locMapName == null) locMapName = loadTranslationMap("location_map.properties");
+        if (visMapName == null) visMapName = loadTranslationMap("shadowed_location_map.properties");
+        if (libMapName == null) libMapName = loadTranslationMap("library_map.properties");
         String mappedHomeVis = Utils.remap(homeLoc, findMap(visMapName), true);
         String mappedHomeLoc = Utils.remap(homeLoc, findMap(locMapName), true);
         if (mappedHomeVis.equals("VISIBLE") && mappedHomeLoc == null)
