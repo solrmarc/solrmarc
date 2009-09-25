@@ -187,6 +187,7 @@ public class PropertyMapLookup
                 String parts[] = line.split(" +");
                 String part1Mapped = Utils.remap(parts[1], map, true);
                 String part3Mapped = Utils.remap(parts[3], map, true);
+                String count = parts.length > 4 ? parts[4] : null;
                 String mapValue;
                 if ((part1Mapped == null || part1Mapped.equals("null")) && 
                     (part3Mapped == null || part3Mapped.equals("null"))) 
@@ -195,7 +196,7 @@ public class PropertyMapLookup
                 else if (part3Mapped == null || part3Mapped.equals("null")) mapValue = part1Mapped;
                 else mapValue = part1Mapped + " ; " + part3Mapped;
                 String newMapValue = getCustomLocation(parts[1], parts[3], "[LibraryName]");
-                System.out.println(parts[1] + "\t" + parts[3] + "\t" + mapValue + "\t" + newMapValue);
+                System.out.println(parts[1] + "\t" + parts[3] + "\t" + mapValue + "\t" + newMapValue + "\t" + count);
             }
         }
         catch (IOException e)
