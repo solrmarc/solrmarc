@@ -6,8 +6,15 @@ import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+
+import org.marc4j.marc.DataField;
+import org.marc4j.marc.Record;
+import org.marc4j.marc.Subfield;
 
 public class PropertyMapLookup
 {
@@ -109,6 +116,46 @@ public class PropertyMapLookup
             }
         }
     }
+    
+    static String locMapName = loadTranslationMap("location_map.properties");
+    static String visMapName = loadTranslationMap("shadowed_location_map.properties");
+    static String libMapName = loadTranslationMap("library_map.properties");
+    
+    public static String getCustomLocation(String curLoc, String homeLoc, String library)
+    {
+        String result = null;
+        String mappedHomeVis = Utils.remap(homeLoc, findMap(visMapName), true);
+        String mappedHomeLoc = Utils.remap(homeLoc, findMap(locMapName), true);
+        if (mappedHomeVis.equals("VISIBLE") && mappedHomeLoc == null)
+        {
+            String combinedLocMapped = Utils.remap(homeLoc + "__" + "ALDERMAN", findMap(locMapName), true);
+            if (combinedLocMapped != null) mappedHomeLoc = combinedLocMapped;
+        }
+        String mappedLib = library;
+        if (curLoc != null)
+        {
+            String mappedCurLoc = Utils.remap(curLoc, findMap(locMapName), true);
+            String mappedCurVis = Utils.remap(curLoc, findMap(visMapName), true);
+            if (mappedCurVis.equals("HIDDEN")) return(result); // this copy of the item is Hidden, go no further
+            if (mappedCurLoc != null) 
+            {
+                if (mappedCurLoc.contains("$m"))
+                {
+      //              mappedCurLoc.replaceAll("$l", mappedHomeLoc);
+                    mappedCurLoc = mappedCurLoc.replaceAll("[$]m", mappedLib);
+                }
+                result = mappedCurLoc;
+                return(result);   // Used
+            }
+        }
+        if (mappedHomeVis.equals("HIDDEN"))  return(result); // this copy of the item is Hidden, go no further
+        if (mappedHomeLoc.contains("$"))
+        {
+            mappedHomeLoc.replaceAll("$m", mappedLib);
+        }
+        result = mappedHomeLoc;
+        return result;
+    }
 
     /**
      * @param args
@@ -144,7 +191,8 @@ public class PropertyMapLookup
                 else if (part1Mapped == null || part1Mapped.equals("null")) mapValue = part3Mapped;
                 else if (part3Mapped == null || part3Mapped.equals("null")) mapValue = part1Mapped;
                 else mapValue = part1Mapped + " ; " + part3Mapped;
-                System.out.println(parts[1] + "\t" + parts[3] + "\t" + mapValue);
+                String newMapValue = getCustomLocation(parts[1], parts[3], "[LibraryName]");
+                System.out.println(parts[1] + "\t" + parts[3] + "\t" + mapValue + "\t" + newMapValue);
             }
         }
         catch (IOException e)
