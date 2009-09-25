@@ -152,7 +152,7 @@ public class PropertyMapLookup
             }
         }
         if (mappedHomeVis.equals("HIDDEN"))  return(result); // this copy of the item is Hidden, go no further
-        if (mappedHomeLoc.contains("$"))
+        if (mappedHomeVis != null && mappedHomeLoc.contains("$"))
         {
             mappedHomeLoc.replaceAll("$m", mappedLib);
         }
