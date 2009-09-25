@@ -610,6 +610,35 @@ public class BlacklightIndexer extends SolrIndexer
         return(resultSet);
     }
     
+    public Set<String> getCustomLanguage(final Record record, String propertiesMap)
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+        String mapName = loadTranslationMap(null, propertiesMap);
+        String primaryLanguage = getFirstFieldVal(record, mapName, "008[35-37]");
+        Set<String> otherLanguages = getFieldList(record, "041a:041d");
+        otherLanguages = Utils.remap(otherLanguages, findMap(mapName), true);
+        Set<String> translatedFrom = getFieldList(record, "041h");
+        translatedFrom = Utils.remap(translatedFrom, findMap(mapName), true);
+        Set<String> subtitleLanguage = getFieldList(record, "041b");
+        subtitleLanguage = Utils.remap(subtitleLanguage, findMap(mapName), true);
+        Set<String> format = getCombinedFormat(record);
+        boolean isBook = Utils.setItemContains(format, "Book");
+        resultSet.add(primaryLanguage);
+        copySetWithSuffix(resultSet, otherLanguages, " (also in)");
+        copySetWithSuffix(resultSet, translatedFrom, " (translated from)");
+        copySetWithSuffix(resultSet, subtitleLanguage, (isBook ? " (summary in)" : " (subtitles in)") );
+        return(resultSet);
+    }
+    
+    private void copySetWithSuffix(Set<String> resultSet, Set<String> languageList, String suffix)
+    {
+        for (String language : languageList)
+        {
+            String toAdd = language + suffix;
+            resultSet.add(toAdd);
+        }  
+    }
+
     public String getShadowedLocation(final Record record, String propertiesMap, String returnHidden, String processExtra)
     {
         boolean processExtraShadowedIds = processExtra.startsWith("extraIds");
