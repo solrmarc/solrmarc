@@ -42,6 +42,9 @@ blacklight_config.properties, u20563.mrc, published_date_facet, Last 50 years
 blacklight_config.properties, u4802090.mrc, published_date_facet, Last 10 years|Last 50 years
 blacklight_config.properties, u11.mrc, published_date_facet, More than 50 years ago
 
+blacklight_dev_config.properties, u8738.mrc, language_facet, English|French (translated from)
+blacklight_dev_config.properties, u4403509.mrc, language_facet, French|English (subtitles in)
+
 blacklight_config.properties, u11.mrc, barcode_facet, 11-1001
 blacklight_config.properties, u60.mrc, barcode_facet, X000872036|X000872037
  
