@@ -601,11 +601,11 @@ public class BlacklightIndexer extends SolrIndexer
                 }
             }
             if (mappedHomeVis.equals("HIDDEN"))  continue; // this copy of the item is Hidden, go no further
-            if (mappedHomeLoc.contains("$"))
+            if (mappedHomeLoc != null && mappedHomeLoc.contains("$"))
             {
                 mappedHomeLoc.replaceAll("$m", mappedLib);
             }
-            resultSet.add(mappedHomeLoc);
+            if (mappedHomeLoc != null) resultSet.add(mappedHomeLoc);
         }
         return(resultSet);
     }
@@ -622,14 +622,30 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> subtitleLanguage = getFieldList(record, "041b");
         subtitleLanguage = Utils.remap(subtitleLanguage, findMap(mapName), true);
         Set<String> format = getCombinedFormat(record);
-        boolean isBook = Utils.setItemContains(format, "Book");
+        boolean isBook = Utils.setItemContains(format, "Book") || Utils.setItemContains(format, "Journal");
+        boolean isDVD = Utils.setItemContains(format, "DVD") ;
         if (primaryLanguage != null)  resultSet.add(primaryLanguage);
-        if (!(otherLanguages.size() == 1 && primaryLanguage != null && 
-              Utils.setItemContains(otherLanguages, primaryLanguage)))
+        if (primaryLanguage != null && Utils.setItemContains(otherLanguages, primaryLanguage))
         {
-            copySetWithSuffix(resultSet, otherLanguages, " (also in)");
+            otherLanguages.remove(primaryLanguage);
         }
-        copySetWithSuffix(resultSet, translatedFrom, " (translated from)");
+        if (isBook && otherLanguages.size() == 1 && translatedFrom.size() == 0)
+        {
+            copySetWithSuffix(resultSet, otherLanguages, " (translated from)");
+        }
+        else 
+        {
+            if (isDVD)
+                copySetWithSuffix(resultSet, otherLanguages, " (dubbed in)");
+            else
+                copySetWithSuffix(resultSet, otherLanguages, " (also in)");
+            
+            if (primaryLanguage != null && Utils.setItemContains(translatedFrom, primaryLanguage))
+            {
+                translatedFrom.remove(primaryLanguage);
+            }
+            copySetWithSuffix(resultSet, translatedFrom, " (translated from)");
+        }
         copySetWithSuffix(resultSet, subtitleLanguage, (isBook ? " (summary in)" : " (subtitles in)") );
         return(resultSet);
     }
