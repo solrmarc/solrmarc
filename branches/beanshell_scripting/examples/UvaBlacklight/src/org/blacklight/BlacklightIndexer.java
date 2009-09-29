@@ -624,12 +624,14 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> format = getCombinedFormat(record);
         boolean isBook = Utils.setItemContains(format, "Book") || Utils.setItemContains(format, "Journal");
         boolean isDVD = Utils.setItemContains(format, "DVD") ;
+        Set<String> notesFields = getFieldList(record, "500a");
+        boolean isTranslated = Utils.setItemContains(notesFields, "[Tt]ranslat((ed)|(ion))");
         if (primaryLanguage != null)  resultSet.add(primaryLanguage);
         if (primaryLanguage != null && Utils.setItemContains(otherLanguages, primaryLanguage))
         {
             otherLanguages.remove(primaryLanguage);
         }
-        if (isBook && otherLanguages.size() == 1 && translatedFrom.size() == 0)
+        if (isBook && isTranslated && otherLanguages.size() == 1 && translatedFrom.size() == 0)
         {
             copySetWithSuffix(resultSet, otherLanguages, " (translated from)");
         }
