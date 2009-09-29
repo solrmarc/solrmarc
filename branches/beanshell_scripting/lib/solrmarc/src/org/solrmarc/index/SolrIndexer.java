@@ -1896,7 +1896,7 @@ public class SolrIndexer
         {
             DataField dfield = (DataField) vf;
             Subfield link = dfield.getSubfield('6');
-            if (link.getData().startsWith(tag))
+            if (link != null && link.getData().startsWith(tag))
             {
                 List<Subfield> subList = dfield.getSubfields();
                 StringBuffer buf = new StringBuffer("");
