@@ -3,13 +3,27 @@ package org.solrmarc.marc;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.marc4j.ErrorHandler;
 import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
-import org.marc4j.marc.Subfield;
-import org.marc4j.marc.VariableField;
+
+
+/**
+ * @author rh9ec
+ * 
+ * Binary Marc records have a maximum size of 99999 bytes.  In the data dumps from 
+ * the Sirsi/Dynix Virgo system if a record with all of its holdings information 
+ * attached would be greater that that size, the records is written out multiple
+ * times with each subsequent record containing a subset of the total holdings information.
+ * This class reads ahead to determine when the next record in a Marc file is actually 
+ * a continuation of the same record.   When this occurs, the holdings information in the
+ * next record is appended to/merged with the in-memory Marc record representation already 
+ * read. 
+ *
+ */
 
 public class MarcCombiningReader implements MarcReader
 {
@@ -17,16 +31,51 @@ public class MarcCombiningReader implements MarcReader
     Record nextRecord = null;
     MarcReader reader;
     String idsToMerge = null;
-
+    ErrorHandler nextErrors;
+    ErrorHandler currentErrors;
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
 
+    
+    /**
+     * Constructor for a "combining" Marc reader, that looks ahead at the Marc file to determine 
+     * when the next record is a continuation of the currently read record.  
+     * 
+     * @param reader - The Lower level MarcReader that returns Marc4J Record objects that are read from a Marc file.
+     * @param idsToMerge - string representing a regular expression matching those fields to be merged for continuation records.
+     */
     MarcCombiningReader(MarcReader reader, String idsToMerge)
     {
         this.reader = reader;
         this.idsToMerge = idsToMerge;
+        this.nextErrors = null;
+        this.currentErrors = null;
     }
     
+    /**
+     * Constructor for a "combining" Marc reader, that looks ahead at the Marc file to determine 
+     * when the next record is a continuation of the currently read record.  Because this reader 
+     * needs to have two records in memory to determine when the subsequent record is a continuation,
+     * if Error Handling is being performed, this constructor needs to be used, so that the errors 
+     * from the "next" record are not appended to the results for the "current" record.
+     * Call this constructor in the following way:
+     *          ErrorHandler errors2 = errors;
+     *          errors = new ErrorHandler();
+     *          reader = new MarcCombiningReader(reader, errors, errors2, combineConsecutiveRecordsFields);
+     *          
+     * @param reader - The Lower level MarcReader that returns Marc4J Record objects that are read from a Marc file.
+     * @param currentErrors - ErrorHandler Object to use for attaching errors to a record.
+     * @param nextErrors - ErrorHandler Object that was passed into the lower level MarcReader
+     * @param idsToMerge - string representing a regular expression matching those fields to be merged for continuation records.
+     */
+    MarcCombiningReader(MarcReader reader, ErrorHandler currentErrors, ErrorHandler nextErrors, String idsToMerge)
+    {
+        this.reader = reader;
+        this.idsToMerge = idsToMerge;
+        this.nextErrors = nextErrors;
+        this.currentErrors = currentErrors;
+    }
+   
     public boolean hasNext()
     {
         if (currentRecord == null) 
@@ -49,7 +98,8 @@ public class MarcCombiningReader implements MarcReader
         {
             if (nextRecord != null) 
             { 
-                currentRecord = nextRecord; 
+                currentRecord = nextRecord;
+                copyErrors(currentErrors, nextErrors);
                 nextRecord = null; 
             }
             if (!reader.hasNext()) 
@@ -74,6 +124,7 @@ public class MarcCombiningReader implements MarcReader
                     currentRecord.getControlNumber().equals(nextRecord.getControlNumber()))
             {
                 currentRecord = combineRecords(currentRecord, nextRecord);
+                mergeErrors(currentErrors, nextErrors);
                 if (reader.hasNext())
                 {
                     try {
@@ -97,6 +148,23 @@ public class MarcCombiningReader implements MarcReader
             return(next());
         }
         return(null);
+    }
+
+    private void copyErrors(ErrorHandler currentErr, ErrorHandler nextErr)
+    {
+        if (currentErr != null && nextErr != null)
+        {
+            currentErr.reset();
+            mergeErrors(currentErr, nextErr);
+        }
+    }
+
+    private void mergeErrors(ErrorHandler currentErr, ErrorHandler nextErr)
+    {
+        if (currentErr != null && nextErr != null)
+        {
+            currentErr.addErrors(nextErr.getErrors());
+        }
     }
 
     private Record combineRecords(Record currentRecord, Record nextRecord)
