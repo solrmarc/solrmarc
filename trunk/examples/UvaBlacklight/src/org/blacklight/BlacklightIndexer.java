@@ -11,12 +11,15 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.Subfield;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
@@ -558,6 +561,106 @@ public class BlacklightIndexer extends SolrIndexer
         }
     }
     
+    public Set<String>getCustomLocation(final Record record, String locationMap, String visibilityMap, String libraryMap)
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+        List<?> fields999 = record.getVariableFields("999");
+        String locMapName = loadTranslationMap(null, locationMap);
+        String visMapName = loadTranslationMap(null, visibilityMap);
+        String libMapName = loadTranslationMap(null, libraryMap);
+        for ( DataField field : (List<DataField>)fields999 )
+        {
+            Subfield curLocF = field.getSubfield('k');
+            Subfield homeLocF = field.getSubfield('l');
+            Subfield libF = field.getSubfield('m');
+            String curLoc = (curLocF != null ? curLocF.getData() : null);
+            String homeLoc = (homeLocF != null ? homeLocF.getData() : null);
+            String lib = (libF != null ? libF.getData() : null);
+            String mappedHomeVis = Utils.remap(homeLoc, findMap(visMapName), true);
+            String mappedHomeLoc = Utils.remap(homeLoc, findMap(locMapName), true);
+            if (mappedHomeVis.equals("VISIBLE") && mappedHomeLoc == null)
+            {
+                String combinedLocMapped = Utils.remap(homeLoc + "__" + lib, findMap(locMapName), true);
+                if (combinedLocMapped != null) mappedHomeLoc = combinedLocMapped;
+            }
+            String mappedLib = Utils.remap(lib, findMap(libMapName), true);
+            if (curLoc != null)
+            {
+                String mappedCurLoc = Utils.remap(curLoc, findMap(locMapName), true);
+                String mappedCurVis = Utils.remap(curLoc, findMap(visMapName), true);
+                if (mappedCurVis.equals("HIDDEN")) continue; // this copy of the item is Hidden, go no further
+                if (mappedCurLoc != null) 
+                {
+                    if (mappedCurLoc.contains("$m"))
+                    {
+          //              mappedCurLoc.replaceAll("$l", mappedHomeLoc);
+                        mappedCurLoc = mappedCurLoc.replaceAll("[$]m", mappedLib);
+                    }
+                    resultSet.add(mappedCurLoc);
+                    continue;   // Used
+                }
+            }
+            if (mappedHomeVis.equals("HIDDEN"))  continue; // this copy of the item is Hidden, go no further
+            if (mappedHomeLoc != null && mappedHomeLoc.contains("$"))
+            {
+                mappedHomeLoc.replaceAll("$m", mappedLib);
+            }
+            if (mappedHomeLoc != null) resultSet.add(mappedHomeLoc);
+        }
+        return(resultSet);
+    }
+    
+    public Set<String> getCustomLanguage(final Record record, String propertiesMap)
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+        String mapName = loadTranslationMap(null, propertiesMap);
+        String primaryLanguage = getFirstFieldVal(record, mapName, "008[35-37]");
+        Set<String> otherLanguages = getFieldList(record, "041a:041d");
+        otherLanguages = Utils.remap(otherLanguages, findMap(mapName), true);
+        Set<String> translatedFrom = getFieldList(record, "041h");
+        translatedFrom = Utils.remap(translatedFrom, findMap(mapName), true);
+        Set<String> subtitleLanguage = getFieldList(record, "041b");
+        subtitleLanguage = Utils.remap(subtitleLanguage, findMap(mapName), true);
+        Set<String> format = getCombinedFormat(record);
+        boolean isBook = Utils.setItemContains(format, "Book") || Utils.setItemContains(format, "Journal");
+        boolean isDVD = Utils.setItemContains(format, "DVD") ;
+        Set<String> notesFields = getFieldList(record, "500a");
+        boolean isTranslated = Utils.setItemContains(notesFields, "[Tt]ranslat((ed)|(ion))");
+        if (primaryLanguage != null)  resultSet.add(primaryLanguage);
+        if (primaryLanguage != null && Utils.setItemContains(otherLanguages, primaryLanguage))
+        {
+            otherLanguages.remove(primaryLanguage);
+        }
+        if (isBook && isTranslated && otherLanguages.size() == 1 && translatedFrom.size() == 0)
+        {
+            copySetWithSuffix(resultSet, otherLanguages, " (translated from)");
+        }
+        else 
+        {
+            if (isDVD)
+                copySetWithSuffix(resultSet, otherLanguages, " (dubbed in)");
+            else
+                copySetWithSuffix(resultSet, otherLanguages, " (also in)");
+            
+            if (primaryLanguage != null && Utils.setItemContains(translatedFrom, primaryLanguage))
+            {
+                translatedFrom.remove(primaryLanguage);
+            }
+            copySetWithSuffix(resultSet, translatedFrom, " (translated from)");
+        }
+        copySetWithSuffix(resultSet, subtitleLanguage, (isBook ? " (summary in)" : " (subtitles in)") );
+        return(resultSet);
+    }
+    
+    private void copySetWithSuffix(Set<String> resultSet, Set<String> languageList, String suffix)
+    {
+        for (String language : languageList)
+        {
+            String toAdd = language + suffix;
+            resultSet.add(toAdd);
+        }  
+    }
+
     public String getShadowedLocation(final Record record, String propertiesMap, String returnHidden, String processExtra)
     {
         boolean processExtraShadowedIds = processExtra.startsWith("extraIds");
