@@ -25,6 +25,10 @@ blacklight_config.properties, u3344744.mrc, location_facet, Semester at Sea Coll
 blacklight_config.properties, u3344744.mrc, library_facet, Semester at Sea
 blacklight_config.properties, u3344744.mrc, shadowed_location_facet, VISIBLE
 
+blacklight_config.properties, u150-u153.mrc(u150), marc_error, 
+blacklight_config.properties, u150-u153.mrc(u151), marc_error, Minor Error  : Subfield contains odd pattern of subscript or superscript escapes.  --- [ 245 : a ]
+blacklight_config.properties, u150-u153.mrc(u152), marc_error, 
+
 blacklight_config.properties, u2956.mrc, location_facet, Fine Arts Regular Stacks|Semester at Sea Collection|Ivy Annex
 blacklight_config.properties, u2956.mrc, library_facet, Fine Arts|Semester at Sea|Ivy Annex
 blacklight_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
@@ -37,6 +41,10 @@ blacklight_config.properties, u8692.mrc, year_multisort_i, 1974
 blacklight_config.properties, u20563.mrc, published_date_facet, Last 50 years
 blacklight_config.properties, u4802090.mrc, published_date_facet, Last 10 years|Last 50 years
 blacklight_config.properties, u11.mrc, published_date_facet, More than 50 years ago
+
+blacklight_dev_config.properties, u8738.mrc, language_facet, English|French (translated from)
+blacklight_dev_config.properties, u4403509.mrc, language_facet, French|English (subtitles in)
+blacklight_dev_config.properties, u392.mrc, language_facet, Russian|English (also in)
 
 blacklight_config.properties, u11.mrc, barcode_facet, 11-1001
 blacklight_config.properties, u60.mrc, barcode_facet, X000872036|X000872037
