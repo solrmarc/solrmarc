@@ -49,16 +49,28 @@ public class ParameterizedIndexTest
      */
     public void verifyIndexingResults() throws Exception 
     {
-        MarcMappingOnly marcMappingTest = new MarcMappingOnly(config);
+        MarcMappingOnly marcMappingTest = new MarcMappingOnly(new String[]{config, "id"});
+        String recordToLookAt = null;  // null means just get the first record from the named file
+        if (recordFilename.matches("[^(]*[(][^)]*[)]"))
+        {
+            String recParts[] = recordFilename.split("[()]");
+            recordFilename = recParts[0];
+            recordToLookAt = recParts[1];
+        }
         String fullRecordFilename = dataDirectory + File.separator + recordFilename;
-        Map<String, Object> solrFldName2ValMap = marcMappingTest.getIndexMapForRecord(null, fullRecordFilename);
-        String expected[] = expectedValue.split("[|]");
+        Map<String, Object> solrFldName2ValMap = marcMappingTest.getIndexMapForRecord(recordToLookAt, fullRecordFilename);
+        String expected[];
+        if (expectedValue.length() > 0)
+            expected = expectedValue.split("[|]");
+        else
+            expected = new String[0];
         Object solrFldValObj = solrFldName2ValMap.get(fieldToCheck);
         String received[] = null;
         if (solrFldValObj == null)
         {
             if (expected.length != 0)
                 fail("No value assigned for Solr field " + fieldToCheck + " in Solr document " + recordFilename);
+            received = new String[0];
         }
         if (solrFldValObj instanceof String)
         {
@@ -67,11 +79,11 @@ public class ParameterizedIndexTest
         }
         else if (solrFldValObj instanceof Collection)
         {
-            received = new String[((Collection<String>)solrFldValObj).size()];
+            received = new String[((Collection<Object>)solrFldValObj).size()];
             int i = 0;
-            for (String fldVal : (Collection<String>) solrFldValObj)
+            for (Object fldVal : (Collection<Object>) solrFldValObj)
             {
-                received[i++] = fldVal;
+                received[i++] = fldVal.toString();
             }
         }
         
