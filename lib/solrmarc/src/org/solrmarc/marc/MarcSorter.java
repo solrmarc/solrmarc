@@ -25,6 +25,7 @@ import org.solrmarc.tools.StringNaturalCompare;
 public class MarcSorter
 {
     static TreeMap<String, byte[]> recordMap = null;
+    static boolean verbose = false;
 	 // Initialize logging category
 //    static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
 	
@@ -51,21 +52,30 @@ public class MarcSorter
     //    try {
         DataInputStream input;
         recordMap = new TreeMap<String, byte[]>(new StringNaturalCompare());
+        int offset = 0;
+        if (args[0].equals("-v")) { verbose = true; offset = 1; }
         try
         {
-            if (args[0].equals("-"))
+            if (args[offset].equals("-"))
             {
                 input = new DataInputStream(new BufferedInputStream(System.in));
+                if (verbose)  System.err.println("reading Stdin");
             }
             else
             {    
-                input = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[0]))));
+                input = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[offset]))));
+                if (verbose)  System.err.println("reading file "+ args[offset]);
             }            
             processInput(input);
         }
         catch (FileNotFoundException e)
         {
             // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (Exception e)
+        {
+            System.err.println("Exception: "+e.getMessage());
             e.printStackTrace();
         }
 
@@ -122,10 +132,12 @@ public class MarcSorter
                 {
                     recordMap.put(field001, fullBuf);
                 }
+                if (verbose) System.err.println("Record read : "+ field001);
             }
         }
         catch (EOFException e)
         {
+            if (verbose)  System.err.println("EOFException");
             //  Done Reading input,   Be happy
         }
         catch (IOException e)
@@ -141,6 +153,7 @@ public class MarcSorter
                 byte recValue[] = recordMap.remove(firstKey);
                 System.out.write(recValue);
                 System.out.flush();
+                if (verbose) System.err.println("Record written : "+ firstKey);
             }
         }
         catch (IOException e)
