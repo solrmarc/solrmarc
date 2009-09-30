@@ -353,6 +353,19 @@ public class SolrIndexer
     }
 
     /**
+     * public interface callable from custom indexing scripts to 
+     * load the translation map into transMapMap
+     * @param translationMapSpec the specification of a translation map - 
+     *   could be name of a _map.properties file, or some subset of entries in a 
+     *   _map.properties file
+     * @return the name of the translation map to be used in a subsequent call to FindMap
+     */
+    public String loadTranslationMap(String translationMapSpec) 
+    {
+        return(this.loadTranslationMap(null, translationMapSpec));
+    }
+    
+    /**
      * load the translation map into transMapMap
      * @param indexProps _index.properties as Properties object
      * @param translationMapSpec the specification of a translation map - 
@@ -1338,7 +1351,7 @@ public class SolrIndexer
      * @param mapName the name of the translation map to find
      * @return populated Map object
      */
-    protected Map<String, String> findMap(String mapName)
+    public Map<String, String> findMap(String mapName)
     {
         if (mapName.startsWith("pattern_map:"))
             mapName = mapName.substring("pattern_map:".length());
