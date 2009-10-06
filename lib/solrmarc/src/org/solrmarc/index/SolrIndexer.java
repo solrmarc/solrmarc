@@ -151,10 +151,14 @@ public class SolrIndexer
                         // index of first unescaped comma after method name
                         int commaIx = Utils.getIxUnescapedComma(values[1]);
 
-                        if (parenIx != -1 && commaIx != -1 && parenIx < commaIx)
+                        if (parenIx != -1 && commaIx != -1 && parenIx < commaIx) {
                             // remainder should be split after close paren
                             // followed by comma (optional spaces in between)
                             lastValues = values[1].trim().split("\\) *,", 2);
+                            
+                            // Reattach the closing parenthesis:
+                            lastValues[0] += ")";
+                        }
                         else
                             // no parens - split comma preceded by optional spaces
                             lastValues = values[1].trim().split(" *,", 2);
