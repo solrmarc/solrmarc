@@ -307,12 +307,18 @@ public abstract class MarcHandler {
                                                      solrmarcPath + File.separator + TRANS_MAP_DIR,
                                                      solrmarcPath + File.separator + SCRIPTS_DIR }; 
 	        }
-	        else if (siteSpecificPath != null && solrmarcPath == null)
-	        {
-	             propertySearchPath =  new String[] { siteSpecificPath,
-	                                                  siteSpecificPath + File.separator + TRANS_MAP_DIR,
-	                                                  siteSpecificPath + File.separator + SCRIPTS_DIR };
-	        }
+            else if (siteSpecificPath != null && solrmarcPath == null)
+            {
+                 propertySearchPath =  new String[] { siteSpecificPath,
+                                                      siteSpecificPath + File.separator + TRANS_MAP_DIR,
+                                                      siteSpecificPath + File.separator + SCRIPTS_DIR };
+            }
+            else if (siteSpecificPath == null && solrmarcPath == null)
+            {
+                 propertySearchPath =  new String[] { ".",
+                                                      "." + File.separator + TRANS_MAP_DIR,
+                                                      "." + File.separator + SCRIPTS_DIR };
+            }
 	        Object instance = constructor.newInstance(indexerProps, propertySearchPath);
 	
 	        if (instance instanceof SolrIndexer)
