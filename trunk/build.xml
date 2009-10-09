@@ -204,6 +204,11 @@
             <input-save message="Enter encoding of MARC records:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You want the program to try to determine the encoding${line.separator}" 
                 addproperty="marc.default_encoding"  validargs="MARC8,UNIMARC,UTF-8,BESTGUESS" 
                 defaultvalue="${example.default.marc.default_encoding}" propertyfile="${site.dir}/build_override.properties" />
+            <input-save message="Properties files should be copied to the one-jar jar file that is produced " 
+                addproperty="bundle.properties.in.jar"  validargs="true,false" 
+                defaultvalue="${example.default.bundle.properties.in.jar}" propertyfile="${site.dir}/build_override.properties" />
+            <echo level="error" message="example.default.bundle.properties.in.jar = ${example.default.bundle.properties.in.jar}" />
+            <echo level="error" message="bundle.properties.in.jar = ${bundle.properties.in.jar}" />
         </sequential>
     </macrodef>
 
@@ -233,7 +238,7 @@
     <macrodef name="copy_files_from_example_directory_1">
         <sequential>
             <copy todir="${site.dir}" preservelastmodified="true">
-                <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,test/**,log4j.properties,extra_data/**" >
+                <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,script_templates/*,scripts/*,test/**,log4j.properties,extra_data/**" >
                     <depend targetdir="${site.dir}" />
                 </fileset>
             </copy>
@@ -277,7 +282,7 @@
         <input-save message="Enter name of directory to contain all site-specific files:"       
             addproperty="site.dir" propertyfile="site.dir.properties" />
         <init_site_props />
-
+        
         <echo message="site.test.solr.dir = ${site.test.solr.dir}" />
         <if>
             <and>
@@ -374,12 +379,12 @@
                         <loadproperties srcfile="examples/${example.configuration}/build.properties">
                             <filterchain>
                                 <tokenfilter>
-                                    <containsregex pattern="(custom.config.file.prefix|custom.jar.name|distribution.jar.name|exe.mem.args|solr.hosturl|marc.default_encoding|default.config)" />
+                                    <containsregex pattern="(custom.config.file.prefix|custom.jar.name|distribution.jar.name|exe.mem.args|solr.hosturl|marc.default_encoding|default.config|bundle.properties.in.jar)" />
                                 </tokenfilter>
                                 <prefixlines prefix="example.default." />
                             </filterchain>
                         </loadproperties>
-
+                        <echo level="error" message="example.default.bundle.properties.in.jar = ${example.default.bundle.properties.in.jar}" />
                         <make_site_dirs />
                         <get_site_specific_settings />
                         <copy_files_from_example_directory_1 />
@@ -712,24 +717,46 @@
         <merge_maps />
         
         <copy todir="${build.dir}/tmp_map_dir" >
-            <flattenmapper/>
-            <fileset dir="${site.dir}" includes="extra_data/**" />
+             <flattenmapper/>
+             <fileset dir="${site.dir}" includes="extra_data/**" />
         </copy>
-            
-        <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
-               manifest="${buildtools.path}/manifest.mf">
-            <main jar="${lib.dir}/solrmarc/${solrmarc.core.build.dir}/${solrmarc.core.jar.name}" />
-            <lib>
-                <fileset dir="${lib.dir}" includes="*.jar" excludes="junit*.jar,jzkit_client.jar" />
-                <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
-                <fileset dir="${site.build.dir}" includes="*.jar" />
-                <fileset dir="${site.lib.dir}" includes="*.jar" />
-            </lib>
-            <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
-            <fileset dir="${build.dir}/tmp_map_dir" includes="**" />
-            <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
-            <!-- <fileset dir="${site.dir}" includes="extra_data/**" /> -->   
-        </one-jar>
+        <copy todir="${build.dir}/tmp_map_dir" >
+             <flattenmapper/>
+             <fileset dir="${site.dir}" includes="scripts/**" />
+        </copy>
+        <if >
+            <equals arg1="${bundle.properties.in.jar}" arg2="false"/>
+            <then>
+                <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
+                        manifest="${buildtools.path}/manifest.mf">
+                     <main jar="${lib.dir}/solrmarc/${solrmarc.core.build.dir}/${solrmarc.core.jar.name}" />
+                     <lib>
+                         <fileset dir="${lib.dir}" includes="*.jar" excludes="junit*.jar,jzkit_client.jar" />
+                         <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
+                         <fileset dir="${site.build.dir}" includes="*.jar" />
+                         <fileset dir="${site.lib.dir}" includes="*.jar" />
+                     </lib>
+                     <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
+                     <!-- <fileset dir="${site.dir}" includes="extra_data/**" /> -->   
+                 </one-jar>
+            </then>
+            <else>
+                <one-jar destfile="${dist.dir}/${distribution.jar.name}.jar" 
+                       manifest="${buildtools.path}/manifest.mf">
+                    <main jar="${lib.dir}/solrmarc/${solrmarc.core.build.dir}/${solrmarc.core.jar.name}" />
+                    <lib>
+                        <fileset dir="${lib.dir}" includes="*.jar" excludes="junit*.jar,jzkit_client.jar" />
+                        <fileset dir="${lib.dir}/solr_${solr.version}" includes="*.jar" />
+                        <fileset dir="${site.build.dir}" includes="*.jar" />
+                        <fileset dir="${site.lib.dir}" includes="*.jar" />
+                    </lib>
+                    <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
+                    <fileset dir="${build.dir}/tmp_map_dir" includes="**" />
+                    <fileset dir="${site.dir}" includes="${custom.config.file.prefix}*.properties" excludes="build.properties" />
+                    <!-- <fileset dir="${site.dir}" includes="extra_data/**" /> -->   
+                </one-jar>
+            </else>
+        </if>
         
         <delete_merged_maps />
         
@@ -760,22 +787,7 @@
                 <include name="docs/*" />
                 <include name="buildtools/**" />
                 <exclude name="buildtools/manifest.mf"/>
-                <include name="examples/GenericVuFind/script_templates/*"/>
-                <include name="examples/GenericVuFind/src/**"/>
-                <include name="examples/GenericVuFind/translation_maps/*"/>
-                <include name="examples/GenericVuFind/*.properties"/>
-                <include name="examples/GenericBlacklight/*.properties"/>
-                <include name="examples/UvaBlacklight/script_templates/*"/>
-                <include name="examples/UvaBlacklight/src/**"/>
-                <include name="examples/UvaBlacklight/extra_data/**"/>
-                <include name="examples/UvaBlacklight/translation_maps/*"/>
-                <include name="examples/UvaBlacklight/*.properties"/>
-                <include name="examples/stanfordBlacklight/scripts/*"/>
-                <include name="examples/stanfordBlacklight/src/**"/>
-                <include name="examples/stanfordBlacklight/translation_maps/*"/>
-                <include name="examples/stanfordBlacklight/*.properties"/>
-                <include name="examples/stanfordBlacklight/test/src/**"/>
-                <include name="examples/stanfordBlacklight/bibixSolrConf/*"/>
+                <include name="examples/**"/>
             </tarfileset>
         </tar>
     </target>
@@ -800,7 +812,7 @@
                 <loadproperties srcfile="tmpexternal/build_override.properties">
                     <filterchain>
                         <tokenfilter>
-                            <containsregex pattern="distribution.jar.name" />
+                            <containsregex pattern="(distribution.jar.name|bundle.properties.in.jar)" />
                         </tokenfilter>
                         <prefixlines prefix="external." />
                     </filterchain>
@@ -813,12 +825,27 @@
                 <loadproperties srcfile="tmpexternal/build.properties">
                     <filterchain>
                         <tokenfilter>
-                            <containsregex pattern="distribution.jar.name" />
+                            <containsregex pattern="(distribution.jar.name|bundle.properties.in.jar)" />
                         </tokenfilter>
                         <prefixlines prefix="external." />
                     </filterchain>
                 </loadproperties>
             </then>
+        </if>
+        <echo level="error" message="bundle properties in jar = ${external.bundle.properties.in.jar} " />
+        <if>
+             <equals arg1="${external.bundle.properties.in.jar}" arg2="false" />
+             <then>
+                 <copy todir="external/${scripts.dir}" >
+                     <fileset dir="tmpexternal/${scripts.dir}" includes="*.bsh" />
+                 </copy>
+                 <copy todir="external/${trans.map.path}" >
+                     <fileset dir="tmpexternal/${trans.map.path}" includes="*.properties" />
+                 </copy>
+                 <copy todir="external" >
+                     <fileset dir="tmpexternal" includes="*.properties" excludes="build*.properties"/>
+                 </copy>
+             </then>
         </if>
         <property name="external.distribution.jar.name" value="SolrMarc" />
         <tar destfile="Binary_${external.distribution.jar.name}_Unix.tar.gz" compression="gzip">
@@ -837,6 +864,7 @@
         <zip destfile="Binary_${external.distribution.jar.name}_PC.zip" compress="true" whenempty="create">
             <zipfileset dir="external" >
                 <include name="*.bat" />
+                <include name="*.properties" />
                 <include name="*.jar" />
             </zipfileset>
             <zipfileset dir="${buildtools.path}" >
@@ -847,7 +875,7 @@
                 <include name="${trans.map.path}/**" />
             </zipfileset>
         </zip> 
-        <delete dir="tmpexternal" />
+        <delete dir="tmpexternal" /> 
         <delete dir="external" /> 
     </target>
         
@@ -856,7 +884,7 @@
         <antcall target="package-prebuilt" inheritAll="false">
             <param name="example.configuration" value="GenericBlacklight" />
             <param name="accept.default.for.input" value="true" />
-        </antcall>
+        </antcall> 
         <antcall target="package-prebuilt" inheritAll="false">
             <param name="example.configuration" value="GenericVuFind" />
             <param name="accept.default.for.input" value="true" />
