@@ -9,7 +9,7 @@ org.solrmarc.index.SolrIndexer indexer = null;
  * @param record
  * @return Call number label
  */
-public String getFullCallNumber(final Record record) {
+public String getFullCallNumber(Record record) {
 
 	String val = indexer.getFirstFieldVal(record, "099ab:090ab:050ab");
 
@@ -25,7 +25,7 @@ public String getFullCallNumber(final Record record) {
  * @param record
  * @return Call number label
  */
-public String getCallNumberLabel(final Record record) {
+public String getCallNumberLabel(Record record) {
 	
 	String val = indexer.getFirstFieldVal(record, "090a:050a");
 	
@@ -48,7 +48,7 @@ public String getCallNumberLabel(final Record record) {
  * @param record
  * @return Call number label
  */
-public String getCallNumberSubject(final Record record) {
+public String getCallNumberSubject(Record record) {
 
     String val = indexer.getFirstFieldVal(record, "090a:050a");
 
