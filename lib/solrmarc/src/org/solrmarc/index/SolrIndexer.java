@@ -1941,7 +1941,8 @@ public class SolrIndexer
                         buf.append(subF.getData());
                     }
                 }
-                result.add(Utils.cleanData(buf.toString()));
+                if (buf.length() > 0) 
+                    result.add(Utils.cleanData(buf.toString()));
             }
         }
         return(result);
