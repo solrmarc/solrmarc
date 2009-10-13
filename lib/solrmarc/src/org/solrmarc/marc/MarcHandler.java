@@ -315,9 +315,9 @@ public abstract class MarcHandler {
             }
             else if (siteSpecificPath == null && solrmarcPath == null)
             {
-                 propertySearchPath =  new String[] { ".",
-                                                      "." + File.separator + TRANS_MAP_DIR,
-                                                      "." + File.separator + SCRIPTS_DIR };
+                 propertySearchPath =  new String[] { homeDir,
+                                                      homeDir + File.separator + TRANS_MAP_DIR,
+                                                      homeDir + File.separator + SCRIPTS_DIR };
             }
 	        Object instance = constructor.newInstance(indexerProps, propertySearchPath);
 	
