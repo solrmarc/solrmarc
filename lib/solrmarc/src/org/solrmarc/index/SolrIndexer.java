@@ -157,7 +157,7 @@ public class SolrIndexer
                             lastValues = values[1].trim().split("\\) *,", 2);
                             
                             // Reattach the closing parenthesis:
-                            lastValues[0] += ")";
+                            if (lastValues.length == 2)  lastValues[0] += ")";
                         }
                         else
                             // no parens - split comma preceded by optional spaces
