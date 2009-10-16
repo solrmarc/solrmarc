@@ -65,7 +65,7 @@ public abstract class IndexTest {
         int numImported = importer.importRecords();       
         importer.finish();
         
-        solrCoreProxy = importer.getSolrCoreProxy();
+        solrCoreProxy = (SolrCoreProxy)importer.getSolrProxy();
 	}
 	
 //	private void deleteAllRecordsFromSolrIndex(String configPropFilename) throws IOException
