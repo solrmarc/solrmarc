@@ -5,7 +5,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 
-public class SolrCoreProxy
+public class SolrCoreProxy implements SolrProxy
 {
     Object solrCore = null;
     Object updateHandler = null;
@@ -63,8 +63,8 @@ public class SolrCoreProxy
         }
         return(false);
     }
-    /**
-     * return true if exception is a SolrException
+    /* (non-Javadoc)
+     * @see org.solrmarc.solr.SolrProxy#isSolrException(java.lang.Exception)
      */
     public boolean isSolrException(Exception e)
     {
@@ -83,11 +83,8 @@ public class SolrCoreProxy
     }
         
     
-    /**
-     * given a map of field names and values, create a Document and add it to 
-     *  the index
-     * @param fieldsMap - map of field names and values to add to the document
-     * @return a string representation of the document
+    /* (non-Javadoc)
+     * @see org.solrmarc.solr.SolrProxy#addDoc(java.util.Map, boolean, boolean)
      */
     public String addDoc(Map<String, Object> fieldsMap, boolean verbose, boolean addDocToIndex) throws IOException
     {
@@ -141,9 +138,8 @@ public class SolrCoreProxy
     }
 
     
-    /**
-     * delete doc from the index
-     * @param id the unique identifier of the document to be deleted
+    /* (non-Javadoc)
+     * @see org.solrmarc.solr.SolrProxy#delete(java.lang.String, boolean, boolean)
      */
     public void delete(String id, boolean fromCommitted, boolean fromPending)
         throws IOException
@@ -157,9 +153,8 @@ public class SolrCoreProxy
         invokeUpdateHandlerMethodNoArgs("delete", deleteUpdateCommand);
     }
 
-    /**
-     * delete all docs from the index
-     * Warning: be very sure you want to call this
+    /* (non-Javadoc)
+     * @see org.solrmarc.solr.SolrProxy#deleteAllDocs()
      */
     public void deleteAllDocs() throws IOException
     {
@@ -187,8 +182,8 @@ public class SolrCoreProxy
     }
 
     
-    /**
-     * commit changes to the index
+    /* (non-Javadoc)
+     * @see org.solrmarc.solr.SolrProxy#commit(boolean)
      */
     public void commit(boolean optimize) throws IOException
     {
@@ -200,8 +195,8 @@ public class SolrCoreProxy
     }
 
     
-    /**
-     * close the solrCore
+    /* (non-Javadoc)
+     * @see org.solrmarc.solr.SolrProxy#close()
      */
     public void close()
     {
