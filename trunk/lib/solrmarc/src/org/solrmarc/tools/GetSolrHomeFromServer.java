@@ -14,6 +14,9 @@ public class GetSolrHomeFromServer {
 	   /**
      * @param args
      */
+    
+    public static boolean urlIsToLocalHost = false;
+    
     public static void main(String[] args)
     {
         String solrServerURL = null;
@@ -41,12 +44,13 @@ public class GetSolrHomeFromServer {
         
         solrServerURL = solrServerURL + "/admin";
         
-        int exitCode = 1;
+        int exitCode = -1;
         try
         {
         	String solrHome = getSolrHome(solrServerURL);
         	System.out.println(solrHome);
-        	exitCode = 0;
+        	if (urlIsToLocalHost) exitCode = 0;
+        	else                  exitCode = 1;
         }
         catch (MalformedURLException me)
         {
@@ -70,7 +74,15 @@ public class GetSolrHomeFromServer {
 
         // URL of CGI-Bin script.
         url = new URL (solrHostURL);
-
+        java.net.InetAddress address = java.net.InetAddress.getByName(url.getHost());
+        
+        String urlCanonicalHostName = address.getCanonicalHostName();
+        String localCanonicalHostName = java.net.InetAddress.getLocalHost().getCanonicalHostName();
+        System.err.println("hostname in url is " + urlCanonicalHostName);
+        System.err.println("address in url isLoopbackAddress: " + address.isLoopbackAddress());
+        System.err.println("address in url isAnyLocalAddress: " + address.isAnyLocalAddress());
+        if (address.isLoopbackAddress() || urlCanonicalHostName.equals(localCanonicalHostName)) urlIsToLocalHost = true;
+        else return("REMOTE");
         // URL connection channel.
         urlConn = url.openConnection();
 

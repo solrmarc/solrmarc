@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.PatternSyntaxException;
@@ -46,6 +47,7 @@ public class MarcImporter extends MarcHandler
 {	
 	/** needs to be visible to StanfordItemMarcImporter ... */
     protected SolrProxy solrProxy;
+    protected boolean solrProxyIsRemote;
 
     protected String solrCoreDir;
     protected String solrDataDir;
@@ -517,9 +519,43 @@ public class MarcImporter extends MarcHandler
     {
         if (solrProxy == null)
         {
-            if ((solrCoreDir == null || solrCoreDir.length() == 0 || solrCoreDir.equalsIgnoreCase("REMOTE")) && SolrHostURL != null)
+            solrProxyIsRemote = false;
+            if (SolrHostURL != null && SolrHostURL.length() > 0)
             {
-                solrProxy = new SolrRemoteProxy(SolrHostURL);             
+                if ((solrCoreDir == null || solrCoreDir.length() == 0 || solrCoreDir.equalsIgnoreCase("REMOTE")))
+                {
+                    solrProxyIsRemote = true;
+                }
+                else 
+                {
+                    URL solrhostURL;
+                    try
+                    {
+                        solrhostURL = new URL(SolrHostURL);
+                        java.net.InetAddress address = java.net.InetAddress.getByName(solrhostURL.getHost());
+                        
+                        String urlCanonicalHostName = address.getCanonicalHostName();
+                        String localCanonicalHostName = java.net.InetAddress.getLocalHost().getCanonicalHostName();
+                        if (!(address.isLoopbackAddress() || urlCanonicalHostName.equals(localCanonicalHostName))) 
+                        {
+                            solrProxyIsRemote = true;
+                        }
+                    }
+                    catch (MalformedURLException e)
+                    {
+                        // URL seems invalid, assume that we want local access to the solr index and proceed
+                        solrProxyIsRemote = false;
+                    }
+                    catch (UnknownHostException e)
+                    {
+                        // hostname in URL seems invalid, assume that we want local access to the solr index and proceed
+                        solrProxyIsRemote = false;
+                    }
+                }
+            }
+            if (solrProxyIsRemote)
+            {
+                solrProxy = new SolrRemoteProxy(SolrHostURL); 
             }
             else 
             {
