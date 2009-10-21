@@ -59,7 +59,11 @@ if "%url%" == "" goto :dont_hit_url
 
     java -Done-jar.main.class="org.solrmarc.tools.GetSolrHomeFromServer" -jar %jar% %url% > %tmp%/_solrhome
     
-	set /p solrpath= < %tmp%/_solrhome
+    if ERRORLEVEL 1 (
+        set solrpath=REMOTE
+    ) ELSE (
+	    set /p solrpath= < %tmp%/_solrhome
+	)
     
     del /q %tmp%\_solrhome
     
@@ -70,7 +74,8 @@ if "%url%" == "" goto :dont_hit_url
 
 
 :dont_hit_url
-
+    if "%solrpath%" == "REMOTE" goto :solrpathok
+    
 	if NOT EXIST %solrpath% (
 	
 	    echo "Error: unable to access directory designated as Solr home: %solrpath%"
@@ -93,18 +98,23 @@ set solrpathdef=solr.path=%solrpath%
 set urldef=
 if "%url%" NEQ "" set urldef=solr.hosturl=%url%/update
 
-java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar %jar% %config% | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar %jar% "%solrpathdef%" "%urldef%" > %tmp%\%config%
+if EXIST %scriptdir%/%config% (
+   type %scriptdir%/%config% | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar %jar% "%solrpathdef%" "%urldef%" > %tmp%/%config%
+   cp %tmp%/%config% %scriptdir%/%config% 
+) ELSE (
+   java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar %jar% %config% | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar %jar% "%solrpathdef%" "%urldef%" > %tmp%\%config%
 
-pushd %tmp%
+   pushd %tmp%
 
 ::jar uf "%jar%" %config%
-java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "%jar%" JarUtils.jar %scriptdir%
-java -classpath %scriptdir%JarUtils.jar JarUpdate "%jar%" %config% > NUL
-del /q %scriptdir%JarUtils.jar
+   java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "%jar%" JarUtils.jar %scriptdir%
+   java -classpath %scriptdir%JarUtils.jar JarUpdate "%jar%" %config% %config% > NUL
+   del /q %scriptdir%JarUtils.jar
 
-del /q %config%
+   del /q %config%
 
-popd
+   popd
+)
 
 GOTO :done
 
