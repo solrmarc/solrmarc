@@ -736,7 +736,8 @@
                          <fileset dir="${site.build.dir}" includes="*.jar" />
                          <fileset dir="${site.lib.dir}" includes="*.jar" />
                      </lib>
-                     <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
+                    <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
+                    <fileset dir="${build.dir}/tmp_map_dir" includes="log4j.properties" />
                      <!-- <fileset dir="${site.dir}" includes="extra_data/**" /> -->   
                  </one-jar>
             </then>
@@ -843,7 +844,7 @@
                      <fileset dir="tmpexternal/${trans.map.path}" includes="*.properties" />
                  </copy>
                  <copy todir="external" >
-                     <fileset dir="tmpexternal" includes="*.properties" excludes="build*.properties"/>
+                     <fileset dir="tmpexternal" includes="*.properties" excludes="build*.properties,log4j.properties"/>
                  </copy>
              </then>
         </if>
