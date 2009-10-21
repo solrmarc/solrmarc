@@ -83,7 +83,11 @@ then
     echo "no solrpath, hitting URL"
 
     solrpath=`java -Done-jar.main.class="org.solrmarc.tools.GetSolrHomeFromServer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $url`
-    
+    remoteurl=$?
+    if [[ "$remoteurl" = "1" ]] 
+    then
+        solrpath=REMOTE
+    fi
     if [[ "$solrpath" = "" ]]
     then
         echo "Error: no Solr server currently running at URL: $url"
@@ -91,13 +95,13 @@ then
     fi
 fi
 
-if [[ ! -d "$solrpath" ]]
+if [[ ! "$solrpath" = "REMOTE" && ! -d "$solrpath" ]]
 then
     echo "Error: unable to access directory designated as Solr home: $solrpath"
     exit $E_BAD_ARGS
 fi
 
-if [[ ! -d "$solrpath"/conf ]]
+if [[ ! "$solrpath" = "REMOTE" && ! -d "$solrpath"/conf ]]
 then
     echo "Error: no 'conf' directory in directory designated as Solr home: $solrpath"
     exit $E_BAD_ARGS
@@ -117,17 +121,22 @@ then
    urldef="solr.hosturl=$url/update"
 fi
 
-java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar $jar $config% | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar $jar "$solrpathdef" "$urldef" > $tmp/$config
-
-pushd $tmp > /dev/null
-
 # jar uf "$jar" $config
-java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "$jar" JarUtils.jar $scriptdir
-java -classpath $scriptdir/JarUtils.jar JarUpdate "$jar" $config > /dev/null
-rm -f $scriptdir/JarUtils.jar
+if [[ -e $scriptdir/$config ]] 
+then
+   cat $scriptdir/$config | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar $jar "$solrpathdef" "$urldef" > $tmp/$config
+   cp $tmp/$config $scriptdir/$config 
+else
+   java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar $jar $config | java -Done-jar.main.class="org.solrmarc.tools.PropertyFileEditor" -jar $jar "$solrpathdef" "$urldef" > $tmp/$config
 
-#cat "$config" 
+   pushd $tmp > /dev/null
+   java -Done-jar.main.class="org.solrmarc.tools.PropertyFileFetcher" -jar "$jar" JarUtils.jar $scriptdir
+   java -classpath $scriptdir/JarUtils.jar JarUpdate "$jar" $config $config > /dev/null
+   rm -f $scriptdir/JarUtils.jar
 
-popd > /dev/null
-rm -rf "$tmp"
+#   cat "$config" 
+
+   popd > /dev/null
+   rm -rf "$tmp"
+fi
 
