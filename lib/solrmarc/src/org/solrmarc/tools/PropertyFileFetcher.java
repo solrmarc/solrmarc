@@ -52,7 +52,9 @@ public class PropertyFileFetcher {
         {
             propertyFile = GetDefaultConfig.getConfigName("");
         }
-        InputStream in = Utils.getPropertyFileInputStream(null, propertyFile);
+        String homeDir = GetDefaultConfig.getJarFileName();
+        if (homeDir != null) homeDir = new File(homeDir).getParent();
+        InputStream in = Utils.getPropertyFileInputStream(new String[]{homeDir}, propertyFile);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         String line;
         try {
