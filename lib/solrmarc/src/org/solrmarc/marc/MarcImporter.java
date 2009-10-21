@@ -555,6 +555,7 @@ public class MarcImporter extends MarcHandler
             }
             if (solrProxyIsRemote)
             {
+                logger.info(" Connecting to remote Solr server at URL " + SolrHostURL);
                 solrProxy = new SolrRemoteProxy(SolrHostURL); 
             }
             else 
@@ -580,6 +581,10 @@ public class MarcImporter extends MarcHandler
                     logger.error("Error: Supplied Solr home directory does not contain proper solr configuration: "+ solrCoreDir) ;
                     System.exit(1);               
                 }
+                logger.info(" Updating to Solr index at " + solrCoreDir);
+                logger.info("     Using Solr data dir " + solrDataDir);
+                if (solrCoreName != null && solrCoreName.length() != 0)
+                    logger.info("     Using Solr core " + solrCoreName);
                 solrProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, solrCoreName, logger);
             }
         }
