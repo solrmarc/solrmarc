@@ -271,13 +271,13 @@ public class BlacklightIndexer extends SolrIndexer
     } */
     
     /* 
-     * Extract a cleaned call number from a record
+     * Extract a silgle cleaned call number from a record
     * @param record
     * @return Clean call number
     */
-   public String getCallNumberCleaned(final Record record)
+   public String getCallNumberCleaned(final Record record, String fieldSpec)
    {
-       String val = getFirstFieldVal(record, "999a");
+       String val = getFirstFieldVal(record, fieldSpec);
        if (val == null || val.length() == 0) {
            return(null);
        }
