@@ -30,7 +30,7 @@ blacklight_config.properties, u150-u153.mrc(u151), marc_error, Minor Error  : Su
 blacklight_config.properties, u150-u153.mrc(u152), marc_error, 
 
 blacklight_config.properties, u2956.mrc, location_facet, Fine Arts Regular Stacks|Semester at Sea Collection|Ivy Annex
-blacklight_config.properties, u2956.mrc, library_facet, Fine Arts|Semester at Sea|Ivy Annex
+blacklight_config.properties, u2956.mrc, library_facet, Fine Arts|Semester at Sea|Ivy Stacks
 blacklight_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
 blacklight_config.properties, u2362477.mrc, location_facet, Clemons Robertson Media Center Vault
 
