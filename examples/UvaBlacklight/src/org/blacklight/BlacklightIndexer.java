@@ -418,6 +418,47 @@ public class BlacklightIndexer extends SolrIndexer
         }
     }
     
+    private String buildParsableURLString(DataField df, String defaultLabel)
+    {
+        String label = (df.getSubfield('z') != null) ? df.getSubfield('z').getData() : defaultLabel;
+        String url = df.getSubfield('u').getData(); 
+        String result = url + "||" + label;
+        return(result);
+    }
+    
+    public Set<String> getLabelledURL(final Record record, String defaultLabel)
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+        Set<String> backupResultSet = new LinkedHashSet<String>();
+        List<?> urlFields = record.getVariableFields("856");
+        for (Object field : urlFields)
+        {
+            if (field instanceof DataField)
+            {
+                DataField dField = (DataField)field;
+                if (dField.getIndicator1() == '4' && dField.getIndicator2() == '0')
+                {
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        resultSet.add(buildParsableURLString(dField, defaultLabel));
+                    }
+                }
+                if (dField.getIndicator1() == ' ' && dField.getIndicator2() == ' ')
+                {
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        backupResultSet.add(buildParsableURLString(dField, defaultLabel));
+                    }
+                }
+            }
+        }
+        if (resultSet.size() == 0 && backupResultSet.size() != 0)
+        {
+            return(backupResultSet);
+        }
+        return(resultSet);
+    }
+    
     private String getCommonPrefix(String string1, String string2, Comparator comp)
     {
         int l1 = string1.length();

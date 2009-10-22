@@ -811,7 +811,7 @@ public class SolrIndexer
      */
     private String dequote(String str)
     {
-        if (str.length() > 2 && str.charAt(0) == '"' && str.charAt(str.length()-1) == '"')
+        if (str.length() >= 2 && str.charAt(0) == '"' && str.charAt(str.length()-1) == '"')
             return str.substring(1, str.length() - 1);
 
         return str;
