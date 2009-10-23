@@ -21,6 +21,7 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.tools.CallNumUtils;
 import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
 
@@ -275,14 +276,24 @@ public class BlacklightIndexer extends SolrIndexer
     * @param record
     * @return Clean call number
     */
-   public String getCallNumberCleaned(final Record record, String fieldSpec)
+   public String getCallNumberCleaned(final Record record, String fieldSpec, String sortable)
    {
-       String val = getFirstFieldVal(record, fieldSpec);
-       if (val == null || val.length() == 0) {
+       Set<String> list = getFieldList(record, fieldSpec);
+       if (list == null || list.size() == 0) {
            return(null);
        }
-       val = val.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
-       return(val);
+       boolean sortableFlag = (sortable != null && ( sortable.equals("sortable") || sortable.equals("true")));
+       for (String val : list)
+       {
+           if (CallNumUtils.isValidLC(val))
+           {
+               val = val.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+               if (sortableFlag) 
+                   val = CallNumUtils.getLCShelfkey(val, record.getControlNumberField().getData());
+               return(val);
+           }
+       }
+       return(null);
    }
    
     /**
@@ -441,6 +452,34 @@ public class BlacklightIndexer extends SolrIndexer
                     if (dField.getSubfield('u') != null) 
                     {
                         resultSet.add(buildParsableURLString(dField, defaultLabel));
+                    }
+                }
+                if (dField.getIndicator1() == '4' && dField.getIndicator2() == '1')
+                {
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        resultSet.add(buildParsableURLString(dField, defaultLabel));
+                    }
+                }
+                if (dField.getIndicator1() == '4' && dField.getIndicator2() == ' ')
+                {
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        resultSet.add(buildParsableURLString(dField, defaultLabel));
+                    }
+                }
+                if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '0')
+                {
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        backupResultSet.add(buildParsableURLString(dField, defaultLabel));
+                    }
+                }
+                if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '1')
+                {
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        backupResultSet.add(buildParsableURLString(dField, defaultLabel));
                     }
                 }
                 if (dField.getIndicator1() == ' ' && dField.getIndicator2() == ' ')
