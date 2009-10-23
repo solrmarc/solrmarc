@@ -768,6 +768,7 @@
     </target>
 
     <target name="package-src" description="Create a gzipped src tarball for distribution" >
+        <delete file="SolrMarc_Distribution.tar.gz" />
         <tar destfile="SolrMarc_Distribution.tar.gz" compression="gzip" >
             <tarfileset dir=".">
                 <include name="build.xml" />
@@ -803,6 +804,7 @@
             <param name="package-prebuilt.allscripts.batch" value="true" />
             <param name="package-prebuilt.allscripts.shell" value="true" />
         </antcall>
+        <property name="path.in.zip.for.jar" value="" />
         <mkdir dir="external/${scripts.dir}" />
         <mkdir dir="external/${trans.map.path}" />
         <copy todir="external/${scripts.dir}" file="${buildtools.path}/README_SCRIPTS" />
@@ -849,10 +851,16 @@
              </then>
         </if>
         <property name="external.distribution.jar.name" value="SolrMarc" />
+        <delete file="Binary_${external.distribution.jar.name}_Unix.tar.gz" />
+        <delete file="Binary_${external.distribution.jar.name}_PC.zip" />
         <tar destfile="Binary_${external.distribution.jar.name}_Unix.tar.gz" compression="gzip">
-            <tarfileset dir="external" filemode="755">
+            <tarfileset dir="external" filemode="755" prefix="${path.in.zip.for.jar}" >
                 <include name="*" />
                 <exclude name="*.bat" />
+                <exclude name="*.properties" />
+            </tarfileset>
+            <tarfileset dir="external" >
+                <include name="*.properties" />
             </tarfileset>
             <tarfileset dir="${buildtools.path}">
                 <include name="README_UNIX" />
@@ -863,10 +871,12 @@
             </tarfileset>
         </tar> 
         <zip destfile="Binary_${external.distribution.jar.name}_PC.zip" compress="true" whenempty="create">
-            <zipfileset dir="external" >
+            <zipfileset dir="external"  prefix="${path.in.zip.for.jar}" >
                 <include name="*.bat" />
-                <include name="*.properties" />
                 <include name="*.jar" />
+            </zipfileset>
+            <zipfileset dir="external" >
+                <include name="*.properties" />
             </zipfileset>
             <zipfileset dir="${buildtools.path}" >
                  <include name="README_PC.txt" />
@@ -889,6 +899,7 @@
         <antcall target="package-prebuilt" inheritAll="false">
             <param name="example.configuration" value="GenericVuFind" />
             <param name="accept.default.for.input" value="true" />
+            <param name="path.in.zip.for.jar" value="bin" />
         </antcall> 
     </target>
         
