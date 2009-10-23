@@ -278,7 +278,8 @@ public class BlacklightIndexer extends SolrIndexer
     */
    public String getCallNumberCleaned(final Record record, String fieldSpec, String sortable)
    {
-       Set<String> list = getFieldList(record, fieldSpec);
+       Set<String> list = getCallNumbersCleaned(record, fieldSpec, "true", 0, 0);
+//       Set<String> list = getFieldList(record, fieldSpec);
        if (list == null || list.size() == 0) {
            return(null);
        }
@@ -287,7 +288,8 @@ public class BlacklightIndexer extends SolrIndexer
        {
            if (CallNumUtils.isValidLC(val))
            {
-               val = val.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+               val = val.trim().replaceAll(":", " ").replaceAll("\\s\\s+", " ")
+                               .replaceAll("\\s?\\.\\s?", ".").replaceAll("[(][0-9]* volumes[)]", "");
                if (sortableFlag) 
                    val = CallNumUtils.getLCShelfkey(val, record.getControlNumberField().getData());
                return(val);
@@ -296,12 +298,22 @@ public class BlacklightIndexer extends SolrIndexer
        return(null);
    }
    
-    /**
-     * Extract a cleaned call number from a record
+   /**
+    * Extract a set of cleaned call numbers from a record
+    * @param record
+    * @return Clean call number
+    */
+    public Set<String> getCallNumbersCleaned(final Record record, String fieldSpec, String conflatePrefixes)
+    {
+        return(getCallNumbersCleaned(record, fieldSpec, conflatePrefixes, 100, 10));
+    }
+    
+   /**
+     * Extract a set of cleaned call numbers from a record
      * @param record
      * @return Clean call number
      */
-    public Set<String> getCallNumbersCleaned(final Record record, String fieldSpec, String conflatePrefixes)
+    private Set<String> getCallNumbersCleaned(final Record record, String fieldSpec, String conflatePrefixes, int bound1, int bound2)
     {
         Comparator<String> normedComparator = new Comparator<String>() 
         {
@@ -399,7 +411,7 @@ public class BlacklightIndexer extends SolrIndexer
                             sep = ",";
                         }
                     }
-                    if (sb.length() > 100 || valueArr.length > 10)
+                    if (sb.length() > bound1 || valueArr.length > bound2)
                     {
                         results.add(prefix + " (" + valueArr.length + " volumes)");
                     }
