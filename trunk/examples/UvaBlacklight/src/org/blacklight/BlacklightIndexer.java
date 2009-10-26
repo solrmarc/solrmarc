@@ -272,30 +272,45 @@ public class BlacklightIndexer extends SolrIndexer
     } */
     
     /* 
-     * Extract a silgle cleaned call number from a record
+     * Extract a single cleaned call number from a record
     * @param record
     * @return Clean call number
     */
    public String getCallNumberCleaned(final Record record, String fieldSpec, String sortable)
    {
-       Set<String> list = getCallNumbersCleaned(record, fieldSpec, "true", 0, 0);
-//       Set<String> list = getFieldList(record, fieldSpec);
-       if (list == null || list.size() == 0) {
+       Set<String> fieldList = getFieldList(record, fieldSpec);
+       if (fieldList.isEmpty())  {
+           return(null);
+       }
+       Map<String, Set<String>> resultNormed = getCallNumbersCleanedConflated(fieldList);
+       if (resultNormed == null || resultNormed.size() == 0) {
            return(null);
        }
        boolean sortableFlag = (sortable != null && ( sortable.equals("sortable") || sortable.equals("true")));
-       for (String val : list)
+       int maxEntries = 0;
+       String maxEntriesKey = null;
+       Set<String> maxEntrySet = null;
+       Set<String> keys = resultNormed.keySet();
+       for (String key : keys)
        {
-           if (CallNumUtils.isValidLC(val))
+           Set<String> values = resultNormed.get(key);
+           if (values.size() > maxEntries)
            {
-               val = val.trim().replaceAll(":", " ").replaceAll("\\s\\s+", " ")
-                               .replaceAll("\\s?\\.\\s?", ".").replaceAll("[(][0-9]* volumes[)]", "");
-               if (sortableFlag) 
-                   val = CallNumUtils.getLCShelfkey(val, record.getControlNumberField().getData());
-               return(val);
+               maxEntries = values.size();
+               maxEntriesKey = key;
+               maxEntrySet = values;
            }
        }
-       return(null);
+       String valueArr[] = maxEntrySet.toArray(new String[0]);
+       Comparator<String> comp = new StringNaturalCompare();
+       Arrays.sort(valueArr, comp);
+       String result = valueArr[0];
+       result = result.trim().replaceAll(":", " ").replaceAll("\\s\\s+", " ")
+                             .replaceAll("\\s?\\.\\s?", ".").replaceAll("[(][0-9]* volumes[)]", "");
+       if (sortableFlag) 
+           result = CallNumUtils.getLCShelfkey(result, record.getControlNumberField().getData());
+       return(result);
+
    }
    
    /**
@@ -305,28 +320,9 @@ public class BlacklightIndexer extends SolrIndexer
     */
     public Set<String> getCallNumbersCleaned(final Record record, String fieldSpec, String conflatePrefixes)
     {
-        return(getCallNumbersCleaned(record, fieldSpec, conflatePrefixes, 100, 10));
-    }
-    
-   /**
-     * Extract a set of cleaned call numbers from a record
-     * @param record
-     * @return Clean call number
-     */
-    private Set<String> getCallNumbersCleaned(final Record record, String fieldSpec, String conflatePrefixes, int bound1, int bound2)
-    {
-        Comparator<String> normedComparator = new Comparator<String>() 
-        {
-            public int compare(String s1, String s2)
-            {
-                String s1Norm = s1.replaceAll("[. ]", "");
-                String s2Norm = s2.replaceAll("[. ]", "");
-                return s1Norm.compareToIgnoreCase(s2Norm);
-            }
-        };
+        boolean conflate = !conflatePrefixes.equalsIgnoreCase("false");
         boolean processExtraShadowedIds = fieldSpec.contains("';'");
 
-        boolean conflate = !conflatePrefixes.equalsIgnoreCase("false");
         //int conflateThreshhold = conflate ? Integer.parseInt(conflatePrefixes) : 0;
         Set<String> fieldList = getFieldList(record, fieldSpec);
         if (fieldList.isEmpty())  {
@@ -349,9 +345,10 @@ public class BlacklightIndexer extends SolrIndexer
             }
             fieldList = newFieldList;
         }
-        if (conflate)
+        if (!conflate)
         {
-            Map<String, Set<String>> resultNormed = new TreeMap<String, Set<String>>();
+            Comparator<String> comp = new StringNaturalCompare();
+            Set<String> resultNormed = new TreeSet<String>(comp);
             for (String callNum : fieldList)
             {
                 String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
@@ -360,20 +357,23 @@ public class BlacklightIndexer extends SolrIndexer
                 {
                     val = nVal;
                 }
-                String key = val.substring(0, Math.min(val.length(), 5)).toUpperCase();
-                if (resultNormed.containsKey(key))
-                {
-                    Set<String> set = resultNormed.get(key);
-                    set.add(val);
-                    resultNormed.put(key, set);
-                }
-                else
-                {
-                    Set<String> set = new TreeSet<String>(normedComparator);
-                    set.add(val);
-                    resultNormed.put(key, set);
-                }
+                resultNormed.add(val);
             }
+            return resultNormed;
+        }
+        else
+        {
+            Comparator<String> normedComparator = new Comparator<String>() 
+            {
+                public int compare(String s1, String s2)
+                {
+                    String s1Norm = s1.replaceAll("[. ]", "");
+                    String s2Norm = s2.replaceAll("[. ]", "");
+                    return s1Norm.compareToIgnoreCase(s2Norm);
+                }
+            };
+
+            Map<String, Set<String>> resultNormed = getCallNumbersCleanedConflated(fieldList);
             Set<String> keys = resultNormed.keySet();
             Set<String> results = new TreeSet<String>(normedComparator);
             for (String key : keys)
@@ -411,7 +411,7 @@ public class BlacklightIndexer extends SolrIndexer
                             sep = ",";
                         }
                     }
-                    if (sb.length() > bound1 || valueArr.length > bound2)
+                    if (sb.length() > 100 || valueArr.length > 10)
                     {
                         results.add(prefix + " (" + valueArr.length + " volumes)");
                     }
@@ -421,24 +421,50 @@ public class BlacklightIndexer extends SolrIndexer
                     }
                 }
             }
-            return(results);
+            return (results);
         }
-        else 
+    }
+    
+   /**
+     * Extract a set of cleaned call numbers from a record
+     * @param record
+     * @return Clean call number
+     */
+    private Map<String, Set<String>> getCallNumbersCleanedConflated(Set<String> fieldList)
+    {
+        Comparator<String> normedComparator = new Comparator<String>() 
         {
-            Comparator<String> comp = new StringNaturalCompare();
-            Set<String> resultNormed = new TreeSet<String>(comp);
-            for (String callNum : fieldList)
+            public int compare(String s1, String s2)
             {
-                String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
-                String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
-                if (!nVal.equals(val))
-                {
-                    val = nVal;
-                }
-                resultNormed.add(val);
+                String s1Norm = s1.replaceAll("[. ]", "");
+                String s2Norm = s2.replaceAll("[. ]", "");
+                return s1Norm.compareToIgnoreCase(s2Norm);
             }
-            return resultNormed;
+        };
+        Map<String, Set<String>> resultNormed = new TreeMap<String, Set<String>>();
+        for (String callNum : fieldList)
+        {
+            String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+            String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
+            if (!nVal.equals(val))
+            {
+                val = nVal;
+            }
+            String key = val.substring(0, Math.min(val.length(), 5)).toUpperCase();
+            if (resultNormed.containsKey(key))
+            {
+                Set<String> set = resultNormed.get(key);
+                set.add(val);
+                resultNormed.put(key, set);
+            }
+            else
+            {
+                Set<String> set = new TreeSet<String>(normedComparator);
+                set.add(val);
+                resultNormed.put(key, set);
+            }
         }
+        return(resultNormed);
     }
     
     private String buildParsableURLString(DataField df, String defaultLabel)
