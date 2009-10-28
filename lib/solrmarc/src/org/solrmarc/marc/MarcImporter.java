@@ -406,6 +406,7 @@ public class MarcImporter extends MarcHandler
             return;
         if (SolrHostURL == null || SolrHostURL.length() == 0) return;
         try {
+            logger.info("Connecting to solr server at URL: " + SolrHostURL);
             SolrUpdate.signalServer(SolrHostURL);
         }
         catch (MalformedURLException me)
