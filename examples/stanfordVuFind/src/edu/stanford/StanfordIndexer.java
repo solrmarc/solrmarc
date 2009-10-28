@@ -648,51 +648,6 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     
     
     /**
-     * @param DataField with ind2 containing # non-filing chars, or has value ' '
-     * @param skipSubFldc true if subfield c contents should be skipped
-     * @return StringBuffer of the contents of the subfields - with a trailing 
-     *  space
-     */
- 	@SuppressWarnings("unchecked")
-	private StringBuffer getAlphaSubfldsAsSortStr(DataField df, boolean skipSubFldc)
-    {
-    	StringBuffer result = new StringBuffer();
-       	int nonFilingInt = getInd2AsInt(df);
-    	boolean firstSubfld = true;
-    	
-    	List<Subfield> subList = df.getSubfields();
-		for (Subfield sub : subList) {
-			char subcode = sub.getCode();
-			if (Character.isLetter(subcode) && (!skipSubFldc || subcode != 'c'))
-			{
-				String data = sub.getData();
-				if (firstSubfld) {
-					if (nonFilingInt < data.length() -1)
-						data = data.substring(nonFilingInt);
-					firstSubfld = false;
-				}
-				// eliminate ascii punctuation marks from sorting as well
-				result.append(data.replaceAll("\\p{Punct}*", "").trim() + ' ');
-			}
-		}
-    	return result;
-    }
-
- 	
-    /**
-     * @param df a DataField
-     * @return the integer (0-9, 0 if blank) in the 2nd indicator
-     */
-    private int getInd2AsInt(DataField df) {
-    	char int2char = df.getIndicator2();
-       	int result = 0;
-       	if (Character.isDigit(int2char))
-       		result = Integer.valueOf(String.valueOf(int2char));
-       	return result;
-    }
-    
-    
-    /**
      * returns the access facet values for a record.  A record can have multiple
      *  values: online, on campus and upon request are not mutually exclusive.
      * @param record
@@ -817,25 +772,6 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     	else return false;
     }
     
-    /**
-     * return true if passed 856 field contains a supplementary url (rather than
-     *  a fulltext URL.
-     * Determine by presence of "table of contents" or "sample text" string
-     *  (ignoring case) in subfield 3 or z.
-     * Note:  Called only when second indicator is not 0 or 2.
-     */
-    private boolean isSupplementalUrl(DataField f856) {
-		boolean supplmntl = false;
-		List<String> list3z = Utils.getSubfieldStrings(f856, '3');
-		list3z.addAll(Utils.getSubfieldStrings(f856, 'z'));
-		for (String s : list3z) {
-			if (s.toLowerCase().contains("table of contents") ||
-    			s.toLowerCase().contains("sample text"))
-				supplmntl = true;
-		}
-		return supplmntl;
-    }
-
     /**
      * returns the publication date from a record, if it is present
      * @param record
