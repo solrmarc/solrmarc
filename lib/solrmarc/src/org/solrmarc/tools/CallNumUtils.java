@@ -88,8 +88,8 @@ public final class CallNumUtils {
 	 */
 	public static final String DEWEY_CUTTER_REGEX = CUTTER_REGEX + " *[A-Z]*+";
 	public static final String DEWEY_CUTTER_NO_TRAILING_LETTERS_REGEX = CUTTER_REGEX;
-	public static final String DEWEY_CUTTER_TRAILING_LETTERS_REGEX = CUTTER_REGEX + "[A-Z]++";
-	public static final String DEWEY_CUTTER_SPACE_TRAILING_LETTERS_REGEX = CUTTER_REGEX + " +[A-Z]++";
+	public static final String DEWEY_CUTTER_TRAILING_LETTERS_REGEX = CUTTER_REGEX + "[A-Z]+";
+	public static final String DEWEY_CUTTER_SPACE_TRAILING_LETTERS_REGEX = CUTTER_REGEX + " +[A-Z]+";
 
 	private static Map<Character, Character> alphanumReverseMap = new HashMap<Character, Character>();
 	static {
