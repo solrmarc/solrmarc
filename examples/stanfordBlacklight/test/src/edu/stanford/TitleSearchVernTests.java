@@ -13,7 +13,7 @@ import org.xml.sax.SAXException;
  * junit4 tests for Stanford University's vernacular title searching fields
  * @author Naomi Dushay
  */
-public class TitleSearchVernTests extends BibIndexTest {
+public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 	
 @Before
 	public final void setup() 
@@ -31,12 +31,12 @@ public class TitleSearchVernTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_245a_search";
-		assertSearchFldOneValProps(fldName, solrCore, sis);
+		assertSearchFldOneValProps(fldName);
 		
-		assertSingleResult("2xxVernSearch", fldName, "vern245a", sis);
+		assertSingleResult("2xxVernSearch", fldName, "vern245a");
 
-		assertZeroResults(fldName, "vern245b", sis); 
-		assertZeroResults(fldName, "vern245p", sis); 
+		assertZeroResults(fldName, "vern245b"); 
+		assertZeroResults(fldName, "vern245p"); 
 	}
 
 	/**
@@ -47,18 +47,18 @@ public class TitleSearchVernTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_245_search";
-		assertSearchFldOneValProps(fldName, solrCore, sis);
+		assertSearchFldOneValProps(fldName);
 
-		assertSingleResult("2xxVernSearch", fldName, "vern245a", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern245b", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern245f", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern245g", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern245k", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern245n", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern245p", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern245s", sis); 
+		assertSingleResult("2xxVernSearch", fldName, "vern245a");
+		assertSingleResult("2xxVernSearch", fldName, "vern245b");
+		assertSingleResult("2xxVernSearch", fldName, "vern245f");
+		assertSingleResult("2xxVernSearch", fldName, "vern245g");
+		assertSingleResult("2xxVernSearch", fldName, "vern245k");
+		assertSingleResult("2xxVernSearch", fldName, "vern245n");
+		assertSingleResult("2xxVernSearch", fldName, "vern245p");
+		assertSingleResult("2xxVernSearch", fldName, "vern245s"); 
 		
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 
 
@@ -70,36 +70,36 @@ public class TitleSearchVernTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_uniform_search";
-		assertSearchFldOneValProps(fldName, solrCore, sis);
+		assertSearchFldOneValProps(fldName);
 		
-		assertSingleResult("2xxVernSearch", fldName, "vern130a", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130d", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130f", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130g", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130k", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130l", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130m", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130n", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130o", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130p", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130r", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130s", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern130t", sis);
+		assertSingleResult("2xxVernSearch", fldName, "vern130a");
+		assertSingleResult("2xxVernSearch", fldName, "vern130d");
+		assertSingleResult("2xxVernSearch", fldName, "vern130f");
+		assertSingleResult("2xxVernSearch", fldName, "vern130g");
+		assertSingleResult("2xxVernSearch", fldName, "vern130k");
+		assertSingleResult("2xxVernSearch", fldName, "vern130l");
+		assertSingleResult("2xxVernSearch", fldName, "vern130m");
+		assertSingleResult("2xxVernSearch", fldName, "vern130n");
+		assertSingleResult("2xxVernSearch", fldName, "vern130o");
+		assertSingleResult("2xxVernSearch", fldName, "vern130p");
+		assertSingleResult("2xxVernSearch", fldName, "vern130r");
+		assertSingleResult("2xxVernSearch", fldName, "vern130s");
+		assertSingleResult("2xxVernSearch", fldName, "vern130t");
 		
-		assertSingleResult("240VernSearch", fldName, "vern240a", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240d", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240f", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240g", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240k", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240l", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240m", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240n", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240o", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240p", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240r", sis);
-		assertSingleResult("240VernSearch", fldName, "vern240s", sis);
+		assertSingleResult("240VernSearch", fldName, "vern240a");
+		assertSingleResult("240VernSearch", fldName, "vern240d");
+		assertSingleResult("240VernSearch", fldName, "vern240f");
+		assertSingleResult("240VernSearch", fldName, "vern240g");
+		assertSingleResult("240VernSearch", fldName, "vern240k");
+		assertSingleResult("240VernSearch", fldName, "vern240l");
+		assertSingleResult("240VernSearch", fldName, "vern240m");
+		assertSingleResult("240VernSearch", fldName, "vern240n");
+		assertSingleResult("240VernSearch", fldName, "vern240o");
+		assertSingleResult("240VernSearch", fldName, "vern240p");
+		assertSingleResult("240VernSearch", fldName, "vern240r");
+		assertSingleResult("240VernSearch", fldName, "vern240s");
 
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -110,18 +110,18 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_variant_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 
-		assertSingleResult("2xxVernSearch", fldName, "vern210a", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern210b", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern222a", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern222b", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern242a", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern242b", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern242n", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern242p", sis);
+		assertSingleResult("2xxVernSearch", fldName, "vern210a");
+		assertSingleResult("2xxVernSearch", fldName, "vern210b");
+		assertSingleResult("2xxVernSearch", fldName, "vern222a");
+		assertSingleResult("2xxVernSearch", fldName, "vern222b");
+		assertSingleResult("2xxVernSearch", fldName, "vern242a");
+		assertSingleResult("2xxVernSearch", fldName, "vern242b");
+		assertSingleResult("2xxVernSearch", fldName, "vern242n");
+		assertSingleResult("2xxVernSearch", fldName, "vern242p");
 		
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -132,23 +132,23 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_variant_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("2xxVernSearch", fldName, "vern243a", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243d", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243f", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243g", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243k", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243l", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243m", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243n", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243o", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243p", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243r", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern243s", sis);
+		assertSingleResult("2xxVernSearch", fldName, "vern243a");
+		assertSingleResult("2xxVernSearch", fldName, "vern243d");
+		assertSingleResult("2xxVernSearch", fldName, "vern243f");
+		assertSingleResult("2xxVernSearch", fldName, "vern243g");
+		assertSingleResult("2xxVernSearch", fldName, "vern243k");
+		assertSingleResult("2xxVernSearch", fldName, "vern243l");
+		assertSingleResult("2xxVernSearch", fldName, "vern243m");
+		assertSingleResult("2xxVernSearch", fldName, "vern243n");
+		assertSingleResult("2xxVernSearch", fldName, "vern243o");
+		assertSingleResult("2xxVernSearch", fldName, "vern243p");
+		assertSingleResult("2xxVernSearch", fldName, "vern243r");
+		assertSingleResult("2xxVernSearch", fldName, "vern243s");
 		
-		assertDocHasNoFieldValue("2xxVernSearch", fldName, "vern243", sis);
-		assertZeroResults(fldName, "nope", sis);
+		assertDocHasNoFieldValue("2xxVernSearch", fldName, "vern243");
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -159,24 +159,24 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_variant_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("2xxVernSearch", fldName, "vern246a", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern246b", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern246f", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern246g", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern246n", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern246p", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern247a", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern247b", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern247f", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern247g", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern247n", sis);
-		assertSingleResult("2xxVernSearch", fldName, "vern247p", sis);
+		assertSingleResult("2xxVernSearch", fldName, "vern246a");
+		assertSingleResult("2xxVernSearch", fldName, "vern246b");
+		assertSingleResult("2xxVernSearch", fldName, "vern246f");
+		assertSingleResult("2xxVernSearch", fldName, "vern246g");
+		assertSingleResult("2xxVernSearch", fldName, "vern246n");
+		assertSingleResult("2xxVernSearch", fldName, "vern246p");
+		assertSingleResult("2xxVernSearch", fldName, "vern247a");
+		assertSingleResult("2xxVernSearch", fldName, "vern247b");
+		assertSingleResult("2xxVernSearch", fldName, "vern247f");
+		assertSingleResult("2xxVernSearch", fldName, "vern247g");
+		assertSingleResult("2xxVernSearch", fldName, "vern247n");
+		assertSingleResult("2xxVernSearch", fldName, "vern247p");
 		
-		assertDocHasNoFieldValue("2xxVernSearch", fldName, "vern246", sis);
-		assertDocHasNoFieldValue("2xxVernSearch", fldName, "vern247", sis);
-		assertZeroResults(fldName, "nope", sis);
+		assertDocHasNoFieldValue("2xxVernSearch", fldName, "vern246");
+		assertDocHasNoFieldValue("2xxVernSearch", fldName, "vern247");
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -187,9 +187,10 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
-		assertSingleResult("4xxVernSearch", fldName, "vern505t", sis);
-		assertZeroResults(fldName, "nope", sis);
+		createIxInitVars("summaryTests.mrc");
+		assertSearchFldMultValProps(fldName);
+		assertSingleResult("505", fldName, "vern505t");
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -200,27 +201,27 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("7xxLowVernSearch", fldName, "vern700f", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern700k", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern700l", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern700m", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern700n", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern700o", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern700p", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern700r", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern700s", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern700t", sis);
+		assertSingleResult("7xxLowVernSearch", fldName, "vern700f");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern700k");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern700l");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern700m");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern700n");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern700o");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern700p");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern700r");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern700s");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern700t");
 
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("7xxLowVernSearch");
 		docIds.add("7xxVernPersonSearch");
 		// overlap author
-		assertSearchResults(fldName, "vern700g", docIds, sis); 
+		assertSearchResults(fldName, "vern700g", docIds); 
 		
-		assertZeroResults(fldName, "vern700j", sis);
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "vern700j");
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -231,28 +232,28 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("7xxLowVernSearch", fldName, "vern710l", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern710m", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern710o", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern710p", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern710r", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern710s", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern710t", sis);
+		assertSingleResult("7xxLowVernSearch", fldName, "vern710l");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern710m");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern710o");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern710p");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern710r");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern710s");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern710t");
 		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("7xxLowVernSearch");
 		docIds.add("7xxVernCorpSearch");
 		// overlap author
-		assertSearchResults(fldName, "vern710d", docIds, sis); 
-		assertSearchResults(fldName, "vern710g", docIds, sis); 
-		assertSearchResults(fldName, "vern710n", docIds, sis);
+		assertSearchResults(fldName, "vern710d", docIds); 
+		assertSearchResults(fldName, "vern710g", docIds); 
+		assertSearchResults(fldName, "vern710n", docIds);
 		// used to be in author
-		assertSearchResults(fldName, "vern710f", docIds, sis);
-		assertSearchResults(fldName, "vern710k", docIds, sis);
+		assertSearchResults(fldName, "vern710f", docIds);
+		assertSearchResults(fldName, "vern710k", docIds);
 
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -263,23 +264,23 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("7xxLowVernSearch", fldName, "vern711f", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern711k", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern711l", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern711p", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern711s", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern711t", sis);
+		assertSingleResult("7xxLowVernSearch", fldName, "vern711f");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern711k");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern711l");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern711p");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern711s");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern711t");
 
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("7xxLowVernSearch");
 		docIds.add("7xxVernMeetingSearch");
 		// overlap author
-		assertSearchResults(fldName, "vern711g", docIds, sis); 
-		assertSearchResults(fldName, "vern711n", docIds, sis);
+		assertSearchResults(fldName, "vern711g", docIds); 
+		assertSearchResults(fldName, "vern711n", docIds);
 		
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -290,23 +291,23 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730a", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730d", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730f", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730g", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730k", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730l", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730m", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730n", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730o", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730p", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730r", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730s", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern730t", sis);
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730a");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730d");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730f");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730g");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730k");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730l");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730m");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730n");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730o");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730p");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730r");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730s");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern730t");
 	
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -317,13 +318,13 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("7xxLowVernSearch", fldName, "vern740a", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern740n", sis);
-		assertSingleResult("7xxLowVernSearch", fldName, "vern740p", sis);
+		assertSingleResult("7xxLowVernSearch", fldName, "vern740a");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern740n");
+		assertSingleResult("7xxLowVernSearch", fldName, "vern740p");
 	
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -334,18 +335,18 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("76xVernSearch", fldName, "vern760s", sis);
-		assertSingleResult("76xVernSearch", fldName, "vern760t", sis);
-		assertSingleResult("76xVernSearch", fldName, "vern762s", sis);
-		assertSingleResult("76xVernSearch", fldName, "vern762t", sis);
-		assertSingleResult("76xVernSearch", fldName, "vern765s", sis);
-		assertSingleResult("76xVernSearch", fldName, "vern765t", sis);
-		assertSingleResult("76xVernSearch", fldName, "vern767s", sis);
-		assertSingleResult("76xVernSearch", fldName, "vern767t", sis);
+		assertSingleResult("76xVernSearch", fldName, "vern760s");
+		assertSingleResult("76xVernSearch", fldName, "vern760t");
+		assertSingleResult("76xVernSearch", fldName, "vern762s");
+		assertSingleResult("76xVernSearch", fldName, "vern762t");
+		assertSingleResult("76xVernSearch", fldName, "vern765s");
+		assertSingleResult("76xVernSearch", fldName, "vern765t");
+		assertSingleResult("76xVernSearch", fldName, "vern767s");
+		assertSingleResult("76xVernSearch", fldName, "vern767t");
 	
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_related_title_search: 770, 772, 773, 774, 775, 776, 777
@@ -355,24 +356,24 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("77xVernSearch", fldName, "vern770s", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern770t", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern772s", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern772t", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern773s", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern773t", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern774s", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern774t", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern775s", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern775t", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern776s", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern776t", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern777s", sis);
-		assertSingleResult("77xVernSearch", fldName, "vern777t", sis);
+		assertSingleResult("77xVernSearch", fldName, "vern770s");
+		assertSingleResult("77xVernSearch", fldName, "vern770t");
+		assertSingleResult("77xVernSearch", fldName, "vern772s");
+		assertSingleResult("77xVernSearch", fldName, "vern772t");
+		assertSingleResult("77xVernSearch", fldName, "vern773s");
+		assertSingleResult("77xVernSearch", fldName, "vern773t");
+		assertSingleResult("77xVernSearch", fldName, "vern774s");
+		assertSingleResult("77xVernSearch", fldName, "vern774t");
+		assertSingleResult("77xVernSearch", fldName, "vern775s");
+		assertSingleResult("77xVernSearch", fldName, "vern775t");
+		assertSingleResult("77xVernSearch", fldName, "vern776s");
+		assertSingleResult("77xVernSearch", fldName, "vern776t");
+		assertSingleResult("77xVernSearch", fldName, "vern777s");
+		assertSingleResult("77xVernSearch", fldName, "vern777t");
 	
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_related_title_search: 780, 785, 786, 787
@@ -382,18 +383,18 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("78xVernSearch", fldName, "vern780s", sis);
-		assertSingleResult("78xVernSearch", fldName, "vern780t", sis);
-		assertSingleResult("78xVernSearch", fldName, "vern785s", sis);
-		assertSingleResult("78xVernSearch", fldName, "vern785t", sis);
-		assertSingleResult("78xVernSearch", fldName, "vern786s", sis);
-		assertSingleResult("78xVernSearch", fldName, "vern786t", sis);
-		assertSingleResult("78xVernSearch", fldName, "vern787s", sis);
-		assertSingleResult("78xVernSearch", fldName, "vern787t", sis);
+		assertSingleResult("78xVernSearch", fldName, "vern780s");
+		assertSingleResult("78xVernSearch", fldName, "vern780t");
+		assertSingleResult("78xVernSearch", fldName, "vern785s");
+		assertSingleResult("78xVernSearch", fldName, "vern785t");
+		assertSingleResult("78xVernSearch", fldName, "vern786s");
+		assertSingleResult("78xVernSearch", fldName, "vern786t");
+		assertSingleResult("78xVernSearch", fldName, "vern787s");
+		assertSingleResult("78xVernSearch", fldName, "vern787t");
 	
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_related_title_search: 796
@@ -403,27 +404,27 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("79xVernSearch", fldName, "vern796f", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern796k", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern796l", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern796m", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern796n", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern796o", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern796p", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern796r", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern796s", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern796t", sis);
+		assertSingleResult("79xVernSearch", fldName, "vern796f");
+		assertSingleResult("79xVernSearch", fldName, "vern796k");
+		assertSingleResult("79xVernSearch", fldName, "vern796l");
+		assertSingleResult("79xVernSearch", fldName, "vern796m");
+		assertSingleResult("79xVernSearch", fldName, "vern796n");
+		assertSingleResult("79xVernSearch", fldName, "vern796o");
+		assertSingleResult("79xVernSearch", fldName, "vern796p");
+		assertSingleResult("79xVernSearch", fldName, "vern796r");
+		assertSingleResult("79xVernSearch", fldName, "vern796s");
+		assertSingleResult("79xVernSearch", fldName, "vern796t");
 	
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("79xVernSearch");
 		docIds.add("7xxVernPersonSearch");
 		// overlap author
-		assertSearchResults(fldName, "vern796g", docIds, sis); 
+		assertSearchResults(fldName, "vern796g", docIds); 
 		
-		assertZeroResults(fldName, "vern796j", sis);
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "vern796j");
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_related_title_search: 797 field
@@ -433,33 +434,33 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-//		assertSingleResult("79xVernSearch", fldName, "vern797d", sis);
-//		assertSingleResult("79xVernSearch", fldName, "vern797f", sis);
-//		assertSingleResult("79xVernSearch", fldName, "vern797g", sis);
-//		assertSingleResult("79xVernSearch", fldName, "vern797k", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern797l", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern797m", sis);
-//		assertSingleResult("79xVernSearch", fldName, "vern797n", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern797o", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern797p", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern797r", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern797s", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern797t", sis);
+//		assertSingleResult("79xVernSearch", fldName, "vern797d");
+//		assertSingleResult("79xVernSearch", fldName, "vern797f");
+//		assertSingleResult("79xVernSearch", fldName, "vern797g");
+//		assertSingleResult("79xVernSearch", fldName, "vern797k");
+		assertSingleResult("79xVernSearch", fldName, "vern797l");
+		assertSingleResult("79xVernSearch", fldName, "vern797m");
+//		assertSingleResult("79xVernSearch", fldName, "vern797n");
+		assertSingleResult("79xVernSearch", fldName, "vern797o");
+		assertSingleResult("79xVernSearch", fldName, "vern797p");
+		assertSingleResult("79xVernSearch", fldName, "vern797r");
+		assertSingleResult("79xVernSearch", fldName, "vern797s");
+		assertSingleResult("79xVernSearch", fldName, "vern797t");
 	
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("79xVernSearch");
 		docIds.add("7xxVernCorpSearch");
 		// overlap author
-		assertSearchResults(fldName, "vern797d", docIds, sis); 
-		assertSearchResults(fldName, "vern797g", docIds, sis); 
-		assertSearchResults(fldName, "vern797n", docIds, sis);
+		assertSearchResults(fldName, "vern797d", docIds); 
+		assertSearchResults(fldName, "vern797g", docIds); 
+		assertSearchResults(fldName, "vern797n", docIds);
 		// used to be in author
-		assertSearchResults(fldName, "vern797f", docIds, sis);
-		assertSearchResults(fldName, "vern797k", docIds, sis);
+		assertSearchResults(fldName, "vern797f", docIds);
+		assertSearchResults(fldName, "vern797k", docIds);
 		
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_related_title_search: 798 field
@@ -469,25 +470,25 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("79xVernSearch", fldName, "vern798f", sis);
-//		assertSingleResult("79xVernSearch", fldName, "vern798g", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern798k", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern798l", sis);
-//		assertSingleResult("79xVernSearch", fldName, "vern798n", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern798p", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern798s", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern798t", sis);
+		assertSingleResult("79xVernSearch", fldName, "vern798f");
+//		assertSingleResult("79xVernSearch", fldName, "vern798g");
+		assertSingleResult("79xVernSearch", fldName, "vern798k");
+		assertSingleResult("79xVernSearch", fldName, "vern798l");
+//		assertSingleResult("79xVernSearch", fldName, "vern798n");
+		assertSingleResult("79xVernSearch", fldName, "vern798p");
+		assertSingleResult("79xVernSearch", fldName, "vern798s");
+		assertSingleResult("79xVernSearch", fldName, "vern798t");
 	
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("79xVernSearch");
 		docIds.add("7xxVernMeetingSearch");
 		// overlap author
-		assertSearchResults(fldName, "vern798g", docIds, sis); 
-		assertSearchResults(fldName, "vern798n", docIds, sis);
+		assertSearchResults(fldName, "vern798g", docIds); 
+		assertSearchResults(fldName, "vern798n", docIds);
 		
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_related_title_search: 799 field
@@ -497,23 +498,23 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("79xVernSearch", fldName, "vern799a", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799d", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799f", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799g", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799k", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799l", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799m", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799n", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799o", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799p", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799r", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799s", sis);
-		assertSingleResult("79xVernSearch", fldName, "vern799t", sis);
+		assertSingleResult("79xVernSearch", fldName, "vern799a");
+		assertSingleResult("79xVernSearch", fldName, "vern799d");
+		assertSingleResult("79xVernSearch", fldName, "vern799f");
+		assertSingleResult("79xVernSearch", fldName, "vern799g");
+		assertSingleResult("79xVernSearch", fldName, "vern799k");
+		assertSingleResult("79xVernSearch", fldName, "vern799l");
+		assertSingleResult("79xVernSearch", fldName, "vern799m");
+		assertSingleResult("79xVernSearch", fldName, "vern799n");
+		assertSingleResult("79xVernSearch", fldName, "vern799o");
+		assertSingleResult("79xVernSearch", fldName, "vern799p");
+		assertSingleResult("79xVernSearch", fldName, "vern799r");
+		assertSingleResult("79xVernSearch", fldName, "vern799s");
+		assertSingleResult("79xVernSearch", fldName, "vern799t");
 	
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 
 	/**
@@ -524,16 +525,16 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("4xxVernSearch", fldName, "vern440a", sis);
-		assertSingleResult("4xxVernSearch", fldName, "vern440n", sis);
-		assertSingleResult("4xxVernSearch", fldName, "vern440p", sis);
-		assertSingleResult("4xxVernSearch", fldName, "vern440v", sis);
-		assertSingleResult("4xxVernSearch", fldName, "vern490a", sis);
-		assertSingleResult("4xxVernSearch", fldName, "vern490v", sis);
+		assertSingleResult("4xxVernSearch", fldName, "vern440a");
+		assertSingleResult("4xxVernSearch", fldName, "vern440n");
+		assertSingleResult("4xxVernSearch", fldName, "vern440p");
+		assertSingleResult("4xxVernSearch", fldName, "vern440v");
+		assertSingleResult("4xxVernSearch", fldName, "vern490a");
+		assertSingleResult("4xxVernSearch", fldName, "vern490v");
 	
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_title_series_search: 800
@@ -543,28 +544,28 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("8xxVernSearch", fldName, "vern800f", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern800k", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern800l", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern800m", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern800n", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern800o", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern800p", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern800r", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern800s", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern800t", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern800v", sis);
+		assertSingleResult("8xxVernSearch", fldName, "vern800f");
+		assertSingleResult("8xxVernSearch", fldName, "vern800k");
+		assertSingleResult("8xxVernSearch", fldName, "vern800l");
+		assertSingleResult("8xxVernSearch", fldName, "vern800m");
+		assertSingleResult("8xxVernSearch", fldName, "vern800n");
+		assertSingleResult("8xxVernSearch", fldName, "vern800o");
+		assertSingleResult("8xxVernSearch", fldName, "vern800p");
+		assertSingleResult("8xxVernSearch", fldName, "vern800r");
+		assertSingleResult("8xxVernSearch", fldName, "vern800s");
+		assertSingleResult("8xxVernSearch", fldName, "vern800t");
+		assertSingleResult("8xxVernSearch", fldName, "vern800v");
 	
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("8xxVernSearch");
 		docIds.add("800VernSearch");
 		// overlap author
-		assertSearchResults(fldName, "vern800g", docIds, sis); 
+		assertSearchResults(fldName, "vern800g", docIds); 
 		
-		assertZeroResults(fldName, "vern800j", sis);
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "vern800j");
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_title_series_search: 810
@@ -574,34 +575,34 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-//		assertSingleResult("8xxVernSearch", fldName, "vern810d", sis);
-//		assertSingleResult("8xxVernSearch", fldName, "vern810f", sis);
-//		assertSingleResult("8xxVernSearch", fldName, "vern810g", sis);
-//		assertSingleResult("8xxVernSearch", fldName, "vern810k", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern810l", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern810m", sis);
-//		assertSingleResult("8xxVernSearch", fldName, "vern810n", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern810o", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern810p", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern810r", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern810s", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern810t", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern810v", sis);
+//		assertSingleResult("8xxVernSearch", fldName, "vern810d");
+//		assertSingleResult("8xxVernSearch", fldName, "vern810f");
+//		assertSingleResult("8xxVernSearch", fldName, "vern810g");
+//		assertSingleResult("8xxVernSearch", fldName, "vern810k");
+		assertSingleResult("8xxVernSearch", fldName, "vern810l");
+		assertSingleResult("8xxVernSearch", fldName, "vern810m");
+//		assertSingleResult("8xxVernSearch", fldName, "vern810n");
+		assertSingleResult("8xxVernSearch", fldName, "vern810o");
+		assertSingleResult("8xxVernSearch", fldName, "vern810p");
+		assertSingleResult("8xxVernSearch", fldName, "vern810r");
+		assertSingleResult("8xxVernSearch", fldName, "vern810s");
+		assertSingleResult("8xxVernSearch", fldName, "vern810t");
+		assertSingleResult("8xxVernSearch", fldName, "vern810v");
 	
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("8xxVernSearch");
 		docIds.add("810VernSearch");
 		// overlap author
-		assertSearchResults(fldName, "vern810d", docIds, sis); 
-		assertSearchResults(fldName, "vern810g", docIds, sis); 
-		assertSearchResults(fldName, "vern810n", docIds, sis);
+		assertSearchResults(fldName, "vern810d", docIds); 
+		assertSearchResults(fldName, "vern810g", docIds); 
+		assertSearchResults(fldName, "vern810n", docIds);
 		// used to be in author
-		assertSearchResults(fldName, "vern810f", docIds, sis);
-		assertSearchResults(fldName, "vern810k", docIds, sis);
+		assertSearchResults(fldName, "vern810f", docIds);
+		assertSearchResults(fldName, "vern810k", docIds);
 		
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_title_series_search: 811
@@ -611,26 +612,26 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("8xxVernSearch", fldName, "vern811f", sis);
-//		assertSingleResult("8xxVernSearch", fldName, "vern811g", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern811k", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern811l", sis);
-//		assertSingleResult("8xxVernSearch", fldName, "vern811n", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern811p", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern811s", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern811t", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern811v", sis);
+		assertSingleResult("8xxVernSearch", fldName, "vern811f");
+//		assertSingleResult("8xxVernSearch", fldName, "vern811g");
+		assertSingleResult("8xxVernSearch", fldName, "vern811k");
+		assertSingleResult("8xxVernSearch", fldName, "vern811l");
+//		assertSingleResult("8xxVernSearch", fldName, "vern811n");
+		assertSingleResult("8xxVernSearch", fldName, "vern811p");
+		assertSingleResult("8xxVernSearch", fldName, "vern811s");
+		assertSingleResult("8xxVernSearch", fldName, "vern811t");
+		assertSingleResult("8xxVernSearch", fldName, "vern811v");
 	
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("8xxVernSearch");
 		docIds.add("811VernSearch");
 		// overlap author
-		assertSearchResults(fldName, "vern811g", docIds, sis); 
-		assertSearchResults(fldName, "vern811n", docIds, sis);
+		assertSearchResults(fldName, "vern811g", docIds); 
+		assertSearchResults(fldName, "vern811n", docIds);
 		
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_title_series_search: 830
@@ -640,24 +641,24 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
+		assertSearchFldMultValProps(fldName);
 	
-		assertSingleResult("8xxVernSearch", fldName, "vern830a", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830d", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830f", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830g", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830k", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830l", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830m", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830n", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830o", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830p", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830r", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830s", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830t", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern830v", sis);
+		assertSingleResult("8xxVernSearch", fldName, "vern830a");
+		assertSingleResult("8xxVernSearch", fldName, "vern830d");
+		assertSingleResult("8xxVernSearch", fldName, "vern830f");
+		assertSingleResult("8xxVernSearch", fldName, "vern830g");
+		assertSingleResult("8xxVernSearch", fldName, "vern830k");
+		assertSingleResult("8xxVernSearch", fldName, "vern830l");
+		assertSingleResult("8xxVernSearch", fldName, "vern830m");
+		assertSingleResult("8xxVernSearch", fldName, "vern830n");
+		assertSingleResult("8xxVernSearch", fldName, "vern830o");
+		assertSingleResult("8xxVernSearch", fldName, "vern830p");
+		assertSingleResult("8xxVernSearch", fldName, "vern830r");
+		assertSingleResult("8xxVernSearch", fldName, "vern830s");
+		assertSingleResult("8xxVernSearch", fldName, "vern830t");
+		assertSingleResult("8xxVernSearch", fldName, "vern830v");
 	
-		assertZeroResults(fldName, "nope", sis);
+		assertZeroResults(fldName, "nope");
 	}
 	/**
 	 * vern_title_series_search: 840
@@ -667,10 +668,10 @@ public class TitleSearchVernTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName, solrCore, sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern840a", sis);
-		assertSingleResult("8xxVernSearch", fldName, "vern840v", sis);
-		assertZeroResults(fldName, "nope", sis);
+		assertSearchFldMultValProps(fldName);
+		assertSingleResult("8xxVernSearch", fldName, "vern840a");
+		assertSingleResult("8xxVernSearch", fldName, "vern840v");
+		assertZeroResults(fldName, "nope");
 	}	
 
 }

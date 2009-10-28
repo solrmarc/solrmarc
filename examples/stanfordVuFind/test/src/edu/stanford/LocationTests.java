@@ -10,7 +10,7 @@ import edu.stanford.StanfordIndexer.Access;
 import org.xml.sax.SAXException;
 
 
-public class LocationTests extends BibIndexTest {
+public class LocationTests extends AbstractStanfordVufindTest {
 
 	private final String testDataFname = "locationTests.mrc";
 	private final String fldName = "building";

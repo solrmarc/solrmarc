@@ -14,7 +14,7 @@ import org.junit.*;
  * @author Naomi Dushay
  *
  */
-public class DisplayFieldTests extends BibIndexTest {
+public class DisplayFieldTests extends AbstractStanfordVufindTest {
 	
 	private final String testDataFname = "displayFieldsTests.mrc";
 

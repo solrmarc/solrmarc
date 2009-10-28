@@ -14,7 +14,7 @@ import org.xml.sax.SAXException;
  * @author Naomi Dushay
  *
  */
-public class StandardNumberTests extends BibIndexTest {
+public class StandardNumberTests extends AbstractStanfordVufindTest {
 
 	/**
 	 * Test population of oclc field
@@ -209,7 +209,7 @@ public class StandardNumberTests extends BibIndexTest {
 		// isbn search with sub a value from record with mult a and z
 		String value = "052185668X";
 		assertResultSize(fldName, value, 2);
-		String docList[] = searcherProxy.getIdSet(fldName, value);
+		String docList[] = searcherProxy.getDocIdsFromSearch(fldName, value, docIDfname);
 		String msg = "isbn search \""+ value + "\": ";
 		assertDocInList(docList, "020suba10trailingText", msg);
 		assertDocInList(docList, "020SubaAndz", msg);
@@ -217,7 +217,7 @@ public class StandardNumberTests extends BibIndexTest {
 		// isbn search with sub z value from record with mult a and z
 		value = "9780809424887";
 		assertResultSize(fldName, value, 7);
-		docList = searcherProxy.getIdSet(fldName, value);
+		docList = searcherProxy.getDocIdsFromSearch(fldName, value, docIDfname);
 		msg = fldName + " search \""+ value + "\": ";
 		assertDocInList(docList, "020suba13", msg);
 		assertDocInList(docList, "020suba13trailingText", msg);
@@ -285,7 +285,7 @@ public class StandardNumberTests extends BibIndexTest {
 		assertSingleResult("022subaX", fldName, "1047-201X");
 	
 		assertResultSize(fldName, "0796-5621", 3);
-		String docList[] = searcherProxy.getIdSet(fldName, "0796-5621");
+		String docList[] = searcherProxy.getDocIdsFromSearch(fldName, "0796-5621", docIDfname);
 		assertDocInList(docList, "022subL", fldName + " search \"0796-5621\": ");
 		assertDocInList(docList, "022subAandL", fldName + " search \"0796-5621\": ");
 		assertDocInList(docList, "022subLandM", fldName + " search \"0796-5621\": ");

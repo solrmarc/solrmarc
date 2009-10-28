@@ -13,7 +13,7 @@ import org.xml.sax.SAXException;
  * @author Naomi Dushay
  *
  */
-public class TitleTests extends BibIndexTest {
+public class TitleTests extends AbstractStanfordVufindTest {
 	
 	private final String testDataFname = "titleTests.mrc";
 

@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
  * @author Naomi Dushay
  *
  */
-public class StanfordFieldTests extends BibIndexTest {
+public class StanfordFieldTests extends AbstractStanfordVufindTest {
 	
 	/**
 	 * Test correct document id - the id is from 001 with an a in front

@@ -16,7 +16,7 @@ import edu.stanford.StanfordIndexer.Access;
  * @author Naomi Dushay
  *
  */
-public class AccessTests extends BibIndexTest {
+public class AccessTests extends AbstractStanfordVufindTest {
 	
 	private final String testDataFname = "onlineFormat.mrc";
 	private String fldName = "accessMethod_facet";
@@ -126,7 +126,7 @@ public class AccessTests extends BibIndexTest {
 	 	// "At the Library"
 	 	String fldVal = "\"" + Access.AT_LIBRARY.toString() + "\"";
 	 	// don't want to check *all* of them ...
-	 	String resultDocIds[] = searcherProxy.getIdSet(fldName, fldVal);
+	 	String resultDocIds[] = searcherProxy.getDocIdsFromSearch(fldName, fldVal, docIDfname);
 	// 	List<DocumentProxy> docList = getAllMatchingDocs(fldName, fldVal);
 	 	String msg = fldName + " " + Access.AT_LIBRARY.toString() + ": ";
 	 	// formerly "On campus"

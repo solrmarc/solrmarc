@@ -467,46 +467,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     
     
 // Title Methods ------------------- Begin ----------------------- Title Methods    
-    
-    /**
-     * returns the 245 a + b + h, without the trailing slash before the last 
-     *  subfield c
-     */
-//    @SuppressWarnings("unchecked")
-// TODO:  can remove this method when brief title display settles down.
-/*
-	public Set<String> getBriefTitleDisplay(final Record record)
-    {
-    	Set<String> resultSet = new HashSet<String>();
-    	List<VariableField> list245 = record.getVariableFields("245");
-    	for (VariableField vf : list245) {
-    		DataField d245 = (DataField) vf;
-    		StringBuffer buffer = new StringBuffer();
-    		List<Subfield> subList = d245.getSubfields();
-    		for (Subfield sub : subList) {
-    			char subcode = sub.getCode();
-    			if (subcode == 'a' || subcode == 'b' || subcode == 'h') {
-    				if (buffer.length() > 0) {
-                        buffer.append(" " + sub.getData().trim());
-                    } else {
-                        buffer.append(sub.getData().trim());
-                    }
-    			}
-    		}
-    		// remove trailing slash, if present
-    		if (buffer.length() > 0) {
-        		int lastCharIx = buffer.length() - 1;
-        		if (buffer.substring(lastCharIx).toString().equals("/")) {
-        			resultSet.add(buffer.deleteCharAt(lastCharIx).toString().trim());
-        		}
-        		else
-        			resultSet.add(buffer.toString());
-    		}
-    	}
-    	return resultSet;
-    }
-*/
-    
+        
     /**
      * returns string for title sort:  a string containing
      *  1. the uniform title (130), if there is one - not including non-filing chars 
@@ -534,57 +495,6 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     
 // Title Methods -------------------- End ------------------------ Title Methods    
     
-
-// Author Methods ----------------- Begin ----------------------- Author Methods    
-    
-    /**
-     * returns string for author sort:  a string containing
-     *  1. the main entry author, if there is one 
-     *  2. the main entry uniform title (240), if there is one - not including 
-     *    non-filing chars as noted in 2nd indicator
-     * followed by
-     *  3.  the 245 title, not including non-filing chars as noted in ind 2
-     */
-    @SuppressWarnings("unchecked")
-	public String getSortAuthor(final Record record) 
-    {
-    	StringBuffer resultBuf = new StringBuffer();
-
-    	DataField df = (DataField) record.getVariableField("100");
-    	// main entry personal name
-    	if (df != null) 
-        	resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
-
-    	df = (DataField) record.getVariableField("110");
-    	// main entry corporate name
-    	if (df != null) 
-        	resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
-
-    	df = (DataField) record.getVariableField("111");
-    	// main entry meeting name
-    	if (df != null) 
-        	resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
-
-    	// need to sort fields missing 100/110/111 last
-    	if (resultBuf.length() == 0) {
-    		resultBuf.append(Character.toChars(Character.MAX_CODE_POINT)); 
-    		resultBuf.append(' '); // for legibility in luke
-    	}
-    	
-    	// uniform title, main entry
-      	df = (DataField) record.getVariableField("240");
-       	if (df != null)
-           	resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
-    	
-    	// 245 (required) title statement
-       	df = (DataField) record.getVariableField("245");
-       	if (df != null)
-       		resultBuf.append(getAlphaSubfldsAsSortStr(df, true));
-
-    	return resultBuf.toString().trim();
-    }
-    
-// Author Methods ------------------ End ------------------------ Author Methods    
 
 // Subject Methods ----------------- Begin --------------------- Subject Methods    
 
@@ -710,6 +620,15 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     public Set<String> getFullTextUrls(final Record record)
     {
         Set<String> resultSet = new HashSet<String>();
+        
+        // get full text urls from 856, then check for gsb forms
+    	resultSet = super.getFullTextUrls(record);
+       	for (String possUrl : resultSet) {
+       		if (possUrl.startsWith("http://www.gsb.stanford.edu/jacksonlibrary/services/") ||
+          		     possUrl.startsWith("https://www.gsb.stanford.edu/jacksonlibrary/services/"))
+       			resultSet.remove(possUrl);
+       	}
+       	resultSet.addAll(resultSet);
 
         // get all 956 subfield u containing fulltext urls that aren't SFX
         Set<String> f956urls = getFieldList(record, "956u");
@@ -717,67 +636,9 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         	if (!isSFXUrl(url))
         		resultSet.add(url);
         }
-        
-        List<VariableField> list856 = record.getVariableFields("856");
-        for (VariableField vf : list856) {
-        	DataField df = (DataField) vf;
-        	List<String> possUrls = Utils.getSubfieldStrings(df, 'u');
-        	// need possUrls to be thread safe or get concurrent exceptions
-        	Vector<String> possUrlsV = new Vector(possUrls);
-        	// don't use GSB request form for offsite materials
-           	for (String possUrl : possUrlsV) {
-           		if (possUrl.startsWith("http://www.gsb.stanford.edu/jacksonlibrary/services/") ||
-              		     possUrl.startsWith("https://www.gsb.stanford.edu/jacksonlibrary/services/"))
-           			possUrls.remove(possUrl);
-           	}
-        	if (possUrls.size() > 0) {
-            	char ind2 = df.getIndicator2();
-            	switch (ind2) {
-        	    	case '0':
-        	    		resultSet.addAll(possUrls);
-        	    		break;
-        	    	case '2':
-        	    		break;
-        	    	default:
-        	    		if (!isSupplementalUrl(df))
-        	    			resultSet.addAll(possUrls);
-        	    		break;
-            	}
-        	}
-        }        
-        
         return resultSet;
     }
     
-    /**
-     * returns the URLs for supplementary information (rather than fulltext)
-     * @param record
-     * @return Set of Strings containing supplementary urls, or empty string if none
-     */
-    @SuppressWarnings("unchecked")
-	public Set<String> getSupplUrls(final Record record)
-    {
-        Set<String> resultSet = new HashSet<String>();
-
-        List<VariableField> list856 = record.getVariableFields("856");
-        for (VariableField vf : list856) {
-         	DataField df = (DataField) vf;
-        	List<String> possUrls = Utils.getSubfieldStrings(df, 'u');
-        	char ind2 = df.getIndicator2();
-        	switch (ind2) {
-    	    	case '2':
-    	    		resultSet.addAll(possUrls);
-    	    		break;
-    	    	case '0':
-    	    		break;
-    	    	default:
-    	    		if (isSupplementalUrl(df))
-    	    			resultSet.addAll(possUrls);
-    	    		break;
-        	}
-        }        
-    	return resultSet;
-    }
     
     private boolean isSFXUrl(String urlStr) {
     	if (urlStr.startsWith("http://caslon.stanford.edu:3210/sfxlcl3?") ||
@@ -786,30 +647,50 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
     	else return false;
     }
     
-    /**
-     * return true if passed 856 field contains a supplementary url (rather than
-     *  a fulltext URL.
-     * Determine by presence of "table of contents" or "sample text" string
-     *  (ignoring case) in subfield 3 or z.
-     * Note:  Called only when second indicator is not 0 or 2.
-     */
-    private boolean isSupplementalUrl(DataField f856) {
-		boolean supplmntl = false;
-		List<String> list3z = Utils.getSubfieldStrings(f856, '3');
-		list3z.addAll(Utils.getSubfieldStrings(f856, 'z'));
-		for (String s : list3z) {
-			if (s.toLowerCase().contains("table of contents") ||
-    			s.toLowerCase().contains("sample text"))
-				supplmntl = true;
-		}
-		return supplmntl;
-    }
-
 // URL Methods --------------------  End  -------------------------- URL Methods    
     
 
-// Pub Date Methods  -------------- Begin --------------------- Pub Date Methods    
+// Publication Methods  -------------- Begin --------------- Publication Methods    
     
+    /**
+     * Gets the value strings, but skips over 655a values when Lane is one of
+     *  the locations.  Also ignores 650a with value "nomesh".
+     * @param record
+     * @param fieldSpec - which marc fields / subfields to use as values
+     * @return Set of strings containing values without Lane 655a or 650a nomesh
+     */
+    public Set<String> getPublication(final Record record) 
+    { 
+    	Set<String> resultSet = new LinkedHashSet<String>();
+    	// 260ab  but ignore  s.l  in 260a and s.n. in 260b
+    	List<VariableField> vf260List = record.getVariableFields("260");
+    	for (VariableField vf260 : vf260List) 
+    	{
+    		DataField df260 = (DataField) vf260;
+            List<Subfield> subFlds = df260.getSubfields();
+            StringBuffer buffer = new StringBuffer("");
+            for (Subfield sf : subFlds)
+            {
+            	char sfcode = sf.getCode();
+            	String sfdata = sf.getData();
+            	boolean addIt = false;
+                if (sfcode == 'a' && !sfdata.matches("(?i).*s\\.l\\..*"))
+                	addIt = true;
+                else if (sfcode == 'b' && !sfdata.matches("(?i).*s\\.n\\..*"))
+                	addIt = true;
+                if (addIt)
+                {
+                    if (buffer.length() > 0)
+                        buffer.append(" ");
+                    buffer.append(sfdata);
+                }
+            }
+            if (buffer.length() > 0)
+            	resultSet.add(Utils.cleanData(buffer.toString()));
+    	}
+    	return resultSet;
+    }
+        
     /**
      * returns the publication date from a record, if it is present and not
      *  beyond the current year + 1 (and not earlier than 0500 if it is a 
@@ -2114,73 +1995,9 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 
 		return false;
 	}
-	
-
-	/**
-	 * return true if the record has an 856 subfield u  for the GSB offsite
-	 *  request form (for materials at SAL3)
-	 */
-	@SuppressWarnings("unchecked")
-	@Deprecated  // no longer used
-	private boolean gsbOffsiteItemByRequest(Record record) {
 		
-        List<VariableField> list856 = record.getVariableFields("856");
-        for (VariableField vf : list856) {
-        	DataField df = (DataField) vf;
-        	List<String> urlList = Utils.getSubfieldStrings(df, 'u');
-        	if (urlList.contains("http://www.gsb.stanford.edu/jacksonlibrary/services/sal3_request.html")
-        		|| urlList.contains("https://www.gsb.stanford.edu/jacksonlibrary/services/sal3_request.html"))
-        		return true;
-        }
-		
-		return false;
-	}
-	
 
 // Utility Methods ---------------- Begin ---------------------- Utility Methods    
-    
-    /**
-     * @param DataField with ind2 containing # non-filing chars, or has value ' '
-     * @param skipSubFldc true if subfield c contents should be skipped
-     * @return StringBuffer of the contents of the subfields - with a trailing 
-     *  space
-     */
- 	@SuppressWarnings("unchecked")
-	private StringBuffer getAlphaSubfldsAsSortStr(DataField df, boolean skipSubFldc)
-    {
-    	StringBuffer result = new StringBuffer();
-       	int nonFilingInt = getInd2AsInt(df);
-    	boolean firstSubfld = true;
-    	
-    	List<Subfield> subList = df.getSubfields();
-		for (Subfield sub : subList) {
-			char subcode = sub.getCode();
-			if (Character.isLetter(subcode) && (!skipSubFldc || subcode != 'c'))
-			{
-				String data = sub.getData();
-				if (firstSubfld) {
-					if (nonFilingInt < data.length() -1)
-						data = data.substring(nonFilingInt);
-					firstSubfld = false;
-				}
-				// eliminate ascii punctuation marks from sorting as well
-				result.append(data.replaceAll("\\p{Punct}*", "").trim() + ' ');
-			}
-		}
-    	return result;
-    }
- 	
-    /**
-     * @param df a DataField
-     * @return the integer (0-9, 0 if blank) in the 2nd indicator
-     */
-    private int getInd2AsInt(DataField df) {
-    	char int2char = df.getIndicator2();
-       	int result = 0;
-       	if (Character.isDigit(int2char))
-       		result = Integer.valueOf(String.valueOf(int2char));
-       	return result;
-    }
     
     /**
      * Removes trailing periods or commas at the ends of the value strings 
@@ -2240,7 +2057,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	/**
 	 * Get the vernacular (880) fields which corresponds to the marc field
 	 *  in the 880 subfield 6 linkage 
-     * @param marc field - which marc field to seek in 880 fields (via linkages)
+     * @param marcField - which field to be matched by 880 fields 
 	 */
 	@SuppressWarnings("unchecked")
 	protected final Set<VariableField> getVernacularFields(final Record record, String marcField) 
@@ -2258,58 +2075,12 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         //  subfield 6 (linkage info) in the 880
         for (VariableField vf : list880s) {
          	DataField df880 = (DataField) vf;
-        	String linkage = Utils.getSubfieldData(df880, '6');
-       		int dashIx = linkage.indexOf('-');
-        	if (dashIx == 3 && marcField.equals(linkage.substring(0, dashIx)) ) {
+        	String sub6 = Utils.getSubfieldData(df880, '6');
+       		int dashIx = sub6.indexOf('-');
+        	if ((dashIx == 3) && marcField.equals(sub6.substring(0, 3)) ) 
         		resultSet.add(df880);
-          	}
         }        
         return (resultSet);
-	}
-	
-
-	/**
-	 * Get the vernacular (880) field based which corresponds to the fieldSpec
-	 *  in the subfield 6 linkage 
-     * @param fieldSpec - which marc fields / subfields need to be sought in 
-     *  880 fields (via linkages)
-	 */
-	@SuppressWarnings("unchecked")
-	public final Set<String> getVernacular(final Record record, String fieldSpec) 
-	{
-        Set<String> result = new LinkedHashSet<String>();
-		// find the right 880 field
-		//  then do the regular thing
-        
-        List<VariableField> list880s = record.getVariableFields("880");
-        if (list880s == null || list880s.size() == 0)
-        	return result;
-		
-        // is this a right to left language? - determine at record level
-        // TODO: it would be more appropriate to autodetect script of 880 field
-        VariableField vf8 = record.getVariableField("008");
-        ControlField f008 = (ControlField) vf8;
-        String langcode = f008.getData().substring(35, 38);
-        boolean rightToLeft = Utils.isRightToLeftLanguage(langcode);
-        
-        // we know which 880s we're looking for by the fieldSpec and 
-        //  subfield 6 (linkage info) in the 880
-        String[] linkPieces = fieldSpec.split(":");
-        
-        for (int i = 0; i < linkPieces.length; i++)
-        {
-        	String linkTOspec = linkPieces[i];
-            String linkTOfield = linkTOspec.substring(0, 3);
-        	Set<VariableField> matching880s = getVernacularFields(record, linkTOfield);
-            
-            // look for 880s that link to the right field
-            for (VariableField vf : matching880s) {
-             	DataField df880 = (DataField) vf;
-                String subfldStr = linkTOspec.substring(3);
-                result.addAll(getSubfieldsAsSet(df880, subfldStr, rightToLeft));
-            }        
-        }
-        return (result);
 	}
 	
 
@@ -2324,7 +2095,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	@SuppressWarnings("unchecked")
 	public final Set<String> getVernacular(final Record record, String fieldSpec, String multOccurs) 
 	{
-        Set<String> result = getVernacular(record, fieldSpec);
+        Set<String> result = getLinkedField(record, fieldSpec);
         
         if (multOccurs.equals("first")) {
         	Set<String> first = new HashSet<String>();
@@ -2348,8 +2119,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         return result;
 	}
 
-	
-	
+
 	/**
 	 *  
      * For each occurrence of a marc field in the fieldSpec list, get the 
@@ -2431,14 +2201,14 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
 	@SuppressWarnings("unchecked")
 	public final Set<String> vernRemoveTrailingPunc(final Record record, String fieldSpec, String charsToReplaceRegEx, String charsB4periodRegEx) 
 	{
-        Set<String> origVals = getVernacular(record, fieldSpec);
+        Set<String> origVals = getLinkedField(record, fieldSpec);
         Set<String> result = new LinkedHashSet<String>();
         
     	for (String val : origVals) {
     		result.add(Utils.removeAllTrailingCharAndPeriod(val, "(" + charsToReplaceRegEx + ")+", charsB4periodRegEx));
     	}
         return result;
-	}
+	}	
 	
 // Vernacular Methods ---------------  End  ----------------- Vernacular Methods    
 

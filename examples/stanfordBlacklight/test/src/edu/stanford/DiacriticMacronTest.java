@@ -17,7 +17,7 @@ import org.xml.sax.SAXException;
  * 
  * @author Naomi Dushay
  */
-public class DiacriticMacronTest extends BibIndexTest {
+public class DiacriticMacronTest extends AbstractStanfordBlacklightTest {
 
 	// contains the diacritics in our test data
 	private String fldName = "author_person_search";
@@ -36,7 +36,7 @@ public class DiacriticMacronTest extends BibIndexTest {
 	public final void testMacronExact() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("2099904", fldName, "istorīi", sis);
+		assertSingleResult("2099904", fldName, "istorīi");
 	}
 	
 	/**
@@ -46,7 +46,7 @@ public class DiacriticMacronTest extends BibIndexTest {
 	public final void testMacronText() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("2099904", fldName, "istorii", sis);
+		assertSingleResult("2099904", fldName, "istorii");
 	}
 	
 }

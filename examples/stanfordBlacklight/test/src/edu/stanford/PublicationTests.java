@@ -2,32 +2,131 @@ package edu.stanford;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+//import org.apache.lucene.document.*;
+
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.xml.sax.SAXException;
-
-import org.apache.lucene.document.*;
 import org.junit.*;
 
+import org.solrmarc.solr.DocumentProxy;
 import edu.stanford.StanfordIndexer.PubDateGroup;
 
 /**
  * junit4 tests for Stanford University publication fields for blacklight index
  * @author Naomi Dushay
  */
-public class PublicationTests extends BibIndexTest 
+public class PublicationTests extends AbstractStanfordBlacklightTest 
 {
-
 @Before
 	public final void setup() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		createIxInitVars("pubDateTests.mrc");
+		mappingTestInit();
 	}
 
+
+	/**
+	 * assure publication field is populated correctly  
+	 */
+@Test
+	public void testPublication()
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		String fldName = "pub_search";
+		assertTextFieldProperties(fldName);
+		assertFieldOmitsNorms(fldName);
+		assertFieldMultiValued(fldName);
+		assertFieldIndexed(fldName);
+		String publTestFilePath = testDataParentPath + File.separator + "publicationTests.mrc";
+
+		// 260ab
+		solrFldMapTest.assertSolrFldValue(publTestFilePath, "260ababc", fldName, "Paris : Gauthier-Villars ; Chicago : University of Chicago Press");
+		solrFldMapTest.assertSolrFldValue(publTestFilePath, "260abbc", fldName, "Washington, D.C. : first b : second b U.S. G.P.O.");
+		solrFldMapTest.assertSolrFldValue(publTestFilePath, "260ab3", fldName, "London : Vogue");
+		solrFldMapTest.assertSolrFldHasNoValue(publTestFilePath, "260crightbracket", fldName, "[i.e. Bruxelles : Moens");
+		solrFldMapTest.assertSolrFldValue(publTestFilePath, "260crightbracket", fldName, "i.e. Bruxelles : Moens");
+		
+		// 260a contains s.l. (unknown - sin location, presumably)
+		solrFldMapTest.assertSolrFldHasNoValue(publTestFilePath, "260aunknown", fldName, "[S.l.] : Insight Press");
+		solrFldMapTest.assertSolrFldValue(publTestFilePath, "260aunknown", fldName, "Insight Press");
+		solrFldMapTest.assertSolrFldHasNoValue(publTestFilePath, "260abaslbc", fldName, "[Philadelphia] : Some name [s.l.] : another name");
+		solrFldMapTest.assertSolrFldValue(publTestFilePath, "260abaslbc", fldName, "[Philadelphia] : Some name another name");		
+		
+		// 260b contains s.n. (unknown - sin name, presumably)
+		solrFldMapTest.assertSolrFldHasNoValue(publTestFilePath, "260bunknown", fldName, "Victoria, B.C. : [s.n.]");
+		solrFldMapTest.assertSolrFldValue(publTestFilePath, "260bunknown", fldName, "Victoria, B.C.");
+
+		solrFldMapTest.assertSolrFldHasNoValue(publTestFilePath, "260abunknown", fldName, "[S.l. : s.n.");
+		solrFldMapTest.assertSolrFldHasNoValue(publTestFilePath, "260abunknown", fldName, "S.l. : s.n.");
+		
+		// test searching
+		createIxInitVars("publicationTests.mrc");
+		assertSingleResult("260aunknown", fldName, "Insight");
+		assertSingleResult("260bunknown", fldName, "victoria"); // downcased
+		
+		// these codes should be skipped
+		assertDocHasNoField("260abunknown", fldName);  // 260a s.l, 260b s.n.
+		assertZeroResults(fldName, "s.l.");
+		assertZeroResults(fldName, "s.n.");
+	}
+	
+	/**
+	 * assure publication field is populated correctly  
+	 */
+@Test
+	public void testVernPublication()
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		String fldName = "vern_pub_search";
+		assertTextFieldProperties(fldName);
+		assertFieldOmitsNorms(fldName);
+		assertFieldMultiValued(fldName);
+		assertFieldIndexed(fldName);
+		String publTestFilePath = testDataParentPath + File.separator + "publicationTests.mrc";
+	
+		// 260ab from 880
+		solrFldMapTest.assertSolrFldValue(publTestFilePath, "vern260abc", fldName, "vern260a : vern260b");
+		solrFldMapTest.assertSolrFldValue(publTestFilePath, "vern260abcg", fldName, "vern260a : vern260b");
+
+		// test searching
+		createIxInitVars("publicationTests.mrc");
+		Set<String> docIds = new HashSet<String>();
+		docIds.add("vern260abc");
+		docIds.add("vern260abcg");
+		assertSearchResults(fldName, "vern260a", docIds);
+	}
+
+
+	/**
+	 * assure publication country field is populated correctly  
+	 */
+@Test
+	public void testPublicationCountry()
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		String fldName = "pub_country";
+		assertTextFieldProperties(fldName);
+		assertFieldOmitsNorms(fldName);
+		assertFieldNotMultiValued(fldName);
+		assertFieldIndexed(fldName);
+		String pubTestFilePath = testDataParentPath + File.separator + "publicationTests.mrc";
+
+		// 008[15-17]  via translation map
+		solrFldMapTest.assertSolrFldValue(pubTestFilePath, "008mdu", fldName, "Maryland, United States");
+		solrFldMapTest.assertSolrFldValue(pubTestFilePath, "008ja", fldName, "Japan");
+		
+		// these codes should be skipped
+		createIxInitVars("publicationTests.mrc");
+		assertDocHasNoField("008vp", fldName);  // "Various places"
+		assertDocHasNoField("008xx", fldName);  // "No place, unknown, or undetermined"
+	}
+	
 
 	/**
 	 * assure pub dates later than current year +1 are ignored
@@ -37,12 +136,12 @@ public class PublicationTests extends BibIndexTest
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "pub_date";
-		assertZeroResults(fldName, "9999", sis);
-		assertZeroResults(fldName, "6666", sis);
-		assertZeroResults(fldName, "22nd century", sis);
-		assertZeroResults(fldName, "23rd century", sis);
-		assertZeroResults(fldName, "24th century", sis);
-		assertZeroResults(fldName, "8610s", sis);
+		assertZeroResults(fldName, "9999");
+		assertZeroResults(fldName, "6666");
+		assertZeroResults(fldName, "22nd century");
+		assertZeroResults(fldName, "23rd century");
+		assertZeroResults(fldName, "24th century");
+		assertZeroResults(fldName, "8610s");
 	}
 
 
@@ -54,11 +153,11 @@ public class PublicationTests extends BibIndexTest
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "pub_date";
-		assertZeroResults(fldName, "0000", sis);
-		assertZeroResults(fldName, "0019", sis);
-		assertZeroResults(fldName, "0059", sis);
-		assertZeroResults(fldName, "0197", sis);
-		assertZeroResults(fldName, "0204", sis);
+		assertZeroResults(fldName, "0000");
+		assertZeroResults(fldName, "0019");
+		assertZeroResults(fldName, "0059");
+		assertZeroResults(fldName, "0197");
+		assertZeroResults(fldName, "0204");
 	}
 
 	/**
@@ -70,35 +169,35 @@ public class PublicationTests extends BibIndexTest
 	{
 		String fldName = "pub_date";
 		
-		assertDocHasNoFieldValue("pubDate0059", fldName, "0059", sis); 
-		assertDocHasFieldValue("pubDate0059", fldName, "2005", sis); 
+		assertDocHasNoFieldValue("pubDate0059", fldName, "0059"); 
+		assertDocHasFieldValue("pubDate0059", fldName, "2005"); 
 		
-		assertDocHasNoFieldValue("pubDate0197-1", fldName, "0197", sis); 
-//		assertDocHasFieldValue("pubDate0197-1", fldName, "1970s", sis); 
-		assertDocHasFieldValue("pubDate0197-1", fldName, "1970", sis); 
-		assertDocHasNoFieldValue("pubDate0197-2", fldName, "0197", sis); 
-//		assertDocHasFieldValue("pubDate0197-2", fldName, "1970s", sis); 
-		assertDocHasFieldValue("pubDate0197-2", fldName, "1970", sis); 
+		assertDocHasNoFieldValue("pubDate0197-1", fldName, "0197"); 
+//		assertDocHasFieldValue("pubDate0197-1", fldName, "1970s"); 
+		assertDocHasFieldValue("pubDate0197-1", fldName, "1970"); 
+		assertDocHasNoFieldValue("pubDate0197-2", fldName, "0197"); 
+//		assertDocHasFieldValue("pubDate0197-2", fldName, "1970s"); 
+		assertDocHasFieldValue("pubDate0197-2", fldName, "1970"); 
 
 		// correct
-		assertDocHasFieldValue("pubDate0500", fldName, "0500", sis); 
-		assertDocHasFieldValue("pubDate0801", fldName, "0801", sis); 
-		assertDocHasFieldValue("pubDate0960", fldName, "0960", sis); 
-		assertDocHasFieldValue("pubDate0963", fldName, "0963", sis); 
+		assertDocHasFieldValue("pubDate0500", fldName, "0500"); 
+		assertDocHasFieldValue("pubDate0801", fldName, "0801"); 
+		assertDocHasFieldValue("pubDate0960", fldName, "0960"); 
+		assertDocHasFieldValue("pubDate0963", fldName, "0963"); 
 
-		assertDocHasNoFieldValue("pubDate0204", fldName, "0204", sis); 
-		assertDocHasFieldValue("pubDate0204", fldName, "2004", sis); 
+		assertDocHasNoFieldValue("pubDate0204", fldName, "0204"); 
+		assertDocHasFieldValue("pubDate0204", fldName, "2004"); 
 
-		assertDocHasNoFieldValue("pubDate0019", fldName, "0019", sis); 
+		assertDocHasNoFieldValue("pubDate0019", fldName, "0019"); 
 		// TODO: yeah, i wish ...
-//		assertDocHasFieldValue("pubDate0019", fldName, "20th century", sis); 
-//		assertDocHasNoFieldValue("pubDate0965", fldName, "0965", sis); 
-//		assertDocHasFieldValue("pubDate0965", fldName, "1965", sis);
-//		assertDocHasNoFieldValue("pubDate0980", fldName, "0980", sis); 
-//		assertDocHasFieldValue("pubDate0980", fldName, "1980", sis); 
-//		assertDocHasNoFieldValue("pubDate0999", fldName, "0999", sis); 
-//		assertDocHasFieldValue("pubDate0999", fldName, "1999", sis); 
-		assertDocHasNoField("410024", fldName, sis);
+//		assertDocHasFieldValue("pubDate0019", fldName, "20th century"); 
+//		assertDocHasNoFieldValue("pubDate0965", fldName, "0965"); 
+//		assertDocHasFieldValue("pubDate0965", fldName, "1965");
+//		assertDocHasNoFieldValue("pubDate0980", fldName, "0980"); 
+//		assertDocHasFieldValue("pubDate0980", fldName, "1980"); 
+//		assertDocHasNoFieldValue("pubDate0999", fldName, "0999"); 
+//		assertDocHasFieldValue("pubDate0999", fldName, "1999"); 
+		assertDocHasNoField("410024", fldName);
 	}
 
 
@@ -110,25 +209,25 @@ public class PublicationTests extends BibIndexTest
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "pub_date_search";
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldNotMultiValued(fldName, solrCore);
-		assertFieldNotStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
-		assertFieldOmitsNorms(fldName, solrCore);
+		assertTextFieldProperties(fldName);
+		assertFieldNotMultiValued(fldName);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
+		assertFieldOmitsNorms(fldName);
 	
 		pubDateSearchTests(fldName);
 	}
 
 
 	/**
-	 * test pub_date_sort field population.
+	 * test pub_date_sort field population and ascending sort.
 	 */
 @Test
-	public final void testPubDateSort() 
-			throws ParserConfigurationException, IOException, SAXException 
+	public final void testPubDateSortAsc() 
+			throws ParserConfigurationException, IOException, SAXException, InvocationTargetException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException 
 	{
 		String fldName = "pub_date_sort";
-		assertSortFldProps(fldName, solrCore, sis);
+		assertSortFldProps(fldName);
 	
 		// list of doc ids in correct publish date sort order
 		List<String> expectedOrderList = new ArrayList<String>(50);
@@ -189,29 +288,27 @@ public class PublicationTests extends BibIndexTest
 		expectedOrderList.add("b2008");   // "2008"
 		expectedOrderList.add("z2009");   // "2009"
 		expectedOrderList.add("pubDate2010");   // "2010"
-				
+		
 		// get search results sorted by pub_date_sort field
-		List<Document> results = getSortedDocs("collection", "Catalog", "pub_date_sort", sis);
-		Document firstDoc = results.get(0);
-		if (firstDoc.getField("id") != null) {
-			String firstDocId = firstDoc.getField("id").stringValue();
-			assertTrue("9999 pub date should not sort first", firstDocId != "pubDate9999");
-		}		
+		// pub_date_sort isn't stored, so we must look at id field
+        List<DocumentProxy> results = getAscSortDocs("collection", "sirsi", "pub_date_sort");
+		DocumentProxy firstDoc = results.get(0);
+		assertTrue("9999 pub date should not sort first", firstDoc.getValues(docIDfname)[0] != "pubDate9999");
 		
 		// we know we have documents that are not in the expected order list
 		int expDocIx = 0;
-		for (Document doc : results) 
+		for (DocumentProxy doc : results) 
 		{
 			if (expDocIx < expectedOrderList.size() - 1) 
 			{
 				// we haven't found all docs in the expected list yet
-				Field f = doc.getField("id");  // pub_date_sort isn't stored
-				if (f != null) 
-				{
-					String docId = f.stringValue();
-					if (docId.equals(expectedOrderList.get(expDocIx + 1))) 
-						expDocIx++;
-				}
+			    String[] vals = doc.getValues(docIDfname);
+			    if (vals != null && vals.length > 0) 
+			    {
+	                String docId = vals[0];
+	                if (docId.equals(expectedOrderList.get(expDocIx + 1))) 
+	                    expDocIx++;
+			    }
 			}
 			else break;  // we found all the documents in the expected order list
 		}		
@@ -225,12 +322,12 @@ public class PublicationTests extends BibIndexTest
 
 
 	/**
-	 * pub date ascending sort should start with oldest and go to newest 
+	 * pub date descending sort should start with oldest and go to newest 
 	 *  (missing dates sort order tested in another method)
 	 */
 @Test
-	public void testPubDateSortAscending()
-			throws ParserConfigurationException, IOException, SAXException 
+	public void testPubDateSortDesc()
+			throws ParserConfigurationException, IOException, SAXException, NoSuchMethodException, InstantiationException, InvocationTargetException, ClassNotFoundException, IllegalAccessException 
 	{
 		String fldName = "pub_date_sort";
 		
@@ -295,27 +392,25 @@ public class PublicationTests extends BibIndexTest
 		expectedOrderList.add("pubDate0019"); 			
 		
 		// get search results sorted by pub_date_sort field
-		List<Document> results = getReverseSortedDocs("collection", "Catalog", "pub_date_sort", sis);
-		Document firstDoc = results.get(0);
-		if (firstDoc.getField("id") != null) {
-			String firstDocId = firstDoc.getField("id").stringValue();
-			assertTrue("0000 pub date should not sort first", firstDocId != "pubDate0000");
-		}		
+		List<DocumentProxy> results = getDescSortDocs("collection", "sirsi", fldName);
+		DocumentProxy firstDoc = results.get(0);
+		assertTrue("0000 pub date should not sort first", firstDoc.getValues(docIDfname)[0] != "pubDate0000");
+
 		
 		// we know we have documents that are not in the expected order list
 		int expDocIx = 0;
-		for (Document doc : results) 
+		for (DocumentProxy doc : results) 
 		{
 			if (expDocIx < expectedOrderList.size() - 1) 
 			{
 				// we haven't found all docs in the expected list yet
-				Field f = doc.getField("id");  // pub_date_sort isn't stored
-				if (f != null) 
-				{
-					String docId = f.stringValue();
-					if (docId.equals(expectedOrderList.get(expDocIx + 1))) 
-						expDocIx++;
-				}
+                String[] vals = doc.getValues(docIDfname);
+                if (vals != null && vals.length > 0) 
+                {
+                    String docId = vals[0];
+                    if (docId.equals(expectedOrderList.get(expDocIx + 1))) 
+                        expDocIx++;
+                }
 			}
 			else break;  // we found all the documents in the expected order list
 		}		
@@ -323,7 +418,7 @@ public class PublicationTests extends BibIndexTest
 		if (expDocIx != expectedOrderList.size() - 1) 
 		{
 			String lastCorrDocId = expectedOrderList.get(expDocIx);
-			fail("Publish Date Asc Sort Order is incorrect.  Last correct document was " + lastCorrDocId);
+			fail("Publish Date Desc Sort Order is incorrect.  Last correct document was " + lastCorrDocId);
 		}
 	}
 
@@ -337,16 +432,16 @@ public class PublicationTests extends BibIndexTest
 	{
 		String fldName = "pub_date_group_facet";
 		createIxInitVars("pubDateTests.mrc");
-		assertFacetFldProps(fldName, solrCore, sis);
+		assertFacetFieldProperties(fldName);
 		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("pubDate2010");
 		docIds.add("z2009");
 		docIds.add("b2008");
-		assertSearchResults(fldName, "\"" + PubDateGroup.THIS_YEAR.toString() + "\"", docIds, sis);
+		assertSearchResults(fldName, "\"" + PubDateGroup.THIS_YEAR.toString() + "\"", docIds);
 		docIds.add("v2007");
 		docIds.add("z2006");
-		assertSearchResults(fldName, "\"" + PubDateGroup.LAST_3_YEARS.toString() + "\"", docIds, sis);
+		assertSearchResults(fldName, "\"" + PubDateGroup.LAST_3_YEARS.toString() + "\"", docIds);
 		docIds.add("j2005");
 		docIds.add("q2001");
 		docIds.add("f2000");
@@ -357,7 +452,7 @@ public class PublicationTests extends BibIndexTest
 		docIds.add("o20uu");
 		docIds.add("pubDate0059");  // 2005
 		docIds.add("pubDate0204");  // 2004
-		assertSearchResults(fldName, "\"" + PubDateGroup.LAST_10_YEARS.toString() + "\"", docIds, sis);
+		assertSearchResults(fldName, "\"" + PubDateGroup.LAST_10_YEARS.toString() + "\"", docIds);
 		docIds.add("c1998");
 		docIds.add("e1997");
 		docIds.add("m1991");
@@ -371,7 +466,7 @@ public class PublicationTests extends BibIndexTest
 		docIds.add("p19uu");
 		docIds.add("pubDate0197-1");
 		docIds.add("pubDate0197-2");
-		assertSearchResults(fldName, "\"" + PubDateGroup.LAST_50_YEARS.toString() + "\"", docIds, sis);
+		assertSearchResults(fldName, "\"" + PubDateGroup.LAST_50_YEARS.toString() + "\"", docIds);
 
 		docIds.clear();
 		docIds.add("pubDate00uu");   // "1st century"
@@ -399,7 +494,7 @@ public class PublicationTests extends BibIndexTest
 		docIds.add("pubDate0965"); // should be 1965
 		docIds.add("pubDate0980"); // should be 1980
 		docIds.add("pubDate0999"); // should be 1999
-		assertSearchResults(fldName, "\"" + PubDateGroup.MORE_THAN_50_YEARS_AGO.toString() + "\"", docIds, sis);
+		assertSearchResults(fldName, "\"" + PubDateGroup.MORE_THAN_50_YEARS_AGO.toString() + "\"", docIds);
 	}
 
 
@@ -412,9 +507,9 @@ public class PublicationTests extends BibIndexTest
 	{
 		String fldName = "pub_date";
 		createIxInitVars("pubDateTests.mrc");
-        assertStringFieldProperties(fldName, solrCore, sis);
-        assertFieldIndexed(fldName, solrCore);
-        assertFieldStored(fldName, solrCore);
+        assertStringFieldProperties(fldName);
+        assertFieldIndexed(fldName);
+        assertFieldStored(fldName);
 		
 		pubDateSearchTests(fldName);
 	}
@@ -429,83 +524,83 @@ public class PublicationTests extends BibIndexTest
 	{
 		String fldName = "pub_date";
 		createIxInitVars("pubDateTests.mrc");
-        assertStringFieldProperties(fldName, solrCore, sis);
-        assertFieldIndexed(fldName, solrCore);
-        assertFieldStored(fldName, solrCore);
-		assertFieldNotMultiValued(fldName, solrCore);		
+        assertStringFieldProperties(fldName);
+        assertFieldIndexed(fldName);
+        assertFieldStored(fldName);
+		assertFieldNotMultiValued(fldName);		
 
-		assertDocHasFieldValue("firstDateOnly008", fldName, "2000", sis); 
-		assertDocHasFieldValue("bothDates008", fldName, "1964", sis); 
-		assertDocHasFieldValue("contRes", fldName, "1984", sis); 
-		assertDocHasFieldValue("pubDate195u", fldName, "1950s", sis);
-		assertDocHasFieldValue("pubDate00uu", fldName, "1st century", sis); 
-		assertDocHasFieldValue("pubDate01uu", fldName, "2nd century", sis); 
-		assertDocHasFieldValue("pubDate02uu", fldName, "3rd century", sis); 
-		assertDocHasFieldValue("pubDate03uu", fldName, "4th century", sis);
-		assertDocHasFieldValue("pubDate08uu", fldName, "9th century", sis);
-		assertDocHasFieldValue("pubDate09uu", fldName, "10th century", sis);
-		assertDocHasFieldValue("pubDate10uu", fldName, "11th century", sis); 
-		assertDocHasFieldValue("pubDate11uu", fldName, "12th century", sis); 
-		assertDocHasFieldValue("pubDate12uu", fldName, "13th century", sis); 
-		assertDocHasFieldValue("pubDate13uu", fldName, "14th century", sis); 
-		assertDocHasFieldValue("pubDate16uu", fldName, "17th century", sis); 
-		assertDocHasFieldValue("pubDate19uu", fldName, "20th century", sis); 
-		assertDocHasFieldValue("pubDate20uu", fldName, "21st century", sis); 
+		assertDocHasFieldValue("firstDateOnly008", fldName, "2000"); 
+		assertDocHasFieldValue("bothDates008", fldName, "1964"); 
+		assertDocHasFieldValue("contRes", fldName, "1984"); 
+		assertDocHasFieldValue("pubDate195u", fldName, "1950s");
+		assertDocHasFieldValue("pubDate00uu", fldName, "1st century"); 
+		assertDocHasFieldValue("pubDate01uu", fldName, "2nd century"); 
+		assertDocHasFieldValue("pubDate02uu", fldName, "3rd century"); 
+		assertDocHasFieldValue("pubDate03uu", fldName, "4th century");
+		assertDocHasFieldValue("pubDate08uu", fldName, "9th century");
+		assertDocHasFieldValue("pubDate09uu", fldName, "10th century");
+		assertDocHasFieldValue("pubDate10uu", fldName, "11th century"); 
+		assertDocHasFieldValue("pubDate11uu", fldName, "12th century"); 
+		assertDocHasFieldValue("pubDate12uu", fldName, "13th century"); 
+		assertDocHasFieldValue("pubDate13uu", fldName, "14th century"); 
+		assertDocHasFieldValue("pubDate16uu", fldName, "17th century"); 
+		assertDocHasFieldValue("pubDate19uu", fldName, "20th century"); 
+		assertDocHasFieldValue("pubDate20uu", fldName, "21st century"); 
 
 		// No pub date when unknown
-		assertDocHasNoField("bothDatesBlank", fldName, sis); 
-		assertDocHasNoField("pubDateuuuu", fldName, sis); 
+		assertDocHasNoField("bothDatesBlank", fldName); 
+		assertDocHasNoField("pubDateuuuu", fldName); 
 		// xuuu is unassigned
-		assertDocHasNoFieldValue("pubDate1uuu", fldName, "after 1000", sis); 
-		assertDocHasNoField("pubDate1uuu", fldName, sis); 
+		assertDocHasNoFieldValue("pubDate1uuu", fldName, "after 1000"); 
+		assertDocHasNoField("pubDate1uuu", fldName); 
 		
 		// future dates are ignored
-		assertDocHasNoField("pubDate21uu", fldName, sis);   // ignored, not "22nd century" 
-		assertDocHasNoField("pubDate22uu", fldName, sis);   // ignored, not "23rd century" 
-		assertDocHasNoField("pubDate23uu", fldName, sis);   // ignored, not "24th century" 
-		assertDocHasNoField("pubDate9999", fldName, sis);   // ignored, not 9999
-		assertDocHasNoField("pubDate99uu", fldName, sis);   // ignored, not "100th century' 
-		assertDocHasNoField("pubDate6666", fldName, sis);   // ignored, not 6666
-		assertDocHasNoField("pubDate861u", fldName, sis);   // ignored, not 8610s
+		assertDocHasNoField("pubDate21uu", fldName);   // ignored, not "22nd century" 
+		assertDocHasNoField("pubDate22uu", fldName);   // ignored, not "23rd century" 
+		assertDocHasNoField("pubDate23uu", fldName);   // ignored, not "24th century" 
+		assertDocHasNoField("pubDate9999", fldName);   // ignored, not 9999
+		assertDocHasNoField("pubDate99uu", fldName);   // ignored, not "100th century' 
+		assertDocHasNoField("pubDate6666", fldName);   // ignored, not 6666
+		assertDocHasNoField("pubDate861u", fldName);   // ignored, not 8610s
 	}
 
 
 	private void pubDateSearchTests(String fldName)
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("bothDates008", fldName, "\"1964\"", sis);
-		assertSingleResult("pubDate01uu", fldName, "\"2nd century\"", sis);
-		assertSingleResult("pubDate2010", fldName, "\"2010\"", sis);
+		assertSingleResult("bothDates008", fldName, "\"1964\"");
+		assertSingleResult("pubDate01uu", fldName, "\"2nd century\"");
+		assertSingleResult("pubDate2010", fldName, "\"2010\"");
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("s195u");
 		docIds.add("pubDate195u");
-		assertSearchResults(fldName, "\"1950s\"", docIds, sis);
+		assertSearchResults(fldName, "\"1950s\"", docIds);
 		docIds.clear();
 		docIds.add("p19uu");
 		docIds.add("pubDate19uu");
-		assertSearchResults(fldName, "\"20th century\"", docIds, sis);
+		assertSearchResults(fldName, "\"20th century\"", docIds);
 
-		assertZeroResults(fldName, "\"after 1000\"", sis);
+		assertZeroResults(fldName, "\"after 1000\"");
 		// future dates are ignored/skipped
-		assertZeroResults(fldName, "\"6666\"", sis);
-		assertZeroResults(fldName, "\"8610s\"", sis);
-		assertZeroResults(fldName, "\"9999\"", sis);
-		assertZeroResults(fldName, "\"23rd century\"", sis);
-		assertZeroResults(fldName, "\"22nd century\"", sis);
+		assertZeroResults(fldName, "\"6666\"");
+		assertZeroResults(fldName, "\"8610s\"");
+		assertZeroResults(fldName, "\"9999\"");
+		assertZeroResults(fldName, "\"23rd century\"");
+		assertZeroResults(fldName, "\"22nd century\"");
 
 		// dates before 500 are ignored/skipped
-		assertZeroResults(fldName, "\"0000\"", sis);
-		assertZeroResults(fldName, "\"0019\"", sis);
+		assertZeroResults(fldName, "\"0000\"");
+		assertZeroResults(fldName, "\"0019\"");
 
 		// corrected values
 		docIds.clear();
 		docIds.add("pubDate0059");
 		docIds.add("j2005");
-		assertSearchResults(fldName, "2005", docIds, sis);
+		assertSearchResults(fldName, "2005", docIds);
 		docIds.clear();
 		docIds.add("pubDate0197-1");
 		docIds.add("pubDate0197-2");
-		assertSearchResults(fldName, "1970", docIds, sis);
+		assertSearchResults(fldName, "1970", docIds);
 	}
 
 }
