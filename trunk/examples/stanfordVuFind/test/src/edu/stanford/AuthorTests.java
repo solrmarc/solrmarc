@@ -10,7 +10,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
-public class AuthorTests extends BibIndexTest {
+public class AuthorTests extends AbstractStanfordVufindTest {
 	
 	private final String testDataFname = "authorTests.mrc";
 	

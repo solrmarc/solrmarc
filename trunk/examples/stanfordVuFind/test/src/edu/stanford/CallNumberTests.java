@@ -8,7 +8,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
-public class CallNumberTests extends BibIndexTest {
+public class CallNumberTests extends AbstractStanfordVufindTest {
 
 	private final String testDataFname = "callNumberTests.mrc";
 	private final String govDocStr = "Government Document";

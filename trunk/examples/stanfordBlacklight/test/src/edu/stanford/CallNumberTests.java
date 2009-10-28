@@ -16,7 +16,7 @@ import org.xml.sax.SAXException;
  * junit4 tests for Stanford University call number fields for blacklight index
  * @author Naomi Dushay
  */
-public class CallNumberTests extends BibIndexTest {
+public class CallNumberTests extends AbstractStanfordBlacklightTest {
 
 	private final String govDocStr = "Government Document";
 
@@ -38,40 +38,40 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "callnum_top_facet";
-		assertFacetFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
+		assertFacetFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
 		
 		// LC values
 		// single char LC classification
-		assertSingleResult("6661112", fldName, "\"Z - Bibliography, Library Science, Information Resources\"", sis);
+		assertSingleResult("6661112", fldName, "\"Z - Bibliography, Library Science, Information Resources\"");
 		// two char LC classification
-		assertSingleResult("999LC22", fldName, "\"C - Historical Sciences (Archaeology, Genealogy)\"", sis);
-		assertSingleResult("1033119", fldName, "\"B - Philosophy, Psychology, Religion\"", sis);
+		assertSingleResult("999LC22", fldName, "\"C - Historical Sciences (Archaeology, Genealogy)\"");
+		assertSingleResult("1033119", fldName, "\"B - Philosophy, Psychology, Religion\"");
 		// mixed one char and two char classification values
 		String val = "\"D - World History\"";
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("999LC1dec");
 		docIds.add("2913114");
 		docIds.add("3400092");
-		assertSearchResults(fldName, val, docIds, sis);
+		assertSearchResults(fldName, val, docIds);
 		// mixed 2 and 3 three char LC classification
 		val = "\"K - Law\"";
 		docIds.clear();
 		docIds.add("999LC3NoDec");
 		docIds.add("999LC3Dec");
 		docIds.add("999LC3DecSpace");
-		assertSearchResults(fldName, val, docIds, sis);
+		assertSearchResults(fldName, val, docIds);
 						
 		// LCPER
-		assertSingleResult("460947", fldName, "\"E - History of the Americas (General)\"", sis);
+		assertSingleResult("460947", fldName, "\"E - History of the Americas (General)\"");
 		
 		// bad LC values should not be found
 		// bad start chars for LC
-		assertZeroResults(fldName, "I*", sis); // IN PROCESS and illegal LC
-		assertZeroResults(fldName, "X*", sis); // illegal LC
-		assertZeroResults(fldName, "W*", sis); // illegal LC
+		assertZeroResults(fldName, "I*"); // IN PROCESS and illegal LC
+		assertZeroResults(fldName, "X*"); // illegal LC
+		assertZeroResults(fldName, "W*"); // illegal LC
 		// only N call number in test data is "NO CALL NUMBER"
-		assertZeroResults(fldName, "N*", sis);
+		assertZeroResults(fldName, "N*");
 	}
 
 	/**
@@ -84,44 +84,44 @@ public class CallNumberTests extends BibIndexTest {
 		throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "lc_alpha_facet";
-		assertFacetFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
+		assertFacetFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
 		
 		// single char LC classification
-		assertSingleResult("6661112", fldName, "\"Z - Bibliography, Library Science, Information Resources\"", sis);
+		assertSingleResult("6661112", fldName, "\"Z - Bibliography, Library Science, Information Resources\"");
 		// LC 999 one letter, space before Cutter
-		assertSingleResult("7772223", fldName, "\"F - History of the Americas (Local)\"", sis);
-		assertSingleResult("999LC1dec", fldName, "\"D - World History\"", sis);
+		assertSingleResult("7772223", fldName, "\"F - History of the Americas (Local)\"");
+		assertSingleResult("999LC1dec", fldName, "\"D - World History\"");
 
 		// two char LC classification
-		assertZeroResults(fldName, "\"B - Philosophy, Psychology, Religion\"", sis);
-		assertSingleResult("1033119", fldName, "\"BX - Christian Denominations\"", sis);
+		assertZeroResults(fldName, "\"B - Philosophy, Psychology, Religion\"");
+		assertSingleResult("1033119", fldName, "\"BX - Christian Denominations\"");
 		// LC 999 two letters, space before Cutter
-		assertSingleResult("999LC2", fldName, "\"HG - Finance\"", sis);
-		assertZeroResults(fldName, "\"C - Auxiliary Sciences of History (General)\"", sis);
-		assertSingleResult("999LC22", fldName, "\"CB - History of Civilization\"", sis);		
-		assertSingleResult("2913114", fldName, "\"DH - Low Countries (History)\"", sis);
-		assertSingleResult("1732616", fldName, "\"QA - Mathematics\"", sis); 
-		assertSingleResult("115472", fldName, "\"HC - Economic History & Conditions\"", sis); 
+		assertSingleResult("999LC2", fldName, "\"HG - Finance\"");
+		assertZeroResults(fldName, "\"C - Auxiliary Sciences of History (General)\"");
+		assertSingleResult("999LC22", fldName, "\"CB - History of Civilization\"");		
+		assertSingleResult("2913114", fldName, "\"DH - Low Countries (History)\"");
+		assertSingleResult("1732616", fldName, "\"QA - Mathematics\""); 
+		assertSingleResult("115472", fldName, "\"HC - Economic History & Conditions\""); 
 		// mult values for a single doc
-		assertSingleResult("3400092", fldName, "\"DC - France (History)\"", sis);
+		assertSingleResult("3400092", fldName, "\"DC - France (History)\"");
 
 		// three char LC classification
-		assertZeroResults(fldName, "\"K - Law\"", sis);
+		assertZeroResults(fldName, "\"K - Law\"");
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("999LC3NoDec");
 		docIds.add("999LC3Dec");
 		docIds.add("999LC3DecSpace");
-		assertSearchResults(fldName, "\"KJH - Law of Andorra\"", docIds, sis);
+		assertSearchResults(fldName, "\"KJH - Law of Andorra\"", docIds);
 		
 		// bad values should not be found
-		assertZeroResults(fldName, "NO*", sis);  // NO CALL NUMBER
-		assertZeroResults(fldName, "I*", sis);  // illegal LC char, "IN PROCESS"
-		assertZeroResults(fldName, "X*", sis);  // illegal LC char
-		assertZeroResults(fldName, "W*", sis);  // illegal LC char, "WITHDRAWN"
+		assertZeroResults(fldName, "NO*");  // NO CALL NUMBER
+		assertZeroResults(fldName, "I*");  // illegal LC char, "IN PROCESS"
+		assertZeroResults(fldName, "X*");  // illegal LC char
+		assertZeroResults(fldName, "W*");  // illegal LC char, "WITHDRAWN"
 		
 		// LCPER
-		assertSingleResult("460947", fldName, "\"E - History of the Americas (General)\"", sis);
+		assertSingleResult("460947", fldName, "\"E - History of the Americas (General)\"");
 	}
 
 	/**
@@ -133,40 +133,40 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "lc_b4cutter_facet";
-		assertFacetFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
+		assertFacetFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
 	
 		// bad values should not be found
-		assertZeroResults(fldName, "NO CALL NUMBER", sis);
-		assertZeroResults(fldName, "IN PROCESS", sis);
-		assertZeroResults(fldName, "I*", sis);
-		assertZeroResults(fldName, "X*", sis);
-		assertZeroResults(fldName, "WITHDRAWN", sis);
-		assertZeroResults(fldName, "W*", sis);
-		assertZeroResults(fldName, "110978984448763", sis);
+		assertZeroResults(fldName, "NO CALL NUMBER");
+		assertZeroResults(fldName, "IN PROCESS");
+		assertZeroResults(fldName, "I*");
+		assertZeroResults(fldName, "X*");
+		assertZeroResults(fldName, "WITHDRAWN");
+		assertZeroResults(fldName, "W*");
+		assertZeroResults(fldName, "110978984448763");
 			
 		// search for LC values
-		assertZeroResults(fldName, "Z", sis);
-		assertSingleResult("6661112", fldName, "Z3871", sis);
-		assertSingleResult("999LC1dec", fldName, "D764.7", sis);
-		assertZeroResults(fldName, "C", sis);
-		assertZeroResults(fldName, "CB", sis);
-		assertSingleResult("999LC22", fldName, "CB3", sis);		
-		assertZeroResults(fldName, "D810", sis);
-		assertSingleResult("2913114", fldName, "DH135", sis);
-		assertZeroResults(fldName, "K", sis);
-		assertZeroResults(fldName, "KJ", sis);
-		assertZeroResults(fldName, "KJH", sis);
-		assertSingleResult("999LC3NoDec", fldName, "KJH2678", sis);
-		assertSingleResult("999LC3DecSpace", fldName, "KJH66.6", sis);
-		assertSingleResult("1033119", fldName, "BX4659", sis);
+		assertZeroResults(fldName, "Z");
+		assertSingleResult("6661112", fldName, "Z3871");
+		assertSingleResult("999LC1dec", fldName, "D764.7");
+		assertZeroResults(fldName, "C");
+		assertZeroResults(fldName, "CB");
+		assertSingleResult("999LC22", fldName, "CB3");		
+		assertZeroResults(fldName, "D810");
+		assertSingleResult("2913114", fldName, "DH135");
+		assertZeroResults(fldName, "K");
+		assertZeroResults(fldName, "KJ");
+		assertZeroResults(fldName, "KJH");
+		assertSingleResult("999LC3NoDec", fldName, "KJH2678");
+		assertSingleResult("999LC3DecSpace", fldName, "KJH66.6");
+		assertSingleResult("1033119", fldName, "BX4659");
 		// tricky cutter
-		assertZeroResults(fldName, "HC241", sis);
-		assertSingleResult("115472", fldName, "HC241.25", sis);
-		assertSingleResult("3400092", fldName, "DC34.5", sis);
+		assertZeroResults(fldName, "HC241");
+		assertSingleResult("115472", fldName, "HC241.25");
+		assertSingleResult("3400092", fldName, "DC34.5");
 				
 		// LCPER
-		assertSingleResult("460947", fldName, "E184", sis);
+		assertSingleResult("460947", fldName, "E184");
 	}
 
 
@@ -181,65 +181,65 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "callnum_search";
-		assertFieldMultiValued(fldName, solrCore);
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldOmitsNorms(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore); 
-		assertFieldNotStored(fldName, solrCore); 
+		assertFieldMultiValued(fldName);
+		assertTextFieldProperties(fldName);
+		assertFieldOmitsNorms(fldName);
+		assertFieldIndexed(fldName); 
+		assertFieldNotStored(fldName); 
 	
 		// LC 999 one letter
-		assertSingleResult("6661112", fldName, "Z3871.Z8", sis);
+		assertSingleResult("6661112", fldName, "Z3871.Z8");
 		// LC 999 one letter, space before Cutter
-		assertSingleResult("7772223", fldName, "\"F1356 .M464 2005\"", sis);
+		assertSingleResult("7772223", fldName, "\"F1356 .M464 2005\"");
 		// LC 999 one letter, decimal digits and space before Cutter
-		assertSingleResult("999LC1dec", fldName, "\"D764.7 .K72 1990\"", sis);
+		assertSingleResult("999LC1dec", fldName, "\"D764.7 .K72 1990\"");
 		// LC 999 two letters, space before Cutter
-		assertSingleResult("999LC2", fldName, "\"HG6046 .V28 1986\"", sis);
-		assertSingleResult("999LC22", fldName, "\"CB3 .A6 SUPPL. V.31\"", sis);
+		assertSingleResult("999LC2", fldName, "\"HG6046 .V28 1986\"");
+		assertSingleResult("999LC22", fldName, "\"CB3 .A6 SUPPL. V.31\"");
 		// LC 999 two letters, no space before Cutter
-		assertSingleResult("999LC2NoDec", fldName, "\"PQ2678.I26 P54 1992\"", sis);
+		assertSingleResult("999LC2NoDec", fldName, "\"PQ2678.I26 P54 1992\"");
 		// LC 999 three letters, no space before Cutter
-		assertSingleResult("999LC3NoDec", fldName, "\"KJH2678.I26 P54 1992\"", sis);
+		assertSingleResult("999LC3NoDec", fldName, "\"KJH2678.I26 P54 1992\"");
 		// LC 999 three letters, decimal digit, no space before Cutter
-		assertSingleResult("999LC3Dec", fldName, "\"KJH666.4.I26 P54 1992\"", sis);
+		assertSingleResult("999LC3Dec", fldName, "\"KJH666.4.I26 P54 1992\"");
 		// LC 999 three letters, decimal digit, space before Cutter
-		assertSingleResult("999LC3DecSpace", fldName, "\"KJH66.6 .I26 P54 1992\"", sis);
+		assertSingleResult("999LC3DecSpace", fldName, "\"KJH66.6 .I26 P54 1992\"");
 		// LC 999, LC 050, multiple LC facet values, 082 Dewey
-		assertSingleResult("2913114", fldName, "\"DH135 .P6 I65\"", sis);
+		assertSingleResult("2913114", fldName, "\"DH135 .P6 I65\"");
 		// LC 999, LC 050, multiple LC facet values, 082 Dewey
-		assertSingleResult("3400092", fldName, "\"DC34.5 .A78 L4 1996\"", sis);
+		assertSingleResult("3400092", fldName, "\"DC34.5 .A78 L4 1996\"");
 	
 		// LC 999, LC 050, tough cutter
-		assertSingleResult("115472", fldName, "\"HC241.25 .I4 D47\"", sis);
-		assertSingleResult("1033119", fldName, "\"BX4659.E85 W44\"", sis);
-		assertSingleResult("1033119", fldName, "\"BX4659 .E85 W44 1982\"", sis);
+		assertSingleResult("115472", fldName, "\"HC241.25 .I4 D47\"");
+		assertSingleResult("1033119", fldName, "\"BX4659.E85 W44\"");
+		assertSingleResult("1033119", fldName, "\"BX4659 .E85 W44 1982\"");
 		// 082 Dewey, LC 999, 050 (same value)
-		assertSingleResult("1732616", fldName, "\"QA273 .C83 1962\"", sis); 
+		assertSingleResult("1732616", fldName, "\"QA273 .C83 1962\""); 
 	
 		//  bad LC values
 		// LC 999 "NO CALL NUMBER" and 852 to ignore
-		assertZeroResults(fldName, "\"NO CALL NUMBER\"", sis);
-		assertZeroResults(fldName, "\"IN PROCESS\"", sis);
+		assertZeroResults(fldName, "\"NO CALL NUMBER\"");
+		assertZeroResults(fldName, "\"IN PROCESS\"");
 
 		//   this is a bad LC value, but not a bad call number, so it is included
-		assertSingleResult("7233951", fldName, "\"X578 .S64 1851\"", sis);
+		assertSingleResult("7233951", fldName, "\"X578 .S64 1851\"");
 	
 		// LCPER 999
-		assertSingleResult("460947", fldName, "\"E184.S75 R47A V.1 1980\"", sis); 
+		assertSingleResult("460947", fldName, "\"E184.S75 R47A V.1 1980\""); 
 		
 		// SUDOC 999 
-		assertSingleResult("5511738", fldName, "\"Y 4.AG 8/1:108-16\"", sis);
-		assertSingleResult("2678655", fldName, "\"GA 1.13:RCED-85-88\"", sis);
-		assertZeroResults(fldName, "\"" + govDocStr + "\"", sis); 
+		assertSingleResult("5511738", fldName, "\"Y 4.AG 8/1:108-16\"");
+		assertSingleResult("2678655", fldName, "\"GA 1.13:RCED-85-88\"");
+		assertZeroResults(fldName, "\"" + govDocStr + "\""); 
 	
 		// ALPHANUM 999 
-		assertSingleResult("4578538", fldName, "\"SUSEL-69048\"", sis); 
-		assertSingleResult("1261173", fldName, "\"MFILM N.S. 1350 REEL 230 NO. 3741\"", sis); 
-		assertSingleResult("1261173", fldName, "MFILM", sis); 
-		assertSingleResult("1234673", fldName, "MCD", sis); 
+		assertSingleResult("4578538", fldName, "\"SUSEL-69048\""); 
+		assertSingleResult("1261173", fldName, "\"MFILM N.S. 1350 REEL 230 NO. 3741\""); 
+		assertSingleResult("1261173", fldName, "MFILM"); 
+		assertSingleResult("1234673", fldName, "MCD"); 
 		
 		// ASIS 999 "INTERNET RESOURCE": No call number, but access Online
-		assertZeroResults(fldName, "\"INTERNET RESOURCE\"", sis); 
+		assertZeroResults(fldName, "\"INTERNET RESOURCE\""); 
 	}
 
 	/**
@@ -250,8 +250,8 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "callnum_top_facet";
-		assertFacetFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
+		assertFacetFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
 		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("690002");
@@ -265,8 +265,8 @@ public class CallNumberTests extends BibIndexTest {
 		docIds.add("3");
 		docIds.add("31");
 		docIds.add("DeweyVol");
-		assertSearchResults(fldName, "\"" + StanfordIndexer.DEWEY_TOP_FACET_VAL + "\"", docIds, sis);
-		assertSearchResults(fldName, "\"Dewey Classification\"", docIds, sis);
+		assertSearchResults(fldName, "\"" + StanfordIndexer.DEWEY_TOP_FACET_VAL + "\"", docIds);
+		assertSearchResults(fldName, "\"Dewey Classification\"", docIds);
 	}
 	
 
@@ -280,25 +280,25 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey_1digit_facet";
-		assertFacetFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
+		assertFacetFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
 		
-		assertSingleResult("690002", fldName, "\"100s - Philosophy & Psychology\"", sis);
-		assertSingleResult("2328381", fldName, "\"800s - Literature\"", sis);
+		assertSingleResult("690002", fldName, "\"100s - Philosophy & Psychology\"");
+		assertSingleResult("2328381", fldName, "\"800s - Literature\"");
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("2214009");
 		docIds.add("1849258");
-		assertSearchResults(fldName, "\"300s - Social Sciences\"", docIds, sis);
+		assertSearchResults(fldName, "\"300s - Social Sciences\"", docIds);
 		docIds.clear();
 		docIds.add("1");
 		docIds.add("11");
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds, sis);
+		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "\"900s - History & Geography\"", docIds, sis);
+		assertSearchResults(fldName, "\"900s - History & Geography\"", docIds);
 	}
 
 	/**
@@ -311,25 +311,25 @@ public class CallNumberTests extends BibIndexTest {
 		throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey_2digit_facet";
-		assertFacetFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
+		assertFacetFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
 		
-		assertSingleResult("690002", fldName, "\"150s - Psychology\"", sis);
-		assertSingleResult("2328381", fldName, "\"820s - English & Old English Literatures\"", sis);
-		assertSingleResult("1849258", fldName, "\"350s - Public Administration\"", sis);	
-		assertSingleResult("2214009", fldName, "\"370s - Education\"", sis);
+		assertSingleResult("690002", fldName, "\"150s - Psychology\"");
+		assertSingleResult("2328381", fldName, "\"820s - English & Old English Literatures\"");
+		assertSingleResult("1849258", fldName, "\"350s - Public Administration\"");	
+		assertSingleResult("2214009", fldName, "\"370s - Education\"");
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("1");
 		docIds.add("11");
-		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds, sis);
+		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds);
 		docIds.clear();
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "\"020s - Library & Information Sciences\"", docIds, sis);
+		assertSearchResults(fldName, "\"020s - Library & Information Sciences\"", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "\"990s - General History of Other Areas\"", docIds, sis);
+		assertSearchResults(fldName, "\"990s - General History of Other Areas\"", docIds);
 	}
 
 
@@ -342,25 +342,25 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey_b4cutter_facet";
-		assertFacetFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
+		assertFacetFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
 		
-		assertZeroResults(fldName, "159", sis);
-		assertSingleResult("690002", fldName, "159.32", sis);
-		assertZeroResults(fldName, "827", sis);
-		assertSingleResult("2328381", fldName, "827.5", sis); 
-		assertZeroResults(fldName, "352", sis);
-		assertSingleResult("1849258", fldName, "352.042", sis); 
-		assertZeroResults(fldName, "370", sis);
-		assertSingleResult("2214009", fldName, "370.1", sis); 
-		assertZeroResults(fldName, "WITHDRAWN", sis);
+		assertZeroResults(fldName, "159");
+		assertSingleResult("690002", fldName, "159.32");
+		assertZeroResults(fldName, "827");
+		assertSingleResult("2328381", fldName, "827.5"); 
+		assertZeroResults(fldName, "352");
+		assertSingleResult("1849258", fldName, "352.042"); 
+		assertZeroResults(fldName, "370");
+		assertSingleResult("2214009", fldName, "370.1"); 
+		assertZeroResults(fldName, "WITHDRAWN");
 		
-		assertSingleResult("1", fldName, "001", sis); 
-		assertSingleResult("11", fldName, "001.123", sis); 
-		assertSingleResult("2", fldName, "022", sis); 
-		assertSingleResult("22", fldName, "022.456", sis); 
-		assertSingleResult("3", fldName, "999", sis); 
-		assertSingleResult("31", fldName, "999.85", sis); 
+		assertSingleResult("1", fldName, "001"); 
+		assertSingleResult("11", fldName, "001.123"); 
+		assertSingleResult("2", fldName, "022"); 
+		assertSingleResult("22", fldName, "022.456"); 
+		assertSingleResult("3", fldName, "999"); 
+		assertSingleResult("31", fldName, "999.85"); 
 	}
 
 	/**
@@ -372,22 +372,22 @@ public class CallNumberTests extends BibIndexTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "callnum_search";
-		assertFieldMultiValued(fldName, solrCore);
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldOmitsNorms(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore); 
-		assertFieldNotStored(fldName, solrCore);  
+		assertFieldMultiValued(fldName);
+		assertTextFieldProperties(fldName);
+		assertFieldOmitsNorms(fldName);
+		assertFieldIndexed(fldName); 
+		assertFieldNotStored(fldName);  
 		
-		assertSingleResult("690002", fldName, "\"159.32 .W211\"", sis); 
-		assertSingleResult("2328381", fldName, "\"827.5 .S97TG\"", sis); 
-		assertSingleResult("1849258", fldName, "\"352.042 .C594 ED.2\"", sis); 
-		assertSingleResult("2214009", fldName, "\"370.1 .S655\"", sis); 
-		assertSingleResult("1", fldName, "\"1 .N44\"", sis); 
-		assertSingleResult("11", fldName, "\"1.123 .N44\"", sis); 
-		assertSingleResult("2", fldName, "\"22 .N47\"", sis); 
-		assertSingleResult("22", fldName, "\"22.456 .S655\"", sis); 
-		assertSingleResult("3", fldName, "\"999 .F67\"", sis); 
-		assertSingleResult("31", fldName, "\"999.85 .P84\"", sis); 
+		assertSingleResult("690002", fldName, "\"159.32 .W211\""); 
+		assertSingleResult("2328381", fldName, "\"827.5 .S97TG\""); 
+		assertSingleResult("1849258", fldName, "\"352.042 .C594 ED.2\""); 
+		assertSingleResult("2214009", fldName, "\"370.1 .S655\""); 
+		assertSingleResult("1", fldName, "\"1 .N44\""); 
+		assertSingleResult("11", fldName, "\"1.123 .N44\""); 
+		assertSingleResult("2", fldName, "\"22 .N47\""); 
+		assertSingleResult("22", fldName, "\"22.456 .S655\""); 
+		assertSingleResult("3", fldName, "\"999 .F67\""); 
+		assertSingleResult("31", fldName, "\"999.85 .P84\""); 
 	}
 
 
@@ -405,33 +405,33 @@ public class CallNumberTests extends BibIndexTest {
 		docIds.add("11");
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds, sis);
+		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "\"900s - History & Geography\"", docIds, sis);
+		assertSearchResults(fldName, "\"900s - History & Geography\"", docIds);
 
 		fldName = "dewey_2digit_facet";
 		docIds.clear();
 		docIds.add("1");
 		docIds.add("11");
-		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds, sis);
+		assertSearchResults(fldName, "\"000s - Computer Science, Information & General Works\"", docIds);
 		docIds.clear();
 		docIds.add("2");
 		docIds.add("22");
-		assertSearchResults(fldName, "\"020s - Library & Information Sciences\"", docIds, sis);
+		assertSearchResults(fldName, "\"020s - Library & Information Sciences\"", docIds);
 		docIds.clear();
 		docIds.add("3");
 		docIds.add("31");
-		assertSearchResults(fldName, "\"990s - General History of Other Areas\"", docIds, sis);
+		assertSearchResults(fldName, "\"990s - General History of Other Areas\"", docIds);
 
 		fldName = "dewey_b4cutter_facet";
-		assertSingleResult("1", fldName, "001", sis); 
-		assertSingleResult("11", fldName, "001.123", sis); 
-		assertSingleResult("2", fldName, "022", sis); 
-		assertSingleResult("22", fldName, "022.456", sis); 
-		assertSingleResult("3", fldName, "999", sis); 
-		assertSingleResult("31", fldName, "999.85", sis); 
+		assertSingleResult("1", fldName, "001"); 
+		assertSingleResult("11", fldName, "001.123"); 
+		assertSingleResult("2", fldName, "022"); 
+		assertSingleResult("22", fldName, "022.456"); 
+		assertSingleResult("3", fldName, "999"); 
+		assertSingleResult("31", fldName, "999.85"); 
 	}
 
 
@@ -449,8 +449,8 @@ public class CallNumberTests extends BibIndexTest {
 		docIds.add("2557826");
 		docIds.add("5511738");
 		docIds.add("2678655");
-		assertSearchResults(fldName, "\"" + StanfordIndexer.GOV_DOC_TOP_FACET_VAL + "\"", docIds, sis);
-		assertSearchResults(fldName, "\"" + govDocStr + "\"", docIds, sis);
+		assertSearchResults(fldName, "\"" + StanfordIndexer.GOV_DOC_TOP_FACET_VAL + "\"", docIds);
+		assertSearchResults(fldName, "\"" + govDocStr + "\"", docIds);
 	}
 
 
@@ -474,12 +474,12 @@ public class CallNumberTests extends BibIndexTest {
 		docIds.add("ssrcfiche");  // dewey
 		docIds.add("ssrcnwdoc");
 		docIds.add("sudoc");   // not a gov doc location, but sudoc call number
-		assertSearchResults(fldName, "\"" + StanfordIndexer.GOV_DOC_TOP_FACET_VAL + "\"", docIds, sis);
+		assertSearchResults(fldName, "\"" + StanfordIndexer.GOV_DOC_TOP_FACET_VAL + "\"", docIds);
 		
-		assertZeroResults(fldName, "\"300s - Social Sciences\"", sis);
+		assertZeroResults(fldName, "\"300s - Social Sciences\"");
 
 		// This is an LC call number, but the item has a gov doc location
-//		assertZeroResults(fldName, "\"Z - Bibliography, Library Science, Information Resources\"", sis);
+//		assertZeroResults(fldName, "\"Z - Bibliography, Library Science, Information Resources\"");
 	}
 
 
@@ -498,20 +498,20 @@ public class CallNumberTests extends BibIndexTest {
 		createIxInitVars("callNumberGovDocTests.mrc");
 		String fldName = "gov_doc_type_facet";
 
-		assertSingleResult("brit", fldName, "\"" + StanfordIndexer.GOV_DOC_BRIT_FACET_VAL + "\"", sis);
-		assertSingleResult("calif", fldName, "\"" + StanfordIndexer.GOV_DOC_CALIF_FACET_VAL + "\"", sis);
-		assertSingleResult("intl", fldName, "\"" + StanfordIndexer.GOV_DOC_INTL_FACET_VAL + "\"", sis);
+		assertSingleResult("brit", fldName, "\"" + StanfordIndexer.GOV_DOC_BRIT_FACET_VAL + "\"");
+		assertSingleResult("calif", fldName, "\"" + StanfordIndexer.GOV_DOC_CALIF_FACET_VAL + "\"");
+		assertSingleResult("intl", fldName, "\"" + StanfordIndexer.GOV_DOC_INTL_FACET_VAL + "\"");
 		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("fed");
 		docIds.add("ssrcdocs");
 		docIds.add("ssrcfiche");
 		docIds.add("ssrcnwdoc");
-		assertSearchResults(fldName, "\"" + StanfordIndexer.GOV_DOC_FED_FACET_VAL + "\"", docIds, sis);
+		assertSearchResults(fldName, "\"" + StanfordIndexer.GOV_DOC_FED_FACET_VAL + "\"", docIds);
 
-		assertSingleResult("sudoc", fldName, "\"" + StanfordIndexer.GOV_DOC_UNKNOWN_FACET_VAL + "\"", sis);
+		assertSingleResult("sudoc", fldName, "\"" + StanfordIndexer.GOV_DOC_UNKNOWN_FACET_VAL + "\"");
 		
-		assertZeroResults(fldName, "\"" + govDocStr + "\"", sis);
+		assertZeroResults(fldName, "\"" + govDocStr + "\"");
 	}
 
 
@@ -528,7 +528,7 @@ public class CallNumberTests extends BibIndexTest {
 		docIds.add("6280316");
 		docIds.add("7117119");
 		docIds.add("7531910");
-		assertSearchResults(afld, fldVal, docIds, sis);
+		assertSearchResults(afld, fldVal, docIds);
 	}
 
 
@@ -541,7 +541,7 @@ public class CallNumberTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException
 	{
 		String fldName = "lc_b4cutter_facet";
-		assertZeroResults(fldName, "PQ9661", sis);
+		assertZeroResults(fldName, "PQ9661");
 	}
 
 	/**
@@ -557,69 +557,69 @@ public class CallNumberTests extends BibIndexTest {
 		// LC: no volume info
 		String callnum = "HG6046 .V28 1986";
 		String shelfkey = CallNumUtils.getLCShelfkey(callnum, "999LC2");
-		assertSingleResult("999LC2", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis);
+		assertSingleResult("999LC2", fldName, "\"" + shelfkey.toLowerCase() + "\"");
 
 		// LC: volume info to lop off
 		callnum = "CB3 .A6 SUPPL. V.31";
 		shelfkey = CallNumUtils.getLCShelfkey("CB3 .A6 SUPPL.", "999LC22");
-		assertSingleResult("999LC22", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis);
+		assertSingleResult("999LC22", fldName, "\"" + shelfkey.toLowerCase() + "\"");
 		
 		// LCPER
 		callnum = "E184.S75 R47A V.1 1980";
 		shelfkey = CallNumUtils.getLCShelfkey("E184.S75 R47A", "460947");
-		assertSingleResult("460947", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis);
+		assertSingleResult("460947", fldName, "\"" + shelfkey.toLowerCase() + "\"");
 
 		// this is a bad LC value, but not a bad call number, so it is included
 		// (it's actually sudoc)
 		callnum = "X578 .S64 1851";
 		shelfkey = CallNumUtils.getLCShelfkey(callnum, "7233951");
-		assertSingleResult("7233951", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis);
+		assertSingleResult("7233951", fldName, "\"" + shelfkey.toLowerCase() + "\"");
 		
 		//  bad LC values
 		// LC 999 "NO CALL NUMBER" and 852 to ignore
-		assertZeroResults(fldName, "\"NO CALL NUMBER\"", sis);
-		assertZeroResults(fldName, "\"IN PROCESS\"", sis);
+		assertZeroResults(fldName, "\"NO CALL NUMBER\"");
+		assertZeroResults(fldName, "\"IN PROCESS\"");
 
 		// Dewey: no vol info
 		callnum = "999.85 .P84";
 		shelfkey = CallNumUtils.getDeweyShelfKey(callnum);
-		assertSingleResult("31", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("31", fldName, "\"" + shelfkey.toLowerCase() + "\""); 
 		
 		// Dewey: vol info to lop off
 		callnum = "666 .F67 VOL. 5";
 		shelfkey = CallNumUtils.getDeweyShelfKey("666 .F67");
-		assertSingleResult("DeweyVol", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("DeweyVol", fldName, "\"" + shelfkey.toLowerCase() + "\""); 
 		
 // TODO: implement SUDOC volume lopping and shelving key processing		
 
 		// SUDOC 999  -  uses raw callno
 		callnum = "Y 4.AG 8/1:108-16";
 		shelfkey = CallNumUtils.normalizeSuffix(callnum);
-		assertSingleResult("5511738", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("5511738", fldName, "\"" + shelfkey.toLowerCase() + "\""); 
 		
 		callnum = "GA 1.13:RCED-85-88";
 		shelfkey = CallNumUtils.normalizeSuffix(callnum);
-		assertSingleResult("2678655", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("2678655", fldName, "\"" + shelfkey.toLowerCase() + "\""); 
 
-		assertZeroResults(fldName, "\"" + govDocStr + "\"", sis); 
+		assertZeroResults(fldName, "\"" + govDocStr + "\""); 
 	
 // TODO: implement ALPHANUM volume lopping and shelving key processing		
 
 		// ALPHANUM 999 - uses raw callno
 		callnum = "SUSEL-69048";
 		shelfkey = CallNumUtils.normalizeSuffix(callnum);
-		assertSingleResult("4578538", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("4578538", fldName, "\"" + shelfkey.toLowerCase() + "\""); 
 		
 		callnum = "MFILM N.S. 1350 REEL 230 NO. 3741";
 		shelfkey = CallNumUtils.normalizeSuffix(callnum);
-		assertSingleResult("1261173", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("1261173", fldName, "\"" + shelfkey.toLowerCase() + "\""); 
 
 		callnum = "MCD Brendel Plays Beethoven's Eroica variations";
 		shelfkey = CallNumUtils.normalizeSuffix(callnum);
-		assertSingleResult("1234673", fldName, "\"" + shelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("1234673", fldName, "\"" + shelfkey.toLowerCase() + "\""); 
 		
 		// ASIS 999 "INTERNET RESOURCE": No call number, but access Online
-		assertZeroResults(fldName, "\"INTERNET RESOURCE\"", sis); 
+		assertZeroResults(fldName, "\"INTERNET RESOURCE\""); 
 	}
 
 
@@ -636,7 +636,7 @@ public class CallNumberTests extends BibIndexTest {
 		String callnum = "HG6046 .V28 1986";
 		String shelfkey = CallNumUtils.getLCShelfkey(callnum, "999LC2");
 		String reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("999LC2", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis);
+		assertSingleResult("999LC2", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"");
 
 		// LC: volume info to lop off
 		callnum = "CB3 .A6 SUPPL. V.31";
@@ -644,39 +644,39 @@ public class CallNumberTests extends BibIndexTest {
 		String lopped = "CB3 .A6 SUPPL.";
 		shelfkey = CallNumUtils.getLCShelfkey(lopped, "999LC22");
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("999LC22", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis);
+		assertSingleResult("999LC22", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"");
 		
 		// LCPER
 		callnum = "E184.S75 R47A V.1 1980";
 		lopped = "E184.S75 R47A";
 		shelfkey = CallNumUtils.getLCShelfkey(lopped, "460947");
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("460947", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis);
+		assertSingleResult("460947", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"");
 
 		// this is a bad LC value, but not a bad call number, so it is included
 		// (it's actually sudoc)
 		callnum = "X578 .S64 1851";
 		shelfkey = CallNumUtils.getLCShelfkey(callnum, "7233951");
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("7233951", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis);
+		assertSingleResult("7233951", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"");
 		
 		//  bad LC values
 		// LC 999 "NO CALL NUMBER" and 852 to ignore
-		assertZeroResults(fldName, "\"NO CALL NUMBER\"", sis);
-		assertZeroResults(fldName, "\"IN PROCESS\"", sis);
+		assertZeroResults(fldName, "\"NO CALL NUMBER\"");
+		assertZeroResults(fldName, "\"IN PROCESS\"");
 
 		// Dewey: no vol info
 		callnum = "999.85 .P84";
 		shelfkey = CallNumUtils.getDeweyShelfKey(callnum);
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("31", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("31", fldName, "\"" + reverseShelfkey.toLowerCase() + "\""); 
 		
 		// Dewey: vol info to lop off
 		callnum = "352.042 .C594 ED.2";
 		lopped = "352.042 .C594 ED.2";
 		shelfkey = CallNumUtils.getDeweyShelfKey(lopped);
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("1849258", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("1849258", fldName, "\"" + reverseShelfkey.toLowerCase() + "\""); 
 		
 // TODO: implement SUDO volume lopping and shelving key processing	
 		
@@ -684,16 +684,16 @@ public class CallNumberTests extends BibIndexTest {
 		callnum = "Y 4.AG 8/1:108-16";
 		shelfkey = CallNumUtils.normalizeSuffix(callnum);
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("5511738", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("5511738", fldName, "\"" + reverseShelfkey.toLowerCase() + "\""); 
 		
 		callnum = "GA 1.13:RCED-85-88";
 		shelfkey = CallNumUtils.normalizeSuffix(callnum);
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("2678655", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("2678655", fldName, "\"" + reverseShelfkey.toLowerCase() + "\""); 
 
 		shelfkey = CallNumUtils.normalizeSuffix(govDocStr);
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertZeroResults(fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis); 
+		assertZeroResults(fldName, "\"" + reverseShelfkey.toLowerCase() + "\""); 
 	
 // TODO: implement ALPHANUM volume lopping and shelving key processing		
 
@@ -701,20 +701,20 @@ public class CallNumberTests extends BibIndexTest {
 		callnum = "SUSEL-69048";
 		shelfkey = CallNumUtils.normalizeSuffix(callnum);
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("4578538", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("4578538", fldName, "\"" + reverseShelfkey.toLowerCase() + "\""); 
 		
 		callnum = "MFILM N.S. 1350 REEL 230 NO. 3741";
 		shelfkey = CallNumUtils.normalizeSuffix(callnum);
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("1261173", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("1261173", fldName, "\"" + reverseShelfkey.toLowerCase() + "\""); 
 
 		callnum = "MCD Brendel Plays Beethoven's Eroica variations";
 		shelfkey = CallNumUtils.normalizeSuffix(callnum);
 		reverseShelfkey = CallNumUtils.getReverseShelfKey(shelfkey);
-		assertSingleResult("1234673", fldName, "\"" + reverseShelfkey.toLowerCase() + "\"", sis); 
+		assertSingleResult("1234673", fldName, "\"" + reverseShelfkey.toLowerCase() + "\""); 
 		
 		// ASIS 999 "INTERNET RESOURCE": No call number, but access Online
-		assertZeroResults(fldName, "\"INTERNET RESOURCE\"", sis); 
+		assertZeroResults(fldName, "\"INTERNET RESOURCE\""); 
 	}
 
 	/**

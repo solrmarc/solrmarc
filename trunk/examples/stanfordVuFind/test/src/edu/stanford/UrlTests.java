@@ -8,7 +8,7 @@ import org.junit.*;
 import org.xml.sax.SAXException;
 
 
-public class UrlTests extends BibIndexTest {
+public class UrlTests extends AbstractStanfordVufindTest {
 
 	private final String testDataFname = "onlineFormat.mrc";
 

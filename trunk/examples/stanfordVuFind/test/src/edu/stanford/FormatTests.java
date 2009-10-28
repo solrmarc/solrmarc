@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
  * @author Naomi Dushay
  *
  */
-public class FormatTests extends BibIndexTest {
+public class FormatTests extends AbstractStanfordVufindTest {
 	
 	private final String testDataFname = "formatTests.mrc";
 	// TODO: change this field name to format_facet

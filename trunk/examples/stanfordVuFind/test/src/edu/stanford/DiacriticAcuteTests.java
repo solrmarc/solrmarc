@@ -17,7 +17,7 @@ import org.xml.sax.SAXException;
  * 
  * @author Naomi Dushay
  */
-public class DiacriticAcuteTests extends BibIndexTest {
+public class DiacriticAcuteTests extends AbstractStanfordVufindTest {
 
 	private final String testDataFname = "diacriticTests.mrc";
 	

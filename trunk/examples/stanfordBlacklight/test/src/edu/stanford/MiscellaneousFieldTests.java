@@ -6,6 +6,8 @@ import java.util.HashSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.solrmarc.solr.DocumentProxy;
+import org.solrmarc.solr.SolrSearcherProxy;
 import org.xml.sax.SAXException;
 
 import org.junit.*;
@@ -17,7 +19,7 @@ import static org.junit.Assert.*;
  * junit4 tests for Stanford University revisions to solrmarc
  * @author Naomi Dushay
  */
-public class MiscellaneousFieldTests extends BibIndexTest {
+public class MiscellaneousFieldTests extends AbstractStanfordBlacklightTest {
 	
 	/**
 	 * Test correct document id - the id is from 001 with an a in front
@@ -28,25 +30,25 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 	{
 		String fldName = "id";
 		createIxInitVars("idTests.mrc");
-		assertTextFieldProperties(fldName, solrCore, sis);
-		assertFieldNotMultiValued(fldName, solrCore);		
-		assertFieldStored(fldName, solrCore);
-		assertFieldIndexed(fldName, solrCore);
+		assertTextFieldProperties(fldName);
+		assertFieldNotMultiValued(fldName);		
+		assertFieldStored(fldName);
+		assertFieldIndexed(fldName);
 		
-        int numDocs = sis.getReader().numDocs();
+        int numDocs = getNumMatchingDocs("collection", "sirsi");
         assertEquals("Number of documents in index incorrect: ", 3, numDocs);
-        assertDocNotPresent("001noSubNo004", sis);
-        assertDocPresent("001suba", sis);
-        assertDocNotPresent("001and004nosub", sis);
-        assertDocNotPresent("004noSuba", sis);
-        assertDocPresent("001subaAnd004nosub", sis);
-        assertDocNotPresent("004noSuba", sis);
-        assertDocPresent("001subaAnd004suba", sis);
-        assertDocNotPresent("004suba", sis);
+        assertDocNotPresent("001noSubNo004");
+        assertDocPresent("001suba");
+        assertDocNotPresent("001and004nosub");
+        assertDocNotPresent("004noSuba");
+        assertDocPresent("001subaAnd004nosub");
+        assertDocNotPresent("004noSuba");
+        assertDocPresent("001subaAnd004suba");
+        assertDocNotPresent("004suba");
         
-        assertSingleResult("001suba", fldName, "\"001suba\"", sis);
-        assertSingleResult("001subaAnd004nosub", fldName, "\"001subaAnd004nosub\"", sis);
-        assertSingleResult("001subaAnd004suba", fldName, "\"001subaAnd004suba\"", sis);
+        assertSingleResult("001suba", fldName, "\"001suba\"");
+        assertSingleResult("001subaAnd004nosub", fldName, "\"001subaAnd004nosub\"");
+        assertSingleResult("001subaAnd004suba", fldName, "\"001subaAnd004suba\"");
 	}
 	
 
@@ -61,14 +63,14 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 		String fldName = "language";
 		createIxInitVars("langTests.mrc");
 	
-		assertZeroResults(fldName, "null", sis);
-		assertZeroResults(fldName, "\\?\\?\\?", sis);
-		assertZeroResults(fldName, "mis", sis);     // 008mis041ak
-		assertZeroResults(fldName, "Miscellaneous languages", sis);
-		assertZeroResults(fldName, "mul", sis);     // 008mul041atha
-		assertZeroResults(fldName, "Multiple languages", sis); 
-		assertZeroResults(fldName, "und", sis);
-		assertZeroResults(fldName, "zxx", sis);
+		assertZeroResults(fldName, "null");
+		assertZeroResults(fldName, "\\?\\?\\?");
+		assertZeroResults(fldName, "mis");     // 008mis041ak
+		assertZeroResults(fldName, "Miscellaneous languages");
+		assertZeroResults(fldName, "mul");     // 008mul041atha
+		assertZeroResults(fldName, "Multiple languages"); 
+		assertZeroResults(fldName, "und");
+		assertZeroResults(fldName, "zxx");
 	}
 
 	
@@ -81,24 +83,24 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 	{
 		String fldName = "all_search";
 		createIxInitVars("allfieldsTests.mrc");
-		assertSearchFldOneValProps(fldName, solrCore, sis);
+		assertSearchFldOneValProps(fldName);
 		
 		String docId = "allfields1";
 
 		// 245 just for good measure
-        assertSingleResult(docId, fldName, "should", sis); 
+        assertSingleResult(docId, fldName, "should"); 
         
         // 0xx fields are not included except 024, 027, 028
-        assertSingleResult(docId, fldName, "2777802000", sis); // 024
-        assertSingleResult(docId, fldName, "90620", sis); // 024
-        assertSingleResult(docId, fldName, "technical", sis); // 027
-        assertSingleResult(docId, fldName, "vibrations", sis); // 027
-        assertZeroResults(fldName, "ocolcm", sis);  // 035
-        assertZeroResults(fldName, "orlob", sis);  // 040
+        assertSingleResult(docId, fldName, "2777802000"); // 024
+        assertSingleResult(docId, fldName, "90620"); // 024
+        assertSingleResult(docId, fldName, "technical"); // 027
+        assertSingleResult(docId, fldName, "vibrations"); // 027
+        assertZeroResults(fldName, "ocolcm");  // 035
+        assertZeroResults(fldName, "orlob");  // 040
 
         // 3xx fields ARE included
-        assertSingleResult(docId, fldName, "sound", sis); // 300
-        assertSingleResult(docId, fldName, "annual", sis);  // 310
+        assertSingleResult(docId, fldName, "sound"); // 300
+        assertSingleResult(docId, fldName, "annual");  // 310
         
         // 6xx subject fields - we're including them, even though
         // fulltopic is all subfields of all 600, 610, 630, 650, 655
@@ -107,9 +109,9 @@ public class MiscellaneousFieldTests extends BibIndexTest {
         //   but topics are not.
         
         // 9xx fields are NOT included
-        assertZeroResults(fldName, "EDATA", sis);  // 946
-        assertZeroResults(fldName, "pamphlet", sis);  // 947
-        assertZeroResults(fldName, "stacks", sis);  // 999
+        assertZeroResults(fldName, "EDATA");  // 946
+        assertZeroResults(fldName, "pamphlet");  // 947
+        assertZeroResults(fldName, "stacks");  // 999
 	}
 
 
@@ -122,8 +124,8 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 	{
 		createIxInitVars("allfieldsTests.mrc");
 	    String fldName = "marc21";
-	    assertDisplayFldProps(fldName, solrCore, sis);
-	    assertFieldNotMultiValued(fldName, solrCore);
+	    assertDisplayFieldProperties(fldName);
+	    assertFieldNotMultiValued(fldName);
 	}
 
 
@@ -136,7 +138,7 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 	{
 		createIxInitVars("allfieldsTests.mrc");
 	    String fldName = "open_search";
-	    assertDisplayFldProps(fldName, solrCore, sis);
+	    assertDisplayFieldProperties(fldName);
 	}
 
 	/**
@@ -153,17 +155,34 @@ public class MiscellaneousFieldTests extends BibIndexTest {
 		fields.add("spell_author");
 		fields.add("spell_subject");
 		for (String fldName : fields) {
-		    assertTextFieldProperties(fldName, solrCore, sis);
-		    assertFieldOmitsNorms(fldName, solrCore);
-		    assertFieldIndexed(fldName, solrCore);
-		    assertFieldStored(fldName, solrCore);
+		    assertTextFieldProperties(fldName);
+		    assertFieldOmitsNorms(fldName);
+		    assertFieldIndexed(fldName);
+		    assertFieldStored(fldName);
 		}
-		assertFieldNotMultiValued("spell", solrCore);
-		assertFieldMultiValued("spell_title", solrCore);
-		assertFieldMultiValued("spell_author", solrCore);
-		assertFieldMultiValued("spell_subject", solrCore);
+		assertFieldNotMultiValued("spell");
+		assertFieldMultiValued("spell_title");
+		assertFieldMultiValued("spell_author");
+		assertFieldMultiValued("spell_subject");
 	}
 
+
+	/**
+	 * test preservation of field ordering from marc21 input to marc21 stored in record
+	 */
+//@Test
+	public final void testFieldOrdering() 
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		createIxInitVars("fieldOrdering.mrc");
+		int solrDocNum = getSingleDocNum(docIDfname, "1");
+		DocumentProxy doc = getSearcherProxy().getDocumentProxyBySolrDocNum(solrDocNum);
+		String marc21 = doc.getValuesForField("marc21")[0];
+		int ix650 = marc21.indexOf("650first");
+		int ix600 = marc21.indexOf("600second");
+		assertTrue("fields are NOT in the original order", ix650 < ix600);
+	}
+	
 
 	/**
 	 * Hokey horrible way to create a test index.

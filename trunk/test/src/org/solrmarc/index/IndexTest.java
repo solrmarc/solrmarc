@@ -3,6 +3,7 @@ package org.solrmarc.index;
 import static org.junit.Assert.*;
 import org.junit.After;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -66,6 +67,8 @@ public abstract class IndexTest {
         importer.finish();
         
         solrCoreProxy = (SolrCoreProxy)importer.getSolrProxy();
+        solrCoreProxy.commit(false);
+        searcherProxy = new SolrSearcherProxy(solrCoreProxy);
 	}
 	
 //	private void deleteAllRecordsFromSolrIndex(String configPropFilename) throws IOException
@@ -82,7 +85,7 @@ public abstract class IndexTest {
 //        importer = null;
 //    }
 //
-    private SolrSearcherProxy getSearcherProxy()
+    protected SolrSearcherProxy getSearcherProxy()
 	{
 	    while (searcherProxy == null)
 	    {
@@ -139,26 +142,6 @@ public abstract class IndexTest {
 ////		System.setProperty("marc.permissive", "true");
 //	}
 	
-//	public static void copyFile(File sourceFile, File destFile) 
-//			throws IOException {
-//		if (!destFile.exists())
-//		  destFile.createNewFile();
-//		 
-//		FileChannel source = null;
-//		FileChannel destination = null;
-//		try {
-//			source = new FileInputStream(sourceFile).getChannel();
-//			destination = new FileOutputStream(destFile).getChannel();
-//			destination.transferFrom(source, 0, source.size());
-//		}
-//		finally {
-//			if(source != null)
-//				source.close();
-//			if (destination != null)
-//				destination.close();
-//		}
-//	}
-
 	
 	/**
 	 * delete the directory indicated by the argument.
@@ -194,13 +177,12 @@ public abstract class IndexTest {
      * @param docId - the identifier of the SOLR/Lucene document
      * @param fldname - the field to be searched
      * @param fldVal - field value to be found
-     * @param sis
      */
     public final void assertSingleResult(String docId, String fldName, String fldVal) 
             throws ParserConfigurationException, SAXException, IOException 
     {
         int solrDocNum = getSingleDocNum(fldName, fldVal);
-        String recordID = getSearcherProxy().getIdStringBySolrDocNum(solrDocNum);
+        String recordID = getSearcherProxy().getDocIdFromSolrDocNum(solrDocNum, docIDfname);
         assertTrue("doc \"" + docId + "\" does not have " + fldName + " of " + fldVal, recordID.equals(docId));
     
     }
@@ -215,7 +197,6 @@ public abstract class IndexTest {
 	 * Get the Lucene document with the given id from the solr index at the
 	 *  solrDataDir
 	 * @param doc_id - the unique id of the lucene document in the index
-	 * @param sis - SolrIndexSearcher for the relevant index
 	 * @return the Lucene document matching the given id
 	 */
 	public final DocumentProxy getDocument(String doc_id)
@@ -223,7 +204,7 @@ public abstract class IndexTest {
 	{
 		int solrDocNums[] = getSearcherProxy().getDocSet(docIDfname, doc_id);
 		if (solrDocNums.length == 1)
-			return getSearcherProxy().getDocumentBySolrDocNum(solrDocNums[0]);
+			return getSearcherProxy().getDocumentProxyBySolrDocNum(solrDocNums[0]);
 		else
 			return null;		
 	}
@@ -376,7 +357,7 @@ public abstract class IndexTest {
 		// TODO: repeatable field vs. not ...
 		//  TODO: check for single occurrence of field value, even for repeatable field
 		int solrDocNum = getSingleDocNum(docIDfname, doc_id);
-		DocumentProxy doc = getSearcherProxy().getDocumentBySolrDocNum(solrDocNum);
+		DocumentProxy doc = getSearcherProxy().getDocumentProxyBySolrDocNum(solrDocNum);
 		if (doc.hasFieldWithValue(fldName, fldVal)) return;
 		fail("Field " + fldName + " did not contain value \"" + fldVal + "\" in doc " + doc_id);
 	}
@@ -387,7 +368,7 @@ public abstract class IndexTest {
 		// TODO: repeatable field vs. not ...
 		// TODO: check for single occurrence of field value, even for repeatable field
         int solrDocNum = getSingleDocNum(docIDfname, doc_id);
-        DocumentProxy doc = getSearcherProxy().getDocumentBySolrDocNum(solrDocNum);
+        DocumentProxy doc = getSearcherProxy().getDocumentProxyBySolrDocNum(solrDocNum);
         if (doc.hasFieldWithValue(fldName, fldVal)) 
             fail("Field " + fldName + " contained value \"" + fldVal + "\" in doc " + doc_id);
 	}
@@ -407,17 +388,24 @@ public abstract class IndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 	    int solrDocNum = getSingleDocNum(docIDfname, doc_id);
-	    DocumentProxy doc = getSearcherProxy().getDocumentBySolrDocNum(solrDocNum);
+	    DocumentProxy doc = getSearcherProxy().getDocumentProxyBySolrDocNum(solrDocNum);
 	    String vals[] = doc.getValuesForField(fldName);
 	    if (vals == null || vals.length == 0) 
             return;
         fail("Field " + fldName + " found in doc \"" + doc_id + "\"");
 	}
 
+	/**
+	 * Do a search for the implied term query and assert the search results
+	 *  have docIds that are an exact match of the set of docIds passed in
+	 * @param fldName - name of the field to be searched
+	 * @param fldVal - value of the field to be searched
+	 * @param docIds - Set of doc ids expected to be in the results
+	 */
 	public final void assertSearchResults(String fldName, String fldVal, Set<String> docIds) 
 			throws ParserConfigurationException, SAXException, IOException
 	{
-        String resultDocIds[] = getSearcherProxy().getIdSet(fldName, fldVal);
+        String resultDocIds[] = getSearcherProxy().getDocIdsFromSearch(fldName, fldVal, docIDfname);
         assertTrue("Expected " + docIds.size() + " documents for " + fldName + " search \"" 
                    + fldVal + "\" but got " + resultDocIds.length, docIds.size() == resultDocIds.length);
         
@@ -439,101 +427,151 @@ public abstract class IndexTest {
 	/**
 	 * get all the documents matching the implied term search and check for
 	 *  expected number of results
-	 * @param fld
-	 * @param text
+     * @param fldName - the field to be searched
+     * @param fldVal - field value to be found
 	 * @param numExp the number of documents expected
-	 * @param sis - SolrIndexSearcher for relevant index
 	 * @return List of the Documents returned from the search
 	 */
-	public final void assertResultSize(String fld, String text, int numExp) 
+	public final void assertResultSize(String fldName, String fldVal, int numExp) 
 			throws ParserConfigurationException, SAXException, IOException 
 	{
-        int num = getSearcherProxy().getNumberOfHits(fld, text); 
-		assertTrue("Expected " + numExp + " documents for " + fld + " search \"" 
-				+ text + "\" but got " + num, num == numExp);
+        int num = getSearcherProxy().getNumberOfHits(fldName, fldVal); 
+		assertTrue("Expected " + numExp + " documents for " + fldName + " search \"" 
+				+ fldVal + "\" but got " + num, num == numExp);
 	}
 
-	public final String[] getDocIDList(String fld, String text)
+	/**
+	 * get the ids of all the documents matching the implied term search
+     * @param fldName - the field to be searched
+     * @param fldVal - field value to be found
+	 */
+	public final String[] getDocIDList(String fldName, String fldVal)
 	        throws ParserConfigurationException, SAXException, IOException 
 	{
-	    return searcherProxy.getIdSet(fld, text);
+	    return searcherProxy.getDocIdsFromSearch(fldName, fldVal, docIDfname);
 	}
 	
 	/**
 	 * Given an index field name and value, return a list of Lucene Documents
 	 *  that match the term query sent to the index
 	 * @param fld - the name of the field to be searched in the lucene index
-	 * @param text - the string to be searched in the given field
-	 * @param sis - SolrIndexSearcher for relevant index
+	 * @param value - the string to be searched in the given field
 	 * @return a list of Lucene Documents
 	 */
-	public final List<DocumentProxy> getAllMatchingDocs(String fld, String text) 
+	public final List<DocumentProxy> getAllMatchingDocs(String fld, String value) 
 			throws ParserConfigurationException, SAXException, IOException 
 	{
 		List<DocumentProxy> docList = new ArrayList<DocumentProxy>();
-	    int solrDocNums[] = getSearcherProxy().getDocSet(fld, text);
+	    int solrDocNums[] = getSearcherProxy().getDocSet(fld, value);
 	    
 	    for (int solrDocNum : solrDocNums)	        
 	    {
-	    	docList.add( getSearcherProxy().getDocumentBySolrDocNum(solrDocNum) );
+	    	docList.add( getSearcherProxy().getDocumentProxyBySolrDocNum(solrDocNum) );
 	    }
 	    return docList;
 	}
 
+
 	/**
-	 * Given an index field name and value, return a list of Lucene Documents
-	 *  that match the term query sent to the index, sorted as indicated
+	 * return the number of docs that match the implied term query
 	 * @param fld - the name of the field to be searched in the lucene index
-	 * @param text - the string to be searched in the given field
-	 * @param sortfld - name of the field results should be sorted by
-	 * @param sis - SolrIndexSearcher for relevant index
-	 * @return a list of Lucene Documents sorted (ascending) per indicated field
+	 * @param value - the string to be searched in the given field
 	 */
-	public final List<DocumentProxy> getSortedDocs(String fld, String text, String sortfld) 
-			throws ParserConfigurationException, SAXException, IOException {
-        List<DocumentProxy> docList = new ArrayList<DocumentProxy>();
-        int solrDocNums[] = getSearcherProxy().getSortedDocList(fld, text, sortfld);
-        
-        for (int solrDocNum : solrDocNums)          
-        {
-            docList.add( getSearcherProxy().getDocumentBySolrDocNum(solrDocNum) );
-        }
-        return docList;
+	public int getNumMatchingDocs(String fld, String value)
+			throws IOException
+	{
+        return getSearcherProxy().getNumberOfHits(fld, value);
+	}
+
+	/**
+	 * Given an index field name and value, return a list of Documents
+	 *  that match the term query sent to the index, sorted in ascending
+	 *  order per the sort fld
+	 * @param fld - the name of the field to be searched in the lucene index
+	 * @param value - the string to be searched in the given field
+	 * @param sortfld - name of the field by which results should be sorted
+	 *   (ascending)
+	 * @return a sorted list of DocumentProxy objects
+	 */
+	public final List<DocumentProxy> getAscSortDocs(String fld, String value, String sortfld) 
+			throws IOException, InstantiationException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException 
+	{
+        int solrDocNums[] = getSearcherProxy().getAscSortDocNums(fld, value, sortfld);
+        return getDocProxiesFromDocNums(solrDocNums);
 	}
 	
-//	public static final SolrIndexSearcher getSolrIndexSearcher(String solrPath, String solrDataDir)
-//			throws ParserConfigurationException, IOException, SAXException {
-//		return getSolrIndexSearcher(getSolrCore(solrPath, solrDataDir));
-//	}
-//
-//	public static final SolrIndexSearcher getSolrIndexSearcher(SolrCore solrCore)
-//			throws ParserConfigurationException, IOException, SAXException {
-//		return solrCore.getSearcher().get();
-//	}
-//
-//	public static final SolrCore getSolrCore(String solrPath, String solrDataDir)
-//			throws ParserConfigurationException, IOException, SAXException {
-//		SolrCoreProxy solrCoreProxy = SolrCoreLoader.loadCore(solrPath, solrDataDir, null, logger);
-//		return (SolrCore) solrCoreProxy.getCore();
-//	}
-
-//	public static final IndexReader getIndexReader(String solrPath, String solrDataDir)
-//			throws ParserConfigurationException, IOException, SAXException {
-//	    return getSolrIndexSearcher(solrPath, solrDataDir).getReader();
-//	}
-//
-//	public static final IndexReader getIndexReader(SolrCore solrCore)
-//			throws ParserConfigurationException, IOException, SAXException {
-//	    return getSolrIndexSearcher(solrCore).getReader();
-//	}
-
+	/**
+	 * Given an index field name and value, return a list of Documents
+	 *  that match the term query sent to the index, sorted in descending
+	 *  order per the sort fld
+	 * @param fld - the name of the field to be searched in the lucene index
+	 * @param value - the string to be searched in the given field
+	 * @param sortfld - name of the field by which results should be sorted
+	 *   (descending)
+	 * @return a sorted list of DocumentProxy objects
+	 */
+	public final List<DocumentProxy> getDescSortDocs(String fld, String value, String sortfld) 
+            throws IOException, InstantiationException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException 
+	{
+        int solrDocNums[] = getSearcherProxy().getDescSortDocNums(fld, value, sortfld);
+        return getDocProxiesFromDocNums(solrDocNums);
+	}
+		
+	/**
+	 * Given an index field name and value, return a list of Lucene Documents
+	 *  numbers that match the term query sent to the index, sorted in ascending
+	 *  order per the sort fld
+	 * @param fld - the name of the field to be searched in the lucene index
+	 * @param value - the string to be searched in the given field
+	 * @param sortfld - name of the field by which results should be sorted
+	 *   (ascending)
+	 * @return an array of int that are sorted (ascending) solr document 
+	 * numbers
+	 */
+	public final int[] getAscSortDocNums(String fld, String value, String sortfld) 
+			throws IOException, NoSuchMethodException, ClassNotFoundException, InvocationTargetException, IllegalAccessException, InstantiationException
+	{
+        return getSearcherProxy().getAscSortDocNums(fld, value, sortfld);
+	}
+	
+	/**
+	 * Given an index field name and value, return a list of Lucene Documents
+	 *  numbers that match the term query sent to the index, sorted in descending
+	 *  order per the sort fld
+	 * @param fld - the name of the field to be searched in the lucene index
+	 * @param value - the string to be searched in the given field
+	 * @param sortfld - name of the field by which results should be sorted
+	 *   (descending)
+	 * @return an array of int that are sorted (descending) solr document 
+	 * numbers
+	 */
+	public final int[] getDescSortDocNums(String fld, String value, String sortfld) 
+            throws IOException, InstantiationException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException 
+	{
+        return getSearcherProxy().getDescSortDocNums(fld, value, sortfld);
+	}
+	
+	
+	/**
+	 * given an array of Solr document numbers as int, return a List of
+	 * DocumentProxy objects corresponding to the Solr doc nums.  Order is
+	 * maintained.
+	 */
+	private List<DocumentProxy> getDocProxiesFromDocNums(int[] solrDocNums) 
+		throws IOException 
+	{
+        List<DocumentProxy> docProxyList = new ArrayList<DocumentProxy>();
+        for (int solrDocNum : solrDocNums)
+            docProxyList.add( getSearcherProxy().getDocumentProxyBySolrDocNum(solrDocNum) );
+        return docProxyList;
+	}
+	
 	/**
 	 * assert field is not tokenized, has no termVector and, if indexed, omitsNorm 
 	 */
 	public final void assertStringFieldProperties(String fldName) 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-//	    assertFieldPresent(fldName);
         assertFieldNotTokenized(fldName);
         assertFieldHasNoTermVectors(fldName);
         // since omitNorms is only relevant if field is indexed,
@@ -549,7 +587,6 @@ public abstract class IndexTest {
 	public final void assertTextFieldProperties(String fldName) 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-//		assertFieldPresent(fldName);
 		assertFieldTokenized(fldName);
 		assertFieldHasNoTermVectors(fldName);
 	}
@@ -557,7 +594,6 @@ public abstract class IndexTest {
 	public final void assertDisplayFieldProperties(String fldName) 
             throws ParserConfigurationException, IOException, SAXException 
     {
-	    // assertFieldPresent(fldName);
         assertFieldNotTokenized(fldName);
         assertFieldNotIndexed(fldName);
         assertFieldStored(fldName);
@@ -567,12 +603,53 @@ public abstract class IndexTest {
     public final void assertFacetFieldProperties(String fldName) 
         throws ParserConfigurationException, IOException, SAXException 
     {
-        // assertFieldPresent(fldName);
         assertFieldNotTokenized(fldName);
         assertFieldIndexed(fldName);
   //      assertFieldStored(fldName);
         assertFieldHasNoTermVectors(fldName);
     }
+
+    /**
+     * search fields are tokenized, indexed, not stored, and have norms
+     */
+	public void assertSearchFldOneValProps(String fldName) 
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		assertTextFieldProperties(fldName);
+		assertFieldHasNorms(fldName);
+		assertFieldNotMultiValued(fldName);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
+        // TODO: term vectors used in more like this and highlighting?
+	}
+	
+    /**
+     * search fields are tokenized, indexed, not stored, and have norms
+     */
+	public void assertSearchFldMultValProps(String fldName) 
+			throws ParserConfigurationException, IOException, SAXException 
+	{
+		assertTextFieldProperties(fldName);
+		assertFieldHasNorms(fldName);
+		assertFieldMultiValued(fldName);
+		assertFieldNotStored(fldName);
+		assertFieldIndexed(fldName);
+        // TODO: term vectors used in more like this and highlighting?
+	}
+
+	/**
+	 * sort fields are indexed and not stored nor multivalued
+	 */
+	public void assertSortFldProps(String sortFldName) 
+	    throws ParserConfigurationException, IOException, SAXException
+	{
+		assertFieldHasNoTermVectors(sortFldName);
+		assertFieldOmitsNorms(sortFldName);
+	    assertFieldIndexed(sortFldName);
+	    assertFieldNotStored(sortFldName);
+        assertFieldNotMultiValued(sortFldName);
+	}
+    
 
 	public final void assertDocInList(String[] docIdList, String doc_id, String msgPrefix) 
 			throws ParserConfigurationException, SAXException, IOException 

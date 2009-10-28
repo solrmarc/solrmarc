@@ -1650,7 +1650,7 @@ public class SolrIndexer
                         {
                             if (buffer.length() > 0)
                                 buffer.append(separator != null ? separator : " ");
-                            buffer.append(subfield.getData());
+                            buffer.append(subfield.getData().trim());
                         }
                     }
                     if (buffer.length() > 0)
@@ -1710,9 +1710,9 @@ public class SolrIndexer
                         if (Character.isLetter(sf.getCode()))
                         {
 	                        if (buffer.length() > 0) {
-                                buffer.append(" " + sf.getData());
+                                buffer.append(" " + sf.getData().trim());
 	                        } else {
-                                buffer.append(sf.getData());
+                                buffer.append(sf.getData().trim());
                             }
                         }
                     }
@@ -1823,9 +1823,9 @@ public class SolrIndexer
                                 && tabooSubfldTags.indexOf(sf.getCode()) == -1)
                         {
                             if (buffer.length() > 0)
-                                buffer.append(' ' + sf.getData());
+                                buffer.append(' ' + sf.getData().trim());
                             else
-                                buffer.append(sf.getData());
+                                buffer.append(sf.getData().trim());
                         }
                     }
                     if (buffer.length() > 0)
@@ -1953,7 +1953,7 @@ public class SolrIndexer
                     {
                         if (buf.length() > 0)
                             buf.append(separator != null ? separator : " ");
-                        buf.append(subF.getData());
+                        buf.append(subF.getData().trim());
                     }
                 }
                 if (buf.length() > 0) 

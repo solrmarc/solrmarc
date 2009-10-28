@@ -16,7 +16,7 @@ import org.solrmarc.index.IndexTest;
  * 
  * @author Naomi Dushay
  */
-public class VernacularTests extends BibIndexTest {
+public class VernacularTests extends AbstractStanfordVufindTest {
 
 	private final String testDataFname = "vernacularTests.mrc";
 	

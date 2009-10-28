@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.lucene.document.Document;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
@@ -16,7 +15,7 @@ import edu.stanford.StanfordIndexer.Access;
  * junit4 tests for Stanford University access_facet field
  * @author Naomi Dushay
  */
-public class AccessTests extends BibIndexTest {
+public class AccessTests extends AbstractStanfordBlacklightTest {
 	
 	private final String testDataFname = "onlineFormat.mrc";
 	private String fldName = "access_facet";
@@ -32,9 +31,8 @@ public class AccessTests extends BibIndexTest {
 	public final void testFldProperties() 
 		throws ParserConfigurationException, IOException, SAXException
 	{
-		// facets are indexed, not stored
-		assertFacetFldProps(fldName, solrCore, sis);
-		assertFieldMultiValued(fldName, solrCore);
+		assertFacetFieldProperties(fldName);
+		assertFieldMultiValued(fldName);
 		assertEquals("accessMethod string incorrect: ", "Online", Access.ONLINE.toString());
 		assertEquals("accessMethod string incorrect: ", "At the Library", Access.AT_LIBRARY.toString());
 	}
@@ -64,7 +62,7 @@ public class AccessTests extends BibIndexTest {
 		docIds.add("7117119"); 
 		docIds.add("newSfx"); 
 
-		assertSearchResults(fldName, fldVal, docIds, sis);
+		assertSearchResults(fldName, fldVal, docIds);
 	}
 	
 	/**
@@ -74,13 +72,12 @@ public class AccessTests extends BibIndexTest {
 	public final void testAccessFromSfxURL() 
 			throws IOException, ParserConfigurationException, SAXException 
 	{
-        tearDown(); 
         createIxInitVars("formatTests.mrc");
 	
     	String fldVal =  Access.ONLINE.toString();
 
 		// has SFX url in 956
-		assertSingleResult("7117119", fldName, fldVal, sis);
+		assertSingleResult("7117119", fldName, fldVal);
 	}
 
 
@@ -99,12 +96,12 @@ public class AccessTests extends BibIndexTest {
 		docIds.add("124http"); 
 		docIds.add("1234https"); 
 		docIds.add("7423084"); 
-		assertSearchResults(fldName, fldVal, docIds, sis);
+		assertSearchResults(fldName, fldVal, docIds);
 		
 		String urlFldName = "url";
-		assertDocHasNoField("123http", urlFldName, sis);
-		assertDocHasNoField("124http", urlFldName, sis);
-		assertDocHasNoField("1234https", urlFldName, sis);
+		assertDocHasNoField("123http", urlFldName);
+		assertDocHasNoField("124http", urlFldName);
+		assertDocHasNoField("1234https", urlFldName);
 	}
 
 
@@ -116,35 +113,35 @@ public class AccessTests extends BibIndexTest {
 	public final void testAccessFrom999() 
 			throws ParserConfigurationException, IOException, SAXException
 	{
-		tearDown();
 		createIxInitVars("buildingTests.mrc");
 
 	 	// "Online"
 		// has SFX url in 956
-	 	assertSingleResult("7117119", fldName, Access.ONLINE.toString(), sis);
+	 	assertSingleResult("7117119", fldName, Access.ONLINE.toString());
 
 	 	// "At the Library"
 	 	String fldVal = "\"" + Access.AT_LIBRARY.toString() + "\"";
 	 	// don't want to check *all* of them ...
-	 	List<Document> docList = getAllMatchingDocs(fldName, fldVal, sis);
+//	 	List<DocumentProxy> docList = getAllMatchingDocs(fldName, fldVal);
+	 	String[] docList = getDocIDList(fldName, fldVal);
 	 	String msg = fldName + " " + Access.AT_LIBRARY.toString() + ": ";
 	 	// formerly "On campus"
-	 	assertDocInList(docList, "115472", msg, sis); 
-	 	assertDocInList(docList, "2442876", msg, sis); 
-	 	assertDocInList(docList, "3142611", msg, sis);
+	 	assertDocInList(docList, "115472", msg); 
+	 	assertDocInList(docList, "2442876", msg); 
+	 	assertDocInList(docList, "3142611", msg);
 	 	// formerly "Upon request"
 	 	// SAL1 & 2
-	 	assertDocInList(docList, "1033119", msg, sis);  
-	 	assertDocInList(docList, "1962398", msg, sis);  
-	 	assertDocInList(docList, "2328381", msg, sis);  
-	 	assertDocInList(docList, "2913114", msg, sis);  
+	 	assertDocInList(docList, "1033119", msg);  
+	 	assertDocInList(docList, "1962398", msg);  
+	 	assertDocInList(docList, "2328381", msg);  
+	 	assertDocInList(docList, "2913114", msg);  
 	 	// SAL3
-	 	assertDocInList(docList, "690002", msg, sis);  
-	 	assertDocInList(docList, "3941911", msg, sis); 
-	 	assertDocInList(docList, "7651581", msg, sis);  
-	 	assertDocInList(docList, "2214009", msg, sis);  
+	 	assertDocInList(docList, "690002", msg);  
+	 	assertDocInList(docList, "3941911", msg); 
+	 	assertDocInList(docList, "7651581", msg);  
+	 	assertDocInList(docList, "2214009", msg);  
 	 	// SAL-NEWARK
-	 	assertDocInList(docList, "804724", msg, sis); 
+	 	assertDocInList(docList, "804724", msg); 
 	}
 
 }

@@ -17,7 +17,7 @@ import org.xml.sax.SAXException;
  * 
  * @author Naomi Dushay
  */
-public class DiacriticAcuteTests extends BibIndexTest {
+public class DiacriticAcuteTests extends AbstractStanfordBlacklightTest {
 
 	// contains the diacritics in our test data
 	private String fldName = "author_person_search";
@@ -36,14 +36,14 @@ public class DiacriticAcuteTests extends BibIndexTest {
 	public final void testAcuteExact() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("2442876", fldName, "piétons", sis);
+		assertSingleResult("2442876", fldName, "piétons");
 
-		assertSingleResult("1391080", fldName, "Gijón", sis);
-		assertSingleResult("1391080", fldName, "jesús.", sis);
-		assertSingleResult("1391080", fldName, "contemporánea", sis);
-		assertSingleResult("1391080", fldName, "José María", sis);
+		assertSingleResult("1391080", fldName, "Gijón");
+		assertSingleResult("1391080", fldName, "jesús.");
+		assertSingleResult("1391080", fldName, "contemporánea");
+		assertSingleResult("1391080", fldName, "José María");
 
-//		assertSingleDocWithValue("2", fldName, "économique", sis);
+//		assertSingleDocWithValue("2", fldName, "économique");
 	}
 	
 	/**
@@ -53,14 +53,14 @@ public class DiacriticAcuteTests extends BibIndexTest {
 	public final void testPlainText() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("2442876", fldName, "pietons", sis);
+		assertSingleResult("2442876", fldName, "pietons");
 
-		assertSingleResult("1391080", fldName, "gijon", sis);	
-		assertSingleResult("1391080", fldName, "jesus", sis);	
-		assertSingleResult("1391080", fldName, "contemporanea", sis);
-		assertSingleResult("1391080", fldName, "jose maria", sis);
+		assertSingleResult("1391080", fldName, "gijon");	
+		assertSingleResult("1391080", fldName, "jesus");	
+		assertSingleResult("1391080", fldName, "contemporanea");
+		assertSingleResult("1391080", fldName, "jose maria");
 
-//		assertSingleDocWithValue("2", fldName, "economique", sis);
+//		assertSingleDocWithValue("2", fldName, "economique");
 	}
 	
 	
@@ -73,12 +73,12 @@ public class DiacriticAcuteTests extends BibIndexTest {
 	{
 		// how it appears in oxygen, terminal, bbedit, textedit
 		// wonder if this should work ... this is how it appears in oxygen ...
-		assertSingleResult("2442876", fldName, "piÃ©tons", sis);
+		assertSingleResult("2442876", fldName, "piÃ©tons");
 
-		assertSingleResult("1391080", fldName, "GijÃ³n", sis);
-		assertSingleResult("1391080", fldName, "JesÃºs", sis);
-		assertSingleResult("1391080", fldName, "contemporÃ¡nea", sis);
-		assertSingleResult("1391080", fldName, "JosÃ© MarÃ­a", sis);
+		assertSingleResult("1391080", fldName, "GijÃ³n");
+		assertSingleResult("1391080", fldName, "JesÃºs");
+		assertSingleResult("1391080", fldName, "contemporÃ¡nea");
+		assertSingleResult("1391080", fldName, "JosÃ© MarÃ­a");
 	}
 
 	/**
@@ -88,14 +88,14 @@ public class DiacriticAcuteTests extends BibIndexTest {
 	public final void testMultiple() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("1391080", fldName, "José María", sis);
-		assertSingleResult("1391080", fldName, "José Maria", sis);
-		assertSingleResult("1391080", fldName, "Jose María", sis);
-		assertSingleResult("1391080", fldName, "jose maria", sis);
+		assertSingleResult("1391080", fldName, "José María");
+		assertSingleResult("1391080", fldName, "José Maria");
+		assertSingleResult("1391080", fldName, "Jose María");
+		assertSingleResult("1391080", fldName, "jose maria");
 
-		assertSingleResult("1391080", fldName, "Gijón jesús", sis);
-		assertSingleResult("1391080", fldName, "Gijón jesus", sis);
-		assertSingleResult("1391080", fldName, "Gijon jesús", sis);
-		assertSingleResult("1391080", fldName, "Gijon jesus", sis);
+		assertSingleResult("1391080", fldName, "Gijón jesús");
+		assertSingleResult("1391080", fldName, "Gijón jesus");
+		assertSingleResult("1391080", fldName, "Gijon jesús");
+		assertSingleResult("1391080", fldName, "Gijon jesus");
 	}
 }

@@ -100,7 +100,7 @@ public class SolrReIndexer extends MarcImporter
             int solrDocNums[] = solrSearcherProxy.getDocSet(queryparts[0], queryparts[1]);
             for (int docNum : solrDocNums)
             {
-                DocumentProxy doc = solrSearcherProxy.getDocumentBySolrDocNum(docNum);
+                DocumentProxy doc = solrSearcherProxy.getDocumentProxyBySolrDocNum(docNum);
                 Record record = getRecordFromDocument(doc);
                 if (output != null) 
                 {

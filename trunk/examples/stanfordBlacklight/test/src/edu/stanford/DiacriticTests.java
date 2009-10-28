@@ -19,7 +19,7 @@ import org.xml.sax.SAXException;
  * 
  * @author Naomi Dushay
  */
-public class DiacriticTests extends BibIndexTest {
+public class DiacriticTests extends AbstractStanfordBlacklightTest {
 
 	// 100 field contains the diacritics in our test data
 	private String fldName = "author_1xx_search";
@@ -40,15 +40,15 @@ public class DiacriticTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		// U - upper case
-		assertSingleResult("2797607", fldName, "Über", sis);
-		assertSingleResult("2797607", fldName, "über", sis);
-		assertSingleResult("2797607", fldName, "uber", sis);
+		assertSingleResult("2797607", fldName, "Über");
+		assertSingleResult("2797607", fldName, "über");
+		assertSingleResult("2797607", fldName, "uber");
 		// u - lower case
-		assertSingleResult("2797607", fldName, "Fragwürdigkeit", sis);
-		assertSingleResult("2797607", fldName, "Fragwurdigkeit", sis);
+		assertSingleResult("2797607", fldName, "Fragwürdigkeit");
+		assertSingleResult("2797607", fldName, "Fragwurdigkeit");
 		// o - lower case
-		assertSingleResult("2797607", fldName, "Murtomäki", sis);
-		assertSingleResult("2797607", fldName, "Murtomaki", sis);
+		assertSingleResult("2797607", fldName, "Murtomäki");
+		assertSingleResult("2797607", fldName, "Murtomaki");
 	}
 
 	/**
@@ -59,25 +59,25 @@ public class DiacriticTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		// all vowels - lower case  (with acute)
-		assertSingleResult("1391080", fldName, "contemporánea", sis);
-		assertSingleResult("2442876", fldName, "piétons", sis);
-		assertSingleResult("1391080", fldName, "José María", sis);
-		assertSingleResult("1391080", fldName, "Gijón", sis);
-		assertSingleResult("1391080", fldName, "jesús.", sis);
+		assertSingleResult("1391080", fldName, "contemporánea");
+		assertSingleResult("2442876", fldName, "piétons");
+		assertSingleResult("1391080", fldName, "José María");
+		assertSingleResult("1391080", fldName, "Gijón");
+		assertSingleResult("1391080", fldName, "jesús.");
 		// plain text
-		assertSingleResult("1391080", fldName, "contemporanea", sis);
-		assertSingleResult("2442876", fldName, "pietons", sis);
-		assertSingleResult("1391080", fldName, "Jose Maria", sis);
-		assertSingleResult("1391080", fldName, "Gijon", sis);
-		assertSingleResult("1391080", fldName, "jesus.", sis);
+		assertSingleResult("1391080", fldName, "contemporanea");
+		assertSingleResult("2442876", fldName, "pietons");
+		assertSingleResult("1391080", fldName, "Jose Maria");
+		assertSingleResult("1391080", fldName, "Gijon");
+		assertSingleResult("1391080", fldName, "jesus.");
 		// test multiple variations
-		assertSingleResult("1391080", fldName, "José Maria", sis);
-		assertSingleResult("1391080", fldName, "Jose María", sis);
+		assertSingleResult("1391080", fldName, "José Maria");
+		assertSingleResult("1391080", fldName, "Jose María");
 
-		assertSingleResult("1391080", fldName, "Gijón jesús", sis);
-		assertSingleResult("1391080", fldName, "Gijón jesus", sis);
-		assertSingleResult("1391080", fldName, "Gijon jesús", sis);
-		assertSingleResult("1391080", fldName, "Gijon jesus", sis);
+		assertSingleResult("1391080", fldName, "Gijón jesús");
+		assertSingleResult("1391080", fldName, "Gijón jesus");
+		assertSingleResult("1391080", fldName, "Gijon jesús");
+		assertSingleResult("1391080", fldName, "Gijon jesus");
 	}
 
 	/**
@@ -88,11 +88,11 @@ public class DiacriticTests extends BibIndexTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		// a - lower case
-		assertSingleResult("3027805", fldName, "verità", sis);
-		assertSingleResult("3027805", fldName, "verita", sis);
+		assertSingleResult("3027805", fldName, "verità");
+		assertSingleResult("3027805", fldName, "verita");
 		// e - lower case
-		assertSingleResult("3027805", fldName, "è", sis);
-		assertSingleResult("3027805", fldName, "e", sis);
+		assertSingleResult("3027805", fldName, "è");
+		assertSingleResult("3027805", fldName, "e");
 	}
 
 	/**
@@ -102,8 +102,8 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testCircumflex() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("3400092", fldName, "ancêtres", sis);
-		assertSingleResult("3400092", fldName, "ancetres", sis);
+		assertSingleResult("3400092", fldName, "ancêtres");
+		assertSingleResult("3400092", fldName, "ancetres");
 	}
 
 	/**
@@ -113,11 +113,11 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testTilde() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("6493823", fldName, "Muñoz", sis);
-		assertSingleResult("6493823", fldName, "munoz", sis);
+		assertSingleResult("6493823", fldName, "Muñoz");
+		assertSingleResult("6493823", fldName, "munoz");
 
-		assertSingleResult("6493823", fldName, "españa", sis);
-		assertSingleResult("6493823", fldName, "espana", sis);
+		assertSingleResult("6493823", fldName, "españa");
+		assertSingleResult("6493823", fldName, "espana");
 	}
 
 	/**
@@ -127,10 +127,10 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testCedilla() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("7651581", fldName, "exaltação", sis);
-		assertSingleResult("7651581", fldName, "exaltacão", sis);
-		assertSingleResult("7651581", fldName, "exaltaçao", sis);
-		assertSingleResult("7651581", fldName, "exaltacao", sis);
+		assertSingleResult("7651581", fldName, "exaltação");
+		assertSingleResult("7651581", fldName, "exaltacão");
+		assertSingleResult("7651581", fldName, "exaltaçao");
+		assertSingleResult("7651581", fldName, "exaltacao");
 	}
 
 	/**
@@ -140,9 +140,9 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testLigature() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("5", fldName, "tysi͡acha", sis);
-		assertSingleResult("5", fldName, "tysi͡acha", sis);
-		assertSingleResult("5", fldName, "tysiacha", sis);
+		assertSingleResult("5", fldName, "tysi͡acha");
+		assertSingleResult("5", fldName, "tysi͡acha");
+		assertSingleResult("5", fldName, "tysiacha");
 	}
 
 	/**
@@ -152,12 +152,12 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testSoftZnak() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("66", fldName, "vosem'sot", sis);
-		assertSingleResult("66", fldName, "vosemsot", sis);
+		assertSingleResult("66", fldName, "vosem'sot");
+		assertSingleResult("66", fldName, "vosemsot");
 		// i have no idea if these should work, or how it should look here
-//		assertSingleDocWithValue("66", fldName, "vosemьsot", sis);
-//		assertSingleDocWithValue("66", fldName, "vosemьot", sis);
-//		assertSingleDocWithValue("66", fldName, "voseьsot", sis);
+//		assertSingleDocWithValue("66", fldName, "vosemьsot");
+//		assertSingleDocWithValue("66", fldName, "vosemьot");
+//		assertSingleDocWithValue("66", fldName, "voseьsot");
 	}
 
 	/**
@@ -167,19 +167,19 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testSoftZnakLots() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("66", fldName, "vosem'sot", sis);
-		assertSingleResult("66", fldName, "vosemsot", sis);
-		assertSingleResult("66", fldName, "semьdesiatykhtysiacha", sis);
-		assertSingleResult("66", fldName, "sem'desiatykhtysiacha", sis);
-		assertSingleResult("66", fldName, "semdesiatykhtysiacha", sis);
+		assertSingleResult("66", fldName, "vosem'sot");
+		assertSingleResult("66", fldName, "vosemsot");
+		assertSingleResult("66", fldName, "semьdesiatykhtysiacha");
+		assertSingleResult("66", fldName, "sem'desiatykhtysiacha");
+		assertSingleResult("66", fldName, "semdesiatykhtysiacha");
 		// test multiples
-		assertSingleResult("66", fldName, "vosemьsot semьdesiatykhtysiacha", sis);
-		assertSingleResult("66", fldName, "vosemьsot semdesiatykhtysiacha", sis);
-		assertSingleResult("66", fldName, "vosemsot semьdesiatykhtysiacha", sis);
-		assertSingleResult("66", fldName, "vosemьsot sem'desiatykhtysiacha", sis);
-		assertSingleResult("66", fldName, "vosemsot sem'desiatykhtysiacha", sis);
-		assertSingleResult("66", fldName, "vosem'sot semdesiatykhtysiacha", sis);
-		assertSingleResult("66", fldName, "vosemsot semdesiatykhtysiacha", sis);
+		assertSingleResult("66", fldName, "vosemьsot semьdesiatykhtysiacha");
+		assertSingleResult("66", fldName, "vosemьsot semdesiatykhtysiacha");
+		assertSingleResult("66", fldName, "vosemsot semьdesiatykhtysiacha");
+		assertSingleResult("66", fldName, "vosemьsot sem'desiatykhtysiacha");
+		assertSingleResult("66", fldName, "vosemsot sem'desiatykhtysiacha");
+		assertSingleResult("66", fldName, "vosem'sot semdesiatykhtysiacha");
+		assertSingleResult("66", fldName, "vosemsot semdesiatykhtysiacha");
 	}
 
 	/**
@@ -189,11 +189,11 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testHardZnak() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("6", fldName, "Obʺedinenie", sis);
-		assertSingleResult("6", fldName, "Obedinenie", sis);
+		assertSingleResult("6", fldName, "Obʺedinenie");
+		assertSingleResult("6", fldName, "Obedinenie");
 		// i have no idea if these should work, or how it should look here
-//		assertSingleDocWithValue("6", fldName, "Oъedinenie", sis);
-//		assertSingleDocWithValue("6", fldName, "Obъedinenie", sis);
+//		assertSingleDocWithValue("6", fldName, "Oъedinenie");
+//		assertSingleDocWithValue("6", fldName, "Obъedinenie");
 	}
 
 	/**
@@ -203,14 +203,14 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testCaron() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("345228", fldName, "povesť", sis);
-		assertSingleResult("345228", fldName, "povest'", sis);
-		assertSingleResult("345228", fldName, "povest", sis);
+		assertSingleResult("345228", fldName, "povesť");
+		assertSingleResult("345228", fldName, "povest'");
+		assertSingleResult("345228", fldName, "povest");
 	
 		// TODO: don't know why it doesn't like caron after the l ...
-//		assertSingleDocWithValue("345228", fldName, "dokumentaľnai*", sis);
-//		assertSingleDocWithValue("345228", fldName, "dokumental'nai*", sis);
-		assertSingleResult("345228", fldName, "dokumentalnai*", sis);
+//		assertSingleDocWithValue("345228", fldName, "dokumentaľnai*");
+//		assertSingleDocWithValue("345228", fldName, "dokumental'nai*");
+		assertSingleResult("345228", fldName, "dokumentalnai*");
 	}
 
 	/**
@@ -220,11 +220,11 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testRussianMacronOverI() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("2099904", fldName, "istorīi", sis);
-		assertSingleResult("2099904", fldName, "istorii", sis);
+		assertSingleResult("2099904", fldName, "istorīi");
+		assertSingleResult("2099904", fldName, "istorii");
 		// i have no idea if these should work, or how it should look here
-//		assertSingleDocWithValue("2099904", fldName, "istorī", sis);
-//		assertSingleDocWithValue("2099904", fldName, "istori", sis);
+//		assertSingleDocWithValue("2099904", fldName, "istorī");
+//		assertSingleDocWithValue("2099904", fldName, "istori");
 	}
 
 	/**
@@ -234,8 +234,8 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testMacron() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("6676531", fldName, "kaisō", sis);
-		assertSingleResult("6676531", fldName, "kaiso", sis);
+		assertSingleResult("6676531", fldName, "kaisō");
+		assertSingleResult("6676531", fldName, "kaiso");
 	}
 
 //TODO: Tests below this line don't work.  The data looks okay here
@@ -258,15 +258,15 @@ public class DiacriticTests extends BibIndexTest {
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("Ae1");
 		docIds.add("Ae2");
-		assertSearchResults(fldName, "Æon", docIds, sis);
-		assertSearchResults(fldName, "Aeon", docIds, sis);
+		assertSearchResults(fldName, "Æon", docIds);
+		assertSearchResults(fldName, "Aeon", docIds);
 
 		// lower case
 		docIds.clear();
 		docIds.add("ae1");
 		docIds.add("ae2");
-		assertSearchResults(fldName, "Encyclopædia", docIds, sis);
-		assertSearchResults(fldName, "Encyclopaedia", docIds, sis);
+		assertSearchResults(fldName, "Encyclopædia", docIds);
+		assertSearchResults(fldName, "Encyclopaedia", docIds);
 	}
 
 	/**
@@ -284,15 +284,15 @@ public class DiacriticTests extends BibIndexTest {
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("Oe1");
 		docIds.add("Oe2");
-		assertSearchResults(fldName, "Œlalala", docIds, sis);
-		assertSearchResults(fldName, "Oelalala", docIds, sis);
+		assertSearchResults(fldName, "Œlalala", docIds);
+		assertSearchResults(fldName, "Oelalala", docIds);
 
 		// lower case
 		docIds.clear();
 		docIds.add("oe1");
 		docIds.add("oe2");
-		assertSearchResults(fldName, "Cœurdevey", docIds, sis);
-		assertSearchResults(fldName, "Coeurdevey", docIds, sis);
+		assertSearchResults(fldName, "Cœurdevey", docIds);
+		assertSearchResults(fldName, "Coeurdevey", docIds);
 	}
 
 
@@ -303,8 +303,8 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testKreska() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("7", fldName, "Śpiewy", sis);
-		assertSingleResult("7", fldName, "spiewy", sis);
+		assertSingleResult("7", fldName, "Śpiewy");
+		assertSingleResult("7", fldName, "spiewy");
 	}
 	
 	/**
@@ -314,9 +314,9 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testSlash() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-//		assertSingleDocWithValue("8", fldName, "nnðýþnn", sis);
-//		assertSingleDocWithValue("8", fldName, "nnønn", sis);
-		assertSingleResult("8", fldName, "nnunn", sis);
+//		assertSingleDocWithValue("8", fldName, "nnðýþnn");
+//		assertSingleDocWithValue("8", fldName, "nnønn");
+		assertSingleResult("8", fldName, "nnunn");
 	}
 
 	/**
@@ -326,8 +326,8 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testCaron2() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("9", fldName, "Latviesǔ", sis);
-		assertSingleResult("9", fldName, "Latviesu", sis);
+		assertSingleResult("9", fldName, "Latviesǔ");
+		assertSingleResult("9", fldName, "Latviesu");
 	}
 
 	/**
@@ -337,9 +337,9 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testOgonek() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("10", fldName, "lokalių", sis);
-		assertSingleResult("10", fldName, "lokaliu", sis);
-		assertZeroResults(fldName, "lokaliy", sis);
+		assertSingleResult("10", fldName, "lokalių");
+		assertSingleResult("10", fldName, "lokaliu");
+		assertZeroResults(fldName, "lokaliy");
 	}
 
 	/**
@@ -349,8 +349,8 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testOverdot() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("10", fldName, "pridėtos", sis);
-		assertSingleResult("10", fldName, "pridetos", sis);
+		assertSingleResult("10", fldName, "pridėtos");
+		assertSingleResult("10", fldName, "pridetos");
 	}
 
 	/**
@@ -360,8 +360,8 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testVietnamese() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		assertSingleResult("6676531", fldName, "Lập", sis);
-		assertSingleResult("6676531", fldName, "lap", sis);
+		assertSingleResult("6676531", fldName, "Lập");
+		assertSingleResult("6676531", fldName, "lap");
 	}
 
 // TODO: move hebrew test to other class when indexing non-latin
@@ -374,7 +374,7 @@ public class DiacriticTests extends BibIndexTest {
 	public final void testHebrew() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-								assertSingleResult("13", fldName, "עברית", sis);
-		assertSingleResult("13", fldName, "ivrit", sis);
+								assertSingleResult("13", fldName, "עברית");
+		assertSingleResult("13", fldName, "ivrit");
 	}
 }

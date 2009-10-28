@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
  * junit4 tests for Stanford University format fields for blacklight index
  * @author Naomi Dushay
  */
-public class FormatTests extends BibIndexTest {
+public class FormatTests extends AbstractStanfordBlacklightTest {
 	
 	private final String testDataFname = "formatTests.mrc";
 	String displayFldName = "format";
@@ -28,10 +28,10 @@ public class FormatTests extends BibIndexTest {
 		throws ParserConfigurationException, IOException, SAXException
 	{
         createIxInitVars(testDataFname);
-        assertStringFieldProperties(facetFldName, solrCore, sis);
-        assertFieldIndexed(facetFldName, solrCore);
-        assertFieldStored(facetFldName, solrCore);
-		assertFieldMultiValued(facetFldName, solrCore);
+        assertStringFieldProperties(facetFldName);
+        assertFieldIndexed(facetFldName);
+        assertFieldStored(facetFldName);
+		assertFieldMultiValued(facetFldName);
 		
 		// are values as expected?
 		assertEquals("format string incorrect: ", "Book", Format.BOOK.toString());
@@ -73,12 +73,12 @@ public class FormatTests extends BibIndexTest {
 		docIds.add("5666387");
 		docIds.add("666");
 
-		assertFieldValues(displayFldName, fldVal, docIds, sis);
+		assertFieldValues(displayFldName, fldVal, docIds);
 
-		assertSearchResults(facetFldName, fldVal, docIds, sis);
+		assertSearchResults(facetFldName, fldVal, docIds);
 
 		// formerly believed to be monographic series 
-		assertDocHasNoFieldValue("leader07b00600s00821m", displayFldName, fldVal, sis);
+		assertDocHasNoFieldValue("leader07b00600s00821m", displayFldName, fldVal);
 	}
 
 
@@ -97,14 +97,14 @@ public class FormatTests extends BibIndexTest {
 		docIds.add("leader07sNo00600821p");
 		docIds.add("335577");
 		
-		assertFieldValues(displayFldName, fldVal, docIds, sis);
+		assertFieldValues(displayFldName, fldVal, docIds);
 
-		assertSearchResults(facetFldName, fldVal, docIds, sis);
+		assertSearchResults(facetFldName, fldVal, docIds);
 
 		// LCPER in 999w - but Serial Publication
-		assertDocHasNoFieldValue("460947", displayFldName, fldVal, sis);
+		assertDocHasNoFieldValue("460947", displayFldName, fldVal);
 		// 006/00 s but 006/04 blank  leader/07 b  008/21 p
-		assertDocHasNoFieldValue("leader07b00600s00821p", displayFldName, fldVal, sis);
+		assertDocHasNoFieldValue("leader07b00600s00821p", displayFldName, fldVal);
 	}
 
 
@@ -129,12 +129,12 @@ public class FormatTests extends BibIndexTest {
 		docIds.add("446688");  // even though DEWEYPER in 999 w
 		
 		
-		assertFieldValues(displayFldName, fldVal, docIds, sis);
+		assertFieldValues(displayFldName, fldVal, docIds);
 		
-		assertSearchResults(facetFldName, "\"" + fldVal + "\"", docIds, sis);
+		assertSearchResults(facetFldName, "\"" + fldVal + "\"", docIds);
 
 		// leader/07s 008/21 d   006/00 s  006/04 d -- other 
-		assertDocHasNoFieldValue("112233", displayFldName, fldVal, sis);
+		assertDocHasNoFieldValue("112233", displayFldName, fldVal);
 	}
 
 
@@ -159,12 +159,12 @@ public class FormatTests extends BibIndexTest {
 		docIds.add("leader07sNo00600821p");
 		docIds.add("335577");
 		
-		assertFieldValues(displayFldName, fldVal, docIds, sis);
+		assertFieldValues(displayFldName, fldVal, docIds);
 		
-		assertSearchResults(facetFldName, "\"" + fldVal + "\"", docIds, sis);
+		assertSearchResults(facetFldName, "\"" + fldVal + "\"", docIds);
 	
 		// leader/07s 008/21 d   006/00 s  006/04 d -- other 
-		assertDocHasNoFieldValue("112233", displayFldName, fldVal, sis);
+		assertDocHasNoFieldValue("112233", displayFldName, fldVal);
 	}
 
 
@@ -183,12 +183,12 @@ public class FormatTests extends BibIndexTest {
 		docIds.add("leader07sNo00600821n");
 		docIds.add("334455");
 		
-		assertFieldValues(displayFldName, fldVal, docIds, sis);
+		assertFieldValues(displayFldName, fldVal, docIds);
 		
-		assertSearchResults(facetFldName, fldVal, docIds, sis);
+		assertSearchResults(facetFldName, fldVal, docIds);
 		
 		// leader/07b 006/00s 008/21n - serial publication
-		assertDocHasNoFieldValue("leader07b00600s00821n", displayFldName, fldVal, sis);
+		assertDocHasNoFieldValue("leader07b00600s00821n", displayFldName, fldVal);
 	}
 
 	/**
@@ -208,9 +208,9 @@ public class FormatTests extends BibIndexTest {
 		docIds.add("5666387");
 		docIds.add("666");
 		
-		assertFieldValues(displayFldName, fldVal, docIds, sis);
+		assertFieldValues(displayFldName, fldVal, docIds);
 		
-		assertSearchResults(facetFldName, "\"" + fldVal + "\"", docIds, sis);
+		assertSearchResults(facetFldName, "\"" + fldVal + "\"", docIds);
 	}
 
 
@@ -243,9 +243,9 @@ public class FormatTests extends BibIndexTest {
 		docIds.add("7117119"); // leader/07 s, 006/00 m, 008/21 |
 		docIds.add("778899");  // leader/07 s 008/21 d, 006/00 j 006/04 p
 		
-		assertFieldValues(displayFldName, fldVal, docIds, sis);
+		assertFieldValues(displayFldName, fldVal, docIds);
 		
-		assertSearchResults(facetFldName, fldVal, docIds, sis);
+		assertSearchResults(facetFldName, fldVal, docIds);
 	}
 
 
@@ -258,42 +258,42 @@ public class FormatTests extends BibIndexTest {
 	{
         createIxInitVars(testDataFname);
         // map/globe
-		assertDocHasFieldValue("leader06e", displayFldName, "Map/Globe", sis); 
-		assertDocHasFieldValue("leader06f", displayFldName, Format.MAP_GLOBE.toString(), sis); 
+		assertDocHasFieldValue("leader06e", displayFldName, "Map/Globe"); 
+		assertDocHasFieldValue("leader06f", displayFldName, Format.MAP_GLOBE.toString()); 
 		// image
 		String imgVal = "Image";
-		assertDocHasFieldValue("leader06k00833i", displayFldName, imgVal, sis); 
-		assertDocHasFieldValue("leader06k00833k", displayFldName, imgVal, sis); 
-		assertDocHasFieldValue("leader06k00833p", displayFldName, imgVal, sis); 
-		assertDocHasFieldValue("leader06k00833s", displayFldName, imgVal, sis); 
-		assertDocHasFieldValue("leader06k00833t", displayFldName, imgVal, sis); 
+		assertDocHasFieldValue("leader06k00833i", displayFldName, imgVal); 
+		assertDocHasFieldValue("leader06k00833k", displayFldName, imgVal); 
+		assertDocHasFieldValue("leader06k00833p", displayFldName, imgVal); 
+		assertDocHasFieldValue("leader06k00833s", displayFldName, imgVal); 
+		assertDocHasFieldValue("leader06k00833t", displayFldName, imgVal); 
 		// video
-		assertDocHasFieldValue("leader06g00833m", displayFldName, "Video", sis); 
-		assertDocHasFieldValue("leader06g00833v", displayFldName, Format.VIDEO.toString(), sis); 
+		assertDocHasFieldValue("leader06g00833m", displayFldName, "Video"); 
+		assertDocHasFieldValue("leader06g00833v", displayFldName, Format.VIDEO.toString()); 
 		// audio - non-music
-		assertDocHasFieldValue("leader06i", displayFldName, "Sound Recording", sis); 
+		assertDocHasFieldValue("leader06i", displayFldName, "Sound Recording"); 
 		// music - audio
-		assertDocHasFieldValue("leader06j", displayFldName, "Music - Recording", sis); 
+		assertDocHasFieldValue("leader06j", displayFldName, "Music - Recording"); 
 		// music - score
-		assertDocHasFieldValue("leader06c", displayFldName, "Music - Score", sis); 
-		assertDocHasFieldValue("leader06d", displayFldName, Format.MUSIC_SCORE.toString(), sis); 
-		assertDocHasFieldValue("245hmicroform", displayFldName, Format.MUSIC_SCORE.toString(), sis); 
+		assertDocHasFieldValue("leader06c", displayFldName, "Music - Score"); 
+		assertDocHasFieldValue("leader06d", displayFldName, Format.MUSIC_SCORE.toString()); 
+		assertDocHasFieldValue("245hmicroform", displayFldName, Format.MUSIC_SCORE.toString()); 
 		// manuscript/archive
-		assertDocHasFieldValue("leader06b", displayFldName, "Manuscript/Archive", sis); 
-		assertDocHasFieldValue("leader06p", displayFldName, Format.MANUSCRIPT_ARCHIVE.toString(), sis); 
+		assertDocHasFieldValue("leader06b", displayFldName, "Manuscript/Archive"); 
+		assertDocHasFieldValue("leader06p", displayFldName, Format.MANUSCRIPT_ARCHIVE.toString()); 
 		// thesis
-		assertDocHasFieldValue("502", displayFldName, "Thesis", sis); 
+		assertDocHasFieldValue("502", displayFldName, "Thesis"); 
 		// computer file
-		assertDocHasFieldValue("leader06m00826a", displayFldName, "Computer File", sis); 
+		assertDocHasFieldValue("leader06m00826a", displayFldName, "Computer File"); 
 		// microfilm
-		assertDocHasFieldValue("245hmicroform", displayFldName, "Microformat", sis); 
+		assertDocHasFieldValue("245hmicroform", displayFldName, "Microformat"); 
 		
 		String scoreVal = "\"" + "Music - Score" + "\"";
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("leader06c");
 		docIds.add("leader06d");
 		docIds.add("245hmicroform");
-		assertSearchResults(facetFldName, scoreVal, docIds, sis);		
+		assertSearchResults(facetFldName, scoreVal, docIds);		
 	}
 
 
@@ -308,9 +308,9 @@ public class FormatTests extends BibIndexTest {
 		createIxInitVars("callNumberTests.mrc");
 		
 		// 999 ALPHANUM starting with MFLIM
-		assertDocHasFieldValue("1261173", displayFldName, Format.MICROFORMAT.toString(), sis); 
+		assertDocHasFieldValue("1261173", displayFldName, Format.MICROFORMAT.toString()); 
 		// 999 ALPHANUM starting with MCD
-		assertDocHasFieldValue("1234673", displayFldName, Format.MUSIC_RECORDING.toString(), sis); 
+		assertDocHasFieldValue("1234673", displayFldName, Format.MUSIC_RECORDING.toString()); 
 	}
 
 }
