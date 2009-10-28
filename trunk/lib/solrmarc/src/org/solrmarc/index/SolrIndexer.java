@@ -33,6 +33,7 @@ import org.solrmarc.tools.Utils;
 import bsh.BshMethod;
 import bsh.EvalError;
 import bsh.Interpreter;
+import bsh.Primitive;
 import bsh.UtilEvalError;
 
 /**
@@ -488,6 +489,7 @@ public class SolrIndexer
     public Map<String, Object> map(Record record, ErrorHandler errors)
     {
         this.errors = errors;
+        perRecordInit(record);
         Map<String, Object> indexMap = new HashMap<String, Object>();
 
         for (String key : fieldMap.keySet())
@@ -544,6 +546,17 @@ public class SolrIndexer
         }
         this.errors = null;
         return indexMap;
+    }
+
+    /**
+     * This routine can be overridden in a sub-class to perform some processing that need to be done once 
+     * for each record, and which may be needed by several indexing specifications, especially custom methods.
+     * The default version does nothing.
+     * 
+     * @param record -  The MARC record that is being indexed.
+     */
+    protected void perRecordInit(Record record)
+    {
     }
 
     /**
@@ -718,6 +731,8 @@ public class SolrIndexer
         boolean deleteIfEmpty = false;
         if (indexType.startsWith("scriptDeleteRecordIfFieldEmpty")) 
             deleteIfEmpty = true;
+        if (retval == Primitive.NULL)  
+            retval = null;
         return finishCustomOrScript(indexMap, indexField, mapName, returnType, retval, deleteIfEmpty);
     }
 
