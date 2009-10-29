@@ -50,10 +50,23 @@ public class BlacklightIndexer extends SolrIndexer
      */
     Map<String, String> addnlShadowedIds = null;
     String extraIdsFilename = "AllShadowedIds.txt";
+    Set<String> callNumberFieldList = null;
+    Map<String, Set<String>> callNumberClusterMap = null;
+    Comparator<String> normedComparator = null;
+    String bestSingleCallNumber = null;
     
     public BlacklightIndexer(final String propertiesMapFile, final String propertyPaths[])
     {
         super(propertiesMapFile, propertyPaths);
+        normedComparator = new Comparator<String>() 
+        {
+            public int compare(String s1, String s2)
+            {
+                String s1Norm = s1.replaceAll("[. ]", "");
+                String s2Norm = s2.replaceAll("[. ]", "");
+                return s1Norm.compareToIgnoreCase(s2Norm);
+            }
+        };
     }
     
     /**
@@ -140,9 +153,168 @@ public class BlacklightIndexer extends SolrIndexer
     }
 
     /**
+     * This routine can be overridden in a sub-class to perform some processing that need to be done once 
+     * for each record, and which may be needed by several indexing specifications, especially custom methods.
+     * The default version does nothing.
+     * 
+     * @param record -  The MARC record that is being indexed.
+     */
+    protected void perRecordInit(Record record)
+    {
+        String fieldSpec = "999ai';'";
+        
+        callNumberFieldList = getCallNumberFieldSet(record, fieldSpec);
+        callNumberClusterMap =  getCallNumbersCleanedConflated(callNumberFieldList);
+        bestSingleCallNumber = getBestSingleCallNumber(callNumberClusterMap);
+    }
+    
+    private String getBestSingleCallNumber(Map<String, Set<String>>resultNormed)
+    {
+        if (resultNormed == null || resultNormed.size() == 0) {
+            return(null);
+        }
+        String[] bestSet =  getBestCallNumberSubset(resultNormed);
+        if (bestSet.length == 0) return(null);
+        String result = bestSet[0];
+        result = result.trim().replaceAll("[-:/]", " ").replaceAll("\\s\\s+", " ")
+                              .replaceAll("\\s?\\.\\s?", ".");
+        return(result);
+    }
+    
+    private String[] getBestCallNumberSubset(Map<String, Set<String>>resultNormed)
+    {
+        if (resultNormed == null || resultNormed.size() == 0) {
+            return(null);
+        }
+        int maxEntries = 0;
+        //String maxEntriesKey = null;
+        Set<String> maxEntrySet = null;
+        int maxLCEntries = 0;
+        //String maxLCEntriesKey = null;
+        Set<String> maxLCEntrySet = null;
+        Set<String> keys = resultNormed.keySet();
+        for (String key : keys)
+        {
+            Set<String> values = resultNormed.get(key);
+            if (values.size() > maxEntries)
+            {
+                maxEntries = values.size();
+                //maxEntriesKey = key;
+                maxEntrySet = values;
+            }
+            if (CallNumUtils.isValidLC(values.iterator().next()) && values.size() > maxLCEntries)
+            {
+                maxLCEntries = values.size();
+                //maxLCEntriesKey = key;
+                maxLCEntrySet = values;
+            }
+        }
+        if (maxLCEntrySet == null)
+        {
+            maxLCEntrySet = maxEntrySet;
+        }
+        String valueArr[] = maxLCEntrySet.toArray(new String[0]);
+        Comparator<String> comp = new StringNaturalCompare();
+        Arrays.sort(valueArr, comp);
+        return(valueArr);
+    }
+    
+    /**
+     * Since there are several routines that grab and process LC Call Numbers for a given record, 
+     * this code is called once per record to gather the list of call numbers, rather than creating that 
+     * list within each implementation of the custom indexing functions.
+     * 
+     * @param record -  The MARC record that is being indexed.
+     */
+    private Set<String> getCallNumberFieldSet(final Record record, String fieldSpec)
+    {
+        boolean processExtraShadowedIds = fieldSpec.contains("';'");
+    
+        Set<String> fieldList = getFieldList(record, fieldSpec);
+        if (fieldList.isEmpty())  {
+            return(null);
+        }
+        if (processExtraShadowedIds)
+        {
+            loadExtraShadowedIds(extraIdsFilename);
+            Set<String> newFieldList = new LinkedHashSet<String>();
+            String extraString = addnlShadowedIds.get(record.getControlNumber());
+          
+            for (String field : fieldList)
+            {
+                String fieldparts[] = field.split(";");
+                if (fieldparts.length != 2) continue;
+                if (extraString == null || extraString.equals("") || !extraString.contains("|" + fieldparts[1] + "|"))
+                {
+                    newFieldList.add(fieldparts[0]);
+                }
+            }
+            fieldList = newFieldList;
+        }
+        // discard LC numbers that aren't valid according to the CallNumUtil routine
+        boolean hasLCNumber = false;
+        for (String field : fieldList)
+        {
+            if (CallNumUtils.isValidLC(field))
+            {
+                hasLCNumber = true;
+                break;
+            }
+        }
+        // if there are no 999 fields with valid LC Call Numbers then look in the 050ab field
+        if (!hasLCNumber)
+        {
+            Set<String> fList2 = getFieldList(record, "050ab");
+            for (String field : fList2)
+            {
+                if (CallNumUtils.isValidLC(field))
+                {
+                    fieldList.add(field);
+                }
+            }
+        }
+        return(fieldList);
+    }
+
+    /**
+     * Extract a set of cleaned call numbers from a record
+     * @param record
+     * @return Clean call number
+     */
+    private Map<String, Set<String>> getCallNumbersCleanedConflated(Set<String> fieldList)
+    {
+        Map<String, Set<String>> resultNormed = new TreeMap<String, Set<String>>();
+        if (fieldList == null || fieldList.size() == 0)  return(null);
+        for (String callNum : fieldList)
+        {
+            String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+            String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
+            if (!nVal.equals(val))
+            {
+                val = nVal;
+            }
+            String key = val.substring(0, Math.min(val.length(), 5)).toUpperCase();
+            if (resultNormed.containsKey(key))
+            {
+                Set<String> set = resultNormed.get(key);
+                set.add(val);
+                resultNormed.put(key, set);
+            }
+            else
+            {
+                Set<String> set = new TreeSet<String>(normedComparator);
+                set.add(val);
+                resultNormed.put(key, set);
+            }
+        }
+        return(resultNormed);
+    }
+ 
+   /**
      * Extract call number prefix from a record
      * @param record
      * @return Call number prefix
+     * @deprecated
      */
     public String getCallNumberPrefix(final Record record, String mapName, String part)
     {
@@ -179,6 +351,66 @@ public class BlacklightIndexer extends SolrIndexer
             while (result == null && prefix.length() > 0)
             {
                 result = Utils.remap(prefix, findMap(mapName), false);
+                if (result == null)
+                {
+                    prefix = prefix.substring(0, prefix.length()-1);
+                }
+            }
+        }
+        int partNum = Utils.isNumber(part) ? Integer.parseInt(part) : 0;
+        if (result == null) return(result);
+        if (partNum == 0) return(prefix + " - " + result.replaceAll("[|]", " - "));
+        String resultParts[] = result.split("[|]");
+        if (partNum-1 >= resultParts.length) return(null);
+        return(prefix.substring(0,1) + " - " + resultParts[partNum-1]);
+    }
+ 
+ 
+    /**
+     * Extract call number prefix from a record
+     * @param record
+     * @return Call number prefix
+     */
+    public String getCallNumberPrefixNew(final Record record, String mapName, String part)
+    {
+        try
+        {
+            mapName = loadTranslationMap(null, mapName);
+        }
+        catch (IllegalArgumentException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+//        String useRecord = getFirstFieldVal(record, "050a:090a");
+//        if (useRecord == null || useRecord.matches("[0-9].*"))  
+//        {
+//            return(null);
+//        }
+        
+        String val = bestSingleCallNumber;
+        String result = null;
+        if (val == null || val.length() == 0)
+        { 
+            return(null);
+        }
+        
+        String vals[] = val.split("[^A-Za-z]+", 2);
+        String prefix = vals[0];
+        
+        if (vals.length == 0 || vals[0] == null || vals[0].length() == 0 ||  vals[0].length() > 3 || !vals[0].toUpperCase().equals(vals[0])) 
+        {
+            return(null);
+        }
+        else
+        {
+            while (result == null && prefix.length() > 0)
+            {
+                result = Utils.remap(prefix, findMap(mapName), false);
+                if (result == null && prefix.length() == 2)
+                {
+                    break;
+                }
                 if (result == null)
                 {
                     prefix = prefix.substring(0, prefix.length()-1);
@@ -276,6 +508,108 @@ public class BlacklightIndexer extends SolrIndexer
     * @param record
     * @return Clean call number
     */
+   public String getCallNumberCleanedNew(final Record record, String fieldSpec, String sortable)
+   {
+       boolean sortableFlag = (sortable != null && ( sortable.equals("sortable") || sortable.equals("true")));
+       String result = bestSingleCallNumber;
+       if (sortableFlag && result != null && CallNumUtils.isValidLC(result)) 
+           result = CallNumUtils.getLCShelfkey(result, record.getControlNumberField().getData());
+       return(result);
+
+   }
+   
+   /**
+    * Extract a set of cleaned call numbers from a record
+    * @param record
+    * @return Clean call number
+    */
+    public Set<String> getCallNumbersCleanedNew(final Record record, String fieldSpec, String conflatePrefixes)
+    {
+        boolean conflate = !conflatePrefixes.equalsIgnoreCase("false");
+        
+        if (!conflate)
+        {
+            Set<String> fieldList = this.callNumberFieldList;
+            if (fieldList == null || fieldList.isEmpty())  
+            {
+                return(null);
+            }
+
+            Comparator<String> comp = new StringNaturalCompare();
+            Set<String> resultNormed = new TreeSet<String>(comp);
+            for (String callNum : fieldList)
+            {
+                String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+                String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
+                if (!nVal.equals(val))
+                {
+                    val = nVal;
+                }
+                resultNormed.add(val);
+            }
+            return resultNormed;
+        }
+        else
+        {
+            Map<String, Set<String>> resultNormed = this.callNumberClusterMap;
+            if (resultNormed == null || resultNormed.size() == 0) return(null);
+            Set<String> keys = resultNormed.keySet();
+            Set<String> results = new TreeSet<String>(normedComparator);
+            for (String key : keys)
+            {
+                Set<String> values = resultNormed.get(key);
+                String valueArr[] = values.toArray(new String[0]);
+                if (valueArr.length == 1)
+                {
+                    results.add(valueArr[0]);
+                }
+                else
+                {
+                    String prefix = valueArr[0];
+                    for (int i = 1; i < valueArr.length; i++)
+                    {
+                        prefix = getCommonPrefix(prefix, valueArr[i], normedComparator);
+                    }
+                    if (prefix.lastIndexOf(' ') != -1)
+                    {
+                        prefix = prefix.substring(0, prefix.lastIndexOf(' '));
+                    }
+                    StringBuffer sb = new StringBuffer(prefix);
+                    String sep = " ";
+                    for (int i = 0; i < valueArr.length; i++)
+                    {
+                        valueArr[i] = valueArr[i].substring(prefix.length());
+                    }
+                    Comparator<String> comp = new StringNaturalCompare();
+                    Arrays.sort(valueArr, comp);
+                    for (int i = 0; i < valueArr.length; i++)
+                    {
+                        if (valueArr[i].length() > 0) 
+                        {
+                            sb.append(sep+valueArr[i]);
+                            sep = ",";
+                        }
+                    }
+                    if (sb.length() > 100 || valueArr.length > 10)
+                    {
+                        results.add(prefix + " (" + valueArr.length + " volumes)");
+                    }
+                    else
+                    {
+                        results.add(sb.toString());
+                    }
+                }
+            }
+            return (results);
+        }
+    }
+    
+  /** 
+    * Extract a single cleaned call number from a record
+    * @param record
+    * @return Clean call number
+    * @deprecated
+    */
    public String getCallNumberCleaned(final Record record, String fieldSpec, String sortable)
    {
        Set<String> fieldList = getFieldList(record, fieldSpec);
@@ -317,6 +651,7 @@ public class BlacklightIndexer extends SolrIndexer
     * Extract a set of cleaned call numbers from a record
     * @param record
     * @return Clean call number
+    * @deprecated
     */
     public Set<String> getCallNumbersCleaned(final Record record, String fieldSpec, String conflatePrefixes)
     {
@@ -425,48 +760,7 @@ public class BlacklightIndexer extends SolrIndexer
         }
     }
     
-   /**
-     * Extract a set of cleaned call numbers from a record
-     * @param record
-     * @return Clean call number
-     */
-    private Map<String, Set<String>> getCallNumbersCleanedConflated(Set<String> fieldList)
-    {
-        Comparator<String> normedComparator = new Comparator<String>() 
-        {
-            public int compare(String s1, String s2)
-            {
-                String s1Norm = s1.replaceAll("[. ]", "");
-                String s2Norm = s2.replaceAll("[. ]", "");
-                return s1Norm.compareToIgnoreCase(s2Norm);
-            }
-        };
-        Map<String, Set<String>> resultNormed = new TreeMap<String, Set<String>>();
-        for (String callNum : fieldList)
-        {
-            String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
-            String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
-            if (!nVal.equals(val))
-            {
-                val = nVal;
-            }
-            String key = val.substring(0, Math.min(val.length(), 5)).toUpperCase();
-            if (resultNormed.containsKey(key))
-            {
-                Set<String> set = resultNormed.get(key);
-                set.add(val);
-                resultNormed.put(key, set);
-            }
-            else
-            {
-                Set<String> set = new TreeSet<String>(normedComparator);
-                set.add(val);
-                resultNormed.put(key, set);
-            }
-        }
-        return(resultNormed);
-    }
-    
+         
     private String buildParsableURLString(DataField df, String defaultLabel)
     {
         String label = (df.getSubfield('z') != null) ? df.getSubfield('z').getData() : defaultLabel;
@@ -580,6 +874,73 @@ public class BlacklightIndexer extends SolrIndexer
         return null;
     }
     
+    public Set<String> getCombinedFormatNew(final Record record)
+    {    
+        // part1_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first
+        // part2_format_facet = 999t, format_maps.properties(format)
+
+        String mapName1 = loadTranslationMap(null, "format_maps.properties(broad_format)");
+        String mapName1a = loadTranslationMap(null, "format_maps.properties(broad_format_electronic)");
+        String mapName2 = loadTranslationMap(null, "format_maps.properties(format_007)");
+        String mapName3 = loadTranslationMap(null, "format_maps.properties(format)");
+
+        Set<String> result = getFieldList(record, "999t");
+        result = Utils.remap(result, findMap(mapName3), false);
+
+        Set<String> urls = getFieldList(record, "856u");
+        Set<String> format_007_raw = getFieldList(record, "007[0-1]");
+        if (Utils.setItemContains(format_007_raw, "cr"))
+        {
+            String other007 = null;
+            String broadFormat = getFirstFieldVal(record, null, "000[6-7]");
+            if (format_007_raw.size() > 1)
+            {
+                for (String str007 : format_007_raw)
+                {
+                    if (!str007.equals("cr"))
+                    {
+                        other007 = str007;
+                        break;
+                    }
+                }
+            }
+            if (other007 != null && other007.startsWith("v")) 
+            {
+                result.add(Utils.remap("v", findMap(mapName1a), true)); // Streaming Video
+                result.add(Utils.remap("v", findMap(mapName2), true));  // Video
+            }
+            if (broadFormat.equals("am")) 
+            {
+                result.add(Utils.remap("am", findMap(mapName1a), true)); // eBook
+                result.add(Utils.remap("a", findMap(mapName1), true));  // Book
+            }
+            else if (broadFormat.equals("as"))
+            {
+                result.add(Utils.remap("as", findMap(mapName1a), true)); // Online
+                result.add(Utils.remap("as", findMap(mapName1), true));  // Journal/Magazine
+            }
+        }
+        else if (Utils.setItemContains(urls, "serialssolutions"))
+        {
+            String serialsFormat = Utils.remap("as", findMap(mapName1), true);
+            if (serialsFormat != null) result.add(serialsFormat);
+        }
+        else
+        {
+            String format_007 = getFirstFieldVal(record, mapName2, "007[0]");
+            if (format_007 != null) 
+            {
+                result.add(format_007);
+            }
+            else 
+            {
+                String broadFormat = getFirstFieldVal(record, mapName1, "000[6-7]:000[6]");
+                if (broadFormat != null) result.add(broadFormat);
+            }
+        }
+        return(result);
+    }
+
     public Set<String> getCombinedFormat(final Record record)
     {    
     	// part1_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first
