@@ -176,7 +176,7 @@ public class BlacklightIndexer extends SolrIndexer
         String[] bestSet =  getBestCallNumberSubset(resultNormed);
         if (bestSet.length == 0) return(null);
         String result = bestSet[0];
-        result = result.trim().replaceAll("[-:/]", " ").replaceAll("\\s\\s+", " ")
+        result = result.trim().replaceAll("[^A-Za-z0-9.]", " ").replaceAll("\\s\\s+", " ")
                               .replaceAll("\\s?\\.\\s?", ".");
         return(result);
     }
@@ -417,12 +417,40 @@ public class BlacklightIndexer extends SolrIndexer
                 }
             }
         }
-        int partNum = Utils.isNumber(part) ? Integer.parseInt(part) : 0;
-        if (result == null) return(result);
-        if (partNum == 0) return(prefix + " - " + result.replaceAll("[|]", " - "));
-        String resultParts[] = result.split("[|]");
-        if (partNum-1 >= resultParts.length) return(null);
-        return(prefix.substring(0,1) + " - " + resultParts[partNum-1]);
+        if (mapName.equals("callnumber_map"))
+        {
+            int partNum = Utils.isNumber(part) ? Integer.parseInt(part) : 0;
+            if (result == null) return(result);
+            if (partNum == 0) return(prefix + " - " + result.replaceAll("[|]", " - "));
+            String resultParts[] = result.split("[|]");
+            if (partNum-1 >= resultParts.length) return(null);
+            return(prefix.substring(0,1) + " - " + resultParts[partNum-1]);
+        }
+        else // deatiled call number map
+        {
+            if (result == null) return(result);
+            if (result.startsWith("{"))
+            {
+                String shelfKey = CallNumUtils.getLCShelfkey(val, record.getControlNumberField().getData());
+                String keyDigits = shelfKey.substring(4, 8);
+                String ranges[] = result.replaceAll("[{]", "").split("[}]");
+                for (String range : ranges)
+                {
+                    String rangeParts[] = range.split("[-=]", 3);
+                    if (keyDigits.compareTo(rangeParts[0])>= 0 && keyDigits.compareTo(rangeParts[1])<= 0 )
+                    {
+                        return(prefix + rangeParts[0].replaceFirst("^0+", "") + "-" + 
+                                prefix + rangeParts[1].replaceFirst("^0+", "") + " - " + rangeParts[2]);
+                    }
+                }
+                return(null);
+            }
+            else 
+            {
+                return(prefix + " - " + result);
+            }
+               
+        }
     }
 
     /**
@@ -918,6 +946,10 @@ public class BlacklightIndexer extends SolrIndexer
             {
                 result.add(Utils.remap("as", findMap(mapName1a), true)); // Online
                 result.add(Utils.remap("as", findMap(mapName1), true));  // Journal/Magazine
+            }
+            else if (broadFormat.startsWith("m"))
+            {
+                result.add(Utils.remap("m", findMap(mapName1), true));
             }
         }
         else if (Utils.setItemContains(urls, "serialssolutions"))
