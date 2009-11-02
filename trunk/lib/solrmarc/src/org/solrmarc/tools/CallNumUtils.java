@@ -675,7 +675,8 @@ public final class CallNumUtils {
    		    	}
    	    	}
    		} catch (NumberFormatException e) {
-   			System.err.println("Problem creating shelfkey for record " + recid + "; call number: " + rawLCcallnum);
+   			if (recid != null)
+   			    System.err.println("Problem creating shelfkey for record " + recid + "; call number: " + rawLCcallnum);
    			//e.printStackTrace();
    			resultBuf = new StringBuffer();
    		}
