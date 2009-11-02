@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import org.marc4j.marc.VariableField;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.tools.CallNumUtils;
 import org.solrmarc.tools.StringNaturalCompare;
@@ -161,10 +162,10 @@ public class BlacklightIndexer extends SolrIndexer
      */
     protected void perRecordInit(Record record)
     {
-        String fieldSpec = "999ai';'";
+        String fieldSpec = "999awi';'";
         
         callNumberFieldList = getCallNumberFieldSet(record, fieldSpec);
-        callNumberClusterMap =  getCallNumbersCleanedConflated(callNumberFieldList);
+        callNumberClusterMap =  getCallNumbersCleanedConflated(callNumberFieldList, true);
         bestSingleCallNumber = getBestSingleCallNumber(callNumberClusterMap);
     }
     
@@ -176,8 +177,12 @@ public class BlacklightIndexer extends SolrIndexer
         String[] bestSet =  getBestCallNumberSubset(resultNormed);
         if (bestSet.length == 0) return(null);
         String result = bestSet[0];
-        result = result.trim().replaceAll("[^A-Za-z0-9.]", " ").replaceAll("\\s\\s+", " ")
-                              .replaceAll("\\s?\\.\\s?", ".");
+        String resultParts[] = result.split(":", 2);
+        if (resultParts[0].equals("LC"))
+        {
+            result = resultParts[0]+":"+resultParts[1].trim().replaceAll("[^A-Za-z0-9.]", " ").replaceAll("\\s\\s+", " ")
+                        .replaceAll("\\s?\\.\\s?", ".");
+        }        
         return(result);
     }
     
@@ -202,7 +207,10 @@ public class BlacklightIndexer extends SolrIndexer
                 //maxEntriesKey = key;
                 maxEntrySet = values;
             }
-            if (CallNumUtils.isValidLC(values.iterator().next()) && values.size() > maxLCEntries)
+            String firstNum = values.iterator().next();
+            String parts[] = firstNum.split(":", 2);
+            if (parts[0].equals("LC") || 
+                ( parts[0].equals("") && CallNumUtils.isValidLC(parts[1])) && values.size() > maxLCEntries)
             {
                 maxLCEntries = values.size();
                 //maxLCEntriesKey = key;
@@ -230,32 +238,37 @@ public class BlacklightIndexer extends SolrIndexer
     {
         boolean processExtraShadowedIds = fieldSpec.contains("';'");
     
-        Set<String> fieldList = getFieldList(record, fieldSpec);
-        if (fieldList.isEmpty())  {
+        List<?> fields999 = record.getVariableFields("999");
+        //Set<String> fieldList = getFieldList(record, fieldSpec);
+        if (fields999.isEmpty())  {
             return(null);
         }
+        Set<String> fieldList = new LinkedHashSet<String>();
         if (processExtraShadowedIds)
         {
             loadExtraShadowedIds(extraIdsFilename);
-            Set<String> newFieldList = new LinkedHashSet<String>();
             String extraString = addnlShadowedIds.get(record.getControlNumber());
           
-            for (String field : fieldList)
+            for (Object field : fields999)
             {
-                String fieldparts[] = field.split(";");
-                if (fieldparts.length != 2) continue;
-                if (extraString == null || extraString.equals("") || !extraString.contains("|" + fieldparts[1] + "|"))
+                DataField df = ((DataField)(field));
+                String barCode = df.getSubfield('i').getData();
+                String numberScheme = df.getSubfield('w').getData();
+                if (numberScheme.equals("MONO-SER") || numberScheme.equals("LCPER"))  numberScheme = "LC";
+                String callNumber = df.getSubfield('a').getData();
+                if (extraString == null || extraString.equals("") || !extraString.contains("|" + barCode + "|"))
                 {
-                    newFieldList.add(fieldparts[0]);
+                    fieldList.add(numberScheme + ":" + callNumber);
                 }
             }
-            fieldList = newFieldList;
         }
         // discard LC numbers that aren't valid according to the CallNumUtil routine
         boolean hasLCNumber = false;
         for (String field : fieldList)
         {
-            if (CallNumUtils.isValidLC(field))
+            String fieldParts[] = field.split(":", 2);
+            if (fieldParts[0].equals("LC") || 
+                (fieldParts[0].equals("") && CallNumUtils.isValidLC(field)))
             {
                 hasLCNumber = true;
                 break;
@@ -269,7 +282,7 @@ public class BlacklightIndexer extends SolrIndexer
             {
                 if (CallNumUtils.isValidLC(field))
                 {
-                    fieldList.add(field);
+                    fieldList.add("LC:"+field);
                 }
             }
         }
@@ -281,19 +294,33 @@ public class BlacklightIndexer extends SolrIndexer
      * @param record
      * @return Clean call number
      */
-    private Map<String, Set<String>> getCallNumbersCleanedConflated(Set<String> fieldList)
+    private Map<String, Set<String>> getCallNumbersCleanedConflated(Set<String> fieldList, boolean expectColon)
     {
         Map<String, Set<String>> resultNormed = new TreeMap<String, Set<String>>();
         if (fieldList == null || fieldList.size() == 0)  return(null);
-        for (String callNum : fieldList)
+        for (String callNumPlus : fieldList)
         {
-            String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+            String parts[] = callNumPlus.split(":", 2);
+            String prefix = null;
+            String callNumPart = null;
+            if (!expectColon || parts.length == 1)
+            {
+                prefix = "";
+                callNumPart = parts[0];
+            }
+            else
+            {
+                prefix = parts[0]+":";
+                callNumPart = parts[1];
+            }
+            String val = callNumPart.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
             String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
             if (!nVal.equals(val))
             {
                 val = nVal;
             }
             String key = val.substring(0, Math.min(val.length(), 5)).toUpperCase();
+            val = prefix+val;
             if (resultNormed.containsKey(key))
             {
                 Set<String> set = resultNormed.get(key);
@@ -394,8 +421,12 @@ public class BlacklightIndexer extends SolrIndexer
         { 
             return(null);
         }
-        
-        String vals[] = val.split("[^A-Za-z]+", 2);
+        String valParts[] = val.split(":", 2);
+        if (!valParts[0].equals("LC"))
+        {
+            return(null);
+        }
+        String vals[] = valParts[1].split("[^A-Za-z]+", 2);
         String prefix = vals[0];
         
         if (vals.length == 0 || vals[0] == null || vals[0].length() == 0 ||  vals[0].length() > 3 || !vals[0].toUpperCase().equals(vals[0])) 
@@ -431,7 +462,7 @@ public class BlacklightIndexer extends SolrIndexer
             if (result == null) return(result);
             if (result.startsWith("{"))
             {
-                String shelfKey = CallNumUtils.getLCShelfkey(val, record.getControlNumberField().getData());
+                String shelfKey = CallNumUtils.getLCShelfkey(valParts[1], record.getControlNumberField().getData());
                 String keyDigits = shelfKey.substring(4, 8);
                 String ranges[] = result.replaceAll("[{]", "").split("[}]");
                 for (String range : ranges)
@@ -536,12 +567,14 @@ public class BlacklightIndexer extends SolrIndexer
     * @param record
     * @return Clean call number
     */
-   public String getCallNumberCleanedNew(final Record record, String fieldSpec, String sortable)
+   public String getCallNumberCleanedNew(final Record record, String sortable)
    {
        boolean sortableFlag = (sortable != null && ( sortable.equals("sortable") || sortable.equals("true")));
        String result = bestSingleCallNumber;
-       if (sortableFlag && result != null && CallNumUtils.isValidLC(result)) 
-           result = CallNumUtils.getLCShelfkey(result, record.getControlNumberField().getData());
+       if (result == null) return(result);
+       String resultParts[] = result.split(":", 2);
+       if (sortableFlag && ( resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1]))))
+           result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumberField().getData());
        return(result);
 
    }
@@ -551,7 +584,7 @@ public class BlacklightIndexer extends SolrIndexer
     * @param record
     * @return Clean call number
     */
-    public Set<String> getCallNumbersCleanedNew(final Record record, String fieldSpec, String conflatePrefixes)
+    public Set<String> getCallNumbersCleanedNew(final Record record, String conflatePrefixes)
     {
         boolean conflate = !conflatePrefixes.equalsIgnoreCase("false");
         
@@ -565,8 +598,10 @@ public class BlacklightIndexer extends SolrIndexer
 
             Comparator<String> comp = new StringNaturalCompare();
             Set<String> resultNormed = new TreeSet<String>(comp);
-            for (String callNum : fieldList)
+            for (String field : fieldList)
             {
+                String fieldParts[] = field.split(":", 2);
+                String callNum = fieldParts[1];
                 String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
                 String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
                 if (!nVal.equals(val))
@@ -587,6 +622,10 @@ public class BlacklightIndexer extends SolrIndexer
             {
                 Set<String> values = resultNormed.get(key);
                 String valueArr[] = values.toArray(new String[0]);
+                for (int i = 0; i < valueArr.length; i++)
+                {
+                    valueArr[i] = getCallNum(valueArr[i]);
+                }
                 if (valueArr.length == 1)
                 {
                     results.add(valueArr[0]);
@@ -632,7 +671,13 @@ public class BlacklightIndexer extends SolrIndexer
         }
     }
     
-  /** 
+    private String getCallNum(final String callNum)
+    {
+        String callNumParts[] = callNum.split(":", 2);
+        return (callNumParts[1]);
+    }
+
+/** 
     * Extract a single cleaned call number from a record
     * @param record
     * @return Clean call number
@@ -644,7 +689,7 @@ public class BlacklightIndexer extends SolrIndexer
        if (fieldList.isEmpty())  {
            return(null);
        }
-       Map<String, Set<String>> resultNormed = getCallNumbersCleanedConflated(fieldList);
+       Map<String, Set<String>> resultNormed = getCallNumbersCleanedConflated(fieldList, false);
        if (resultNormed == null || resultNormed.size() == 0) {
            return(null);
        }
@@ -670,7 +715,7 @@ public class BlacklightIndexer extends SolrIndexer
        result = result.trim().replaceAll(":", " ").replaceAll("\\s\\s+", " ")
                              .replaceAll("\\s?\\.\\s?", ".").replaceAll("[(][0-9]* volumes[)]", "");
        if (sortableFlag) 
-           result = CallNumUtils.getLCShelfkey(result, record.getControlNumberField().getData());
+           result = CallNumUtils.getLCShelfkey(result, null);
        return(result);
 
    }
@@ -736,7 +781,7 @@ public class BlacklightIndexer extends SolrIndexer
                 }
             };
 
-            Map<String, Set<String>> resultNormed = getCallNumbersCleanedConflated(fieldList);
+            Map<String, Set<String>> resultNormed = getCallNumbersCleanedConflated(fieldList, false);
             Set<String> keys = resultNormed.keySet();
             Set<String> results = new TreeSet<String>(normedComparator);
             for (String key : keys)
