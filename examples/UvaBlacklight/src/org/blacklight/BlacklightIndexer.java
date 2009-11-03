@@ -476,6 +476,10 @@ public class BlacklightIndexer extends SolrIndexer
                 }
                 return(null);
             }
+            else if (result.startsWith(prefix.substring(0,1)) && result.matches("["+prefix.substring(0,1)+"][A-Z]-["+prefix.substring(0,1)+"][A-Z] - .*"))
+            {
+                return(result);                
+            }
             else 
             {
                 return(prefix + " - " + result);
