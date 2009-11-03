@@ -970,7 +970,7 @@ public class BlacklightIndexer extends SolrIndexer
         {
             String other007 = null;
             String broadFormat = getFirstFieldVal(record, null, "000[6-7]");
-            if (format_007_raw.size() > 1)
+            if (format_007_raw.size() >= 1)
             {
                 for (String str007 : format_007_raw)
                 {
