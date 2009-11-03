@@ -25,8 +25,8 @@ if "%query%" == "" if "%id%" NEQ "" set query=id:%id%
 ::
 if "%SOLRMARC_MEM_ARGS%" EQU ""  set SOLRMARC_MEM_ARGS=@MEM_ARGS@
 ::
-if "%url%" == "" java %SOLRMARC_MEM_ARGS% %solrjardef% -Done-jar.main.class=org.solrmarc.marc.SolrReIndexer -jar %scriptdir%@CUSTOM_JAR_NAME@ %query% 2> NUL
-if "%url%" NEQ "" java %SOLRMARC_MEM_ARGS% -Done-jar.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar %scriptdir%@CUSTOM_JAR_NAME@ %url% %query% 
+if "%url%" == "" java %SOLRMARC_MEM_ARGS% %solrjardef% -Done-jar.main.class=org.solrmarc.marc.SolrReIndexer -jar %scriptdir%@CUSTOM_JAR_NAME@ "%query%" 2> NUL
+if "%url%" NEQ "" java %SOLRMARC_MEM_ARGS% -Done-jar.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar %scriptdir%@CUSTOM_JAR_NAME@ %url% "%query%" 
 ::
 goto done
 ::
