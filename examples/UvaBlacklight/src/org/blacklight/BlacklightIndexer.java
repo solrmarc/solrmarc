@@ -986,7 +986,7 @@ public class BlacklightIndexer extends SolrIndexer
                 result.add(Utils.remap("v", findMap(mapName1a), true)); // Streaming Video
                 result.add(Utils.remap("v", findMap(mapName2), true));  // Video
             }
-            if (broadFormat.equals("am")) 
+            else if (broadFormat.equals("am")) 
             {
                 result.add(Utils.remap("am", findMap(mapName1a), true)); // eBook
                 result.add(Utils.remap("a", findMap(mapName1), true));  // Book
