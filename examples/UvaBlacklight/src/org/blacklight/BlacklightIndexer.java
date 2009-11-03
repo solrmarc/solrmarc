@@ -966,7 +966,7 @@ public class BlacklightIndexer extends SolrIndexer
 
         Set<String> urls = getFieldList(record, "856u");
         Set<String> format_007_raw = getFieldList(record, "007[0-1]");
-        if (Utils.setItemContains(format_007_raw, "cr"))
+        if (Utils.setItemContains(format_007_raw, "cr") || Utils.setItemContains(result, "Online"))
         {
             String other007 = null;
             String broadFormat = getFirstFieldVal(record, null, "000[6-7]");
