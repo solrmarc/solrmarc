@@ -44,14 +44,23 @@ public class RemoteSolrSearcher
     {
         output = new MarcStreamWriter(System.out, "UTF8");
         if (solrFieldContainingEncodedMarcRecord == null) solrFieldContainingEncodedMarcRecord = "marc_display";
-        String queryparts[] = query.split(":");
+        /*String queryparts[] = query.split(":");
         if (queryparts.length != 2) 
         {
             //System.err.println("Error query must be of the form    field:term");
             System.out.println("Error: query must be of the form    field:term  " + query);
             return 0;
+        }*/
+        String encQuery;
+        try
+        {
+            encQuery = java.net.URLEncoder.encode(query, "UTF-8");
         }
-        String resultSet[] = getIdSet(queryparts[0], queryparts[1]);
+        catch (UnsupportedEncodingException e)
+        {
+            encQuery = query;
+        }
+        String resultSet[] = getIdSet(encQuery);
         String recordStr = null;
         for (String id : resultSet)
         {
@@ -131,9 +140,9 @@ public class RemoteSolrSearcher
         return(result);
     }
 
-    public String[] getIdSet(String field, String term) 
+    public String[] getIdSet(String query) 
     {
-        String fullURLStr = solrBaseURL + "/select/?q="+field+"%3A"+term+"&wt=json&indent=on&fl=id&start=0&rows=10000";
+        String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&indent=on&fl=id&start=0&rows=10000";
         URL fullURL = null;
         try
         {
