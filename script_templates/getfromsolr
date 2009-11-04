@@ -24,7 +24,8 @@ http*) url=$1 ;;
 *.properties) config=$1 ;;
 *:*) query=$1 ;;
 [A-Za-z_]+) id=$1 ;;
--v[v]?) flag=$1 ;;
+-v) flag=$1 ;;
+-vv) flag=$1 ;;
 esac
 
 case $2 in
@@ -32,7 +33,8 @@ http*) url=$2 ;;
 *.properties) config=$2 ;;
 *:*) query=$2 ;;
 [A-Za-z_]+) id=$2 ;;
--v[v]?) flag=$2 ;;
+-v) flag=$2 ;;
+-vv) flag=$2 ;;
 esac
 
 case $3 in
@@ -40,7 +42,8 @@ http*) url=$3 ;;
 *.properties) config=$3 ;;
 *:*) query=$3 ;;
 [A-Za-z_]+) id=$3 ;;
--v[v]?) flag=$3 ;;
+-v) flag=$3 ;;
+-vv) flag=$3 ;;
 esac
 
 if [[ "$query" == "" && "$id" != "" ]]
