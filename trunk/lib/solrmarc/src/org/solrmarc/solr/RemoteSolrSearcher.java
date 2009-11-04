@@ -25,6 +25,7 @@ import org.marc4j.marc.Record;
 
 public class RemoteSolrSearcher
 {
+    static boolean verbose = false;
     Object solrSearcher = null;
     String maxRows = "10000";
     String solrBaseURL;
@@ -40,6 +41,7 @@ public class RemoteSolrSearcher
         this.solrFieldContainingEncodedMarcRecord = solrFieldContainingEncodedMarcRecord;
         this.maxRows = maxRows;
         this.query = query;
+        if (verbose) System.err.println("URL = "+ solrBaseURL + "  query = "+ query+ "  maxRows = "+ maxRows);
     }
     
     public int handleAll()
@@ -62,6 +64,7 @@ public class RemoteSolrSearcher
         {
             encQuery = query;
         }
+        if (verbose) System.err.println("encoded query = "+ encQuery);
         String resultSet[] = getIdSet(encQuery, maxRows);
         String recordStr = null;
         for (String id : resultSet)
@@ -145,6 +148,7 @@ public class RemoteSolrSearcher
     public String[] getIdSet(String query, String maxRows) 
     {
         String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&indent=on&fl=id&start=0&rows="+maxRows;
+        if (verbose) System.err.println("Full URL for search = "+ fullURLStr);
         URL fullURL = null;
         try
         {
@@ -183,10 +187,12 @@ public class RemoteSolrSearcher
                     String numFoundStr = line.replaceFirst(".*numFound[^0-9]*([0-9]*).*", "$1");
                     numFound = Integer.parseInt(numFoundStr);
                     resultSet = new String[numFound];
+                    if (verbose) System.err.println("numFound = "+ numFound);
                 }
                 else if (line.contains("\"id\":[")) 
                 {
                     String id = line.replaceFirst(".*:.\"([-A-Za-z0-9_]*).*", "$1");
+                    if (verbose) System.err.println("record num = "+ (count) + "  id = " + id);
                     resultSet[count++] = id;
                 }
             }
@@ -348,7 +354,8 @@ public class RemoteSolrSearcher
         String field = "marc_display";
         for (int i = 0; i < args.length; i++)
         {
-            if (args[i].startsWith("http")) baseURLStr = args[i];
+            if (args[i].equals("-v")) verbose = true;
+            else if (args[i].startsWith("http")) baseURLStr = args[i];
             else if (args[i].contains(":")) query = args[i];
             else if (args[i].matches("[0-9]+")) maxRows = args[i];
             else field = args[i];
