@@ -1,6 +1,6 @@
 #! /bin/bash
-# build_bibix.sh
-# Import all marc files into a Solr index  (Stanford Blacklight flavor)
+# index_all_sirsi.sh
+# Import all marc files from sirsi full dump into a Solr index  (Stanford Blacklight flavor)
 #  Naomi Dushay 2008-10-12
 
 BLACKLIGHT_HOMEDIR=/home/blacklight
@@ -11,7 +11,7 @@ DIST_DIR=$SOLRMARC_BASEDIR/dist
 #RAW_DATA_DIR=$SITE_BASEDIR/test/data
 RAW_DATA_DIR=$BLACKLIGHT_HOMEDIR/data/unicorn/latest
 SOLR_DATA_DIR=$BLACKLIGHT_HOMEDIR/data/solr/dataBuild
-SOLRMARC_JAR=$DIST_DIR/stanfordBlacklightSolrmarc.jar
+SOLRMARC_JAR=$DIST_DIR/swSolrmarc.jar
 
 JAVA_HOME=/usr/lib/jvm/java
 
@@ -52,6 +52,7 @@ nohup java -Xmx16g -Xms16g -jar $SOLRMARC_JAR $RAW_DATA_DIR/uni_05500000_0599999
 nohup java -Xmx16g -Xms16g -jar $SOLRMARC_JAR $RAW_DATA_DIR/uni_06000000_06499999.marc &>$LOG_DIR/log600-649.txt
 nohup java -Xmx16g -Xms16g -jar $SOLRMARC_JAR $RAW_DATA_DIR/uni_06500000_06999999.marc &>$LOG_DIR/log650-699.txt
 nohup java -Xmx16g -Xms16g -jar $SOLRMARC_JAR $RAW_DATA_DIR/uni_07000000_07499999.marc &>$LOG_DIR/log700-749.txt
-nohup java -Xmx16g -Xms16g -Dsolr.optimize_at_end="true" -jar $SOLRMARC_JAR $RAW_DATA_DIR/uni_07500000_07999999.marc &>$LOG_DIR/log750-799.txt
+nohup java -Xmx16g -Xms16g -jar $SOLRMARC_JAR $RAW_DATA_DIR/uni_07500000_07999999.marc &>$LOG_DIR/log750-799.txt
+nohup java -Xmx16g -Xms16g -Dsolr.optimize_at_end="true" -jar $SOLRMARC_JAR $RAW_DATA_DIR/uni_08000000_08499999.marc &>$LOG_DIR/log800-849.txt
 
 exit 0
