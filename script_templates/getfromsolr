@@ -17,19 +17,43 @@ fi
 id=
 url=
 config=
+flag=
+max=
 
 case $1 in
 http*) url=$1 ;;
 *.properties) config=$1 ;;
 *:*) query=$1 ;;
-[A-Za-z]*) id=$1 ;;
+[A-Za-z_]+) id=$1 ;;
+[0-9]+) max=$1 ;;
+-v) flag=$1 ;;
 esac
 
 case $2 in
 http*) url=$2 ;;
 *.properties) config=$2 ;;
 *:*) query=$2 ;;
-[A-Za-z]*) id=$2 ;;
+[A-Za-z_]+) id=$2 ;;
+[0-9]+) max=$2 ;;
+-v) flag=$2 ;;
+esac
+
+case $3 in
+http*) url=$3 ;;
+*.properties) config=$3 ;;
+*:*) query=$3 ;;
+[A-Za-z_]+) id=$3 ;;
+[0-9]+) max=$3 ;;
+-v) flag=$3 ;;
+esac
+
+case $4 in
+http*) url=$4 ;;
+*.properties) config=$4 ;;
+*:*) query=$4 ;;
+[A-Za-z_]+) id=$4 ;;
+[0-9]+) max=$4 ;;
+-v) flag=$4 ;;
 esac
 
 if [[ "$query" == "" && "$id" != "" ]]
@@ -48,7 +72,7 @@ if [ "$url" == "" ]
 then
     java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -Done-jar.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $config "$query" 2> /dev/null
 else
-    java $SOLRMARC_MEM_ARGS -Done-jar.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar $scriptdir/@CUSTOM_JAR_NAME@ $url "$query"
+    java $SOLRMARC_MEM_ARGS -Done-jar.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar $scriptdir/@CUSTOM_JAR_NAME@ $flag $url "$query" $max
 fi
 
 exit 0
