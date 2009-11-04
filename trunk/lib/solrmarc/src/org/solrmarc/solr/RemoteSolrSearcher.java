@@ -26,17 +26,19 @@ import org.marc4j.marc.Record;
 public class RemoteSolrSearcher
 {
     Object solrSearcher = null;
+    String maxRows = "10000";
     String solrBaseURL;
     String solrFieldContainingEncodedMarcRecord;
     MarcStreamWriter output;
     String query;
     
-    public RemoteSolrSearcher(String solrBaseURL, String query, String solrFieldContainingEncodedMarcRecord)
+    public RemoteSolrSearcher(String solrBaseURL, String query, String solrFieldContainingEncodedMarcRecord, String maxRows)
     {
 //      refedSolrSearcher = solrCore.getSearcher();
 //      solrSearcher = refedSolrSearcher.get();
         this.solrBaseURL = solrBaseURL;  
         this.solrFieldContainingEncodedMarcRecord = solrFieldContainingEncodedMarcRecord;
+        this.maxRows = maxRows;
         this.query = query;
     }
     
@@ -60,7 +62,7 @@ public class RemoteSolrSearcher
         {
             encQuery = query;
         }
-        String resultSet[] = getIdSet(encQuery);
+        String resultSet[] = getIdSet(encQuery, maxRows);
         String recordStr = null;
         for (String id : resultSet)
         {
@@ -140,9 +142,9 @@ public class RemoteSolrSearcher
         return(result);
     }
 
-    public String[] getIdSet(String query) 
+    public String[] getIdSet(String query, String maxRows) 
     {
-        String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&indent=on&fl=id&start=0&rows=10000";
+        String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&indent=on&fl=id&start=0&rows="+maxRows;
         URL fullURL = null;
         try
         {
@@ -342,14 +344,16 @@ public class RemoteSolrSearcher
     {
         String baseURLStr = "http://localhost:8983/solr";
         String query = null;
+        String maxRows = "10000";
         String field = "marc_display";
         for (int i = 0; i < args.length; i++)
         {
             if (args[i].startsWith("http")) baseURLStr = args[i];
             else if (args[i].contains(":")) query = args[i];
+            else if (args[i].matches("[0-9]+")) maxRows = args[i];
             else field = args[i];
         }
-        RemoteSolrSearcher searcher = new RemoteSolrSearcher(baseURLStr, query, field);
+        RemoteSolrSearcher searcher = new RemoteSolrSearcher(baseURLStr, query, field, maxRows);
         searcher.handleAll();
         
     }
