@@ -1,5 +1,5 @@
 #! /bin/bash
-# build_bibix_test.sh
+# build_test_index.sh
 # Import a single marc file into a Solr index  (Stanford Blacklight)
 #  Naomi Dushay 2008-10-12
 
@@ -12,7 +12,7 @@ RAW_DATA_DIR=$SITE_BASEDIR/test/data
 #RAW_DATA_DIR=$BLACKLIGHT_HOMEDIR/data/unicorn/latest
 #SOLR_DATA_DIR=$BLACKLIGHT_HOMEDIR/data/solr/dataBuild
 SOLR_DATA_DIR=$SITE_BASEDIR/test/data/solr/data
-SOLRMARC_JAR=$DIST_DIR/stanfordBlacklightSolrmarc.jar
+SOLRMARC_JAR=$DIST_DIR/swSolrmarc.jar
 
 JAVA_HOME=/usr/lib/jvm/java
 
@@ -38,6 +38,6 @@ mkdir $LOG_DIR
 
 # index the file
 #java -Xmx1g -Xms1g -Dsolr.data.dir=$SOLR_DATA_DIR -jar $SOLRMARC_JAR $RAW_DATA_DIR/physicalTests.mrc &>$LOG_DIR/log.txt
-java -Xmx16g -Xms16g -Dsolr.data.dir=$SOLR_DATA_DIR -Dsolr.optimize_at_end="true" -jar $SOLRMARC_JAR $RAW_DATA_DIR/unicornWHoldings.mrc &>$LOG_DIR/log.txt
+java -Xmx1g -Xms1g -Dsolr.data.dir=$SOLR_DATA_DIR -Dsolr.optimize_at_end="true" -jar $SOLRMARC_JAR $RAW_DATA_DIR/unicornWHoldings.mrc &>$LOG_DIR/log.txt
 
 exit 0
