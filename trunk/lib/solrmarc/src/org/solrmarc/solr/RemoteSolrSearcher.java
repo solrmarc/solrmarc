@@ -26,22 +26,21 @@ import org.marc4j.marc.Record;
 public class RemoteSolrSearcher
 {
     static boolean verbose = false;
+    static boolean veryverbose = false;
     Object solrSearcher = null;
-    String maxRows = "10000";
     String solrBaseURL;
     String solrFieldContainingEncodedMarcRecord;
     MarcStreamWriter output;
     String query;
     
-    public RemoteSolrSearcher(String solrBaseURL, String query, String solrFieldContainingEncodedMarcRecord, String maxRows)
+    public RemoteSolrSearcher(String solrBaseURL, String query, String solrFieldContainingEncodedMarcRecord)
     {
 //      refedSolrSearcher = solrCore.getSearcher();
 //      solrSearcher = refedSolrSearcher.get();
         this.solrBaseURL = solrBaseURL;  
         this.solrFieldContainingEncodedMarcRecord = solrFieldContainingEncodedMarcRecord;
-        this.maxRows = maxRows;
         this.query = query;
-        if (verbose) System.err.println("URL = "+ solrBaseURL + "  query = "+ query+ "  maxRows = "+ maxRows);
+        if (verbose) System.err.println("URL = "+ solrBaseURL + "  query = "+ query);
     }
     
     public int handleAll()
@@ -65,7 +64,7 @@ public class RemoteSolrSearcher
             encQuery = query;
         }
         if (verbose) System.err.println("encoded query = "+ encQuery);
-        String resultSet[] = getIdSet(encQuery, maxRows);
+        String resultSet[] = getIdSet(encQuery);
         String recordStr = null;
         for (String id : resultSet)
         {
@@ -145,9 +144,12 @@ public class RemoteSolrSearcher
         return(result);
     }
 
-    public String[] getIdSet(String query, String maxRows) 
+    public String[] getIdSet(String query) 
     {
-        String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&indent=on&fl=id&start=0&rows="+maxRows;
+        int setSize = getIdSetSize(query);
+        String resultSet[] = new String[setSize];
+
+        String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&indent=on&fl=id&start=0&rows="+setSize;
         if (verbose) System.err.println("Full URL for search = "+ fullURLStr);
         URL fullURL = null;
         try
@@ -176,23 +178,15 @@ public class RemoteSolrSearcher
         }
         String line;
         int numFound = 0;
-        String resultSet[] = null;
         int count = 0;
         try
         {
             while ((line = sIn.readLine()) != null)
             {
-                if (line.contains("\"numFound\""))
-                {
-                    String numFoundStr = line.replaceFirst(".*numFound[^0-9]*([0-9]*).*", "$1");
-                    numFound = Integer.parseInt(numFoundStr);
-                    resultSet = new String[numFound];
-                    if (verbose) System.err.println("numFound = "+ numFound);
-                }
-                else if (line.contains("\"id\":[")) 
+                if (line.contains("\"id\":[")) 
                 {
                     String id = line.replaceFirst(".*:.\"([-A-Za-z0-9_]*).*", "$1");
-                    if (verbose) System.err.println("record num = "+ (count) + "  id = " + id);
+                    if (veryverbose) System.err.println("record num = "+ (count) + "  id = " + id);
                     resultSet[count++] = id;
                 }
             }
@@ -208,6 +202,62 @@ public class RemoteSolrSearcher
             e.printStackTrace();
         }
         return(resultSet);
+    }
+    
+    public int getIdSetSize(String query) 
+    {
+        String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&indent=on&start=0&rows=0";
+        if (verbose) System.err.println("Full URL for search = "+ fullURLStr);
+        URL fullURL = null;
+        try
+        {
+            fullURL = new URL(fullURLStr);
+        }
+        catch (MalformedURLException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        BufferedReader sIn = null;
+        try
+        {
+            sIn = new BufferedReader( new InputStreamReader(fullURL.openStream(), "UTF-8"));
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        String line;
+        int numFound = 0;
+        try
+        {
+            while ((line = sIn.readLine()) != null)
+            {
+                if (line.contains("\"numFound\""))
+                {
+                    String numFoundStr = line.replaceFirst(".*numFound[^0-9]*([0-9]*).*", "$1");
+                    numFound = Integer.parseInt(numFoundStr);
+                    if (verbose) System.err.println("numFound = "+ numFound);
+                }
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return(numFound);
     }
     /**
      * Extract the marc record from binary marc
@@ -350,17 +400,17 @@ public class RemoteSolrSearcher
     {
         String baseURLStr = "http://localhost:8983/solr";
         String query = null;
-        String maxRows = "10000";
+        String maxRows = "20000";
         String field = "marc_display";
         for (int i = 0; i < args.length; i++)
         {
             if (args[i].equals("-v")) verbose = true;
+            else if (args[i].equals("-vv")) { verbose = true; veryverbose = true; }
             else if (args[i].startsWith("http")) baseURLStr = args[i];
             else if (args[i].contains(":")) query = args[i];
-            else if (args[i].matches("[0-9]+")) maxRows = args[i];
             else field = args[i];
         }
-        RemoteSolrSearcher searcher = new RemoteSolrSearcher(baseURLStr, query, field, maxRows);
+        RemoteSolrSearcher searcher = new RemoteSolrSearcher(baseURLStr, query, field);
         searcher.handleAll();
         
     }
