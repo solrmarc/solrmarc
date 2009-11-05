@@ -143,7 +143,11 @@ _UNIMARC_ - Encoding scheme used by many European libraries<br />
 _UTF8_ - Unicode character encoding scheme, used in some newer systems<br />
 _BESTGUESS_ - You want the program to try to determine the encoding
 
-*_10. Enter the instance of Solr code to use for your site:_* war, 1.2, 1.3, 1.4, external
+*_10. Properties files should be copied to the one-jar jar file that is produced_*  (true, [false])
+_true_ - everything is in in the jar, no worries about separate files needed.
+_false_ - you can easily change the properties files without having to touch the jar.
+
+*_11. Enter the instance of Solr code to use for your site:_* war, 1.2, 1.3, 1.4, external
 
 _war_ - a particular solr.war file used by the web server hosting your solr application.  You will then be prompted for the full path of the location of the solr.war file, e.g. c:\solr\webapps\solr.war, /usr/local/me/jetty/webapps/solr.war<br />
 
