@@ -67,6 +67,9 @@ Download the !SolrMarc software via a subversion checkout:
    _svn checkout http://solrmarc.googlecode.com/svn/trunk solrmarc_
 
 <br />
+=== What Should my Marc Data Look Like ===
+normal marc data;  data that follows the marc bibliographic record standard.  It can be in marcxml or marc21 (these are the file structures, not the encoding).
+
 == Configuring the Importer Program ==
 
 The default ant target will build the whole program and will query the user for correct settings, but we suggest you do the initialization step separately from the build step. 
