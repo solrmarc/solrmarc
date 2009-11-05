@@ -89,6 +89,8 @@ Choose an example implementation you wish you use as a template for your !SolrMa
 
 The selected example is used as a template to create the directory structure that will be populated by the rest of the configuration script.
 
+*need explanations of what the example installations are tuned for to help folks choose*
+
 *_3. Enter the name of the Jar file to contain site-specific custom indexing code_*
 
 Enter _"none"_ if you expect not to have any site-specific custom indexing code. If you require custom indexing functions beyond what is provided, enter a name for the jar file that will contain your site-specific code.  Omit _".jar"_ from the end of the name.
