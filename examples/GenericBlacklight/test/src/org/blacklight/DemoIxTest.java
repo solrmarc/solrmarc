@@ -27,11 +27,8 @@ public abstract class DemoIxTest extends IndexTest
         if (solrPath == null)
         {
             // solrPath = siteSpecificPath + File.separator + "solr";
-            String ngdeDir = File.separator + "Users" + File.separator + "naomi"
-                    + File.separator + "NGDE";
-            solrPath = ngdeDir + File.separator + "blacklight" + File.separator
-                    + "bl-demo" + File.separator + "jetty" + File.separator
-                    + "solr";
+            solrPath = "home" + File.separator + "genericBlacklight" + File.separator
+                    + "jetty" + File.separator + "solr";
             System.setProperty("solr.path", solrPath);
         }
 

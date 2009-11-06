@@ -31,12 +31,8 @@ public abstract class AbstractStanfordBlacklightTest extends IndexTest {
         String solrPath = System.getProperty("solr.path");
         if (solrPath == null)
         {
-    		String ngdeDir = File.separator + "Users" + File.separator + "naomi" 
-    				+ File.separator + "NGDE";
-            solrPath = ngdeDir + File.separator + "solr" + File.separator + "solr1.4";
-//            solrPath = ngdeDir + File.separator + "blacklight" + File.separator
-//                    + "searchworksBL" + File.separator + "jetty" + File.separator
- //                   + "solr";
+            solrPath = "home" + File.separator + "solrmarc" + File.separator
+                    + "jetty" + File.separator + "solr";
             System.setProperty("solr.path", solrPath);
         }
 
@@ -58,7 +54,7 @@ public abstract class AbstractStanfordBlacklightTest extends IndexTest {
         
         String configPropFile = System.getProperty("test.config.file");
 		if (configPropFile == null) {
-		    configPropFile = configPropDir + File.separator + "bibix_config.properties";
+		    configPropFile = configPropDir + File.separator + "sw_config.properties";
             System.setProperty("test.config.file", configPropFile);
 		}
 		
@@ -101,7 +97,7 @@ public abstract class AbstractStanfordBlacklightTest extends IndexTest {
 		// needed to get through initialization; overridden in individual tests
 		System.setProperty("marc.path", anyTestFile);
 
-		solrFldMapTest = new SolrFieldMappingTest(siteDir + File.separator + "bibix_config.properties", docIDfname);
+		solrFldMapTest = new SolrFieldMappingTest(siteDir + File.separator + "sw_config.properties", docIDfname);
 	}
 
 
