@@ -161,13 +161,13 @@
             <subfield code="t">nope</subfield>
         </datafield>   
     </record>   
-    <!-- 4xx, 505 search subfields -->
+    <!-- 4xx search subfields -->
     <record>
         <leader>66662cim  2200457Ia 45í0</leader>
         <controlfield tag="001">a4xxVernSearch</controlfield>
         <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
         <datafield tag="245" ind1="1" ind2=" ">
-            <subfield code="a">testing 4xx and 505 title vernacular - all searching subfields</subfield>
+            <subfield code="a">testing 4xx title vernacular - all searching subfields</subfield>
         </datafield>   
         <datafield tag="440" ind1="1" ind2=" ">
             <subfield code="6">880-01</subfield>
@@ -176,10 +176,6 @@
         <datafield tag="490" ind1="1" ind2=" ">
             <subfield code="6">880-02</subfield>
             <subfield code="a">490a</subfield>
-        </datafield>   
-        <datafield tag="505" ind1="1" ind2=" ">
-            <subfield code="6">880-03</subfield>
-            <subfield code="a">505a</subfield>
         </datafield>   
         <datafield tag="880" ind1="1" ind2=" ">
             <subfield code="6">440-01</subfield>
@@ -198,11 +194,6 @@
             <subfield code="n">nope</subfield>
             <subfield code="p">nope</subfield>
             <subfield code="v">vern490v</subfield>
-        </datafield>   
-        <datafield tag="880" ind1="1" ind2=" ">
-            <subfield code="6">505-03</subfield>
-            <subfield code="a">nope</subfield>
-            <subfield code="t">vern505t</subfield>
         </datafield>   
     </record>
     <!-- 700-740 search subfields -->
@@ -1019,29 +1010,6 @@
             <subfield code="g">vern300g</subfield>
         </datafield>
     </record>
-    
-    <!-- 505 (table of contents) search subfields -->
-    <record>
-        <leader>00880cam a2200217 i 4500</leader>
-        <controlfield tag="001">a505VernSearch</controlfield>
-        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
-        <datafield tag="245" ind1="1" ind2="0">
-            <subfield code="a">505 (table of contents) vernacular search subfields</subfield>
-        </datafield>
-        <datafield tag="505" ind1="1" ind2=" ">
-            <subfield code="6">880-01</subfield>
-            <subfield code="a">a505</subfield>
-        </datafield>   
-        <datafield tag="880" ind1="1" ind2=" ">
-            <subfield code="6">505-01</subfield>
-            <subfield code="a">a505vern</subfield>
-            <subfield code="g">none</subfield>
-            <subfield code="r">none</subfield>
-            <subfield code="t">none</subfield>
-            <subfield code="u">none</subfield>
-        </datafield>
-    </record>
-    
     
     <!-- chinese 880s, with repeated occurence of same field -->
     <record>
