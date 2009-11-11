@@ -568,6 +568,16 @@ public class MarcImporter extends MarcHandler
                     System.exit(1);               
                 }
                 File solrcoretest = new File(solrCoreDir);
+                if (!solrcoretest.isAbsolute())  solrcoretest = new File(homeDir, solrCoreDir);
+                try
+                {
+                    solrCoreDir = solrcoretest.getCanonicalPath();
+                }
+                catch (IOException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 if (!solrcoretest.exists() || !solrcoretest.isDirectory() )
                 {
                     System.err.println("Error: Supplied Solr home directory does not exist: "+ solrCoreDir) ;
