@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+
+    <!-- all vernacular fields present, except uniform title (130 / 240) and 110, 111 -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">aallVern</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+<!-- 
+  author = custom, removeTrailingPunct(100abcdq, [\\\\,/;:], ([A-Za-z]{4}|[0-9]{3}|\\)|\\,) )
+  creator_display = 100abcdefghijklmnopqrstuvwxyz
+-->
+        <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">personal name author</subfield>
+            <subfield code="g">miscellaneous author info</subfield>
+        </datafield>   
+<!--         
+  full_title_display = 245abcdefghijklmnopqrstuvwxyz
+  brief_title_display = custom, removeTrailingPunct(245abdefghijklmnopqrstuvwxyz)
+  variant_title_display = 246abcdefghijklmnopqrstuvwxyz
+-->        
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">title 245</subfield>
+            <subfield code="c">[subfield c].</subfield>
+        </datafield>
+        <datafield tag="246" ind1="1" ind2=" ">
+            <subfield code="6">880-05</subfield>
+            <subfield code="a">variant title</subfield>
+        </datafield>   
+           
+<!--         
+  edition = 250ab
+  publication_display = 260abcefg
+  physical = 300abcefg
+-->
+        <datafield tag="250" ind1=" " ind2=" ">
+            <subfield code="6">880-06</subfield>
+            <subfield code="a">edition</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="6">880-07</subfield>
+            <subfield code="a">publication</subfield>
+        </datafield>
+        <datafield tag="300" ind1=" " ind2=" ">
+            <subfield code="6">880-08</subfield>
+            <subfield code="a">Let's get physical, physical!</subfield>
+        </datafield>
+        
+<!--  
+*  series_title_display = 440anpv
+*  series_display = 490av
+-->
+        <datafield tag="440" ind1=" " ind2=" ">
+            <subfield code="6">880-09</subfield>
+            <subfield code="a">series title</subfield>
+        </datafield>
+        <datafield tag="490" ind1=" " ind2=" ">
+            <subfield code="6">880-10</subfield>
+            <subfield code="a">just the series, ma'am</subfield>
+        </datafield>
+        
+<!-- and a field that is NOT displayed -->
+        <datafield tag="505" ind1="1" ind2=" ">
+            <subfield code="6">880-11</subfield>
+            <subfield code="a">contents</subfield>
+        </datafield>
+
+        <!-- 880s -->
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">100-01</subfield>
+            <subfield code="a">vernacular personal name author</subfield>
+            <subfield code="g">vernacular miscellaneous author info</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2="0">
+            <subfield code="6">245-04</subfield>
+            <subfield code="a">vernacular title 245</subfield>
+            <subfield code="c">[vernacular subfield c].</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">246-05</subfield>
+            <subfield code="a">vernacular variant title</subfield>
+        </datafield>   
+        
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">250-06</subfield>
+            <subfield code="a">vernacular edition</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">260-07</subfield>
+            <subfield code="a">vernacular publication</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">300-08</subfield>
+            <subfield code="a">vernacular Let's get physical, physical!</subfield>
+        </datafield>
+        
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">440-09</subfield>
+            <subfield code="a">vernacular series title</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">490-10</subfield>
+            <subfield code="a">vernacular just the series, ma'am</subfield>
+        </datafield>
+        
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">505-11</subfield>
+            <subfield code="a">vernacular contents</subfield>
+        </datafield>
+    </record>
+    
+    
+    <!-- corporate author vernacular field 110 -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">aCorpAuthorVern</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+<!-- 
+    corp_author_display = 110abcdefghijklmnopqrstuvwxyz
+-->
+        <datafield tag="110" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">corp name author</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">110-01</subfield>
+            <subfield code="a">vernacular corp name author</subfield>
+        </datafield>
+    </record>    
+    
+    <!-- meeting author vernacular field 111 -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">aMeetingAuthorVern</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <!-- 
+            meeting_display = 111abcdefghijklmnopqrstuvwxyz
+        -->
+        <datafield tag="111" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">mtg name author</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">111-01</subfield>
+            <subfield code="a">vernacular mtg name author</subfield>
+        </datafield>
+    </record>    
+    
+
+<!-- uniform title records 
+    *  uniform_title_display = 130abcdefghijklmnopqrstuvwxyz:240abcdefghijklmnopqrstuvwxyz, first
+-->    
+    <!-- 130 no 240 -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a130only</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="130" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">main entry uniform title</subfield>
+        </datafield>   
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">title for 130</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">130-01</subfield>
+            <subfield code="a">vernacular main entry uniform title</subfield>
+        </datafield>   
+    </record>
+        
+    <!-- no 130 yes 240 -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a240only</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="240" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">uniform title</subfield>
+        </datafield>   
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">title for 240</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">240-01</subfield>
+            <subfield code="a">vernacular uniform title</subfield>
+        </datafield>   
+    </record>
+    
+    <!-- two 700 fields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">atwo700</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">two 700 fields</subfield>
+        </datafield>
+        <datafield tag="700" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">first 700</subfield>
+        </datafield>   
+        <datafield tag="246" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">second 700</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">700-01</subfield>
+            <subfield code="a">vernacular first 700</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">700-02</subfield>
+            <subfield code="a">vernacular second 700</subfield>
+        </datafield>   
+    </record>
+    
+    <!-- duplicated subfields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">aDupSubflds</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">duplicated subfields</subfield>
+        </datafield>
+        <datafield tag="800" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">Wellington, </subfield>
+            <subfield code="a">New Zealand</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">800-01</subfield>
+            <subfield code="a">Naomi in Wellington, </subfield>
+            <subfield code="a">in New Zealand</subfield>
+        </datafield>   
+    </record>
+    
+    <!-- trailing punctuation -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">atrailingPunct</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">internal colon : </subfield>
+            <subfield code="b">ending period.</subfield>
+        </datafield>    
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">ends in slash /</subfield>
+            <subfield code="c">[ignored].</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">100-01</subfield>
+            <subfield code="a">vernacular internal colon : </subfield>
+            <subfield code="b">vernacular ending period.</subfield>
+        </datafield>    
+        <datafield tag="880" ind1="1" ind2="0">
+            <subfield code="6">245-02</subfield>
+            <subfield code="a">vernacular ends in slash /</subfield>
+            <subfield code="c">[vernacular ignored].</subfield>
+        </datafield>
+    </record>
+    
+    <!-- chinese 880s, with repeated occurence of same field -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a4160530</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    chi d</controlfield>
+        <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">Xiao, Qian,</subfield>
+            <subfield code="d">1910-</subfield>
+        </datafield>    
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">Xiao Qian shu xin ji /</subfield>
+            <subfield code="c">[Bian zhe Fu Guangming ; ze ren bian ji Zhang Yulin].</subfield>
+        </datafield>
+        <datafield tag="250" ind1=" " ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">Di 1 ban.</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">[Zhengzhou] : </subfield>
+            <subfield code="b">Henan jiao yu chu ban she : </subfield>
+            <subfield code="b">Henan sheng xin hua shu dian fa xing,</subfield>
+            <subfield code="c">1991.</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">100-01</subfield>
+            <subfield code="a">萧乾,</subfield>
+            <subfield code="d">1910-</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2="0">
+            <subfield code="6">245-02</subfield>
+            <subfield code="a">萧乾书信集 /</subfield>
+            <subfield code="c">[编者傅光明;责任编辑张玉林].</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">250-03</subfield>
+            <subfield code="a">第1版.</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">260-04</subfield>
+            <subfield code="a">[郑州]:</subfield>
+            <subfield code="b">河南教育出版社:</subfield>
+            <subfield code="b">河南省新华书店发行,</subfield>
+            <subfield code="c">1991.</subfield>
+        </datafield>
+    </record>
+
+<!-- fake right to left language -->
+    <record>
+        <controlfield tag="001">aRtoL</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    heb d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">a is for alligator /</subfield>
+            <subfield code="c">c is for crocodile,</subfield>
+            <subfield code="d">1980</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">245-01</subfield>
+            <subfield code="a">alligator for is a /</subfield>
+            <subfield code="c">crocodile for is c,</subfield>
+            <subfield code="d">1980</subfield>
+        </datafield>
+    </record>
+    <record>
+        <controlfield tag="001">aRtoL2</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    ara d</controlfield>
+        <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">LTR a :</subfield>
+            <subfield code="b">LTR b,</subfield>
+            <subfield code="c">LTR c</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">a first /</subfield>
+            <subfield code="c">c second,</subfield>
+            <subfield code="d">1980</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">100-01</subfield>
+            <subfield code="a">vern (RTL?) a (first) :</subfield>
+            <subfield code="b">vern (RTL?) b (second),</subfield>
+            <subfield code="c">vern (RTL?) c (third)</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">245-02</subfield>
+            <subfield code="a">vern (RTL?) a /</subfield>
+            <subfield code="c">vern (RTL?) c followed by number,</subfield>
+            <subfield code="d">1980</subfield>
+        </datafield>
+    </record>
+    <!-- hebrew 880s -->
+    <record>
+        <controlfield tag="001">ahebrew1</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    yid d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">Alef bet shel Yahadut.</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">Yerushalayim :</subfield>
+            <subfield code="b">Mosad ha-Rav Ḳuḳ, </subfield>
+            <subfield code="c">c1983.</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2="0">
+            <subfield code="6">245-02//r</subfield>
+            <subfield code="a">אל״ף בי״ת של יהדות /</subfield>
+            <subfield code="c">הלל צייטלין ; תירגם וערך מנחם ברש־רועי</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">260-03//r</subfield>
+            <subfield code="a">ירושלים : </subfield>
+            <subfield code="b">מוסד הרב קוק, </subfield>
+            <subfield code="c">c1983</subfield>
+        </datafield>
+    </record>
+
+    <!-- hebrew 880s -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">ahebrew2</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    heb d</controlfield>
+        <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">Zeitlin, Hillel</subfield>
+            <subfield code="d">1871-1942.</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">Alef bet shel Yahadut.</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">Yerushalayim :</subfield>
+            <subfield code="b">Mosad ha-Rav Ḳuḳ, </subfield>
+            <subfield code="c">c1983.</subfield>
+        </datafield>
+        <datafield tag="490" ind1=" " ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">Sifriyat targumim ṿa-asupot me-ḥokhmat Yiśraʼel ;\</subfield>
+            <subfield code="v">47</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">100-01//r</subfield>
+            <subfield code="a">צייטלין, הלל. </subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2="0">
+            <subfield code="6">245-02//r</subfield>
+            <subfield code="a">אל״ף בי״ת של יהדות /</subfield>
+            <subfield code="c">הלל צייטלין ; תירגם וערך מנחם ברש־רועי</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">260-03//r</subfield>
+            <subfield code="a">ירושלים : </subfield>
+            <subfield code="b">מוסד הרב קוק, </subfield>
+            <subfield code="c">c1983</subfield>
+        </datafield>
+        <datafield tag="880" ind1="0" ind2=" ">
+            <subfield code="6">490-04//r</subfield>
+            <subfield code="a">ספרית תרגומים ואסופות מחכמת ישראל ;</subfield>
+            <subfield code="v">47</subfield>
+        </datafield>
+    </record>
+    
+</collection>

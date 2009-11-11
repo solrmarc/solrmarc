@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+    <!-- 300abc -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a300111</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="300" ind1=" " ind2=" ">
+            <subfield code="a">1 sound disc (20 min.);</subfield>
+            <subfield code="b">analog, 33 1/3 rpm, stereo. ;</subfield>
+            <subfield code="c">12 in.</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="4">
+            <subfield code="a">300abc</subfield>
+        </datafield>
+    </record>
+    <!-- 300abce -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a300222</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="300" ind1=" " ind2=" ">
+            <subfield code="a">271 p. :</subfield>
+            <subfield code="b">ill. ;</subfield>
+            <subfield code="c">21 cm. +</subfield>
+            <subfield code="e">answer book.</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="4">
+            <subfield code="a">300abce</subfield>
+        </datafield>
+    </record>
+    <!-- 300 3afg -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a300333</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="300" ind1=" " ind2=" ">
+            <subfield code="3">records</subfield>
+            <subfield code="a">1</subfield>
+            <subfield code="f">box</subfield>
+            <subfield code="g">2 x 4 x 3 1/2 ft.</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="4">
+            <subfield code="a">300 3afg</subfield>
+        </datafield>
+    </record>
+    <!-- 300aafafc -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a300444</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="300" ind1=" " ind2=" ">
+            <subfield code="a">diary</subfield>
+            <subfield code="a">1</subfield>
+            <subfield code="f">volume</subfield>
+            <subfield code="a">(463</subfield>
+            <subfield code="f">pages) ;</subfield>
+            <subfield code="c">17 cm. x 34.5 cm.</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2="4">
+            <subfield code="a">300aafafc</subfield>
+        </datafield>
+    </record>
+</collection>
