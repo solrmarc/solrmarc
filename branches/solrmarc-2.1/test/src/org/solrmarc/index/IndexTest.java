@@ -52,7 +52,12 @@ public abstract class IndexTest {
             }
             System.setProperty("solr.data.dir", solrDataDir);
         }
-        deleteDirContents(solrDataDir);
+        logger.debug("System.getProperty(\"os.name\") : "+System.getProperty("os.name"));
+        if (!System.getProperty("os.name").toLowerCase().contains("win"))
+        {
+            logger.info("Calling Delete Dir Contents");
+            deleteDirContents(solrDataDir);
+        }
         if (configPropFilename != null)
         {
             importer = new MarcImporter(new String[]{configPropFilename, testDataParentPath + File.separator + testDataFname});
@@ -61,7 +66,11 @@ public abstract class IndexTest {
         {
             importer = new MarcImporter(new String[]{testDataParentPath + File.separator + testDataFname});
         }
-      //  importer.getSolrCoreProxy().deleteAllDocs();
+        if (System.getProperty("os.name").toLowerCase().contains("win"))
+        {
+            logger.info("Calling Delete All Docs");
+            importer.getSolrProxy().deleteAllDocs();
+        }
         
         int numImported = importer.importRecords();       
         importer.finish();
@@ -169,6 +178,7 @@ public abstract class IndexTest {
 			{	// recursively remove files and directories
 				deleteDir(file.getAbsolutePath());
 			}
+		logger.debug("Deleting: "+ d.getAbsolutePath());
 		d.delete();
 	}
 
