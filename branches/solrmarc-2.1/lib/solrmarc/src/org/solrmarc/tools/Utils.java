@@ -142,6 +142,7 @@ public final class Utils {
                     try
                     {
                         in = new FileInputStream(propertyFile);
+                        logger.debug("Opening file: "+ propertyFile.getAbsolutePath());
                     }
                     catch (FileNotFoundException e)
                     {
@@ -165,6 +166,8 @@ public final class Utils {
             URL url = utilObj.getClass().getClassLoader().getResource(propertyFileName);
             if (url == null)  
                 url = utilObj.getClass().getResource("/" + propertyFileName);
+            logger.debug("Opening resource via URL: "+ url.toString());
+
 /*
             if (url == null) 
                 url = utilObj.getClass().getClassLoader().getResource(propertyPath + "/" + propertyFileName);
