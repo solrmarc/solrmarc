@@ -41,12 +41,8 @@ public class SolrReIndexer extends MarcImporter
      * @param args additional arguments
      * @throws IOException
      */
-    public SolrReIndexer(String args[])
+    public SolrReIndexer()
     {
-        super(args);
-        loadLocalProperties(configProps);
-        processAdditionalArgs(addnlArgs);
-        solrSearcherProxy = new SolrSearcherProxy((SolrCoreProxy)solrProxy);
     }
 
     @Override
@@ -60,24 +56,28 @@ public class SolrReIndexer extends MarcImporter
         return 0;
     }
 
-    private void loadLocalProperties(Properties props)
+    @Override
+    protected void loadLocalProperties()
     {
-        solrFieldContainingEncodedMarcRecord = Utils.getProperty(props, "solr.fieldname");
-        queryForRecordsToUpdate = Utils.getProperty(props, "solr.query");
-        String up = Utils.getProperty(props, "solr.do_update");
+        super.loadLocalProperties();
+        solrFieldContainingEncodedMarcRecord = Utils.getProperty(configProps, "solr.fieldname");
+        queryForRecordsToUpdate = Utils.getProperty(configProps, "solr.query");
+        String up = Utils.getProperty(configProps, "solr.do_update");
         doUpdate = (up == null) ? true : Boolean.parseBoolean(up);
     }
     
-    private void processAdditionalArgs(String[] args) 
+    @Override
+    protected void processAdditionalArgs() 
     {
-        if (queryForRecordsToUpdate == null && args.length > 0)
+        if (queryForRecordsToUpdate == null && addnlArgs.length > 0)
         {
-            queryForRecordsToUpdate = args[0];
+            queryForRecordsToUpdate = addnlArgs[0];
         }
-        if (solrFieldContainingEncodedMarcRecord == null && args.length > 1)
+        if (solrFieldContainingEncodedMarcRecord == null && addnlArgs.length > 1)
         {
-            solrFieldContainingEncodedMarcRecord = args[1];
+            solrFieldContainingEncodedMarcRecord = addnlArgs[1];
         }
+        solrSearcherProxy = new SolrSearcherProxy((SolrCoreProxy)solrProxy);
     }
 
     
@@ -173,6 +173,7 @@ public class SolrReIndexer extends MarcImporter
     {
         addExtraInfoFromDocToMap(doc, docMap, "fund_code_facet");
         addExtraInfoFromDocToMap(doc, docMap, "date_received_facet");   
+        addExtraInfoFromDocToMap(doc, docMap, "marc_error");   
     }
 
     /**
@@ -533,7 +534,8 @@ public class SolrReIndexer extends MarcImporter
         newArgs[0] = "NONE";
         
         SolrReIndexer reader = null;
-        reader = new SolrReIndexer(newArgs);
+        reader = new SolrReIndexer();
+        reader.init(newArgs);
           
         reader.handleAll();
         
