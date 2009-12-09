@@ -41,13 +41,8 @@ public class BooklistReader extends SolrReIndexer
      * @param properties Path to properties files
      * @throws IOException
      */
-    public BooklistReader(String args[]) 
+    public BooklistReader() 
     {
-        super(addArg(args, "NONE"));
-        loadLocalProperties(configProps);
-        //handle args that weren't grabbed by some super class.
-        processAdditionalArgs(this.addnlArgs);
-        documentCache = new LinkedHashMap<String, Map<String, Object>>();
     }
     
     static String[] addArg(String args[], String toAdd)
@@ -58,7 +53,8 @@ public class BooklistReader extends SolrReIndexer
         return(result);
     }
     
-    private void loadLocalProperties(Properties props)
+    @Override
+    protected void loadLocalProperties()
     {
         if (solrFieldContainingEncodedMarcRecord == null) 
         {
@@ -66,9 +62,11 @@ public class BooklistReader extends SolrReIndexer
         }
     }
     
-    private void processAdditionalArgs(String[] args) 
+    @Override
+    protected void processAdditionalArgs() 
     {
-        booklistFilename = args.length > 0 ? args[0] : "booklists.txt";
+        booklistFilename = addnlArgs.length > 0 ? addnlArgs[0] : "booklists.txt";
+        documentCache = new LinkedHashMap<String, Map<String, Object>>();
     }
 
     public int handleAll()
@@ -247,7 +245,8 @@ public class BooklistReader extends SolrReIndexer
         BooklistReader reader = null;
         try
         {
-            reader = new BooklistReader(args);
+            reader = new BooklistReader();
+            reader.init(addArg(args, "NONE"));
         }
         catch (IllegalArgumentException e)
         {

@@ -58,13 +58,14 @@ public abstract class IndexTest {
             logger.info("Calling Delete Dir Contents");
             deleteDirContents(solrDataDir);
         }
+        importer = new MarcImporter();
         if (configPropFilename != null)
         {
-            importer = new MarcImporter(new String[]{configPropFilename, testDataParentPath + File.separator + testDataFname});
+            importer.init(new String[]{configPropFilename, testDataParentPath + File.separator + testDataFname});
         }
         else 
         {
-            importer = new MarcImporter(new String[]{testDataParentPath + File.separator + testDataFname});
+            importer.init(new String[]{testDataParentPath + File.separator + testDataFname});
         }
         if (System.getProperty("os.name").toLowerCase().contains("win"))
         {

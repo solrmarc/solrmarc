@@ -61,17 +61,16 @@ public class MarcPrinter extends MarcHandler
     private MarcWriter writer = null;
     private PrintWriter out;
     
-    public MarcPrinter(String args[], PrintWriter out)
+    public MarcPrinter(PrintWriter out)
     {
-        super(args);
+        super();
         this.out = out;
-        loadLocalProperties(configProps);
-        processAdditionalArgs(addnlArgs);
     }
     
-    private void processAdditionalArgs(String[] args) 
+    @Override
+    protected void processAdditionalArgs() 
     {
-        for (String arg : args)
+        for (String arg : addnlArgs)
         {
             if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate"))
             {
@@ -88,10 +87,11 @@ public class MarcPrinter extends MarcHandler
         }
     }
 
-    private void loadLocalProperties(Properties props) 
+    @Override
+    protected void loadLocalProperties() 
     {
-        String marcIncludeIfPresent2 = Utils.getProperty(props, "marc.include_if_present2");
-        String marcIncludeIfMissing2 = Utils.getProperty(props, "marc.include_if_missing2");
+        String marcIncludeIfPresent2 = Utils.getProperty(configProps, "marc.include_if_present2");
+        String marcIncludeIfMissing2 = Utils.getProperty(configProps, "marc.include_if_missing2");
 
         if (reader != null && (marcIncludeIfPresent2 != null || marcIncludeIfMissing2 != null)) 
         {
@@ -102,7 +102,7 @@ public class MarcPrinter extends MarcHandler
     @Override
     public int handleAll() 
     {
-           // keep track of record count
+        // keep track of record count
         int recordCounter = 0;
         
         while(reader != null && reader.hasNext())
@@ -213,7 +213,8 @@ public class MarcPrinter extends MarcHandler
         PrintWriter pOut = null;
         try {
             pOut = new PrintWriter(new OutputStreamWriter(System.out, "UTF-8"));
-            marcPrinter = new MarcPrinter(args, pOut);
+            marcPrinter = new MarcPrinter(pOut);
+            marcPrinter.init(args);
         }
         catch (IllegalArgumentException e)
         {
