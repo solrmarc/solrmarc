@@ -71,7 +71,7 @@
             <classpath refid="classpath.test.jars" />
         </javac>
         
-        <jar destfile="${test.dir}/${junit.test.jar.name}">
+        <jar destfile="${test.dir}/${build.dir}/${junit.test.jar.name}">
             <fileset dir="${test.dir}/${build.dir}" includes="**/*.class" />
         </jar>
 
@@ -84,7 +84,7 @@
             <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
             <fileset dir="${lib.dir}" includes="solr_remote_only/*.jar" />
             <fileset dir="${lib.dir}" includes="test/*.jar" />
-            <fileset dir="../.." includes="test/*.jar" />
+            <zipfileset dir="${test.dir}/${build.dir}" includes="*.jar" prefix="test" />
             <!-- <fileset dir="${site.dir}" includes="extra_data/**" /> -->   
         </one-jar> 
         
