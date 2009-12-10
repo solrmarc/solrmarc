@@ -11,6 +11,12 @@
     <taskdef name="propertyregex" classname="net.sf.antcontrib.property.RegexTask" 
         classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
 
+    <taskdef name="urlencode" classname="net.sf.antcontrib.property.URLEncodeTask" 
+        classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
+
+    <typedef name="numgt" classname="org.solrmarc.ant.NumGreaterThan" 
+        classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
+    
     <macrodef name="input-save">
         <attribute name="message" />
         <attribute name="validargs" default=""/>
@@ -60,7 +66,7 @@
                                 </if>
                             </else>
                         </if>
-                    	<propertyfile file="@{propertyfile}" >
+                        <propertyfile file="@{propertyfile}" >
                             <entry key="@{addproperty}" value="${@{addproperty}}" />
                         </propertyfile>
                     </sequential>
@@ -69,7 +75,7 @@
          </sequential>
     </macrodef>
     
-	<macrodef name="input-filepath">
+    <macrodef name="input-filepath" >
         <attribute name="message" />
         <attribute name="validargs" default=""/>
         <attribute name="addproperty" />
@@ -106,11 +112,11 @@
                                 </if>
                             </else>
                         </if>
-                    	<propertyregex property="@{addproperty}" input="${@{addproperty}}" global="true" regexp="\\" replace="/" override="true"/>
+                        <propertyregex property="@{addproperty}" input="${@{addproperty}}" global="true" regexp="\\" replace="/" override="true"/>
                     </sequential>
                 </then>
             </if>
          </sequential>
     </macrodef>
-
+    
 </project>

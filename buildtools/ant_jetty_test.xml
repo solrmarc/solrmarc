@@ -1,0 +1,212 @@
+<?xml version="1.0"?>
+<project>
+    <macrodef name="jetty-start" description="check whether jetty is running at a particular port, if so, stop it, then start a new one there, possibly with a different solr home">
+        <attribute name="port" default="8983" />
+        <attribute name="solrhome" />
+        <attribute name="solrdata" default="" />
+        <attribute name="solrcore" default="" />
+        <attribute name="jettyloc" default="${site.test.dir}/jetty" />
+        <sequential>
+            <jetty-stop jettyloc="@{jettyloc}" port="@{port}" />
+            <pathconvert targetos="unix" property="basedirfixed" >
+                <propertyset>
+                    <propertyref name="basedir" />
+                </propertyset>
+            </pathconvert>
+            <echo message="basedirfixed = ${basedirfixed}" />
+            <propertyregex property="solrhomearg" input="@{solrhome}" regexp="(.+)" replace="-Dsolr.solr.home=&quot;\1&quot;" defaultValue="" override="true" />
+            <propertyregex property="solrdataarg" input="@{solrdata}" regexp="(.+)" replace="-Dsolr.data.dir=&quot;\1&quot;" defaultValue="" override="true" />
+            <propertyregex property="solrcorearg" input="@{solrcore}" regexp="(.+)" replace="/\1" defaultValue="" override="true" />
+           
+            <parallel >
+                <daemons>
+                    <java jar="@{jettyloc}/start.jar" fork="true" dir="@{jettyloc}" spawn="true" >
+                        <jvmarg value="-Dfile.encoding=UTF-8"/>
+                        <jvmarg value="-DSTOP.PORT=8079"/>
+                        <jvmarg value="-DSTOP.KEY=secret"/>
+                        <jvmarg value="-Djetty.port=@{port}"/>
+                        <jvmarg value="${solrhomearg}"/>
+                        <jvmarg value="${solrdataarg}"/>
+                    </java>
+                </daemons>
+            </parallel>
+            <echo level="warning" message="Waiting for Jetty to start....." />
+            <waitfor maxwait="40" maxwaitunit="second" checkevery="500" checkeveryunit="millisecond" timeoutproperty="jetty.not.started" >
+                    <http url="http://localhost:@{port}/solr${solrcorearg}/admin/ping" />
+            </waitfor>
+            <echo level="warning" message="Jetty started....." />
+            <sleep seconds="2" />
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="jetty-stop" description="check whether jetty is running at a particular port, if so, stop it, and wait 2 secords for it to terminate" >
+        <attribute name="port" default="8983" />
+        <attribute name="jettyloc" default="${site.test.dir}/jetty" />
+        <sequential>
+            <if> 
+                <socket server="localhost" port="@{port}"/>
+                <then>
+                    <java jar="@{jettyloc}/start.jar" fork="true" dir="@{jettyloc}">
+                        <jvmarg value="-DSTOP.PORT=8079"/>
+                        <jvmarg value="-DSTOP.KEY=secret"/>
+                        <arg value="--stop"/>
+                    </java>
+                    <sleep seconds="3"/>
+                    <if> 
+                        <socket server="localhost" port="@{port}"/>
+                        <then>
+                            <echo level="error" message="ERROR- tried to stop server at port @{port}, but failed!" />
+                            <fail />
+                        </then>
+                    </if>
+                </then>
+            </if>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="jetty-delete-all" description="use post.jar to send a delete all message to a running solr server" >
+        <attribute name="returnproperty" />
+        <attribute name="solrcore" default="" />
+        <attribute name="port" default="8983" />
+        <attribute name="jettyloc" default="${site.test.dir}/jetty" />
+        <sequential>
+            <propertyregex property="solrcorearg" input="@{solrcore}" regexp="(.+)" replace="/\1" defaultValue="" override="true" />
+            <propertyregex property="solrupdateurl" input="http://localhost:PORT/solr${solrcorearg}/update" regexp="PORT" replace="@{port}" override="true" />
+            <java jar="${buildtools.path}/post.jar" fork="true" dir="@{jettyloc}" output="@{jettyloc}/delete_all_post.output">
+                 <arg value="${solrupdateurl}"/>
+                 <arg value="${buildtools.path}/delete_all.xml" />
+            </java>
+            <loadfile property="@{returnproperty}" srcFile="@{jettyloc}/delete_all_post.output" >
+                <filterchain>
+                    <linecontainsregexp>
+                      <regexp pattern="SimplePostTool: POST"/>
+                    </linecontainsregexp>
+                </filterchain>
+            </loadfile>
+            <delete file="@{jettyloc}/delete_all_post.output" />
+        </sequential>
+    </macrodef>
+
+    <macrodef name="indexfile" description="Use SolrMarc to index a record (or set of records) to an index" >
+        <attribute name="marcfile"  />
+        <attribute name="solrwar" default="${site.test.dir}/jetty/webapps/solr.war"/>
+        <attribute name="solrhome" default=""/>
+        <attribute name="solrdata" default=""/>
+        <attribute name="config" default="${default.config}"/>
+        <attribute name="solrurlappname" default="solr"/>
+        <attribute name="solrmachinename" default="localhost" />
+        <attribute name="solrcore" default="" />
+        <attribute name="port" default="8983" />
+        <attribute name="returnproperty" default="" />
+        <sequential>
+            <propertyregex property="solrwararg" input="@{solrwar}" regexp="(.+)" replace="-Dsolrmarc.solr.war.path=&quot;\1&quot;" defaultValue="" override="true" />
+            <propertyregex property="solrhomearg" input="@{solrhome}" regexp="(.+)" replace="-Dsolr.path=&quot;\1&quot;" defaultValue="" override="true" />
+            <propertyregex property="solrdataarg" input="@{solrdata}" regexp="(.+)" replace="-Dsolr.data.dir=&quot;\1&quot;" defaultValue="" override="true" />
+            <propertyregex property="solrcorearg" input="@{solrcore}" regexp="(.+)" replace="/\1" defaultValue="" override="true" />
+            <if>
+                <equals arg1="@{returnproperty}" arg2="" />
+                <then>
+                    <java jar="${dist.path}/SolrMarc.jar" fork="true" dir="${dist.path}" >
+                        <jvmarg value="${solrwararg}" />
+                        <jvmarg value="-Dsolr.hosturl=&quot;http://@{solrmachinename}:@{port}/@{solrurlappname}${solrcorearg}/update&quot;" />
+                        <jvmarg value="${solrhomearg}" />
+                        <jvmarg value="${solrdataarg}" />
+                        <arg value="@{config}"/>
+                        <arg value="@{marcfile}" />
+                    </java>
+                </then>
+                <else>    
+                    <java jar="${dist.path}/SolrMarc.jar" fork="true" dir="${dist.path}" output="${site.test.dir}/indexfile.output" failonerror="true"  >
+                        <jvmarg value="${solrwararg}" />
+                        <jvmarg value="-Dsolr.hosturl=&quot;http://@{solrmachinename}:@{port}/@{solrurlappname}${solrcorearg}/update&quot;" />
+                        <jvmarg value="${solrhomearg}" />
+                        <jvmarg value="${solrdataarg}" />
+                        <arg value="@{config}"/>
+                        <arg value="@{marcfile}" />
+                    </java>
+                    <loadfile property="@{returnproperty}" srcFile="${site.test.dir}/indexfile.output" >
+                        <filterchain>
+                            <tokenfilter>
+                                <linetokenizer />
+                                <containsregex pattern="Adding" />
+                            </tokenfilter>
+                        </filterchain>
+                    </loadfile>
+                   <delete file="${site.test.dir}/indexfile.output" /> 
+                </else>
+            </if>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="check-record-present" description="Do a HTTP get " >
+        <attribute name="port" default="8983" />
+        <attribute name="numtoget" default="100" />
+        <attribute name="recordlistprop" default="" />
+        <attribute name="numfoundprop" default="" />
+        <attribute name="expectmaxcount" default="" />
+        <attribute name="query" default="*:*" />
+        <attribute name="solrcore" default="" />
+        <attribute name="jettyloc" default="${site.test.dir}/jetty" />
+        <sequential>
+            <propertyregex property="solrcorearg" input="@{solrcore}" regexp="(.+)" replace="/\1" defaultValue="" override="true" />
+            <urlencode property="macrodef.check.record.present.query" override="true" value="@{query}" />
+            <get src="http://localhost:@{port}/solr${solrcorearg}/select?q=${macrodef.check.record.present.query}&amp;start=0&amp;rows=@{numtoget}&amp;qt=standard&amp;fl=id&amp;wt=json&amp;indent=true"
+                 dest="${site.test.dir}/httpget.json" />
+            <if>
+                <not><equals arg1="@{recordlistprop}" arg2="" /></not>
+                <then>
+                    <loadfile property="@{recordlistprop}" srcFile="${site.test.dir}/httpget.json" >
+                        <filterchain>
+                            <tokenfilter>
+                                <stringtokenizer delims="{,} " suppressdelims="true" />
+                                <containsregex pattern="&quot;id&quot;:[^&quot;]*&quot;[A-Za-z0-9]*&quot;"/>
+                            </tokenfilter>
+                        </filterchain>
+                    </loadfile>
+                    <echo level="debug" message="property  @{recordlistprop}  has value  ${@{recordlistprop}} " />
+                    <propertyregex property="@{recordlistprop}" input="${@{recordlistprop}}" regexp="&quot;id&quot;:[^&quot;]*&quot;([A-Za-z0-9]+)*&quot;[^&quot;]*" replace=" id:\1" global="true" defaultValue="" override="true" /> 
+                    <if>
+                        <not><isset property="@{recordlistprop}" /></not>
+                        <then>
+                            <property name="@{recordlistprop}" value="" />
+                        </then>
+                    </if>
+                    <echo level="debug" message="property  @{recordlistprop}  has value  ${@{recordlistprop}} " />
+                </then>
+            </if>
+            <if>
+                 <not><equals arg1="@{numfoundprop}" arg2="" /></not>
+                 <then>
+                     <loadfile property="@{numfoundprop}" srcFile="${site.test.dir}/httpget.json" >
+                        <filterchain>
+                            <tokenfilter>
+                                <stringtokenizer delims="{,} " suppressdelims="true" />
+                                <containsregex pattern="&quot;numFound&quot;:[0-9]*"/>
+                            </tokenfilter>
+                        </filterchain>
+                     </loadfile>
+                     <propertyregex property="@{numfoundprop}" input="${@{numfoundprop}}" regexp="&quot;numFound&quot;:([0-9]+)" replace="\1" defaultValue="0" override="true" />
+                     <echo level="debug" message="property  @{numfoundprop}  has value  ${@{numfoundprop}} " />
+                     <if>
+                         <not><equals arg1="@{expectmaxcount}" arg2="" /></not>
+                         <then>
+                             <if>
+                                 <numgt arg1="${@{numfoundprop}}" arg2="@{expectmaxcount}" />
+                                 <then>
+                                     <echo level="error" message="ERROR: Site test jetty instance contains ${smoketest.initial.num.found} items" />
+                                     <echo level="error" message="ERROR: It is expected that that index will contain @{expectmaxcount} (or fewer) items" />
+                                     <echo level="error" message="ERROR: The index may be pointing to an index you want to keep.  This test will now terminate." />
+                                     <delete file="${site.test.dir}/httpget.json" />
+                                     <jetty-stop jettyloc="@{jettyloc}" port="@{port}" />
+                                     <fail/>
+                                 </then>
+                             </if>
+                         </then>
+                     </if>
+                 </then>
+            </if>
+            <delete file="${site.test.dir}/httpget.json" />
+        </sequential>
+    </macrodef>
+
+</project>
