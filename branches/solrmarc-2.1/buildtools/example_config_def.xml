@@ -1,0 +1,4 @@
+
+# - example.configuration - name of example configuration that your site is based on.
+example.configuration = ${example.configuration}
+

@@ -1,1 +1,5 @@
-This is the directory in which you should place locally defined translation maps.
+This is the directory in which you should customizations of the solr configuration
+If you add any fields to your xxxx_index.properties  specification, you must ensure 
+that there is either a <field> definition in the schema.xml file that matches each 
+of your new fields, OR that there is a <dynamicField> that has a name pattern that 
+matches that your new fields.
