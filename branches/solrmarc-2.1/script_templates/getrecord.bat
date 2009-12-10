@@ -17,4 +17,4 @@ if "%arg1%" NEQ "-" set arg2=%2
 if "%arg1%" EQU "-" set arg3=%2 
 if "%arg1%" NEQ "-" set arg3=%3
 
-java -Done-jar.main.class="org.solrmarc.marc.RawRecordReader" -jar %scriptdir%@CUSTOM_JAR_NAME@ %arg1% %arg2% %arg3%
+java -Dsolrmarc.main.class="org.solrmarc.marc.RawRecordReader" -jar %scriptdir%SolrMarc.jar %arg1% %arg2% %arg3%

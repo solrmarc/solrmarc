@@ -1,0 +1,63 @@
+#!/bin/bash
+# A simple script to start jetty given the default configuration of solr for solrmarc
+# $Id: jettystart
+
+E_BADARGS=65
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+config=`$scriptdir/getdefaultconfig`
+for i in "$@" 
+do
+case "$i" in
+*config.properties) config="$i" ;;
+esac
+done
+
+if [[ $JETTY_HOME == "" ]] 
+then
+    JETTY_HOME=$scriptdir/jetty
+fi
+
+if [[ $JETTY_SOLR_HOME == "" ]] 
+then
+    if [ -f "$scriptdir/$config" ] 
+    then
+        JETTY_SOLR_HOME=`egrep "^solr[.]path[ ]*=" "$scriptdir/$config" | sed -e 's/solr[.]path[ ]*=[ ]*//' -e 's/REMOTE//'`
+    fi
+fi
+if [[ $JETTY_SOLR_HOME == "" ]] 
+then
+    JETTY_SOLR_HOME=$JETTY_HOME/solr
+fi
+
+if [[ $JETTY_SOLR_PORT == "" ]] 
+then
+    if [ -f "$scriptdir/$config" ] 
+    then
+        JETTY_SOLR_PORT=`egrep "^solr[.]hosturl[ ]*=" "$scriptdir/$config" | sed -e 's/solr[.]hosturl[ ]*=[ ]*//' -e 's#http[s]*://[^:]*:\([0-9]*\).*#\1#'`
+    fi
+fi
+if [[ $JETTY_SOLR_PORT == "" ]] 
+then
+    JETTY_SOLR_PORT=8983
+fi
+
+if [[ "$JETTY_MEM_ARGS" == "" ]] 
+then
+    JETTY_MEM_ARGS='@MEM_ARGS@'
+fi
+
+pushd $JETTY_HOME
+
+echo Starting jetty webserver 
+echo  based on SolrMarc config file: $config
+echo  using solr home of $JETTY_SOLR_HOME
+echo  using port $JETTY_SOLR_PORT
+echo  writing output to `pwd`/nohup.out
+
+mv nohup.out nohup.out.bak 
+nohup java $JETTY_MEM_ARGS -DSTOP.PORT=8079 -DSTOP.KEY=secret -Dsolr.solr.home="$JETTY_SOLR_HOME" -Djetty.port=$JETTY_SOLR_PORT -jar start.jar &
+
+sleep 4
+

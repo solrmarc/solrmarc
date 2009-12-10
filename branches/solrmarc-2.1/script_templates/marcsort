@@ -13,7 +13,7 @@ then
     exit $E_BADARGS
 fi
 
-java -Done-jar.main.class="org.solrmarc.marc.MarcSorter" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2
+java -Dsolrmarc.main.class="org.solrmarc.marc.MarcSorter" -jar $scriptdir/SolrMarc.jar $1 $2
 
 exit 0
 
