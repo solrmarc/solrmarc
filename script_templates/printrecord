@@ -18,7 +18,7 @@ then
   fi
 fi
 
-java -Done-jar.main.class="org.solrmarc.marc.MarcPrinter" -jar $scriptdir/@CUSTOM_JAR_NAME@ print $1 $2 
+java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPrinter" -jar $scriptdir/SolrMarc.jar print $1 $2 
 
 exit 0
 

@@ -11,4 +11,4 @@ set inarg=%1
 set arg1=-
 for /f "delims=" %%a in ('echo %inarg% ^| findstr "\.mrc"') do @set arg1=%%a
 
-java -Done-jar.main.class="org.solrmarc.marc.MarcSorter" -jar %scriptdir%@CUSTOM_JAR_NAME@ %arg1% 
+java -Dsolrmarc.main.class="org.solrmarc.marc.MarcSorter" -jar %scriptdir%SolrMarc.jar %arg1% 

@@ -7,7 +7,7 @@ E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
 
-java -Done-jar.main.class="org.solrmarc.tools.SolrUpdate" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 
+java -Dsolrmarc.main.class="org.solrmarc.tools.SolrUpdate" -jar $scriptdir/SolrMarc.jar $1 
 
 exit 0
 

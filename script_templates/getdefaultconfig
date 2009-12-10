@@ -1,0 +1,13 @@
+#! /bin/bash
+# getdefaultconfig
+# return the name of the default configuration file
+# $Id: getdefaultconfig
+
+E_BADARGS=65
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+
+java -Dsolrmarc.main.class="org.solrmarc.tools.GetDefaultConfig" -jar $scriptdir/SolrMarc.jar 
+
+exit 0
+

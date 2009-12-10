@@ -60,9 +60,9 @@ SOLRWAR_OR_JARS=@SOLR_JAR_DEF@
 
 if [ "$url" == "" ]
 then
-    java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -Done-jar.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $config "$query" 2> /dev/null
+    java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -Dsolrmarc.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/SolrMarc.jar $config "$query" 2> /dev/null
 else
-    java $SOLRMARC_MEM_ARGS -Done-jar.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar $scriptdir/@CUSTOM_JAR_NAME@ $flag $url "$query" 
+    java $SOLRMARC_MEM_ARGS -Dsolrmarc.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar $scriptdir/SolrMarc.jar $flag $url "$query" 
 fi
 
 exit 0
