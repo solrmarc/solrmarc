@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="build" name="SolrMarc Custom">
+   
+    <target name="package-src" description="Create a gzipped src tarball for distribution" >
+        <delete file="SolrMarc_Distribution.tar.gz" />
+        <tar destfile="SolrMarc_Distribution.tar.gz" compression="gzip" >
+            <tarfileset dir=".">
+                <include name="build.xml" />
+                <include name="build.properties" />
+                <include name="log4j.properties" />
+                <include name="test/**" />
+                <include name="script_templates/*" />
+                <include name="lib/*.jar" />
+                <exclude name="lib/jzkit_client.jar" /> 
+                <include name="lib/solrmarc/**" />
+                <exclude name="lib/solrmarc/**/*.class" /> 
+                <exclude name="lib/solrmarc/**/z3950/*.java" />
+                <exclude name="lib/solrmarc/**/*.jar" />
+                <include name="lib/solr_1.2/**" />
+                <include name="lib/solr_1.3/**" />
+                <include name="lib/solr_1.4/**" />
+                <include name="lib/solr_external" />
+                <include name="docs/*" />
+                <include name="buildtools/**" />
+                <exclude name="buildtools/manifest.mf"/>
+                <include name="examples/**"/>
+            </tarfileset>
+        </tar>
+    </target>
+        
+    <target name="package-prebuilt" description="Create a gzipped pre-built version for distribution" >
+        <antcall target="build" inheritAll="false" >
+            <param name="site.dir" value="tmpexternal" />
+            <param name="dist.dir" value="external" />
+            <param name="solr.path" value="" />
+            <param name="solr.version" value="external" />
+            <param name="solr.external.location" value="" />
+            <param name="package-prebuilt.allscripts.batch" value="true" />
+            <param name="package-prebuilt.allscripts.shell" value="true" />
+        </antcall>
+        <property name="path.in.zip.for.jar" value="" />
+        <mkdir dir="external/${scripts.dir}" />
+        <mkdir dir="external/${trans.map.dir}" />
+        <copy todir="external/${scripts.dir}" file="${buildtools.path}/README_SCRIPTS" />
+        <copy todir="external/${trans.map.dir}" file="${buildtools.path}/README_MAPS" />
+        <if>
+            <available file="tmpexternal/build_override.properties" />
+            <then>
+                <loadproperties srcfile="tmpexternal/build_override.properties">
+                    <filterchain>
+                        <tokenfilter>
+                            <containsregex pattern="(distribution.jar.name|bundle.properties.in.jar)" />
+                        </tokenfilter>
+                        <prefixlines prefix="external." />
+                    </filterchain>
+                </loadproperties>
+            </then>
+        </if>
+        <if>
+            <available file="tmpexternal/build.properties" />
+            <then>
+                <loadproperties srcfile="tmpexternal/build.properties">
+                    <filterchain>
+                        <tokenfilter>
+                            <containsregex pattern="(distribution.jar.name|bundle.properties.in.jar)" />
+                        </tokenfilter>
+                        <prefixlines prefix="external." />
+                    </filterchain>
+                </loadproperties>
+            </then>
+        </if>
+        <echo level="error" message="bundle properties in jar = ${external.bundle.properties.in.jar} " />
+        <if>
+             <equals arg1="${external.bundle.properties.in.jar}" arg2="false" />
+             <then>
+                 <copy todir="external/${scripts.dir}" >
+                     <fileset dir="tmpexternal/${scripts.dir}" includes="*.bsh" />
+                 </copy>
+                 <copy todir="external/${trans.map.dir}" >
+                     <fileset dir="tmpexternal/${trans.map.dir}" includes="*.properties" />
+                 </copy>
+                 <copy todir="external" >
+                     <fileset dir="tmpexternal" includes="*.properties" excludes="build*.properties,log4j.properties"/>
+                 </copy>
+             </then>
+        </if>
+        <property name="external.distribution.jar.name" value="SolrMarc" />
+        <delete file="Binary_${external.distribution.jar.name}_Unix.tar.gz" />
+        <delete file="Binary_${external.distribution.jar.name}_PC.zip" />
+        <tar destfile="Binary_${external.distribution.jar.name}_Unix.tar.gz" compression="gzip">
+            <tarfileset dir="external" filemode="755" prefix="${path.in.zip.for.jar}" >
+                <include name="*" />
+                <exclude name="*.bat" />
+                <exclude name="*.properties" />
+            </tarfileset>
+            <tarfileset dir="external" >
+                <include name="*.properties" />
+            </tarfileset>
+            <tarfileset dir="${buildtools.path}">
+                <include name="README_UNIX" />
+            </tarfileset>
+            <tarfileset dir="external">
+                <include name="${scripts.dir}/**" />
+                <include name="${trans.map.dir}/**" />
+            </tarfileset>
+        </tar> 
+        <zip destfile="Binary_${external.distribution.jar.name}_PC.zip" compress="true" whenempty="create">
+            <zipfileset dir="external"  prefix="${path.in.zip.for.jar}" >
+                <include name="*.bat" />
+                <include name="*.jar" />
+            </zipfileset>
+            <zipfileset dir="external" >
+                <include name="*.properties" />
+            </zipfileset>
+            <zipfileset dir="${buildtools.path}" >
+                 <include name="README_PC.txt" />
+            </zipfileset>
+            <zipfileset dir="external">
+                <include name="${scripts.dir}/**" />
+                <include name="${trans.map.dir}/**" />
+            </zipfileset>
+        </zip> 
+        <delete dir="tmpexternal" /> 
+        <delete dir="external" /> 
+    </target>
+        
+    <target name="package" description="Create both prebuilt binary distributions and a source distribution" >
+        <antcall target="package-src" inheritAll="false" />
+        <antcall target="package-prebuilt" inheritAll="false">
+            <param name="example.configuration" value="GenericBlacklight" />
+            <param name="accept.default.for.input" value="true" />
+        </antcall> 
+        <antcall target="package-prebuilt" inheritAll="false">
+            <param name="example.configuration" value="GenericVuFind" />
+            <param name="accept.default.for.input" value="true" />
+            <param name="path.in.zip.for.jar" value="bin" />
+        </antcall> 
+    </target>
+    
+</project >
