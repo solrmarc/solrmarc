@@ -5,7 +5,7 @@
      as well as the default solrconfig file included with solr -->
 
   <abortOnConfigurationError>${solr.abortOnConfigurationError:true}</abortOnConfigurationError>
-  <dataDir>${solr.data.dir:./solr/data}</dataDir>
+  <dataDir>${solr.solr.home:.}/data</dataDir>
 
   <indexDefaults>
    <!-- Values here affect all index writers and act as a default unless overridden. -->

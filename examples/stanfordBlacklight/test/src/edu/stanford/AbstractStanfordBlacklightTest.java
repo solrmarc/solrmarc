@@ -36,27 +36,30 @@ public abstract class AbstractStanfordBlacklightTest extends IndexTest {
             System.setProperty("solr.path", solrPath);
         }
 
-        String solrmarcPath = System.getProperty("solrmarc.path");
-        if (solrmarcPath == null) {
-            solrmarcPath = new File("lib" + File.separator + "solrmarc").getAbsolutePath();
-            System.setProperty("solrmarc.path", solrmarcPath);
-        }
-		
-		String solrmarcSitePath = System.getProperty("solrmarc.site.path");
-		if (solrmarcSitePath == null) {
-			solrmarcSitePath = new File("examples" + File.separator + "stanfordBlacklight").getAbsolutePath(); 
-            System.setProperty("solrmarc.site.path", solrmarcSitePath);
-		}
-		
+//        String solrmarcPath = System.getProperty("solrmarc.path");
+//        if (solrmarcPath == null) {
+//            solrmarcPath = new File("lib" + File.separator + "solrmarc").getAbsolutePath();
+//            System.setProperty("solrmarc.path", solrmarcPath);
+//        }
+//		
+//		String solrmarcSitePath = System.getProperty("solrmarc.site.path");
+//		if (solrmarcSitePath == null) {
+//			solrmarcSitePath = new File("examples" + File.separator + "stanfordBlacklight").getAbsolutePath(); 
+//            System.setProperty("solrmarc.site.path", solrmarcSitePath);
+//		}
+//		
         String configPropDir = System.getProperty("test.config.dir");
-        if (configPropDir == null)
-            configPropDir = solrmarcSitePath;
+//        System.err.println("configPropDir = "+ configPropDir);
+//        if (configPropDir == null)
+//            configPropDir = solrmarcSitePath;
         
         String configPropFile = System.getProperty("test.config.file");
+//        System.err.println("configPropFile = "+ configPropFile);
 		if (configPropFile == null) {
-		    configPropFile = configPropDir + File.separator + "sw_config.properties";
+		    configPropFile = new File(configPropDir, "sw_config.properties").getAbsolutePath();
             System.setProperty("test.config.file", configPropFile);
 		}
+//        System.err.println("configPropFile = "+ configPropFile);
 		
 		testDataParentPath = System.getProperty("test.data.path");
         if (testDataParentPath == null)
@@ -86,18 +89,20 @@ public abstract class AbstractStanfordBlacklightTest extends IndexTest {
 	{
 		docIDfname = "id";
 		
-		String siteDir = "examples" + File.separator + "stanfordBlacklight";
-		String marcFileDir = siteDir + File.separator + 
-										"test" + File.separator +
-										"data" + File.separator;
-		String anyTestFile = marcFileDir + "pubDateTests.mrc";
+        String testDataParentPath = System.getProperty("test.data.path");
+        if (testDataParentPath == null)
+        {
+            fail("property test.data.path must be defined for the tests to run");
+        }
+		String anyTestFile = new File(testDataParentPath, "pubDateTests.mrc").getAbsolutePath();
 
 		// these properties must be set or MarcHandler can't initialize properly
 		System.setProperty("marc.source", "FILE");
 		// needed to get through initialization; overridden in individual tests
 		System.setProperty("marc.path", anyTestFile);
+        String testConfigFname = System.getProperty("test.config.file");
 
-		solrFldMapTest = new SolrFieldMappingTest(siteDir + File.separator + "sw_config.properties", docIDfname);
+		solrFldMapTest = new SolrFieldMappingTest(testConfigFname, docIDfname);
 	}
 
 
@@ -123,8 +128,7 @@ public abstract class AbstractStanfordBlacklightTest extends IndexTest {
         if (testConfigFname == null)
             fail("property test.config.file must be defined for the tests to run");
 
-        createIxInitVars(testConfigFname, solrPath, null, testDataParentPath,
-                testDataFname);
+        createIxInitVars(testConfigFname, solrPath, null, testDataParentPath, testDataFname);
 
 //		createNewTestIndex(testDataParentPath + File.separator + testDataFname, configPropFile, solrPath, solrDataDir, solrmarcPath, siteSpecificPath);
 //		solrCore = getSolrCore(solrPath, solrDataDir);
