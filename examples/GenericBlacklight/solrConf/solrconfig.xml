@@ -6,7 +6,7 @@
 -->
 <config>
   <abortOnConfigurationError>${solr.abortOnConfigurationError:true}</abortOnConfigurationError>
-  <dataDir>${solr.data.dir:./solr/data}</dataDir>
+  <dataDir>${solr.solr.home:.}/data</dataDir>
   
   <!-- index time configurations -->
   <indexDefaults>
