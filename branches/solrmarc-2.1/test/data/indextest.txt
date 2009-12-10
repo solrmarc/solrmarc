@@ -1,0 +1,7 @@
+# config file name, marc file to index, solr field to examine, value to expect
+
+${default.config}, u399.mrc, id, u399
+
+# config file name, marc file to index(id of record to index), solr field to examine, value to expect
+
+${default.config}, selectedRecs.mrc(u2), id, u2

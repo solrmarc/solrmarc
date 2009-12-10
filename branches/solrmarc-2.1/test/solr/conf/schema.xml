@@ -285,6 +285,9 @@
    
    <field name="id" type="string" indexed="true" stored="true" required="true" />
    
+   <!-- these display fields are NOT multi-valued -->
+   <field name="marc_display" type="string" indexed="false" stored="true" multiValued="false"/>
+   
    <field name="text" type="text" indexed="true" stored="false" multiValued="true"/>
 
    <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
@@ -302,15 +305,17 @@
   
    <dynamicField name="random*" type="random" />
    
+   <dynamicField name="*_text" type="text" indexed="true" stored="false" multiValued="true" />
    <dynamicField name="*_facet" type="string" indexed="true" stored="true" multiValued="true" />
    <dynamicField name="*_display" type="string" indexed="false" stored="true" />   
-   <dynamicField name="*_error" type="string" indexed="true" stored="true" omitNorms="true" />
+   <dynamicField name="*_error" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    
  </fields>
 
  <uniqueKey>id</uniqueKey>
  <defaultSearchField>text</defaultSearchField>
  <solrQueryParser defaultOperator="OR"/>
+ <copyField source="*_text" dest="text"/>
  <copyField source="*_facet" dest="text"/>
 
 </schema>
