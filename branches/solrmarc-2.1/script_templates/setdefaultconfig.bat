@@ -7,6 +7,14 @@ setlocal
 for %%x in (%0) do set scriptdir=%%~dpsx
 for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
 
+if EXIST %scriptdir%SolrMarc.jar goto doit
+pushd %scriptdir%/..
+for %%x in (%CD%) do set scriptdir=%%~dpsx
+for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
+popd
+
+:doit
+
 if "%1" NEQ "" call :set_arg %1
 if "%config%" NEQ "" goto :do_it
 echo  Usage: setdefaultconfig your_config.properties
