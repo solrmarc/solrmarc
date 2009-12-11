@@ -34,6 +34,7 @@ public class SolrCoreLoader
         try{
             boolean has_1_3_libs = false;
             boolean has_1_2_libs = false;
+            System.setProperty("solr.solr.home", solrCoreDir);
             try
             {
                 Class<?> areLibraries_1_3 = Class.forName("org.apache.solr.core.CoreContainer");
