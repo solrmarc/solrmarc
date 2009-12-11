@@ -4,6 +4,8 @@
     <property file="build.properties" />
     <property name="dist.dir" value="dist" />
     <property name="dist.path" location="${dist.dir}" />
+    <property name="dist.exe.dir" value="${dist.dir}/bin" />
+    <property name="dist.exe.path" location="${dist.exe.dir}" />
     <property name="solrmarc.core.one-jar.name" value="SolrMarc.jar" /> 
     <property name="jetty.install.dir" value="${dist.path}/jetty" />
     <property name="solr.install.dir" value="${dist.path}/jetty/solr" />
@@ -435,7 +437,8 @@
                     <equals arg1="${package-prebuilt.allscripts.batch}" arg2="true"/>
                 </or>
                 <then>
-                    <copy todir="${dist.path}" overwrite="true">
+                    <mkdir dir="${dist.exe.path}" />
+                    <copy todir="${dist.exe.path}" overwrite="true">
                         <fileset dir="${site.script.template.dir}" includes="*.bat" />
                         <filterchain>
                             <fixcrlf eol="dos"/>
@@ -453,7 +456,8 @@
                     <equals arg1="${package-prebuilt.allscripts.shell}" arg2="true"/>
                 </or>
                 <then>
-                    <copy todir="${dist.path}" overwrite="true">
+                    <mkdir dir="${dist.exe.path}" />
+                    <copy todir="${dist.exe.path}" overwrite="true">
                         <fileset dir="${site.script.template.dir}" includes="*" excludes="*.bat" />
                         <filterchain>
                             <fixcrlf eol="unix"/>
@@ -465,7 +469,7 @@
                     </copy>
     
                     <chmod perm="u+x">
-                        <fileset dir="${dist.path}" excludes="*.jar,*.bat" />
+                        <fileset dir="${dist.exe.path}" excludes="*.jar,*.bat,*.properties,*.log" />
                     </chmod>
                 </then>
             </if>

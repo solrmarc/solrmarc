@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project >
+<project name="SolrMarc site initialization add-ons" >
     
     <macrodef name="build_solrmarc" description="Build the core SolrMarc code" >
         <attribute name="defaultconfig" default="" />
@@ -291,7 +291,7 @@
                                 <fileset dir="${test.solr.dir}" includes="lib/*.jar" excludes="conf" />
                             </copy>
                             <copy overwrite="true" todir="${site.test.solr.dir}" failonerror="false">
-                                <fileset dir="${site.dir}/solrConf" includes="**" excludes="solr.war" />
+                                <fileset dir="${site.dir}/solrConf" includes="**" excludes="*.war" />
                             </copy>
                             <property name="solr.core.name" value="${example.default.solr.core.name}" />
                             <loadproperties srcfile="${site.dir}/${default.config}" >
@@ -309,7 +309,7 @@
                                 <fileset dir="${test.solr.dir}" includes="lib/*.jar,conf/**,data" />
                             </copy>
                             <copy overwrite="true" todir="${site.test.solr.dir}/conf" failonerror="false">
-                                <fileset dir="${site.dir}/solrConf" includes="*" excludes="*.jar" />
+                                <fileset dir="${site.dir}/solrConf" includes="*" excludes="*.jar,*.war" />
                             </copy>
                             <copy overwrite="true" todir="${site.test.solr.dir}/lib" failonerror="false">
                                 <fileset dir="${site.dir}/solrConf" includes="*.jar" />
@@ -429,6 +429,7 @@
     <macrodef name="create_build_properties_file" >
         <attribute name="source" default="${buildtools.path}/template_build.properties" />
         <sequential>
+            <property name="dist.path" location="${dist.dir}" />
             <concat destfile="${site.dir}/build.properties" >
                 <filelist dir="${basedir}" files="build.properties" />
                 <filterchain>

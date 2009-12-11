@@ -2,3 +2,6 @@
 # - example.configuration - name of example configuration that your site is based on.
 example.configuration = ${example.configuration}
 
+# - dist.path - full path of where the distribution should be written
+dist.path = ${dist.path}
+

@@ -34,8 +34,15 @@
             <waitfor maxwait="40" maxwaitunit="second" checkevery="500" checkeveryunit="millisecond" timeoutproperty="jetty.not.started" >
                     <http url="http://localhost:@{port}/solr${solrcorearg}/admin/ping" />
             </waitfor>
+            <if>
+                <not><isset property="jetty.not.started" /></not>
+                <then>
+                    <waitfor maxwait="40" maxwaitunit="second" checkevery="500" checkeveryunit="millisecond" timeoutproperty="jetty.not.started" >
+                            <http url="http://localhost:@{port}/solr${solrcorearg}/select?q=*%3A*&amp;start=0&amp;rows=100&amp;qt=standard&amp;fl=id&amp;wt=json&amp;indent=true" />
+                    </waitfor>
+                </then>
+            </if>
             <echo level="warning" message="Jetty started....." />
-            <sleep seconds="2" />
         </sequential>
     </macrodef>
     
@@ -116,7 +123,7 @@
                     </java>
                 </then>
                 <else>    
-                    <java jar="${dist.path}/SolrMarc.jar" fork="true" dir="${dist.path}" output="${site.test.dir}/indexfile.output" failonerror="true"  >
+                    <java jar="${dist.path}/SolrMarc.jar" fork="true" dir="${dist.path}" output="${site.test.dir}/indexfile.output" resultproperty="@{returnproperty}.result"  >
                         <jvmarg value="${solrwararg}" />
                         <jvmarg value="-Dsolr.hosturl=&quot;http://@{solrmachinename}:@{port}/@{solrurlappname}${solrcorearg}/update&quot;" />
                         <jvmarg value="${solrhomearg}" />
@@ -124,15 +131,27 @@
                         <arg value="@{config}"/>
                         <arg value="@{marcfile}" />
                     </java>
-                    <loadfile property="@{returnproperty}" srcFile="${site.test.dir}/indexfile.output" >
-                        <filterchain>
-                            <tokenfilter>
-                                <linetokenizer />
-                                <containsregex pattern="Adding" />
-                            </tokenfilter>
-                        </filterchain>
-                    </loadfile>
-                   <delete file="${site.test.dir}/indexfile.output" /> 
+                    <if>
+                        <not><equals arg1="${@{returnproperty}.result}" arg2="0" /></not>
+                        <then>
+                            <loadfile property="@{returnproperty}" srcFile="${site.test.dir}/indexfile.output" >
+                            </loadfile>
+                            <echo level="error" message="Error encountered in indexing file: @{marcfile}" />
+                            <jetty-stop port="@{port}" />
+                            <fail message="Error encountered in indexing file: @{marcfile}" />
+                        </then>
+                        <else>
+                            <loadfile property="@{returnproperty}" srcFile="${site.test.dir}/indexfile.output" >
+                                <filterchain>
+                                    <tokenfilter>
+                                        <linetokenizer />
+                                        <containsregex pattern="Adding" />
+                                    </tokenfilter>
+                                </filterchain>
+                            </loadfile>
+                            <delete file="${site.test.dir}/indexfile.output" /> 
+                        </else>
+                    </if>
                 </else>
             </if>
         </sequential>

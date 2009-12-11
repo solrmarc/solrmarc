@@ -13,6 +13,7 @@
     <import file="${buildtools.path}/ant_extras.xml" />
     <import file="${buildtools.path}/ant_jetty_test.xml" />
     <import file="ant_init.xml" />
+    <import file="ant_package.xml" />
 
     <tstamp>
         <format property="year" pattern="yyyy" />
@@ -36,9 +37,9 @@
     <target name="veryclean" depends="clean" 
         description="clean any generated files and restore the 
                      project as near as possible to a just-downloaded state">
+        <property name="package.dir" value="package" />
+        <delete dir="${package.dir}" /> 
         <delete dir="${site.dir}" /> 
-        <!-- delete properties file generated in site.dir in response to prompts  -->
-        <delete file="${site.dir}/build_override.properties" />
     </target>
 
     <target name="init" depends="init_site" unless="init.already.run"
@@ -101,7 +102,16 @@
             <property name="dist.path" location="${dist.dir}" />
         </ant>
     </target>
-         
+
+    <target name="package" description="Create both prebuilt binary distributions and a source distribution" >
+        <property name="package.dir" value="package" />
+        <mkdir dir="${package.dir}" />
+        <packagesrc />
+        <packageprebuilt example="GenericBlacklight" binprefix="bin" />
+        <packageprebuilt example="GenericVuFind" binprefix="bin" />
+        <!-- <packageprebuilt example="none" srconly="true" /> -->
+    </target>
+    
     <target name="usage" description="Prints usage instructions">
         <echo message="Welcome to the Solrmarc indexing project" />
         <echo message="Use 'ant' to build the latest code" />
