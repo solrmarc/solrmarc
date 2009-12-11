@@ -5,6 +5,11 @@
 E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
+solrmarcdir=$( (cd -P $(dirname $0) && pwd) )
+if ! [ -e $solrmarcdir/SolrMarc.jar ] 
+then
+  solrmarcdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
 
 config=`$scriptdir/getdefaultconfig`
 for i in "$@" 
@@ -16,14 +21,14 @@ done
 
 if [[ $JETTY_HOME == "" ]] 
 then
-    JETTY_HOME=$scriptdir/jetty
+    JETTY_HOME=$solrmarcdir/jetty
 fi
 
 if [[ $JETTY_SOLR_HOME == "" ]] 
 then
-    if [ -f "$scriptdir/$config" ] 
+    if [ -f "$solrmarcdir/$config" ] 
     then
-        JETTY_SOLR_HOME=`egrep "^solr[.]path[ ]*=" "$scriptdir/$config" | sed -e 's/solr[.]path[ ]*=[ ]*//' -e 's/REMOTE//'`
+        JETTY_SOLR_HOME=`egrep "^solr[.]path[ ]*=" "$solrmarcdir/$config" | sed -e 's/solr[.]path[ ]*=[ ]*//' -e 's/REMOTE//'`
     fi
 fi
 if [[ $JETTY_SOLR_HOME == "" ]] 
@@ -33,9 +38,9 @@ fi
 
 if [[ $JETTY_SOLR_PORT == "" ]] 
 then
-    if [ -f "$scriptdir/$config" ] 
+    if [ -f "$solrmarcdir/$config" ] 
     then
-        JETTY_SOLR_PORT=`egrep "^solr[.]hosturl[ ]*=" "$scriptdir/$config" | sed -e 's/solr[.]hosturl[ ]*=[ ]*//' -e 's#http[s]*://[^:]*:\([0-9]*\).*#\1#'`
+        JETTY_SOLR_PORT=`egrep "^solr[.]hosturl[ ]*=" "$solrmarcdir/$config" | sed -e 's/solr[.]hosturl[ ]*=[ ]*//' -e 's#http[s]*://[^:]*:\([0-9]*\).*#\1#'`
     fi
 fi
 if [[ $JETTY_SOLR_PORT == "" ]] 

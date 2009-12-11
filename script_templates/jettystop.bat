@@ -7,19 +7,27 @@ setlocal
 ::Get the current batch file's short path
 for %%x in (%0) do set scriptdir=%%~dpsx
 for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
+set solrmarcdir=%scriptdir%
+if EXIST %solrmarcdir%SolrMarc.jar goto doit
+pushd %scriptdir%/..
+for %%x in (%CD%) do set solrmarcdir=%%~dpsx
+for %%x in (%scriptdir%) do set solrmarcdir=%%~dpsx
+popd
+
+:doit
 
 for /f "usebackq delims=" %%g in (`%scriptdir%getdefaultconfig`) do set config=%%g
 
 if "%1" NEQ "" call :set_arg %1
 
 if "%JETTY_HOME%" NEQ "" goto :have_jetty_home
-set JETTY_HOME=%scriptdir%jetty
+set JETTY_HOME=%solrmarcdir%jetty
 
 :have_jetty_home
 
 if "%JETTY_SOLR_HOME%" NEQ "" goto :have_solr_home
-if EXIST "%scriptdir%%config%" ( 
-for /f "usebackq tokens=3 delims= " %%H in (`findstr /B "solr.path" %scriptdir%%config%`) do set JETTY_SOLR_HOME=%%~fH
+if EXIST "%solrmarcdir%%config%" ( 
+for /f "usebackq tokens=3 delims= " %%H in (`findstr /B "solr.path" %solrmarcdir%%config%`) do set JETTY_SOLR_HOME=%%~fH
 )
 
 if "%JETTY_SOLR_HOME%" == "REMOTE" goto :get_solr_home 
@@ -32,7 +40,7 @@ set JETTY_SOLR_HOME=%JETTY_HOME%/solr
 if "%JETTY_SOLR_PORT%" NEQ "" goto :have_solr_port 
 
 if EXIST "%scriptdir%%config%" ( 
-for /f "usebackq tokens=4 delims=:/= " %%G in (`findstr "^solr.hosturl" %scriptdir%%config%`) do set JETTY_SOLR_PORT=%%G 
+for /f "usebackq tokens=4 delims=:/= " %%G in (`findstr "^solr.hosturl" %solrmarcdir%%config%`) do set JETTY_SOLR_PORT=%%G 
 )
 if "%JETTY_SOLR_PORT%" NEQ "" goto :have_solr_port 
 set JETTY_SOLR_PORT=8983
