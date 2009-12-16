@@ -17,12 +17,12 @@
     <typedef name="numgt" classname="org.solrmarc.ant.NumGreaterThan" 
         classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
     
-    <macrodef name="input-save">
+    <macrodef name="input-default">
         <attribute name="message" />
         <attribute name="validargs" default=""/>
         <attribute name="addproperty" />
         <attribute name="defaultvalue" default=""/>
-        <attribute name="propertyfile"/>
+        <attribute name="propertyfile" default=""/>
         <sequential>
             <if>
                 <not>
@@ -66,9 +66,6 @@
                                 </if>
                             </else>
                         </if>
-                        <propertyfile file="@{propertyfile}" >
-                            <entry key="@{addproperty}" value="${@{addproperty}}" />
-                        </propertyfile>
                     </sequential>
                 </then>
             </if>

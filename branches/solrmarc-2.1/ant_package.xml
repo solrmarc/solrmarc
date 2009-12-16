@@ -33,18 +33,19 @@
         <attribute name="srconly" default="false" />
         <attribute name="example" />
         <attribute name="binprefix" default="" />
+        <attribute name="acceptpromptdefaults" default="false" />
         <sequential>
 	        <property name="temp.site.dir" location="tmp-site" />
 	        <property name="temp.dist.dir" location="tmp-dist" />
 	        <delete dir="${temp.site.dir}" />
 	        <delete dir="${temp.dist.dir}" />
             <propertyregex property="examplelabel" input="@{example}" regexp="none" replace="Generic" defaultValue="@{example}" override="true" />
-
 	        <antcall target="init" inheritAll="false" >
                 <param name="example.configuration" value="@{example}" />
                 <param name="site.dir" value="${temp.site.dir}" />
 	            <param name="dist.path" value="dist" />
-	            <param name="dist.dir" value="${temp.dist.dir}" />
+                <param name="dist.dir" value="${temp.dist.dir}" />
+                <param name="accept.default.for.input" value="@{acceptpromptdefaults}" />
 	        </antcall>
 	        
 	        <delete file="${package.dir}/SolrMarc_${examplelabel}_Source.tar.gz" />

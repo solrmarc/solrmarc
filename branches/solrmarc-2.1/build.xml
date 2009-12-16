@@ -109,7 +109,7 @@
         <packagesrc />
         <packageprebuilt example="GenericBlacklight" binprefix="bin" />
         <packageprebuilt example="GenericVuFind" binprefix="bin" />
-        <!-- <packageprebuilt example="none" srconly="true" /> -->
+        <packageprebuilt example="none" binprefix="bin" acceptpromptdefaults="true"/> 
     </target>
     
     <target name="usage" description="Prints usage instructions">
