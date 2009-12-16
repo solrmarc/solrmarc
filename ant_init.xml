@@ -337,7 +337,7 @@
                     <property name="jetty.solr.war.to.copy" location="${site.dir}/solrConf/solr.war" />
                 </then>
                 <else>
-                    <property name="jetty.solr.war.to.copy" value="${test.dir}/solr/war/apache-solr-1.4-dev.war" />
+                    <property name="jetty.solr.war.to.copy" value="${test.dir}/solr/war/apache-solr-1.4.0.war" />
                 </else>
             </if>
             <copy overwrite="false" todir="${jetty.site.location}" >
@@ -534,20 +534,20 @@
     <macrodef name="get_site_specific_settings">
         <sequential>
             <property name="default.custom.config.file.prefix" value="myprefix" />
-            <input message="Enter prefix for site-specific config and index properties file names:${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
+            <input-default message="Enter prefix for site-specific config and index properties file names:${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
                 addproperty="custom.config.file.prefix" defaultvalue="${default.custom.config.file.prefix}"  />
                     
             <property name="default.exe.mem.args" value="-Xmx256m" />            
             <!-- <property name="exe.mem.args" value="${default.exe.mem.args}" /> -->            
-            <input message="Enter java heap size to use in generated scripts for running site-specific SolrMarc Indexer:"
+            <input-default message="Enter java heap size to use in generated scripts for running site-specific SolrMarc Indexer:"
                 addproperty="exe.mem.args" defaultvalue="${default.exe.mem.args}" /> 
             
             <property name="default.marc.default_encoding" value="MARC8" />
-            <input message="Enter encoding of MARC records:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You want the program to try to determine the encoding${line.separator}" 
+            <input-default message="Enter encoding of MARC records:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You want the program to try to determine the encoding${line.separator}" 
                 addproperty="marc.encoding"  validargs="MARC8,UNIMARC,UTF-8,BESTGUESS" 
                 defaultvalue="${default.marc.default_encoding}" />
             
-            <input message="Do you want to use the 'builtin' solr configuration, jetty configuration and solr.war file${line.separator}or do you want to use a 'custom' one you have already installed.${line.separator}Note: You can start from the builtin version and modify to suit your needs. Or you can change the one used later by modifying the build.properties file." 
+            <input-default message="Do you want to use the 'builtin' solr configuration, jetty configuration and solr.war file${line.separator}or do you want to use a 'custom' one you have already installed.${line.separator}Note: You can start from the builtin version and modify to suit your needs. Or you can change the one used later by modifying the build.properties file." 
                 addproperty="use.builtin.solr"  validargs="builtin,custom"  defaultvalue="builtin" />
             
             <if>
