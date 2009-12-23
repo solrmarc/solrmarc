@@ -18,7 +18,7 @@
     <!-- Tell Lucene when to flush documents to disk.
       Giving Lucene more memory for indexing means faster indexing at the cost of more RAM
     -->
-    <ramBufferSizeMB>10240</ramBufferSizeMB>
+    <ramBufferSizeMB>1024</ramBufferSizeMB>
     <maxMergeDocs>2147483647</maxMergeDocs>
     <writeLockTimeout>1000</writeLockTimeout>
     <commitLockTimeout>10000</commitLockTimeout>   
@@ -32,7 +32,7 @@
   <mainIndex>
     <!-- options specific to the main on-disk lucene index -->
     <useCompoundFile>false</useCompoundFile>
-    <ramBufferSizeMB>10240</ramBufferSizeMB>
+    <ramBufferSizeMB>1024</ramBufferSizeMB>
     <mergeFactor>20</mergeFactor>
     <maxMergeDocs>2147483647</maxMergeDocs>
     <maxFieldLength>10000</maxFieldLength>
