@@ -4,7 +4,7 @@
     <property file="build.properties" />
     <property name="dist.dir" value="dist" />
     <property name="dist.path" location="${dist.dir}" />
-    <property name="dist.exe.dir" value="${dist.dir}/${dist.exe.dir}" />
+    <property name="dist.exe.dir" value="bin" />
     <property name="dist.exe.path" location="${dist.path}/${dist.exe.dir}" />
     <property name="solrmarc.core.one-jar.name" value="SolrMarc.jar" /> 
     <property name="jetty.install.dir" value="${dist.path}/jetty" />
