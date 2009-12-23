@@ -21,12 +21,10 @@
     
     <target name="clean" description="clean the generated directories" >
         <init_site_properties />
-        <delete quiet="true">
-            <fileset dir="${site.build.dir}" includes="**" />
-            <fileset dir="${site.test.build.dir}/data" includes="**" />
-            <fileset dir="${site.test.solr.dir}/data" includes="**" />
-            <fileset dir="${dist.path}" includes="**" />
-        </delete>
+        <delete dir="${site.build.dir}" quiet="true" />
+        <delete dir="${site.test.build.dir}" quiet="true" /> 
+        <delete dir="${site.test.solr.dir}/data" quiet="true" />
+        <delete dir="${dist.path}" quiet="true" />
     </target>
 
     <target name="init" unless="init.already.run"  
