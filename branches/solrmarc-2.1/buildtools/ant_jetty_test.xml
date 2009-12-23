@@ -14,8 +14,8 @@
                 </propertyset>
             </pathconvert>
             <echo message="basedirfixed = ${basedirfixed}" />
-            <propertyregex property="solrhomearg" input="@{solrhome}" regexp="(.+)" replace="-Dsolr.solr.home=&quot;\1&quot;" defaultValue="" override="true" />
-            <propertyregex property="solrdataarg" input="@{solrdata}" regexp="(.+)" replace="-Dsolr.data.dir=&quot;\1&quot;" defaultValue="" override="true" />
+            <propertyregex property="solrhomearg" input="@{solrhome}" regexp="(.+)" replace="-Dsolr.solr.home=\1" defaultValue="" override="true" />
+            <propertyregex property="solrdataarg" input="@{solrdata}" regexp="(.+)" replace="-Dsolr.data.dir=\1" defaultValue="" override="true" />
             <propertyregex property="solrcorearg" input="@{solrcore}" regexp="(.+)" replace="/\1" defaultValue="" override="true" />
            
             <parallel >
@@ -106,9 +106,9 @@
         <attribute name="port" default="8983" />
         <attribute name="returnproperty" default="" />
         <sequential>
-            <propertyregex property="solrwararg" input="@{solrwar}" regexp="(.+)" replace="-Dsolrmarc.solr.war.path=&quot;\1&quot;" defaultValue="" override="true" />
-            <propertyregex property="solrhomearg" input="@{solrhome}" regexp="(.+)" replace="-Dsolr.path=&quot;\1&quot;" defaultValue="" override="true" />
-            <propertyregex property="solrdataarg" input="@{solrdata}" regexp="(.+)" replace="-Dsolr.data.dir=&quot;\1&quot;" defaultValue="" override="true" />
+            <propertyregex property="solrwararg" input="@{solrwar}" regexp="(.+)" replace="-Dsolrmarc.solr.war.path=\1" defaultValue="" override="true" />
+            <propertyregex property="solrhomearg" input="@{solrhome}" regexp="(.+)" replace="-Dsolr.path=\1" defaultValue="" override="true" />
+            <propertyregex property="solrdataarg" input="@{solrdata}" regexp="(.+)" replace="-Dsolr.data.dir=\1" defaultValue="" override="true" />
             <propertyregex property="solrcorearg" input="@{solrcore}" regexp="(.+)" replace="/\1" defaultValue="" override="true" />
             <if>
                 <equals arg1="@{returnproperty}" arg2="" />

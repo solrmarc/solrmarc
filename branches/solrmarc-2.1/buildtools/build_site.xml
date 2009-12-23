@@ -4,8 +4,8 @@
     <property file="build.properties" />
     <property name="dist.dir" value="dist" />
     <property name="dist.path" location="${dist.dir}" />
-    <property name="dist.exe.dir" value="${dist.dir}/bin" />
-    <property name="dist.exe.path" location="${dist.exe.dir}" />
+    <property name="dist.exe.dir" value="${dist.dir}/${dist.exe.dir}" />
+    <property name="dist.exe.path" location="${dist.path}/${dist.exe.dir}" />
     <property name="solrmarc.core.one-jar.name" value="SolrMarc.jar" /> 
     <property name="jetty.install.dir" value="${dist.path}/jetty" />
     <property name="solr.install.dir" value="${dist.path}/jetty/solr" />
@@ -20,13 +20,15 @@
     <import file="${import.path}/ant_jetty_test.xml" optional="true"/>
     
     <target name="clean" description="clean the generated directories" >
-        <delete >
-            <fileset dir="${site.build.dir}" include="**" />
-            <fileset dir="${site.test.build.dir}/data" include="**" />
-            <fileset dir="${site.test.solr.dir}/data" include="**" />
+        <init_site_properties />
+        <delete quiet="true">
+            <fileset dir="${site.build.dir}" includes="**" />
+            <fileset dir="${site.test.build.dir}/data" includes="**" />
+            <fileset dir="${site.test.solr.dir}/data" includes="**" />
+            <fileset dir="${dist.path}" includes="**" />
         </delete>
     </target>
-        
+
     <target name="init" unless="init.already.run"  
             description="create (empty) generated directories and define a bunch of needed properties" >
         <init_site_properties />
@@ -375,7 +377,7 @@
         <attribute name="todir" />
         <sequential>
             <java jar="${site.lib.dir}/${solrmarc.core.one-jar.name}" fork="true" >
-                <jvmarg value="-Dsolrmarc.main.class=&quot;org.solrmarc.tools.PropertyFileFetcher&quot;" />
+                <jvmarg value="-Dsolrmarc.main.class=org.solrmarc.tools.PropertyFileFetcher" />
                 <arg value="JarUtils.jar" />
                 <arg value="${site.build.dir}" />
             </java>
