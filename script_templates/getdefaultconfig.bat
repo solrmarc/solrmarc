@@ -9,9 +9,8 @@ for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
 ::echo BatchPath = %scriptdir%
 
 if EXIST %scriptdir%SolrMarc.jar goto doit
-pushd %scriptdir%/..
-for %%x in (%CD%) do set scriptdir=%%~dpsx
-for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
+pushd %scriptdir%..
+for %%x in (%CD%) do set scriptdir=%%~sx\
 popd
 
 :doit
