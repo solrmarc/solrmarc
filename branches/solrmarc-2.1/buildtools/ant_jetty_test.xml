@@ -115,7 +115,7 @@
                 <then>
                     <java jar="${dist.path}/SolrMarc.jar" fork="true" dir="${dist.path}" >
                         <jvmarg value="${solrwararg}" />
-                        <jvmarg value="-Dsolr.hosturl=&quot;http://@{solrmachinename}:@{port}/@{solrurlappname}${solrcorearg}/update&quot;" />
+                        <jvmarg value="-Dsolr.hosturl=http://@{solrmachinename}:@{port}/@{solrurlappname}${solrcorearg}/update" />
                         <jvmarg value="${solrhomearg}" />
                         <jvmarg value="${solrdataarg}" />
                         <arg value="@{config}"/>
@@ -125,7 +125,7 @@
                 <else>    
                     <java jar="${dist.path}/SolrMarc.jar" fork="true" dir="${dist.path}" output="${site.test.dir}/indexfile.output" resultproperty="@{returnproperty}.result"  >
                         <jvmarg value="${solrwararg}" />
-                        <jvmarg value="-Dsolr.hosturl=&quot;http://@{solrmachinename}:@{port}/@{solrurlappname}${solrcorearg}/update&quot;" />
+                        <jvmarg value="-Dsolr.hosturl=http://@{solrmachinename}:@{port}/@{solrurlappname}${solrcorearg}/update" />
                         <jvmarg value="${solrhomearg}" />
                         <jvmarg value="${solrdataarg}" />
                         <arg value="@{config}"/>

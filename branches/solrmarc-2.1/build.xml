@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="build" name="SolrMarc Custom">
+<project basedir="." default="dist" name="SolrMarc Custom">
 
     <!-- property files -->
     <property file="build.properties" />
