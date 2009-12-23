@@ -8,9 +8,8 @@ for %%x in (%0) do set scriptdir=%%~dpsx
 for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
 
 if EXIST %scriptdir%SolrMarc.jar goto doit
-pushd %scriptdir%/..
-for %%x in (%CD%) do set scriptdir=%%~dpsx
-for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
+pushd %scriptdir%..
+for %%x in (%CD%) do set scriptdir=%%~sx\
 popd
 
 :doit
