@@ -67,7 +67,7 @@
                             <depend targetdir="${site.dir}" />
                             <different targetdir="${site.dir}" />
                         </fileset>
-                        <fileset dir="${basedir}" includes="${script.template.dir}/*,${buildtools.dir}/ant*" >
+                        <fileset dir="${basedir}" includes="${script.template.dir}/*,${buildtools.dir}/ant_extra*,${buildtools.dir}/ant_jetty_test.xml" >
                             <depend targetdir="${site.dir}" />
                             <different targetdir="${site.dir}" />
                         </fileset>

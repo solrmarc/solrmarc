@@ -46,7 +46,7 @@
         </sequential>
     </macrodef>
     
-    <macrodef name="jetty-stop" description="check whether jetty is running at a particular port, if so, stop it, and wait 2 secords for it to terminate" >
+    <macrodef name="jetty-stop" description="check whether jetty is running at a particular port, if so, stop it, and wait 3 secords for it to terminate" >
         <attribute name="port" default="8983" />
         <attribute name="jettyloc" default="${site.test.dir}/jetty" />
         <sequential>
@@ -157,7 +157,8 @@
         </sequential>
     </macrodef>
 
-    <macrodef name="check-record-present" description="Do a HTTP get " >
+    <macrodef name="check-record-present" 
+              description="Do a HTTP get against a running jetty/solr to test whether the indexed records are there" >
         <attribute name="port" default="8983" />
         <attribute name="numtoget" default="100" />
         <attribute name="recordlistprop" default="" />

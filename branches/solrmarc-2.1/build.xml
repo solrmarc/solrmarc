@@ -9,11 +9,15 @@
     <property name="buildtools.path" location="${buildtools.dir}" />
 
     <!-- import other ant scripts -->
+    <!-- import ant_extras.xml which defines several general purpose macros most drawn from the ant-contrib package -->
     <property name="ant_extras.dist.dir" location="${buildtools.path}" />
     <import file="${buildtools.path}/ant_extras.xml" />
-    <import file="${buildtools.path}/ant_jetty_test.xml" />
-    <import file="ant_init.xml" />
-    <import file="ant_package.xml" />
+
+    <!-- import ant_init.xml which defines all of the macros used by the site initialization process -->
+    <import file="${buildtools.path}/ant_init.xml" />
+
+    <!-- import ant_package.xml which defines all of the macros used to create the source and binary distribution packages -->
+    <import file="${buildtools.path}/ant_package.xml" />
 
     <tstamp>
         <format property="year" pattern="yyyy" />
