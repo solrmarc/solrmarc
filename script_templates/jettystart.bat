@@ -26,8 +26,12 @@ set JETTY_HOME=%solrmarcdir%jetty
 
 if "%JETTY_SOLR_HOME%" NEQ "" goto :have_solr_home
 if EXIST "%solrmarcdir%%config%" ( 
+pushd %solrmarcdir%
 for /f "usebackq tokens=3 delims= " %%H in (`findstr /B "solr.path" %solrmarcdir%%config%`) do set JETTY_SOLR_HOME=%%~fH
+popd
 )
+
+echo jetty solr home = %JETTY_SOLR_HOME%
 
 if "%JETTY_SOLR_HOME%" == "REMOTE" goto :get_solr_home 
 if "%JETTY_SOLR_HOME%" NEQ "" goto :have_solr_home
@@ -48,15 +52,19 @@ set JETTY_SOLR_PORT=8983
 if "%JETTY_MEM_ARGS%" == ""  set JETTY_MEM_ARGS=@MEM_ARGS@
 if "%JETTY_MEM_ARGS:0,1%" == "@"  set JETTY_MEM_ARGS=-Xmx256m
 
-pushd %JETTY_HOME%
+set baseconfig=%config:~0,-11%
+set outfile=%solrmarcdir%%baseconfig%.jetty.out
 
 echo Starting jetty webserver 
 echo  based on SolrMarc config file: %config% 
 echo  using solr home of %JETTY_SOLR_HOME%
 echo  using port %JETTY_SOLR_PORT% 
+echo  writing output to %outfile%
 
-move /Y jetty.out jetty.out.bak > NUL 2>&1
-start /B java %JETTY_MEM_ARGS% -DSTOP.PORT=8079 -DSTOP.KEY=secret -Dsolr.solr.home="%JETTY_SOLR_HOME%" -Djetty.port=%JETTY_SOLR_PORT% -jar start.jar > jetty.out 2>&1
+pushd %JETTY_HOME%
+
+move /Y %outfile% %outfile%.bak > NUL 2>&1
+start /B java %JETTY_MEM_ARGS% -DSTOP.PORT=0 -Dsolr.solr.home="%JETTY_SOLR_HOME%" -Djetty.port=%JETTY_SOLR_PORT% -jar start.jar > %outfile% 2>&1
 
 :: sleep for 2 seconds
 ping 1.1.1.1 -n 2 -w 1000 > NUL 2>&1
@@ -67,12 +75,7 @@ GOTO :done
 :set_arg
 
 set arg=%1
-::if "%arg:~0,4%" == "http" set url=%arg%
 if "%arg:~-17%" == "config.properties" set config=%arg%
-::if "%arg:~-4%" == ".jar" set jar=%arg%
-::if "%arg:~-4%" NEQ ".jar" if "%arg:~1,2%" == ":/" set solrpath=%arg%
-::if "%arg:~-4%" NEQ ".jar" if "%arg:~1,2%" == ":\" set solrpath=%arg%
-::if "%arg:~-4%" NEQ ".jar" if "%arg:~0,1%" == "." for %%g in (%arg%) do set solrpath=%%~fg
 
 goto :eof
 
