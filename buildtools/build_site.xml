@@ -11,14 +11,16 @@
     <property name="solr.install.dir" value="${dist.path}/jetty/solr" />
     <property name="buildtools.path" location="buildtools" />
 
-    <!-- import other ant scripts (skips import if files already included) -->
+    <!-- import ant extras macros (skips import if file already included) -->
     <condition property="import.path" value="${buildtools.path}" else="doesnt_exist" >
         <not><typefound name="if" /></not>
     </condition>           
     <property name="ant_extras.dist.dir" location="${buildtools.path}" />
-    <import file="${import.path}/ant_extras.xml" optional="true"/>
-    <import file="${import.path}/ant_jetty_test.xml" optional="true"/>
-    
+    <import file="${import.path}/ant_extras.xml" optional="true" />
+
+    <!-- import ant_package.xml which defines all of the macros used for running the tests especially the smoke test -->
+    <import file="${buildtools.path}/ant_jetty_test.xml" />
+
     <target name="clean" description="clean the generated directories" >
         <init_site_properties />
         <delete dir="${site.build.dir}" quiet="true" />
@@ -50,7 +52,7 @@
         </path>
 
         <mkdir dir="${site.build.dir}" />
-        
+
         <javac destdir="${site.build.dir}" srcdir="${site.src.dir}" 
                 target="${java.compat.version}" 
                 source="${java.compat.version}" 
@@ -71,13 +73,13 @@
             <flattenmapper/>
             <fileset dir="${basedir}" includes="extra_data/**" />
         </copy>
-        
+
         <resources id="customjarfiles" >
             <fileset dir="${site.build.dir}" includes="**/*.class" />
             <fileset dir="${basedir}" includes="log4j.properties" />
             <fileset dir="${site.build.dir}/tmp_extra" includes="**" />
         </resources>
-                
+
         <if>
             <resourcecount refid="customjarfiles" count="0" when="gt" />
             <then>
@@ -88,7 +90,7 @@
                 </jar>
             </then>
         </if>
-        
+
         <delete dir="${site.build.dir}/tmp_extra" />
         <property name="build.already.run" value="true" />
     </target>
@@ -112,13 +114,13 @@
                   <fixcrlf />
             </filterchain>     
         </copy>
-                  
+
         <copy_scripts />
         <copy_jetty />
         <copy_solr />
         <property name="dist.already.run" value="true" />
     </target>
- 
+
     <!-- Site Testing Targets -->
 
     <target name="testClean" depends="init" description="clean generated test directories">
@@ -131,7 +133,7 @@
         <property name="site.test.jar" value="${custom.jar.name}Test.jar" />
         <property name="test.solr.dir" value="${site.test.solr.dir}" />
         <property name="test.data.dir" value="${site.test.data.dir}" />
-        
+
         <if>
             <available file="${site.test.src.dir}" type="dir" />
             <then>
@@ -143,7 +145,7 @@
                 </condition>
             </then>
         </if>
-                
+
         <if>
             <available type="file" file="${test.solr.dir}/solr.xml" />
             <then>
@@ -207,36 +209,54 @@
             </else>
         </if>
         <property name="jetty.test.port" value="8983" />
+
+        <!-- start a jetty server at the port defined by property  jetty.test.port  -->
         <echo level="warning" message="Starting Jetty for testing at URL:  http://localhost:${jetty.test.port} ..." />
         <jetty-start jettyloc="${jetty.install.dir}" solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" port="${jetty.test.port}" solrcore="${solr.core.name}" />
+
+        <!-- check whether index in jetty server contains more than a certain number of records -->
+        <!-- this is done because the next step deletes ALL of the records there, and we don't want -->
+        <!-- delete your production index by mistake. -->
         <property name="maximum.expected.recs.in.test.solr" value="20" />
         <check-record-present port="${jetty.test.port}" solrcore="${solr.core.name}" numfoundprop="smoketest.initial.num.found" expectmaxcount="${maximum.expected.recs.in.test.solr}" />
+
+        <!-- Now delete all of the records in the test solr index -->
         <echo level="warning" message="Deleting all records from test jetty via URL:  http://localhost:${jetty.test.port}/solr/update " />
         <jetty-delete-all returnproperty="test.smoke.delete.all" port="${jetty.test.port}" solrcore="${solr.core.name}" />
         <echo message="${test.smoke.delete.all}" />
-        <echo level="warning" message="Indexing file: u399.mrc" /> 
-        <indexfile solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" marcfile="${site.test.dir}/data/u399.mrc" port="${jetty.test.port}" solrcore="${solr.core.name}" returnproperty="smoketest.index.run.1" />   
+
+        <!-- Index a sample file containing a single record -->
+        <property name="smoketest.index.run.1.marcfile" location="${site.test.dir}/data/u399.mrc" />
+        <echo level="warning" message="Indexing file: ${smoketest.index.run.1.marcfile}" /> 
+        <indexfile solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" marcfile="${smoketest.index.run.1.marcfile}" port="${jetty.test.port}" solrcore="${solr.core.name}" returnproperty="smoketest.index.run.1" />   
         <echo level="warning" message="${smoketest.index.run.1}" /> 
-        <echo level="warning" message="Indexing file: selectedRecs.mrc" /> 
-        <indexfile solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" marcfile="${site.test.dir}/data/selectedRecs.mrc" port="${jetty.test.port}" solrcore="${solr.core.name}" returnproperty="smoketest.index.run.2"/>   
+
+        <!-- Index a sample file containing about a dozen records -->
+        <property name="smoketest.index.run.2.marcfile" location="${site.test.dir}/data/selectedRecs.mrc" />
+        <echo level="warning" message="Indexing file: ${smoketest.index.run.2.marcfile}" /> 
+        <indexfile solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" marcfile="${smoketest.index.run.2.marcfile}" port="${jetty.test.port}" solrcore="${solr.core.name}" returnproperty="smoketest.index.run.2" />   
         <echo level="warning" message="${smoketest.index.run.2}" /> 
-        <echo level="warning" message="Records Indexed " /> 
+
+        <!-- Check number of records in index after the to sample index files are added -->
         <check-record-present port="${jetty.test.port}" solrcore="${solr.core.name}" recordlistprop="smoketest.record.list" numfoundprop="smoketest.num.found" />
         <echo level="warning" message="num found: ${smoketest.num.found} :  ${smoketest.record.list}" /> 
         <jetty-stop port="${jetty.test.port}" /> 
+
+        <!-- Fail and exit if the wrong number of documents was found-->
+        <property name="smoketest.expected.num" value="12" />
+        <fail message="Expected to find ${smoketest.expected.num} documents in index instead found ${smoketest.num.found}" >
+            <condition>
+                <not><equals arg1="${smoketest.num.found}" arg2="${smoketest.expected.num}" /></not>
+            </condition>
+        </fail>
+        <echo level="warning" message="Smoketest Successful!" />
     </target>
-    
+
     <target name="indextest" depends="dist,testJar" description="run index acceptance test">
         <echo message="solr.path: ${solr.path}" />
         <echo message="solr.path being used for testing: ${site.test.solr.dir}" />
         <property name="solr.jar.file.dir" value="${site.test.dir}/tmp_solr_war_jars" />
-        <mkdir dir="${solr.jar.file.dir}" />
-        <unwar src="${jetty.install.dir}/webapps/solr.war" dest="${solr.jar.file.dir}">
-            <flattenmapper/>
-            <patternset>
-                <include name="**/*.jar"/>
-            </patternset>
-        </unwar>
+        <get_jars_from_solr_war src="${jetty.install.dir}/webapps/solr.war" todir="${solr.jar.file.dir}" />
         <get_jars_from_solrmarc_onejar junit="test/*.jar"  todir="${site.test.dir}/tmp_solrmarc_jars" />
 
         <path id="test.run.classpath.jars">
@@ -293,14 +313,8 @@
         <echo message="solr.path: ${solr.path}" />
         <echo message="solr.path being used for testing: ${site.test.solr.dir}" />
         <property name="solr.jar.file.dir" value="${site.test.dir}/tmp_solr_war_jars" />
-        <mkdir dir="${solr.jar.file.dir}" />
-        <unwar src="${jetty.install.dir}/webapps/solr.war" dest="${solr.jar.file.dir}">
-            <flattenmapper/>
-            <patternset>
-                <include name="**/*.jar"/>
-            </patternset>
-        </unwar>
-        <get_jars_from_solrmarc_onejar junit="test/*.jar" todir="${site.test.dir}/tmp_solrmarc_jars" />
+        <get_jars_from_solr_war src="${jetty.install.dir}/webapps/solr.war" todir="${solr.jar.file.dir}" />
+        <get_jars_from_solrmarc_onejar junit="test/*.jar"  todir="${site.test.dir}/tmp_solrmarc_jars" />
 
         <path id="test.run.classpath.jars">
             <fileset file="${site.build.dir}/${custom.jar.name}.jar" />
@@ -350,7 +364,7 @@
 
     <!-- macros to handle the bulk of the work for the targets defined above   --> 
 
-    <macrodef name="init_site_properties">
+    <macrodef name="init_site_properties" description="define properties for various directories">
         <sequential>
             <property name="site.base.dir" location="${basedir}" />
             <property file="${site.base.dir}/build_override.properties" />
@@ -370,6 +384,7 @@
         </sequential>
     </macrodef>
     
+    <!-- macro to copy SolrMarc.jar from lib directory to dist directory and set the default config to use at the same time -->
     <macrodef name="copy_solrmarc_set_default_config" >
         <attribute name="config" />
         <attribute name="todir" />
@@ -492,6 +507,7 @@
         </sequential>
     </macrodef>
 
+    <!-- macro to determine the name of the class containing custom indexer source code -->
     <macrodef name="get_custom_indexer_class">
         <sequential>
             <if>
@@ -558,6 +574,7 @@
         </sequential>
     </macrodef>
     
+    <!-- macro to unbundle all of the necessary jars from the SolrMarc One-Jar so they can be used by junit tests -->
     <macrodef name="get_jars_from_solrmarc_onejar" >
         <attribute name="junit" default="lib/*.jar" />
         <attribute name="todir" />
@@ -570,6 +587,21 @@
                     <include name="@{junit}"/>
                 </patternset>
                 <flattenmapper />
+            </unwar>
+        </sequential>
+    </macrodef>
+
+    <!-- macro to unbundle all of the necessary jars from the solr.war file so they can be used by junit tests -->
+    <macrodef name="get_jars_from_solr_war" >
+        <attribute name="src" default="${jetty.install.dir}/webapps/solr.war" />
+        <attribute name="todir" />
+        <sequential>
+            <mkdir dir="@{todir}" />
+            <unwar src="@{src}" dest="@{todir}">
+                <flattenmapper/>
+                <patternset>
+                    <include name="**/*.jar"/>
+                </patternset>
             </unwar>
         </sequential>
     </macrodef>
