@@ -55,13 +55,18 @@ fi
 
 pushd $JETTY_HOME
 
+baseconfig=${config%.*}
+outfile=$solrmarcdir/$baseconfig.jetty.out
 
 echo Stopping jetty webserver 
 echo  based on SolrMarc config file: $config 
 echo  using solr home of $JETTY_SOLR_HOME
 echo  using port $JETTY_SOLR_PORT 
 
-java -DSTOP.PORT=8079 -DSTOP.KEY=secret -jar start.jar --stop
+stopport=`head -1 $outfile`
+stopkey=`head -2 $outfile | tail -1`
+
+java -DSTOP.PORT=$stopport $stopkey -jar start.jar --stop
 
 
 
