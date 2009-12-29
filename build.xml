@@ -31,7 +31,10 @@
         <delete dir="${dist.dir}" />
         <ant dir="${lib.dir}/solrmarc" target="clean" inheritAll="false" />
         <if>
-            <isset property="site.dir" />
+            <and>
+                <isset property="site.dir" />
+                <available file="${site.dir}/build.xml" />
+            </and>
             <then>
                 <ant dir="${site.dir}" target="clean" inheritAll="false" />
             </then>
