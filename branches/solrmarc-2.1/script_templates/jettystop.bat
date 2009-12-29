@@ -2,7 +2,7 @@
 :: A simple script to start jetty given the default configuration of solr for solrmarc
 :: $Id: jettystart.bat
 
-setlocal
+setlocal enabledelayedexpansion
 
 ::Get the current batch file's short path
 for %%x in (%0) do set scriptdir=%%~dpsx
@@ -26,7 +26,9 @@ set JETTY_HOME=%solrmarcdir%jetty
 
 if "%JETTY_SOLR_HOME%" NEQ "" goto :have_solr_home
 if EXIST "%solrmarcdir%%config%" ( 
+pushd %solrmarcdir%
 for /f "usebackq tokens=3 delims= " %%H in (`findstr /B "solr.path" %solrmarcdir%%config%`) do set JETTY_SOLR_HOME=%%~fH
+popd
 )
 
 if "%JETTY_SOLR_HOME%" == "REMOTE" goto :get_solr_home 
@@ -45,29 +47,33 @@ if "%JETTY_SOLR_PORT%" NEQ "" goto :have_solr_port
 set JETTY_SOLR_PORT=8983
 
 :have_solr_port
-if "%JETTY_MEM_ARGS%" == ""  set JETTY_MEM_ARGS=@MEM_ARGS@
-if "%JETTY_MEM_ARGS:0,1%" == "@"  set JETTY_MEM_ARGS=-Xmx256m
 
-pushd %JETTY_HOME%
+set baseconfig=%config:~0,-11%
+set outfile=%solrmarcdir%%baseconfig%.jetty.out
 
 echo Stopping jetty webserver 
 echo  based on SolrMarc config file: %config% 
 echo  using solr home of %JETTY_SOLR_HOME%
 echo  using port %JETTY_SOLR_PORT% 
 
-java %JETTY_MEM_ARGS% -DSTOP.PORT=8079 -DSTOP.KEY=secret -jar start.jar --stop 
+set stopport=
+set stopkey=
+for /f "usebackq delims=" %%a in (`type %outfile%`) do (
+if "!stopport!" == ""  ( set stopport=%%a ) else if "!stopkey!" == ""  set stopkey=%%a
+if "!stopkey!" NEQ ""  goto gotstopport
+)
+:gotstopport
+
+pushd %JETTY_HOME%
+
+java -DSTOP.PORT=%stopport% %stopkey% -jar %JETTY_HOME%\start.jar --stop 
 
 GOTO :done
 
 :set_arg
 
 set arg=%1
-::if "%arg:~0,4%" == "http" set url=%arg%
 if "%arg:~-17%" == "config.properties" set config=%arg%
-::if "%arg:~-4%" == ".jar" set jar=%arg%
-::if "%arg:~-4%" NEQ ".jar" if "%arg:~1,2%" == ":/" set solrpath=%arg%
-::if "%arg:~-4%" NEQ ".jar" if "%arg:~1,2%" == ":\" set solrpath=%arg%
-::if "%arg:~-4%" NEQ ".jar" if "%arg:~0,1%" == "." for %%g in (%arg%) do set solrpath=%%~fg
 
 goto :eof
 
