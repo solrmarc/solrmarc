@@ -11,11 +11,13 @@ then
   solrmarcdir=$( (cd -P $(dirname $0)/.. && pwd) )
 fi
 
+JAVAARG=
 config=`$scriptdir/getdefaultconfig`
 for i in "$@" 
 do
 case "$i" in
 *config.properties) config="$i" ;;
+-*) JAVAARG=$i
 esac
 done
 
@@ -53,16 +55,28 @@ then
     JETTY_MEM_ARGS='@MEM_ARGS@'
 fi
 
+baseconfig=${config%.*}
+outfile=$solrmarcdir/$baseconfig.jetty.out
+
 pushd $JETTY_HOME
 
 echo Starting jetty webserver 
 echo  based on SolrMarc config file: $config
 echo  using solr home of $JETTY_SOLR_HOME
 echo  using port $JETTY_SOLR_PORT
-echo  writing output to `pwd`/nohup.out
+echo  writing output to $outfile
 
-mv nohup.out nohup.out.bak 
-nohup java $JETTY_MEM_ARGS -DSTOP.PORT=8079 -DSTOP.KEY=secret -Dsolr.solr.home="$JETTY_SOLR_HOME" -Djetty.port=$JETTY_SOLR_PORT -jar start.jar &
+if [[ -f $outfile ]]
+then
+    mv -f $outfile $outfile.bak
+fi
 
+if [[ $JAVAARG == "" ]]
+then
+    java $JETTY_MEM_ARGS -DSTOP.PORT=0 -Dsolr.solr.home="$JETTY_SOLR_HOME" -Djetty.port=$JETTY_SOLR_PORT -jar start.jar > $outfile 2>1 & 
+else
+    echo  adding ARGS $JAVAARG
+    java $JETTY_MEM_ARGS "$JAVAARG" -DSTOP.PORT=0 -Dsolr.solr.home="$JETTY_SOLR_HOME" -Djetty.port=$JETTY_SOLR_PORT -jar start.jar > $outfile 2>1 & 
+fi
 sleep 4
 
