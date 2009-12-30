@@ -17,6 +17,7 @@
     <import file="${buildtools.path}/ant_init.xml" />
 
     <!-- import ant_package.xml which defines all of the macros used to create the source and binary distribution packages -->
+    <property name="ant_package.dist.dir" location="${buildtools.path}" />   
     <import file="${buildtools.path}/ant_package.xml" />
 
     <tstamp>
@@ -117,6 +118,27 @@
         <packageprebuilt example="GenericBlacklight" binprefix="bin" />
         <packageprebuilt example="GenericVuFind" binprefix="bin" />
         <packageprebuilt example="none" binprefix="bin" acceptpromptdefaults="true"/> 
+    </target>
+    
+    <target name="upload" depends="package" description="Upload prebuilt binary distributions and a source distribution to googlecode" >
+        <if> 
+            <available file="build.credentials.properties" />
+            <then>
+                <property file="build.credentials.properties" />
+                <fail unless="gc.username" message="Missing property 'gc.username' from file 'build.credentials.properties'."/>
+                <fail unless="gc.password" message="Missing property 'gc.password' from file 'build.credentials.properties'."/>
+                <uploadsrc username="${gc.username}" password="${gc.password}" />
+                <uploadprebuilt username="${gc.username}" password="${gc.password}" example="GenericBlacklight"
+                       sitelabel="Blacklight site" />
+                <uploadprebuilt username="${gc.username}" password="${gc.password}" example="GenericVuFind"
+                       sitelabel="VuFind site" />
+                <uploadprebuilt username="${gc.username}" password="${gc.password}" example="none"
+                       sitelabel="Custom Configuration (for non-Blacklight and non-VuFind site)" />
+            </then>
+            <else>
+            	<fail message="Can't find file 'build.credentials.properties'."/>
+            </else>
+        </if>
     </target>
     
     <target name="usage" description="Prints usage instructions">
