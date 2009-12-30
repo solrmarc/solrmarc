@@ -156,17 +156,6 @@
             <if>
                 <equals arg1="@{srconly}" arg2="false" />
                 <then>
-                    <antcall target="dist" inheritAll="false" >
-                        <param name="site.dir" value="${temp.site.dir}" />
-                        <param name="dist.path" location="${temp.dist.dir}" />
-                        <param name="dist.dir" value="${temp.dist.dir}" />
-                        <param name="dist.exe.dir" value="" />
-                        <param name="package-prebuilt.allscripts.batch" value="true" />
-                        <param name="package-prebuilt.allscripts.shell" value="true" />
-                    </antcall>
-                    
-                    <delete file="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix.tar.gz" />
-                    <delete file="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" />
                     <gcupload 
                              username="@{username}" 
                              password="@{password}" 
