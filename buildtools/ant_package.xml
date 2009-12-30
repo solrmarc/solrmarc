@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="SolrMarc package add-ons">
-        
+    <property name="ant_package.dist.dir" location="." />   
+    <taskdef name="gcupload" classname="net.bluecow.googlecode.ant.GoogleCodeUploadTask" 
+             classpath="${ant_package.dist.dir}/ant-googlecode-0.0.2.jar" onerror="report" />  
+    
     <macrodef name="packagesrc" description="Create a gzipped src tarball for distribution" >
         <sequential>
             <delete file="${package.dir}/SolrMarc_Distribution.tar.gz" />
@@ -28,94 +31,161 @@
             </tar>
         </sequential>
     </macrodef>
-        
+
+    <macrodef name="uploadsrc" description="Upload source package to googlecode downloads page" >
+        <attribute name="username" />
+        <attribute name="password" />
+        <sequential>
+        	<gcupload 
+        	        username="@{username}" 
+        	        password="@{password}" 
+        	        projectname="solrmarc" 
+        	        filename="${package.dir}/SolrMarc_Distribution.tar.gz" 
+        	        targetfilename="SolrMarc_Distribution.tar.gz"
+        	        summary="Static snapshot of full source code distribution for all of SolrMarc-2.1 including all examples (Can be used to build ALL of the other distributions listed here and more)"
+        	        labels="Type-Source, OpSys-All" />	
+        </sequential>
+    </macrodef>
+    
     <macrodef name="packageprebuilt" description="Create a gzipped pre-built version for distribution" >
         <attribute name="srconly" default="false" />
         <attribute name="example" />
         <attribute name="binprefix" default="" />
         <attribute name="acceptpromptdefaults" default="false" />
         <sequential>
-	        <property name="temp.site.dir" location="tmp-site" />
-	        <property name="temp.dist.dir" location="tmp-dist" />
-	        <delete dir="${temp.site.dir}" />
-	        <delete dir="${temp.dist.dir}" />
+            <property name="temp.site.dir" location="tmp-site" />
+            <property name="temp.dist.dir" location="tmp-dist" />
+            <delete dir="${temp.site.dir}" />
+            <delete dir="${temp.dist.dir}" />
             <propertyregex property="examplelabel" input="@{example}" regexp="none" replace="Generic" defaultValue="@{example}" override="true" />
-	        <antcall target="init" inheritAll="false" >
+            <antcall target="init" inheritAll="false" >
                 <param name="example.configuration" value="@{example}" />
                 <param name="site.dir" value="${temp.site.dir}" />
-	            <param name="dist.path" value="dist" />
+                <param name="dist.path" value="dist" />
                 <param name="dist.dir" value="${temp.dist.dir}" />
                 <param name="accept.default.for.input" value="@{acceptpromptdefaults}" />
-	        </antcall>
-	        
-	        <delete file="${package.dir}/SolrMarc_${examplelabel}_Source.tar.gz" />
-	        <delete file="${package.dir}/SolrMarc_${examplelabel}_Source.zip" />
-	        <tar destfile="${package.dir}/SolrMarc_${examplelabel}_Source.tar.gz" compression="gzip">
-	            <tarfileset dir="${temp.site.dir}" >
-	                <include name="**" />
-	            </tarfileset>
-	        </tar> 
-	        <zip destfile="${package.dir}/SolrMarc_${examplelabel}_Source.zip" compress="true" whenempty="create">
-	            <zipfileset dir="${temp.site.dir}" >
-	                <include name="**" />
-	            </zipfileset>
-	        </zip> 
+            </antcall>
+            
+            <delete file="${package.dir}/SolrMarc_${examplelabel}_Source.tar.gz" />
+            <delete file="${package.dir}/SolrMarc_${examplelabel}_Source.zip" />
+            <tar destfile="${package.dir}/SolrMarc_${examplelabel}_Source.tar.gz" compression="gzip">
+                <tarfileset dir="${temp.site.dir}" >
+                    <include name="**" />
+                </tarfileset>
+            </tar> 
+            <zip destfile="${package.dir}/SolrMarc_${examplelabel}_Source.zip" compress="true" whenempty="create">
+                <zipfileset dir="${temp.site.dir}" >
+                    <include name="**" />
+                </zipfileset>
+            </zip> 
             <if>
                 <equals arg1="@{srconly}" arg2="false" />
                 <then>
-        	        <antcall target="dist" inheritAll="false" >
-        	            <param name="site.dir" value="${temp.site.dir}" />
-        	            <param name="dist.path" location="${temp.dist.dir}" />
+                    <antcall target="dist" inheritAll="false" >
+                        <param name="site.dir" value="${temp.site.dir}" />
+                        <param name="dist.path" location="${temp.dist.dir}" />
                         <param name="dist.dir" value="${temp.dist.dir}" />
                         <param name="dist.exe.dir" value="" />
-        	            <param name="package-prebuilt.allscripts.batch" value="true" />
-        	            <param name="package-prebuilt.allscripts.shell" value="true" />
-        	        </antcall>
-        	        
+                        <param name="package-prebuilt.allscripts.batch" value="true" />
+                        <param name="package-prebuilt.allscripts.shell" value="true" />
+                    </antcall>
+                    
                     <delete file="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix.tar.gz" />
-        	        <delete file="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" />
-        	        <tar destfile="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix.tar.gz" compression="gzip">
-        	            <tarfileset dir="${buildtools.path}">
-        	                <include name="README_UNIX" />
-        	            </tarfileset>
-        	            <tarfileset dir="${temp.dist.dir}" filemode="755" prefix="@{binprefix}" >
-        	                <include name="*" />
-        	                <exclude name="*.bat" />
-        	                <exclude name="*.jar" />
-        	                <exclude name="*.properties" />
-        	            </tarfileset>
-        	            <tarfileset dir="${temp.dist.dir}" >
-        	                <include name="*.properties" />
-        	                <include name="*.jar" />
-        	            </tarfileset>
-        	            <tarfileset dir="${temp.dist.dir}">
-        	                <include name="${scripts.dir}/**" />
-        	                <include name="${trans.map.dir}/**" />
-        	                <include name="jetty/**" />
-        	            </tarfileset>
-        	        </tar> 
-        	        <zip destfile="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" compress="true" whenempty="create">
-        	            <zipfileset dir="${buildtools.path}" >
-        	                 <include name="README_PC.txt" />
-        	            </zipfileset>
-        	            <zipfileset dir="${temp.dist.dir}"  prefix="@{binprefix}" >
-        	                <include name="*.bat" />
-        	            </zipfileset>
-        	            <zipfileset dir="${temp.dist.dir}" >
-        	                <include name="*.properties" />
-        	                <include name="*.jar" />
-        	            </zipfileset>
-        	            <zipfileset dir="${temp.dist.dir}">
-        	                <include name="${scripts.dir}/**" />
-        	                <include name="${trans.map.dir}/**" />
-        	                <include name="jetty/**" />
-        	            </zipfileset>
-        	        </zip> 
+                    <delete file="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" />
+                    <tar destfile="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix.tar.gz" compression="gzip">
+                        <tarfileset dir="${buildtools.path}">
+                            <include name="README_UNIX" />
+                        </tarfileset>
+                        <tarfileset dir="${temp.dist.dir}" filemode="755" prefix="@{binprefix}" >
+                            <include name="*" />
+                            <exclude name="*.bat" />
+                            <exclude name="*.jar" />
+                            <exclude name="*.properties" />
+                        </tarfileset>
+                        <tarfileset dir="${temp.dist.dir}" >
+                            <include name="*.properties" />
+                            <include name="*.jar" />
+                        </tarfileset>
+                        <tarfileset dir="${temp.dist.dir}">
+                            <include name="${scripts.dir}/**" />
+                            <include name="${trans.map.dir}/**" />
+                            <include name="jetty/**" />
+                        </tarfileset>
+                    </tar> 
+                    <zip destfile="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" compress="true" whenempty="create">
+                        <zipfileset dir="${buildtools.path}" >
+                             <include name="README_PC.txt" />
+                        </zipfileset>
+                        <zipfileset dir="${temp.dist.dir}"  prefix="@{binprefix}" >
+                            <include name="*.bat" />
+                        </zipfileset>
+                        <zipfileset dir="${temp.dist.dir}" >
+                            <include name="*.properties" />
+                            <include name="*.jar" />
+                        </zipfileset>
+                        <zipfileset dir="${temp.dist.dir}">
+                            <include name="${scripts.dir}/**" />
+                            <include name="${trans.map.dir}/**" />
+                            <include name="jetty/**" />
+                        </zipfileset>
+                    </zip> 
                 </then>
             </if>
-	        <delete dir="${temp.site.dir}" /> 
-	        <delete dir="${temp.dist.dir}" /> 
+            <delete dir="${temp.site.dir}" /> 
+            <delete dir="${temp.dist.dir}" /> 
         </sequential>       
     </macrodef>
-        
+	
+    <macrodef name="uploadprebuilt" description="Upload a gzipped pre-built version to googlecode downloads page" >
+        <attribute name="username" />
+        <attribute name="password" />
+        <attribute name="srconly" default="false" />
+        <attribute name="example" />
+        <attribute name="sitelabel" />
+        <sequential>
+            <propertyregex property="examplelabel" input="@{example}" regexp="none" replace="Generic" defaultValue="@{example}" override="true" />
+
+            <gcupload 
+                     username="@{username}" 
+                     password="@{password}" 
+                     projectname="solrmarc" 
+                     filename="${package.dir}/SolrMarc_${examplelabel}_Source.tar.gz" 
+                     targetfilename="SolrMarc_${examplelabel}_Source.tar.gz"
+                     summary="Source Code distribution of SolrMarc-2.1 for any environment for @{sitelabel}"
+                     labels="Type-Source, OpSys-All" />
+            <if>
+                <equals arg1="@{srconly}" arg2="false" />
+                <then>
+                    <antcall target="dist" inheritAll="false" >
+                        <param name="site.dir" value="${temp.site.dir}" />
+                        <param name="dist.path" location="${temp.dist.dir}" />
+                        <param name="dist.dir" value="${temp.dist.dir}" />
+                        <param name="dist.exe.dir" value="" />
+                        <param name="package-prebuilt.allscripts.batch" value="true" />
+                        <param name="package-prebuilt.allscripts.shell" value="true" />
+                    </antcall>
+                    
+                    <delete file="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix.tar.gz" />
+                    <delete file="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" />
+                    <gcupload 
+                             username="@{username}" 
+                             password="@{password}" 
+                             projectname="solrmarc" 
+                             filename="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix.tar.gz" 
+                             targetfilename="SolrMarc_${examplelabel}_Binary_Unix.tar.gz"
+                             summary="Prebuilt Binary distribution of SolrMarc-2.1 for UNIX environment for @{sitelabel}"
+                             labels="Type-Archive, OpSys-Linux, OpSys-OSX" />
+                    <gcupload 
+                             username="@{username}" 
+                             password="@{password}" 
+                             projectname="solrmarc" 
+                             filename="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" 
+                             targetfilename="SolrMarc_${examplelabel}_Binary_PC.zip"
+                             summary="Prebuilt Binary distribution of SolrMarc-2.1 for PC environment for @{sitelabel}"
+                             labels="Type-Archive, OpSys-Windows" />
+                </then>
+            </if>
+        </sequential>       
+    </macrodef>
+    
 </project >
