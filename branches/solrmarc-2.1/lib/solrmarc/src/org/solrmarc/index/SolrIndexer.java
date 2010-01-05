@@ -1044,7 +1044,8 @@ public class SolrIndexer
                     // if bracket expression is digits, expression is treated as character positions
                     int substart = Integer.parseInt(sub[0]);
                     subend = (sub.length > 1) ? Integer.parseInt(sub[1]) + 1 : substart + 1;
-                    result.addAll(getSubfieldDataAsSet(record, tag, subfield, substart, subend));
+                    String subfieldWObracket = subfield.substring(0, bracket-3);
+                    result.addAll(getSubfieldDataAsSet(record, tag, subfieldWObracket, substart, subend));
                 }
                 catch (NumberFormatException e)
                 {
