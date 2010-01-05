@@ -32,10 +32,8 @@ if "%3" NEQ "" call :set_arg %3
 if "%query%" == "" if "%id%" NEQ "" set query=id:%id%
 ::echo query=%query%
 ::
-if "%SOLRMARC_MEM_ARGS%" EQU ""  set SOLRMARC_MEM_ARGS=@MEM_ARGS@
-::
-if "%url%" == "" java %SOLRMARC_MEM_ARGS% -Dsolrmarc.main.class=org.solrmarc.marc.SolrReIndexer -jar %scriptdir%SolrMarc.jar %config% "%query%" "%field%" 2> NUL
-if "%url%" NEQ "" java %SOLRMARC_MEM_ARGS% -Dsolrmarc.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar %scriptdir%SolrMarc.jar %url% "%query%" "%field%"
+if "%url%" == "" java -Dsolrmarc.main.class=org.solrmarc.marc.SolrReIndexer -jar %scriptdir%SolrMarc.jar %config% "%query%" "%field%" 2> NUL
+if "%url%" NEQ "" java -Dsolrmarc.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar %scriptdir%SolrMarc.jar %url% "%query%" "%field%"
 ::
 goto done
 ::
