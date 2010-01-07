@@ -22,7 +22,7 @@ else
   url=$1
 fi
 
-java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.BooklistReader" -jar $scriptdir/@CUSTOM_JAR_NAME@ $url $2 
+java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.BooklistReader" -jar $scriptdir/SolrMarc.jar $url $2 
 
 exit 0
 
