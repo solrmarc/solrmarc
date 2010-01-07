@@ -56,6 +56,7 @@ public class BooklistReader extends SolrReIndexer
     @Override
     protected void loadLocalProperties()
     {
+        super.loadLocalProperties();
         if (solrFieldContainingEncodedMarcRecord == null) 
         {
             solrFieldContainingEncodedMarcRecord = "marc_display";
