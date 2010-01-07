@@ -65,6 +65,7 @@ public class BooklistReader extends SolrReIndexer
     @Override
     protected void processAdditionalArgs() 
     {
+        super.processAdditionalArgs();
         booklistFilename = addnlArgs.length > 0 ? addnlArgs[0] : "booklists.txt";
         documentCache = new LinkedHashMap<String, Map<String, Object>>();
     }
@@ -75,7 +76,14 @@ public class BooklistReader extends SolrReIndexer
 
         Date start = new Date();
         
-        readBooklist(booklistFilename);
+        try {
+            readBooklist(booklistFilename);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Exception: "+e.getMessage());
+            e.printStackTrace();
+        }
         
         finish(); 
         
