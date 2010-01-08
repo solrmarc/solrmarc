@@ -28,6 +28,6 @@ do
     cp $file.tmp $file
     rm $file.tmp
 done
-rm $solrnewdir.tmp/*/.nfs*
+rm $solrnewdir.tmp/*/.nfs* 2> /dev/null
 
 mv $solrnewdir.tmp $solrnewdir
