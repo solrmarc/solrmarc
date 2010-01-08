@@ -21,11 +21,16 @@ solrnewdir=$solrhome/$solrnewcore
 
 # copy entire index via creating hard links, then turn segment files from hardlinks to copies
 cp -lR $solrdir $solrnewdir.tmp
-for file in $solrnewdir/*/seg*
+for file in $solrnewdir.tmp/*/seg*
 do
 #   echo $file
     mv $file $file.tmp
     cp $file.tmp $file
     rm $file.tmp
+done
+for file in $solrnewdir.tmp/*/.nfs*
+do
+#   echo $file
+    rm $file
 done
 mv $solrnewdir.tmp $solrnewdir
