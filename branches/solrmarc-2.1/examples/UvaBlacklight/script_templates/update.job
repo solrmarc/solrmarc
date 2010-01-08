@@ -1,5 +1,5 @@
 #!/bin/bash
-PATH=/usr/local/projects/solrmarc-2.0/dist:$PATH
+PATH=/usr/local/projects/solrmarc-2.1/dist/bin:$PATH
 export PATH
 num=0
 JAVA_HOME=/usr/java/latest/bin/java
@@ -10,109 +10,26 @@ INPUTDIR=$DATADIR/incoming
 PROCESSEDDIR=$DATADIR/processed
 RESULTSDIR=$DATADIR/results
 
-for file in `find $INPUTDIR -name '*.mrc' -print | sort`
-    do
-    fname=`basename $file`
-    froot=`basename $file .mrc`
-    dir=`dirname $file`
-    delfname=$froot.del
-    delfile=$dir/$delfname
-    output=$RESULTSDIR/results_$froot
-    output_dev=$RESULTSDIR/results_dev_$froot
-    output_merge=$RESULTSDIR/results_merge_$froot
-
-    #check whether the mrc file has already been processed
-    if [ -e "$PROCESSEDDIR/$fname" ] ; then
-            cmp -s $file $PROCESSEDDIR/$fname
-        if [ "$?" -eq 1 ] ; then
-            # file already exists in processed directory but its different
-                # than the new incoming one, make backup and index new file
-            mv $PROCESSEDDIR/$fname $PROCESSEDDIR/$fname-`date +%Y%m%e`
-            cp $file $PROCESSEDDIR
-            indexfile $file > $output 2>&1
-            indexfile blacklight_dev_config.properties $file > $output_dev 2>&1
-            let "num += 1"
-        else
-            # incoming file already processed, just delete it
-            rm $file
-        fi
-    else
-        # file doesnt exist in processed dir, index it normally
-        cp $file $PROCESSEDDIR
-        indexfile $file  > $output 2>&1
-        indexfile blacklight_dev_config.properties $file > $output_dev 2>&1
-        let "num += 1"
-    fi
-
-    #check whether the del file has already been processed
-    if [ -e "$delfile" ] ; then
-        if [ -e "$PROCESSEDDIR/$delfname" ] ; then
-                cmp -s $delfile $PROCESSEDDIR/$delfname
-            if [ "$?" -eq 1 ] ; then
-                # file already exists in processed directory but its different
-                    # than the new incoming one, make backup and index new file
-                mv $PROCESSEDDIR/$delfname $PROCESSEDDIR/$delfname-`date +%Y%m%e`
-                cp $delfile $PROCESSEDDIR
-                indexfile NONE $delfile >> $output 2>&1
-                indexfile blacklight_dev_config.properties NONE $delfile >> $output_dev 2>&1
-                let "num += 1"
-            else
-                # incoming file already processed, just delete it
-                rm $delfile
-            fi
-        else
-            # file doesnt exist in processed dir, index it normally
-            cp $delfile $PROCESSEDDIR
-            indexfile NONE $delfile >> $output 2>&1
-            indexfile blacklight_dev_config.properties NONE $delfile >> $output_dev 2>&1
-            let "num += 1"
-        fi
-    else
-        # no .del file exists corresponding to the .mrc file found in the incoming directory
-        # do nothing, be happy
-        nodelfile=true
-    fi
-
-    done
-
-# now move auth files to another directory
+# first move auth files to another directory
 for file in `find $INPUTDIR -name '*.auth*' -print`
     do
     mv $file $DATADIR/not_processed
     done
 
-# run booklist daily update
-runbooklist daily > $RESULTSDIR/results_booklists_$froot 2>&1
-runbooklist daily blacklight_dev_config.properties > $RESULTSDIR/results_booklists_$froot 2>&1
-
-# if any files were indexed, optimize solr index
-if [ "$num" -ne 0 ] 
-    then
-    optimizesolr > $RESULTSDIR/results_optimize 2>&1
-    optimizesolr blacklight_dev_config.properties > $RESULTSDIR/results_dev_optimize 2>&1
-fi
-
-
-PROCESSED_SORTED_DIR=$DATADIR/processed_sorted 
-PROCESSED_COMBINED_DIR=$DATADIR/processed_combined
-
-for file in `find $INPUTDIR -name '*.mrc' -print | sort`
+for dir in prod dev multicore merge
     do
-    fname=`basename $file`
-    froot=`basename $file .mrc`
-    dir=`dirname $file`
-    delfname=$froot.del
-    delfile=$dir/$delfname
-    output_merge=$RESULTSDIR/results_merge_$froot
-    if [ ! -f "$PROCESSED_SORTED_DIR/$fname" ] ; then
-        marcsort $file > $PROCESSED_SORTED_DIR/$fname 2> $output_merge
-        sort -n $delfile > $PROCESSED_SORTED_DIR/$delfname
-        marcupdate $PROCESSED_COMBINED_DIR/all_mods_00.mrc $PROCESSED_SORTED_DIR/$fname > $PROCESSED_COMBINED_DIR/all_mods_01.mrc
-        mv $PROCESSED_COMBINED_DIR/all_mods_01.mrc $PROCESSED_COMBINED_DIR/all_mods_00.mrc
-        marcupdate $PROCESSED_COMBINED_DIR/all_mods_00.del $PROCESSED_SORTED_DIR/$fname > $PROCESSED_COMBINED_DIR/all_mods_01.del
-        mv $PROCESSED_COMBINED_DIR/all_mods_01.del $PROCESSED_COMBINED_DIR/all_mods_00.del
-        process_full_dump $PROCESSED_SORTED_DIR/$fname >> $output_merge 2>&1
-        echo "Last File Merged Into full_dump: $PROCESSED_SORTED_DIR/$fname" >> $DATADIR/full_dump_updated/updates.txt
-    fi
+
+    mkdir $DATADIR/incoming_$dir 2> /dev/null
+    mkdir $DATADIR/processed_$dir 2> /dev/null
+    mkdir $DATADIR/results_$dir 2> /dev/null
+    cp $INPUTDIR/*.mrc $DATADIR/incoming_$dir
+    cp $INPUTDIR/*.del $DATADIR/incoming_$dir
 done
 
+update.index.job prod blacklight_config.properties
+update.index.job dev blacklight_dev_config.properties
+
+update.index.job multicore blacklight_multicore_config.properties
+update.multicore.job
+
+update.merge.job

@@ -1,0 +1,38 @@
+#!/bin/bash
+PATH=/usr/local/projects/solrmarc-2.1/dist/bin:$PATH
+export PATH
+num=0
+JAVA_HOME=/usr/java/latest/bin/java
+export JAVA_HOME
+
+DATADIR=/usr/local/projects/marc
+INPUTDIR=$DATADIR/incoming_merge
+RESULTSDIR=$DATADIR/results_merge
+
+
+PROCESSED_SORTED_DIR=$DATADIR/processed_sorted 
+PROCESSED_COMBINED_DIR=$DATADIR/processed_combined
+
+for file in `find $INPUTDIR -name '*.mrc' -print | sort`
+    do
+    fname=`basename $file`
+    froot=`basename $file .mrc`
+    dir=`dirname $file`
+    delfname=$froot.del
+    delfile=$dir/$delfname
+    output_merge=$RESULTSDIR/results_merge_$froot
+    if [ ! -f "$PROCESSED_SORTED_DIR/$fname" ] ; then
+        marcsort $file > $PROCESSED_SORTED_DIR/$fname 2> $output_merge
+        sort -n $delfile > $PROCESSED_SORTED_DIR/$delfname
+        marcupdate $PROCESSED_COMBINED_DIR/all_mods_00.mrc $PROCESSED_SORTED_DIR/$fname > $PROCESSED_COMBINED_DIR/all_mods_01.mrc
+        mv $PROCESSED_COMBINED_DIR/all_mods_01.mrc $PROCESSED_COMBINED_DIR/all_mods_00.mrc
+        marcupdate $PROCESSED_COMBINED_DIR/all_mods_00.del $PROCESSED_SORTED_DIR/$fname > $PROCESSED_COMBINED_DIR/all_mods_01.del
+        mv $PROCESSED_COMBINED_DIR/all_mods_01.del $PROCESSED_COMBINED_DIR/all_mods_00.del
+        process_full_dump $PROCESSED_SORTED_DIR/$fname >> $output_merge 2>&1
+        echo "Last File Merged Into full_dump: $PROCESSED_SORTED_DIR/$fname" >> $DATADIR/full_dump_updated/updates.txt
+    else
+       # already processed file, just delete it
+       rm $file
+    fi
+done
+
