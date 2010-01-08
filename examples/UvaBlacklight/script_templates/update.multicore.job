@@ -28,9 +28,6 @@ do
     cp $file.tmp $file
     rm $file.tmp
 done
-for file in $solrnewdir.tmp/*/.nfs*
-do
-#   echo $file
-    rm $file
-done
+rm $solrnewdir.tmp/*/.nfs*
+
 mv $solrnewdir.tmp $solrnewdir
