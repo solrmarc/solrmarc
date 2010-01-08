@@ -1,0 +1,31 @@
+#!/bin/bash
+PATH=/usr/local/projects/solrmarc-2.1/dist/bin:$PATH
+export PATH
+num=0
+JAVA_HOME=/usr/java/latest/bin/java
+export JAVA_HOME
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+if ! [ -e $scriptdir/SolrMarc.jar ] 
+then
+  scriptdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
+
+solrhome=`cat $scriptdir/blacklight_multicore_config.properties | egrep solr.path | sed -e's/.* = //'`
+solrcore=`cat $scriptdir/blacklight_multicore_config.properties | egrep solr.core.name | sed -e's/.* = //'`
+
+solrnewcore=`echo $solrcore | sed -e's/_.*//'`_`date +%Y%m%d`
+
+solrdir=$solrhome/$solrcore
+solrnewdir=$solrhome/$solrnewcore
+
+# copy entire index via creating hard links, then turn segment files from hardlinks to copies
+cp -lR $solrdir $solrnewdir.tmp
+for file in $solrnewdir/*/seg*
+do
+#   echo $file
+    mv $file $file.tmp
+    cp $file.tmp $file
+    rm $file.tmp
+done
+mv $solrnewdir.tmp $solrnewdir
