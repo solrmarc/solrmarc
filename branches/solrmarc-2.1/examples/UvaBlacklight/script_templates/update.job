@@ -33,3 +33,7 @@ update.index.job multicore blacklight_multicore_config.properties
 update.multicore.job
 
 update.merge.job
+
+rm $INPUTDIR/*.mrc
+rm $INPUTDIR/*.del
+

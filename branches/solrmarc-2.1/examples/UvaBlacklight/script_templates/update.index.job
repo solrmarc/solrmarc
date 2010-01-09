@@ -56,7 +56,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
                 let "num += 1"
             else
                 # incoming file already processed, just delete it
-                rm $file
+                rm $delfile
             fi
         else
             # file doesnt exist in processed dir, index it normally
