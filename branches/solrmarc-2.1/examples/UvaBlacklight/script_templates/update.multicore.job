@@ -6,13 +6,15 @@ JAVA_HOME=/usr/java/latest/bin/java
 export JAVA_HOME
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
-if ! [ -e $scriptdir/SolrMarc.jar ] 
+solrmarcdir=$scriptdir
+if ! [ -e $solrmarcdir/SolrMarc.jar ] 
 then
-  scriptdir=$( (cd -P $(dirname $0)/.. && pwd) )
+  solrmarcdir=$( (cd -P $(dirname $0)/.. && pwd) )
 fi
 
-solrhome=`cat $scriptdir/blacklight_multicore_config.properties | egrep solr.path | sed -e's/.* = //'`
-solrcore=`cat $scriptdir/blacklight_multicore_config.properties | egrep solr.core.name | sed -e's/.* = //'`
+solrhome=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.path | sed -e's/.* = //'`
+solrcore=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.core.name | sed -e's/.* = //'`
+solrurlstart=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.hosturl | sed -e's:/[A-Za-z0-9_]*$::'`
 
 solrnewcore=`echo $solrcore | sed -e's/_.*//'`_`date +%Y%m%d`
 
@@ -31,3 +33,5 @@ done
 rm $solrnewdir.tmp/*/.nfs* 2> /dev/null
 
 mv $solrnewdir.tmp $solrnewdir
+
+curl "$solrurlstart/admin/multicore?action=CREATE&name=blacklight_search&instanceDir=$solrnewcore" > /dev/null 2>1
