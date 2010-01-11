@@ -33,6 +33,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
     else
        # already processed file, just delete it
        rm $file
+       rm $delfile
     fi
 done
 
