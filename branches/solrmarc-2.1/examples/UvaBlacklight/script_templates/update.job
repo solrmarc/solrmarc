@@ -43,7 +43,7 @@ update.merge.job
 
 for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
 do
-     rm $file
+     mv $file $DATADIR/processed
 done
 
 
