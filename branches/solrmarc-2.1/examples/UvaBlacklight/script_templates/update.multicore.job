@@ -14,7 +14,7 @@ fi
 
 solrhome=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.path | sed -e's/.* = //'`
 solrcore=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.core.name | sed -e's/.* = //'`
-solrurlstart=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.hosturl | sed -e's:/[A-Za-z0-9_]*$::'`
+solrurlstart=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.hosturl | sed -e's/.* = //' -e's:/[A-Za-z0-9_]*$::'`
 
 solrnewcore=`echo $solrcore | sed -e's/_.*//'`_`date +%Y%m%d`
 
