@@ -107,6 +107,15 @@
             <fileset dir="${site.build.dir}" includes="*.jar" />
             <fileset dir="${site.base.dir}" includes="*_index.properties" />
         </copy>
+        <if >
+            <available file="${site.build.dir}/${custom.jar.name}.jar" />
+            <then>
+                <property name="custom.jar.name.jar" value="${custom.jar.name}.jar" />
+            </then>
+            <else>
+                <property name="custom.jar.name.jar" value="" />
+            </else>
+        </if>
         <copy todir="${dist.path}" >
             <fileset dir="${site.base.dir}" includes="*_config.properties" />
             <filterchain>
