@@ -12,18 +12,25 @@ RESULTSDIR=$DATADIR/results
 
 # first move auth files to another directory
 for file in `find $INPUTDIR -name '*.auth*' -print`
-    do
+do
     mv $file $DATADIR/not_processed
-    done
+done
 
+#make sure directories exist
 for dir in prod dev multicore merge
-    do
-
+do
     mkdir $DATADIR/incoming_$dir 2> /dev/null
     mkdir $DATADIR/processed_$dir 2> /dev/null
     mkdir $DATADIR/results_$dir 2> /dev/null
-    cp $INPUTDIR/*.mrc $DATADIR/incoming_$dir
-    cp $INPUTDIR/*.del $DATADIR/incoming_$dir
+done
+
+for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
+do
+     fname=`basename $file`
+     for dir in prod dev multicore merge
+     do
+        ln $file $DATADIR/incoming_$dir/$fname
+     done
 done
 
 update.index.job prod blacklight_config.properties
@@ -34,6 +41,9 @@ update.multicore.job
 
 update.merge.job
 
-rm $INPUTDIR/*.mrc
-rm $INPUTDIR/*.del
+for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
+do
+     rm $file
+done
+
 
