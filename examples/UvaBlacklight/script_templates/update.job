@@ -41,9 +41,28 @@ update.multicore.job
 
 update.merge.job
 
-for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
+for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -print | sort`
 do
-     mv $file $DATADIR/processed
+#     echo $file
+     fname=`basename $file`
+     found=1
+     for dir in prod dev multicore sorted
+     do     
+         if [ ! -f $DATADIR/processed_$dir/$fname ] 
+         then
+#             echo "not found in dir $dir"
+             found=0
+         fi
+     done
+     if [ $found == "1" ]
+     then
+#         echo " moving $file to $DATADIR/processed"
+         cp $file $DATADIR/processed
+     fi
 done
 
+for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
+do
+    rm $file
+done
 
