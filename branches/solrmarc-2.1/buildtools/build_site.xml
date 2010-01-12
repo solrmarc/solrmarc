@@ -116,7 +116,7 @@
                 <property name="custom.jar.name.jar" value="" />
             </else>
         </if>
-        <copy todir="${dist.path}" >
+        <copy todir="${dist.path}" overwrite="true" >
             <fileset dir="${site.base.dir}" includes="*_config.properties" />
             <filterchain>
                   <expandproperties />
