@@ -8,6 +8,7 @@ import java.util.*;
 public class SolrCoreProxy implements SolrProxy
 {
     Object solrCore = null;
+    Object genericCoreContainerObject = null;
     Object updateHandler = null;
     Object deleteUpdateCommand = null;
     Object commitUpdateCommand = null;
@@ -15,9 +16,10 @@ public class SolrCoreProxy implements SolrProxy
     Object documentBuilder = null;
     Class<?> solrExceptionClass = null;
     
-    public SolrCoreProxy(Object solrCore)
+    public SolrCoreProxy(Object solrCore, Object genericCoreContainerObject)
     {
         this.solrCore = solrCore;
+        this.genericCoreContainerObject = genericCoreContainerObject;
     }
     
     /** return the solrCore as an Object.  Public b/c it's used by test code */
@@ -204,6 +206,11 @@ public class SolrCoreProxy implements SolrProxy
         {
             Method closeMethod = solrCore.getClass().getMethod("close");
             closeMethod.invoke(solrCore);
+            if (genericCoreContainerObject != null)
+            {
+                Method shutdownMethod = genericCoreContainerObject.getClass().getMethod("shutdown");
+                shutdownMethod.invoke(genericCoreContainerObject);
+            }
         }
         catch (Exception e)
         {
