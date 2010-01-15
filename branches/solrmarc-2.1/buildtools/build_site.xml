@@ -290,7 +290,7 @@
                     <available filepath="${test.data.dir}" file="${indextest.data.file}" type="file" />
                     <then>
                         <junit showoutput="yes" printsummary="yes" dir="${dist.path}" fork="yes" forkmode="once" >
-                            <formatter type="plain" usefile="no" />
+                            <formatter type="xml" usefile="yes" />
                 
                             <classpath>
                                 <path refid="test.run.classpath.jars" />
@@ -346,7 +346,7 @@
             </and>
             <then>
                 <junit showoutput="yes" printsummary="yes" fork="yes" forkmode="once" dir="${dist.path}">
-                    <formatter type="plain" usefile="no" />
+                    <formatter type="xml" usefile="yes" />
         
                     <classpath>
                         <path refid="test.run.classpath.jars" />
