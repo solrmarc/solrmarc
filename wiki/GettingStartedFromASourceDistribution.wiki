@@ -3,14 +3,7 @@
 
 === About This Guide ===
 
-This getting started guide describes !SolrMarc, defines its software dependencies, steps the user through configuring and building the importer program, and gives basic information about some helpful scripts that are included in the !SolrMarc program’s tools.
-
-=== About !SolrMarc ===
-
-SolrMarc is a utility that reads in MaRC records from a file, extracts information from various fields as specified in an indexing configuration script, and adds that information to a specified Apache Solr index.
-
-!SolrMarc provides a rich set of techniques for mapping the tags, fields, and subfields contained in the MARC record to the fields you wish to include in your Solr index record, but it also allows the creation of custom indexing functions if you cannot achieve what you require using the predefined mapping techniques.
-
+This getting started guide describes !SolrMarc, defines its software dependencies, steps the user through configuring and building the importer program, and gives basic 
 Currently, !SolrMarc is configured to work with:
   * Blacklight (http://projectblacklight.org/) -- see !SolrMarc BlacklightHowTo 
   * !VuFind (http://vufind.org/) -- see !SolrMarc VufindHowTo
@@ -94,29 +87,29 @@ If you specify ‘none’ then you will have to answer a few more questions befo
 The questions it will ask are as follows:  (Note that for all of them you can accept the default responses by hitting return)
 
 ===== Enter prefix for site-specific config and index properties file names: =====
-(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix) 
-default response: myprefix
+      (ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix) 
+      default response: myprefix
 
 ===== Enter java heap size to use in generated scripts for running site-specific SolrMarc Indexer: =====
-default response: -Xmx256m
+      default response: -Xmx256m
 
-While 256MB is sufficient to load the demo, a real-world indexing job requires much more. The developer uses 1024MB on his desktop and 2048MB on the server where the indexing job will include millions of records.
+      While 256MB is sufficient to load the demo, a real-world indexing job requires much more. The developer uses 1024MB on his desktop and 2048MB on the server where the indexing job will include millions of records.
 
 ===== Enter encoding of MARC records: =====
       MARC8 - Longstanding standard encoding scheme used by U.S. libraries
       UNIMARC - Encoding scheme used in many places in Europe
       UTF8 - Unicode character encoding scheme, used in some newer systems
       BESTGUESS - You want the program to try to determine the encoding
- default response: MARC8
+      default response: MARC8
 
-Note that if you have a pretty good guess as to the encoding that is used in the records you will be processing, SolrMarc can run faster.  If some records are in MARC8 while others will be in UTF8, SolrMarc will be able to handle them, since SolrMarc translates all records to UTF-8 and for the records that are already in UTF-8, the translation step will be skipped.   Also note that the BESTGUESS option will try to make a determination as to the character encoding used on a record-by-record basis, however since many records do not have large numbers of "special characters" (ie. ones outside the basic 7-bit ascii range) the information available for deciding the correct encoding can be minimal.) 
+      Note that if you have a pretty good guess as to the encoding that is used in the records you will be processing, SolrMarc can run faster.  If some records are in MARC8 while others will be in UTF8, SolrMarc will be able to handle them, since SolrMarc translates all records to UTF-8 and for the records that are already in UTF-8, the translation step will be skipped.   Also note that the BESTGUESS option will try to make a determination as to the character encoding used on a record-by-record basis, however since many records do not have large numbers of "special characters" (ie. ones outside the basic 7-bit ascii range) the information available for deciding the correct encoding can be minimal.) 
 
 ===== Do you want to use the 'builtin' solr configuration, jetty configuration and solr.war file or do you want to use a 'custom' one you have already installed. =====
-     Note: You can start from the builtin version and modify to suit your needs. 
-     Or you can change the one used later by modifying the build.properties file.
-default response: builtin
+      Note: You can start from the builtin version and modify to suit your needs. 
+      Or you can change the one used later by modifying the build.properties file.
+      default response: builtin
 
-If you answer "custom", you will be asked for the URL of where your Solr server will be running, the full path location of your solr home directory, and the full path of the solr.war file that the Solr server uses for running solr.   
+      If you answer "custom", you will be asked for the URL of where your Solr server will be running, the full path location of your solr home directory, and the full path of the solr.war file that the Solr server uses for running solr.   
 
 Note one option that you can use if the Solr server will be running on a different machine than where you intend to run SolrMarc, and you want to remotely access that running Solr server, enter the URL of the Solr server for the first response, and then enter "REMOTE" for the question: "Enter full path of Solr home directory"  and enter an empty string for the question: "Enter full path of where solr.war file is located (include solr.war at end)"
 
