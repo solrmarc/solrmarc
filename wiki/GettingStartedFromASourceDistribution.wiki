@@ -15,7 +15,7 @@ There are three different ways in which you can obtain/create a working SolrMarc
 
 The process you will then take for each of the cases to create a SolrMarc installation which is customized for your needs is similar.  The details of where edits and additions should be made in some cases are different for each of these different methods, but the steps that you have to take are largely the same.
 
-If you do not anticipate a need for writing your own custom indexing functions, the third of the options, the binary distribution of !SolrMarc,is a simpler option. The binary distribution is dilivered as a single large .zip or .tar file.  When unpacked this distribution will create a directory containing a large SolrMarc.jar file, a number of .properties files, and a couple of sub-directories.
+If you do not anticipate a need for writing your own custom indexing functions, the third of the options, the binary distribution of !SolrMarc, is a simpler option. The binary distribution is delivered as a single large .zip or .tar file.  When unpacked this distribution will create a directory containing a large SolrMarc.jar file, a number of .properties files, and a couple of sub-directories.
 
 For information on using binary distributions, see SolrMarcBinaryDistribution
 
