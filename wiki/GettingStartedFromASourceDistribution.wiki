@@ -67,13 +67,14 @@ normal marc data;  data that follows the marc bibliographic record standard.  It
 
 First either download the software via a subversion checkout:
 
-svn checkout http://solrmarc.googlecode.com/svn/branches/solrmarc-2.1 solrmarc
-or by downloading the distribution (SolrMarc_Distribution.tar.gz) from the downloads page:
+{{{svn checkout http://solrmarc.googlecode.com/svn/branches/solrmarc-2.1 solrmarc}}}
+
+or by downloading the distribution (!SolrMarc_Distribution.tar.gz) from the downloads page:
 http://code.google.com/p/solrmarc/downloads/list
 
 Next, at the command prompt, run 
 
-ant init
+{{{ant init}}}
 
 The initialization process will ask which of the examples should be used to base your local site on:
 !GenericBlacklight,  !GenericVuFind,  !stanfordBlacklight,  !UvaBlacklight,   or  none.
