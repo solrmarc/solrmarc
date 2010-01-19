@@ -70,7 +70,7 @@ normal marc data;  data that follows the marc bibliographic record standard.  It
 
    _cat marcfile.withdifferentsuffix | indexfile _
 
-==== Getting Started from a Full Source distribution, or a SVN checkout ====
+=== Getting Started from a Full Source distribution, or a SVN checkout ===
 
 First either download the software via a subversion checkout:
 
@@ -83,25 +83,26 @@ Next, at the command prompt, run
 ant init
 
 The initialization process will ask which of the examples should be used to base your local site on:
-GenericBlacklight,  GenericVuFind,  stanfordBlacklight,  UvaBlacklight,   or  none.
+!GenericBlacklight,  !GenericVuFind,  !stanfordBlacklight,  !UvaBlacklight,   or  none.
 
 If you select one of the provided examples, all of the necessary files will be copied to the local_build directory, and you will then be ready to build a working copy of SolrMarc.   You can skip forward to the section on {{{Customizing SolrMarc built from a Full Source distribution, or a SVN checkout}}}
 
-=== Installation Questions ===
+==== Installation Questions ====
 
 If you specify ‘none’ then you will have to answer a few more questions before you will be able to build SolrMarc, and even then you will have to extensively modify the index.properties files before your SolrMarc will be able to produce a useful solr index.   (Since the default index specification file is simply a placeholder, which specifies the record id and the title as the only fields that are added to the solr index.)
 
 The questions it will ask are as follows:  (Note that for all of them you can accept the default responses by hitting return)
 
-- Enter prefix for site-specific config and index properties file names:
+===== Enter prefix for site-specific config and index properties file names: =====
 (ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix) 
 default response: myprefix
 
-- Enter java heap size to use in generated scripts for running site-specific SolrMarc Indexer: 
+===== Enter java heap size to use in generated scripts for running site-specific SolrMarc Indexer: =====
 default response: -Xmx256m
 
 While 256MB is sufficient to load the demo, a real-world indexing job requires much more. The developer uses 1024MB on his desktop and 2048MB on the server where the indexing job will include millions of records.
-- Enter encoding of MARC records:
+
+===== Enter encoding of MARC records: =====
       MARC8 - Longstanding standard encoding scheme used by U.S. libraries
       UNIMARC - Encoding scheme used in many places in Europe
       UTF8 - Unicode character encoding scheme, used in some newer systems
@@ -110,8 +111,7 @@ While 256MB is sufficient to load the demo, a real-world indexing job requires m
 
 Note that if you have a pretty good guess as to the encoding that is used in the records you will be processing, SolrMarc can run faster.  If some records are in MARC8 while others will be in UTF8, SolrMarc will be able to handle them, since SolrMarc translates all records to UTF-8 and for the records that are already in UTF-8, the translation step will be skipped.   Also note that the BESTGUESS option will try to make a determination as to the character encoding used on a record-by-record basis, however since many records do not have large numbers of "special characters" (ie. ones outside the basic 7-bit ascii range) the information available for deciding the correct encoding can be minimal.) 
 
-- Do you want to use the 'builtin' solr configuration, jetty configuration and solr.war file
-     or do you want to use a 'custom' one you have already installed.
+===== Do you want to use the 'builtin' solr configuration, jetty configuration and solr.war file or do you want to use a 'custom' one you have already installed. =====
      Note: You can start from the builtin version and modify to suit your needs. 
      Or you can change the one used later by modifying the build.properties file.
 default response: builtin
@@ -122,21 +122,28 @@ Note one option that you can use if the Solr server will be running on a differe
 
 These custom settings are now written out to a build.properties file, in the local_build directory, and they will be used when you run the "ant dist" target to correctly fill in values in the configuration files.
 
-==== Customizing SolrMarc built from a Full Source distribution, or a SVN checkout or customizing SolrMarc based on a pre-built Source distribution. ====
+=== Customizing SolrMarc built from a Full Source distribution, or a SVN checkout or customizing SolrMarc based on a pre-built Source distribution. ===
 
 If you look in the "local_build" directory after you complete the "ant init" step, you will see a number of directories, a couple of properties files, and a build.xml file.  These files and directories are explained below.   At this point you will be at virtually the same point that you would be if you had merely obtained a pre-built source distribution.
 
 At this point you can modify the files in the local_build directory to customize your installation.  
--You can modify the xxxx_config.properties file that specifies how the overall SolrMarc program will run, how MARC files should be processed as they are read, what file (or files) defines the indexing specification to use, whether Marc processing errors should be added to the Solr index.  
+
+-You can modify the xxxx_config.properties file that specifies how the overall SolrMarc program will run, how MARC files should be processed as they are read, what file (or files) defines the indexing specification to use, whether Marc processing errors should be added to the Solr index. 
+ 
 -You can modify the xxxx_index.properties files to change what fields are added to the index and where and how the data for those fields is extracted. (Note that any fields added to this file _must_ match either a field declaration in the schema.xml file that is a part of the solr configuration or match a dynamic field declaration in that file.)
+
 -You can add custom indexing java routines in the src directory, and reference them in the xxxx_index.properties file.
+
 -You can add custom java-like indexing scripts in the index_scripts directory,  and reference them in the xxxx_index.properties file.
+
 -You can add or modify translation maps that map values found in the MARC records to more-readable values.
+
 -You can change entries found in the build.properties file that are copied into the xxxx_config.properties file or into the bash script or batch files from the script_templates directory.
+
 -You can modify the solr configuration, which can be done by editing files or adding new files in the solrConf directory, or by going directly to the test/solr directory and adding or editing files there.  
+
 -You can add tests to the test/data/indextest.txt file so that you can help ensure that as you make any of the above changes you don’t accidently break some other aspect of your indexing configuration.  
 
-
+==== Building Runnable SolrMarc after Changing Configuration ====
 After you have made the desired changes, you should run "ant dist" which will copy all the necessary files to the distribution directory.  You can change to that directory, or merely add dist/bin to your executable path, and run the indexing utilities (described in a later section) from any command prompt.
 Note: you should refrain from editing files in the distribution directory directly when you are working from a source distribution, since those changes could be overwritten the next time you run "ant dist".
-
