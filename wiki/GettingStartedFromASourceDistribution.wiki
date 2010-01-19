@@ -9,9 +9,9 @@ Currently, !SolrMarc is configured to work with:
   * !VuFind (http://vufind.org/) -- see !SolrMarc VufindHowTo
 
 There are three different ways in which you can obtain/create a working SolrMarc:  
-1) Start from a Full Source distribution from the googlecode download page or a full SVN checkout
-2) Start from a Pre-built source distribution from the googlecode download page.
-3) Start from a Pre-built binary distribution from the googlecode download page.
+  1) Start from a Full Source distribution from the googlecode download page or a full SVN checkout
+  2) Start from a Pre-built source distribution from the googlecode download page.
+  3) Start from a Pre-built binary distribution from the googlecode download page.
 
 The process you will then take for each of the cases to create a SolrMarc installation which is customized for your needs is similar.  The details of where edits and additions should be made in some cases are different for each of these different methods, but the steps that you have to take are largely the same.
 
