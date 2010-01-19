@@ -32,7 +32,7 @@ The rest of this guide will assume that you have opted for one of the source dis
 <br />
 === Software Dependencies ===
 
-!SolrMarc requires the java development kit (JDK) version 1.5 or newer and ant version 1.7 or newer.
+Building !SolrMarc from source requires the java development kit (JDK) version 1.5 or newer and ant version 1.7 or newer.
 
 ==== Java ====
 
