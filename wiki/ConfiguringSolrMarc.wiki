@@ -1,4 +1,4 @@
-a#summary This page will guide you through configuring and using SolrMarc
+#summary This page will guide you through configuring and using SolrMarc
 <wiki:toc max_depth="5" />
 
 <br />
