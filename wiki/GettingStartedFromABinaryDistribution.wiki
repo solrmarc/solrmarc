@@ -1,6 +1,4 @@
-#summary Getting Started from a Pre-Built Binary Distribution
-
-#summary Getting started with the binary distribution of SolrMarc.
+#summary Getting Started from a Pre-Built Binary Distribution of SolrMarc
 
 === About This Document ===
 
