@@ -54,7 +54,7 @@ To download the proper version of ant, go to http://ant.apache.org/
 
 !SolrMarc includes a runnable copy of jetty and a solr.war file taken from the recent Solr 1.4 release.  These are used internally, by default, for testing, and _can_ be used to deploy and run the solr index, or you can point !SolrMarc at an already installed copy of Solr.
 
-To download Solr, go to http://lucene.apache.org/solr/
+If you decide you want to download and install a separate installation of Solr, go to http://lucene.apache.org/solr/
 
 <br />
 
