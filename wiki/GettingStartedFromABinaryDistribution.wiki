@@ -18,7 +18,7 @@ Currently, !SolrMarc is configured to work with:
   * [VufindHowTo Vufind]
 
 
-NOTE: If you anticipate a need for custom indexing functions, you will need to download the !SolrMarc source code and build the package using the instructions from the [GettingStartedFromASourceDistribution] document on this wiki.  However with the recent addition of support for custom indexing scripts, you can now accomplish anything you can do with a custom indexing function, by writing a custom script that will be interrpreted at runtime.  
+NOTE: If you anticipate a need for custom indexing functions, you will need to download the !SolrMarc source code and build the package using the instructions from the [GettingStartedFromASourceDistribution] document on this wiki.  However with the recent addition of support for custom indexing scripts, you can now accomplish anything you can do with a custom indexing function, by writing a custom script that will be interpreted at runtime.  
 
 <br />
 === Software Dependencies ===
