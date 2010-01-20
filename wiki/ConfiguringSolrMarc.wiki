@@ -2,26 +2,26 @@ a#summary This page will guide you through configuring and using SolrMarc
 <wiki:toc max_depth="5" />
 
 <br />
-== About This Guide ==
+= About This Guide =
 
 This configuring SolrMarc guide explains the setup of the two configuration files that control the operation of SolrMarc and gives examples of custom indexing routines.
 
 <br />
 
-== About !SolrMarc ==
+= About !SolrMarc =
 
 A Configurable Java-based program for indexing MARC records into a Solr index.
 
-The SolrMarc program reads in MARC records stored in standard binary format (ISO 2709) and uses a configurable and customizable script for extracting values from the fields and sub-fields of the MARC record to build an index entry for adding to Solr.  Additionally, so that it can run faster, rather than building the records and POSTing them to a Solr search engine, this program directly writes to the index directory of the Solr search engine.
+The !SolrMarc program reads in MARC records stored in standard binary format (ISO 2709) and uses a configurable and customizable script for extracting values from the fields and sub-fields of the MARC record to build an index entry for adding to Solr.  Additionally, so that it can run faster, rather than building the records and POSTing them to a Solr search engine, this program directly writes to the index directory of the Solr search engine.
 
 <br />
 
-== config.properties File ==
+= config.properties File =
 
 The main configuration of the program is currently done via a properties file that is created and stored in the jar file produced by the build process. The name of this file can be passed in as the first parameter on the command line, however you can declare one particular config.properties file to be the default.  Then if a command doesn't specify which config.properties file to use, that default one will be used.  An example config.properties file is below:
 
 {{{
-# Properties for the SolrMarc import program
+# Properties for the !SolrMarc import program
 #  for more documentation, see 
 #  http://code.google.com/p/solrmarc/wiki/ConfiguringSolrMarc
 
@@ -85,7 +85,7 @@ marc.include_errors = false
 === config.properties File Entries ===
  * *solrmarc.solr.war.path: * Must point to either a war file for the version of Solr that you want to use, or to a directory of jar files extracted from a Solr war file.  If this is not provided, SolrMarc can only work by communicating over HTTP with a running Solr server.
 
- * *solrmarc.custom.jar.path: * Name of Jar containing custom java code to use in indexing. If solr.indexer below is defined (other than the default value of org.solrmarc.index.SolrIndexer) you MUST define this value to be the Jar containing the class listed there. 
+ * *solrmarc.custom.jar.path: * Name of Jar containing custom java code to use in indexing. If solr.indexer below is defined (other than the default value of !org.solrmarc.index.SolrIndexer) you MUST define this value to be the Jar containing the class listed there. 
 
  * *solr.path:* lists the full path to the Solr home directory, which should contain the directories {{{etc}}}, {{{conf}}} and {{{data}}}.  The directory {{{conf}}} should contain a file named _schema.xml_ which describes the different indexing fields that the instance of the Solr search engine is expecting, and the data directory is where the Solr index files will be placed. Note that if the special value of {{{REMOTE}}} is used here, SolrMarc will use the value for solr.hosturl (described below) and send updates directly to that Solr server over a HTTP connection.
 
@@ -95,7 +95,7 @@ marc.include_errors = false
 
  * *solr.indexer.properties:* lists the name of the properties file that defines the mapping from the MARC record fields and sub-fields to the Solr index entries. For details of how this mapping is done, please see below.  Note that multiple property files can be listed here separated by commas. Index specification entries found in the second (or subesequent) file, either add to the Index specification of the first file, or override entries found there.
  
- * *solr.indexer:* (optional); specifies the name of a custom indexing class which defines any custom routines for extracting and mapping data for a particular Solr index field. These custom routines will only be needed in cases where values from several different MARC fields and sub-fields need to be consulted to determine the value to add to the Solr index field. Several examples of these custom indexing routines are given below. If, however, you can handle all of the necessary MARC field-to-Solr index field mappings using the available specification language, you do not need to define a value for this entry, and the default SolrIndexer class will be used.
+ * *solr.indexer:* (optional); specifies the name of a custom indexing class which defines any custom routines for extracting and mapping data for a particular Solr index field. These custom routines will only be needed in cases where values from several different MARC fields and sub-fields need to be consulted to determine the value to add to the Solr index field. Several examples of these custom indexing routines are given below. If, however, you can handle all of the necessary MARC field-to-Solr index field mappings using the available specification language, you do not need to define a value for this entry, and the default !SolrIndexer class will be used.
 
  * *solr.hosturl:* Specifies the URL of a currently running Solr search engine that is referencing the same index data that is specified in the {{{solr.path}}}, entry.  If this value is given, when the indexing process completes, this indexing program will send a signal to the currently running Solr search engine, which will cause it to read the newly modified index files. This is primarily a convenience function, to avoid having to stop and restart the running Solr search engine. If no search engine is running at the URL specified, the program will quietly proceed along it way, with the understanding that when that search engine is eventually restarted it will read in the new index data anyway.
 
@@ -123,11 +123,11 @@ Lastly, there are several special purpose entries that will not be used in gener
 
  * *marc.verbose:* a boolean value. If it is set to true, instructs the program to print out the entire MARC record as it is read in, followed by the entire index record that will be sent to Solr.
 
- * *marc.include_if_present* and *marc.include_if_missing:* used for reprocessing records that have already been indexed, if a new index field is added.  They are only useful when the newly added field draws its information from fields that only occur in a small subset of records. For example, in the Indexer configuration file shown below, the following field specification:<br><br>   {{{instrument_facet = 048m[0-1], instrument_map}}}<br> specifies that the information should be found in the 048m field of the MARC record. This was a typo, it should have read 048a, therefore no index records were created with a value for {{{instrument_facet}}}.  To fix it, rather than re-index all of our records, I was able to set {{{marc.include_if_present = 048a}}}  which specifies that only those records that have one or more 048a fields will be re-indexed, the rest will be skipped (which is fine since the indexed record would be the same in any case.)  *Note:* Rather than setting these entries, you should use the {{{filterrecords}}} script which internally uses these settings to operate as a marc-based-grep program.
+ * *marc.include_if_present* and *marc.include_if_missing:* used for reprocessing records that have already been indexed, if a new index field is added.  They are only useful when the newly added field draws its information from fields that only occur in a small subset of records. For example, in the Indexer configuration file shown below, the following field specification:<br><br>   {{{instrument_facet = 048m[0-1], instrument_map}}}<br><br> specifies that the information should be found in the 048m field of the MARC record. This was a typo, it should have read 048a, therefore no index records were created with a value for {{{instrument_facet}}}.  To fix it, rather than re-index all of our records, I was able to set {{{marc.include_if_present = 048a}}}  which specifies that only those records that have one or more 048a fields will be re-indexed, the rest will be skipped (which is fine since the indexed record would be the same in any case.)<br>*Note:* Rather than setting these entries, you should use the {{{filterrecords}}} script which internally uses these settings to operate as a marc-based-grep program.
 
 <br />
 
-== index.properties File ==
+= index.properties File =
 
 The specification of which MARC fields and subfields are to be mapped to which Solr index fields is handled via an index.properties configuration file, the exact name of which is specified by the {{{solr.indexer.properties}}} entry in the config.properties file as described above. Since the field specification configuration file is a properties file, there are certain constraints of how the file is structured. Basically all properties files consist of a number of pairs of values separated by an equals sign. The key values represent the name of the field that will be added to the Solr document. All of these must either match a field definition that occurs in the _schema.xml_ file for the Solr search engine, or they must match a !dynamicField definition in that file.   
 
@@ -757,3 +757,108 @@ This custom function returns the beginning portion of the call number (extracted
 }}}
 
 This routine gathers all 035a fields in the MARC record, and scans through them looking for one labeled with the string _(OCoLC)_ indicating that it is an OCLC number, the routine strips out the string _(OCoLC)_ and returns the remaining string which is the OCLC number of the item in the MARC record. If no 035a field containing that label is found, no OCLC number is added to the Solr index record for this item.
+
+== Custom Indexing Scripts ==
+
+A new feature that was recently added to SolrMarc is that ability to have custom indexing scripts in addition to custom indexing routines.  The difference being that the scripts are interpreted at run-time, therefore no compiling is necessary.  So custom indexing scripts are a way to extend !SolrMarc even if you started from a Pre-built binary release, and are unable to compile custom indexing routines.  The syntax of the language [http://www.beanshell.org BeanShell] for creating a custom indexing script is _very_ similar to java.  If you obtain the java source code for a custom indexing routine from someone, and want to implement that routine in a !BeanShell script, it usually takes only about 5 minutes to manually convert.  
+
+The syntax that you need to use in your index.properties file to reference a custom indexing script is very similar to was described above for referencing a custom indexing routine.  You can reference a custom-created indexing script, by specifying {{{script}}} as the second value in the field specification entry as shown in the example below:
+
+ {{{callnumber = script(callnumber.bsh), getFullCallNumber}}}
+
+In this case the value in parentheses after _script_ specifies the name the !BeanShell script that contains the custom scripted indexing method that you want to use, and the value following the comma is the name of the scripted method to invoke to handle this particular bit of indexing.
+
+<br />
+
+=== Creating Custom Indexing Scripts===
+
+Note before you go to the work to create a new custom indexing script, see the above section on [#Pre-Defined_Custom_Indexing_Routines Pre-Defined Custom Indexing Routines], because there may already be a custom routine included in SolrMarc to accomplish what you want.  If you are still unable to accomplish what you want to do using any of the provided indexing techniques, there is the option to create your own custom indexing functions.
+
+Steps to create a custom indexing function:
+
+ # Create a !BeanShell script file in the index_scripts directory, defining one or more scripted custom indexing methods.
+ # Add {{{import}}} statements to the top of the !BeanShell script file referencing all of the non-builtin-java classes your scripts reference, such as classes from SolrMarc or from marc4j.
+ # Add a script-wide variable declaration of a variable named indexer: {{{org.solrmarc.index.SolrIndexer indexer = null;}}}  Note that the SolrIndexer code will set this value before script methods are called.
+
+For example, if you include the following index specification:
+
+ {{{callnumber = script(callnumber.bsh), getFullCallNumber}}}
+
+You will need to define a script named callnumber.bsh in the index_scripts directory as show below:
+
+ {{{
+import org.marc4j.marc.Record;
+
+// define the base level indexer so that its methods can be called from the script.
+// note that the SolrIndexer code will set this value before the script methods are called.
+org.solrmarc.index.SolrIndexer indexer = null;
+
+/**
+ * Extract the call number label from a record
+ * @param record
+ * @return Call number label
+ */
+public String getFullCallNumber(Record record) {
+
+    String val = indexer.getFirstFieldVal(record, "099ab:090ab:050ab");
+
+    if (val != null) 
+    {
+        return val.toUpperCase().replaceAll(" ", "");
+    } 
+    else 
+    {
+        return val;
+    }
+}
+
+}}}
+
+This example gets the first occurance of field 099, 090 or 050 and extract the a and b subfields from that field.  It then shifts the returned string to all uppercase letters and strips out spaces.
+
+Note that if you want to define more than one scripted custom indexing method, they *can* all be defined in the same BeanShell custom indexing script file, or they can be separated into several different BeanShell files.  Also note that all scripted custom indexing methods must return either a {{{String}}} or a {{{Set}}}, and must accept a parameter consisting of the {{{Record}}} being operated upon, followed by zero or more {{{String}}} parameters that can be used for greater control over the operation of the custom function. 
+
+<br />
+==== Example Scripted Custom Indexing Methods ====
+
+*_Create a facet based on the Dewey Decimal numbers found in the record_*  
+
+ {{{
+import org.marc4j.marc.Record;
+import org.solrmarc.tools.Utils;
+import org.solrmarc.tools.CallNumUtils;
+
+// define the base level indexer so that its methods can be called from the script.
+// note that the SolrIndexer code will set this value before the script methods are called.
+org.solrmarc.index.SolrIndexer indexer = null;
+
+/**
+ * returns the facet value for dewey hundreds digits, and dewey tens digits
+ * @param record
+ * @return Set of Strings containing facet value for dewey hundreds digits, and dewey tens digits
+ */
+Set getDeweyFacet(Record record, String propertiesMapName)
+{
+    LinkedHashSet resultSet = new LinkedHashSet();
+    Set values = indexer.getFieldList(record, "082a");
+    String mapName = indexer.loadTranslationMap(propertiesMapName);
+
+    for (String dewey : values)
+    {
+        if (! CallNumUtils.isValidDewey(dewey))  continue;
+        String hundreds = dewey.substring(0, 1) + "00";
+        String tens = dewey.substring(0,2) + "0";
+        String hundredsMapped = Utils.remap(hundreds, indexer.findMap(mapName), true);
+        String tensMapped = Utils.remap(tens, indexer.findMap(mapName), true);
+        if (hundredsMapped != null) resultSet.add(hundredsMapped);
+        if (tensMapped != null) resultSet.add(tensMapped);
+    }
+
+    return resultSet;
+}
+
+}}}
+
+Note that the above routine invokes a translation map before it returns its results (the name of the translation map to use is passed in as a parameter), you can either handle it this way in a scripted custom indexing routine, or return the values unmapped, and include a third parameter on the field specification entry as described above for the other index specifications.  In this case though since both the description of the Dewey decimal number at the hundreds level and at the tens level is desired, the mapping must be handled in this way.   Also note that if this !BeanShell scrip was written out to a file named dewey.bsh, the indexing specification to invoke this method would be:
+
+{{{ dewey_facet = script(dewey.bsh), getDeweyFacet(callnumber_map.properties) }}}
