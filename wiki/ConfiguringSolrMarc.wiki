@@ -816,7 +816,7 @@ public String getFullCallNumber(Record record) {
 
 This example gets the first occurance of field 099, 090 or 050 and extract the a and b subfields from that field.  It then shifts the returned string to all uppercase letters and strips out spaces.
 
-Note that if you want to define more than one scripted custom indexing method, they *can* all be defined in the same BeanShell custom indexing script file, or they can be separated into several different BeanShell files.  Also note that all scripted custom indexing methods must return either a {{{String}}} or a {{{Set}}}, and must accept a parameter consisting of the {{{Record}}} being operated upon, followed by zero or more {{{String}}} parameters that can be used for greater control over the operation of the custom function. 
+Note that if you want to define more than one scripted custom indexing method, they *can* all be defined in the same !BeanShell custom indexing script file, or they can be separated into several different !BeanShell files.  Also note that all scripted custom indexing methods must return either a {{{String}}} or a {{{Set}}}, and must accept a parameter consisting of the {{{Record}}} being operated upon, followed by zero or more {{{String}}} parameters that can be used for greater control over the operation of the custom function. 
 
 <br />
 ==== Example Scripted Custom Indexing Methods ====
