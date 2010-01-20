@@ -77,13 +77,12 @@ Next, at the command prompt, run
 {{{ant init}}}
 
 The initialization process will ask which of the examples should be used to base your local site on:
-!GenericBlacklight,  !GenericVuFind,  !stanfordBlacklight,  !UvaBlacklight,   or  none.
+!GenericBlacklight,  !GenericVuFind,  stanfordBlacklight,  !UvaBlacklight,   or  none.
 
-If you select one of the provided examples, all of the necessary files will be copied to the local_build directory, and you will then be ready to build a working copy of SolrMarc.   You can skip forward to the section on {{{Customizing SolrMarc built from a Full Source distribution, or a SVN checkout}}}
-
+If you select one of the provided examples, all of the necessary files will be copied to the local_build directory, and you will then be ready to build a working copy of SolrMarc.   You can skip forward to the section on [GettingStartedFromASourceDistribution#Customizing_SolrMarc_build_from_a_Full_Source_distribution,_or_a_SVN_checkout Customizing SolrMarc build from a Full Source distribution, or a SVN checkout]
 ==== Installation Questions ====
 
-If you specify ‘none’ then you will have to answer a few more questions before you will be able to build SolrMarc, and even then you will have to extensively modify the index.properties files before your SolrMarc will be able to produce a useful solr index.   (Since the default index specification file is simply a placeholder, which specifies the record id and the title as the only fields that are added to the solr index.)
+If you specify ‘none’ then you will have to answer a few more questions before you will be able to build !SolrMarc, and even then you will have to extensively modify the index.properties files before your SolrMarc will be able to produce a useful solr index.   (Since the default index specification file is simply a placeholder, which specifies the record id and the title as the only fields that are added to the solr index.)
 
 The questions it will ask are as follows:  (Note that for all of them you can accept the default responses by hitting return)
 
