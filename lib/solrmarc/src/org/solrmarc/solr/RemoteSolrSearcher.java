@@ -16,12 +16,16 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.marc4j.MarcException;
 import org.marc4j.MarcStreamReader;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcXmlReader;
 import org.marc4j.marc.Record;
+
+import com.ibm.icu.text.Normalizer;
 
 public class RemoteSolrSearcher
 {
@@ -90,7 +94,8 @@ public class RemoteSolrSearcher
    
     private String getFieldFromDocumentGivenDocID(String id, String solrFieldContainingEncodedMarcRecord2)
     {
-        String fullURLStr = solrBaseURL + "/select/?q=id%3A"+id+"&wt=json&indent=on&fl="+solrFieldContainingEncodedMarcRecord2;
+        String fullURLStr = solrBaseURL + "/select/?q=id%3A"+id+"&wt=json&indent=on&qt=standard&fl="+solrFieldContainingEncodedMarcRecord2;
+        if (verbose) System.err.println("encoded document retrieval url = "+ fullURLStr);
         URL fullURL = null;
         try
         {
@@ -124,11 +129,20 @@ public class RemoteSolrSearcher
         {
             while ((line = sIn.readLine()) != null)
             {
-                if (line.contains("\"<?xml version"))
+                if (line.contains(solrFieldContainingEncodedMarcRecord2+"\":"))
                 {
-                    result = line.replaceFirst(".*<\\?xml", "<?xml");
-                    result = result.replaceFirst("</collection>.*", "</collection>");
-                    result = result.replaceAll("\\\\\"", "\"");
+                    if (line.contains("\"<?xml version"))
+                    {
+                        result = line.replaceFirst(".*<\\?xml", "<?xml");
+                        result = result.replaceFirst("</collection>.*", "</collection>");
+                        result = result.replaceAll("\\\\\"", "\"");
+                    }
+                    else 
+                    {
+                        result = line.replaceFirst("[^:]*:\"", "");
+                        result = result.replaceFirst("\"}]$", "");
+                        result = normalizeUnicode(result);
+                    }
                 }
                 else
                 {
@@ -144,12 +158,37 @@ public class RemoteSolrSearcher
         return(result);
     }
 
+    private String normalizeUnicode(String string)
+    {
+        Pattern pattern = Pattern.compile("\\\\u([0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f])"); 
+        Matcher matcher = pattern.matcher(string);
+        StringBuffer result = new StringBuffer();
+        int prevEnd = 0;
+        while (matcher.find())
+        {
+            result.append(string.substring(prevEnd, matcher.start()));
+            result.append(getChar(matcher.group(1)));
+            prevEnd = matcher.end();
+        }
+        result.append(string.substring(prevEnd));
+        string = result.toString();
+        return(string);
+    }
+
+    private String getChar(String charCodePoint)
+    {
+        int charNum = Integer.parseInt(charCodePoint, 16);
+        String result = ""+((char)charNum);
+        return(result);
+    }
+    
+    
     public String[] getIdSet(String query) 
     {
         int setSize = getIdSetSize(query);
         String resultSet[] = new String[setSize];
 
-        String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&indent=on&fl=id&start=0&rows="+setSize;
+        String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&qt=standard&indent=on&fl=id&start=0&rows="+setSize;
         if (verbose) System.err.println("Full URL for search = "+ fullURLStr);
         URL fullURL = null;
         try
@@ -183,9 +222,9 @@ public class RemoteSolrSearcher
         {
             while ((line = sIn.readLine()) != null)
             {
-                if (line.contains("\"id\":[")) 
+                if (line.contains("\"id\":")) 
                 {
-                    String id = line.replaceFirst(".*:.\"([-A-Za-z0-9_]*).*", "$1");
+                    String id = line.replaceFirst(".*:[^\"]?\"([-A-Za-z0-9_]*).*", "$1");
                     if (veryverbose) System.err.println("record num = "+ (count) + "  id = " + id);
                     resultSet[count++] = id;
                 }
@@ -206,7 +245,7 @@ public class RemoteSolrSearcher
     
     public int getIdSetSize(String query) 
     {
-        String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&indent=on&start=0&rows=0";
+        String fullURLStr = solrBaseURL + "/select/?q="+query+"&wt=json&qt=standard&indent=on&start=0&rows=0";
         if (verbose) System.err.println("Full URL for search = "+ fullURLStr);
         URL fullURL = null;
         try

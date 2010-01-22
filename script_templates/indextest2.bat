@@ -4,14 +4,20 @@
 :: without actually adding any records to Solr.
 :: $Id: indextest2.bat 
 setlocal
-set solrjardef=@SOLR_JAR_DEF@
 ::Get the current batch file's short path
 for %%x in (%0) do set scriptdir=%%~dpsx
 for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
+
+if EXIST %scriptdir%SolrMarc.jar goto doit
+pushd %scriptdir%..
+for %%x in (%CD%) do set scriptdir=%%~sx\
+popd
+
+:doit
 ::echo BatchPath = %scriptdir%
 ::
 if "%SOLRMARC_MEM_ARGS%" EQU ""  set SOLRMARC_MEM_ARGS=@MEM_ARGS@
 ::
-java %SOLRMARC_MEM_ARGS% %solrjardef% -Dmarc.just_index_dont_add="true" -jar %scriptdir%@CUSTOM_JAR_NAME@ %1 %2 %3 
+java %SOLRMARC_MEM_ARGS% -Dmarc.just_index_dont_add="true" -jar %scriptdir%SolrMarc.jar %1 %2 %3 
 
 

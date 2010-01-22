@@ -30,28 +30,20 @@ public class MarcMappingOnly extends MarcHandler
      * Constructor
      * @param args - array of Strings:
      *    arg[0] - name of xxx_config.properties file
-     *            arg[1] - name of unique key field in solr document
+     *    arg[1] - name of unique key field in solr document
      */
-    public MarcMappingOnly(String args[])
+    public MarcMappingOnly()
     {
-        super(args);
-        if (args.length < 2)
-        {
-            throw new RuntimeException(
-                    "Must have at least 2 arguments for MarcMappingTest: name of xxx_config.properties file and the name of the unique key field in the solr document");
-        }
-        idFldName = args[1];
+        super();
     }
     
-    /**
-     * Constructor
-     * @param arg - String :  name of xxx_config.properties file
+    /** 
+     * processAdditionalArgs - local init for subclasses of MarcHandler
      */
-    public MarcMappingOnly(String arg)
+    protected void processAdditionalArgs()
     {
-        super(new String[]{arg});
-        idFldName = null;
-    }
+        idFldName = addnlArgs[0];
+    }  
 
     /**
      * read in the file of marc records indicated, looking for the desired

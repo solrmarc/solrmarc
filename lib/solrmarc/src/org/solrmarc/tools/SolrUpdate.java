@@ -2,6 +2,7 @@ package org.solrmarc.tools;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -17,7 +18,7 @@ import org.solrmarc.tools.GetDefaultConfig;
 public class SolrUpdate
 {
 	// Initialize logging category
-	protected static Logger logger = Logger.getLogger(MarcImporter.class.getName());
+	protected static Logger logger = Logger.getLogger(SolrUpdate.class.getName());
 
     /**
      * @param args
@@ -42,7 +43,8 @@ public class SolrUpdate
             String configProperties = GetDefaultConfig.getConfigName(null);
             if (configProperties != null)
             {
-                configProps = Utils.loadProperties(null, configProperties);
+                String homeDir = getHomeDir();
+                configProps = Utils.loadProperties(new String[]{homeDir}, configProperties, false);
                 // Ths URL of the currently running Solr server
                 solrServerURL = Utils.getProperty(configProps, "solr.hosturl");
             }
@@ -50,18 +52,32 @@ public class SolrUpdate
         
         try
         {
+            logger.info("Connecting to solr server at URL: " + solrServerURL);
             signalServer(solrServerURL);
         }
         catch (MalformedURLException me)
         {
-            System.err.println("Specified URL is malformed: " + solrServerURL);
+            logger.error("Specified URL is malformed: " + solrServerURL);
         }
         catch (IOException ioe)
         {
-            System.err.println("Unable to establish connection to solr server at URL: " + solrServerURL);
+            logger.error("Unable to establish connection to solr server at URL: " + solrServerURL);
         }
-   }
+    }
     
+    private static String getHomeDir()
+    {
+        String result = GetDefaultConfig.getJarFileName();       
+        if (result == null)
+        {
+            result = new File(".").getAbsolutePath();
+            logger.debug("Setting homeDir to \".\"");
+        }
+        if (result != null) result = new File(result).getParent();
+        logger.debug("Setting homeDir to: "+ result);
+        return(result);
+    }
+
     /**
      * If there is a running Solr server instance looking at the same index
      * that is being updated by this process, this function can be used to signal 

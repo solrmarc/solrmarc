@@ -6,6 +6,10 @@
 E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
+if ! [ -e $scriptdir/SolrMarc.jar ] 
+then
+  scriptdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
 
 if ! [ -p /dev/stdin ]
 then  
@@ -23,9 +27,7 @@ then
     SOLRMARC_MEM_ARGS='@MEM_ARGS@'
 fi
 
-SOLRWAR_OR_JARS=@SOLR_JAR_DEF@
-
-java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3
+java $SOLRMARC_MEM_ARGS -jar $scriptdir/SolrMarc.jar $1 $2 $3
 
 exit 0
 

@@ -15,16 +15,21 @@ public class AbstractMappingTests {
 	/** SolrFieldMappingTest object to be used in specific tests */
 	protected SolrFieldMappingTest solrFldMapTest = null;
 	
-    private String siteDir = "examples" + File.separator + "GenericBlacklight";
-	protected String marcFileDir = siteDir + File.separator + 
-									"test" + File.separator +
-									"data" + File.separator;
-	protected String marc30recTestFile = marcFileDir + "test_data.utf8.mrc";
+	protected String siteDir = null;
+	protected String marcFileDir = null;
+	protected String marc30recTestFile = null;
 
 @Before
 	public void setup() 
 	{
 		// these properties must be set or MarcHandler can't initialize properly
+        siteDir = ".";
+
+        marcFileDir = System.getProperty("test.data.path", siteDir + File.separator + "test" + File.separator + "data");
+        marcFileDir = new File(marcFileDir).getAbsolutePath();
+        if (!marcFileDir.endsWith(File.separator)) marcFileDir = marcFileDir + File.separator;
+        marc30recTestFile = new File(marcFileDir, "test_data.utf8.mrc").getAbsolutePath();
+        
         System.setProperty("solrmarc.path", "lib" + File.separator + "solrmarc");
 		System.setProperty("solrmarc.site.path", siteDir); 
     	System.setProperty("marc.source", "FILE");
@@ -32,7 +37,7 @@ public class AbstractMappingTests {
     	// needed to get through initialization; overridden in individual tests
     	System.setProperty("marc.path", marc30recTestFile);
 
-    	solrFldMapTest = new SolrFieldMappingTest(siteDir + File.separator + "demo_config.properties", "id");
+    	solrFldMapTest = new SolrFieldMappingTest("demo_config.properties", "id");
 	}
 
 }

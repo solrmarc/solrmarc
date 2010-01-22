@@ -109,7 +109,29 @@ public final class Utils {
      */
     public static Properties loadProperties(String propertyPaths[], String propertyFileName)
     {
-        InputStream in = getPropertyFileInputStream(propertyPaths, propertyFileName);
+        return(loadProperties(propertyPaths, propertyFileName, false, null));
+    }
+    /**
+     * load a properties file into a Properties object
+     * @param propertyPaths the directories to search for the properties file
+     * @param propertyFileName name of the sought properties file
+     * @return Properties object 
+     */
+    public static Properties loadProperties(String propertyPaths[], String propertyFileName, boolean showName)
+    {
+        return(loadProperties(propertyPaths, propertyFileName, showName, null));
+    }
+    /**
+     * load a properties file into a Properties object
+     * @param propertyPaths the directories to search for the properties file
+     * @param propertyFileName name of the sought properties file
+     * @param showName whether the name of the file/resource being read should be shown.
+     * @return Properties object 
+     */
+    public static Properties loadProperties(String propertyPaths[], String propertyFileName, boolean showName, String filenameProperty)
+    {
+        String inputStreamSource[] = new String[]{null};
+        InputStream in = getPropertyFileInputStream(propertyPaths, propertyFileName, showName, inputStreamSource);
         String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
         
         // load the properties
@@ -118,6 +140,12 @@ public final class Utils {
         {
             props.load(in);
             in.close();
+            if (filenameProperty != null && inputStreamSource[0] != null)
+            {
+                File tmpFile = new File(inputStreamSource[0]);
+                
+                props.setProperty(filenameProperty, tmpFile.getParent());
+            }
         }
         catch (IOException e)
         {
@@ -128,6 +156,16 @@ public final class Utils {
 
     public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName) 
     {
+        return(getPropertyFileInputStream(propertyPaths, propertyFileName, false));
+    }
+    
+    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName, boolean showName) 
+    {
+        return(getPropertyFileInputStream(propertyPaths, propertyFileName, false, null));
+    }
+    
+    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName, boolean showName, String inputSource[]) 
+        {
         InputStream in = null;
         // look for properties file in paths
         if (propertyPaths != null)
@@ -142,6 +180,14 @@ public final class Utils {
                     try
                     {
                         in = new FileInputStream(propertyFile);
+                        if (inputSource != null && inputSource.length >= 1)
+                        {
+                            inputSource[0] = propertyFile.getAbsolutePath();
+                        }
+                        if (showName)
+                            logger.info("Opening file: "+ propertyFile.getAbsolutePath());
+                        else
+                            logger.debug("Opening file: "+ propertyFile.getAbsolutePath());
                     }
                     catch (FileNotFoundException e)
                     {
@@ -165,6 +211,16 @@ public final class Utils {
             URL url = utilObj.getClass().getClassLoader().getResource(propertyFileName);
             if (url == null)  
                 url = utilObj.getClass().getResource("/" + propertyFileName);
+            if (url == null)
+            {
+                logger.error(errmsg);
+                throw new IllegalArgumentException(errmsg);
+            }
+            if (showName)
+                logger.info("Opening resource via URL: "+ url.toString());
+            else
+                logger.debug("Opening resource via URL: "+ url.toString());
+
 /*
             if (url == null) 
                 url = utilObj.getClass().getClassLoader().getResource(propertyPath + "/" + propertyFileName);

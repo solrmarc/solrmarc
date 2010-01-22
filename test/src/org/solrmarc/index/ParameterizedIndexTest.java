@@ -1,6 +1,5 @@
 package org.solrmarc.index;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -19,7 +18,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.solrmarc.marc.MarcPrinter;
 
 @RunWith(Parameterized.class)
 public class ParameterizedIndexTest
@@ -49,7 +47,8 @@ public class ParameterizedIndexTest
      */
     public void verifyIndexingResults() throws Exception 
     {
-        MarcMappingOnly marcMappingTest = new MarcMappingOnly(new String[]{config, "id"});
+        MarcMappingOnly marcMappingTest = new MarcMappingOnly();
+        marcMappingTest.init(new String[]{config, "id"});
         String recordToLookAt = null;  // null means just get the first record from the named file
         if (recordFilename.matches("[^(]*[(][^)]*[)]"))
         {
