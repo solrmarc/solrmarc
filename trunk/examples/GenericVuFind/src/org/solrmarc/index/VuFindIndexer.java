@@ -337,36 +337,56 @@ public class VuFindIndexer extends SolrIndexer
      */
     public String getFullCallNumber(final Record record) {
 
-		String val = getFirstFieldVal(record, "099ab:090ab:050ab");
-
-		if (val != null) {
-            return val.toUpperCase().replaceAll(" ", "");
-		} else {
-			return val;
-		}
-	}
+        return(getFullCallNumber(record, "099ab:090ab:050ab"));
+    }
 
     /**
      * Extract the call number label from a record
      * @param record
      * @return Call number label
      */
-    public String getCallNumberLabel(final Record record) {
-		
-		String val = getFirstFieldVal(record, "090a:050a");
-		
-		if (val != null) {
+    public String getFullCallNumber(final Record record, String fieldSpec) {
+
+        String val = getFirstFieldVal(record, fieldSpec);
+
+        if (val != null) {
+            return val.toUpperCase().replaceAll(" ", "");
+        } else {
+            return val;
+        }
+    }
+
+    /**
+     * Extract the call number label from a record
+     * @param record
+     * @return Call number label
+     */
+    public String getCallNumberLabel(final Record record) {       
+    
+        return getCallNumberLabel(record, "090a:050a");
+    }
+    
+    /**
+     * Extract the call number label from a record
+     * @param record
+     * @return Call number label
+     */
+    public String getCallNumberLabel(final Record record, String fieldSpec) {
+        
+        String val = getFirstFieldVal(record, fieldSpec);
+        
+        if (val != null) {
             int dotPos = val.indexOf(".");
             if (dotPos > 0) {
                 val = val.substring(0, dotPos);
             }
             return val.toUpperCase();
-		} else {
-			return val;
-		}
-	}
+        } else {
+            return val;
+        }
+    }
 	
-	/**
+    /**
      * Extract the subject component of the call number
      *
      * Can return null
@@ -376,14 +396,27 @@ public class VuFindIndexer extends SolrIndexer
      */
     public String getCallNumberSubject(final Record record) {
 
-        String val = getFirstFieldVal(record, "090a:050a");
+        return(getCallNumberSubject(record, "090a:050a"));
+    }
+    
+    /**
+     * Extract the subject component of the call number
+     *
+     * Can return null
+     *
+     * @param record
+     * @return Call number label
+     */
+    public String getCallNumberSubject(final Record record, String fieldSpec) {
+
+        String val = getFirstFieldVal(record, fieldSpec);
 
         if (val != null) {
             String [] callNumberSubject = val.toUpperCase().split("[^A-Z]+");
-        	if (callNumberSubject.length > 0)
-        	{
-        	    return callNumberSubject[0];
-        	}
+            if (callNumberSubject.length > 0)
+            {
+                return callNumberSubject[0];
+            }
         }
         return(null);
     }
