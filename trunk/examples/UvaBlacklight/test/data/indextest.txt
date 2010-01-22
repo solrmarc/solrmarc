@@ -54,18 +54,20 @@ blacklight_dev_config.properties, u55.mrc, call_number_display, PR4231.A43 1984 
 blacklight_dev_config.properties, u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
 blacklight_dev_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (23 volumes)
 blacklight_dev_config.properties, u642.mrc, call_number_display, ML5.G654 (43 volumes)
-blacklight_dev_config.properties, u696140.mrc, call_number_display, ND1489.G4713 1986
+
+blacklight_dev_config.properties, u399.mrc, instrument_facet, Chamber orchestra|Tenor voice
+blacklight_dev_config.properties, u1023.mrc, instrument_facet, Soprano voice|Alto voice|Tenor voice|Bass voice|Choruses, Unspecified|Chamber orchestra
 
 blacklight_config.properties, u11.mrc, barcode_facet, 11-1001
 blacklight_config.properties, u60.mrc, barcode_facet, X000872036|X000872037
  
-blacklight_sas_config.properties, u3344744.mrc, location_facet, Semester at Sea Collection
-blacklight_sas_config.properties, u3344744.mrc, library_facet, Semester at Sea
-blacklight_sas_config.properties, u3344744.mrc, shadowed_location_facet, VISIBLE
+#blacklight_sas_config.properties, u3344744.mrc, location_facet, Semester at Sea Collection
+#blacklight_sas_config.properties, u3344744.mrc, library_facet, Semester at Sea
+#blacklight_sas_config.properties, u3344744.mrc, shadowed_location_facet, VISIBLE
 
-blacklight_sas_config.properties, u2956.mrc, location_facet, Semester at Sea Collection
-blacklight_sas_config.properties, u2956.mrc, library_facet, Semester at Sea
-blacklight_sas_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
+#blacklight_sas_config.properties, u2956.mrc, location_facet, Semester at Sea Collection
+#blacklight_sas_config.properties, u2956.mrc, library_facet, Semester at Sea
+#blacklight_sas_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
 
 
 

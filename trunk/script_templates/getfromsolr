@@ -6,6 +6,10 @@
 E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
+if ! [ -e $scriptdir/SolrMarc.jar ] 
+then
+  scriptdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
 
 if [ $# -eq 0 ]
   then
@@ -23,7 +27,7 @@ case $1 in
 http*) url=$1 ;;
 *.properties) config=$1 ;;
 *:*) query=$1 ;;
-[A-Za-z_]+) id=$1 ;;
+[A-Za-z0-9]*) id=$1 ;;
 -v) flag=$1 ;;
 -vv) flag=$1 ;;
 esac
@@ -32,7 +36,7 @@ case $2 in
 http*) url=$2 ;;
 *.properties) config=$2 ;;
 *:*) query=$2 ;;
-[A-Za-z_]+) id=$2 ;;
+[A-Za-z0-9]*) id=$2 ;;
 -v) flag=$2 ;;
 -vv) flag=$2 ;;
 esac
@@ -41,7 +45,7 @@ case $3 in
 http*) url=$3 ;;
 *.properties) config=$3 ;;
 *:*) query=$3 ;;
-[A-Za-z_]+) id=$3 ;;
+[A-Za-z0-9]*) id=$3 ;;
 -v) flag=$3 ;;
 -vv) flag=$3 ;;
 esac
@@ -51,18 +55,11 @@ then
     query="id:$id"
 fi
 
-if [[ "$SOLRMARC_MEM_ARGS" == "" ]] 
-then
-    SOLRMARC_MEM_ARGS='@MEM_ARGS@'
-fi
-
-SOLRWAR_OR_JARS=@SOLR_JAR_DEF@
-
 if [ "$url" == "" ]
 then
-    java $SOLRMARC_MEM_ARGS $SOLRWAR_OR_JARS -Done-jar.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/@CUSTOM_JAR_NAME@ $config "$query" 2> /dev/null
+    java -Dsolrmarc.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/SolrMarc.jar $config "$query" 2> /dev/null
 else
-    java $SOLRMARC_MEM_ARGS -Done-jar.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar $scriptdir/@CUSTOM_JAR_NAME@ $flag $url "$query" 
+    java -Dsolrmarc.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar $scriptdir/SolrMarc.jar $flag $url "$query" 
 fi
 
 exit 0

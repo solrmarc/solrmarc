@@ -33,7 +33,8 @@ public class SolrFieldMappingTest
      */
     public SolrFieldMappingTest(String configPropsName, String idFldName)
     {
-        marcMappingTest = new MarcMappingOnly(new String[] { configPropsName, idFldName });
+        marcMappingTest = new MarcMappingOnly();
+        marcMappingTest.init(new String[] { configPropsName, idFldName });
     }
 
     /**

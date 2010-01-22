@@ -54,7 +54,8 @@ public class MarcImporter extends MarcHandler
     protected String solrCoreName;
     private String deleteRecordListFilename;
     private String deleteRecordIDMapper = null;
-    private String SolrHostURL;
+    private String solrHostURL;
+    private String solrHostUpdateURL;
     protected boolean optimizeAtEnd = false;
     protected boolean shuttingDown = false;
     protected boolean isShutDown = false;
@@ -71,35 +72,42 @@ public class MarcImporter extends MarcHandler
     /**
 	 * Constructs an instance with properties files
 	 */
-    public MarcImporter(String args[])
+    public MarcImporter()
     {
-        // Process Properties in super class MarcHandler
-    	super(args);
-    	
-    	loadLocalProperties(configProps);
-        // Set up Solr core
-        solrProxy = getSolrProxy();
+        showConfig = true;
+        showInputFile = true;
 	}
     	
     /**
 	 * Load the properties file
 	 * @param properties
 	 */
-	private void loadLocalProperties(Properties props) 
+    @Override
+    protected void loadLocalProperties() 
 	{
         // The solr.home directory
-        solrCoreDir = Utils.getProperty(props, "solr.path");
+        solrCoreDir = Utils.getProperty(configProps, "solr.path");
 
         // The solr data diretory to use
-        solrDataDir = Utils.getProperty(props, "solr.data.dir");
+        solrDataDir = Utils.getProperty(configProps, "solr.data.dir");
 
         // The name of the solr core to use, in a solr multicore environment
-        solrCoreName = Utils.getProperty(props, "solr.core.name");
+        solrCoreName = Utils.getProperty(configProps, "solr.core.name");
         
         // Ths URL of the currently running Solr server
-        SolrHostURL = Utils.getProperty(props, "solr.hosturl");
+        solrHostURL = Utils.getProperty(configProps, "solr.hosturl");
         
-        String solrLogLevel = Utils.getProperty(props, "solr.log.level");
+        // Ths URL of the currently running Solr server
+        solrHostUpdateURL = Utils.getProperty(configProps, "solr.updateurl");
+        if (solrHostUpdateURL == null && solrHostURL != null) 
+        {
+            if (solrHostURL.endsWith("/update"))
+                solrHostUpdateURL = solrHostURL;
+            else
+                solrHostUpdateURL = solrHostURL+"/update";
+        }
+        
+        String solrLogLevel = Utils.getProperty(configProps, "solr.log.level");
         
         Level level = Level.WARNING;
         if (solrLogLevel != null)
@@ -119,7 +127,7 @@ public class MarcImporter extends MarcHandler
         // Specification of how to modify the entries in the delete record file
         // before passing the id onto Solr.   Based on syntax of String.replaceAll
         //  To prepend a 'u' specify the following:  "(.*)->u$1"
-        deleteRecordIDMapper = Utils.getProperty(props, "marc.delete_record_id_mapper");
+        deleteRecordIDMapper = Utils.getProperty(configProps, "marc.delete_record_id_mapper");
         if (deleteRecordIDMapper != null)
         {
             String parts[] = deleteRecordIDMapper.split("->");
@@ -145,11 +153,15 @@ public class MarcImporter extends MarcHandler
             }
         }
         
-        justIndexDontAdd = Boolean.parseBoolean(Utils.getProperty(props, "marc.just_index_dont_add"));
+        justIndexDontAdd = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.just_index_dont_add"));
         if (justIndexDontAdd)
             Utils.setLog4jLogLevel(org.apache.log4j.Level.WARN);
-        deleteRecordListFilename = Utils.getProperty(props, "marc.ids_to_delete");
-        optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(props, "solr.optimize_at_end"));
+        deleteRecordListFilename = Utils.getProperty(configProps, "marc.ids_to_delete");
+        optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(configProps, "solr.optimize_at_end"));
+        
+        // Set up Solr core
+        solrProxy = getSolrProxy();
+
         return;
 	}
 
@@ -391,7 +403,7 @@ public class MarcImporter extends MarcHandler
      * that server that the indexes have changed, so that it will find the new data
      * with out having to be restarted.
      * 
-     * uses member variable SolrHostURL which contains the URL of the Solr server
+     * uses member variable solrHostUpdateURL which contains the URL of the Solr server
      * for example:    http://localhost:8983/solr/update
      * This value is taken from the  solr.hosturl  entry in the properties file. 
      */
@@ -399,25 +411,25 @@ public class MarcImporter extends MarcHandler
     protected void signalServer()
     {
         if (shuttingDown) return;
-        // if solrCoreDir == null  and  SolrHostURL != null  then we are talking to a remote 
+        // if solrCoreDir == null  and  solrHostUpdateURL != null  then we are talking to a remote 
         // solr server during the main program, so there is no need to separately contact
         // server to tell it to commit,  therefore merely return.
-        if ((solrCoreDir == null || solrCoreDir.length() == 0 || solrCoreDir.equalsIgnoreCase("REMOTE")) && SolrHostURL != null) 
+        if ((solrCoreDir == null || solrCoreDir.length() == 0 || solrCoreDir.equalsIgnoreCase("REMOTE")) && solrHostUpdateURL != null) 
             return;
-        if (SolrHostURL == null || SolrHostURL.length() == 0) return;
+        if (solrHostUpdateURL == null || solrHostUpdateURL.length() == 0) return;
         try {
-            logger.info("Connecting to solr server at URL: " + SolrHostURL);
-            SolrUpdate.signalServer(SolrHostURL);
+            logger.info("Connecting to solr server at URL: " + solrHostUpdateURL);
+            SolrUpdate.signalServer(solrHostUpdateURL);
         }
         catch (MalformedURLException me)
         {
             //System.err.println("MalformedURLException: " + me);
-        	logger.error("Specified URL is malformed: " + SolrHostURL);
+        	logger.error("Specified URL is malformed: " + solrHostUpdateURL);
         }
         catch (IOException ioe)
         {
             //System.err.println("IOException: " + ioe.getMessage());
-        	logger.warn("Unable to establish connection to solr server at URL: " + SolrHostURL);
+        	logger.warn("Unable to establish connection to solr server at URL: " + solrHostUpdateURL);
         }
     }  
 
@@ -521,7 +533,7 @@ public class MarcImporter extends MarcHandler
         if (solrProxy == null)
         {
             solrProxyIsRemote = false;
-            if (SolrHostURL != null && SolrHostURL.length() > 0)
+            if (solrHostUpdateURL != null && solrHostUpdateURL.length() > 0)
             {
                 if ((solrCoreDir == null || solrCoreDir.length() == 0 || solrCoreDir.equalsIgnoreCase("REMOTE")))
                 {
@@ -532,7 +544,7 @@ public class MarcImporter extends MarcHandler
                     URL solrhostURL;
                     try
                     {
-                        solrhostURL = new URL(SolrHostURL);
+                        solrhostURL = new URL(solrHostUpdateURL);
                         java.net.InetAddress address = java.net.InetAddress.getByName(solrhostURL.getHost());
                         
                         String urlCanonicalHostName = address.getCanonicalHostName();
@@ -556,8 +568,8 @@ public class MarcImporter extends MarcHandler
             }
             if (solrProxyIsRemote)
             {
-                logger.info(" Connecting to remote Solr server at URL " + SolrHostURL);
-                solrProxy = new SolrRemoteProxy(SolrHostURL); 
+                logger.info(" Connecting to remote Solr server at URL " + solrHostUpdateURL);
+                solrProxy = new SolrRemoteProxy(solrHostUpdateURL); 
             }
             else 
             {
@@ -572,6 +584,7 @@ public class MarcImporter extends MarcHandler
                 try
                 {
                     solrCoreDir = solrcoretest.getCanonicalPath();
+                    System.setProperty("solr.solr.home", solrCoreDir);
                 }
                 catch (IOException e)
                 {
@@ -593,7 +606,20 @@ public class MarcImporter extends MarcHandler
                     System.exit(1);               
                 }
                 logger.info(" Updating to Solr index at " + solrCoreDir);
-                logger.info("     Using Solr data dir " + solrDataDir);
+                if (!solrcoretest1.exists() && solrDataDir == null)
+                {
+                    solrDataDir = new File(solrcoretest, "data").getAbsolutePath();
+                }
+                else if (solrDataDir != null && solrDataDir.contains("${solr.path}"))
+                {
+                    String dataPathFrag = solrDataDir.replaceFirst("[$][{]solr[.]path[}][/\\\\]+", "");
+                    solrDataDir = new File(solrCoreDir, dataPathFrag).getAbsolutePath();
+                }
+                if (solrDataDir != null)
+                {
+                    System.setProperty("solr.data.dir", solrDataDir);
+                    logger.info("     Using Solr data dir " + solrDataDir);
+                }
                 if (solrCoreName != null && solrCoreName.length() != 0)
                     logger.info("     Using Solr core " + solrCoreName);
                 solrProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, solrCoreName, logger);
@@ -613,7 +639,8 @@ public class MarcImporter extends MarcHandler
         MarcImporter importer = null;
         try
         {
-            importer = new MarcImporter(args);
+            importer = new MarcImporter();
+            importer.init(args);
         }
         catch (IllegalArgumentException e)
         {

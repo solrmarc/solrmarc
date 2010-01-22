@@ -118,7 +118,7 @@ public class StanfordIndexer extends org.solrmarc.index.SolrIndexer
         if (fld != null && fld.getData() != null)
         {
         	String id = fld.getData();
-        	if (id.startsWith("a"))
+        	if (id.startsWith("a") || id.startsWith("u"))
         		return id.substring(1);
         	else 
         		return null;

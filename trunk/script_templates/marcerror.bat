@@ -6,6 +6,13 @@ setlocal
 ::Get the current batch file's short path
 for %%x in (%0) do set scriptdir=%%~dpsx
 for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
+
+if EXIST %scriptdir%SolrMarc.jar goto doit
+pushd %scriptdir%..
+for %%x in (%CD%) do set scriptdir=%%~sx\
+popd
+
+:doit
 ::echo BatchPath = %scriptdir%
 
-java -Done-jar.main.class="org.solrmarc.tools.PermissiveReaderTest" -jar %scriptdir%@CUSTOM_JAR_NAME@ %1 %2 %3
+java -Dsolrmarc.main.class="org.solrmarc.tools.PermissiveReaderTest" -jar %scriptdir%SolrMarc.jar %1 %2 %3

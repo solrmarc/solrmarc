@@ -6,6 +6,10 @@
 E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
+if ! [ -e $scriptdir/SolrMarc.jar ] 
+then
+  scriptdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
 
 if [ $# -eq 0 ]
   then
@@ -22,7 +26,7 @@ else
   url=$1
 fi
 
-java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.BooklistReader" -jar $scriptdir/@CUSTOM_JAR_NAME@ $url $2 
+java @MEM_ARGS@ -Done-jar.main.class="org.solrmarc.marc.BooklistReader" -jar $scriptdir/SolrMarc.jar $url $2 
 
 exit 0
 

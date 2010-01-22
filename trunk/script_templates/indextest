@@ -7,6 +7,10 @@
 E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
+if ! [ -e $scriptdir/SolrMarc.jar ] 
+then
+  scriptdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
 
 if ! [ -p /dev/stdin ]
 then  
@@ -19,7 +23,7 @@ then
   fi
 fi
 
-java -Done-jar.main.class="org.solrmarc.marc.MarcPrinter" -jar $scriptdir/@CUSTOM_JAR_NAME@ index $1 $2 $3
+java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPrinter" -jar $scriptdir/SolrMarc.jar index $1 $2 $3
 
 exit 0
 

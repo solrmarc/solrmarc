@@ -6,6 +6,10 @@
 E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
+if ! [ -e $scriptdir/SolrMarc.jar ] 
+then
+  scriptdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
 
 if [ $# -eq 0 ]
   then
@@ -14,7 +18,7 @@ if [ $# -eq 0 ]
   fi
 
 
-java -Done-jar.main.class="org.solrmarc.tools.PermissiveReaderTest" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3
+java -Dsolrmarc.main.class="org.solrmarc.tools.PermissiveReaderTest" -jar $scriptdir/SolrMarc.jar $1 $2 $3
 
 exit 0
 

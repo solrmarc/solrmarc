@@ -29,11 +29,13 @@ public class SolrCoreLoader
     public static SolrCoreProxy loadCore(String solrCoreDir, String solrDataDir, String solrCoreName, Logger logger)
     {
         Object solrCore = null;
+        Object genericCoreContainerObject = null;
         SolrCoreProxy solrCoreProxy = null;
             
         try{
             boolean has_1_3_libs = false;
             boolean has_1_2_libs = false;
+            System.setProperty("solr.solr.home", solrCoreDir);
             try
             {
                 Class<?> areLibraries_1_3 = Class.forName("org.apache.solr.core.CoreContainer");
@@ -103,7 +105,7 @@ public class SolrCoreLoader
                     // cc = new org.apache.solr.core.CoreContainer(solrCoreDir, multicoreConfigFile);
                     Class<?> coreContainerClass = Class.forName("org.apache.solr.core.CoreContainer");
                     Constructor<?> coreContainerConstructor = coreContainerClass.getConstructor(String.class, File.class);
-                    Object genericCoreContainerObject = coreContainerConstructor.newInstance(solrCoreDir, multicoreConfigFile);
+                    genericCoreContainerObject = coreContainerConstructor.newInstance(solrCoreDir, multicoreConfigFile);
                     
                     // cc.getCore(solrCoreName);
                     Method getCoreMethod = coreContainerClass.getMethod("getCore", String.class);
@@ -125,12 +127,12 @@ public class SolrCoreLoader
                     //cc = new CoreContainer();
                     Class<?> coreContainerClass = Class.forName("org.apache.solr.core.CoreContainer");
                     Constructor<?> coreContainerConstructor = coreContainerClass.getConstructor();
-                    Object genericCoreContainerObject = coreContainerConstructor.newInstance();
+                    Object genericCoreContainerObject1 = coreContainerConstructor.newInstance();
                     
                     //CoreDescriptor desc = new CoreDescriptor(cc, "Solr", solrCoreDir+"/conf");
                     Class<?> coreDescClass = Class.forName("org.apache.solr.core.CoreDescriptor");
                     Constructor<?> coreDescCtor = coreDescClass.getConstructor(coreContainerClass, String.class, String.class);
-                    Object genericCoreDesc = coreDescCtor.newInstance(genericCoreContainerObject, "Solr", solrCoreDir+"/conf");
+                    Object genericCoreDesc = coreDescCtor.newInstance(genericCoreContainerObject1, "Solr", solrCoreDir+"/conf");
                     
                     Class<?> indexSchemaClass = Class.forName("org.apache.solr.schema.IndexSchema");
                     Constructor<?> IndexSchemaConstructor = indexSchemaClass.getConstructor(solrConfigClass, String.class, InputStream.class);
@@ -158,7 +160,7 @@ public class SolrCoreLoader
             e.printStackTrace();
             System.exit(1);
         }
-        solrCoreProxy = new SolrCoreProxy(solrCore);
+        solrCoreProxy = new SolrCoreProxy(solrCore, genericCoreContainerObject);
         return(solrCoreProxy);
     }
 

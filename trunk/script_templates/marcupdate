@@ -6,6 +6,10 @@
 E_BADARGS=65
 
 scriptdir=$( (cd -P $(dirname $0) && pwd) )
+if ! [ -e $scriptdir/SolrMarc.jar ] 
+then
+  scriptdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
 
 if [ $# -eq 0 ]
   then
@@ -13,7 +17,7 @@ if [ $# -eq 0 ]
     exit $E_BADARGS
   fi
 
-java -Done-jar.main.class="org.solrmarc.marc.MarcMerger" -jar $scriptdir/@CUSTOM_JAR_NAME@ $1 $2 $3 $4 $5 $6 $7
+java -Dsolrmarc.main.class="org.solrmarc.marc.MarcMerger" -jar $scriptdir/SolrMarc.jar $1 $2 $3 $4 $5 $6 $7
 
 exit 0
 
