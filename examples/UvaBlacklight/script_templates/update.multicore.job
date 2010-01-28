@@ -34,4 +34,4 @@ rm $solrnewdir.tmp/*/.nfs* 2> /dev/null
 
 mv $solrnewdir.tmp $solrnewdir
 
-curl "$solrurlstart/admin/multicore?action=CREATE&name=blacklight_search&instanceDir=$solrnewcore" > /dev/null 2>1
+curl "$solrurlstart/admin/multicore?action=CREATE&name=virgobeta&instanceDir=$solrnewcore" > /dev/null 2>1
