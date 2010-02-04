@@ -52,7 +52,9 @@ public class BlacklightIndexer extends SolrIndexer
     Map<String, String> addnlShadowedIds = null;
     String extraIdsFilename = "AllShadowedIds.txt";
     Set<String> callNumberFieldList = null;
+    Set<String> callNumberFieldListNo050 = null;
     Map<String, Set<String>> callNumberClusterMap = null;
+    Map<String, Set<String>> callNumberClusterMapNo050 = null;
     Comparator<String> normedComparator = null;
     String bestSingleCallNumber = null;
     
@@ -164,7 +166,9 @@ public class BlacklightIndexer extends SolrIndexer
     {
         String fieldSpec = "999awi';'";
         
-        callNumberFieldList = getCallNumberFieldSet(record, fieldSpec);
+        callNumberFieldListNo050 = getCallNumberFieldSetNo050(record, fieldSpec);
+        callNumberFieldList = getCallNumberFieldSet(record, callNumberFieldListNo050);
+        callNumberClusterMapNo050 =  getCallNumbersCleanedConflated(callNumberFieldListNo050, true);
         callNumberClusterMap =  getCallNumbersCleanedConflated(callNumberFieldList, true);
         bestSingleCallNumber = getBestSingleCallNumber(callNumberClusterMap);
     }
@@ -234,7 +238,7 @@ public class BlacklightIndexer extends SolrIndexer
      * 
      * @param record -  The MARC record that is being indexed.
      */
-    private Set<String> getCallNumberFieldSet(final Record record, String fieldSpec)
+    private Set<String> getCallNumberFieldSetNo050(final Record record, String fieldSpec)
     {
         boolean processExtraShadowedIds = fieldSpec.contains("';'");
     
@@ -262,6 +266,20 @@ public class BlacklightIndexer extends SolrIndexer
                 }
             }
         }
+        return(fieldList);
+    }
+    /**
+     * Since there are several routines that grab and process LC Call Numbers for a given record, 
+     * this code is called once per record to gather the list of call numbers, rather than creating that 
+     * list within each implementation of the custom indexing functions.
+     * 
+     * @param record -  The MARC record that is being indexed.
+     */
+    private Set<String> getCallNumberFieldSet(final Record record, Set<String> startingFieldList)
+    {
+        Set<String> fieldList = new LinkedHashSet<String>();
+        fieldList.addAll(startingFieldList);
+
         // discard LC numbers that aren't valid according to the CallNumUtil routine
         boolean hasLCNumber = false;
         for (String field : fieldList)
@@ -582,19 +600,32 @@ public class BlacklightIndexer extends SolrIndexer
        return(result);
 
    }
+ 
+   public Set<String> getCallNumbersCleanedNewNo050(final Record record, String conflatePrefixes)
+   {
+       return(getCallNumbersCleanedNew(record, conflatePrefixes, this.callNumberFieldListNo050, this.callNumberClusterMapNo050));
+   }
+
    
+   public Set<String> getCallNumbersCleanedNew(final Record record, String conflatePrefixes)
+   {
+       return(getCallNumbersCleanedNew(record, conflatePrefixes, this.callNumberFieldList, this.callNumberClusterMap));
+   }
+
    /**
     * Extract a set of cleaned call numbers from a record
     * @param record
     * @return Clean call number
     */
-    public Set<String> getCallNumbersCleanedNew(final Record record, String conflatePrefixes)
+    public Set<String> getCallNumbersCleanedNew(final Record record, String conflatePrefixes, 
+                                                Set<String> localCallNumberFieldList, 
+                                                Map<String, Set<String>> localCallNumberClusterMap)
     {
         boolean conflate = !conflatePrefixes.equalsIgnoreCase("false");
         
         if (!conflate)
         {
-            Set<String> fieldList = this.callNumberFieldList;
+            Set<String> fieldList = localCallNumberFieldList;
             if (fieldList == null || fieldList.isEmpty())  
             {
                 return(null);
@@ -618,7 +649,7 @@ public class BlacklightIndexer extends SolrIndexer
         }
         else
         {
-            Map<String, Set<String>> resultNormed = this.callNumberClusterMap;
+            Map<String, Set<String>> resultNormed = localCallNumberClusterMap;
             if (resultNormed == null || resultNormed.size() == 0) return(null);
             Set<String> keys = resultNormed.keySet();
             Set<String> results = new TreeSet<String>(normedComparator);
@@ -964,6 +995,11 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> result = getFieldList(record, "999t");
         result = Utils.remap(result, findMap(mapName3), false);
 
+        Set<String> f245h = getFieldList(record, "245h");
+        if (Utils.setItemContains(f245h, "cartographic material"))
+        {
+            result.add("Map");
+        }
         Set<String> urls = getFieldList(record, "856u");
         Set<String> format_007_raw = getFieldList(record, "007[0-1]");
         if (Utils.setItemContains(format_007_raw, "cr") || Utils.setItemContains(result, "Online"))
