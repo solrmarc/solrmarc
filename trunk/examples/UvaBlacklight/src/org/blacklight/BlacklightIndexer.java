@@ -278,7 +278,10 @@ public class BlacklightIndexer extends SolrIndexer
     private Set<String> getCallNumberFieldSet(final Record record, Set<String> startingFieldList)
     {
         Set<String> fieldList = new LinkedHashSet<String>();
-        fieldList.addAll(startingFieldList);
+        if (startingFieldList != null) 
+        {
+            fieldList.addAll(startingFieldList);
+        }
 
         // discard LC numbers that aren't valid according to the CallNumUtil routine
         boolean hasLCNumber = false;
