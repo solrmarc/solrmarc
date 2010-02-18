@@ -17,9 +17,11 @@ solrcore=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.c
 solrurlstart=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.hosturl | sed -e's/.* = //' -e's:/[A-Za-z0-9_]*$::'`
 
 solrnewcore=`echo $solrcore | sed -e's/_.*//'`_`date +%Y%m%d`
+solroldcore=`echo $solrcore | sed -e's/_.*//'`_`date --date="-3 days" +%Y%m%d`
 
 solrdir=$solrhome/$solrcore
 solrnewdir=$solrhome/$solrnewcore
+solrolddir=$solrhome/$solroldcore
 
 # copy entire index via creating hard links, then turn segment files from hardlinks to copies
 cp -lR $solrdir $solrnewdir.tmp
@@ -35,3 +37,7 @@ rm $solrnewdir.tmp/*/.nfs* 2> /dev/null
 mv $solrnewdir.tmp $solrnewdir
 
 curl "$solrurlstart/admin/multicore?action=CREATE&name=virgobeta&instanceDir=$solrnewcore" > /dev/null 2>1
+
+# now delete the solr data directory form three days ago
+rm -rf $solrolddir
+
