@@ -72,7 +72,7 @@ First either download the software via a subversion checkout:
 or by downloading the distribution (!SolrMarc_Distribution.tar.gz) from the downloads page:
 http://code.google.com/p/solrmarc/downloads/list
 
-Next, at the command prompt, run 
+Next, switch into the solrmarc directory you just created, and at the command prompt, run 
 
 {{{ant init}}}
 
