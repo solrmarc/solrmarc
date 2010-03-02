@@ -5,3 +5,12 @@ ${default.config}, u399.mrc, id, u399
 # config file name, marc file to index(id of record to index), solr field to examine, value to expect
 
 ${default.config}, selectedRecs.mrc(u2), id, u2
+
+# These following tests don't seem to be actually running?  Added by jrochkind 
+# 2 March 2010
+# marc record with no 245$a, but a 345$k. Does getTitleSorted still find
+# the $k?
+${default.config}, title_k.mrc, title_sorted, AAAMorton Hoffman papers.
+# marc record with no 245$, but a $b. (Bad data). Does getTitleSorted
+# not raise, and still come up with something, even if it's weird?
+$(default.config), title_b.mrc, title_sorted, "family physician; or, Domestic medical friend:"

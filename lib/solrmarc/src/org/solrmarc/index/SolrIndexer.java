@@ -1149,30 +1149,36 @@ public class SolrIndexer
      *    See org.solrmarc.tools.Utils.cleanData() for details on the 
      *     punctuation removal
      * @param record - the marc record object
-     * @return 245a and 245b values concatenated, with trailing punct removed.
+     * @return 245a, b, and k values concatenated in order found, with trailing punct removed. Returns empty string if no suitable title found. 
      */
     public String getTitle(Record record)
     {
         DataField titleField = (DataField) record.getVariableField("245");
-        String thisTitle = "";
-
-        if (titleField != null && titleField.getSubfield('a') != null)
-        {
-            thisTitle = titleField.getSubfield('a').getData();
-
-            // check for a subfield b
-            if (titleField.getSubfield('b') != null)
-                thisTitle += " " + titleField.getSubfield('b').getData();
+        if ( titleField == null) {
+          return ""; 
         }
-        return Utils.cleanData(thisTitle);
+        
+        StringBuilder titleBuilder = new StringBuilder();
+
+        Iterator<Subfield> iter = titleField.getSubfields().iterator();
+        while ( iter.hasNext() ) {
+          Subfield f = iter.next(); 
+          char code = f.getCode();
+          if ( code == 'a' || code == 'b' || code == 'k' ) {
+             titleBuilder.append(f.getData()); 
+          }
+        }        
+
+        return Utils.cleanData(titleBuilder.toString());
     }
 
     /**
      * Get the title (245ab) from a record, without non-filing chars as
-     * specified in 245 2nd indicator
+     * specified in 245 2nd indicator, and lowercased. 
      * @param record - the marc record object
      * @return 245a and 245b values concatenated, with trailing punct removed,
-     *         and with non-filing characters omitted
+     *         and with non-filing characters omitted. Null returned if no
+     *         title can be found. 
      * 
      * @see org.solrmarc.index.SolrIndexer.getTitle()
      */
@@ -1180,10 +1186,23 @@ public class SolrIndexer
     {
         DataField titleField = (DataField) record.getVariableField("245");
         if (titleField == null)
-            return null;
+            return "";
+          
         int nonFilingInt = getInd2AsInt(titleField);
-        String thisTitle = getTitle(record).substring(nonFilingInt);
-        return thisTitle.toLowerCase();
+        
+        String title = getTitle(record);
+        title = title.toLowerCase();
+        
+        //Skip non-filing chars, if possible. 
+        if ( title.length() > nonFilingInt )  {
+          title = title.substring(nonFilingInt);          
+        }
+        
+        if ( title.length() == 0) {
+          return null;
+        }                
+        
+        return title;
     }
 
     /**
