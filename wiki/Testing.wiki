@@ -58,7 +58,7 @@ The JUnit code that is used for these tests is org.solrmarc.test.!ParameterizedI
 
 These tests are "closer" to the java indexing code, so if you are writing customized java methods for indexing, this approach may be more convenient.  
 
-These approaches may also be more convenient if you intend to have multiple MARC records in your test files.  Additionally, these approaches allow checking for the presence or absence of a single value for a Solr field, so it may be more useful when there are many values to be assigned to a particular Solr field (e.g. a record with a lot of 650 subject fields).
+These approaches may also be more convenient if you intend to have multiple MARC records in your test files.  Additionally, these approaches allow checking for the presence or absence of a single value for a Solr field, so it may be more useful when there are many values to be assigned to a particular Solr field (e.g. a record with a lot of 650 subject fields).  Lastly, you do not need a solr index running to test this way.
 
 It allows tests to be run from Eclipse or other IDEs.  Because it is just java code, it can also be run from an ant task.  
   * The tests and expected results are in the java code.
@@ -66,6 +66,7 @@ It allows tests to be run from Eclipse or other IDEs.  Because it is just java c
   * These tests indicate which Solr document is to be tested, so you can use a test data file with multiple MaRC records. 
   * These tests allow any individual value for a field to be specified, without having to specify all the other values.
   * These tests can check for the absence of a value from a Solr field.
+  * A Solr index does not need to be running to execute these tests.
 
 == Method II:  Mapping Tests in Java Code ==
 
@@ -190,7 +191,7 @@ This approach actually creates an index, which allows for additional types of te
   * Searching tests for Solr indexed fields.
   * More refined assertions about contents and properties of Solr fields.
 
-Running tests with this approach can take longer, since you are building an index, possibly for each test.  This is especially true for large sets of test records.
+Running tests with this approach can take longer, since you are building an index, possibly for each test.  This is especially true for large sets of test records.  Note that Solr does NOT need to be running for this type of testing -- the tests use the Solr java API to access the index.
 
 The tests and expected results will be in java code in your site's test/src directory. You can run these tests from within your IDE;  you could also easily adapt the ant "test" target to run these tests.
 
