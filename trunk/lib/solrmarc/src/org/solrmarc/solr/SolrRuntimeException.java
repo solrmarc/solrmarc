@@ -7,4 +7,8 @@ public class SolrRuntimeException extends RuntimeException
      {
          super(message, containedException);
      }
+     public SolrRuntimeException(String message)
+     {
+         super(message);
+     }
 }
