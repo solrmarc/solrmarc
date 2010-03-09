@@ -55,6 +55,10 @@ public class SolrIndexer
      *  values are the translation maps (hence, it's a map of maps) */
     private Map<String, Map<String, String>> transMapMap = null;
 
+    /** map of custom methods.  keys are names of custom methods; 
+     *  values are the translation maps (hence, it's a map of maps) */
+    private Map<String, Method> customMethodMap = null;
+
     /** map of script interpreters.  keys are names of scripts; 
      *  values are the Interpterers  */
     private Map<String, Interpreter> scriptMap = null;
@@ -80,6 +84,7 @@ public class SolrIndexer
         fieldMap = new HashMap<String, String[]>();
         transMapMap = new HashMap<String, Map<String, String>>();
         scriptMap = new HashMap<String, Interpreter>();
+        customMethodMap = new HashMap<String, Method>();
         indexDate = new Date();
     }
 
@@ -316,10 +321,13 @@ public class SolrIndexer
                     parmClasses[i + 1] = String.class;
                 }
                 method = getClass().getMethod(functionName, parmClasses);
+                customMethodMap.put(functionName, method);
             }
             else
+            {    
                 method = getClass().getMethod(indexParm, new Class[] { Record.class });
-
+                customMethodMap.put(indexParm, method);
+            }
             Class<?> retval = method.getReturnType();
             // if (!method.isAccessible())
             // {
@@ -604,13 +612,15 @@ public class SolrIndexer
                     parmClasses[i + 1] = String.class;
                     objParms[i + 1] = dequote(parms[i].trim());
                 }
-                method = getClass().getMethod(functionName, parmClasses);
+                method = customMethodMap.get(functionName);
+                // method = getClass().getMethod(functionName, parmClasses);
                 returnType = method.getReturnType();
                 retval = method.invoke(this, objParms);
             }
             else
             {
-                method = getClass().getMethod(indexParm, new Class[]{Record.class});
+                method = customMethodMap.get(indexParm);
+                //method = getClass().getMethod(indexParm, new Class[]{Record.class});
                 returnType = method.getReturnType();
                 retval = method.invoke(this, new Object[] { record });
             }
@@ -620,11 +630,11 @@ public class SolrIndexer
             // e.printStackTrace();
             logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
         }
-        catch (NoSuchMethodException e)
-        {
-            // e.printStackTrace();
-            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
-        }
+//        catch (NoSuchMethodException e)
+//        {
+//            // e.printStackTrace();
+//            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+//        }
         catch (IllegalArgumentException e)
         {
             // e.printStackTrace();
@@ -1557,7 +1567,7 @@ public class SolrIndexer
     protected String writeRaw(Record record)
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        MarcWriter writer = new MarcStreamWriter(out, "UTF-8");
+        MarcWriter writer = new MarcPermissiveStreamWriter(out, "UTF-8");
         writer.write(record);
         writer.close();
 
