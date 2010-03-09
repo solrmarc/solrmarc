@@ -19,6 +19,7 @@ package org.solrmarc.marc;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -28,12 +29,16 @@ import java.util.logging.Level;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.log4j.*;
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.marc4j.ErrorHandler;
 import org.marc4j.marc.Record;
 import org.solrmarc.solr.SolrCoreLoader;
 import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRemoteProxy;
 import org.solrmarc.solr.SolrRuntimeException;
+import org.solrmarc.solr.SolrServerProxy;
 import org.solrmarc.tools.SolrUpdate;
 import org.solrmarc.tools.Utils;
 
@@ -64,7 +69,7 @@ public class MarcImporter extends MarcHandler
     private int recsIndexedCounter = 0;
     private int idsToDeleteCounter = 0;
     private int recsDeletedCounter = 0;
-    
+    private boolean useBinaryRequestHandler = false;
     // Initialize logging category
     protected static Logger logger = Logger.getLogger(MarcImporter.class.getName());
     
@@ -160,7 +165,12 @@ public class MarcImporter extends MarcHandler
         optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(configProps, "solr.optimize_at_end"));
         
         // Set up Solr core
-        solrProxy = getSolrProxy();
+        boolean useSolrServerProxy = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_solr_server_proxy"));
+        useBinaryRequestHandler = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_binary_request_handler"));
+        if (useSolrServerProxy) 
+            solrProxy = getSolrServerProxy();
+        else
+            solrProxy = getSolrProxy();
 
         return;
 	}
@@ -569,7 +579,7 @@ public class MarcImporter extends MarcHandler
             if (solrProxyIsRemote)
             {
                 logger.info(" Connecting to remote Solr server at URL " + solrHostUpdateURL);
-                solrProxy = new SolrRemoteProxy(solrHostUpdateURL); 
+                solrProxy = new SolrRemoteProxy(solrHostUpdateURL, useBinaryRequestHandler); 
             }
             else 
             {
@@ -623,6 +633,128 @@ public class MarcImporter extends MarcHandler
                 if (solrCoreName != null && solrCoreName.length() != 0)
                     logger.info("     Using Solr core " + solrCoreName);
                 solrProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, solrCoreName, logger);
+            }
+        }
+        return(solrProxy);
+    }
+    
+    public SolrProxy getSolrServerProxy()
+    {
+        if (solrProxy == null)
+        {
+            solrProxyIsRemote = false;
+            if (solrHostUpdateURL != null && solrHostUpdateURL.length() > 0)
+            {
+                if ((solrCoreDir == null || solrCoreDir.length() == 0 || solrCoreDir.equalsIgnoreCase("REMOTE")))
+                {
+                    solrProxyIsRemote = true;
+                }
+                else 
+                {
+                    URL solrhostURL;
+                    try
+                    {
+                        solrhostURL = new URL(solrHostUpdateURL);
+                        java.net.InetAddress address = java.net.InetAddress.getByName(solrhostURL.getHost());
+                        
+                        String urlCanonicalHostName = address.getCanonicalHostName();
+                        String localCanonicalHostName = java.net.InetAddress.getLocalHost().getCanonicalHostName();
+                        if (!(address.isLoopbackAddress() || urlCanonicalHostName.equals(localCanonicalHostName))) 
+                        {
+                            solrProxyIsRemote = true;
+                        }
+                    }
+                    catch (MalformedURLException e)
+                    {
+                        // URL seems invalid, assume that we want local access to the solr index and proceed
+                        solrProxyIsRemote = false;
+                    }
+                    catch (UnknownHostException e)
+                    {
+                        // hostname in URL seems invalid, assume that we want local access to the solr index and proceed
+                        solrProxyIsRemote = false;
+                    }
+                }
+            }
+            if (solrProxyIsRemote)
+            {
+                logger.info(" Connecting to remote Solr server at URL " + solrHostUpdateURL);
+                SolrServer solrserver;
+                try
+                {
+                    String URL = solrHostUpdateURL.replaceAll("[/\\\\]update$", "");
+                    CommonsHttpSolrServer httpsolrserver = new CommonsHttpSolrServer(URL);
+//                    Class<?> clazz = httpsolrserver.getClass();
+//                    Method methods[] = clazz.getMethods();
+//                    for (Method m : methods)
+//                    {
+//                        System.out.println(m.toString());
+//                    }
+                    if (useBinaryRequestHandler)
+                    {
+                        httpsolrserver.setRequestWriter(new BinaryRequestWriter());
+                    }
+                    solrProxy = new SolrServerProxy(httpsolrserver); 
+                }
+                catch (MalformedURLException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            else 
+            {
+                if (solrCoreDir.equals("@SOLR_PATH@") )
+                {
+                    System.err.println("Error: Solr home directory not initialized, please run setsolrhome") ;
+                    logger.error("Error: Solr home directory not initialized, please run setsolrhome") ;
+                    System.exit(1);               
+                }
+                File solrcoretest = new File(solrCoreDir);
+                if (!solrcoretest.isAbsolute())  solrcoretest = new File(homeDir, solrCoreDir);
+                try
+                {
+                    solrCoreDir = solrcoretest.getCanonicalPath();
+                    System.setProperty("solr.solr.home", solrCoreDir);
+                }
+                catch (IOException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                if (!solrcoretest.exists() || !solrcoretest.isDirectory() )
+                {
+                    System.err.println("Error: Supplied Solr home directory does not exist: "+ solrCoreDir) ;
+                    logger.error("Error: Supplied Solr home directory does not exist: "+ solrCoreDir) ;
+                    System.exit(1);               
+                }
+                File solrcoretest1 = new File(solrCoreDir, "solr.xml");
+                File solrcoretest2 = new File(solrCoreDir, "conf");
+                if (!solrcoretest1.exists() &&  !solrcoretest2.exists() )
+                {
+                    System.err.println("Error: Supplied Solr home directory does not contain proper solr configuration: "+ solrCoreDir) ;
+                    logger.error("Error: Supplied Solr home directory does not contain proper solr configuration: "+ solrCoreDir) ;
+                    System.exit(1);               
+                }
+                logger.info(" Updating to Solr index at " + solrCoreDir);
+                if (!solrcoretest1.exists() && solrDataDir == null)
+                {
+                    solrDataDir = new File(solrcoretest, "data").getAbsolutePath();
+                }
+                else if (solrDataDir != null && solrDataDir.contains("${solr.path}"))
+                {
+                    String dataPathFrag = solrDataDir.replaceFirst("[$][{]solr[.]path[}][/\\\\]+", "");
+                    solrDataDir = new File(solrCoreDir, dataPathFrag).getAbsolutePath();
+                }
+                if (solrDataDir != null)
+                {
+                    System.setProperty("solr.data.dir", solrDataDir);
+                    logger.info("     Using Solr data dir " + solrDataDir);
+                }
+                if (solrCoreName != null && solrCoreName.length() != 0)
+                    logger.info("     Using Solr core " + solrCoreName);
+              //  solrProxy = SolrCoreLoader.loadCore(solrCoreDir, solrDataDir, solrCoreName, logger);
+                solrProxy = SolrCoreLoader.loadEmbeddedCore(solrCoreDir, solrDataDir, solrCoreName, useBinaryRequestHandler, logger);
             }
         }
         return(solrProxy);
