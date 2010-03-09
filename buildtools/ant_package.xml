@@ -161,7 +161,7 @@
                      username="@{username}" 
                      password="@{password}" 
                      projectname="solrmarc" 
-                     filename="${package.dir}/SolrMarc_${examplelabel}_Source.tar.gz" 
+                     filename="${package.dir}/SolrMarc_${examplelabel}_Source${version_parm}.tar.gz" 
                      targetfilename="SolrMarc_${examplelabel}_Source${version_parm}.tar.gz"
                      summary="Source Code distribution of SolrMarc${version_parm} for any environment for @{sitelabel}"
                      labels="Type-Source, OpSys-All" />
@@ -172,7 +172,7 @@
                              username="@{username}" 
                              password="@{password}" 
                              projectname="solrmarc" 
-                             filename="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix.tar.gz" 
+                             filename="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix${version_parm}.tar.gz" 
                              targetfilename="SolrMarc_${examplelabel}_Binary_Unix${version_parm}.tar.gz"
                              summary="Prebuilt Binary distribution of SolrMarc${version_parm} for UNIX environment for @{sitelabel}"
                              labels="Type-Archive, OpSys-Linux, OpSys-OSX" />
@@ -180,7 +180,7 @@
                              username="@{username}" 
                              password="@{password}" 
                              projectname="solrmarc" 
-                             filename="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" 
+                             filename="${package.dir}/SolrMarc_${examplelabel}_Binary_PC${version_parm}.zip" 
                              targetfilename="SolrMarc_${examplelabel}_Binary_PC${version_parm}.zip"
                              summary="Prebuilt Binary distribution of SolrMarc${version_parm} for PC environment for @{sitelabel}"
                              labels="Type-Archive, OpSys-Windows" />
