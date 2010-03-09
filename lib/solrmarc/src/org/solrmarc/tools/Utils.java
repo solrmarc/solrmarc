@@ -18,6 +18,7 @@ package org.solrmarc.tools;
 
 import java.io.*;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -40,11 +41,11 @@ public final class Utils {
     
     private final static Pattern FOUR_DIGIT_PATTERN_BRACES = Pattern.compile("\\[[12]\\d{3,3}\\]");
     private final static Pattern FOUR_DIGIT_PATTERN_ONE_BRACE = Pattern.compile("\\[[12]\\d{3,3}");
-    private final static Pattern FOUR_DIGIT_PATTERN_STARTING_WITH_1_2 = Pattern.compile("(200|1[98765][0-9])[0-9]");
+    private final static Pattern FOUR_DIGIT_PATTERN_STARTING_WITH_1_2 = Pattern.compile("(20|19|18|17|16|15)[0-9][0-9]");
     private final static Pattern FOUR_DIGIT_PATTERN_OTHER_1 = Pattern.compile("l\\d{3,3}");
     private final static Pattern FOUR_DIGIT_PATTERN_OTHER_2 = Pattern.compile("\\[19\\]\\d{2,2}");
-    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_3 = Pattern.compile("(200|1[98765][0-9])[-?0-9]");
-    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_4 = Pattern.compile("i.e. (200|1[98765][0-9])[0-9]");
+    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_3 = Pattern.compile("(20|19|18|17|16|15)[0-9][-?0-9]");
+    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_4 = Pattern.compile("i.e. (20|19|18|17|16|15)[0-9][0-9]");
     private final static Pattern BC_DATE_PATTERN = Pattern.compile("[0-9]+ [Bb][.]?[Cc][.]?");
     private final static Pattern FOUR_DIGIT_PATTERN = Pattern.compile("\\d{4,4}");
     private static Matcher matcher;
@@ -337,6 +338,20 @@ public final class Utils {
         {   
             cleanDate = matcher_three_digits_plus_unk.group().replaceAll("[-?]", "0");
         } 
+        if (cleanDate != null)
+        {
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy");
+            String thisYear = dateFormat.format(calendar.getTime());
+            try {
+                if (Integer.parseInt(cleanDate) > Integer.parseInt(thisYear) + 1) 
+                    cleanDate = null;
+            }
+            catch (NumberFormatException nfe)
+            {
+                cleanDate = null;
+            }
+        }
         if (cleanDate != null)
         {
             logger.debug("Date : "+ date + " mapped to : "+ cleanDate);            
