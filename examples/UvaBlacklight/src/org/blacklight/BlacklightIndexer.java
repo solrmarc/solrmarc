@@ -256,13 +256,14 @@ public class BlacklightIndexer extends SolrIndexer
             for (Object field : fields999)
             {
                 DataField df = ((DataField)(field));
-                String barCode = df.getSubfield('i').getData();
-                String numberScheme = df.getSubfield('w').getData();
+                String barCode = (df.getSubfield('i') != null) ? df.getSubfield('i').getData() : "";
+                String numberScheme = (df.getSubfield('w') != null) ? df.getSubfield('w').getData() : "";
                 if (numberScheme.equals("MONO-SER") || numberScheme.equals("LCPER"))  numberScheme = "LC";
-                String callNumber = df.getSubfield('a').getData();
+                String callNumber = (df.getSubfield('a') != null) ? df.getSubfield('a').getData() : "";
                 if (extraString == null || extraString.equals("") || !extraString.contains("|" + barCode + "|"))
                 {
-                    fieldList.add(numberScheme + ":" + callNumber);
+                    if (numberScheme.length() > 0 && callNumber.length() > 0) 
+                        fieldList.add(numberScheme + ":" + callNumber);
                 }
             }
         }
