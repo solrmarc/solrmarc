@@ -7,7 +7,7 @@
     <macrodef name="packagesrc" description="Create a gzipped src tarball for distribution" >
         <attribute name="version" />
         <sequential>
-            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="_@{version}" defaultValue="_@{version}" override="true" />
+            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="-@{version}" defaultValue="-@{version}" override="true" />
             <delete>
                 <fileset dir="${package.dir}" includes="SolrMarc_Distribution*.tar.gz" />
             </delete>
@@ -41,7 +41,7 @@
         <attribute name="password" />
         <attribute name="version" />
         <sequential>
-            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="_@{version}" defaultValue="_@{version}" override="true" />
+            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="-@{version}" defaultValue="-@{version}" override="true" />
         	<gcupload 
         	        username="@{username}" 
         	        password="@{password}" 
@@ -64,7 +64,7 @@
             <property name="temp.dist.dir" location="tmp-dist" />
             <delete dir="${temp.site.dir}" />
             <delete dir="${temp.dist.dir}" />
-            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="_@{version}" defaultValue="_@{version}" override="true" />
+            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="-@{version}" defaultValue="-@{version}" override="true" />
             <propertyregex property="examplelabel" input="@{example}" regexp="none" replace="Generic" defaultValue="@{example}" override="true" />
             <antcall target="init" inheritAll="false" >
                 <param name="example.configuration" value="@{example}" />
@@ -155,7 +155,7 @@
         <attribute name="sitelabel" />
         <sequential>
             <propertyregex property="examplelabel" input="@{example}" regexp="none" replace="Generic" defaultValue="@{example}" override="true" />
-            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="_@{version}" defaultValue="_@{version}" override="true" />
+            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="-@{version}" defaultValue="-@{version}" override="true" />
 
             <gcupload 
                      username="@{username}" 
