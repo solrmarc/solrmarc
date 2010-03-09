@@ -39,7 +39,9 @@
     <macrodef name="uploadsrc" description="Upload source package to googlecode downloads page" >
         <attribute name="username" />
         <attribute name="password" />
+        <attribute name="version" />
         <sequential>
+            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="_@{version}" defaultValue="_@{version}" override="true" />
         	<gcupload 
         	        username="@{username}" 
         	        password="@{password}" 

@@ -128,13 +128,13 @@
                 <property file="build.credentials.properties" />
                 <fail unless="gc.username" message="Missing property 'gc.username' from file 'build.credentials.properties'."/>
                 <fail unless="gc.password" message="Missing property 'gc.password' from file 'build.credentials.properties'."/>
-                <uploadsrc username="${gc.username}" password="${gc.password}" />
+                <uploadsrc username="${gc.username}" password="${gc.password}" version="${version}" />
                 <uploadprebuilt username="${gc.username}" password="${gc.password}" example="GenericBlacklight"
-                       sitelabel="Blacklight site" />
+                       sitelabel="Blacklight site" version="${version}" />
                 <uploadprebuilt username="${gc.username}" password="${gc.password}" example="GenericVuFind"
-                       sitelabel="VuFind site" />
+                       sitelabel="VuFind site" version="${version}" />
                 <uploadprebuilt username="${gc.username}" password="${gc.password}" example="none"
-                       sitelabel="Custom Configuration (for non-Blacklight and non-VuFind site)" />
+                       sitelabel="Custom Configuration (for non-Blacklight and non-VuFind site)" version="${version}" />
             </then>
             <else>
             	<fail message="Can't find file 'build.credentials.properties'."/>
