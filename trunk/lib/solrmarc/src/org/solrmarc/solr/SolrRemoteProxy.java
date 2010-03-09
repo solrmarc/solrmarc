@@ -14,17 +14,17 @@ public class SolrRemoteProxy implements SolrProxy
     Object solrInputDoc = null;
     Class<?> solrServerExceptionClass = null;
     
-    public SolrRemoteProxy(String remoteURL)
+    public SolrRemoteProxy(String remoteURL, boolean binaryMode)
     {
         initializeSolrInputDoc();
         String URL = remoteURL.replaceAll("[/\\\\]update$", "");
-        initializeSolrServer(URL);
+        initializeSolrServer(URL, binaryMode);
     }
     
     /**
      * initialize SolrServer object 
      */
-    private void initializeSolrServer(String remoteURL)
+    private void initializeSolrServer(String remoteURL, boolean binaryMode)
     {
         try
         {
@@ -32,6 +32,13 @@ public class SolrRemoteProxy implements SolrProxy
             {
                 Class<?> solrServerClass = Class.forName("org.apache.solr.client.solrj.impl.CommonsHttpSolrServer");
                 server = solrServerClass.getConstructor(String.class).newInstance(remoteURL);
+                if (binaryMode)
+                {
+                    Class<?> binaryRequestWriterClass = Class.forName("org.apache.solr.client.solrj.impl.BinaryRequestWriter");
+                    Class<?> requestWriterClass = Class.forName("org.apache.solr.client.solrj.request.RequestWriter");
+                    Object binaryRequestWriter = binaryRequestWriterClass.getConstructor().newInstance();
+                    solrServerClass.getMethod("setRequestWriter", requestWriterClass).invoke(server, binaryRequestWriter);
+                }
             }
         }
         catch (Exception e)
