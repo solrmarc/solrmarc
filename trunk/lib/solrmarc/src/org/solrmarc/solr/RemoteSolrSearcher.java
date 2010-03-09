@@ -160,24 +160,32 @@ public class RemoteSolrSearcher
 
     private String normalizeUnicode(String string)
     {
-        Pattern pattern = Pattern.compile("\\\\u([0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f])"); 
+        Pattern pattern = Pattern.compile("(\\\\u([0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|(#(29|30|31);)");
         Matcher matcher = pattern.matcher(string);
         StringBuffer result = new StringBuffer();
         int prevEnd = 0;
-        while (matcher.find())
+        while(matcher.find())
         {
             result.append(string.substring(prevEnd, matcher.start()));
-            result.append(getChar(matcher.group(1)));
+            result.append(getChar(matcher.group()));
             prevEnd = matcher.end();
         }
         result.append(string.substring(prevEnd));
         string = result.toString();
         return(string);
     }
-
+    
     private String getChar(String charCodePoint)
     {
-        int charNum = Integer.parseInt(charCodePoint, 16);
+        int charNum;
+        if (charCodePoint.startsWith("\\u"))
+        {
+            charNum = Integer.parseInt(charCodePoint.substring(1), 16);
+        }
+        else
+        {
+            charNum = Integer.parseInt(charCodePoint.substring(1, 3));
+        }
         String result = ""+((char)charNum);
         return(result);
     }
