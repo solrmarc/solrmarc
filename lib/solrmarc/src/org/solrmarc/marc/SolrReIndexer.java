@@ -4,6 +4,8 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.marc4j.*;
 import org.marc4j.marc.Record;
@@ -102,7 +104,7 @@ public class SolrReIndexer extends MarcImporter
             {
                 DocumentProxy doc = solrSearcherProxy.getDocumentProxyBySolrDocNum(docNum);
                 Record record = getRecordFromDocument(doc);
-                if (output != null) 
+                if (output != null && record != null) 
                 {
                     output.write(record);
                     System.out.flush();
@@ -252,9 +254,11 @@ public class SolrReIndexer extends MarcImporter
     private Record getRecordFromRawMarc(String marcRecordStr)
     {
         MarcStreamReader reader;
+        int tries = 0;
         boolean tryAgain = false;
         do {
             try {
+                tries++;
                 tryAgain = false;
                 reader = new MarcStreamReader(new ByteArrayInputStream(marcRecordStr.getBytes("UTF8")));
                 if (reader.hasNext())
@@ -269,7 +273,15 @@ public class SolrReIndexer extends MarcImporter
             }
             catch( MarcException me)
             {
-                me.printStackTrace();
+                if (tries == 1)
+                {
+                    tryAgain = true; 
+                    marcRecordStr = normalizeUnicode(marcRecordStr);
+                }
+                else 
+                {
+                    me.printStackTrace();
+                }
             }
             catch (UnsupportedEncodingException e)
             {
@@ -277,6 +289,38 @@ public class SolrReIndexer extends MarcImporter
             }
         } while (tryAgain);
         return(null);
+    }
+    
+    private String normalizeUnicode(String string)
+    {
+        Pattern pattern = Pattern.compile("(\\\\u([0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|(#(29|30|31);)");
+        Matcher matcher = pattern.matcher(string);
+        StringBuffer result = new StringBuffer();
+        int prevEnd = 0;
+        while(matcher.find())
+        {
+            result.append(string.substring(prevEnd, matcher.start()));
+            result.append(getChar(matcher.group()));
+            prevEnd = matcher.end();
+        }
+        result.append(string.substring(prevEnd));
+        string = result.toString();
+        return(string);
+    }
+    
+    private String getChar(String charCodePoint)
+    {
+        int charNum;
+        if (charCodePoint.startsWith("\\u"))
+        {
+            charNum = Integer.parseInt(charCodePoint.substring(1), 16);
+        }
+        else
+        {
+            charNum = Integer.parseInt(charCodePoint.substring(1, 3));
+        }
+        String result = ""+((char)charNum);
+        return(result);
     }
     
     // error output
