@@ -5,9 +5,13 @@
              classpath="${ant_package.dist.dir}/ant-googlecode-0.0.2.jar" onerror="report" />  
     
     <macrodef name="packagesrc" description="Create a gzipped src tarball for distribution" >
+        <attribute name="version" />
         <sequential>
-            <delete file="${package.dir}/SolrMarc_Distribution.tar.gz" />
-            <tar destfile="${package.dir}/SolrMarc_Distribution.tar.gz" compression="gzip" >
+            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="_@{version}" defaultValue="_@{version}" override="true" />
+            <delete>
+                <fileset dir="${package.dir}" includes="SolrMarc_Distribution*.tar.gz" />
+            </delete>
+            <tar destfile="${package.dir}/SolrMarc_Distribution${version_parm}.tar.gz" compression="gzip" >
                 <tarfileset dir=".">
                     <include name="build.xml" />
                     <include name="build.properties" />
@@ -40,9 +44,9 @@
         	        username="@{username}" 
         	        password="@{password}" 
         	        projectname="solrmarc" 
-        	        filename="${package.dir}/SolrMarc_Distribution.tar.gz" 
-        	        targetfilename="SolrMarc_Distribution.tar.gz"
-        	        summary="Static snapshot of full source code distribution for all of SolrMarc-2.1 including all examples (Can be used to build ALL of the other distributions listed here and more)"
+        	        filename="${package.dir}/SolrMarc_Distribution${version_parm}.tar.gz" 
+        	        targetfilename="SolrMarc_Distribution${version_parm}.tar.gz"
+        	        summary="Static snapshot of full source code distribution for all of SolrMarc${version_parm} including all examples (Can be used to build ALL of the other distributions listed here and more)"
         	        labels="Type-Source, OpSys-All" />	
         </sequential>
     </macrodef>
@@ -50,6 +54,7 @@
     <macrodef name="packageprebuilt" description="Create a gzipped pre-built version for distribution" >
         <attribute name="srconly" default="false" />
         <attribute name="example" />
+        <attribute name="version" />
         <attribute name="binprefix" default="" />
         <attribute name="acceptpromptdefaults" default="false" />
         <sequential>
@@ -57,6 +62,7 @@
             <property name="temp.dist.dir" location="tmp-dist" />
             <delete dir="${temp.site.dir}" />
             <delete dir="${temp.dist.dir}" />
+            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="_@{version}" defaultValue="_@{version}" override="true" />
             <propertyregex property="examplelabel" input="@{example}" regexp="none" replace="Generic" defaultValue="@{example}" override="true" />
             <antcall target="init" inheritAll="false" >
                 <param name="example.configuration" value="@{example}" />
@@ -66,14 +72,15 @@
                 <param name="accept.default.for.input" value="@{acceptpromptdefaults}" />
             </antcall>
             
-            <delete file="${package.dir}/SolrMarc_${examplelabel}_Source.tar.gz" />
-            <delete file="${package.dir}/SolrMarc_${examplelabel}_Source.zip" />
-            <tar destfile="${package.dir}/SolrMarc_${examplelabel}_Source.tar.gz" compression="gzip">
+            <delete>
+                <fileset dir="${package.dir}" includes="SolrMarc_${examplelabel}_Source*.tar.gz,SolrMarc_${examplelabel}_Source*.zip" />  
+            </delete>
+            <tar destfile="${package.dir}/SolrMarc_${examplelabel}_Source${version_parm}.tar.gz" compression="gzip">
                 <tarfileset dir="${temp.site.dir}" >
                     <include name="**" />
                 </tarfileset>
             </tar> 
-            <zip destfile="${package.dir}/SolrMarc_${examplelabel}_Source.zip" compress="true" whenempty="create">
+            <zip destfile="${package.dir}/SolrMarc_${examplelabel}_Source${version_parm}.zip" compress="true" whenempty="create">
                 <zipfileset dir="${temp.site.dir}" >
                     <include name="**" />
                 </zipfileset>
@@ -90,9 +97,10 @@
                         <param name="package-prebuilt.allscripts.shell" value="true" />
                     </antcall>
                     
-                    <delete file="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix.tar.gz" />
-                    <delete file="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" />
-                    <tar destfile="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix.tar.gz" compression="gzip">
+                    <delete >
+                    	<fileset dir="${package.dir}" includes="SolrMarc_${examplelabel}_Binary_Unix*tar.gz,SolrMarc_${examplelabel}_Binary_PC*.zip" />
+                    </delete>
+                    <tar destfile="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix${version_parm}.tar.gz" compression="gzip">
                         <tarfileset dir="${buildtools.path}">
                             <include name="README_UNIX" />
                         </tarfileset>
@@ -112,7 +120,7 @@
                             <include name="jetty/**" />
                         </tarfileset>
                     </tar> 
-                    <zip destfile="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" compress="true" whenempty="create">
+                    <zip destfile="${package.dir}/SolrMarc_${examplelabel}_Binary_PC${version_parm}.zip" compress="true" whenempty="create">
                         <zipfileset dir="${buildtools.path}" >
                              <include name="README_PC.txt" />
                         </zipfileset>
@@ -139,19 +147,21 @@
     <macrodef name="uploadprebuilt" description="Upload a gzipped pre-built version to googlecode downloads page" >
         <attribute name="username" />
         <attribute name="password" />
+        <attribute name="version" />
         <attribute name="srconly" default="false" />
         <attribute name="example" />
         <attribute name="sitelabel" />
         <sequential>
             <propertyregex property="examplelabel" input="@{example}" regexp="none" replace="Generic" defaultValue="@{example}" override="true" />
+            <propertyregex property="version_parm" input="@{version}" regexp="none" replace="_@{version}" defaultValue="_@{version}" override="true" />
 
             <gcupload 
                      username="@{username}" 
                      password="@{password}" 
                      projectname="solrmarc" 
                      filename="${package.dir}/SolrMarc_${examplelabel}_Source.tar.gz" 
-                     targetfilename="SolrMarc_${examplelabel}_Source.tar.gz"
-                     summary="Source Code distribution of SolrMarc-2.1 for any environment for @{sitelabel}"
+                     targetfilename="SolrMarc_${examplelabel}_Source${version_parm}.tar.gz"
+                     summary="Source Code distribution of SolrMarc${version_parm} for any environment for @{sitelabel}"
                      labels="Type-Source, OpSys-All" />
             <if>
                 <equals arg1="@{srconly}" arg2="false" />
@@ -161,16 +171,16 @@
                              password="@{password}" 
                              projectname="solrmarc" 
                              filename="${package.dir}/SolrMarc_${examplelabel}_Binary_Unix.tar.gz" 
-                             targetfilename="SolrMarc_${examplelabel}_Binary_Unix.tar.gz"
-                             summary="Prebuilt Binary distribution of SolrMarc-2.1 for UNIX environment for @{sitelabel}"
+                             targetfilename="SolrMarc_${examplelabel}_Binary_Unix${version_parm}.tar.gz"
+                             summary="Prebuilt Binary distribution of SolrMarc${version_parm} for UNIX environment for @{sitelabel}"
                              labels="Type-Archive, OpSys-Linux, OpSys-OSX" />
                     <gcupload 
                              username="@{username}" 
                              password="@{password}" 
                              projectname="solrmarc" 
                              filename="${package.dir}/SolrMarc_${examplelabel}_Binary_PC.zip" 
-                             targetfilename="SolrMarc_${examplelabel}_Binary_PC.zip"
-                             summary="Prebuilt Binary distribution of SolrMarc-2.1 for PC environment for @{sitelabel}"
+                             targetfilename="SolrMarc_${examplelabel}_Binary_PC${version_parm}.zip"
+                             summary="Prebuilt Binary distribution of SolrMarc${version_parm} for PC environment for @{sitelabel}"
                              labels="Type-Archive, OpSys-Windows" />
                 </then>
             </if>

@@ -113,11 +113,12 @@
 
     <target name="package" description="Create both prebuilt binary distributions and a source distribution" >
         <property name="package.dir" value="package" />
+        <property name="version" value="2.1" />
         <mkdir dir="${package.dir}" />
-        <packagesrc />
-        <packageprebuilt example="GenericBlacklight" binprefix="bin" />
-        <packageprebuilt example="GenericVuFind" binprefix="bin" />
-        <packageprebuilt example="none" binprefix="bin" acceptpromptdefaults="true"/> 
+        <packagesrc version="${version}" />
+        <packageprebuilt example="GenericBlacklight" binprefix="bin" version="${version}" />
+        <packageprebuilt example="GenericVuFind" binprefix="bin" version="${version}" />
+        <packageprebuilt example="none" binprefix="bin" acceptpromptdefaults="true" version="${version}" /> 
     </target>
     
     <target name="upload" depends="package" description="Upload prebuilt binary distributions and a source distribution to googlecode" >
