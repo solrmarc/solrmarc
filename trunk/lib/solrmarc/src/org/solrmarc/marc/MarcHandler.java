@@ -92,15 +92,21 @@ public abstract class MarcHandler {
         configToUse = configProperties;
         
         initLocal();
-        // System.out.println("Loading properties from " + properties);
-        logger.debug("Loading config properties from " + configToUse);
-        // Process Properties
-        loadProperties(configToUse);
+        if (configToUse != null) 
+        {
+            // System.out.println("Loading properties from " + properties);
+            logger.debug("Loading config properties from " + configToUse);
+            // Process Properties
+            loadProperties(configToUse);
+        }
 
         //  Load the custom Indexer (or the standard one)
         //  note the values indexerName and indexerProps are initialized
         //  by the above call to loadProperties
-        loadIndexer(indexerName, indexerProps); 
+        if (indexerName != null)
+        {
+            loadIndexer(indexerName, indexerProps); 
+        }
         
         loadLocalProperties();
         processAdditionalArgs();
