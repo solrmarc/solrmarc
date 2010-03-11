@@ -51,6 +51,7 @@ import org.marc4j.marc.VariableField;
 import org.marc4j.marc.impl.SubfieldImpl;
 
 import org.solrmarc.marc.MarcFilteredReader;
+import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -82,6 +83,7 @@ public class MarcPatcher extends MarcHandler
     private String locationFileLine[] = null;
     private String libraryLocationMap = null;
     private Properties libraries = null;
+    private StringNaturalCompare compare = null;
 
     public MarcPatcher(String locationFile, String changedFile, String libraryLocationMap, PrintStream out)
     {
@@ -118,7 +120,7 @@ public class MarcPatcher extends MarcHandler
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
+        compare = new StringNaturalCompare();
     }
     
     @Override
@@ -241,11 +243,11 @@ public class MarcPatcher extends MarcHandler
         boolean patched = false;
         String recId = record.getControlNumber();
         if (locationFileLine == null) locationFileLine = getNextLocationLine(locationReader);
-        while (locationFileLine != null && locationFileLine[0].compareTo(recId) < 0)
+        while (locationFileLine != null && compare.compare(locationFileLine[0], recId) < 0)
         {
             locationFileLine = getNextLocationLine(locationReader);
         }
-        while (locationFileLine != null && locationFileLine[0].compareTo(recId) == 0)
+        while (locationFileLine != null && compare.compare(locationFileLine[0], recId) == 0)
         {
             patched |= patchRecordWithLine(record, locationFileLine);
             locationFileLine = getNextLocationLine(locationReader);
