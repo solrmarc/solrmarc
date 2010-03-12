@@ -256,6 +256,7 @@ public class MarcPatcher extends MarcHandler
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        if (line == null) return(null);
         String result[] = line.split("\\|");
         result[0] =  result[0].replaceFirst(mapPattern, mapReplace);
         result[1] = result[1].trim();
