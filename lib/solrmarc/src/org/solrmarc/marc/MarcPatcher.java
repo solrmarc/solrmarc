@@ -304,7 +304,7 @@ public class MarcPatcher extends MarcHandler
                         changed = true;
                     }
                 }
-                if (!locationFileLine2[3].equals(homeLoc.getData()))
+                if (homeLoc != null && !locationFileLine2[3].equals(homeLoc.getData()))
                 {
                     Subfield libraryName = df999.getSubfield('m');
                     String newLibraryName = locationFileLine2[4];                    
