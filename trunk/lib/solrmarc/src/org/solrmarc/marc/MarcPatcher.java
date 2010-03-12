@@ -23,34 +23,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.TreeSet;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.log4j.Logger;
 
 import org.marc4j.MarcException;
 import org.marc4j.MarcPermissiveStreamWriter;
-import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
-import org.marc4j.MarcXmlWriter;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.marc4j.marc.impl.SubfieldImpl;
 
-import org.solrmarc.marc.MarcFilteredReader;
 import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
 
@@ -81,17 +70,17 @@ public class MarcPatcher extends MarcHandler
     private String mapPattern = null;
     private String mapReplace = null;
     private String locationFileLine[] = null;
-    private String libraryLocationMap = null;
-    private Properties libraries = null;
+//    private String libraryLocationMap = null;
+//    private Properties libraries = null;
     private StringNaturalCompare compare = null;
 
-    public MarcPatcher(String locationFile, String changedFile, String libraryLocationMap, PrintStream out)
+    public MarcPatcher(String locationFile, String changedFile, PrintStream out)
     {
         super();
         this.out = out;
         locationFileName = locationFile;
         changedRecordFileName = changedFile;
-        this.libraryLocationMap = libraryLocationMap;
+//        this.libraryLocationMap = libraryLocationMap;
     }
     
     @Override
@@ -105,21 +94,21 @@ public class MarcPatcher extends MarcHandler
         loadReader(source, fName);
         mapPattern = "u?([0-9]*).*";
         mapReplace = "u$1";
-        libraries = new Properties();
-        try
-        {
-            libraries.load(new FileInputStream(libraryLocationMap));
-        }
-        catch (FileNotFoundException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//        libraries = new Properties();
+//        try
+//        {
+//            libraries.load(new FileInputStream(libraryLocationMap));
+//        }
+//        catch (FileNotFoundException e)
+//        {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        catch (IOException e)
+//        {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
         compare = new StringNaturalCompare();
     }
     
@@ -318,7 +307,7 @@ public class MarcPatcher extends MarcHandler
                 if (!locationFileLine2[3].equals(homeLoc.getData()))
                 {
                     Subfield libraryName = df999.getSubfield('m');
-                    String newLibraryName = getLibraryName(locationFileLine2[3]);                    
+                    String newLibraryName = locationFileLine2[4];                    
                     homeLoc.setData(locationFileLine2[3]);
                     if (newLibraryName != null && !newLibraryName.equals(libraryName.getData()))
                     {
@@ -331,19 +320,19 @@ public class MarcPatcher extends MarcHandler
         return(changed);
     }
 
-    private String getLibraryName(String location)
-    {
-        String result = null;
-        if (libraries != null)
-        {
-            result = libraries.getProperty(location);
-            if (!result.equals(result.toUpperCase()))
-            {
-                result = null;
-            }
-        }
-        return(result);
-    }
+//    private String getLibraryName(String location)
+//    {
+//        String result = null;
+//        if (libraries != null)
+//        {
+//            result = libraries.getProperty(location);
+//            if (!result.equals(result.toUpperCase()))
+//            {
+//                result = null;
+//            }
+//        }
+//        return(result);
+//    }
 
     /**
      * @param args
@@ -358,7 +347,6 @@ public class MarcPatcher extends MarcHandler
         String locationFile = null;
         String changedFile = null;
         boolean changesOnly = false;
-        String libraryLocationMapFile = null;
         String outputFile = null;
         for (int i = 1; i < args.length; i++)
         {
@@ -366,7 +354,6 @@ public class MarcPatcher extends MarcHandler
             else if (args[i].equals("changesOnly")) changesOnly = true;
             else if (args[i].endsWith(".mrc") && changedFile == null) changedFile = args[i];
             else if (args[i].endsWith(".mrc") && changedFile != null) outputFile = args[i];
-            else if (args[i].endsWith(".properties")) libraryLocationMapFile = args[i];
         }
         
         try {
@@ -384,7 +371,7 @@ public class MarcPatcher extends MarcHandler
                 pOut = new PrintStream(new FileOutputStream(new File(outputFile)));
             else
                 pOut = System.out;
-            marcPatcher = new MarcPatcher(locationFile, changedFile, libraryLocationMapFile, pOut);
+            marcPatcher = new MarcPatcher(locationFile, changedFile, pOut);
             marcPatcher.init(tmpArgs);
         }
         catch (IllegalArgumentException e)
