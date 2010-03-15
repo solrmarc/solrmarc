@@ -89,6 +89,8 @@ public class MarcPatcher extends MarcHandler
         configToUse = null;
         configProps = new Properties();
         configProps.setProperty("marc.to_utf_8", "false");
+        configProps.setProperty("marc.permissive", "true");
+        permissiveReader = true;
         String fName = Utils.getProperty(configProps, "marc.path");
         String source = Utils.getProperty(configProps, "marc.source", "STDIN").trim();
         loadReader(source, fName);
