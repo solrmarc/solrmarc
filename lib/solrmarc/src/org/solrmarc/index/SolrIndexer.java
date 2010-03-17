@@ -106,6 +106,26 @@ public class SolrIndexer
             fillMapFromProperties(indexingProps);
         }
     }
+    
+    /* A constructor that takes an INDEXER Properties object, and a search
+     * path (possibly empty). This is used by SolrMarc tests, may not
+     * work as you might expect right in actual program use, not sure.
+     *
+     *  You can initialize an 'empty' indexex for unit testing like so:
+     *  SolrIndexer.indexerFromProperties( new Properties(), 
+     *
+     * @param indexingProperties a Properties mapping solr
+     *  field names to values in the marc records
+     * @param propertyDirs - array of directories holding properties files
+     * UNTESTED SO COMMENTED OUT FOR THE FUTURE
+     */
+     /*public static SolrIndexer indexerFromProperties(Properties indexingProperties, String searchPath[]) {
+        SolrIndexer indexer = new SolrIndexer();
+        indexer.propertyFilePaths = searchPath;
+        indexer.fillMapFromProperties(indexingProperties);
+        
+        return indexer;
+     }*/
 
     /**
      * Parse the properties file and load parameters into fieldMap. Also
@@ -647,7 +667,7 @@ public class SolrIndexer
         }
         catch (InvocationTargetException e)
         {
-            // e.printStackTrace();
+            //e.printStackTrace();
             logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
         }
         boolean deleteIfEmpty = false;
@@ -1086,6 +1106,121 @@ public class SolrIndexer
         return result;
     }
 
+    /****
+     * Intended to be called as a custom method from an indexing properties
+     * file: some_field = custom, getWithOptions( marcFieldSpec, options)
+     *
+     *  marcFieldSpec is the ordinary field spec for SolrIndexer, eg
+     *  "245a:500az" etc. 
+     *
+     *  Options is a colon-seperated list of one or more of the following:
+     *
+     *  first  => take first value found only
+     *  includeLinkedFields => include all 880 linked fields for spec, with getLinkedField
+     *  removeTrailingPunct => Remove trailing punctuation from all values, using Util.cleanData. 
+     * map=mapName  =>   A map to send all values through, using the same semantics as the other SolrIndexer mapping functions. Eg, "map=somefile.properties" or "map=map_defined_in_index_properties". Utils.remap is used to do the mapping. 
+     * "default=Default Value" => A default value to use whenever there are otherwise no values found for this index entry. Default value can contain spaces, but not colons (since we parse colon-seperated). If a map is used, and there are marc fields matching the spec,  this default value will be used ONLY if the map returns _no_ values (map is not set to pass through, map does not have default value). If there are no marc fields matching the spec, the default value will always be used. 
+     * combineSubfields=joinStr => combine all subfields in the same marc field in one Solr field, joined by the joinStr. Will use getAllSubfields to fetch, instead of getFieldList. joinStr can include spaces but not colons. If you want it to end in a space, and it's the last option in an options list, just add a terminal colon.   "combineSubfields= :"
+     *
+     * eg:  some_field = custom, getWithOptions(245a:500a, includeLinkedFields:removeTrailingPunct:default=Unknown)
+     * 
+     */
+    public Set<String> getWithOptions(Record record, String tagStr, String optionStr) {
+      //default options
+      boolean first = false;
+      boolean includeLinked = false;
+      boolean removeTrailingPunct = false;
+      String strDefault = null;
+      String mapName = null;
+      String combineSubfieldsJoin = null;
+      //specified options
+      String[] options = optionStr.split(":");
+      for (int i = 0; i < options.length; i++) {
+         String option = options[i];
+         if (option.equals("first")) {
+          first = true;
+         } else if (option.equals("includedLinkedFields")) {
+          includeLinked = true;
+         } else if ( option.equals("removeTrailingPunct")) {
+          removeTrailingPunct = true; 
+         } else if ( option.length() > 4 &&
+                     option.substring(0, 4).equals("map=")) {
+          mapName = option.substring(4, option.length()); 
+         } else if ( option.length() > 8 && 
+                     option.substring(0,8).equals("default=")) {
+          strDefault = option.substring(8, option.length());
+         } else if ( option.length() > 17 &&
+                     option.substring(0, 17).equals("combineSubfields=")) {
+          combineSubfieldsJoin = option.substring(17, option.length());
+         }
+      }
+      
+      
+       // While getFieldList and similar methods are
+       // declared as returning only a Set, for
+       // 'first' functionality to work, it better be a LinkedHashSet
+       // with predictable order! That we can't really guarantee this
+       // seems to be a flaw in the jdk library designs, there's no
+       // interface for predictable-order-set. oh well.
+       
+       // We need to use two different methods depending on if we're doing
+      // a combineSubfieldsJoin or not. TODO, would be nice to refactor
+      // SolrIndexer to make this more straightforward. 
+      
+      Set<String> results = null;
+      if ( combineSubfieldsJoin == null ) {      
+        results = getFieldList(record, tagStr);
+      }
+      else {
+        //combine subfields!
+        results = getAllSubfields(record, tagStr, combineSubfieldsJoin);
+      }
+       
+
+       
+       //linked fields?
+       if (includeLinked) {
+          results.addAll(getLinkedField(record, tagStr));    
+       }       
+       
+       //first only?       
+       if ( results.size() > 0 && first) {
+         Iterator<String> iter = results.iterator();
+         Set newResults = new LinkedHashSet<String>();
+         newResults.add(iter.next());
+         results = newResults;
+       }
+       
+       //Map?
+       if (mapName != null ) {
+         //TODO: It's somewhat inefficient to call loadTranslationMap
+         // when it may already have beenloaded. But it's the only
+         // way to get the internal map name we need for later call
+         // to findMap, to pass to remap. Code in rest of this class
+         // should be refactored to make this a lot more reasonable.  
+         String internalMapName = loadTranslationMap(mapName);         
+         results = Utils.remap(results, findMap(internalMapName), true);         
+       }
+       
+       //removeTrailingPunct?
+       if ( removeTrailingPunct ) {
+         Set newResults = new LinkedHashSet<String>();
+         for (String s : results)
+         {
+            newResults.add(Utils.cleanData(s));
+         }
+         results = newResults;
+       }
+       
+       //default value?
+       if ( (results.size() == 0) && (strDefault != null) ) {
+         results.add(strDefault); 
+       }
+       
+       return results;
+    }
+
+    
     /**
      * Get all field values specified by tagStr, joined as a single string.
      * @param record - the marc record object
