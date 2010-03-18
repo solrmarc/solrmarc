@@ -21,6 +21,11 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
     delfname=$froot.del
     delfile=$dir/$delfname
     output=$RESULTSDIR/results_$froot
+        
+    marcsort $file > $file.sorted 2> /dev/null
+    mv $file.sorted $file
+    sort -n $delfile > $delfile.sorted
+    mv $delfile.sorted $delfile
 
     #check whether the mrc file has already been processed
     if [ -e "$PROCESSEDDIR/$fname" ] ; then
