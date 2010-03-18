@@ -12,6 +12,14 @@ DATADIR=/usr/local/projects/marc
 INPUTDIR=$DATADIR/incoming_${dirname}
 PROCESSEDDIR=$DATADIR/processed_${dirname}
 RESULTSDIR=$DATADIR/results_${dirname}
+verbose=0
+if [ "$1" -eq "-v" ]  ; then 
+    verbose=1
+fi
+
+if [ $verbose -eq "1" ] ; then
+    echo processing initial nightly updates
+fi
 
 for file in `find $INPUTDIR -name '*.mrc' -print | sort`
     do
@@ -26,6 +34,11 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
     mv $file.sorted $file
     sort -n $delfile > $delfile.sorted
     mv $delfile.sorted $delfile
+
+    if [ $verbose -eq "1" ] ; then
+        echo indexing $file
+    fi
+
 
     #check whether the mrc file has already been processed
     if [ -e "$PROCESSEDDIR/$fname" ] ; then
@@ -46,6 +59,10 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
         cp $file $PROCESSEDDIR
         indexfile ${configname} $file  > $output 2>&1
         let "num += 1"
+    fi
+
+    if [ $verbose -eq "1" ] ; then
+        echo indexing $delfile
     fi
 
     #check whether the del file has already been processed
@@ -77,12 +94,20 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
 
     done
 
+if [ $verbose -eq "1" ] ; then
+    echo merging initial nightly updates
+fi
+
 for updatefile in `find $INPUTDIR -name '*.mrc' -print | sort`
 do 
     endId=u0
 
     for file in /usr/local/projects/marc/full_dump_patched/*.mrc 
     do
+        if [ $verbose -eq "1" ] ; then
+            echo   merging $file
+        fi
+        
         startId=$endId
         file1=`echo $file | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
         file2=`echo $file | sed -e 's/[^0-9]*0*\([1-9][0-9]*\).*/\1/'`
@@ -105,14 +130,27 @@ done
 location_file=/usr/local/projects/marc/incoming/location.txt
 patch_dir=/usr/local/projects/marc/patched_debug
 
-mkdir $patch_dir
-patch_out=$patch_dir/location_patch_`date --date="-3 days" +%Y%m%d`
-rm $patch_out
+#make sure patch directory exists
+mkdir $patch_dir 2> /dev/null
+patch_out=$patch_dir/location_patch_`date --date="-3 days" +%Y%m%d` 
+#make sure todays patch file does not exist 
+rm $patch_out 2> /dev/null
+
+if [ $verbose -eq "1" ] ; then
+    echo processing location.txt
+fi
 
 for file in `find /usr/local/projects/marc/full_dump_patched -name 'uva_*.mrc' -print | sort`
 do
+    if [ $verbose -eq "1" ] ; then
+        echo $file
+    fi
     java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar /usr/local/projects/solrmarc-2.1/dist/SolrMarc.jar $file  $location_file changesOnly >> $patch_out
 done 
+
+if [ $verbose -eq "1" ] ; then
+    echo indexing patch file
+fi
 
 file=$patch_out
     fname=`basename $file`
@@ -140,6 +178,11 @@ file=$patch_out
         indexfile ${configname} $file  > $output 2>&1
         let "num += 1"
     fi
+
+if [ $verbose -eq "1" ] ; then
+    echo merging patch file
+fi
+
 
 updatefile=$patch_out
     endId=u0
