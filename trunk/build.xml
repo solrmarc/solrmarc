@@ -154,8 +154,26 @@
 
     <!-- Site Testing Targets -->
 
-    <target name="test" depends="init" description="clean generated test directories">
+    <target name="test" depends="init" description="Run all three test suites in local build directory: smoketest, indextest and junittest">
          <ant antfile="${site.dir}/build.xml" target="test" inheritAll="false" >
+             <property name="dist.path" location="${dist.dir}" />
+         </ant>
+    </target>
+        
+    <target name="junittest" depends="init" description="Run junittest test suite in local build directory">
+         <ant antfile="${site.dir}/build.xml" target="junittest" inheritAll="false" >
+             <property name="dist.path" location="${dist.dir}" />
+         </ant>
+    </target>
+    
+    <target name="smoketest" depends="init" description="Run smoketest test suite in local build directory">
+         <ant antfile="${site.dir}/build.xml" target="smoketest" inheritAll="false" >
+             <property name="dist.path" location="${dist.dir}" />
+         </ant>
+    </target>
+    
+    <target name="indextest" depends="init" description="Run indextest test suite in local build directory">
+         <ant antfile="${site.dir}/build.xml" target="indextest" inheritAll="false" >
              <property name="dist.path" location="${dist.dir}" />
          </ant>
     </target>
