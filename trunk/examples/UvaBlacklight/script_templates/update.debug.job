@@ -77,7 +77,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
 
     done
 
-for file in `find $INPUTDIR -name '*.mrc' -print | sort`
+for updatefile in `find $INPUTDIR -name '*.mrc' -print | sort`
 do 
     endId=u0
 
@@ -97,7 +97,7 @@ do
                 endId=`head -c $len $nextfile | printrecord '001'| sed -e 's/001 //'`
         fi
         echo $file  $startId  $endId
-        marcupdate -min $startId -max $endId $file $1 > $file.updated
+        marcupdate -min $startId -max $endId $file $updatefile > $file.updated
         mv $file.updated $file
     done
 done
@@ -114,8 +114,7 @@ do
     java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar /usr/local/projects/solrmarc-2.1/dist/SolrMarc.jar $file  $location_file changesOnly >> $patch_out
 done 
 
-for file in `find $patch_dir -name '*.mrc' -print | sort`
-    do
+file=$patch_out
     fname=`basename $file`
     froot=`basename $file .mrc`
     dir=`dirname $file`
@@ -141,10 +140,8 @@ for file in `find $patch_dir -name '*.mrc' -print | sort`
         indexfile ${configname} $file  > $output 2>&1
         let "num += 1"
     fi
-done
 
-for file in `find $patch_dir -name '*.mrc' -print | sort`
-do 
+updatefile=$patch_out
     endId=u0
 
     for file in /usr/local/projects/marc/full_dump_patched/*.mrc 
@@ -163,10 +160,9 @@ do
                 endId=`head -c $len $nextfile | printrecord '001'| sed -e 's/001 //'`
         fi
         echo $file  $startId  $endId
-        marcupdate -min $startId -max $endId $file $1 > $file.updated
+        marcupdate -min $startId -max $endId $file $updatefile > $file.updated
         mv $file.updated $file
     done
-done
 
 # run booklist daily update
 runbooklist daily ${configname} > $RESULTSDIR/results_booklists_$froot 2>&1
