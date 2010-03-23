@@ -13,7 +13,7 @@ INPUTDIR=$DATADIR/incoming_${dirname}
 PROCESSEDDIR=$DATADIR/processed_${dirname}
 RESULTSDIR=$DATADIR/results_${dirname}
 verbose=0
-if [ "$1" -eq "-v" ]  ; then 
+if [ "$1" == "-v" ]  ; then 
     verbose=1
 fi
 
@@ -132,7 +132,7 @@ patch_dir=/usr/local/projects/marc/patched_debug
 
 #make sure patch directory exists
 mkdir $patch_dir 2> /dev/null
-patch_out=$patch_dir/location_patch_`date --date="-3 days" +%Y%m%d` 
+patch_out=$patch_dir/location_patch_`date +%Y%m%d`.mrc 
 #make sure todays patch file does not exist 
 rm $patch_out 2> /dev/null
 
