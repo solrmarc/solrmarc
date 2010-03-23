@@ -1702,7 +1702,7 @@ public class SolrIndexer
     protected String writeRaw(Record record)
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        MarcWriter writer = new MarcPermissiveStreamWriter(out, "UTF-8");
+        MarcWriter writer = new MarcStreamWriter(out, "UTF-8", true);
         writer.write(record);
         writer.close();
 
