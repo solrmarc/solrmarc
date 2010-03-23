@@ -32,7 +32,7 @@ import java.util.regex.PatternSyntaxException;
 import org.apache.log4j.Logger;
 
 import org.marc4j.MarcException;
-import org.marc4j.MarcPermissiveStreamWriter;
+import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
@@ -89,8 +89,10 @@ public class MarcPatcher extends MarcHandler
         configToUse = null;
         configProps = new Properties();
         configProps.setProperty("marc.to_utf_8", "false");
+        configProps.setProperty("marc.default_encoding", "ISO-8859-1");
         configProps.setProperty("marc.permissive", "true");
         permissiveReader = true;
+        defaultEncoding = "ISO8859_1";
         String fName = Utils.getProperty(configProps, "marc.path");
         String source = Utils.getProperty(configProps, "marc.source", "STDIN").trim();
         loadReader(source, fName);
@@ -178,7 +180,7 @@ public class MarcPatcher extends MarcHandler
         }
         if (writerAll == null && out != null && changedRecordFileName != null)
         {
-            writerAll = new MarcPermissiveStreamWriter(out, "UTF-8");
+            writerAll = new MarcStreamWriter(out, "ISO-8859-1", true);
         }
         if (writerChanged == null && changedRecordFileName != null)
         {
@@ -187,7 +189,7 @@ public class MarcPatcher extends MarcHandler
             {
                 File changedRecordFile = new File(changedRecordFileName);
                 changedRecordStream = new FileOutputStream(changedRecordFile);
-                writerChanged = new MarcPermissiveStreamWriter(changedRecordStream, "UTF-8");
+                writerChanged = new MarcStreamWriter(changedRecordStream, "ISO-8859-1", true);
             }
             catch (FileNotFoundException e)
             {
@@ -198,7 +200,7 @@ public class MarcPatcher extends MarcHandler
         }
         else if (writerChanged == null && changedRecordFileName == null && out != null)
         {
-            writerChanged = new MarcPermissiveStreamWriter(out, "UTF-8");
+            writerChanged = new MarcStreamWriter(out, "ISO-8859-1", true);
         }
 
         while(reader != null && reader.hasNext())
