@@ -17,7 +17,7 @@ do
 done
 
 #make sure directories exist
-for dir in prod dev multicore merge
+for dir in prod dev multicore merge debug
 do
     mkdir $DATADIR/incoming_$dir 2> /dev/null
     mkdir $DATADIR/processed_$dir 2> /dev/null
@@ -27,7 +27,7 @@ done
 for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
 do
      fname=`basename $file`
-     for dir in prod dev multicore merge
+     for dir in prod dev multicore merge debug
      do
         ln $file $DATADIR/incoming_$dir/$fname
      done
@@ -41,12 +41,14 @@ update.multicore.job
 
 update.merge.job
 
+update.debug.job
+
 for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -print | sort`
 do
 #     echo $file
      fname=`basename $file`
      found=1
-     for dir in prod dev multicore sorted
+     for dir in prod dev multicore sorted debug
      do     
          if [ ! -f $DATADIR/processed_$dir/$fname ] 
          then
