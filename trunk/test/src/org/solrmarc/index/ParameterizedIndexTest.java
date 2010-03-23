@@ -57,13 +57,21 @@ public class ParameterizedIndexTest
             recordToLookAt = recParts[1];
         }
         String fullRecordFilename = dataDirectory + File.separator + recordFilename;
-        Map<String, Object> solrFldName2ValMap = marcMappingTest.getIndexMapForRecord(recordToLookAt, fullRecordFilename);
+        Object solrFldValObj;
+        if (fieldToCheck.matches("^[0-9].*"))
+        {
+            solrFldValObj = marcMappingTest.lookupRawRecordValue(recordToLookAt, fullRecordFilename, fieldToCheck);
+        }
+        else 
+        {
+            Map<String, Object> solrFldName2ValMap = marcMappingTest.getIndexMapForRecord(recordToLookAt, fullRecordFilename);
+            solrFldValObj = solrFldName2ValMap.get(fieldToCheck);
+        }
         String expected[];
         if (expectedValue.length() > 0)
             expected = expectedValue.split("[|]");
         else
             expected = new String[0];
-        Object solrFldValObj = solrFldName2ValMap.get(fieldToCheck);
         String received[] = null;
         if (solrFldValObj == null)
         {

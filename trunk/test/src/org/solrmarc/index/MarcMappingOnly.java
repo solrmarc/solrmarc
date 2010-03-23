@@ -84,6 +84,43 @@ public class MarcMappingOnly extends MarcHandler
         }
         return null;
     }
+    /**
+     * read in the file of marc records indicated, looking for the desired
+     * record, and return the specified field/fields according to the provided fieldSpec
+     * 
+     * @param desiredRecId -
+     *            value for solr id field, or pass in a value of null to simply accept 
+     *            the first record that occurs in the specified marc file
+     * @param mrcFileName -
+     *            absolute path of file of marc records (name must end in .mrc
+     *            or .marc or .xml)
+     * @param fieldSpec -
+     *            a raw SolrMarc-type field specification, for testing the lower level functions of 
+     *            SolrMarc without first processing a full indexing specification.
+     * @return the field/subfields from the indicated record as specified by the fieldSpec parameter
+     */
+    public Set<String> lookupRawRecordValue(String desiredRecId, String mrcFileName, String fieldSpec)
+    {
+        loadReader("FILE", mrcFileName);
+        while (reader != null && reader.hasNext())
+        {
+            try
+            {
+                Record record = reader.next();
+
+                String thisRecId = record.getControlNumber();
+                if (!thisRecId.equals(desiredRecId)) continue;
+
+                Set<String> result = SolrIndexer.getFieldList(record, fieldSpec);
+                return(result);
+            }
+            catch (MarcException me)
+            {
+                System.err.println("Error reading Marc Record: " + me.getMessage());
+            }
+        }
+        return null;
+    }
 
     @Override
     /**
