@@ -30,7 +30,6 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import org.marc4j.MarcException;
-import org.marc4j.MarcPermissiveStreamWriter;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.MarcXmlWriter;
@@ -144,7 +143,7 @@ public class MarcPrinter extends MarcHandler
                 {
                     if (writer == null)
                     {
-                        writer = new MarcPermissiveStreamWriter(System.out, "UTF-8");
+                        writer = new MarcStreamWriter(System.out, "UTF-8", true);
                     }
                     writer.write(record);
                 }
