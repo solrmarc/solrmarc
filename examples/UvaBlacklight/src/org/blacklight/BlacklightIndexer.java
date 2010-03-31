@@ -884,8 +884,11 @@ public class BlacklightIndexer extends SolrIndexer
      {"South Dakota", "S.D."},{"Tennessee", "Tenn."}, {"Texas", "Tex."}, {"Utah", "Utah"}, {"Vermont", "Vt."}, 
      {"Virginia", "Va."}, {"Washington", "Wash."}, {"West Virginia", "W. Va."}, {"Wisconsin", "Wis."}, {"Wyoming", "Wyo."}, 
      {"New York (State)", "N.Y."}, {"District of Columbia", "D.C."}, {"Puerto Rico", "P.R."}, {"Virgin Islands", "V.I."}, 
-     {"Alberta", "Alta."}, {"Ontario", "Ont."}, {"New Brunswick", "N.B."}, {"British Columbia", "B.C."}, {"Saskatoon", "Sask."}, {"Quebec", "Que'bec"},
-     {"New South Wales", "N.S.W."}, {"Northern Territories", "N.T."}, {"South Australia", "S.Aust."}, {"Victoria", "Vic."}, {"Queensland", "Qld."} };
+     {"Alberta", "Alta."}, {"British Columbia", "B.C."}, {"Manitoba", "Man."}, {"Newfoundland and Labrador", "N.L."}, 
+     {"New Brunswick", "N.B."}, {"Northwest Territories", "N.W.T."}, {"Nova Scotia", "N.S."}, {"Nunavut", "Nunavut"}, 
+     {"Ontario", "Ont."}, {"Prince Edward Island", "P.E.I."}, {"Quebec", "Que'bec"}, {"Saskatoon", "Sask."}, {"Yukon", "Yukon"},
+     {"Australian Capital Territory", "A.C.T."}, {"New South Wales", "N.S.W."}, {"Northern Territory", "N.T."}, {"Queensland", "Qld."}, 
+     {"South Australia", "S. Aust."}, {"Tasmania", "Tas."}, {"Victoria", "Vic."}, {"Western Australia", "W.A." }};
     
     static Map<String, String> stateMap = null;
     
@@ -1073,6 +1076,9 @@ public class BlacklightIndexer extends SolrIndexer
                     {
                         if (parts[i].matches("(\\p{L}\\p{M}*|\\.|[- ])+[ ]?\\((\\p{L}\\p{M}*|\\.|[- ])+ : (\\p{L}\\p{M}*|\\.|[- ])+\\)"))
                         {    
+                        // equivalent of, but with expanded character sets to include unicode accented letters and accent marks : 
+                        //    parts[i] = parts[i].replaceFirst("([-A-Za-z ]+[A-Za-z])[ ]?\\(([-A-Za-z ]+) : ([-A-Za-z ]+)\\)", 
+                        //                                     "$1 ($2, "+parts[0]+" : $3)");
                             parts[i] = parts[i].replaceFirst("((\\p{L}\\p{M}*|\\.|[- ])+(\\p{L}\\p{M}*|\\.))[ ]?\\(((\\p{L}\\p{M}*|\\.|[- ])+) : ((\\p{L}\\p{M}*|\\.|[- ])+)\\)", 
                                                              "$1 ($4, "+parts[0]+" : $6)");
                         }
@@ -1376,6 +1382,37 @@ public class BlacklightIndexer extends SolrIndexer
                 e.printStackTrace();
             }
         }
+    }
+    
+    public Set<String>getCustomLibrary(final Record record, String visibilityMap, String libraryMap)
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+        List<?> fields999 = record.getVariableFields("999");
+        String visMapName = loadTranslationMap(null, visibilityMap);
+        String libMapName = loadTranslationMap(null, libraryMap);
+        for ( DataField field : (List<DataField>)fields999 )
+        {
+            Subfield curLocF = field.getSubfield('k');
+            Subfield homeLocF = field.getSubfield('l');
+            Subfield libF = field.getSubfield('m');
+            String lib = (libF != null ? libF.getData() : null);
+            String mappedLib = Utils.remap(lib, findMap(libMapName), true);
+            if (resultSet.contains(mappedLib))  continue;
+            String curLoc = (curLocF != null ? curLocF.getData() : null);
+            String homeLoc = (homeLocF != null ? homeLocF.getData() : null);
+            String mappedHomeVis = Utils.remap(homeLoc, findMap(visMapName), true);
+            if (mappedHomeVis.equals("HIDDEN") )
+            {
+                continue;
+            }
+            if (curLoc != null)
+            {
+                String mappedCurVis = Utils.remap(curLoc, findMap(visMapName), true);
+                if (mappedCurVis.equals("HIDDEN")) continue; // this copy of the item is Hidden, go no further
+            }
+            resultSet.add(mappedLib);
+        }
+        return(resultSet);
     }
     
     public Set<String>getCustomLocation(final Record record, String locationMap, String visibilityMap, String libraryMap)
