@@ -18,7 +18,7 @@ The !SolrMarc program reads in MARC records stored in standard binary format (IS
 
 = config.properties File =
 
-The main configuration of the program is currently done via a properties file that is created and stored in the jar file produced by the build process. The name of this file can be passed in as the first parameter on the command line, however you can declare one particular config.properties file to be the default.  Then if a command doesn't specify which config.properties file to use, that default one will be used.  An example config.properties file is below:
+The main configuration of the program is currently done via a properties file that is created and stored in the jar file produced by the build process. The name of this file can be passed in as the first parameter on the command line, however you can declare one particular config.properties file to be the default.  Then if a command doesn't specify which config.properties file to use, that default one will be used.  An example config.properties file is below (more details about the entries follow):
 
 {{{
 # Properties for the !SolrMarc import program
@@ -56,9 +56,9 @@ solr.path = jetty/solr
 #   (note: Solr can be configured to use a different data directory)
 solr.data.dir = jetty/solr/data
 
-# - solr.hosturl - URL of running solr search engine for getting
-#   updates to Solr index via http (?).
-solr.hosturl = http://localhost:8983/solr
+# - solr.hosturl - optional URL to send commit to Solr after indexing to avoid
+#   need for Solr restart.
+solr.hosturl = http://localhost:8983/solr/update
 
 
 # -- MARC data properties ------------------------------------------------------
@@ -97,7 +97,7 @@ marc.include_errors = false
  
  * *solr.indexer:* (optional); specifies the name of a custom indexing class which defines any custom routines for extracting and mapping data for a particular Solr index field. These custom routines will only be needed in cases where values from several different MARC fields and sub-fields need to be consulted to determine the value to add to the Solr index field. Several examples of these custom indexing routines are given below. If, however, you can handle all of the necessary MARC field-to-Solr index field mappings using the available specification language, you do not need to define a value for this entry, and the default !SolrIndexer class will be used.
 
- * *solr.hosturl:* Specifies the URL of a currently running Solr search engine that is referencing the same index data that is specified in the {{{solr.path}}}, entry.  If this value is given, when the indexing process completes, this indexing program will send a signal to the currently running Solr search engine, which will cause it to read the newly modified index files. This is primarily a convenience function, to avoid having to stop and restart the running Solr search engine. If no search engine is running at the URL specified, the program will quietly proceed along it way, with the understanding that when that search engine is eventually restarted it will read in the new index data anyway.
+ * *solr.hosturl:* Specifies the URL of a currently running Solr search engine that is referencing the same index data that is specified in the {{{solr.path}}}, entry.  If this value is given, when the indexing process completes, this indexing program will send a signal to the currently running Solr search engine, which will cause it to read the newly modified index files. This is primarily a convenience function, to avoid having to stop and restart the running Solr search engine. If no search engine is running at the URL specified, the program will quietly proceed along its way, with the understanding that when that search engine is eventually restarted it will read in the new index data anyway.
 
  * *marc.to_utf_8:* a boolean value, defaulting to false.  If it is set to true, then as MARC records are read in the program translate the fields of the record to UTF-8, prior to sending the record to the indexer.  If the records are determined to already be encoded in UTF-8 the field values will be unchanged. <br><br><b>Note:</b>  You are strongly recommended to use this setting to translate your records to UTF-8, any of the other character encodings that are commonly used in MARC records likely to cause display problems for special characters that occur in the data.
 
