@@ -57,7 +57,8 @@ solr.path = jetty/solr
 solr.data.dir = jetty/solr/data
 
 # - solr.hosturl - optional URL to send commit to Solr after indexing to avoid
-#   need for Solr restart.
+#   need for Solr restart.  Expects an XmlUpdateRequestHandler;  see
+#  http://wiki.apache.org/solr/UpdateXmlMessages
 solr.hosturl = http://localhost:8983/solr/update
 
 
@@ -97,7 +98,7 @@ marc.include_errors = false
  
  * *solr.indexer:* (optional); specifies the name of a custom indexing class which defines any custom routines for extracting and mapping data for a particular Solr index field. These custom routines will only be needed in cases where values from several different MARC fields and sub-fields need to be consulted to determine the value to add to the Solr index field. Several examples of these custom indexing routines are given below. If, however, you can handle all of the necessary MARC field-to-Solr index field mappings using the available specification language, you do not need to define a value for this entry, and the default !SolrIndexer class will be used.
 
- * *solr.hosturl:* Specifies the URL of a currently running Solr search engine that is referencing the same index data that is specified in the {{{solr.path}}}, entry.  If this value is given, when the indexing process completes, this indexing program will send a signal to the currently running Solr search engine, which will cause it to read the newly modified index files. This is primarily a convenience function, to avoid having to stop and restart the running Solr search engine. If no search engine is running at the URL specified, the program will quietly proceed along its way, with the understanding that when that search engine is eventually restarted it will read in the new index data anyway.
+ * *solr.hosturl:* (optional); Setting this value means a "commit" message is sent to a running Solr URL when the indexing process completes.  If Solr is running while its index is being updated, it doesn't automatically know about changes to the index:  either Solr will need to be restarted to find the new data, or solr.hosturl can be set so that a "commit" message is sent to Solr to tell it to reload the index.  The solr.hosturl value should be the URL of an XmlUpdateRequestHandler for the Solr instance, generally http://yer_solr_host:port/solr/update.  To restate:  if this value is given, when the indexing process completes, SolrMarc will send a signal to the currently running Solr search engine, which will cause it to read the newly modified index files. This is primarily a convenience function, to avoid having to stop and restart the running Solr search engine. If no search engine is running at the URL specified, the program will quietly proceed along its way, with the understanding that when that search engine is eventually restarted it will read in the new index data anyway.
 
  * *marc.to_utf_8:* a boolean value, defaulting to false.  If it is set to true, then as MARC records are read in the program translate the fields of the record to UTF-8, prior to sending the record to the indexer.  If the records are determined to already be encoded in UTF-8 the field values will be unchanged. <br><br><b>Note:</b>  You are strongly recommended to use this setting to translate your records to UTF-8, any of the other character encodings that are commonly used in MARC records likely to cause display problems for special characters that occur in the data.
 
