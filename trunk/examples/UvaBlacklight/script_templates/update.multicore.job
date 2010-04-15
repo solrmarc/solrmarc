@@ -34,6 +34,9 @@ fi
 
 # copy entire index via creating hard links, then turn segment files from hardlinks to copies
 cp -lR $solrdir $solrnewdir.tmp
+rm $solrnewdir.tmp/conf/solrcore.properties
+cp $solrhomeparent/solrcore.properties $solrnewdir.tmp/conf
+
 for file in $solrnewdir.tmp/*/seg*
 do
 #   echo $file
