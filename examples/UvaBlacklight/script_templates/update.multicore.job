@@ -13,6 +13,7 @@ then
 fi
 
 solrhome=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.path | sed -e's/.* = //'`
+solrhomeparent=$( (cd -P $solrhome && cd .. && pwd) )
 solrcore=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.core.name | sed -e's/.* = //'`
 solrurlstart=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.hosturl | sed -e's/.* = //' -e's:/[A-Za-z0-9_]*$::'`
 
@@ -20,8 +21,16 @@ solrnewcore=`echo $solrcore | sed -e's/_.*//'`_`date +%Y%m%d`
 solroldcore=`echo $solrcore | sed -e's/_.*//'`_`date --date="-3 days" +%Y%m%d`
 
 solrdir=$solrhome/$solrcore
-solrnewdir=$solrhome/$solrnewcore
-solrolddir=$solrhome/$solroldcore
+solrnewdir=$solrhomeparent/$solrnewcore
+solrolddir=$solrhomeparent/$solroldcore
+
+java -cp /lib_content27/solr/verification/lucene-core-2.9.1.jar org.apache.lucene.index.CheckIndex $solrdir/index  > /dev/null 2>1
+if ! [ "$?" == "0" ] 
+then
+    return=$?
+    echo "Warning index verification process failed.  Index seems to be corrupted."
+    exit $return
+fi
 
 # copy entire index via creating hard links, then turn segment files from hardlinks to copies
 cp -lR $solrdir $solrnewdir.tmp
@@ -36,7 +45,8 @@ rm $solrnewdir.tmp/*/.nfs* 2> /dev/null
 
 mv $solrnewdir.tmp $solrnewdir
 
-curl "$solrurlstart/admin/multicore?action=CREATE&name=virgobeta&instanceDir=$solrnewcore" > /dev/null 2>1
+#copy the file solr.xml.template to solr.xml  replacing the string @@blacklight_index@@ with the name of the new solr core. 
+cat /lib_content27/solr/solr.xml.template  | sed -e "s/@@blacklight_index@@/$solrnewcore/" > solr.xml
 
 # now delete the solr data directory form three days ago
 rm -rf $solrolddir
