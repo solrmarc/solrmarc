@@ -9,6 +9,15 @@ DATADIR=/usr/local/projects/marc
 INPUTDIR=$DATADIR/incoming
 PROCESSEDDIR=$DATADIR/processed
 RESULTSDIR=$DATADIR/results
+verbose=
+
+if [ "$1" == "-v" ]  ; then 
+    verbose=1
+fi
+
+if [ "$verbose" == "1" ] ; then
+    echo copying files from incoming directory
+fi
 
 # first move auth files to another directory
 for file in `find $INPUTDIR -name '*.auth*' -print`
@@ -33,16 +42,47 @@ do
      done
 done
 
+
+if [ "$verbose" == "1" ] ; then
+    echo updating solrpowr:8080/solr index
+fi
 update.index.job prod blacklight_config.properties
+
+
+if [ "$verbose" == "1" ] ; then
+    echo updating solrpowr:8080/solr index
+fi
 update.index.job dev blacklight_dev_config.properties
 
+
+if [ "$verbose" == "1" ] ; then
+    echo updating multicore index at solrpowr:18983/solr/blacklight_index
+fi
 update.index.job multicore blacklight_multicore_config.properties
+
+if [ "$verbose" == "1" ] ; then
+    echo copying blacklight_index to datastamped index to use for searching
+fi
 update.multicore.job
 
+
+if [ "$verbose" == "1" ] ; then
+    echo updating full_dump_updated files with new incoming records.
+fi
 update.merge.job
 
-update.debug.job
 
+if [ "$verbose" == "1" ] ; then
+    echo updating development index at solrpowr.lib:8983/solr
+    update.debug.job -v
+else
+    update.debug.job
+fi
+
+
+if [ "$verbose" == "1" ] ; then
+    echo cleaning up incoming directories
+fi
 for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -print | sort`
 do
 #     echo $file
@@ -67,4 +107,3 @@ for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
 do
     rm $file
 done
-
