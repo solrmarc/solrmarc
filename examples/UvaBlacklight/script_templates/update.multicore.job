@@ -49,7 +49,7 @@ rm $solrnewdir.tmp/*/.nfs* 2> /dev/null
 mv $solrnewdir.tmp $solrnewdir
 
 #copy the file solr.xml.template to solr.xml  replacing the string @@blacklight_index@@ with the name of the new solr core. 
-cat /lib_content27/solr/solr.xml.template  | sed -e "s/@@blacklight_index@@/$solrnewcore/" > solr.xml
+cat /lib_content27/solr/solr.xml.template  | sed -e "s/@@blacklight_index@@/$solrnewcore/" > /lib_content27/solr/solr.xml
 
 # now delete the solr data directory form three days ago
 rm -rf $solrolddir
