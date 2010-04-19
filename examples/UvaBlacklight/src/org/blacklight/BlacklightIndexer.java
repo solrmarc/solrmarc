@@ -1397,7 +1397,7 @@ public class BlacklightIndexer extends SolrIndexer
             Subfield libF = field.getSubfield('m');
             String lib = (libF != null ? libF.getData() : null);
             String mappedLib = Utils.remap(lib, findMap(libMapName), true);
-            if (resultSet.contains(mappedLib))  continue;
+            if (mappedLib == null || resultSet.contains(mappedLib))  continue;
             String curLoc = (curLocF != null ? curLocF.getData() : null);
             String homeLoc = (homeLocF != null ? homeLocF.getData() : null);
             String mappedHomeVis = Utils.remap(homeLoc, findMap(visMapName), true);
@@ -1412,6 +1412,18 @@ public class BlacklightIndexer extends SolrIndexer
             }
             resultSet.add(mappedLib);
         }
+//        for ( DataField field : (List<DataField>)fields999 )
+//        {
+//            Subfield curLocF = field.getSubfield('k');
+//            Subfield homeLocF = field.getSubfield('l');
+//            Subfield libF = field.getSubfield('m');
+//            String lib = (libF != null ? libF.getData() : null);
+//            String mappedLib = Utils.remap(lib, findMap(libMapName), true);
+//            if (mappedLib != null && !resultSet.contains(mappedLib))  
+//            {
+//                resultSet.add("NOT "+mappedLib);
+//            }
+//        }
         return(resultSet);
     }
     
