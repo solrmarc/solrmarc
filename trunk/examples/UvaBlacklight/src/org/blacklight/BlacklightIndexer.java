@@ -1284,6 +1284,77 @@ public class BlacklightIndexer extends SolrIndexer
         }
         return(result);
     }
+    
+    public Set<String> getCombinedFormatNew2(final Record record)
+    {    
+        // part1_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first
+        // part2_format_facet = 999t, format_maps.properties(format)
+
+        String mapName1 = loadTranslationMap(null, "format_maps.properties(broad_format)");
+        String mapName1a = loadTranslationMap(null, "format_maps.properties(broad_format_electronic)");
+        String mapName2 = loadTranslationMap(null, "format_maps.properties(format_007)");
+        String mapName3 = loadTranslationMap(null, "format_maps.properties(format)");
+
+        Set<String> result = getFieldList(record, "999t");
+        result = Utils.remap(result, findMap(mapName3), false);
+
+        Set<String> f245h = getFieldList(record, "245h");
+        if (Utils.setItemContains(f245h, "cartographic material"))
+        {
+            result.add("Map");
+        }
+        Set<String> urls = getFieldList(record, "856u");
+        Set<String> format_007_raw = getFieldList(record, "007[0-1]");
+        if (Utils.setItemContains(format_007_raw, "cr") || Utils.setItemContains(result, "Online"))
+        {
+            String other007 = null;
+            String broadFormat = getFirstFieldVal(record, null, "000[6-7]");
+            if (format_007_raw.size() >= 1)
+            {
+                for (String str007 : format_007_raw)
+                {
+                    if (!str007.equals("cr"))
+                    {
+                        other007 = str007;
+                        break;
+                    }
+                }
+            }
+            if (other007 != null && other007.startsWith("v")) 
+            {
+                result.add(Utils.remap("v", findMap(mapName1a), true)); // Streaming Video
+                result.add(Utils.remap("v", findMap(mapName2), true));  // Video
+            }
+            else if (broadFormat.equals("am")) 
+            {
+                result.add(Utils.remap("am", findMap(mapName1a), true)); // eBook
+                result.add(Utils.remap("a", findMap(mapName1), true));  // Book
+            }
+            else if (broadFormat.equals("as"))
+            {
+                result.add(Utils.remap("as", findMap(mapName1a), true)); // Online
+                result.add(Utils.remap("as", findMap(mapName1), true));  // Journal/Magazine
+            }
+            else if (broadFormat.startsWith("m"))
+            {
+                result.add(Utils.remap("m", findMap(mapName1), true));
+            }
+        }
+        else if (Utils.setItemContains(urls, "serialssolutions"))
+        {
+            String serialsFormat = Utils.remap("as", findMap(mapName1), true);
+            if (serialsFormat != null) result.add(serialsFormat);
+        }
+        else
+        {
+            String format_007 = getFirstFieldVal(record, mapName2, "007[0]");
+            String broadFormat = getFirstFieldVal(record, mapName1, "000[6-7]:000[6]");
+                if (format_007 != null) result.add(format_007);
+                if (broadFormat != null) result.add(broadFormat);
+           //     if (broadFormat != null && format_007 != null) System.out.println("format diff for item: "+ record.getControlNumber()+" : format_007 = "+format_007+ "  broadFormat = " + broadFormat);
+        }
+        return(result);
+    }
 
     public Set<String> getCombinedFormat(final Record record)
     {    
