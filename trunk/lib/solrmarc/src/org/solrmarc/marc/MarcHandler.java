@@ -34,6 +34,7 @@ public abstract class MarcHandler {
 	protected String configToUse = null;
 	protected boolean showConfig = false;
 	protected boolean showInputFile = false;
+	protected String unicodeNormalize = null;
 	
 	private String solrmarcPath;
 	private String siteSpecificPath;
@@ -174,7 +175,11 @@ public abstract class MarcHandler {
         verbose = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.verbose"));
         includeErrors = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.include_errors"));
         to_utf_8 = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.to_utf_8"));
-        boolean unicodeNormalize = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.unicode_normalize"));
+        unicodeNormalize = Utils.getProperty(configProps, "marc.unicode_normalize");
+        if (unicodeNormalize != null) 
+        {
+            unicodeNormalize = handleUnicodeNormalizeParm(unicodeNormalize);
+        }
         String source = Utils.getProperty(configProps, "marc.source", "STDIN").trim();
         if (Utils.getProperty(configProps, "marc.override")!= null)
         {
@@ -187,7 +192,35 @@ public abstract class MarcHandler {
         loadReader(source, fName);
 	}
 	
-	private String getHomeDir()
+	// We only get here if the parm (unicodeNormalize2) is not null compare it against 
+	// the valid values and return the correct value to use as the parm
+	private String handleUnicodeNormalizeParm(String parm)
+    {
+	    if (parm == null) return(null);
+        if (parm.equalsIgnoreCase("KC") || parm.equalsIgnoreCase("CompatibilityCompose"))
+        {
+            parm = "KC";
+        }
+        else if (parm.equalsIgnoreCase("C") || parm.equalsIgnoreCase("Compose") || parm.equalsIgnoreCase("true"))
+        {
+            parm = "C";
+        }
+        else if (parm.equalsIgnoreCase("D") || parm.equalsIgnoreCase("Decompose"))
+        {
+            parm = "D";
+        }
+        else if (parm.equalsIgnoreCase("KD") || parm.equalsIgnoreCase("CompatibiltyDecompose"))
+        {
+            parm = "KD";
+        }
+        else 
+        {
+            parm = null;
+        }
+        return(parm);
+    }
+
+    private String getHomeDir()
     {
 	    String result = GetDefaultConfig.getJarFileName();       
         if (result == null)
@@ -364,12 +397,12 @@ public abstract class MarcHandler {
         {
             reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing, marcDeleteSubfields);
         }
-	//        // Do translating last so that if we are Filtering as well as translating, we don't expend the 
-	//        // effort to translate records, which may then be filtered out and discarded.
-	//        if (reader != null && to_utf_8)
-	//        {
-	//            reader = new MarcTranslatedReader(reader, unicodeNormalize);
-	//        }	    
+        // Do translating last so that if we are Filtering as well as translating, we don't expend the 
+        // effort to translate records, which may then be filtered out and discarded.
+        if (reader != null && to_utf_8 && unicodeNormalize != null)
+        {
+            reader = new MarcTranslatedReader(reader, unicodeNormalize);
+        }	    
         return;
 	}
 
