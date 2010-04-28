@@ -46,50 +46,45 @@ public class MarcTranslatedReader implements MarcReader
 {
     MarcReader reader;
     CharConverter convert;
-    MarcWriter errorWriter;
-    boolean unicodeNormalize = false;
+    Normalizer.Mode unicodeNormalize = Normalizer.NONE;
     
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
     
-    public MarcTranslatedReader(MarcReader r, boolean unicodeNormalize)
+    public MarcTranslatedReader(MarcReader r, boolean unicodeNormalizeBool)
     {
         reader = r;
         convert = new AnselToUnicode();
-        this.unicodeNormalize = unicodeNormalize;
-        errorWriter = null;
+        if (unicodeNormalizeBool) this.unicodeNormalize = Normalizer.NFC;
     }
     
-    public MarcTranslatedReader(MarcReader r, boolean unicodeNormalize, 
-    		                    String filenameForRecordsWithError)
+    public MarcTranslatedReader(MarcReader r, String unicodeNormalizeStr)
     {
         reader = r;
         convert = new AnselToUnicode();
-        this.unicodeNormalize = unicodeNormalize;
-        try
-        {
-            errorWriter = new MarcStreamWriter(new FileOutputStream(filenameForRecordsWithError));
-        }
-        catch (FileNotFoundException e)
-        {
-            System.err.println("Unable to open error output file: "+ filenameForRecordsWithError);
-            errorWriter = null;
-        }
+        if (unicodeNormalizeStr.equals("KC")) unicodeNormalize = Normalizer.NFKC;
+        else if (unicodeNormalizeStr.equals("KD")) unicodeNormalize = Normalizer.NFKD;
+        else if (unicodeNormalizeStr.equals("C")) unicodeNormalize = Normalizer.NFC;
+        else if (unicodeNormalizeStr.equals("D")) unicodeNormalize = Normalizer.NFD;
+        else unicodeNormalize = Normalizer.NONE;
     }
-
-    protected void finalize() throws Throwable 
-    {
-        try {
-            if (errorWriter != null)
-            {
-                errorWriter.close();
-            }
-        } 
-        finally 
-        {
-            super.finalize();
-        }
-    }
+    
+//    public MarcTranslatedReader(MarcReader r, boolean unicodeNormalize, 
+//    		                    String filenameForRecordsWithError)
+//    {
+//        reader = r;
+//        convert = new AnselToUnicode();
+//        this.unicodeNormalize = unicodeNormalize;
+//        try
+//        {
+//            errorWriter = new MarcStreamWriter(new FileOutputStream(filenameForRecordsWithError));
+//        }
+//        catch (FileNotFoundException e)
+//        {
+//            System.err.println("Unable to open error output file: "+ filenameForRecordsWithError);
+//            errorWriter = null;
+//        }
+//    }
     
     public boolean hasNext()
     {
@@ -102,7 +97,7 @@ public class MarcTranslatedReader implements MarcReader
         Leader l = rec.getLeader();
         boolean is_utf_8 = false;
         if (l.getCharCodingScheme() == 'a') is_utf_8 = true;
-        if (is_utf_8 && !unicodeNormalize) return(rec);
+        if (is_utf_8 && unicodeNormalize == Normalizer.NONE) return(rec);
         List fields = rec.getVariableFields();
         Iterator f_iter = fields.iterator();
         while (f_iter.hasNext())
@@ -116,19 +111,15 @@ public class MarcTranslatedReader implements MarcReader
             {
                 Subfield sf = (Subfield)s_iter.next();
                 String oldData = sf.getData();
-                try {
-                    String newData = oldData;
-                    if (!is_utf_8) newData = convert.convert(newData);
-                    if (unicodeNormalize) newData = Normalizer.compose(newData, false);
-                    if (!oldData.equals(newData))
-                    {
-                        sf.setData(newData);
-                    }
-                }
-                catch (Exception e)
+                String newData = oldData;
+                if (!is_utf_8) newData = convert.convert(newData);
+                if (unicodeNormalize != Normalizer.NONE) 
                 {
-                    if (errorWriter != null) errorWriter.write(rec);
-//                    String newData = convert.convert(oldData);
+                    newData = Normalizer.normalize(newData, unicodeNormalize);
+                }
+                if (!oldData.equals(newData))
+                {
+                    sf.setData(newData);
                 }
             }
         }
