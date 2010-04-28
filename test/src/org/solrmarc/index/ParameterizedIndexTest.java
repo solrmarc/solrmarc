@@ -76,7 +76,10 @@ public class ParameterizedIndexTest
         if (solrFldValObj == null)
         {
             if (expected.length != 0)
+            {
+                System.out.println("No value assigned for Solr field " + fieldToCheck + " in Solr document " + recordFilename);
                 fail("No value assigned for Solr field " + fieldToCheck + " in Solr document " + recordFilename);
+            }
             received = new String[0];
         }
         if (solrFldValObj instanceof String)
@@ -106,6 +109,19 @@ public class ParameterizedIndexTest
                 }
                 // System.out.println("DEBUG: value is [" + fldVal + "]");
             }
+            if (!foundIt)
+            {
+                System.out.println("Solr field " + fieldToCheck + " did not have any value matching " + expect);
+                for (String receive : received)
+                {
+                    if (expect.equals(receive))
+                    {    
+                        foundIt = true;
+                        break;
+                    }
+                    System.out.println("DEBUG: found value [" + receive + "]");
+                }
+            }
             assertTrue("Solr field " + fieldToCheck + " did not have any value matching " + expect, foundIt);
         }
         for (String receive : received)
@@ -119,6 +135,10 @@ public class ParameterizedIndexTest
                     break;
                 }
                 // System.out.println("DEBUG: value is [" + fldVal + "]");
+            }
+            if (!foundIt)
+            {
+                System.out.println("Solr field " + fieldToCheck + " did not have any value matching " + receive);
             }
             assertTrue("Solr field " + fieldToCheck + " had extra unexpected value " + receive, foundIt);
         }
