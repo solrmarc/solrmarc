@@ -1,0 +1,54 @@
+import org.marc4j.marc.Record;
+import org.solrmarc.tools.Utils;
+import org.solrmarc.tools.CallNumUtils;
+
+// define the base level indexer so that its methods can be called from the script.
+// note that the SolrIndexer code will set this value before the script methods are called.
+org.solrmarc.index.SolrIndexer indexer = null;
+
+/**
+ * returns the facet value for dewey tens digits
+ * @param record
+ * @return Set of Strings containing facet value for dewey tens digits
+ */
+Set getDeweyTens(Record record)
+{
+    return(getDeweyFacets(record, "10"));
+}
+/**
+ * returns the facet value for dewey hundreds digits
+ * @param record
+ * @return Set of Strings containing facet value for dewey hundreds digits
+ */
+Set getDeweyHundreds(Record record)
+{
+    return(getDeweyFacets(record, "100"));
+}
+
+/**
+ * returns the facet value for dewey hundreds digits, and/or dewey tens digits
+ * @param record
+ * @return Set of Strings containing facet value for dewey hundreds digits, and/or dewey tens digits
+ */
+Set getDeweyFacets(Record record, String tens_or_hundreds)
+{
+    LinkedHashSet resultSet = new LinkedHashSet();
+    Set values = indexer.getFieldList(record, "082a");
+    String mapName = indexer.loadTranslationMap("dewey_map.properties");
+	boolean doTens = true;
+	boolean doHundreds = true;
+	if ("10".equals(tens_or_hundreds))   doHundreds = false;
+	if ("100".equals(tens_or_hundreds))  doTens = false;
+	for (String dewey : values)
+    {
+        if (! CallNumUtils.isValidDewey(dewey))  continue;
+        String hundreds = dewey.substring(0, 1) + "00";
+        String tens = dewey.substring(0,2) + "0";
+        String hundredsMapped = Utils.remap(hundreds, indexer.findMap(mapName), true);
+        String tensMapped = Utils.remap(tens, indexer.findMap(mapName), true);
+        if (doHundreds && hundredsMapped != null) resultSet.add(hundredsMapped);
+        if (doTens && tensMapped != null) resultSet.add(tensMapped);
+    }
+
+    return resultSet;
+}

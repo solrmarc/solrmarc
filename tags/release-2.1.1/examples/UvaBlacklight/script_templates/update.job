@@ -1,0 +1,109 @@
+#!/bin/bash
+PATH=/usr/local/projects/solrmarc-2.1/dist/bin:$PATH
+export PATH
+num=0
+JAVA_HOME=/usr/java/latest/bin/java
+export JAVA_HOME
+
+DATADIR=/usr/local/projects/marc
+INPUTDIR=$DATADIR/incoming
+PROCESSEDDIR=$DATADIR/processed
+RESULTSDIR=$DATADIR/results
+verbose=
+
+if [ "$1" == "-v" ]  ; then 
+    verbose=1
+fi
+
+if [ "$verbose" == "1" ] ; then
+    echo copying files from incoming directory
+fi
+
+# first move auth files to another directory
+for file in `find $INPUTDIR -name '*.auth*' -print`
+do
+    mv $file $DATADIR/not_processed
+done
+
+#make sure directories exist
+for dir in prod dev multicore merge debug
+do
+    mkdir $DATADIR/incoming_$dir 2> /dev/null
+    mkdir $DATADIR/processed_$dir 2> /dev/null
+    mkdir $DATADIR/results_$dir 2> /dev/null
+done
+
+for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
+do
+     fname=`basename $file`
+     for dir in prod dev multicore merge debug
+     do
+        ln $file $DATADIR/incoming_$dir/$fname
+     done
+done
+
+
+if [ "$verbose" == "1" ] ; then
+    echo updating solrpowr:8080/solr index
+fi
+update.index.job prod blacklight_config.properties
+
+
+if [ "$verbose" == "1" ] ; then
+    echo updating solrpowr:8080/solr index
+fi
+update.index.job dev blacklight_dev_config.properties
+
+
+if [ "$verbose" == "1" ] ; then
+    echo updating multicore index at solrpowr:18983/solr/blacklight_index
+fi
+update.index.job multicore blacklight_multicore_config.properties
+
+if [ "$verbose" == "1" ] ; then
+    echo copying blacklight_index to datastamped index to use for searching
+fi
+update.multicore.job
+
+
+if [ "$verbose" == "1" ] ; then
+    echo updating full_dump_updated files with new incoming records.
+fi
+update.merge.job
+
+
+if [ "$verbose" == "1" ] ; then
+    echo updating development index at solrpowr.lib:8983/solr
+    update.debug.job -v
+else
+    update.debug.job
+fi
+
+
+if [ "$verbose" == "1" ] ; then
+    echo cleaning up incoming directories
+fi
+for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -print | sort`
+do
+#     echo $file
+     fname=`basename $file`
+     found=1
+     for dir in prod dev multicore sorted debug
+     do     
+         if [ ! -f $DATADIR/processed_$dir/$fname ] 
+         then
+#             echo "not found in dir $dir"
+             found=0
+         fi
+     done
+     if [ $found == "1" ]
+     then
+#         echo " moving $file to $DATADIR/processed"
+         cp $file $DATADIR/processed
+     fi
+done
+
+for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
+do
+    rm $file
+done

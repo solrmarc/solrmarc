@@ -1,0 +1,4 @@
+This is the directory in which you should place custom java indexing routines.
+Note that your main custom indexing class MUST extend the solrmarc class:
+
+org.solrmarc.index.SolrIndexer

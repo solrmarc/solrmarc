@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="dist" name="SolrMarc Custom">
+
+    <!-- property files -->
+    <property file="build.properties" />
+    <property name="site.dir" value="local_build" />
+
+    <property name="buildtools.dir" value="buildtools" />
+    <property name="buildtools.path" location="${buildtools.dir}" />
+
+    <!-- import other ant scripts -->
+    <!-- import ant_extras.xml which defines several general purpose macros most drawn from the ant-contrib package -->
+    <property name="ant_extras.dist.dir" location="${buildtools.path}" />
+    <import file="${buildtools.path}/ant_extras.xml" />
+
+    <!-- import ant_init.xml which defines all of the macros used by the site initialization process -->
+    <import file="${buildtools.path}/ant_init.xml" />
+
+    <!-- import ant_package.xml which defines all of the macros used to create the source and binary distribution packages -->
+    <property name="ant_package.dist.dir" location="${buildtools.path}" />   
+    <import file="${buildtools.path}/ant_package.xml" />
+
+    <tstamp>
+        <format property="year" pattern="yyyy" />
+        <format property="DSTAMP" pattern="yyyy-MM-dd" />
+        <format property="TSTAMP" pattern="HH:mm:ss" />
+        <format property="dateversion" pattern="yyyy.MM.dd.HH.mm.ss" />
+    </tstamp>
+
+    <target name="clean" description="clean the generated directories">
+        <delete dir="${build.dir}" />
+        <delete dir="${dist.dir}" />
+        <ant dir="${lib.dir}/solrmarc" target="clean" inheritAll="false" />
+        <if>
+            <and>
+                <isset property="site.dir" />
+                <available file="${site.dir}/build.xml" />
+            </and>
+            <then>
+                <ant dir="${site.dir}" target="clean" inheritAll="false" />
+            </then>
+        </if>
+    </target>
+
+    <target name="veryclean" depends="clean" 
+        description="clean any generated files and restore the 
+                     project as near as possible to a just-downloaded state">
+        <property name="package.dir" value="package" />
+        <delete dir="${package.dir}" /> 
+        <delete dir="${site.dir}" /> 
+    </target>
+
+    <target name="init" depends="init_site" unless="init.already.run"
+        description="create (empty) generated directories">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${dist.dir}" />
+        <property name="init.already.run" value="true" />
+    </target>
+
+    <target name="init_site" unless="init_site.already.run"
+        description="Initialize (or update) a local site based on an example">
+        <property name="solr.version" value="external" /> 
+        <property name="solr.version.external" value="true" />
+        <echo message="solr version: ${solr.version}" />
+        <build_solrmarc />
+        <check_site_dir_created  propertytoset="init.site_dir_created" />
+        
+        <init_site_props />
+        <if>
+            <isset property="init.site_dir_created" />
+            <then>
+                <echo message="site_dir ${site.dir} already inited skipping forward. " />
+                <property file="${site.dir}/build.properties" />
+                <check_up_to_date_vs_example />
+                <get_indexer_class />
+            </then>
+            <else>
+                <get_example_config_to_use property="example.configuration" />
+                <if>
+                    <equals arg1="${example.configuration}" arg2="none" />
+                    <then>
+                        <init_from_empty_config />
+                        <copy_test_solr_configuration />
+                    </then>
+                    <else>
+                        <init_from_example example="${example.configuration}" />
+                        <copy_test_solr_configuration />
+                    </else>
+                </if>
+            </else>
+        </if>
+        <copy_solrmarc />
+        <property name="init_site.already.run" value="true" />
+    </target>
+
+    <target name="compile" depends="init" 
+            description="Invoke target compile in the site specific directory">
+        <ant antfile="${site.dir}/build.xml" target="compile" inheritAll="false" /> 
+    </target>
+   
+    <target name="build" depends="init" 
+        description="Invoke target build in the site specific directory">
+        <ant antfile="${site.dir}/build.xml" target="build" inheritAll="false" >
+        </ant>
+    </target>
+    
+    <target name="dist" depends="init" 
+        description="Invoke target dist in the site specific directory">
+        <ant antfile="${site.dir}/build.xml" target="dist" inheritAll="false" >
+            <property name="dist.path" location="${dist.dir}" />
+        </ant>
+    </target>
+
+    <target name="package" description="Create both prebuilt binary distributions and a source distribution" >
+        <property name="package.dir" value="package" />
+        <property name="version" value="2.1" />
+        <mkdir dir="${package.dir}" />
+        <packagesrc version="${version}" />
+        <packageprebuilt example="GenericBlacklight" binprefix="bin" version="${version}" />
+        <packageprebuilt example="GenericVuFind" binprefix="bin" version="${version}" />
+        <packageprebuilt example="none" binprefix="bin" acceptpromptdefaults="true" version="${version}" /> 
+    </target>
+    
+    <target name="upload" depends="package" description="Upload prebuilt binary distributions and a source distribution to googlecode" >
+        <if> 
+            <available file="build.credentials.properties" />
+            <then>
+                <property file="build.credentials.properties" />
+                <fail unless="gc.username" message="Missing property 'gc.username' from file 'build.credentials.properties'."/>
+                <fail unless="gc.password" message="Missing property 'gc.password' from file 'build.credentials.properties'."/>
+                <uploadsrc username="${gc.username}" password="${gc.password}" version="${version}" />
+                <uploadprebuilt username="${gc.username}" password="${gc.password}" example="GenericBlacklight"
+                       sitelabel="Blacklight site" version="${version}" />
+                <uploadprebuilt username="${gc.username}" password="${gc.password}" example="GenericVuFind"
+                       sitelabel="VuFind site" version="${version}" />
+                <uploadprebuilt username="${gc.username}" password="${gc.password}" example="none"
+                       sitelabel="Custom Configuration (for non-Blacklight and non-VuFind site)" version="${version}" />
+            </then>
+            <else>
+            	<fail message="Can't find file 'build.credentials.properties'."/>
+            </else>
+        </if>
+    </target>
+    
+    <target name="usage" description="Prints usage instructions">
+        <echo message="Welcome to the Solrmarc indexing project" />
+        <echo message="Use 'ant' to build the latest code" />
+        <echo message="For developers" />
+        <echo message="Use 'ant clean' to clean the compiled source directory" />
+        <echo message="Use 'ant package-src' to build a gzipped tarball of the source code for distribution" />
+        <echo message="Use 'ant package-prebuilt' to build a gzipped tarball of a pre-built, pre-configured, binary release" />
+        <echo message="Use 'ant test' to run unit tests" />
+    </target>
+
+    <!-- Site Testing Targets -->
+
+    <target name="test" depends="init" description="Run all three test suites in local build directory: smoketest, indextest and junittest">
+         <ant antfile="${site.dir}/build.xml" target="test" inheritAll="false" >
+             <property name="dist.path" location="${dist.dir}" />
+         </ant>
+    </target>
+        
+    <target name="junittest" depends="init" description="Run junittest test suite in local build directory">
+         <ant antfile="${site.dir}/build.xml" target="junittest" inheritAll="false" >
+             <property name="dist.path" location="${dist.dir}" />
+         </ant>
+    </target>
+    
+    <target name="smoketest" depends="init" description="Run smoketest test suite in local build directory">
+         <ant antfile="${site.dir}/build.xml" target="smoketest" inheritAll="false" >
+             <property name="dist.path" location="${dist.dir}" />
+         </ant>
+    </target>
+    
+    <target name="indextest" depends="init" description="Run indextest test suite in local build directory">
+         <ant antfile="${site.dir}/build.xml" target="indextest" inheritAll="false" >
+             <property name="dist.path" location="${dist.dir}" />
+         </ant>
+    </target>
+
+</project>

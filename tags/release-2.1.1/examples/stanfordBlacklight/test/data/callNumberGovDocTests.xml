@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+    
+    <!-- SUDOC -->
+
+<!--  
+    E 1.1:
+    Y 1.1:M 29
+    I 19.2:AL/7/2
+    A 1.2:C 76/5/FACTA 1
+    HE 1.2:EL 2/976-77
+-->
+    
+    <!-- BRIT-DOCS location, LC call number -->
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">abrit</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">BRIT-DOCS location</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">Z3871.Z8</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">36105082101390</subfield>
+            <subfield code="d">8/7/1996</subfield>
+            <subfield code="l">BRIT-DOCS</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="p">$40.00</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">STKS-MONO</subfield>
+            <subfield code="u">2/20/1979</subfield>
+            <subfield code="o">.TECHSTAFF. tf:HOOVER 06/29/05 batch</subfield>
+            <subfield code="o">.TECHSTAFF. 911019</subfield>
+        </datafield>
+    </record>
+    <!-- CALIF-DOCS location, SUDOC -->
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">acalif</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">CALIF-DOCS location</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">E 1.28:COO-4274-1</subfield>
+            <subfield code="w">SUDOC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">001AMR5851</subfield>
+            <subfield code="d">11/22/1998</subfield>
+            <subfield code="l">CALIF-DOCS</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="p">$40.00</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">GOVSTKS</subfield>
+            <subfield code="u">5/20/1979</subfield>
+            <subfield code="x">MARCIVE</subfield>
+            <subfield code="o">.TECHSTAFF. tf:GOV-DOCS 11/98 batch</subfield>
+        </datafield>
+    </record>
+    <!-- FED-DOCS location, SUDOC -->
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">afed</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">FED-DOCS location</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+        <subfield code="a">GA 1.13:RCED-85-88</subfield>
+        <subfield code="w">SUDOC</subfield>
+        <subfield code="c">1</subfield>
+        <subfield code="i">001ANE5736</subfield>
+        <subfield code="d">11/27/1998</subfield>
+        <subfield code="l">FED-DOCS</subfield>
+        <subfield code="m">GREEN</subfield>
+        <subfield code="p">$40.00</subfield>
+        <subfield code="r">Y</subfield>
+        <subfield code="s">Y</subfield>
+        <subfield code="t">GOVSTKS</subfield>
+        <subfield code="u">7/19/1985</subfield>
+        <subfield code="x">MARCIVE</subfield>
+        <subfield code="o">.TECHSTAFF. tf:GOV-DOCS 11/98 batch</subfield>
+    </datafield>
+    </record>
+    <!-- INTL-DOCS location, SUDOC -->
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">aintl</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">INTL-DOCS location</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">ITC 1.15/3:</subfield>
+            <subfield code="w">SUDOC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">4114632-1001</subfield>
+            <subfield code="d">7/12/1999</subfield>
+            <subfield code="l">INTL-DOCS</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">GOVSTKS</subfield>
+            <subfield code="u">7/12/1999</subfield>
+            <subfield code="x">MARCIVE</subfield>
+        </datafield>
+    </record>
+    <!-- SSRC-DOCS location, SUDOC -->
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">assrcdocs</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">SSRC-DOCS location</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">NAS 1.26:205100</subfield>
+            <subfield code="w">SUDOC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">4258089-1001</subfield>
+            <subfield code="l">SSRC-DOCS</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">GOVSTKS</subfield>
+            <subfield code="u">11/11/1999</subfield>
+            <subfield code="x">MARCIVE</subfield>
+        </datafield>
+    </record>
+    <!-- SSRC-FICHE location, Dewey -->
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">assrcfiche</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">SSRC-FICHE location</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">370.1 .S655</subfield>
+            <subfield code="w">DEWEY</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">4258089-1001</subfield>
+            <subfield code="l">SSRC-FICHE</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">GOVSTKS</subfield>
+            <subfield code="u">11/11/1999</subfield>
+            <subfield code="x">MARCIVE</subfield>
+        </datafield>
+    </record>
+    <!-- SSRC-NWDOC location, SUDOC -->
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">assrcnwdoc</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">SSRC-NWDOC location</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">A 1.2:C 76/5/FACTA 1</subfield>
+            <subfield code="w">SUDOC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">4258089-1001</subfield>
+            <subfield code="l">SSRC-NWDOC</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">GOVSTKS</subfield>
+            <subfield code="u">11/11/1999</subfield>
+            <subfield code="x">MARCIVE</subfield>
+        </datafield>
+    </record>
+    
+    <!-- SUDOC *not* in gov doc location -->
+    <record>
+        <leader>01139cam a2200229 i 4500</leader>
+        <controlfield tag="001">asudoc</controlfield>
+        <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+        <datafield tag="245" ind1="1" ind2="2">
+            <subfield code="a">SUDOC *not* in gov doc location</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">HE 1.2:EL 2/976-77</subfield>
+            <subfield code="w">SUDOC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">4258089-1001</subfield>
+            <subfield code="l">STACKS</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="r">Y</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">GOVSTKS</subfield>
+            <subfield code="u">11/11/1999</subfield>
+            <subfield code="x">MARCIVE</subfield>
+        </datafield>
+    </record>
+</collection>
