@@ -12,45 +12,17 @@ then
   solrmarcdir=$( (cd -P $(dirname $0)/.. && pwd) )
 fi
 
-solrhome=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.path | sed -e's/.* = //'`
-solrhomeparent=$( (cd -P $solrhome && cd .. && pwd) )
-solrcore=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.core.name | sed -e's/.* = //'`
-solrurlstart=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.hosturl | sed -e's/.* = //' -e's:/[A-Za-z0-9_]*$::'`
+update.multicore.sub.job blacklight_multicore_config.properties
+update.multicore.sub.job blacklight_multicore_dev_config.properties
 
-solrnewcore=`echo $solrcore | sed -e's/_.*//'`_`date +%Y%m%d`
-solroldcore=`echo $solrcore | sed -e's/_.*//'`_`date --date="-3 days" +%Y%m%d`
+solrcore1=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.core.name | sed -e's/.* = //'`
+solrcore2=`cat $solrmarcdir/blacklight_multicore_dev_config.properties | egrep solr.core.name | sed -e's/.* = //'`
 
-solrdir=$solrhome/$solrcore
-solrnewdir=$solrhomeparent/$solrnewcore
-solrolddir=$solrhomeparent/$solroldcore
+solrnewcore1=`echo $solrcore1 | sed -e's/_index//'`_`date +%Y%m%d`
+solrnewcore2=`echo $solrcore2 | sed -e's/_index//'`_`date +%Y%m%d`
 
-java -cp /lib_content27/solr/verification/lucene-core-2.9.1.jar org.apache.lucene.index.CheckIndex $solrdir/index  > /dev/null 2>1
-if ! [ "$?" == "0" ] 
-then
-    return=$?
-    echo "Warning index verification process failed.  Index seems to be corrupted."
-    exit $return
-fi
-
-# copy entire index via creating hard links, then turn segment files from hardlinks to copies
-cp -lR $solrdir $solrnewdir.tmp
-rm $solrnewdir.tmp/conf/solrcore.properties
-cp $solrhomeparent/solrcore.properties $solrnewdir.tmp/conf
-
-for file in $solrnewdir.tmp/*/seg*
-do
-#   echo $file
-    mv $file $file.tmp
-    cp $file.tmp $file
-    rm $file.tmp
-done
-rm $solrnewdir.tmp/*/.nfs* 2> /dev/null
-
-mv $solrnewdir.tmp $solrnewdir
-
-#copy the file solr.xml.template to solr.xml  replacing the string @@blacklight_index@@ with the name of the new solr core. 
-cat /lib_content27/solr/solr.xml.template  | sed -e "s/@@blacklight_index@@/$solrnewcore/" > /lib_content27/solr/solr.xml
-
-# now delete the solr data directory form three days ago
-rm -rf $solrolddir
+#copy the file solr.xml.template to solr.xml  replacing 
+#the strings @@blacklight_index@@ and @@blacklight_dev_index@@ 
+#with the names of the new solr cores. 
+cat /lib_content27/solr/solr.xml.template  | sed -e "s/@@blacklight_index@@/$solrnewcore1/" -e "s/@@blacklight_dev_index@@/$solrnewcore2/" > /lib_content27/solr/solr.xml
 
