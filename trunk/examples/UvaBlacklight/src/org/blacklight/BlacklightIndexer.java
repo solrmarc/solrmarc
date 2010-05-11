@@ -1540,7 +1540,11 @@ public class BlacklightIndexer extends SolrIndexer
             if (mappedHomeVis.equals("HIDDEN"))  continue; // this copy of the item is Hidden, go no further
             if (mappedHomeLoc != null && mappedHomeLoc.contains("$"))
             {
-                mappedHomeLoc = mappedHomeLoc.replaceAll("[$]m", mappedLib);
+                if (mappedLib != null)
+                    mappedHomeLoc = mappedHomeLoc.replaceAll("[$]m", mappedLib);
+                else
+                    mappedHomeLoc = mappedHomeLoc.replaceAll("[$]m", "Library");
+
             }
             if (mappedHomeLoc != null) resultSet.add(mappedHomeLoc);
         }
