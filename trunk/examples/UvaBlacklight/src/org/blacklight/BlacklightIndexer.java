@@ -1099,6 +1099,7 @@ public class BlacklightIndexer extends SolrIndexer
     private String buildParsableURLString(DataField df, String defaultLabel)
     {
         String label = (df.getSubfield('z') != null) ? df.getSubfield('z').getData() : defaultLabel;
+        if (label.startsWith("(")) label = defaultLabel;
         String url = df.getSubfield('u').getData(); 
         String result = url + "||" + label;
         return(result);
@@ -1121,36 +1122,56 @@ public class BlacklightIndexer extends SolrIndexer
                         resultSet.add(buildParsableURLString(dField, defaultLabel));
                     }
                 }
-                if (dField.getIndicator1() == '4' && dField.getIndicator2() == '1')
+                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == '1')
                 {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Additional Info";
                     if (dField.getSubfield('u') != null) 
                     {
-                        resultSet.add(buildParsableURLString(dField, defaultLabel));
+                        resultSet.add(buildParsableURLString(dField, label));
                     }
                 }
-                if (dField.getIndicator1() == '4' && dField.getIndicator2() == ' ')
+//                if (dField.getIndicator1() == '4' && dField.getIndicator2() == '2')
+//                {
+//                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related Info";
+//                    if (dField.getSubfield('u') != null) 
+//                    {
+//                        resultSet.add(buildParsableURLString(dField, label));
+//                    }
+//                }
+                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == ' ')
                 {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : defaultLabel;
                     if (dField.getSubfield('u') != null) 
                     {
-                        resultSet.add(buildParsableURLString(dField, defaultLabel));
+                        resultSet.add(buildParsableURLString(dField, label));
                     }
                 }
-                if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '0')
+                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '0')
                 {
                     if (dField.getSubfield('u') != null) 
                     {
                         backupResultSet.add(buildParsableURLString(dField, defaultLabel));
                     }
                 }
-                if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '1')
+                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '1')
                 {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Additional Info";
                     if (dField.getSubfield('u') != null) 
                     {
-                        backupResultSet.add(buildParsableURLString(dField, defaultLabel));
+                        backupResultSet.add(buildParsableURLString(dField, label));
                     }
                 }
-                if (dField.getIndicator1() == ' ' && dField.getIndicator2() == ' ')
+//                if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '2')
+//                {
+//                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related Info";
+//                    if (dField.getSubfield('u') != null) 
+//                    {
+//                        backupResultSet.add(buildParsableURLString(dField, label));
+//                    }
+//                }
+                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == ' ')
                 {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : defaultLabel;
                     if (dField.getSubfield('u') != null) 
                     {
                         backupResultSet.add(buildParsableURLString(dField, defaultLabel));
