@@ -1201,7 +1201,7 @@ public class BlacklightIndexer extends SolrIndexer
                 }
                 else if (dField.getIndicator1() == '4' && dField.getIndicator2() == '1')
                 {
-                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Additional Info";
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related resources";
                     if (dField.getSubfield('u') != null) 
                     {
                         resultSet.add(buildParsableURLString(dField, label));
@@ -1232,7 +1232,7 @@ public class BlacklightIndexer extends SolrIndexer
                 }
                 else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '1')
                 {
-                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Additional Info";
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related resources";
                     if (dField.getSubfield('u') != null) 
                     {
                         backupResultSet.add(buildParsableURLString(dField, label));
