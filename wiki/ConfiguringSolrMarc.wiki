@@ -108,7 +108,7 @@ marc.include_errors = false
 
  * *marc.include_errors:* a boolean value, defaulting to false.  If it is set, _and_ if {{{marc.permissive}}} is also set to true, then any errors that are encountered in the process of reading a MARC record, will be stored in the solr index record that is produced, this will allow catalogers to review the errors encountered during reading and to correct the original records in which the errors occurred.
 
- * *marc.unicode_normalize_setting:* (added in SolrMarc 2.1.1)  If it is set, Unicode characters found in the record will be normalized using the specified method: {{{C}}} (Canonical decomposition followed by canonical composition), {{{D}}} (Canonical decomposition), {{{KC}}} (Compatibility decomposition followed by canonical composition) or {{{KD}}} (Compatibility decomposition).  More information on Unicode normalization can be found in [http://unicode.org/reports/tr15/ this technical report].  Some helpful commentary on the use of this setting can be found in [http://bibwild.wordpress.com/2010/05/13/unicode-normalization-forms/ Jonathan Rochkind's blog].
+ * *marc.unicode_normalize:* (added in SolrMarc 2.1.1)  If it is set, Unicode characters found in the record will be normalized using the specified method: {{{C}}} (Canonical decomposition followed by canonical composition), {{{D}}} (Canonical decomposition), {{{KC}}} (Compatibility decomposition followed by canonical composition) or {{{KD}}} (Compatibility decomposition).  More information on Unicode normalization can be found in [http://unicode.org/reports/tr15/ this technical report].  Some helpful commentary on the use of this setting can be found in [http://bibwild.wordpress.com/2010/05/13/unicode-normalization-forms/ Jonathan Rochkind's blog].
 
 <br />
 
