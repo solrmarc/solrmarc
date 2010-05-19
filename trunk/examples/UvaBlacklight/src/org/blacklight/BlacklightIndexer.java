@@ -1418,19 +1418,33 @@ public class BlacklightIndexer extends SolrIndexer
                     }
                 }
             }
+            List<?> field856 = record.getVariableFields("856");
+            boolean isOnline = false;
+            for (Object f : field856)
+            {
+                if (f instanceof DataField)
+                {
+                    DataField df = (DataField)f;
+                    if ((df.getIndicator1() == '4' && df.getIndicator2() == '0') ||
+                        (df.getIndicator1() == '1' && df.getIndicator2() == '1'))
+                    {
+                        isOnline = true;
+                    }
+                }
+            }
             if (other007 != null && other007.startsWith("v")) 
             {
-                result.add(Utils.remap("v", findMap(mapName1a), true)); // Streaming Video
+                if (isOnline) result.add(Utils.remap("v", findMap(mapName1a), true)); // Streaming Video
                 result.add(Utils.remap("v", findMap(mapName2), true));  // Video
             }
             else if (broadFormat.equals("am")) 
             {
-                result.add(Utils.remap("am", findMap(mapName1a), true)); // eBook
+                if (isOnline) result.add(Utils.remap("am", findMap(mapName1a), true)); // eBook
                 result.add(Utils.remap("a", findMap(mapName1), true));  // Book
             }
             else if (broadFormat.equals("as"))
             {
-                result.add(Utils.remap("as", findMap(mapName1a), true)); // Online
+                if (isOnline) result.add(Utils.remap("as", findMap(mapName1a), true)); // Online
                 result.add(Utils.remap("as", findMap(mapName1), true));  // Journal/Magazine
             }
             else if (broadFormat.startsWith("m"))
