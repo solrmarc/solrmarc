@@ -11,13 +11,7 @@ org.solrmarc.index.SolrIndexer indexer = null;
  */
 public String getFullCallNumber(Record record) {
 
-	String val = indexer.getFirstFieldVal(record, "099ab:090ab:050ab");
-
-	if (val != null) {
-        return val.toUpperCase().replaceAll(" ", "");
-	} else {
-		return val;
-	}
+    return(getFullCallNumber(record, "099ab:090ab:050ab"));
 }
 
 /**
@@ -25,19 +19,45 @@ public String getFullCallNumber(Record record) {
  * @param record
  * @return Call number label
  */
-public String getCallNumberLabel(Record record) {
-	
-	String val = indexer.getFirstFieldVal(record, "090a:050a");
-	
-	if (val != null) {
+public String getFullCallNumber(Record record, String fieldSpec) {
+
+    String val = indexer.getFirstFieldVal(record, fieldSpec);
+
+    if (val != null) {
+        return val.toUpperCase().replaceAll(" ", "");
+    } else {
+        return val;
+    }
+}
+
+/**
+ * Extract the call number label from a record
+ * @param record
+ * @return Call number label
+ */
+public String getCallNumberLabel(Record record) {       
+
+    return getCallNumberLabel(record, "090a:050a");
+}
+
+/**
+ * Extract the call number label from a record
+ * @param record
+ * @return Call number label
+ */
+public String getCallNumberLabel(Record record, String fieldSpec) {
+    
+    String val = indexer.getFirstFieldVal(record, fieldSpec);
+    
+    if (val != null) {
         int dotPos = val.indexOf(".");
         if (dotPos > 0) {
             val = val.substring(0, dotPos);
         }
         return val.toUpperCase();
-	} else {
-		return val;
-	}
+    } else {
+        return val;
+    }
 }
 
 /**
@@ -50,14 +70,27 @@ public String getCallNumberLabel(Record record) {
  */
 public String getCallNumberSubject(Record record) {
 
-    String val = indexer.getFirstFieldVal(record, "090a:050a");
+    return(getCallNumberSubject(record, "090a:050a"));
+}
+
+/**
+ * Extract the subject component of the call number
+ *
+ * Can return null
+ *
+ * @param record
+ * @return Call number label
+ */
+public String getCallNumberSubject(Record record, String fieldSpec) {
+
+    String val = indexer.getFirstFieldVal(record, fieldSpec);
 
     if (val != null) {
         String [] callNumberSubject = val.toUpperCase().split("[^A-Z]+");
-    	if (callNumberSubject.length > 0)
-    	{
-    	    return callNumberSubject[0];
-    	}
+        if (callNumberSubject.length > 0)
+        {
+            return callNumberSubject[0];
+        }
     }
     return(null);
 }
