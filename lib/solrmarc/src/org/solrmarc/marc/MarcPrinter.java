@@ -33,6 +33,7 @@ import org.marc4j.MarcException;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.MarcXmlWriter;
+import org.marc4j.converter.impl.UnicodeToAnsel;
 import org.marc4j.marc.Record;
 
 import org.solrmarc.marc.MarcFilteredReader;
@@ -72,7 +73,7 @@ public class MarcPrinter extends MarcHandler
     {
         for (String arg : addnlArgs)
         {
-            if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate"))
+            if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate") || arg.equals("untranslate"))
             {
                 mode = arg;
             }
@@ -144,6 +145,16 @@ public class MarcPrinter extends MarcHandler
                     if (writer == null)
                     {
                         writer = new MarcStreamWriter(System.out, "UTF-8", true);
+                    }
+                    writer.write(record);
+                }
+                else if (mode.equals("untranslate"))
+                {
+                    if (writer == null)
+                    {
+                        writer = new MarcStreamWriter(System.out, "ISO8859_1", true);
+                        writer.setConverter(new UnicodeToAnsel());
+                        record.getLeader().setCharCodingScheme(' ');
                     }
                     writer.write(record);
                 }
