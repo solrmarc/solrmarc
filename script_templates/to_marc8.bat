@@ -1,11 +1,12 @@
 @echo off
-:: filterrecords.bat
-:: Grep for marc records
-:: $Id: filterrecords.bat
+:: printrecord.bat
+:: Diagnostic program to display marc records.
+:: $Id: printrecord.bat
 setlocal
 ::Get the current batch file's short path
 for %%x in (%~f0) do set scriptdir=%%~dpsx
 for %%x in (%scriptdir%) do set scriptdir=%%~dpsx
+::echo BatchPath = %scriptdir%
 
 if EXIST %scriptdir%SolrMarc.jar goto doit
 pushd %scriptdir%..
@@ -14,4 +15,4 @@ popd
 
 :doit
 
-java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPrinter" -Dmarc.include_if_present="%1" -Dmarc.combine_records="" -jar %scriptdir%SolrMarc.jar translate %2 %3 
+java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPrinter" -jar %scriptdir%SolrMarc.jar untranslate %1 %2 %3
