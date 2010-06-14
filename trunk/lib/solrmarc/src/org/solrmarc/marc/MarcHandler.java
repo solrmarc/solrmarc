@@ -52,7 +52,7 @@ public abstract class MarcHandler {
 	{
 	}
 	
-	final public void init(String args[])
+	public void init(String args[])
 	{
         String configProperties = GetDefaultConfig.getConfigName("config.properties");
 
@@ -109,7 +109,6 @@ public abstract class MarcHandler {
             loadIndexer(indexerName, indexerProps); 
         }
         
-        loadLocalProperties();
         processAdditionalArgs();
 	}
 		
@@ -145,8 +144,16 @@ public abstract class MarcHandler {
 	{
         homeDir = getHomeDir();
         logger.debug("Current Directory = "+ (new File(".").getAbsolutePath()));
-        configProps = Utils.loadProperties(new String[]{homeDir}, configProperties, showConfig, "config.file.dir");
-	    
+        if (configProperties.equals("null.properties"))
+        {
+            configProps = new Properties();
+        }
+        else
+        {
+            configProps = Utils.loadProperties(new String[]{homeDir}, configProperties, showConfig, "config.file.dir");
+        }
+        loadLocalProperties();
+        
         solrmarcPath = Utils.getProperty(configProps, "solrmarc.path");
         solrmarcPath = normalizePathsProperty(homeDir, solrmarcPath);
 
@@ -188,7 +195,7 @@ public abstract class MarcHandler {
         reader = null;
         String fName = Utils.getProperty(configProps, "marc.path");
         if (fName != null)  fName = fName.trim();
-        
+
         loadReader(source, fName);
 	}
 	

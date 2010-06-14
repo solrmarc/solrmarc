@@ -86,11 +86,6 @@ public class MarcPrinter extends MarcHandler
                 indexkeyprefix = arg.replaceAll("\\*", ".*").replaceAll("\\?", ".?");
             }
         }
-    }
-
-    @Override
-    protected void loadLocalProperties() 
-    {
         String marcIncludeIfPresent2 = Utils.getProperty(configProps, "marc.include_if_present2");
         String marcIncludeIfMissing2 = Utils.getProperty(configProps, "marc.include_if_missing2");
 
@@ -98,6 +93,11 @@ public class MarcPrinter extends MarcHandler
         {
             reader = new MarcFilteredReader(reader, marcIncludeIfPresent2, marcIncludeIfMissing2, null);
         }
+    }
+
+    @Override
+    protected void loadLocalProperties() 
+    {
     }
 
     @Override
