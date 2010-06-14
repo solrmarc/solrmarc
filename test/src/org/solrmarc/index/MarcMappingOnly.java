@@ -8,6 +8,7 @@ import org.marc4j.MarcException;
 import org.marc4j.marc.Record;
 
 import org.solrmarc.marc.MarcHandler;
+import org.solrmarc.tools.GetDefaultConfig;
 
 /**
  * Reads in marc records and creates mapping of solr field names to solr field
@@ -25,6 +26,7 @@ public class MarcMappingOnly extends MarcHandler
 
     /** name of unique key field in solr document */
     private String idFldName = null;
+    private String argsPlus[] = null;
 
     /**
      * Constructor
@@ -37,6 +39,38 @@ public class MarcMappingOnly extends MarcHandler
         super();
     }
     
+    
+    @Override
+    public void init(String args[])
+    {
+        if (args[0].contains("+"))
+        {
+            argsPlus = args[0].split("[+]");
+            if (argsPlus[0].length() > 0)
+                args[0] = argsPlus[0];
+            else
+                args[0] = "null.properties";
+        }
+        super.init(args);
+    }
+    
+    @Override
+    protected void loadLocalProperties()
+    {
+        if (argsPlus != null && argsPlus.length > 1)
+        {
+            for (int i = 1; i < argsPlus.length; i++)
+            {
+                String argParts[] = argsPlus[i].split("=", 2);
+                if (argParts.length == 2)
+                {
+                    System.err.println("Adding property: "+ argParts[0] + " with value: " + argParts[1]);
+                    configProps.setProperty(argParts[0], argParts[1]);
+                }
+            }
+        }
+    }
+
     /** 
      * processAdditionalArgs - local init for subclasses of MarcHandler
      */

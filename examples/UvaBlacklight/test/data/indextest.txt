@@ -64,10 +64,10 @@ blacklight_config.properties, u11.mrc, barcode_facet, 11-1001
 blacklight_config.properties, u60.mrc, barcode_facet, X000872036|X000872037
 
 #Test of Unicode normalization: this line contains the code point 'à' rather than an 'a' followed by the grave accent '̀'
-blacklight_test_config.properties, u4.mrc(u4), 245a, The princes of Hà-tiên (1682-1867) /
+blacklight_test_config.properties+marc.unicode_normalize=C, u4.mrc(u4), 245a, The princes of Hà-tiên (1682-1867) /
 
 #Test of not using Unicode normalization: this line contains the code points 'a' followed by the grave accent '̀'
-blacklight_config.properties, u4.mrc(u4), 245a, The princes of Hà-tiên (1682-1867) /
+blacklight_test_config.properties, u4.mrc(u4), 245a, The princes of Hà-tiên (1682-1867) /
 
 #blacklight_sas_config.properties, u3344744.mrc, location_facet, Semester at Sea Collection
 #blacklight_sas_config.properties, u3344744.mrc, library_facet, Semester at Sea
