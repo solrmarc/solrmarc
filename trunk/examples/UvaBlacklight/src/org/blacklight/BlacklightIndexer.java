@@ -57,6 +57,7 @@ public class BlacklightIndexer extends SolrIndexer
     Map<String, Set<String>> callNumberClusterMapNo050 = null;
     Comparator<String> normedComparator = null;
     String bestSingleCallNumber = null;
+    List<?> trimmedHoldingsList = null;
     
     public BlacklightIndexer(final String propertiesMapFile, final String propertyPaths[])
     {
@@ -165,14 +166,114 @@ public class BlacklightIndexer extends SolrIndexer
     protected void perRecordInit(Record record)
     {
         String fieldSpec = "999awi';'";
+        trimmedHoldingsList = getTrimmedHoldingsList(record, "999");        
         
-        callNumberFieldListNo050 = getCallNumberFieldSetNo050(record, fieldSpec);
+        callNumberFieldListNo050 = getCallNumberFieldSetNo050(record, trimmedHoldingsList);
         callNumberFieldList = getCallNumberFieldSet(record, callNumberFieldListNo050);
         callNumberClusterMapNo050 =  getCallNumbersCleanedConflated(callNumberFieldListNo050, true);
         callNumberClusterMap =  getCallNumbersCleanedConflated(callNumberFieldList, true);
         bestSingleCallNumber = getBestSingleCallNumber(callNumberClusterMap);
     }
     
+    private List<?> getTrimmedHoldingsList(Record record, String holdingsTag)
+    {
+        List<?> result = record.getVariableFields(holdingsTag);
+        loadExtraShadowedIds(extraIdsFilename);
+        removeShadowed999sFromList(record, result);
+        removeLostHoldings(result);
+        return result;
+    }
+    
+    private void loadExtraShadowedIds(String filename)
+    {
+        if (addnlShadowedIds == null)
+        {
+            addnlShadowedIds = new LinkedHashMap<String, String>();
+            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(null, filename);
+            BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
+            String line;
+            try
+            {
+                while ((line = addnlIdsReader.readLine()) != null)
+                {
+                    String linepts[] = line.split("\\|");
+                    if (linepts.length == 1) 
+                    {
+                        addnlShadowedIds.put(linepts[0], "");
+                    }
+                    else
+                    {
+                        String existing = addnlShadowedIds.get(linepts[0]);
+                        if (existing == null) addnlShadowedIds.put(linepts[0], "|" + linepts[1] + "|"); 
+                        else if (existing.equals("")) continue;
+                        else addnlShadowedIds.put(linepts[0], existing + linepts[1] + "|");
+                    }
+                }
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+    
+
+    private void removeShadowed999sFromList(Record record, List<?> fields999)
+    {
+        String extraString = null;
+        if (addnlShadowedIds != null)
+        {
+            extraString = addnlShadowedIds.get(record.getControlNumber());
+        }  
+        if (extraString == null) return;
+        else if (extraString.equals(""))  return; // this will list locations 
+        else
+        {
+            Iterator<?> iter = fields999.iterator();
+            while (iter.hasNext())
+            {
+                Object field = iter.next();
+                DataField df = (DataField)field;
+                String barcode = df.getSubfield('i').getData();
+                if (extraString != null && extraString.contains("|" + barcode + "|"))
+                {
+                    iter.remove();
+                }
+            }
+        }
+    }
+
+    private void removeLostHoldings(List<?> fields999)
+    {
+        String mapName = loadTranslationMap(null, "shadowed_location_map.properties");
+        Map<String, String> locationMap = findMap(mapName);
+        Iterator<?> iter = fields999.iterator();
+        while (iter.hasNext())
+        {
+            Object field = iter.next();
+            DataField df = (DataField)field;
+            Subfield currentLocation = df.getSubfield('k');
+            Subfield homeLocation = df.getSubfield('l');
+            if (currentLocation != null)
+            {
+                if (Utils.remap(currentLocation.getData(), locationMap, true).equals("HIDDEN"))
+                {
+                    iter.remove();
+                    continue;
+                }
+            }
+            if (homeLocation != null)
+            {
+                if (Utils.remap(homeLocation.getData(), locationMap, true).equals("HIDDEN"))
+                {
+                    iter.remove();
+                }
+            }
+
+        }
+    }
+
     private String getBestSingleCallNumber(Map<String, Set<String>>resultNormed)
     {
         if (resultNormed == null || resultNormed.size() == 0) {
@@ -238,11 +339,11 @@ public class BlacklightIndexer extends SolrIndexer
      * 
      * @param record -  The MARC record that is being indexed.
      */
-    private Set<String> getCallNumberFieldSetNo050(final Record record, String fieldSpec)
+    private Set<String> getCallNumberFieldSetNo050(final Record record, List<?> fields999)
     {
-        boolean processExtraShadowedIds = fieldSpec.contains("';'");
+        boolean processExtraShadowedIds = true; //fieldSpec.contains("';'");
     
-        List<?> fields999 = record.getVariableFields("999");
+     //   List<?> fields999 = record.getVariableFields("999");
         //Set<String> fieldList = getFieldList(record, fieldSpec);
         if (fields999.isEmpty())  {
             return(null);
@@ -1393,7 +1494,12 @@ public class BlacklightIndexer extends SolrIndexer
         String mapName2 = loadTranslationMap(null, "format_maps.properties(format_007)");
         String mapName3 = loadTranslationMap(null, "format_maps.properties(format)");
 
-        Set<String> result = getFieldList(record, "999t");
+        List<?> fields999 = this.trimmedHoldingsList;
+//        if (addnlShadowedIds != null)
+//        {
+//            removeShadowed999sFromList(record, fields999);
+//        }
+        Set<String> result = getSubfieldFromFieldList(fields999, 't');
         result = Utils.remap(result, findMap(mapName3), false);
 
         Set<String> f245h = getFieldList(record, "245h");
@@ -1468,6 +1574,18 @@ public class BlacklightIndexer extends SolrIndexer
         return(result);
     }
 
+    private Set<String> getSubfieldFromFieldList(List<?> fields999, char code)
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+        for (Object field : fields999)
+        {
+            DataField df = (DataField)field;
+            Subfield subfield = df.getSubfield(code);            
+            if (subfield != null) resultSet.add(subfield.getData());
+        }
+        return resultSet;
+    }
+
     public Set<String> getCombinedFormat(final Record record)
     {    
     	// part1_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first
@@ -1533,44 +1651,11 @@ public class BlacklightIndexer extends SolrIndexer
 //        }
 //        return(result);        
 //    }
-    private void loadExtraShadowedIds(String filename)
-    {
-        if (addnlShadowedIds == null)
-        {
-            addnlShadowedIds = new LinkedHashMap<String, String>();
-            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(null, filename);
-            BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
-            String line;
-            try
-            {
-                while ((line = addnlIdsReader.readLine()) != null)
-                {
-                    String linepts[] = line.split("\\|");
-                    if (linepts.length == 1) 
-                    {
-                        addnlShadowedIds.put(linepts[0], "");
-                    }
-                    else
-                    {
-                        String existing = addnlShadowedIds.get(linepts[0]);
-                        if (existing == null) addnlShadowedIds.put(linepts[0], "|" + linepts[1] + "|"); 
-                        else if (existing.equals("")) continue;
-                        else addnlShadowedIds.put(linepts[0], existing + linepts[1] + "|");
-                    }
-                }
-            }
-            catch (IOException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    }
-    
+
     public Set<String>getCustomLibrary(final Record record, String visibilityMap, String libraryMap)
     {
         Set<String> resultSet = new LinkedHashSet<String>();
-        List<?> fields999 = record.getVariableFields("999");
+        List<?> fields999 = trimmedHoldingsList;
         String visMapName = loadTranslationMap(null, visibilityMap);
         String libMapName = loadTranslationMap(null, libraryMap);
         for ( DataField field : (List<DataField>)fields999 )
@@ -1613,7 +1698,7 @@ public class BlacklightIndexer extends SolrIndexer
     public Set<String>getCustomLocation(final Record record, String locationMap, String visibilityMap, String libraryMap)
     {
         Set<String> resultSet = new LinkedHashSet<String>();
-        List<?> fields999 = record.getVariableFields("999");
+        List<?> fields999 = trimmedHoldingsList;
         String locMapName = loadTranslationMap(null, locationMap);
         String visMapName = loadTranslationMap(null, visibilityMap);
         String libMapName = loadTranslationMap(null, libraryMap);
