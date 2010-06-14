@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 
 import org.apache.log4j.Logger;
+import org.solrmarc.tools.RawRecord;
 
 /**
  * Read a binary marc file
@@ -24,23 +25,62 @@ import org.apache.log4j.Logger;
  */
 public class RawRecordReader
 {
+    // Initialize logging category
+    static Logger logger = Logger.getLogger(RawRecordReader.class.getName());
 
-	 // Initialize logging category
-    static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
-	
-    private static int parseRecordLength(byte[] leaderData) throws IOException {
-        InputStreamReader isr = new InputStreamReader(new ByteArrayInputStream(
-                leaderData));
-        int length = -1;
-        char[] tmp = new char[5];
-        isr.read(tmp);
-        try {
-            length = Integer.parseInt(new String(tmp));
-        } catch (NumberFormatException e) {
-            throw new IOException("unable to parse record length");
-        }
-        return(length);
+    private DataInputStream input;
+    RawRecord nextRec = null;
+    RawRecord afterNextRec = null;
+    
+    public RawRecordReader(InputStream is)
+    {
+        input = new DataInputStream(new BufferedInputStream(is));
     }
+    
+    public boolean hasNext()
+    {
+        if (nextRec == null)
+        {
+            nextRec = new RawRecord(input);
+        }
+        if (nextRec != null && nextRec.getRecordBytes() != null)
+        {
+            if (afterNextRec == null)
+            {
+                afterNextRec = new RawRecord(input);
+                while (afterNextRec != null && afterNextRec.getRecordBytes() != null && afterNextRec.getRecordId().equals(nextRec.getRecordId()))
+                {
+                    nextRec = new RawRecord(nextRec, afterNextRec);
+                    afterNextRec = new RawRecord(input);
+                }
+           }
+            return(true);
+        }
+        return(false);
+    }
+    
+    public RawRecord next() 
+    {
+        RawRecord tmpRec = nextRec;
+        nextRec = afterNextRec;
+        afterNextRec = null;
+        return(tmpRec);
+    }
+    
+	
+//    private static int parseRecordLength(byte[] leaderData) throws IOException {
+//        InputStreamReader isr = new InputStreamReader(new ByteArrayInputStream(
+//                leaderData));
+//        int length = -1;
+//        char[] tmp = new char[5];
+//        isr.read(tmp);
+//        try {
+//            length = Integer.parseInt(new String(tmp));
+//        } catch (NumberFormatException e) {
+//            throw new IOException("unable to parse record length");
+//        }
+//        return(length);
+//    }
     
 	/**
 	 * 
@@ -49,7 +89,8 @@ public class RawRecordReader
     public static void main(String[] args)
     {
     //    try {
-        DataInputStream input;
+        RawRecordReader reader;
+        
         if (args.length < 2)
         {
             System.err.println("Error: No records specified for extraction");
@@ -58,16 +99,16 @@ public class RawRecordReader
         {
             if (args[0].equals("-"))
             {
-                input = new DataInputStream(new BufferedInputStream(System.in));
+                reader = new RawRecordReader(System.in);
             }
             else
             {    
-                input = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[0]))));
+                reader = new RawRecordReader(new FileInputStream(new File(args[0])));
             }            
             if (!args[1].equals(".txt"))
             {
                 String idRegex = args[1].trim();
-                processInput(input, idRegex, null);
+                processInput(reader, idRegex, null);
             }
             else 
             {
@@ -85,7 +126,7 @@ public class RawRecordReader
                     }
                     idsLookedFor.add(line);
                 }
-                processInput(input, null, idsLookedFor);
+                processInput(reader, null, idsLookedFor);
 
             }
         }
@@ -101,41 +142,18 @@ public class RawRecordReader
 
     }
 
-    static void processInput(DataInputStream input, String idRegex, HashSet<String>idsLookedFor) throws IOException
+    static void processInput(RawRecordReader reader, String idRegex, HashSet<String>idsLookedFor) throws IOException
     {
-        byte[] byteArray = new byte[24];
-        while (true)
+        while (reader.hasNext())
         {
-            input.readFully(byteArray);
-            int recordLength = parseRecordLength(byteArray);
-            byte[] recordBuf = new byte[recordLength - 24];
-            input.readFully(recordBuf);
-            String recordStr = null;
-            try
-            {
-                recordStr = new String(recordBuf, "ISO-8859-1");
-            }
-            catch (UnsupportedEncodingException e)
-            {
-                // e.printStackTrace();
-                logger.error(e.getMessage());
-            }
-            String leader = new String(byteArray);
-            int offset = Integer.parseInt(leader.substring(12,17)) - 24;
-            int dirOffset = 0;
-            String fieldNum = recordStr.substring(dirOffset, dirOffset+3);
-            for ( ;fieldNum.equals("001"); dirOffset += 12, fieldNum = recordStr.substring(dirOffset, dirOffset+3))
-            {
-                int length = Integer.parseInt(recordStr.substring(dirOffset + 3, dirOffset + 7));
-                int offset2 = Integer.parseInt(recordStr.substring(dirOffset + 7, dirOffset + 12));
-                String id = recordStr.substring(offset+offset2, offset+offset2+length-1).trim();
-                if ( (idsLookedFor == null && id.matches(idRegex)) ||
-                     (idsLookedFor != null && idsLookedFor.contains(id) ) )
-                { 
-                    System.out.write(byteArray);
-                    System.out.write(recordBuf);
-                    System.out.flush();
-                }
+            RawRecord rec = reader.next();
+            String id = rec.getRecordId();
+            if ( (idsLookedFor == null && id.matches(idRegex)) ||
+                 (idsLookedFor != null && idsLookedFor.contains(id) ) )
+            { 
+                byte recordBytes[] = rec.getRecordBytes();
+                System.out.write(recordBytes);
+                System.out.flush();
             }
         }
     }
