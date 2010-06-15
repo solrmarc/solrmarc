@@ -890,7 +890,7 @@ public class SolrIndexer
     /**
      * get the era field values from 045a as a Set of Strings
      */
-    public static Set<String> getEra(Record record)
+    public Set<String> getEra(Record record)
     {
         Set<String> result = new LinkedHashSet<String>();
         String eraField = getFirstFieldVal(record, "045a");

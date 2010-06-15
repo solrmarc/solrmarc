@@ -18,6 +18,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.marc4j.marc.DataField;
+import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
@@ -1913,4 +1914,83 @@ public class BlacklightIndexer extends SolrIndexer
         return resultSet;   
     }
 
+    /**
+     * get the era field values from 045a as a Set of Strings
+     */
+    public Set<String> getMusicEra(Record record)
+    {
+        if (!isMusicalFormat(record)) return(null);
+        
+        Set<String> result = super.getEra(record);
+        String locMapName = loadTranslationMap(null, "composition_era_map.properties");
+        Map<String, String> compositionMap = this.findMap(locMapName);
+        result = Utils.remap(result, compositionMap, false);
+        
+        DataField field045 = (DataField)record.getVariableField("045");
+        if (field045 == null) return(result);
+        char indicator1 = field045.getIndicator1();
+        
+        List<?> subfields = ((DataField)field045).getSubfields('b');
+        if (indicator1 == '0' || indicator1 == '1') 
+        {
+            for (Subfield sf : (List<Subfield>)subfields )
+            {
+                String value = sf.getData();
+                if (value.startsWith("c")) result.add("B.C.");
+                else if(value.startsWith("d"))
+                {
+                    String valueDate = value.substring(1, 4) + "0";
+                    addDate(result, valueDate);
+                }
+            }
+        }
+        else if (indicator1 == '2' && subfields.size() == 2) // range of dates
+        {
+            Iterator<Subfield> iter = ((List<Subfield>)subfields).iterator();
+            Subfield sf1 = iter.next();
+            Subfield sf2 = iter.next();
+            if (sf1.getData().startsWith("c") && sf2.getData().startsWith("c")) 
+            {
+                result.add("B.C.");
+            }
+            else if (sf2.getData().startsWith("d"))
+            {
+                String date1 = sf1.getData().substring(1, 4) + "0";
+                if (sf1.getData().startsWith("c"))
+                {
+                    result.add("B.C.");
+                    date1 = "0000";
+                }
+                String date2 = sf2.getData().substring(1, 4) + "0";
+                int date1val = Integer.parseInt(date1);
+                int date2val = Integer.parseInt(date2);
+                for (int i = date1val; i <= date2val; i += 10)
+                {
+                    addDate(result, (""+(i+10000)).substring(1,5));
+                }
+            }
+        }
+        return(result);
+    }
+
+    private boolean isMusicalFormat(Record record)
+    {
+        Leader leader = record.getLeader();
+        char type = leader.getTypeOfRecord();
+        if (type == 'c' || type == 'd' || type == 'j') return(true);
+        return(false);
+    }
+
+    private void addDate(Set<String> result, String valueDate)
+    {
+        if (valueDate.compareTo("1700") >= 0)
+        {
+            result.add(valueDate+"'s");
+        }
+        int century = Integer.parseInt(valueDate.substring(0, 2)) +1;
+        String suffix = century == 1 || century == 21 ? "st" : century == 2 ? "nd" : century == 3 ? "rd" : "th";
+        result.add("" + century + suffix + " Century"); 
+    }
+    
+    
 }
