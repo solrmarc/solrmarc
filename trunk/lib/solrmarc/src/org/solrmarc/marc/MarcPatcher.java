@@ -442,6 +442,9 @@ public class MarcPatcher extends MarcHandler
                     changed = true;
                 }
             }
+            else if (handleAllLocs && locationFileLine2.length >= 8)
+            {
+            }
             else if (handleAllLocs && !barcodeFound && barcode != null && (curEditDistance = getLevenshteinDistance(barcode.getData(), locationFileLine2[1])) < minEditDistance)
             {
                 minEditDistance = curEditDistance;
@@ -449,20 +452,20 @@ public class MarcPatcher extends MarcHandler
             }
         }
         // didn't find existing 999 corresponding to the location file line in question. create one from scratch.
-        if (!barcodeFound && closestMatch != null)
+        if (!barcodeFound && (closestMatch != null || locationFileLine2.length >= 8))
         {
             DataField df = new DataFieldImpl();
-            df.addSubfield(new SubfieldImpl('a', closestMatch.getSubfield('a').getData()));
-            df.addSubfield(new SubfieldImpl('w', closestMatch.getSubfield('w').getData()));
+            df.addSubfield(new SubfieldImpl('a', closestMatch != null ? closestMatch.getSubfield('a').getData() : locationFileLine2[7]));
+            df.addSubfield(new SubfieldImpl('w', closestMatch != null ? closestMatch.getSubfield('w').getData() : locationFileLine2[6]));
             df.addSubfield(new SubfieldImpl('i', locationFileLine2[1]));
             df.addSubfield(new SubfieldImpl('i', locationFileLine2[2]));
             df.addSubfield(new SubfieldImpl('k', locationFileLine2[3]));
             df.addSubfield(new SubfieldImpl('m', locationFileLine2[4]));
-            df.addSubfield(new SubfieldImpl('t', closestMatch.getSubfield('t').getData()));
+            df.addSubfield(new SubfieldImpl('t', closestMatch != null ? closestMatch.getSubfield('t').getData() : locationFileLine2[5]));
             df.setId(new Long(2));
-            df.setTag(closestMatch.getTag());
-            df.setIndicator1(closestMatch.getIndicator1());
-            df.setIndicator2(closestMatch.getIndicator2());
+            df.setTag(closestMatch != null  ? closestMatch.getTag() : "999");
+            df.setIndicator1(closestMatch != null  ? closestMatch.getIndicator1() : ' ');
+            df.setIndicator2(closestMatch != null  ? closestMatch.getIndicator2() : ' ');
             record.addVariableField(df);
             changed = true;
         }
