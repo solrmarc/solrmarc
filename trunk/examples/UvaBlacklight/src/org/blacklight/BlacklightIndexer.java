@@ -1939,7 +1939,7 @@ public class BlacklightIndexer extends SolrIndexer
                 if (value.startsWith("c")) result.add("B.C.");
                 else if(value.startsWith("d"))
                 {
-                    String valueDate = value.substring(1, 4) + "0";
+                    String valueDate = getDateFrom045b(value);
                     addDate(result, valueDate);
                 }
             }
@@ -1955,22 +1955,37 @@ public class BlacklightIndexer extends SolrIndexer
             }
             else if (sf2.getData().startsWith("d"))
             {
-                String date1 = sf1.getData().substring(1, 4) + "0";
+                String date1;
                 if (sf1.getData().startsWith("c"))
                 {
                     result.add("B.C.");
                     date1 = "0000";
                 }
-                String date2 = sf2.getData().substring(1, 4) + "0";
-                int date1val = Integer.parseInt(date1);
-                int date2val = Integer.parseInt(date2);
-                for (int i = date1val; i <= date2val; i += 10)
+                else
                 {
-                    addDate(result, (""+(i+10000)).substring(1,5));
+                    date1 = getDateFrom045b(sf1.getData());
+                }
+                String date2 = getDateFrom045b(sf2.getData());
+                if (date1 != null || date2 != null)
+                {
+                    int date1val = Integer.parseInt(date1);
+                    int date2val = Integer.parseInt(date2);
+                    for (int i = date1val; i <= date2val; i += 10)
+                    {
+                        addDate(result, (""+(i+10000)).substring(1,5));
+                    }
                 }
             }
         }
         return(result);
+    }
+
+    private String getDateFrom045b(String dateStr)
+    {
+        String result = dateStr.replaceFirst("d[ ]*", "");
+        if (!result.matches("[0-9][0-9][0-9][0-9].*")) return(null);
+        result = result.substring(0, 3) + "0";
+        return (result);
     }
 
     private boolean isMusicalFormat(Record record)
@@ -1983,6 +1998,7 @@ public class BlacklightIndexer extends SolrIndexer
 
     private void addDate(Set<String> result, String valueDate)
     {
+        if (valueDate == null) return;
         if (valueDate.compareTo("1700") >= 0)
         {
             result.add(valueDate+"'s");
