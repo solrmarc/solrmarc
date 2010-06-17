@@ -1982,7 +1982,7 @@ public class BlacklightIndexer extends SolrIndexer
 
     private String getDateFrom045b(String dateStr)
     {
-        String result = dateStr.replaceFirst("d[ ]*", "");
+        String result = dateStr.replaceFirst("[ ]*d[ ]*", "");
         if (!result.matches("[0-9][0-9][0-9][0-9].*")) return(null);
         result = result.substring(0, 3) + "0";
         return (result);
