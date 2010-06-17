@@ -67,6 +67,8 @@ do
 done
 
 location_file=/usr/local/projects/marc/incoming/location.txt
+prev_location_file=/usr/local/projects/marc/incoming/prev_location.txt
+changed_loc_file=/usr/local/projects/marc/incoming/changed.txt
 patch_dir=/usr/local/projects/marc/patched_debug
 
 #make sure patch directory exists
@@ -79,14 +81,19 @@ if [ $verbose -eq "1" ] ; then
     echo processing location.txt
 fi
 
+# find differences between yesterdays location and todays.
+diff $prev_location_file $location_file | egrep '^[<>]' | sed -e 's/[<>] \([0-9]*\).*/\1/' | uniq > $changed_loc_file
+
 for file in `find /usr/local/projects/marc/full_dump_patched -name 'uva_*.mrc' -print | sort`
 do
     if [ $verbose -eq "1" ] ; then
         echo $file
     fi
-    java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar /usr/local/projects/solrmarc-2.1/dist/SolrMarc.jar $file  $location_file changesOnly >> $patch_out
+    java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar /usr/local/projects/solrmarc-2.1/dist/SolrMarc.jar $file $location_file $changed_loc_file changesOnly handleAllLocs >> $patch_out
 done 
 
+mv prev_location.txt prev_prev_location.txt
+cp location.txt prev_location.txt
 
 if [ $verbose -eq "1" ] ; then
     echo merging patch file
