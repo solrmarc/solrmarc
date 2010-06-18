@@ -318,7 +318,7 @@ public class MarcPatcher extends MarcHandler
         {
             locationFileLine = getNextLocationLine(locationReader, changedlocationReader);
         }
-        if (compare.compare(locationFileLine[0], recId) == 0)
+        if (locationFileLine != null && compare.compare(locationFileLine[0], recId) == 0)
         {
             record = rawRecord.getAsRecord(true, false, true, "MARC8");
             List<VariableField> fields999 = (List<VariableField>)record.getVariableFields("999");
