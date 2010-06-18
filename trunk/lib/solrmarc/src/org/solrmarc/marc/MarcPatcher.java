@@ -320,7 +320,7 @@ public class MarcPatcher extends MarcHandler
         }
         if (compare.compare(locationFileLine[0], recId) == 0)
         {
-            record = rawRecord.getAsRecord(true, true, true, "MARC8");
+            record = rawRecord.getAsRecord(true, false, true, "MARC8");
             List<VariableField> fields999 = (List<VariableField>)record.getVariableFields("999");
             while (locationFileLine != null && compare.compare(locationFileLine[0], recId) == 0)
             {
