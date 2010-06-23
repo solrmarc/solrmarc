@@ -20,21 +20,12 @@ import org.solrmarc.marc.RawRecordReader;
 public class MarcDiff
 {
     static boolean verbose = false;
-    static boolean veryverbose = false;
     
     public static void main(String[] args)
     {
         if (args[0].equals("-v")) 
         {
             verbose = true;
-            String newArgs[] = new String[args.length-1];
-            System.arraycopy(args, 1, newArgs, 0, args.length-1);
-            args = newArgs;
-        }
-        if (args[0].equals("-vv")) 
-        {
-            verbose = true;
-            veryverbose = true;
             String newArgs[] = new String[args.length-1];
             System.arraycopy(args, 1, newArgs, 0, args.length-1);
             args = newArgs;
@@ -81,6 +72,7 @@ public class MarcDiff
                     Record r2 = rec2.getAsRecord(true, true, true, "MARC8");
                     String str1 = r1.toString();
                     String str2 = r2.toString();
+                    if (!verbose) System.out.println("record with id: " + rec1.getRecordId() + " different in file1 and file2");
                     if (!str1.equals(str2))
                     {
                         showDiffs(System.out, str1, str2, verbose, null);
@@ -92,27 +84,21 @@ public class MarcDiff
             }
             else if (compVal < 0)
             {
-                if (veryverbose) 
+                System.out.println("record with id: " + rec1.getRecordId() + " found in file1 but not in file2");
+                if (verbose) 
                 {
                     Record rec = rec1.getAsRecord(true, true, true, "MARC8");
                     System.out.println(rec.toString());
-                }
-                else if (verbose)
-                {
-                    System.out.println("record with id: " + rec1.getRecordId() + " found in file1 but not in file2");
                 }
                 rec1 = reader1.next();
             }
             else if (compVal > 0)
             {
-                if (veryverbose) 
+                System.out.println("record with id: " + rec2.getRecordId() + " found in file1 but not in file2");
+                if (verbose) 
                 {
                     Record rec = rec2.getAsRecord(true, true, true, "MARC8");
                     System.out.println(rec.toString());
-                }
-                else if (verbose)
-                {
-                    System.out.println("record with id: " + rec2.getRecordId() + " found in file1 but not in file2");
                 }
                 rec2 = reader2.next();
             }
