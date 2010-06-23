@@ -319,7 +319,7 @@ public class MarcMerger
                     }
                 }
             }
-            while (compare.compare(newOrModrec.getRecordId(), maxRecordID)< 0 && compare.compare(newOrModrec.getRecordId(), maxID)< 0)
+            while (newOrModrec != null && compare.compare(newOrModrec.getRecordId(), maxRecordID)< 0 && compare.compare(newOrModrec.getRecordId(), maxID)< 0)
             {
                 // newOrModrec is a new record,  Write out new record.
                 if (verbose) System.err.println("\nWriting record "+ newOrModrec.getRecordId() + " from mod file");
