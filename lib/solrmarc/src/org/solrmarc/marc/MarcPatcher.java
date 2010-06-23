@@ -267,7 +267,7 @@ public class MarcPatcher extends MarcHandler
         }
         else if (writerChanged == null && changedRecordFileName == null && out != null)
         {
-            writerChanged = new MarcStreamWriter(out, "ISO-8859-1", true);
+            writerChanged = new MarcSplitStreamWriter(out, "ISO-8859-1", 70000, "999");
         }
 
         while(rawReader != null && rawReader.hasNext())
