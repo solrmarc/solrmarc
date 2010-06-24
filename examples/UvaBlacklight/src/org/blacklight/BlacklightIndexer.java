@@ -1427,6 +1427,10 @@ public class BlacklightIndexer extends SolrIndexer
         {
             result.add("Map");
         }
+        if (Utils.setItemContains(f245h, "videorecording"))
+        {
+            result.add("Video");
+        }
         Set<String> urls = getFieldList(record, "856u");
         Set<String> format_007_raw = getFieldList(record, "007[0-1]");
         if (Utils.setItemContains(format_007_raw, "cr") || Utils.setItemContains(result, "Online"))
