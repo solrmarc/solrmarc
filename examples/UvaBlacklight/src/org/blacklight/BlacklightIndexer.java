@@ -1572,8 +1572,18 @@ public class BlacklightIndexer extends SolrIndexer
         {
             String format_007 = getFirstFieldVal(record, mapName2, "007[0]");
             String broadFormat = getFirstFieldVal(record, mapName1, "000[6-7]:000[6]");
-                if (format_007 != null) result.add(format_007);
-                if (broadFormat != null) result.add(broadFormat);
+            if (format_007 != null) result.add(format_007);
+            if (broadFormat != null) 
+            {
+                if (broadFormat.contains("|"))
+                {
+                    String parts[] = broadFormat.split("[|]", 2);
+                    result.add(parts[0]);
+                    result.add(parts[1]);
+                }
+                else
+                    result.add(broadFormat);
+            }
            //     if (broadFormat != null && format_007 != null) System.out.println("format diff for item: "+ record.getControlNumber()+" : format_007 = "+format_007+ "  broadFormat = " + broadFormat);
         }
         return(result);
@@ -1619,7 +1629,12 @@ public class BlacklightIndexer extends SolrIndexer
             else 
             {
                 String broadFormat = getFirstFieldVal(record, mapName1, "000[6-7]:000[6]");
-                if (broadFormat != null) result.add(broadFormat);
+                if (broadFormat != null) 
+                {
+                    if (broadFormat.contains("|"))
+                        broadFormat = broadFormat.substring(0, broadFormat.indexOf('|'));
+                    result.add(broadFormat);
+                }
             }
 	    }
         return(result);
