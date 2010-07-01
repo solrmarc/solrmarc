@@ -1572,7 +1572,17 @@ public class BlacklightIndexer extends SolrIndexer
         {
             String format_007 = getFirstFieldVal(record, mapName2, "007[0]");
             String broadFormat = getFirstFieldVal(record, mapName1, "000[6-7]:000[6]");
-            if (format_007 != null) result.add(format_007);
+            if (format_007 != null) 
+            {
+                if (!format_007.equals("Map") || (broadFormat != null && (broadFormat.startsWith("Map") || broadFormat.startsWith("Book"))))
+                {
+                    result.add(format_007);
+                }
+                else
+                {
+                    format_007 = format_007;
+                }
+            }
             if (broadFormat != null) 
             {
                 if (broadFormat.contains("|"))
