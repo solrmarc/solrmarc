@@ -14,4 +14,12 @@ popd
 
 :doit
 
+set arg=%1
+if "%arg:~0,1%" == "-" goto missing
 java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPrinter" -Dmarc.include_if_present="%1" -Dmarc.combine_records="" -jar %scriptdir%SolrMarc.jar translate %2 %3 
+goto done
+:missing
+set arg1=%arg:~1%
+java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPrinter" -Dmarc.include_if_missing="%arg1%" -Dmarc.combine_records="" -jar %scriptdir%SolrMarc.jar translate %2 %3 
+
+:done
