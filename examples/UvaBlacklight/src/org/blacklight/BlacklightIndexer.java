@@ -1942,7 +1942,17 @@ public class BlacklightIndexer extends SolrIndexer
         resultSet = Utils.remap(resultSet, findMap(mapName), true);
         return resultSet;   
     }
-
+    
+    
+    public Set<String> getMusicCompositionForm(Record record)
+    {
+        if (!isMusicalFormat(record)) return(null);
+        String typeMapName = loadTranslationMap(null, "music_maps.properties(composition_type)");
+        Set<String> result = getFieldList(record, "008[18-19]:047a");
+        result = Utils.remap(result, findMap(typeMapName), false);
+        return(result);
+    }
+    
     /**
      * get the era field values from 045a as a Set of Strings
      */
@@ -1952,7 +1962,7 @@ public class BlacklightIndexer extends SolrIndexer
         
         Set<String> result = super.getEra(record);
         String locMapName = loadTranslationMap(null, "composition_era_map.properties");
-        Map<String, String> compositionMap = this.findMap(locMapName);
+        Map<String, String> compositionMap = findMap(locMapName);
         result = Utils.remap(result, compositionMap, false);
         
         DataField field045 = (DataField)record.getVariableField("045");
