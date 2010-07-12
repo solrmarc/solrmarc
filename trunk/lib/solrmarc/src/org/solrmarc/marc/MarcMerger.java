@@ -270,7 +270,15 @@ public class MarcMerger
             
             while (mainrec != null && compare.compare(mainrec.getRecordId(), maxRecordID)< 0)
             {
-                if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())< 0  && compare.compare(mainrec.getRecordId(), deletedId) < 0)
+                if (newOrModrec == null)
+                {
+                    // mainrec unchanged, just write it out.
+                    if (veryverbose) System.err.println("\nWriting original record "+ mainrec.getRecordId() + " from input file");
+                    out.write(mainrec.getRecordBytes());
+                    out.flush();
+                    mainrec = mainFile.hasNext() ? mainFile.next() : null;
+                }
+                else if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())< 0  && compare.compare(mainrec.getRecordId(), deletedId) < 0)
                 {
                     // mainrec unchanged, just write it out.
                     if (veryverbose) System.err.println("\nWriting original record "+ mainrec.getRecordId() + " from input file");
