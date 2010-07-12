@@ -105,23 +105,23 @@ public class MarcDiff
         }
         while (reader1.hasNext())
         {
-            if (rec1 == null) rec1 = reader1.next();
             System.out.println("record with id: " + rec1.getRecordId() + " found in file1 but not in file2");
             if (verbose) 
             {
                 Record rec = rec1.getAsRecord(true, true, true, "MARC8");
                 System.out.println(rec.toString());
             }
+            rec1 = reader1.next();
         }
         while (reader2.hasNext())
         {
-            if (rec2 == null) rec2 = reader2.next();
             System.out.println("record with id: " + rec2.getRecordId() + " found in file2 but not in file1");
             if (verbose) 
             {
                 Record rec = rec2.getAsRecord(true, true, true, "MARC8");
                 System.out.println(rec.toString());
             }
+            rec2 = reader2.next();
         }
     }
     
