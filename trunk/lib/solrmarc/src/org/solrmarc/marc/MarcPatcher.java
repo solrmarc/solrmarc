@@ -399,8 +399,16 @@ public class MarcPatcher extends MarcHandler
                 // Subfield first_i = (Subfield)multi_i.get(0);
                 Subfield second_i = (Subfield)multi_i.get(1);
                 Subfield loc_k = df999.getSubfield('k');
+                if (loc_k.getData().equals(second_i.getData()))
+                {
+                    df999.removeSubfield(second_i);
+                }
+                else
+                {
+                    second_i.setCode('k');
+                }
                 loc_k.setCode('l');
-                second_i.setCode('k');
+                changed = true;
             }
             Subfield barcode = df999.getSubfield('i');
             int curEditDistance;
