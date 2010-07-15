@@ -458,8 +458,11 @@ public class MarcPatcher extends MarcHandler
             df.addSubfield(new SubfieldImpl('a', closestMatch != null ? closestMatch.getSubfield('a').getData() : locationFileLine2[7]));
             df.addSubfield(new SubfieldImpl('w', closestMatch != null ? closestMatch.getSubfield('w').getData() : locationFileLine2[6]));
             df.addSubfield(new SubfieldImpl('i', locationFileLine2[1]));
-            df.addSubfield(new SubfieldImpl('i', locationFileLine2[2]));
-            df.addSubfield(new SubfieldImpl('k', locationFileLine2[3]));
+            if (!locationFileLine2[2].equals(locationFileLine2[3]))
+            {
+                df.addSubfield(new SubfieldImpl('k', locationFileLine2[2]));
+            }
+            df.addSubfield(new SubfieldImpl('l', locationFileLine2[3]));
             df.addSubfield(new SubfieldImpl('m', locationFileLine2[4]));
             df.addSubfield(new SubfieldImpl('t', closestMatch != null ? closestMatch.getSubfield('t').getData() : locationFileLine2[5]));
             df.setId(new Long(2));
