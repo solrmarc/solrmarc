@@ -392,6 +392,14 @@ public class MarcPatcher extends MarcHandler
         for (VariableField f999 : fields999)
         {
             DataField df999 = (DataField)f999;
+            List multi_i = null;
+            if ((multi_i = df999.getSubfields('i')).size() > 1)
+            {
+                // patch to fix problem with multiple 'i' subfields problem
+                // Subfield first_i = (Subfield)multi_i.get(0);
+                Subfield second_i = (Subfield)multi_i.get(0);
+                second_i.setCode('l');
+            }
             Subfield barcode = df999.getSubfield('i');
             int curEditDistance;
             if (barcode != null && barcode.getData().equals(locationFileLine2[1]))
