@@ -397,7 +397,7 @@ public class MarcPatcher extends MarcHandler
             {
                 // patch to fix problem with multiple 'i' subfields problem
                 // Subfield first_i = (Subfield)multi_i.get(0);
-                Subfield second_i = (Subfield)multi_i.get(0);
+                Subfield second_i = (Subfield)multi_i.get(1);
                 second_i.setCode('l');
             }
             Subfield barcode = df999.getSubfield('i');
