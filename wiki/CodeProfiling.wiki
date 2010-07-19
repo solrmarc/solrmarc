@@ -34,7 +34,7 @@ I ran the test again, and as expected, logging impact on CPU basically disappear
 
 *Test 2* : [http://code.google.com/p/solrmarc/downloads/detail?name=SnapshotCPU2.nps Results]<br/>
 Some points observed:
- * 66.2% of time is spend add records to the index, 13.2% is spent reading/parsing marc data and 12.2% is spent in finish(); the commit is presumably the major (only?) time sink there.
+ * 66.2% of time is spent adding records to the index, 13.2% is spent reading/parsing marc data and 12.2% is spent in finish(); the commit is presumably the major (only?) time sink there.
  * The last significant method hotspot (locking) seems an unavoidable and understandable side effect of the commit at the end of the application, with only a single invocation.
  * If you follow the call tree of the iterator next() method there's a few areas I don't know enough about to comment on, but might show promise:
    * The !UnicodeNormalizationFilter takes 16% of total execution time. The iterator calls don't seem to be the culprits, but they did leave me looking at that area where I noticed 11.7% of time is spent doing duplicate removal... could it be trimmed down?
