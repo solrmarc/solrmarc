@@ -42,5 +42,5 @@ Some points observed:
 
 TBC
 
-*Test 3* : TBD<br/>
-_This test is still running, its and exact copy of Test2, but run against 10,000 records to confirm results scale._
+*Test 3* : [http://code.google.com/p/solrmarc/downloads/detail?name=SnapshotCPU3.nps Results]<br/>
+_~~This test is still running, and~~ its an exact copy of Test2, but run against 10,000 records to confirm results scale._
