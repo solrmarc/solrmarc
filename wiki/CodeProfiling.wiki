@@ -11,6 +11,23 @@ With a profiler attached to the JVM during CPU profiling the performance drops t
 
 == Details ==
 
+The saved NetBeans snapshots are linked with each test. You should be able to download them and explore the considerable amount of data at your own leisure. My knowledge of the Solrmarc codebase is far from complete, so more eyes looking over this will get better data.
+
 *Test 1* : [http://code.google.com/p/solrmarc/downloads/detail?name=SnapshotCPU1.nps Results]
+The largest (single method) CPU hog here was surprisingly the logger. Pumping a line to screen for every record was consuming 16.2% of CPU for the app. To view this start from the method hotpost, right-click it and follow the call tree back up the original call into the logger inside the 'addToIndex()' method.
+
+In my own Solrmarc install I'd always altered this just to lower the size of log files, but I never considered that it would be a real performance hit. The following modification in 'MarcImporter.java' was applied... the number is arbitrary, I use 5,000 in production, but its just personal preference.
+
+{{{
+if (added)
+{
+  recsIndexedCounter++;
+  if (recsIndexedCounter == 1 || recsIndexedCounter % 100 == 0) {
+    logger.info("Added record " + recsReadCounter + " read from file: " + record.getControlNumber());
+  }
+}
+}}}
+
+I ran the test again, and as expected, logging impact on CPU basically disappeared.
 
 *Test 2* : [http://code.google.com/p/solrmarc/downloads/detail?name=SnapshotCPU2.nps Results]
