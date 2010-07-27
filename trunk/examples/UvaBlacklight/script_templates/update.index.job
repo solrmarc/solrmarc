@@ -76,7 +76,8 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
 # run booklist daily update
 if [ "$num" -ne 0 ] 
     then
-    runbooklist daily ${configname} > $RESULTSDIR/results_booklists_$froot 2>&1
+    runbooklist monthly ${configname} > $RESULTSDIR/results_booklists_$froot 2>&1
+    runbooklist daily ${configname} >> $RESULTSDIR/results_booklists_$froot 2>&1
 fi
 
 # if any files were indexed, optimize solr index
