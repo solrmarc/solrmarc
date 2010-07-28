@@ -39,48 +39,47 @@ import org.marc4j.marc.Subfield;
  */
 public class VuFindIndexer extends SolrIndexer
 {
-
-	// Initialize logging category
+    // Initialize logging category
     static Logger logger = Logger.getLogger(VuFindIndexer.class.getName());
-	
-	/**
-	 * Default constructor
-	 * @param propertiesMapFile
-	 * @throws Exception
-	 */
+    
+    /**
+     * Default constructor
+     * @param propertiesMapFile
+     * @throws Exception
+     */
     /*
     public VuFindIndexer(final String propertiesMapFile) throws FileNotFoundException, IOException, ParseException 
     {
         super(propertiesMapFile);
     }
     */
-	public VuFindIndexer(final String propertiesMapFile, final String[] propertyDirs)
-			throws FileNotFoundException, IOException, ParseException {
-		super(propertiesMapFile, propertyDirs);
-	}
+    public VuFindIndexer(final String propertiesMapFile, final String[] propertyDirs)
+            throws FileNotFoundException, IOException, ParseException {
+        super(propertiesMapFile, propertyDirs);
+    }
     
     /**
-	 * Determine Record Format(s)
-	 *
-	 * @param  Record          record
-	 * @return Set<String>     format of record
-	 */
-	public Set<String> getFormat(final Record record){
+     * Determine Record Format(s)
+     *
+     * @param  Record          record
+     * @return Set<String>     format of record
+     */
+    public Set<String> getFormat(final Record record){
         Set<String> result = new LinkedHashSet<String>();
-		String leader = record.getLeader().toString();
-		char leaderBit;
-		ControlField fixedField = (ControlField) record.getVariableField("008");
-		DataField title = (DataField) record.getVariableField("245");
-		char formatCode = ' ';
+        String leader = record.getLeader().toString();
+        char leaderBit;
+        ControlField fixedField = (ControlField) record.getVariableField("008");
+        DataField title = (DataField) record.getVariableField("245");
+        char formatCode = ' ';
 
-		// check if there's an h in the 245
-		if (title != null) {
-		    if (title.getSubfield('h') != null){
-		        if (title.getSubfield('h').getData().toLowerCase().contains("[electronic resource]")) {
-		    		result.add("Electronic");
-		    		return result;
-		        }
-        	}
+        // check if there's an h in the 245
+        if (title != null) {
+            if (title.getSubfield('h') != null){
+                if (title.getSubfield('h').getData().toLowerCase().contains("[electronic resource]")) {
+                    result.add("Electronic");
+                    return result;
+                }
+            }
         }
 
         // check the 007 - this is a repeating field
@@ -91,7 +90,7 @@ public class VuFindIndexer extends SolrIndexer
             while(fieldsIter.hasNext()) {
                 formatField = (ControlField) fieldsIter.next();
                 formatCode = formatField.getData().toUpperCase().charAt(0);
-        	    switch (formatCode) {
+                switch (formatCode) {
                     case 'A':
                         switch(formatField.getData().toUpperCase().charAt(1)) {
                             case 'D':
@@ -246,9 +245,9 @@ public class VuFindIndexer extends SolrIndexer
                                 break;
                         }
                         break;
-            	}
+                }
             }
-        	if (!result.isEmpty()) {
+            if (!result.isEmpty()) {
                 return result;
             }
         }
@@ -290,7 +289,7 @@ public class VuFindIndexer extends SolrIndexer
                 result.add("Manuscript");
                 break;
         }
-    	if (!result.isEmpty()) {
+        if (!result.isEmpty()) {
             return result;
         }
 
@@ -323,12 +322,12 @@ public class VuFindIndexer extends SolrIndexer
         }
 
         // Nothing worked!
-    	if (result.isEmpty()) {
+        if (result.isEmpty()) {
             result.add("Unknown");
         }
         
         return result;
-	}
+    }
 
     /**
      * Extract the call number label from a record
@@ -385,7 +384,7 @@ public class VuFindIndexer extends SolrIndexer
             return val;
         }
     }
-	
+    
     /**
      * Extract the subject component of the call number
      *
@@ -421,4 +420,79 @@ public class VuFindIndexer extends SolrIndexer
         return(null);
     }
 
+    /**
+     * Determine if a record is illustrated.
+     *
+     * @param  Record          record
+     * @return String   "Illustrated" or "Not Illustrated"
+     */
+    public String isIllustrated(Record record) {
+        String leader = record.getLeader().toString();
+        
+        // Does the leader indicate this is a "language material" that might have extra
+        // illustration details in the fixed fields?
+        if (leader.charAt(6) == 'a') {
+            String currentCode = "";         // for use in loops below
+            
+            // List of 008/18-21 codes that indicate illustrations:
+            String illusCodes = "abcdefghijklmop";
+            
+            // Check the illustration characters of the 008:
+            ControlField fixedField = (ControlField) record.getVariableField("008");
+            if (fixedField != null) {
+                String fixedFieldText = fixedField.getData().toLowerCase();
+                for (int i = 18; i <= 21; i++) {
+                    if (i < fixedFieldText.length()) {
+                        currentCode = fixedFieldText.substring(i, i + 1);
+                        if (illusCodes.contains(currentCode)) {
+                            return "Illustrated";
+                        }
+                    }
+                }
+            }
+            
+            // Now check if any 006 fields apply:
+            List<ControlField> fields = record.getVariableFields("006");
+            Iterator<ControlField> fieldsIter = fields.iterator();
+            if (fields != null) {
+                ControlField formatField;
+                while(fieldsIter.hasNext()) {
+                    fixedField = (ControlField) fieldsIter.next();
+                    String fixedFieldText = fixedField.getData().toLowerCase();
+                    for (int i = 1; i <= 4; i++) {
+                         if (i < fixedFieldText.length()) {
+                            currentCode = fixedFieldText.substring(i, i + 1);
+                            if (illusCodes.contains(currentCode)) {
+                                return "Illustrated";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Now check for interesting strings in 300 subfield b:
+        List<ControlField> fields = record.getVariableFields("300");
+        Iterator<ControlField> fieldsIter = fields.iterator();
+        if (fields != null) {
+            DataField physical;
+            while(fieldsIter.hasNext()) {
+                physical = (DataField) fieldsIter.next();
+                List<Subfield> subfields = physical.getSubfields('b');
+                Iterator<Subfield> subfieldsIter = subfields.iterator();
+                if (subfields != null) {
+                    String desc;
+                    while (subfieldsIter.hasNext()) {
+                        desc = subfieldsIter.next().getData().toLowerCase();
+                        if (desc.contains("ill.") || desc.contains("illus.")) {
+                            return "Illustrated";
+                        }
+                    }
+                }
+            }
+        }
+    
+        // If we made it this far, we found no sign of illustrations:
+        return "Not Illustrated";
+    }
 }

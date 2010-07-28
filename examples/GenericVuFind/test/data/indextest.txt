@@ -1,0 +1,10 @@
+# Test isIllustrated method
+vufind_config.properties, notillus1.mrc, illustrated, Not Illustrated
+vufind_config.properties, notillus2.mrc, illustrated, Not Illustrated
+vufind_config.properties, notillus3.mrc, illustrated, Not Illustrated
+vufind_config.properties, illus1.mrc, illustrated, Illustrated
+vufind_config.properties, illus2.mrc, illustrated, Illustrated
+vufind_config.properties, illus3.mrc, illustrated, Illustrated
+vufind_config.properties, illus4.mrc, illustrated, Illustrated
+vufind_config.properties, illus5.mrc, illustrated, Illustrated
+vufind_config.properties, illus6.mrc, illustrated, Illustrated
