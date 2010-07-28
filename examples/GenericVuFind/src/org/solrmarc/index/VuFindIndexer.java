@@ -30,6 +30,7 @@ import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import org.solrmarc.tools.CallNumUtils;
 
 /**
  * 
@@ -428,15 +429,15 @@ public class VuFindIndexer extends SolrIndexer
      */
     public String isIllustrated(Record record) {
         String leader = record.getLeader().toString();
-        
+
         // Does the leader indicate this is a "language material" that might have extra
         // illustration details in the fixed fields?
         if (leader.charAt(6) == 'a') {
             String currentCode = "";         // for use in loops below
-            
+
             // List of 008/18-21 codes that indicate illustrations:
             String illusCodes = "abcdefghijklmop";
-            
+
             // Check the illustration characters of the 008:
             ControlField fixedField = (ControlField) record.getVariableField("008");
             if (fixedField != null) {
@@ -450,7 +451,7 @@ public class VuFindIndexer extends SolrIndexer
                     }
                 }
             }
-            
+
             // Now check if any 006 fields apply:
             List<ControlField> fields = record.getVariableFields("006");
             Iterator<ControlField> fieldsIter = fields.iterator();
@@ -470,7 +471,7 @@ public class VuFindIndexer extends SolrIndexer
                 }
             }
         }
-        
+
         // Now check for interesting strings in 300 subfield b:
         List<ControlField> fields = record.getVariableFields("300");
         Iterator<ControlField> fieldsIter = fields.iterator();
@@ -491,8 +492,113 @@ public class VuFindIndexer extends SolrIndexer
                 }
             }
         }
-    
+
         // If we made it this far, we found no sign of illustrations:
         return "Not Illustrated";
+    }
+
+    /**
+     * Extract a numeric portion of the Dewey decimal call number
+     *
+     * Can return null
+     *
+     * @param record
+     * @param fieldSpec - which MARC fields / subfields need to be analyzed
+     * @param precisionStr - a decimal number (represented in string format) showing the 
+     *  desired precision of the returned number; i.e. 100 to round to nearest hundred, 
+     *  10 to round to nearest ten, 0.1 to round to nearest tenth, etc.
+     * @return Set containing requested numeric portions of Dewey decimal call numbers
+     */
+    public Set<String> getDeweyNumber(Record record, String fieldSpec, String precisionStr) {
+        // Initialize our return value:
+        Set<String> result = new LinkedHashSet<String>();
+
+        // Precision comes in as a string, but we need to convert it to a float:        
+        float precision = Float.parseFloat(precisionStr);
+
+        // Loop through the specified MARC fields:
+        Set<String> input = getFieldList(record, fieldSpec);
+        Iterator<String> iter = input.iterator();
+        while (iter.hasNext()) {
+            // Get the current string to work on:
+            String current = iter.next();
+
+            if (CallNumUtils.isValidDewey(current)) {
+                // Convert the numeric portion of the call number into a float:
+                float currentVal = Float.parseFloat(CallNumUtils.getDeweyB4Cutter(current));
+
+                // Round the call number value to the specified precision:
+                Float finalVal = new Float(Math.floor(currentVal / precision) * precision);
+
+                // Convert the rounded value back to a string (with leading zeros) and save it:
+                result.add(CallNumUtils.normalizeFloat(finalVal.toString(), 3, -1));
+            }
+        }
+
+        // If we found no call number matches, return null; otherwise, return our results:
+        if (result.isEmpty())
+            return null;
+        return result;
+    }
+
+    /**
+     * Normalize Dewey numbers for searching purposes (uppercase/stripped spaces)
+     *
+     * Can return null
+     *
+     * @param record
+     * @param fieldSpec - which MARC fields / subfields need to be analyzed
+     * @return Set containing normalized Dewey numbers extracted from specified fields.
+     */
+    public Set<String> getDeweySearchable(Record record, String fieldSpec) {
+        // Initialize our return value:
+        Set<String> result = new LinkedHashSet();
+
+        // Loop through the specified MARC fields:
+        Set<String> input = getFieldList(record, fieldSpec);
+        Iterator<String> iter = input.iterator();
+        while (iter.hasNext()) {
+            // Get the current string to work on:
+            String current = iter.next();
+
+            // Add valid strings to the set, normalizing them to be all uppercase
+            // and free from whitespace.
+            if (CallNumUtils.isValidDewey(current)) {
+                result.add(current.toUpperCase().replaceAll(" ", ""));
+            }
+        }
+
+        // If we found no call numbers, return null; otherwise, return our results:
+        if (result.isEmpty())
+            return null;
+        return result;
+    }
+
+    /**
+     * Normalize Dewey numbers for sorting purposes (use only the first valid number!)
+     *
+     * Can return null
+     *
+     * @param record
+     * @param fieldSpec - which MARC fields / subfields need to be analyzed
+     * @return String containing the first valid Dewey number encountered, normalized
+     *         for sorting purposes.
+     */
+    public String getDeweySortable(Record record, String fieldSpec) {
+        // Loop through the specified MARC fields:
+        Set<String> input = getFieldList(record, fieldSpec);
+        Iterator<String> iter = input.iterator();
+        while (iter.hasNext()) {
+            // Get the current string to work on:
+            String current = iter.next();
+
+            // If this is a valid Dewey number, return the sortable shelf key:
+            if (CallNumUtils.isValidDewey(current)) {
+                return CallNumUtils.getDeweyShelfKey(current);
+            }
+        }
+
+        // If we made it this far, we didn't find a valid sortable Dewey number:
+        return null;
     }
 }
