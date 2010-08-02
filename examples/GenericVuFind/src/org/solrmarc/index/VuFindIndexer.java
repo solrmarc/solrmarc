@@ -552,7 +552,7 @@ public class VuFindIndexer extends SolrIndexer
      */
     public Set<String> getDeweySearchable(Record record, String fieldSpec) {
         // Initialize our return value:
-        Set<String> result = new LinkedHashSet();
+        Set<String> result = new LinkedHashSet<String>();
 
         // Loop through the specified MARC fields:
         Set<String> input = getFieldList(record, fieldSpec);
