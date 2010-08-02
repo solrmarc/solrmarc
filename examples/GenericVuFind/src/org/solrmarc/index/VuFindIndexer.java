@@ -16,7 +16,8 @@ package org.solrmarc.index;
  * limitations under the License.
  */
 
-
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
@@ -24,6 +25,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.apache.log4j.Logger;
 import org.marc4j.marc.ControlField;
@@ -31,6 +35,7 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.solrmarc.tools.CallNumUtils;
+import org.ini4j.Ini;
 
 /**
  * 
@@ -42,7 +47,14 @@ public class VuFindIndexer extends SolrIndexer
 {
     // Initialize logging category
     static Logger logger = Logger.getLogger(VuFindIndexer.class.getName());
-    
+
+    // Initialize VuFind database connection (null until explicitly activated)
+    private Connection vufindDatabase = null;
+    private UpdateDateTracker tracker = null;
+
+    private static SimpleDateFormat marc005date = new SimpleDateFormat("yyyyMMddHHmmss.S");
+    private static SimpleDateFormat marc008date = new SimpleDateFormat("yyMMdd");
+
     /**
      * Default constructor
      * @param propertiesMapFile
@@ -58,7 +70,157 @@ public class VuFindIndexer extends SolrIndexer
             throws FileNotFoundException, IOException, ParseException {
         super(propertiesMapFile, propertyDirs);
     }
-    
+
+    /**
+     * Default finalizer
+     */
+    protected void finalize() throws Throwable {
+        // Invoke the finalizer of our superclass (just to be on the safe side):
+        super.finalize();
+
+        // Clean up database handle, if any:
+        if (vufindDatabase != null) {
+            vufindDatabase.close();
+        }
+    }
+
+    /**
+     * Connect to the VuFind database if we do not already have a connection.
+     */
+    private void connectToDatabase()
+    {
+        // Already connected?  Do nothing further!
+        if (vufindDatabase != null) {
+            return;
+        }
+
+        // Obtain the DSN from the config.ini file:
+        Ini ini = new Ini();
+        String configFile = "../web/conf/config.ini";
+        File file = new File(configFile);
+        try {
+            ini.load(new FileReader(file));
+        } catch (Throwable e) {
+            System.err.println("Unable to access " + configFile);
+            logger.error("Unable to access " + configFile);
+            System.exit(1);
+        }
+        String dsn = ini.get("Database", "database");
+
+        try {
+            // Parse key settings from the PHP-style DSN:
+            String username = "";
+            String password = "";
+            if (dsn.substring(0, 8).equals("mysql://")) {
+                Class.forName( "com.mysql.jdbc.Driver" ).newInstance();
+                String[] parts = dsn.split("://");
+                if (parts.length > 1) {
+                    parts = parts[1].split("@");
+                    if (parts.length > 1) {
+                        dsn = "mysql://" + parts[1];
+                        parts = parts[0].split(":");
+                        username = parts[0];
+                        if (parts.length > 1) {
+                            password = parts[1];
+                        }
+                    }
+                }
+            }
+
+            // Connect to the database:
+            vufindDatabase = DriverManager.getConnection("jdbc:" + dsn, username, password);
+        } catch (Throwable e) {
+            System.err.println("Unable to connect to VuFind database");
+            logger.error("Unable to connect to VuFind database");
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Establish UpdateDateTracker object if not already available.
+     */
+    private void loadUpdateDateTracker()
+    {
+        if (tracker == null) {
+            connectToDatabase();
+            tracker = new UpdateDateTracker(vufindDatabase);
+        }
+    }
+
+    /**
+     * Support method for getLatestTransaction.
+     * @return Date extracted from 005 (or very old date, if unavailable)
+     */
+    private java.util.Date normalize005Date(String input)
+    {
+        // Normalize "null" strings to a generic bad value:
+        if (input == null) {
+            input = "null";
+        }
+
+        // Try to parse the date; default to "millisecond 0" (very old date) if we can't
+        // parse the data successfully.
+        java.util.Date retVal;
+        try {
+            retVal = marc005date.parse(input);
+        } catch(java.text.ParseException e) {
+            retVal = new java.util.Date(0);
+        }
+        return retVal;
+    }
+
+    /**
+     * Support method for getLatestTransaction.
+     * @return Date extracted from 008 (or very old date, if unavailable)
+     */
+    private java.util.Date normalize008Date(String input)
+    {
+        // Normalize "null" strings to a generic bad value:
+        if (input == null || input.length() < 6) {
+            input = "null";
+        }
+
+        // Try to parse the date; default to "millisecond 0" (very old date) if we can't
+        // parse the data successfully.
+        java.util.Date retVal;
+        try {
+            retVal = marc008date.parse(input.substring(0, 6));
+        } catch(java.text.ParseException e) {
+            retVal = new java.util.Date(0);
+        }
+        return retVal;
+    }
+
+    /**
+     * Extract the latest transaction date from the MARC record.
+     * @param record
+     * @return Latest transaction date.
+     */
+    private java.util.Date getLatestTransaction(Record record) {
+        // First try the 005 -- this is most likely to have a precise transaction date:
+        Set<String> dates = getFieldList(record, "005");
+        if (dates != null) {
+            String current;
+            Iterator<String> dateIter = dates.iterator();
+            if (dateIter.hasNext()) {
+                return normalize005Date(dateIter.next());
+            }
+        }
+
+        // No luck with 005?  Try 008 next -- less precise, but better than nothing:
+        dates = getFieldList(record, "008");
+        if (dates != null) {
+            String current;
+            Iterator<String> dateIter = dates.iterator();
+            if (dateIter.hasNext()) {
+                return normalize008Date(dateIter.next());
+            }
+        }
+
+        // If we got this far, we couldn't find a valid value; return an arbitrary date:
+        return new java.util.Date(0);
+    }
+
     /**
      * Determine Record Format(s)
      *
@@ -600,5 +762,87 @@ public class VuFindIndexer extends SolrIndexer
 
         // If we made it this far, we didn't find a valid sortable Dewey number:
         return null;
+    }
+
+    /**
+     * Update the index date in the database for the specified core/ID pair.
+     */
+    public void updateTracker(String core, String id, java.util.Date latestTransaction)
+    {
+        // Initialize date tracker if not already initialized:
+        loadUpdateDateTracker();
+
+        // Update the database (if necessary):
+        try {
+            tracker.index(core, id, latestTransaction);
+        } catch (java.sql.SQLException e) {
+            System.err.println("Unexpected database error");
+            logger.error("Unexpected database error");
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Get the "first indexed" date for the current record.
+     * @param record
+     * @param fieldSpec
+     * @param core
+     * @return ID string
+     */
+    public String getFirstIndexed(Record record, String fieldSpec, String core) {
+        // Update the database, then send back the first indexed date:
+        updateTracker(core, getFirstFieldVal(record, fieldSpec), getLatestTransaction(record));
+        return tracker.getFirstIndexed();
+    }
+
+    /**
+     * Get the "first indexed" date for the current record.
+     * @param record
+     * @param fieldSpec
+     * @return ID string
+     */
+    public String getFirstIndexed(Record record, String fieldSpec) {
+        return getFirstIndexed(record, fieldSpec, "biblio");
+    }
+
+    /**
+     * Get the "first indexed" date for the current record.
+     * @param record
+     * @return ID string
+     */
+    public String getFirstIndexed(Record record) {
+        return getFirstIndexed(record, "001", "biblio");
+    }
+
+    /**
+     * Get the "last indexed" date for the current record.
+     * @param record
+     * @param fieldSpec
+     * @param core
+     * @return ID string
+     */
+    public String getLastIndexed(Record record, String fieldSpec, String core) {
+        // Update the database, then send back the last indexed date:
+        updateTracker(core, getFirstFieldVal(record, fieldSpec), getLatestTransaction(record));
+        return tracker.getLastIndexed();
+    }
+
+    /**
+     * Get the "last indexed" date for the current record.
+     * @param record
+     * @param fieldSpec
+     * @return ID string
+     */
+    public String getLastIndexed(Record record, String fieldSpec) {
+        return getLastIndexed(record, fieldSpec, "biblio");
+    }
+
+    /**
+     * Get the "last indexed" date for the current record.
+     * @param record
+     * @return ID string
+     */
+    public String getLastIndexed(Record record) {
+        return getLastIndexed(record, "001", "biblio");
     }
 }
