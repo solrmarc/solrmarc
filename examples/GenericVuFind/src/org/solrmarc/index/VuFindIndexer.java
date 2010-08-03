@@ -72,19 +72,6 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Default finalizer
-     */
-    protected void finalize() throws Throwable {
-        // Invoke the finalizer of our superclass (just to be on the safe side):
-        super.finalize();
-
-        // Clean up database handle, if any:
-        if (vufindDatabase != null) {
-            vufindDatabase.close();
-        }
-    }
-
-    /**
      * Connect to the VuFind database if we do not already have a connection.
      */
     private void connectToDatabase()
@@ -133,6 +120,29 @@ public class VuFindIndexer extends SolrIndexer
             System.err.println("Unable to connect to VuFind database");
             logger.error("Unable to connect to VuFind database");
             System.exit(1);
+        }
+
+        Runtime.getRuntime().addShutdownHook(new VuFindShutdownThread(vufindDatabase));
+    }
+
+    class VuFindShutdownThread extends Thread
+    {
+        private Connection db;
+
+        public VuFindShutdownThread(Connection dbConnection)
+        {
+            db = dbConnection;
+        }
+
+        public void run()
+        {
+            try {
+                db.close();
+            } catch (java.sql.SQLException e) {
+                System.err.println("Unexpected database error during shutdown");
+                logger.error("Unexpected database error during shutdown");
+                System.exit(1);
+            }
         }
     }
 
