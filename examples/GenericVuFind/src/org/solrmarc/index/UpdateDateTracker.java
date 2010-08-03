@@ -31,6 +31,7 @@ public class UpdateDateTracker
     private Timestamp firstIndexed;
     private Timestamp lastIndexed;
     private Timestamp lastRecordChange;
+    private Timestamp deleted;
 
     /* Private support method: create a row in the change_tracker table.
      */
@@ -58,7 +59,7 @@ public class UpdateDateTracker
     private boolean readRow() throws SQLException
     {
         PreparedStatement sql = db.prepareStatement(
-            "SELECT first_indexed, last_indexed, last_record_change " +
+            "SELECT first_indexed, last_indexed, last_record_change, deleted " +
             "FROM change_tracker WHERE core = ? AND id = ?;");
         sql.setString(1, core);
         sql.setString(2, id);
@@ -73,6 +74,7 @@ public class UpdateDateTracker
         firstIndexed = result.getTimestamp(1);
         lastIndexed = result.getTimestamp(2);
         lastRecordChange = result.getTimestamp(3);
+        deleted = result.getTimestamp(4);
         return true;
     }
 
@@ -83,17 +85,23 @@ public class UpdateDateTracker
         // Save new values to the object:
         java.util.Date rightNow = new java.util.Date();
         lastIndexed = new Timestamp(rightNow.getTime());
+        // If first indexed is null, we're restoring a deleted record, so
+        // we need to treat it as new -- we'll use the current time.
+        if (firstIndexed == null) {
+            firstIndexed = lastIndexed;
+        }
         lastRecordChange = newRecordChange;
 
         // Save new values to the database:
-        PreparedStatement sql = db.prepareStatement(
-            "UPDATE change_tracker SET last_indexed = ?, last_record_change = ?, deleted = ? " +
+        PreparedStatement sql = db.prepareStatement("UPDATE change_tracker " +
+            "SET first_indexed = ?, last_indexed = ?, last_record_change = ?, deleted = ? " +
             "WHERE core = ? AND id = ?;");
-        sql.setTimestamp(1, lastIndexed);
-        sql.setTimestamp(2, lastRecordChange);
-        sql.setNull(3, java.sql.Types.NULL);
-        sql.setString(4, core);
-        sql.setString(5, id);
+        sql.setTimestamp(1, firstIndexed);
+        sql.setTimestamp(2, lastIndexed);
+        sql.setTimestamp(3, lastRecordChange);
+        sql.setNull(4, java.sql.Types.NULL);
+        sql.setString(5, core);
+        sql.setString(6, id);
         sql.executeUpdate();
     }
 
@@ -141,8 +149,11 @@ public class UpdateDateTracker
             createRow(newRecordChange);
         // Row already exists?  See if it needs to be updated:
         } else {
-            // Was stored record change date before current record change date?
-            if (lastRecordChange.getTime() < newRecordChange.getTime()) {
+            // Are we restoring a previously deleted record, or was the stored 
+            // record change date before current record change date?  Either way,
+            // we need to update the table!
+            if (deleted != null || 
+                lastRecordChange.getTime() < newRecordChange.getTime()) {
                 updateRow(newRecordChange);
             }
         }
