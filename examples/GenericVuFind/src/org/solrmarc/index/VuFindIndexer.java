@@ -55,6 +55,9 @@ public class VuFindIndexer extends SolrIndexer
     private static SimpleDateFormat marc005date = new SimpleDateFormat("yyyyMMddHHmmss.S");
     private static SimpleDateFormat marc008date = new SimpleDateFormat("yyMMdd");
 
+    // Shutdown flag:
+    private boolean shuttingDown = false;
+
     /**
      * Default constructor
      * @param propertiesMapFile
@@ -122,27 +125,39 @@ public class VuFindIndexer extends SolrIndexer
             System.exit(1);
         }
 
-        Runtime.getRuntime().addShutdownHook(new VuFindShutdownThread(vufindDatabase));
+        Runtime.getRuntime().addShutdownHook(new VuFindShutdownThread(this));
+    }
+
+    private void disconnectFromDatabase()
+    {
+        if (vufindDatabase != null) {
+            try {
+                vufindDatabase.close();
+            } catch (SQLException e) {
+                System.err.println("Unable to disconnect from VuFind database");
+                logger.error("Unable to disconnect from VuFind database");
+            }
+        }
+    }
+
+    public void shutdown()
+    {
+        disconnectFromDatabase();
+        shuttingDown = true;
     }
 
     class VuFindShutdownThread extends Thread
     {
-        private Connection db;
+        private VuFindIndexer indexer;
 
-        public VuFindShutdownThread(Connection dbConnection)
+        public VuFindShutdownThread(VuFindIndexer i)
         {
-            db = dbConnection;
+            indexer = i;
         }
 
         public void run()
         {
-            try {
-                db.close();
-            } catch (java.sql.SQLException e) {
-                System.err.println("Unexpected database error during shutdown");
-                logger.error("Unexpected database error during shutdown");
-                System.exit(1);
-            }
+            indexer.shutdown();
         }
     }
 
@@ -786,9 +801,12 @@ public class VuFindIndexer extends SolrIndexer
         try {
             tracker.index(core, id, latestTransaction);
         } catch (java.sql.SQLException e) {
-            System.err.println("Unexpected database error");
-            logger.error("Unexpected database error");
-            System.exit(1);
+            // If we're in the process of shutting down, an error is expected:
+            if (!shuttingDown) {
+                System.err.println("Unexpected database error");
+                logger.error("Unexpected database error");
+                System.exit(1);
+            }
         }
     }
 
