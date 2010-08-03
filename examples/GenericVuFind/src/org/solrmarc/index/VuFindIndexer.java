@@ -217,11 +217,13 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Extract the latest transaction date from the MARC record.
+     * Extract the latest transaction date from the MARC record.  This is useful
+     * for detecting when a record has changed since the last time it was indexed.
+     *
      * @param record
      * @return Latest transaction date.
      */
-    private java.util.Date getLatestTransaction(Record record) {
+    public java.util.Date getLatestTransaction(Record record) {
         // First try the 005 -- this is most likely to have a precise transaction date:
         Set<String> dates = getFieldList(record, "005");
         if (dates != null) {
@@ -790,7 +792,10 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Update the index date in the database for the specified core/ID pair.
+     * Update the index date in the database for the specified core/ID pair.  We
+     * maintain a database of "first/last indexed" times separately from Solr to
+     * allow the history of our indexing activity to be stored permanently in a
+     * fashion that can survive even a total Solr rebuild.
      */
     public void updateTracker(String core, String id, java.util.Date latestTransaction)
     {
@@ -811,7 +816,9 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Get the "first indexed" date for the current record.
+     * Get the "first indexed" date for the current record.  (This is the first
+     * time that SolrMarc ever encountered this particular record).
+     *
      * @param record
      * @param fieldSpec
      * @param core
@@ -824,7 +831,9 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Get the "first indexed" date for the current record.
+     * Get the "first indexed" date for the current record.  (This is the first
+     * time that SolrMarc ever encountered this particular record).
+     *
      * @param record
      * @param fieldSpec
      * @return ID string
@@ -834,7 +843,9 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Get the "first indexed" date for the current record.
+     * Get the "first indexed" date for the current record.  (This is the first
+     * time that SolrMarc ever encountered this particular record).
+     *
      * @param record
      * @return ID string
      */
@@ -843,7 +854,9 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Get the "last indexed" date for the current record.
+     * Get the "last indexed" date for the current record.  (This is the last time
+     * the record changed from SolrMarc's perspective).
+     *
      * @param record
      * @param fieldSpec
      * @param core
@@ -856,7 +869,9 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Get the "last indexed" date for the current record.
+     * Get the "last indexed" date for the current record.  (This is the last time
+     * the record changed from SolrMarc's perspective).
+     *
      * @param record
      * @param fieldSpec
      * @return ID string
@@ -866,7 +881,9 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Get the "last indexed" date for the current record.
+     * Get the "last indexed" date for the current record.  (This is the last time
+     * the record changed from SolrMarc's perspective).
+     *
      * @param record
      * @return ID string
      */
