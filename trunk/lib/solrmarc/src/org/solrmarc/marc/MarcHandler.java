@@ -10,6 +10,7 @@ import java.util.zip.ZipEntry;
 import org.apache.log4j.Logger;
 import org.marc4j.*;
 import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.marcoverride.MarcUnprettyXmlReader;
 import org.solrmarc.tools.GetDefaultConfig;
 import org.solrmarc.tools.Utils;
 
@@ -362,7 +363,7 @@ public abstract class MarcHandler {
         	}
             if (inputTypeXML)
             {
-                reader = new MarcXmlReader(is);
+                reader = new MarcUnprettyXmlReader(is);
             }
             else if (permissiveReader)
             {

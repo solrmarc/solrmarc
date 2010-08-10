@@ -37,6 +37,7 @@ import org.marc4j.converter.impl.UnicodeToAnsel;
 import org.marc4j.marc.Record;
 
 import org.solrmarc.marc.MarcFilteredReader;
+import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.Utils;
 
 /**
@@ -163,40 +164,58 @@ public class MarcPrinter extends MarcHandler
                     String recStr = record.toString();
                         
                     if (verbose) out.println(recStr);
-                    Map<String,Object> indexMap = indexer.map(record, errors);
-                    if (errors != null && includeErrors)
-                    {
-                        if (errors.hasErrors())
+                    try {
+                        Map<String,Object> indexMap = indexer.map(record, errors);
+                        if (errors != null && includeErrors)
                         {
-                            indexMap.put("marc_error", errors.getErrors());
-                        }
-                    }
-                    TreeSet<String> sortedKeys = new TreeSet<String>();
-                    sortedKeys.addAll(indexMap.keySet());
-                    Iterator<String> keys = sortedKeys.iterator();
-                    String key = "id";
-                    Object recordID = indexMap.get(key);
-                    //out.println("\nIndexID= "+ key + "  Value = "+ value);
-                    while (keys.hasNext())
-                    {
-                        key = keys.next();
-                        Object value = indexMap.get(key);
-//                        if (key.equals("id")) continue;
-                        if (indexkeyprefix == null || key.matches(indexkeyprefix))
-                        {
-                            if (value instanceof String)
+                            if (errors.hasErrors())
                             {
-                                out.println(recordID+ " : "+ key + " = "+ value);
+                                indexMap.put("marc_error", errors.getErrors());
                             }
-                            else if (value instanceof Collection)
+                        }
+                        TreeSet<String> sortedKeys = new TreeSet<String>();
+                        sortedKeys.addAll(indexMap.keySet());
+                        Iterator<String> keys = sortedKeys.iterator();
+                        String key = "id";
+                        Object recordID = indexMap.get(key);
+                        //out.println("\nIndexID= "+ key + "  Value = "+ value);
+                        while (keys.hasNext())
+                        {
+                            key = keys.next();
+                            Object value = indexMap.get(key);
+    //                        if (key.equals("id")) continue;
+                            if (indexkeyprefix == null || key.matches(indexkeyprefix))
                             {
-                                Iterator<?> valIter = ((Collection)value).iterator();
-                                while (valIter.hasNext())
+                                if (value instanceof String)
                                 {
-                                    String collVal = valIter.next().toString();
-                                    out.println(recordID+ " : "+ key + " = "+ collVal);
+                                    out.println(recordID+ " : "+ key + " = "+ value);
+                                }
+                                else if (value instanceof Collection)
+                                {
+                                    Iterator<?> valIter = ((Collection)value).iterator();
+                                    while (valIter.hasNext())
+                                    {
+                                        String collVal = valIter.next().toString();
+                                        out.println(recordID+ " : "+ key + " = "+ collVal);
+                                    }
                                 }
                             }
+                        }
+                    }
+                    catch (SolrMarcIndexerException e)
+                    {
+                        if (e.getLevel() == SolrMarcIndexerException.IGNORE)
+                        {
+                            System.err.println("Indexing routine says record "+ record.getControlNumber() + " should be ignored");                                   
+                        }
+                        else if (e.getLevel() == SolrMarcIndexerException.DELETE)
+                        {
+                            System.err.println("Indexing routine says record "+ record.getControlNumber() + " should be deleted");                                   
+                        }
+                        if (e.getLevel() == SolrMarcIndexerException.EXIT)
+                        {
+                            System.err.println("Indexing routine says processing should be terminated at record "+ record.getControlNumber()); 
+                            break;
                         }
                     }
                 }
