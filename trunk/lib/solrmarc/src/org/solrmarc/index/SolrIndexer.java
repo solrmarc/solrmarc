@@ -615,7 +615,6 @@ public class SolrIndexer
      * @param record -  The MARC record that is being indexed.
      * @param indexParm - contains the name of the custom method to invoke, as well as the 
      *                    additional parameters to pass to that method.
-     * @return  returns true if the indexing process should stop and the solr record should be deleted.
      */
     private void handleCustom(Map<String, Object> indexMap,
             String indexType, String indexField, String mapName, Record record,
@@ -710,7 +709,6 @@ public class SolrIndexer
      * @param record -  The MARC record that is being indexed.
      * @param indexParm - contains the name of the custom BeanShell script method to invoke, as well as the 
      *                    additional parameters to pass to that method.
-     * @return  returns true if the indexing process should stop and the solr record should be deleted.
      */
     private void handleScript(Map<String, Object> indexMap, String indexType, String indexField, String mapName, Record record, String indexParm)
     {
