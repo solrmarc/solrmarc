@@ -105,7 +105,7 @@
         <copy todir="${dist.path}" >
             <flattenmapper/>
             <fileset dir="${site.build.dir}" includes="*.jar" />
-            <fileset dir="${site.base.dir}" includes="*_index.properties" />
+            <fileset dir="${site.base.dir}" includes="*_index.properties,marc*.properties" />
         </copy>
         <if >
             <available file="${site.build.dir}/${custom.jar.name}.jar" />
@@ -116,10 +116,14 @@
                 <property name="custom.jar.name.jar" value="" />
             </else>
         </if>
+        <copy_libs_set_property />
         <copy todir="${dist.path}" overwrite="true" >
-            <fileset dir="${site.base.dir}" includes="*_config.properties" />
+            <fileset dir="${site.base.dir}" includes="*_config.properties,import.properties" />
             <filterchain>
                   <expandproperties />
+                  <tokenfilter>
+                      <replaceregex pattern="(solrmarc[.]custom[.]jar[.]path=.*)" replace="\1${add.lib.to.custom.jar.line}" />
+                  </tokenfilter>
                   <fixcrlf />
             </filterchain>     
         </copy>
@@ -500,6 +504,34 @@
         </sequential>
     </macrodef>
 
+    <macrodef name="copy_libs_set_property" description="Copy jar files in the local_build/lib directory to the dist/lib directory, and modify solrmarc.custom.jar.path in config file" >
+        <sequential>
+            <if >
+                <resourcecount when="gt" count="0">
+                    <fileset id="local_lib_jars" dir="${site.lib.dir}" includes="*.jar" excludes="SolrMarc.jar" />
+                </resourcecount>
+                <then>
+                    <mkdir dir="${dist.path}/lib" />
+                    <copy todir="${dist.path}/lib" >
+                        <fileset refid="local_lib_jars" />
+                    </copy>
+                    <if >
+                        <length string="${custom.jar.name.jar}" when="gt" length="0" />
+                        <then>
+                            <property name="add.lib.to.custom.jar.line" value="|lib" />
+                        </then>
+                        <else>
+                            <property name="add.lib.to.custom.jar.line" value="lib" />
+                        </else>
+                    </if >
+                </then>
+                <else>
+                    <property name="add.lib.to.custom.jar.line" value="" />
+                </else>
+            </if>
+        </sequential>
+    </macrodef>
+    
     <macrodef name="copy_jetty"  description="Copy Jetty setup from site test config to distribution dir" >
         <sequential>
             <copy todir="${jetty.install.dir}" overwrite="false" >

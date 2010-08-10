@@ -25,7 +25,7 @@
                 <and>
                     <available file="${site.dir}" />
                     <resourcecount count="2" when="ge">
-                        <fileset dir="${site.dir}" includes="*_config.properties,*_index.properties" />
+                        <fileset dir="${site.dir}" includes="*_config.properties,*_index.properties,import.properties,marc*.properties" />
                     </resourcecount>
                 </and>
                 <then>
@@ -63,7 +63,7 @@
                 </and>
                 <then>
                     <union id="nonuptodatecopies">
-                        <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,index_scripts/*,script_templates/*,test/**,log4j.properties,extra_data/**,*_config.properties,*_index.properties,solrConf/**" excludes="test/bin/**" >
+                        <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,index_scripts/*,script_templates/*,test/**,log4j.properties,extra_data/**,*_config.properties,*_index.properties,import.properties,marc*.properties,solrConf/**" excludes="test/bin/**" >
                             <depend targetdir="${site.dir}" />
                             <different targetdir="${site.dir}" />
                         </fileset>
@@ -168,7 +168,7 @@
                 </fileset>
             </copy>
             <copy todir="${site.dir}" filtering="false" preservelastmodified="true">
-                 <fileset dir="examples/${example.configuration}" includes="*_config.properties,*_index.properties" >
+                 <fileset dir="examples/${example.configuration}" includes="*_config.properties,*_index.properties,import.properties,marc*.properties" >
                      <depend targetdir="${site.dir}" >
                      </depend>
                  </fileset>
@@ -387,7 +387,7 @@
     <macrodef name="determine_defaultconfig" description="Select the default config" >
         <sequential>
             <path id="config.file.set">
-                <fileset dir="${site.dir}" includes="*_config.properties" />
+                <fileset dir="${site.dir}" includes="*_config.properties,import.properties" />
             </path>
             <resourcecount property="config.file.cnt" refid="config.file.set" />
             <if>
