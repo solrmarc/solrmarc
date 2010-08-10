@@ -39,6 +39,7 @@ import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRemoteProxy;
 import org.solrmarc.solr.SolrRuntimeException;
 import org.solrmarc.solr.SolrServerProxy;
+import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.SolrUpdate;
 import org.solrmarc.tools.Utils;
 
@@ -49,8 +50,8 @@ import org.solrmarc.tools.Utils;
  *
  */
 public class MarcImporter extends MarcHandler 
-{	
-	/** needs to be visible to StanfordItemMarcImporter ... */
+{    
+    /** needs to be visible to StanfordItemMarcImporter ... */
     protected SolrProxy solrProxy;
     protected boolean solrProxyIsRemote;
 
@@ -75,21 +76,21 @@ public class MarcImporter extends MarcHandler
     
 
     /**
-	 * Constructs an instance with properties files
-	 */
+     * Constructs an instance with properties files
+     */
     public MarcImporter()
     {
         showConfig = true;
         showInputFile = true;
-	}
-    	
+    }
+        
     /**
-	 * Load the properties file
-	 * @param properties
-	 */
+     * Load the properties file
+     * @param properties
+     */
     @Override
     protected void loadLocalProperties() 
-	{
+    {
         // The solr.home directory
         solrCoreDir = Utils.getProperty(configProps, "solr.path");
 
@@ -173,7 +174,7 @@ public class MarcImporter extends MarcHandler
             solrProxy = getSolrProxy();
 
         return;
-	}
+    }
 
     /**
      * Delete records from the index
@@ -181,9 +182,9 @@ public class MarcImporter extends MarcHandler
      */
     public int deleteRecords()
     {
-    	idsToDeleteCounter = 0;
-    	recsDeletedCounter = 0;
-    	
+        idsToDeleteCounter = 0;
+        recsDeletedCounter = 0;
+        
         if (deleteRecordListFilename == null || 
             deleteRecordListFilename.length() == 0) 
         {
@@ -224,11 +225,11 @@ public class MarcImporter extends MarcHandler
         }
         catch (FileNotFoundException fnfe)
         {
-        	logger.error("Error: unable to find and open delete-record-id-list: " + delFile, fnfe);
+            logger.error("Error: unable to find and open delete-record-id-list: " + delFile, fnfe);
         }
         catch (IOException ioe)
         {
-        	logger.error("Error: reading from delete-record-id-list: " + delFile, ioe);
+            logger.error("Error: reading from delete-record-id-list: " + delFile, ioe);
         }
         return recsDeletedCounter;
     }
@@ -307,10 +308,10 @@ public class MarcImporter extends MarcHandler
                 }
                 else
                 {
-            	    logger.error("Error indexing record: " + record.getControlNumber() + " -- " + e.getMessage(), e);
-            	    // this error should (might?) only be thrown if we can't write to the index
-            	    //   therefore, continuing to index would be pointless.
-            	    if (e instanceof SolrRuntimeException) throw ((SolrRuntimeException)e);
+                    logger.error("Error indexing record: " + record.getControlNumber() + " -- " + e.getMessage(), e);
+                    // this error should (might?) only be thrown if we can't write to the index
+                    //   therefore, continuing to index would be pointless.
+                    if (e instanceof SolrRuntimeException) throw ((SolrRuntimeException)e);
 
                 }
             }
@@ -323,33 +324,41 @@ public class MarcImporter extends MarcHandler
      * Add a record to the index
      * @param record marc record to add
      */
-    private boolean addToIndex(Record record)
-    	throws IOException
+    private boolean addToIndex(Record record) throws IOException
     {
-        Map<String, Object> fieldsMap = indexer.map(record, errors); 
-        // test whether some indexing specification determined that this record should be omitted entirely
-        if (fieldsMap.size() == 0) 
-        {
-            // if so not only don't index it, but try to delete the record if its already there.
-            String id = record.getControlNumber();
-            if (id != null)
-            {
-                solrProxy.delete(id, true, true);
-            }
-            return false;
-        }
-        
-        String docStr = addToIndex(fieldsMap);
+        try {
+            Map<String, Object> fieldsMap = indexer.map(record, errors); 
+            String docStr = addToIndex(fieldsMap);
 
-        if (verbose || justIndexDontAdd)
-        {
-            if (verbose) 
+            if (verbose || justIndexDontAdd)
             {
-                System.out.println(record.toString());
-                logger.info(record.toString());
+                if (verbose) 
+                {
+                    System.out.println(record.toString());
+                    logger.info(record.toString());
+                }
+                System.out.println(docStr);
+                logger.info(docStr);
             }
-            System.out.println(docStr);
-            logger.info(docStr);
+            return(true);
+        }
+        catch (SolrMarcIndexerException e)
+        {
+            if (e.getLevel() == SolrMarcIndexerException.IGNORE)
+            {
+                return(true);// do nothing
+            }
+            if (e.getLevel() == SolrMarcIndexerException.DELETE)
+            {            
+                String id = record.getControlNumber();
+                if (id != null)
+                {
+                    solrProxy.delete(id, true, true);
+                }
+                return false;
+            }
+            else if (e.getLevel() == SolrMarcIndexerException.EXIT)
+                throw(e);
         }
         return(true);
     }
@@ -393,8 +402,8 @@ public class MarcImporter extends MarcHandler
         } 
         catch (IOException ioe) {
             //System.err.println("Final commit and optmization failed");
-        	logger.error("Final commit and optimization failed: " + ioe.getMessage());
-        	logger.debug(ioe);
+            logger.error("Final commit and optimization failed: " + ioe.getMessage());
+            logger.debug(ioe);
             //e.printStackTrace();
         }
         
@@ -434,12 +443,12 @@ public class MarcImporter extends MarcHandler
         catch (MalformedURLException me)
         {
             //System.err.println("MalformedURLException: " + me);
-        	logger.error("Specified URL is malformed: " + solrHostUpdateURL);
+            logger.error("Specified URL is malformed: " + solrHostUpdateURL);
         }
         catch (IOException ioe)
         {
             //System.err.println("IOException: " + ioe.getMessage());
-        	logger.warn("Unable to establish connection to solr server at URL: " + solrHostUpdateURL);
+            logger.warn("Unable to establish connection to solr server at URL: " + solrHostUpdateURL);
         }
     }  
 
@@ -493,7 +502,7 @@ public class MarcImporter extends MarcHandler
      * @param args
      */
     @Override
-	public int handleAll()
+    public int handleAll()
     {
         Runtime.getRuntime().addShutdownHook(new MyShutdownThread(this));
         
@@ -776,8 +785,8 @@ public class MarcImporter extends MarcHandler
         }
         catch (IllegalArgumentException e)
         {
-        	logger.error(e.getMessage());
-        	System.err.println(e.getMessage());
+            logger.error(e.getMessage());
+            System.err.println(e.getMessage());
             //e.printStackTrace();
             System.exit(1);
         }
@@ -785,5 +794,4 @@ public class MarcImporter extends MarcHandler
         int exitCode = importer.handleAll();
         System.exit(exitCode);
     }
- 		
 }
