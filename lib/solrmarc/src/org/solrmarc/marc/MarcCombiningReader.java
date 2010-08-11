@@ -110,15 +110,17 @@ public class MarcCombiningReader implements MarcReader
             try {
                 nextRecord = reader.next();
             }
-            catch (MarcException me)
-            {
-                //System.err.println("Error reading Marc Record: "+ me.getMessage());  
-//              exception = new SolrMarcException(me.getMessage(), me.getCause());
-//              exception.printMessage("Error reading Marc record:");
-//              exception.printStackTrace();
-                logger.error("Error reading Marc Record.");
-                logger.error(me.getMessage());
-            }
+			catch (Exception e)
+			{
+				if (currentRecord != null) {
+					String recCntlNum = currentRecord.getControlNumber();
+				    logger.error("Couldn't get next record after " + (recCntlNum != null ? recCntlNum : "") + " -- " + e.toString(), e);
+				}
+				else
+				    logger.error("Marc record couldn't be read -- " + e.toString(), e);
+			}
+
+
             while (currentRecord != null && nextRecord != null &&
                     currentRecord.getControlNumber() != null && 
                     currentRecord.getControlNumber().equals(nextRecord.getControlNumber()))
@@ -130,14 +132,10 @@ public class MarcCombiningReader implements MarcReader
                     try {
                         nextRecord = reader.next();
                     }
-                    catch (MarcException me)
+                    catch (Exception e)
                     {
-                        //System.err.println("Error reading Marc Record: "+ me.getMessage());  
-    //                  exception = new SolrMarcException(me.getMessage(), me.getCause());
-    //                  exception.printMessage("Error reading Marc record:");
-    //                  exception.printStackTrace();
-                        logger.error("Error reading Marc Record.");
-                        logger.error(me.getMessage());
+						String recCntlNum = currentRecord.getControlNumber();
+						logger.error("Couldn't get next record after " + (recCntlNum != null ? recCntlNum : "") + " -- " + e.toString(), e);
                     }
                 }
                 else 
