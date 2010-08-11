@@ -35,6 +35,7 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.solrmarc.tools.CallNumUtils;
+import org.solrmarc.tools.SolrMarcIndexerException;
 import org.ini4j.Ini;
 
 /**
@@ -75,6 +76,16 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
+     * Log an error message and throw a fatal exception.
+     * @param msg
+     */
+    private void dieWithError(String msg)
+    {
+        logger.error(msg);
+        throw new SolrMarcIndexerException(SolrMarcIndexerException.EXIT, msg);
+    }
+
+    /**
      * Connect to the VuFind database if we do not already have a connection.
      */
     private void connectToDatabase()
@@ -91,9 +102,7 @@ public class VuFindIndexer extends SolrIndexer
         try {
             ini.load(new FileReader(file));
         } catch (Throwable e) {
-            System.err.println("Unable to access " + configFile);
-            logger.error("Unable to access " + configFile);
-            System.exit(1);
+            dieWithError("Unable to access " + configFile);
         }
         String dsn = ini.get("Database", "database");
 
@@ -120,9 +129,7 @@ public class VuFindIndexer extends SolrIndexer
             // Connect to the database:
             vufindDatabase = DriverManager.getConnection("jdbc:" + dsn, username, password);
         } catch (Throwable e) {
-            System.err.println("Unable to connect to VuFind database");
-            logger.error("Unable to connect to VuFind database");
-            System.exit(1);
+            dieWithError("Unable to connect to VuFind database");
         }
 
         Runtime.getRuntime().addShutdownHook(new VuFindShutdownThread(this));
@@ -808,9 +815,7 @@ public class VuFindIndexer extends SolrIndexer
         } catch (java.sql.SQLException e) {
             // If we're in the process of shutting down, an error is expected:
             if (!shuttingDown) {
-                System.err.println("Unexpected database error");
-                logger.error("Unexpected database error");
-                System.exit(1);
+                dieWithError("Unexpected database error");
             }
         }
     }
