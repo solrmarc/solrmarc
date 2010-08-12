@@ -306,6 +306,23 @@ public class MarcImporter extends MarcHandler
                     logger.error("Error indexing record: " + record.getControlNumber() + " -- " + cause.getMessage());
                     if (e instanceof SolrRuntimeException) throw (new SolrRuntimeException(cause.getMessage(), (Exception)cause));
                 }
+                else if (e instanceof SolrMarcIndexerException)
+                {
+                    SolrMarcIndexerException smie = (SolrMarcIndexerException)e;
+                    if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
+                    {
+                        logger.info("Ignored record " + recsReadCounter + " read from file: " + record.getControlNumber());                        
+                    }
+                    else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
+                    {            
+                        logger.info("Deleted record " + recsReadCounter + " read from file: " + record.getControlNumber());                        
+                    }
+                    else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
+                    {
+                        logger.info("Serious Error flagged at " + recsReadCounter + " read from file: " + record.getControlNumber());
+                        throw(smie);
+                    }
+                }
                 else
                 {
                     logger.error("Error indexing record: " + record.getControlNumber() + " -- " + e.getMessage(), e);
@@ -346,19 +363,21 @@ public class MarcImporter extends MarcHandler
         {
             if (e.getLevel() == SolrMarcIndexerException.IGNORE)
             {
-                return(true);// do nothing
+                throw(e);
             }
-            if (e.getLevel() == SolrMarcIndexerException.DELETE)
+            else if (e.getLevel() == SolrMarcIndexerException.DELETE)
             {            
                 String id = record.getControlNumber();
                 if (id != null)
                 {
                     solrProxy.delete(id, true, true);
                 }
-                return false;
+                throw(e);
             }
             else if (e.getLevel() == SolrMarcIndexerException.EXIT)
+            {
                 throw(e);
+            }
         }
         return(true);
     }
