@@ -24,7 +24,7 @@
        You may also set this to false using by setting the system property:
          -Dsolr.abortOnConfigurationError=false
      -->
-  <abortOnConfigurationError>${solr.abortOnConfigurationError:true}</abortOnConfigurationError>
+  <abortOnConfigurationError>${solr.abortOnConfigurationError:false}</abortOnConfigurationError>
 
   <!-- Used to specify an alternate directory to hold all index data
        other than the default ./data under the Solr home.
@@ -114,6 +114,34 @@
          This is not needed if lock type is 'none' or 'single'
      -->
     <unlockOnStartup>false</unlockOnStartup>
+
+    <!--
+        Custom deletion policies can specified here. The class must
+        implement org.apache.lucene.index.IndexDeletionPolicy.
+
+        http://lucene.apache.org/java/2_3_2/api/org/apache/lucene/index/IndexDeletionPolicy.html
+
+        The standard Solr IndexDeletionPolicy implementation supports deleting
+        index commit points on number of commits, age of commit point and
+        optimized status.
+
+        The latest commit point should always be preserved regardless
+        of the criteria.
+    -->
+    <deletionPolicy class="solr.SolrDeletionPolicy">
+      <!-- Keep only optimized commit points -->
+      <str name="keepOptimizedOnly">false</str>
+      <!-- The maximum number of commit points to be kept -->
+      <str name="maxCommitsToKeep">1</str>
+      <!--
+          Delete all commit points once they have reached the given age.
+          Supports DateMathParser syntax e.g.
+
+          <str name="maxCommitAge">30MINUTES</str>
+          <str name="maxCommitAge">1DAY</str>
+      -->
+    </deletionPolicy>
+        
   </mainIndex>
   
   <!--	Enables JMX if and only if an existing MBeanServer is found, use 
@@ -197,7 +225,7 @@
            and old cache.
          -->
     <filterCache
-      class="solr.LRUCache"
+      class="solr.FastLRUCache"
       size="300000"
       initialSize="300000"
       autowarmCount="50000"/>
@@ -315,7 +343,7 @@
     -->
   <requestDispatcher handleSelect="true" >
     <!--Make sure your system has some authentication before enabling remote streaming!  -->
-    <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048" />
+    <requestParsers enableRemoteStreaming="true" multipartUploadLimitInKB="2048000" />
         
     <!-- Set HTTP caching related parameters (for proxy caches and clients).
           
@@ -372,28 +400,76 @@
        <str name="fl">*</str>
        <str name="version">2.1</str>
         -->
-     </lst>
-  </requestHandler>
-
-  <searchComponent name="spellcheck" class="org.apache.solr.handler.component.SpellCheckComponent">
-    <lst name="spellchecker">
-      <str name="name">default</str>
-      <str name="field">spelling</str>
-      <!--<str name="accuracy">0.7</str> -->
-      <str name="spellcheckIndexDir">./spellchecker</str>
+     <str name="spellcheck.extendedResults">true</str>
+     <str name="spellcheck.onlyMorePopular">true</str>
+     <str name="spellcheck.count">20</str>
     </lst>
-    <str name="queryAnalyzerFieldType">textSpell</str>
-    <str name="buildOnCommit">true</str>
-  </searchComponent>
-  <queryConverter name="queryConverter" class="org.apache.solr.spelling.SpellingQueryConverter"/>
-
-  <requestHandler name="/mlt" class="solr.MoreLikeThisHandler">
+    <arr name="last-components">
+      <str>spellcheck</str>
+    </arr>     
+  </requestHandler>
+  
+  <!-- the following handler will be used for eligible dismax searches defined
+     in web/conf/searchspecs.yaml.  Searches relying on advanced features
+     incompatible with dismax will be sent to the standard handler instead.
+     You can use this handler definition to set global Dismax settings
+     (i.e. mm / bf).  If you need different settings for different types of
+     searches (i.e. Title vs. Author), you can also configure individual
+     settings in the searchspecs.yaml file.
+  -->
+  <requestHandler name="dismax" class="solr.SearchHandler">
     <lst name="defaults">
-      <str name="mlt.fl">manu,cat</str>
+     <str name="defType">dismax</str>
+     <str name="echoParams">explicit</str>
+     <str name="spellcheck.extendedResults">true</str>
+     <str name="spellcheck.onlyMorePopular">true</str>
+     <str name="spellcheck.count">20</str>
+    </lst>
+    <arr name="last-components">
+      <str>spellcheck</str>
+    </arr>     
+  </requestHandler>
+  
+  <requestHandler name="morelikethis" class="solr.MoreLikeThisHandler">
+    <lst name="defaults">
+      <str name="mlt.fl">title,title_short,callnumber-label,topic,language,author,publishDate</str>
+      <str name="mlt.qf">
+        title^75
+        title_short^100
+        callnumber-label^400
+        topic^300
+        language^30
+        author^75
+        publishDate
+      </str>
+      <int name="mlt.mintf">1</int>
       <int name="mlt.mindf">1</int>
+      <str name="mlt.boost">true</str>
+      <int name="mlt.count">5</int>
+      <int name="rows">5</int>
     </lst>
   </requestHandler>
   
+  <searchComponent name="spellcheck" class="org.apache.solr.handler.component.SpellCheckComponent">
+    <lst name="spellchecker">
+      <str name="name">default</str>
+      <str name="field">spellingShingle</str>
+      <str name="accuracy">0.75</str>
+      <str name="spellcheckIndexDir">./spellShingle</str>
+      <str name="queryAnalyzerFieldType">textSpellShingle</str>
+      <str name="buildOnOptimize">true</str>
+    </lst>
+    <lst name="spellchecker">
+      <str name="name">basicSpell</str>
+      <str name="field">spelling</str>
+      <str name="accuracy">0.75</str>
+      <str name="spellcheckIndexDir">./spellchecker</str>
+      <str name="queryAnalyzerFieldType">textSpell</str>
+      <str name="buildOnOptimize">true</str>
+    </lst>
+  </searchComponent>
+  <queryConverter name="queryConverter" class="org.apache.solr.spelling.SpellingQueryConverter"/>
+
 
   <!--
    
@@ -405,6 +481,7 @@
    <searchComponent name="facet"     class="org.apache.solr.handler.component.FacetComponent" />
    <searchComponent name="mlt"       class="org.apache.solr.handler.component.MoreLikeThisComponent" />
    <searchComponent name="highlight" class="org.apache.solr.handler.component.HighlightComponent" />
+   <searchComponent name="stats"     class="org.apache.solr.handler.component.StatsComponent" />
    <searchComponent name="debug"     class="org.apache.solr.handler.component.DebugComponent" />
   
    If you register a searchComponent to one of the standard names, that will be used instead.
