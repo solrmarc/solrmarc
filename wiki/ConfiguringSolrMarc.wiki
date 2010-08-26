@@ -250,7 +250,25 @@ Aside:  since the MARC specification states that there can only be a single 245 
 
 {{{author_text = 100a:110a:111a:130a}}}
 
-  for _each_ 1) subfield a in each of the 100 fields 2) subfield a in each of the 110 fields 3) each subfield a in each of the 111 fields 4) subfield a in each of the 130 fields in the MARC record, add a field to the Solr document named author_text with the value from the MARC subfield specified.  Note that each of these values is added as a separate Solr field in the Solr document.  
+  for _each_ 1) subfield a in each of the 100 fields 2) subfield a in each of the 110 fields 3) each subfield a in each of the 111 fields 4) subfield a in each of the 130 fields in the MARC record, add a field to the Solr document named author_text with the value from the MARC subfield specified.  Note that each of these values is added as a separate Solr field in the Solr document. 
+
+{{{fruit_text = 999a}}}
+
+Given a record that contained two 999 fields as follows:
+
+     999 $a apricot
+     999 $a apple $b banana $a aardvark
+
+would produce:   fruit_text:apricot   and   fruit_text:apple   and    fruit_text:aardvark
+
+{{{all_fruit_text = 999ab}}}
+
+Given a record that contained two 999 fields as follows:
+
+     999 $a apricot
+     999 $a apple $b banana $a aardvark
+
+would produce:  all_fruit_text:apricot   and    all_fruit_text:apple banana aardvark 
 
 {{{author_addl_t = 700abcegqu:710abcdegnu:711acdegjnqu}}}
 
