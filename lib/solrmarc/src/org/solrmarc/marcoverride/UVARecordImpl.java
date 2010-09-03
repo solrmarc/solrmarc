@@ -3,7 +3,6 @@ package org.solrmarc.marcoverride;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.IllegalAddException;
 import org.marc4j.marc.VariableField;
-import org.marc4j.marc.impl.RecordImpl;
 import org.marc4j.marc.impl.Verifier;
 
 /**
@@ -12,7 +11,7 @@ import org.marc4j.marc.impl.Verifier;
  * @version $Id$
  *
  */
-public class UVARecordImpl extends RecordImpl
+public class UVARecordImpl extends NoSortRecordImpl
 {
 
     /**
