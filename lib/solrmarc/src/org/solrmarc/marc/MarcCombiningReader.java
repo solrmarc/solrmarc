@@ -31,6 +31,8 @@ public class MarcCombiningReader implements MarcReader
     Record nextRecord = null;
     MarcReader reader;
     String idsToMerge = null;
+    String leftControlField = null;
+    String rightControlField = null;
     ErrorHandler nextErrors;
     ErrorHandler currentErrors;
     // Initialize logging category
@@ -43,11 +45,15 @@ public class MarcCombiningReader implements MarcReader
      * 
      * @param reader - The Lower level MarcReader that returns Marc4J Record objects that are read from a Marc file.
      * @param idsToMerge - string representing a regular expression matching those fields to be merged for continuation records.
+     * @param leftControlField - string representing a control field in the current record to use for matching purposes (null to default to 001).
+     * @param rightControlField - string representing a control field in the next record to use for matching purposes (null to default to 001).
      */
-    MarcCombiningReader(MarcReader reader, String idsToMerge)
+    MarcCombiningReader(MarcReader reader, String idsToMerge, String leftControlField, String rightControlField)
     {
         this.reader = reader;
         this.idsToMerge = idsToMerge;
+        this.leftControlField = leftControlField;
+        this.rightControlField = rightControlField;
         this.nextErrors = null;
         this.currentErrors = null;
     }
@@ -67,11 +73,16 @@ public class MarcCombiningReader implements MarcReader
      * @param currentErrors - ErrorHandler Object to use for attaching errors to a record.
      * @param nextErrors - ErrorHandler Object that was passed into the lower level MarcReader
      * @param idsToMerge - string representing a regular expression matching those fields to be merged for continuation records.
+     * @param leftControlField - string representing a control field in the current record to use for matching purposes (null to default to 001).
+     * @param rightControlField - string representing a control field in the next record to use for matching purposes (null to default to 001).
      */
-    MarcCombiningReader(MarcReader reader, ErrorHandler currentErrors, ErrorHandler nextErrors, String idsToMerge)
+    MarcCombiningReader(MarcReader reader, ErrorHandler currentErrors, ErrorHandler nextErrors, String idsToMerge,
+        String leftControlField, String rightControlField)
     {
         this.reader = reader;
         this.idsToMerge = idsToMerge;
+        this.leftControlField = leftControlField;
+        this.rightControlField = rightControlField;
         this.nextErrors = nextErrors;
         this.currentErrors = currentErrors;
     }
@@ -121,11 +132,8 @@ public class MarcCombiningReader implements MarcReader
 			}
 
 
-            while (currentRecord != null && nextRecord != null &&
-                    currentRecord.getControlNumber() != null && 
-                    currentRecord.getControlNumber().equals(nextRecord.getControlNumber()))
-            {
-                currentRecord = combineRecords(currentRecord, nextRecord);
+            while (recordsMatch(currentRecord, nextRecord))            {
+                currentRecord = combineRecords(currentRecord, nextRecord, idsToMerge);
                 mergeErrors(currentErrors, nextErrors);
                 if (reader.hasNext())
                 {
@@ -148,6 +156,75 @@ public class MarcCombiningReader implements MarcReader
         return(null);
     }
 
+    /**
+     * Support method to find a specific control field within a record and return
+     * its contents as a string.
+     * @param record - record to search
+     * @param tag - tag number to search for
+     */
+    private String findControlField(Record record, String tag)
+    {
+        List fields = record.getVariableFields(tag);
+        for (Object field : fields)
+        {
+            if (field instanceof ControlField)
+            {
+                ControlField cf = (ControlField) field;
+                if (cf.getTag().matches(tag))
+                {
+                    return((String)cf.getData());
+                }
+            }
+        }
+        return(null);
+    }
+
+    /**
+     * Support method to detect if two records match.
+     * @param left - left side of the comparison (current record)
+     * @param right - right side of the comparison (next record)
+     */
+    private boolean recordsMatch(Record left, Record right)
+    {
+        // Records can't match if they don't exist!
+        if (left == null || right == null) {
+            return false;
+        }
+
+        // Initialize match strings extracted from records:
+        String leftStr = null;
+        String rightStr = null;
+
+        // For both sides of the match (left and right), check to see if the user
+        // provided a control field setting.  If no preference was provided, we'll
+        // match using the record ID.  If a preference exists, we need to look up
+        // the specified control field in the record.
+        if (leftControlField == null) 
+        {
+            leftStr = left.getControlNumber();
+        } 
+        else 
+        {
+            leftStr = findControlField(left, leftControlField);
+        }
+        if (rightControlField == null) 
+        {
+            rightStr = right.getControlNumber();
+        } 
+        else 
+        {
+            rightStr = findControlField(right, rightControlField);
+        }
+
+        // Check for a match and return an appropriate status:
+        if (leftStr != null && rightStr != null && leftStr.equals(rightStr)) 
+        {
+            return true;
+        }
+        return false;
+    }
+
+    
     private void copyErrors(ErrorHandler currentErr, ErrorHandler nextErr)
     {
         if (currentErr != null && nextErr != null)
@@ -165,7 +242,7 @@ public class MarcCombiningReader implements MarcReader
         }
     }
 
-    private Record combineRecords(Record currentRecord, Record nextRecord)
+    static public Record combineRecords(Record currentRecord, Record nextRecord, String idsToMerge)
     {
         List fields = nextRecord.getVariableFields();
         for (Object field : fields)
