@@ -193,6 +193,11 @@ public abstract class MarcHandler {
         {
             System.setProperty("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
         }
+        else  // no override, tell solrmarc to use the NoSortMarcFactory by default.
+        {
+            System.setProperty("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
+        }
+
         reader = null;
         String fName = Utils.getProperty(configProps, "marc.path");
         if (fName != null)  fName = fName.trim();
@@ -386,15 +391,17 @@ public abstract class MarcHandler {
         }
         if (reader != null && combineConsecutiveRecordsFields != null)
         {
+            String combineLeftField = Utils.getProperty(configProps, "marc.combine_records.left_field");
+            String combineRightField = Utils.getProperty(configProps, "marc.combine_records.right_field");
             if (errors == null)
             {
-                reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields);
+                reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields, combineLeftField, combineRightField);
             }
             else
             {
                 ErrorHandler errors2 = errors;
                 errors = new ErrorHandler();
-                reader = new MarcCombiningReader(reader, errors, errors2, combineConsecutiveRecordsFields);
+                reader = new MarcCombiningReader(reader, errors, errors2, combineConsecutiveRecordsFields, combineLeftField, combineRightField);
             }
         }
         String marcIncludeIfPresent = Utils.getProperty(configProps, "marc.include_if_present");
