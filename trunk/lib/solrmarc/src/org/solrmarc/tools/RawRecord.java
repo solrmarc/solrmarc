@@ -104,7 +104,8 @@ public class RawRecord implements MarcReader
     public String getRecordId()
     {
         if (id != null) return(id);
-        return(getFieldVal("001"));
+        id = getFieldVal("001");
+        return(id);
     }
     
     public String getFieldVal(String idField)
