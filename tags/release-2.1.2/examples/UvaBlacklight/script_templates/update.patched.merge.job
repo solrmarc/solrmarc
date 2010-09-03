@@ -1,0 +1,140 @@
+#!/bin/bash
+PATH=/usr/local/projects/solrmarc-2.1/dist/bin:$PATH
+export PATH
+num=0
+JAVA_HOME=/usr/java/latest/bin/java
+export JAVA_HOME
+
+DATADIR=/usr/local/projects/marc
+INPUTDIR=$DATADIR/incoming_merge_patch
+PROCESSEDDIR=$DATADIR/processed_merge_patch
+RESULTSDIR=$DATADIR/results_merge_patch
+verbose=0
+if [ "$1" == "-v" ]  ; then 
+    verbose=1
+fi
+
+if [ $verbose -eq "1" ] ; then
+    echo sort initial night updates
+fi
+
+for file in `find $INPUTDIR -name '*.mrc' -print | sort`
+do
+    fname=`basename $file`
+    froot=`basename $file .mrc`
+    dir=`dirname $file`
+    delfname=$froot.del
+    delfile=$dir/$delfname
+    output=$RESULTSDIR/results_$froot
+        
+    marcsort $file > $file.sorted 2> /dev/null
+    mv $file.sorted $file
+    sort -n $delfile > $delfile.sorted
+    mv $delfile.sorted $delfile
+done
+
+if [ $verbose -eq "1" ] ; then
+    echo merging initial nightly updates
+fi
+
+for updatefile in `find $INPUTDIR -name '*.mrc' -print | sort`
+do 
+    endId=u0
+
+    for file in /usr/local/projects/marc/full_dump_patched/*.mrc 
+    do
+        if [ $verbose -eq "1" ] ; then
+            echo   merging $file
+        fi
+        
+        startId=$endId
+        file1=`echo $file | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
+        file2=`echo $file | sed -e 's/[^0-9]*0*\([1-9][0-9]*\).*/\1/'`
+        file3=`echo $file | sed -e 's/[^0-9]*[0-9]*\(.*\)/\1/'`
+        file2=`echo $((file2+1001)) | sed -e 's/.\(...\)/\1/'`
+        nextfile=$file1$file2$file3
+        len=`head -c 5 $nextfile 2> /dev/null`
+        if [ $? != 0 ] 
+            then
+                endId=u9999999999
+            else
+                endId=`head -c $len $nextfile | printrecord '001'| sed -e 's/001 //'`
+        fi
+        echo $file  $startId  $endId
+        marcupdate -min $startId -max $endId $file $updatefile > $file.updated
+        mv $file.updated $file
+    done
+done
+
+location_file=/usr/local/projects/marc/incoming/location.txt
+prev_location_file=/usr/local/projects/marc/incoming/prev_location.txt
+prev_prev_location_file=/usr/local/projects/marc/incoming/prev_prev_location.txt
+changed_loc_file=/usr/local/projects/marc/incoming/changed.txt
+patch_dir=/usr/local/projects/marc/patched_debug
+
+#make sure patch directory exists
+mkdir $patch_dir 2> /dev/null
+patch_out=$patch_dir/location_patch_`date +%Y%m%d`.mrc 
+#make sure todays patch file does not exist 
+rm $patch_out 2> /dev/null
+
+if [ $verbose -eq "1" ] ; then
+    echo processing location.txt
+fi
+
+# find differences between yesterdays location and todays.
+diff $prev_location_file $location_file | egrep '^[<>]' | sed -e 's/[<>] \([0-9]*\).*/\1/' | uniq > $changed_loc_file
+cp $changed_loc_file /usr/local/projects/marc/incoming/changed_`date +%Y%m%d`.txt
+
+for file in `find /usr/local/projects/marc/full_dump_patched -name 'uva_*.mrc' -print | sort`
+do
+    if [ $verbose -eq "1" ] ; then
+        echo $file
+    fi
+    java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar /usr/local/projects/solrmarc-2.1/dist/SolrMarc.jar $file $location_file $changed_loc_file changesOnly handleAllLocs >> $patch_out
+done 
+
+mv $prev_location_file $prev_prev_location_file
+cp $location_file $prev_location_file
+
+if [ $verbose -eq "1" ] ; then
+    echo merging patch file
+fi
+
+updatefile=$patch_out
+endId=u0
+
+for file in /usr/local/projects/marc/full_dump_patched/*.mrc 
+do
+    startId=$endId
+    file1=`echo $file | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
+    file2=`echo $file | sed -e 's/[^0-9]*0*\([1-9][0-9]*\).*/\1/'`
+    file3=`echo $file | sed -e 's/[^0-9]*[0-9]*\(.*\)/\1/'`
+    file2=`echo $((file2+1001)) | sed -e 's/.\(...\)/\1/'`
+    nextfile=$file1$file2$file3
+    len=`head -c 5 $nextfile 2> /dev/null`
+    if [ $? != 0 ] 
+        then
+            endId=u9999999999
+        else
+            endId=`head -c $len $nextfile | printrecord '001'| sed -e 's/001 //'`
+    fi
+    echo $file  $startId  $endId
+    marcupdate -min $startId -max $endId $file $updatefile > $file.updated
+    mv $file.updated $file
+done
+
+if [ $verbose -eq "1" ] ; then
+    echo move incoming files to processed dir
+fi
+
+for file in `find $INPUTDIR -name '*.mrc' -print | sort`
+do
+    mv $file $PROCESSEDDIR
+done
+
+for file in `find $INPUTDIR -name '*.del' -print | sort`
+do
+    mv $file $PROCESSEDDIR
+done
+

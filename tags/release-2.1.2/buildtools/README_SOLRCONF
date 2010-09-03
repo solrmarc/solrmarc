@@ -1,0 +1,11 @@
+This is the directory in which you should place local modifications to the default 
+configuration of solr.  Most commonly this will simply involve a modified 
+solrconfig.xml and schema.xml, but it can also include a different solr.war file 
+if you want or need one that is different from the Solr 1.4 release that is included
+by default.   If you want to override the default single core configuration, consult 
+the Generic VuFind example to see how to organize the files you need to place here.
+
+Note: If you add any fields to your xxxx_index.properties  specification, you must 
+ensure that there is either a <field> definition in the schema.xml file that matches 
+each of your new fields, OR that there is a <dynamicField> that has a name pattern 
+that matches that your new fields.
