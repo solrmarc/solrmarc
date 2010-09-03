@@ -530,7 +530,19 @@ public class SolrIndexer
             String mapName = fieldVal[3];
 
             if (indexType.equals("constant"))
-                addField(indexMap, indexField, indexParm);
+            {
+                if (indexParm.contains("|"))
+                {
+                    String parts[] = indexParm.split("[|]");
+                    Set<String> result = new LinkedHashSet<String>();
+                    result.addAll(Arrays.asList(parts));
+                    // if a zero length string appears, remove it
+                    result.remove("");
+                    addFields(indexMap, indexField, null, result);
+                }
+                else
+                    addField(indexMap, indexField, indexParm);
+            }
             else if (indexType.equals("first"))
                 addField(indexMap, indexField, getFirstFieldVal(record, mapName, indexParm));
             else if (indexType.equals("all"))
