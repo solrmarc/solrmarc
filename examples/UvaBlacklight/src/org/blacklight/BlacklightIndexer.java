@@ -2061,6 +2061,7 @@ public class BlacklightIndexer extends SolrIndexer
         DataField libraryField = null;
         for (int i = 0; i < fields.size(); i++)
         {
+            String holdingsField;
             VariableField vf = fields.get(i);
             if (!(vf instanceof DataField))  continue;
             DataField df = (DataField)vf;
@@ -2069,12 +2070,21 @@ public class BlacklightIndexer extends SolrIndexer
                 libraryField = df;
                 if (getSubfieldVal(libraryField, 'z', null) != null)
                 {
-                    result.add(buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(libraryField, 'z', null)));
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, null, getSubfieldVal(libraryField, 'z', ""));
+                    if (holdingsField != null) result.add(holdingsField);
                 }
             }
             else if (df.getTag().equals("853"))  continue; // ignore 853's here.
-            else if (df.getTag().equals("866"))  result.add(buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', "")));
-            else if (df.getTag().equals("867"))  result.add(buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', "")));
+            else if (df.getTag().equals("866"))  
+            {
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(libraryField, 'z', ""));
+                if (holdingsField != null) result.add(holdingsField);
+            }
+            else if (df.getTag().equals("867"))
+            {
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(libraryField, 'z', ""));
+                if (holdingsField != null) result.add(holdingsField);
+            }
             else if (df.getTag().equals("863"))
             {
                 // look ahead for other 863's to combine                
@@ -2092,13 +2102,15 @@ public class BlacklightIndexer extends SolrIndexer
                 DataField labelField = getLabelField(record, getLinkPrefix(linktag));
                 if (j == i + 1) 
                 {
-                    result.add(buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField)));
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField), getSubfieldVal(libraryField, 'z', ""));
+                    if (holdingsField != null) result.add(holdingsField);
                 }
                 else if (j > i + 1) 
                 {
                     VariableField nvf = fields.get(j-1);
                     DataField ndf = (DataField)nvf;
-                    result.add(buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField) + " - " + processEncodedField(ndf, labelField)));
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField) + " - " + processEncodedField(ndf, labelField), getSubfieldVal(libraryField, 'z', ""));
+                    if (holdingsField != null) result.add(holdingsField);
                     i = j - 1;
                 }
             }
@@ -2112,11 +2124,12 @@ public class BlacklightIndexer extends SolrIndexer
         return result;
     }
 
-    private String buildHoldingsField(DataField libraryField, String libMapName, String locMapName, String holdingsValue)
+    private String buildHoldingsField(DataField libraryField, String libMapName, String locMapName, String holdingsValue, String publicNote)
     {
+        if ((holdingsValue == null || holdingsValue.length() == 0) && (publicNote.length() == 0 )) return(null);
         String libraryName = libraryField.getSubfield('b') != null ? Utils.remap(libraryField.getSubfield('b').getData(), findMap(libMapName), false) : null;
         String locName = libraryField.getSubfield('c') != null ? Utils.remap(libraryField.getSubfield('c').getData(), findMap(locMapName), false) : null;
-        return(libraryName +"|"+ locName +"|"+ holdingsValue);
+        return(libraryName +"|"+ locName +"|"+ holdingsValue+"|"+publicNote);
     }
 
     private String processEncodedField(DataField df, DataField labelField)
