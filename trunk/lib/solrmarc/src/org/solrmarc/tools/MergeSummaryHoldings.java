@@ -94,7 +94,7 @@ public class MergeSummaryHoldings implements MarcReader
         if (rawinput0 != null) 
         {
             RawRecord rawrec = rawinput0.next();
-            rec = rawrec.getAsRecord(permissive, toUtf8, combineRecords, defaultEncoding);
+            rec = rawrec.getAsRecord(permissive, toUtf8, "999", defaultEncoding);
         }
         else if (cookedinput0 != null)
         {
@@ -133,7 +133,7 @@ public class MergeSummaryHoldings implements MarcReader
     
     private Record addSummaryHoldings(Record rec, RawRecord summaryHoldings)
     {
-        Record record1 = summaryHoldings.getAsRecord(permissive, toUtf8, false, defaultEncoding);
+        Record record1 = summaryHoldings.getAsRecord(permissive, toUtf8, null, defaultEncoding);
         List<VariableField> lvf = (List<VariableField>)rec.getVariableFields(fieldsToCopy.split("[|]"));
         for (VariableField vf : lvf)
         {
@@ -199,7 +199,7 @@ public class MergeSummaryHoldings implements MarcReader
         {
             input0 = new RawRecordReader(System.in);
         }
-        
+        System.setProperty("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
         processMergeSummaryHoldings(input0, summaryHoldingsMarcFileName);
     }
     
@@ -219,13 +219,13 @@ public class MergeSummaryHoldings implements MarcReader
             try{
                 if (rec1 != null)
                 {
-                    Record record0 = rec0.getAsRecord(true, false, true, "MARC8");
+                    Record record0 = rec0.getAsRecord(true, false, "999", "MARC8");
                     List<VariableField> lvf = (List<VariableField>)record0.getVariableFields(fieldsToMerge.split("[|]"));
                     for (VariableField vf : lvf)
                     {
                         record0.removeVariableField(vf);
                     }
-                    Record record1 = rec1.getAsRecord(true, false, false, "MARC8");
+                    Record record1 = rec1.getAsRecord(true, false, fieldsToMerge, "MARC8");
                     record0 = MarcCombiningReader.combineRecords(record0, record1, fieldsToMerge);
                     writer.write(record0);
                     System.out.flush();
