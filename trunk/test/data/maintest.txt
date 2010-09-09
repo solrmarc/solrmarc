@@ -5,4 +5,4 @@
 +, title_k.mrc, getSortableTitle(rec), morton hoffman papers
 # marc record with no 245$, but a $b. (Bad data). Does getTitleSorted
 # not raise, and still come up with something, even if it's weird?
-+, title_b.mrc, getSortableTitle(rec), "family physician; or, domestic medical friend"
++, title_b.mrc, getSortableTitle(rec), family physician; or, domestic medical friend
