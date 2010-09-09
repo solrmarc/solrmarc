@@ -191,7 +191,7 @@ public abstract class MarcHandler {
         String source = Utils.getProperty(configProps, "marc.source", "STDIN").trim();
         if (Utils.getProperty(configProps, "marc.override")!= null)
         {
-            System.setProperty("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
+            System.setProperty("org.marc4j.marc.MarcFactory", Utils.getProperty(configProps, "marc.override").trim());
         }
         else  // no override, tell solrmarc to use the NoSortMarcFactory by default.
         {
