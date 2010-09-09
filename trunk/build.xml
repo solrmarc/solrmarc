@@ -154,7 +154,7 @@
 
     <!-- Site Testing Targets -->
 
-    <target name="test" depends="init,topleveltest" description="Run all three test suites in local build directory: smoketest, indextest and junittest">
+    <target name="test" depends="init" description="Run all three test suites in local build directory: smoketest, indextest and junittest">
          <ant antfile="${site.dir}/build.xml" target="test" inheritAll="false" >
              <property name="dist.path" location="${dist.dir}" />
          </ant>
@@ -178,10 +178,9 @@
          </ant>
     </target>
     
-    <target name="topleveltest" depends="init" description="Run indextest test suite from top-level directory">
-         <ant antfile="${site.dir}/build.xml" target="indextest" inheritAll="false" >
+    <target name="maintest" depends="init" description="Run indextest test suite from top-level directory">
+         <ant antfile="${site.dir}/build.xml" target="maintest" inheritAll="false" >
              <property name="dist.path" location="${dist.dir}" />
-             <property name="top_level_test_only" value="true" />
          </ant>
     </target>
 
