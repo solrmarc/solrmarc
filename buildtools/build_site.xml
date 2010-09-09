@@ -208,7 +208,7 @@
         </jar>
     </target>
     
-    <target name="test" depends="smoketest,indextest,junittest" description="run the three types of tests" >
+    <target name="test" depends="maintest,smoketest,indextest,junittest" description="run the four types of tests" >
     </target>
     
     <target name="smoketest" depends="dist,testInit" description="start jetty pointing at test solr, index file, then look for it.">
@@ -332,6 +332,12 @@
         <!--  Now delete the jar files that had to be un-jarred from the solr.war file for the test to run -->
         <delete dir="${solr.jar.file.dir}" deleteonexit="true" quiet="true" />
         <delete dir="${site.test.dir}/tmp_solrmarc_jars" deleteonexit="true" quiet="true" />
+    </target>
+    
+    <target name="maintest" depends="dist,testJar" description="run indexscript tests for main program">
+        <antcall target="indextest" >
+            <param name="top_level_test_only" value="true" />
+        </antcall>
     </target>
     
     <target name="junittest" depends="dist,testJar" description="run junit tests for bib index">
