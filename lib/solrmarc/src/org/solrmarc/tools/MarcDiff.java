@@ -68,8 +68,8 @@ public class MarcDiff
                 byte rec2bytes[] = rec2.getRecordBytes();
                 if (!java.util.Arrays.equals(rec1bytes, rec2bytes))
                 {
-                    Record r1 = rec1.getAsRecord(true, true, true, "MARC8");
-                    Record r2 = rec2.getAsRecord(true, true, true, "MARC8");
+                    Record r1 = rec1.getAsRecord(true, true, "999", "MARC8");
+                    Record r2 = rec2.getAsRecord(true, true, "999", "MARC8");
                     String str1 = r1.toString();
                     String str2 = r2.toString();
                     if (!verbose) System.out.println("record with id: " + rec1.getRecordId() + " different in file1 and file2");
@@ -87,7 +87,7 @@ public class MarcDiff
                 System.out.println("record with id: " + rec1.getRecordId() + " found in file1 but not in file2");
                 if (verbose) 
                 {
-                    Record rec = rec1.getAsRecord(true, true, true, "MARC8");
+                    Record rec = rec1.getAsRecord(true, true, "999", "MARC8");
                     System.out.println(rec.toString());
                 }
                 rec1 = reader1.next();
@@ -97,7 +97,7 @@ public class MarcDiff
                 System.out.println("record with id: " + rec2.getRecordId() + " found in file2 but not in file1");
                 if (verbose) 
                 {
-                    Record rec = rec2.getAsRecord(true, true, true, "MARC8");
+                    Record rec = rec2.getAsRecord(true, true, "999", "MARC8");
                     System.out.println(rec.toString());
                 }
                 rec2 = reader2.next();
@@ -108,7 +108,7 @@ public class MarcDiff
             System.out.println("record with id: " + rec1.getRecordId() + " found in file1 but not in file2");
             if (verbose) 
             {
-                Record rec = rec1.getAsRecord(true, true, true, "MARC8");
+                Record rec = rec1.getAsRecord(true, true, "999", "MARC8");
                 System.out.println(rec.toString());
             }
             rec1 = reader1.next();
@@ -118,7 +118,7 @@ public class MarcDiff
             System.out.println("record with id: " + rec2.getRecordId() + " found in file2 but not in file1");
             if (verbose) 
             {
-                Record rec = rec2.getAsRecord(true, true, true, "MARC8");
+                Record rec = rec2.getAsRecord(true, true, "999", "MARC8");
                 System.out.println(rec.toString());
             }
             rec2 = reader2.next();

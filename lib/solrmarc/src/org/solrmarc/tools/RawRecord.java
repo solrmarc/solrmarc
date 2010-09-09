@@ -142,22 +142,47 @@ public class RawRecord implements MarcReader
         return(rawRecordData);
     }
     
-    public Record getAsRecord(boolean permissive, boolean toUtf8, boolean combinePartials, String defaultEncoding)
+//    public Record getAsRecord(boolean permissive, boolean toUtf8, boolean combinePartials, String defaultEncoding)
+//    {
+//        ByteArrayInputStream bais = new ByteArrayInputStream(rawRecordData);
+//        MarcPermissiveStreamReader reader = new MarcPermissiveStreamReader(bais, permissive, toUtf8, defaultEncoding);
+//        Record next = reader.next();
+//        if (combinePartials)
+//        {
+//            while (reader.hasNext())
+//            {
+//                Record nextNext = reader.next();
+//                List<VariableField> fields999 = (List<VariableField>)nextNext.getVariableFields("999");
+//                Iterator<VariableField> fieldIter = fields999.iterator();
+//                while (fieldIter.hasNext())
+//                {
+//                    VariableField vf = fieldIter.next();
+//                    next.addVariableField(vf);
+//                }
+//            }
+//        }
+//        return(next);
+//    }
+    
+    public Record getAsRecord(boolean permissive, boolean toUtf8, String combinePartials, String defaultEncoding)
     {
         ByteArrayInputStream bais = new ByteArrayInputStream(rawRecordData);
         MarcPermissiveStreamReader reader = new MarcPermissiveStreamReader(bais, permissive, toUtf8, defaultEncoding);
         Record next = reader.next();
-        if (combinePartials)
+        if (combinePartials != null)
         {
             while (reader.hasNext())
             {
                 Record nextNext = reader.next();
-                List<VariableField> fields999 = (List<VariableField>)nextNext.getVariableFields("999");
-                Iterator<VariableField> fieldIter = fields999.iterator();
+                List<VariableField> fieldsAll = (List<VariableField>)nextNext.getVariableFields();
+                Iterator<VariableField> fieldIter = fieldsAll.iterator();
                 while (fieldIter.hasNext())
                 {
                     VariableField vf = fieldIter.next();
-                    next.addVariableField(vf);
+                    if (combinePartials.contains(vf.getTag()))
+                    {
+                        next.addVariableField(vf);
+                    }
                 }
             }
         }
