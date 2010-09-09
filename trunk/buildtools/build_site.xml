@@ -272,15 +272,27 @@
         <get_jars_from_solr_war src="${jetty.install.dir}/webapps/solr.war" todir="${solr.jar.file.dir}" />
         <get_jars_from_solrmarc_onejar junit="test/*.jar"  todir="${site.test.dir}/tmp_solrmarc_jars" />
 
-        <path id="test.run.classpath.jars">
-            <fileset file="${site.build.dir}/${custom.jar.name}.jar" />
-            <fileset dir="${site.test.dir}/tmp_solrmarc_jars" includes="*.jar" />
-            <fileset file="${site.test.build.dir}/${site.test.jar}" />
-            <fileset dir="${solr.jar.file.dir}" includes="*.jar" />
-        </path>
- 
+        <if >
+            <isset property="top_level_test_only" />
+            <then>
+                <path id="test.run.classpath.jars">
+                    <fileset dir="${site.test.dir}/tmp_solrmarc_jars" includes="*.jar" />
+                    <fileset dir="${solr.jar.file.dir}" includes="*.jar" />
+                </path>
+                <property name="indextest.data.file" value="maintest.txt" /> 
+            </then>
+            <else>
+                <path id="test.run.classpath.jars">
+                    <fileset file="${site.build.dir}/${custom.jar.name}.jar" />
+                    <fileset dir="${site.test.dir}/tmp_solrmarc_jars" includes="*.jar" />
+                    <fileset file="${site.test.build.dir}/${site.test.jar}" />
+                    <fileset dir="${solr.jar.file.dir}" includes="*.jar" />
+                </path>
+                <property name="indextest.data.file" value="indextest.txt" /> 
+            </else>
+        </if >
+        
         <property name="indextest.class" value="org.solrmarc.index.ParameterizedIndexTest" />
-        <property name="indextest.data.file" value="indextest.txt" /> 
         <echo message="indextest class = ${indextest.class} " />
         <echo message="solr.data.dir = ${site.test.solr.dir}/data " />
       

@@ -48,7 +48,7 @@ public class ParameterizedIndexTest
     public void verifyIndexingResults() throws Exception 
     {
         MarcMappingOnly marcMappingTest = new MarcMappingOnly();
-        marcMappingTest.init(new String[]{config, "id"});
+        marcMappingTest.init(new String[]{config, "NONE", "id"});
         String recordToLookAt = null;  // null means just get the first record from the named file
         if (recordFilename.matches("[^(]*[(][^)]*[)]"))
         {
@@ -62,7 +62,11 @@ public class ParameterizedIndexTest
         {
             solrFldValObj = marcMappingTest.lookupRawRecordValue(recordToLookAt, fullRecordFilename, fieldToCheck);
         }
-        else 
+        else if (fieldToCheck.contains("(rec"))
+        {
+            solrFldValObj = marcMappingTest.lookupRawRecordValue(recordToLookAt, fullRecordFilename, fieldToCheck);
+        }
+        else
         {
             Map<String, Object> solrFldName2ValMap = marcMappingTest.getIndexMapForRecord(recordToLookAt, fullRecordFilename);
             solrFldValObj = solrFldName2ValMap.get(fieldToCheck);

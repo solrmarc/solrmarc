@@ -67,7 +67,7 @@
                             <depend targetdir="${site.dir}" />
                             <different targetdir="${site.dir}" />
                         </fileset>
-                        <fileset dir="${basedir}" includes="${script.template.dir}/*,${buildtools.dir}/ant_extra*,${buildtools.dir}/ant_jetty_test.xml" >
+                        <fileset dir="${basedir}" includes="${script.template.dir}/*,${buildtools.dir}/ant_extra*,${buildtools.dir}/ant_jetty_test.xml,${test.dir}/data/*" >
                             <depend targetdir="${site.dir}" />
                             <different targetdir="${site.dir}" />
                         </fileset>
@@ -476,7 +476,7 @@
                 </fileset>
             </copy>
             <copy todir="${site.test.dir}/data" preservelastmodified="true" overwrite="false">
-                <fileset dir="${test.dir}/data" includes="u399.mrc,selectedRecs.mrc" >
+                <fileset dir="${test.dir}/data" includes="*.mrc,maintest.txt" >
                     <depend targetdir="${site.test.dir}/data" />
                 </fileset>
             </copy>

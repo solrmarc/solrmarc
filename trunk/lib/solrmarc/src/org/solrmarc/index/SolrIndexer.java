@@ -68,7 +68,7 @@ public class SolrIndexer
     private Date indexDate = null;
 
     /** list of path to look for property files in */
-    private String propertyFilePaths[];
+    protected String propertyFilePaths[];
 
     /** Error Handler used for reporting errors */
     private ErrorHandler errors;
@@ -120,13 +120,14 @@ public class SolrIndexer
      * @param propertyDirs - array of directories holding properties files
      * UNTESTED SO COMMENTED OUT FOR THE FUTURE
      */
-     /*public static SolrIndexer indexerFromProperties(Properties indexingProperties, String searchPath[]) {
+     public static SolrIndexer indexerFromProperties(Properties indexingProperties, String searchPath[]) 
+     {
         SolrIndexer indexer = new SolrIndexer();
         indexer.propertyFilePaths = searchPath;
         indexer.fillMapFromProperties(indexingProperties);
         
         return indexer;
-     }*/
+     }
 
     /**
      * Parse the properties file and load parameters into fieldMap. Also
