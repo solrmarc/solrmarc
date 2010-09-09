@@ -2077,12 +2077,12 @@ public class BlacklightIndexer extends SolrIndexer
             else if (df.getTag().equals("853"))  continue; // ignore 853's here.
             else if (df.getTag().equals("866"))  
             {
-                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(libraryField, 'z', ""));
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""));
                 if (holdingsField != null) result.add(holdingsField);
             }
             else if (df.getTag().equals("867"))
             {
-                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(libraryField, 'z', ""));
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""));
                 if (holdingsField != null) result.add(holdingsField);
             }
             else if (df.getTag().equals("863"))
@@ -2102,14 +2102,14 @@ public class BlacklightIndexer extends SolrIndexer
                 DataField labelField = getLabelField(record, getLinkPrefix(linktag));
                 if (j == i + 1) 
                 {
-                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField), getSubfieldVal(libraryField, 'z', ""));
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField), getSubfieldVal(df, 'z', ""));
                     if (holdingsField != null) result.add(holdingsField);
                 }
                 else if (j > i + 1) 
                 {
                     VariableField nvf = fields.get(j-1);
                     DataField ndf = (DataField)nvf;
-                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField) + " - " + processEncodedField(ndf, labelField), getSubfieldVal(libraryField, 'z', ""));
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField) + " - " + processEncodedField(ndf, labelField), getSubfieldVal(df, 'z', ""));
                     if (holdingsField != null) result.add(holdingsField);
                     i = j - 1;
                 }
