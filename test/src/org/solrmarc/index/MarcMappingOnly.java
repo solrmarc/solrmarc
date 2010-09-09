@@ -1,5 +1,7 @@
 package org.solrmarc.index;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 //import org.apache.log4j.Logger;
@@ -9,6 +11,7 @@ import org.marc4j.marc.Record;
 
 import org.solrmarc.marc.MarcHandler;
 import org.solrmarc.tools.GetDefaultConfig;
+import org.solrmarc.tools.SolrMarcIndexerException;
 
 /**
  * Reads in marc records and creates mapping of solr field names to solr field
@@ -27,6 +30,7 @@ public class MarcMappingOnly extends MarcHandler
     /** name of unique key field in solr document */
     private String idFldName = null;
     private String argsPlus[] = null;
+    private boolean noConfigFile = false;
 
     /**
      * Constructor
@@ -46,10 +50,13 @@ public class MarcMappingOnly extends MarcHandler
         if (args[0].contains("+"))
         {
             argsPlus = args[0].split("[+]");
-            if (argsPlus[0].length() > 0)
+            if (argsPlus.length > 0 && argsPlus[0].length() > 0)
                 args[0] = argsPlus[0];
             else
+            {
                 args[0] = "null.properties";
+                noConfigFile = true;
+            }
         }
         super.init(args);
     }
@@ -118,6 +125,7 @@ public class MarcMappingOnly extends MarcHandler
         }
         return null;
     }
+    
     /**
      * read in the file of marc records indicated, looking for the desired
      * record, and return the specified field/fields according to the provided fieldSpec
@@ -143,9 +151,31 @@ public class MarcMappingOnly extends MarcHandler
                 Record record = reader.next();
 
                 String thisRecId = record.getControlNumber();
-                if (!thisRecId.equals(desiredRecId)) continue;
+                if (desiredRecId != null && !thisRecId.equals(desiredRecId)) continue;
 
-                Set<String> result = SolrIndexer.getFieldList(record, fieldSpec);
+                Set<String> result = null;
+                if (fieldSpec.matches("^[0-9].*")) // if it is a standard 245a type field spec
+                {
+                    result = SolrIndexer.getFieldList(record, fieldSpec);
+                }
+                else if (fieldSpec.contains("(rec"))
+                {
+                    String indexParm = fieldSpec.replaceFirst("\\(rec ?,?", "(");
+                    Properties indexingProps = new Properties();
+                    indexingProps.setProperty("marcmappingtest", "custom, "+ indexParm);
+                    SolrIndexer indexer = SolrIndexer.indexerFromProperties(indexingProps, null);
+                    Map<String, Object> indexMap = indexer.map(record);
+                    Object tmpResult = indexMap.get("marcmappingtest");
+                    if (tmpResult instanceof Set)
+                    {
+                        result = (Set<String>)tmpResult;
+                    }
+                    else if (tmpResult instanceof String)
+                    {
+                        result = new LinkedHashSet<String>();
+                        result.add((String)tmpResult);
+                    }
+                }
                 return(result);
             }
             catch (MarcException me)

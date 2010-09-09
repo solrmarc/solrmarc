@@ -190,7 +190,7 @@ public class BlacklightIndexer extends SolrIndexer
         if (addnlShadowedIds == null)
         {
             addnlShadowedIds = new LinkedHashMap<String, String>();
-            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(null, filename);
+            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(propertyFilePaths, filename);
             BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
             String line;
             try
@@ -2047,5 +2047,193 @@ public class BlacklightIndexer extends SolrIndexer
         result.add("" + century + suffix + " Century"); 
     }
     
+    // process summary holdings info
+    
+    
+    public Set<String> getSummaryHoldingsInfo(Record record, String libraryMapName, String locationMapName)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        String fieldsToUseStr = "852|853|863|866|867";
+        String fieldsToUse[] = fieldsToUseStr.split("[|]");
+        String libMapName = loadTranslationMap(null, libraryMapName);
+        String locMapName = loadTranslationMap(null, locationMapName);
+        List<VariableField> fields = record.getVariableFields();
+        DataField libraryField = null;
+        for (int i = 0; i < fields.size(); i++)
+        {
+            VariableField vf = fields.get(i);
+            if (!(vf instanceof DataField))  continue;
+            DataField df = (DataField)vf;
+            if (df.getTag().equals("852"))  
+            {
+                libraryField = df;
+                if (getSubfieldVal(libraryField, 'z', null) != null)
+                {
+                    result.add(buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(libraryField, 'z', null)));
+                }
+            }
+            else if (df.getTag().equals("853"))  continue; // ignore 853's here.
+            else if (df.getTag().equals("866"))  result.add(buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', "")));
+            else if (df.getTag().equals("867"))  result.add(buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', "")));
+            else if (df.getTag().equals("863"))
+            {
+                // look ahead for other 863's to combine                
+                String linktag = df.getSubfield('8') != null ? df.getSubfield('8').getData() : null;
+                int j = i+1;
+                for (; j < fields.size(); j++)
+                {
+                    VariableField nvf = fields.get(j);
+                    if (!(nvf instanceof DataField))  break;
+                    DataField ndf = (DataField)nvf;
+                    String nlinktag = ndf.getSubfield('8') != null ? ndf.getSubfield('8').getData() : null;
+                    if (linktag == null || nlinktag == null || !getLinkPrefix(linktag).equals(getLinkPrefix(nlinktag))) 
+                        break;                   
+                }
+                DataField labelField = getLabelField(record, getLinkPrefix(linktag));
+                if (j == i + 1) 
+                {
+                    result.add(buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField)));
+                }
+                else if (j > i + 1) 
+                {
+                    VariableField nvf = fields.get(j-1);
+                    DataField ndf = (DataField)nvf;
+                    result.add(buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField) + " - " + processEncodedField(ndf, labelField)));
+                    i = j - 1;
+                }
+            }
+        }
+        return(result);
+    }
+
+    private String getSubfieldVal(DataField df, char subfieldTag, String defValue)
+    {
+        String result = df.getSubfield(subfieldTag) != null ? df.getSubfield(subfieldTag).getData() : defValue;
+        return result;
+    }
+
+    private String buildHoldingsField(DataField libraryField, String libMapName, String locMapName, String holdingsValue)
+    {
+        String libraryName = libraryField.getSubfield('b') != null ? Utils.remap(libraryField.getSubfield('b').getData(), findMap(libMapName), false) : null;
+        String locName = libraryField.getSubfield('c') != null ? Utils.remap(libraryField.getSubfield('c').getData(), findMap(locMapName), false) : null;
+        return(libraryName +"|"+ locName +"|"+ holdingsValue);
+    }
+
+    private String processEncodedField(DataField df, DataField labelField)
+    {
+        StringBuffer result = new StringBuffer();
+        for (char subfield = 'a'; subfield <= 'f'; subfield++)
+        {
+            String label = getSubfieldVal(labelField, subfield, null);
+            String data = getSubfieldVal(df, subfield, null);
+            if (label == null || data == null) break;
+            if (subfield != 'a')  result.append(", ");
+            result.append(label);
+            result.append(data);
+        }
+        StringBuffer alt = new StringBuffer();
+        for (char subfield = 'g'; subfield <= 'h'; subfield++)
+        {
+            String label = getSubfieldVal(labelField, subfield, null);
+            String data = getSubfieldVal(df, subfield, null);
+            if (label == null || data == null) break;
+            if (subfield != 'g')  alt.append(", ");
+            alt.append(label);
+            alt.append(data);
+        }
+        if (alt.length() != 0)
+        {
+            result.append(" ("+alt+")");
+        }
+        String year = null;
+        StringBuffer date = new StringBuffer();
+        for (char subfield = 'i'; subfield <= 'm'; subfield++)
+        {
+            boolean appendComma = false;
+            String label = getSubfieldVal(labelField, subfield, null);
+            String data = getSubfieldVal(df, subfield, null);
+            if (label == null || data == null) break;
+        //    if (subfield != 'i')  result.append(", ");
+            if (label.equalsIgnoreCase("(month)") || label.equalsIgnoreCase("(season)"))
+            {
+                data = expandMonthOrSeason(data);
+            }
+            else if (year != null && !label.equalsIgnoreCase("(day)"))
+            {
+                date.append(year);
+                year = null;
+            }
+            else
+            {
+                appendComma = true;
+            }
+            if (label.equalsIgnoreCase("(year)"))
+            {
+                year = data;
+            }
+            else
+            {
+                date.append(data);
+                if (appendComma) date.append(", ");
+            }
+        }
+        if (year != null) date.append(year);
+        if (date.length() > 0)
+        {
+            if (result.length() > 0) result.append(", ");
+            result.append(date);
+        }    
+        return result.toString();
+    }
+
+    private String expandMonthOrSeason(String data)
+    {
+        data = data.replaceAll("01", "Jan.");
+        data = data.replaceAll("02", "Feb.");
+        data = data.replaceAll("03", "Mar.");
+        data = data.replaceAll("04", "Apr.");
+        data = data.replaceAll("05", "May");
+        data = data.replaceAll("06", "Jun.");
+        data = data.replaceAll("07", "Jul.");
+        data = data.replaceAll("08", "Aug.");
+        data = data.replaceAll("09", "Sep.");
+        data = data.replaceAll("10", "Oct.");
+        data = data.replaceAll("11", "Nov.");
+        data = data.replaceAll("12", "Dec.");
+        data = data.replaceAll("21", "Spring");
+        data = data.replaceAll("22", "Summer");
+        data = data.replaceAll("23", "Autumn");
+        data = data.replaceAll("24", "Winter");
+        return(data);
+
+    }
+
+    private DataField getLabelField(Record record, String linkPrefix)
+    {
+        if (linkPrefix == null) return(null);
+        List<VariableField> fields = (List<VariableField>)record.getVariableFields("853");
+        for (VariableField vf : fields)
+        {
+            if (!(vf instanceof DataField))  continue;
+            DataField df = (DataField)vf;
+            String link = df.getSubfield('8') != null ? df.getSubfield('8').getData() : null;
+            if (link != null && link.equals(linkPrefix))
+            {
+                return(df);
+            }
+        }
+        return(null);
+    }
+
+    private String getLinkPrefix(String linktag)
+    {
+        String prefix = null;
+        int index;
+        if ((index = linktag.indexOf('.')) == -1) 
+            prefix = linktag;
+        else 
+            prefix = linktag.substring(0, index);
+        return(prefix);
+    }
     
 }
