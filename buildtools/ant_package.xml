@@ -120,6 +120,7 @@
                             <include name="${scripts.dir}/**" />
                             <include name="${trans.map.dir}/**" />
                             <include name="jetty/**" />
+                            <include name="lib/**" />
                         </tarfileset>
                     </tar> 
                     <zip destfile="${package.dir}/SolrMarc_${examplelabel}_Binary_PC${version_parm}.zip" compress="true" whenempty="create">
@@ -137,6 +138,7 @@
                             <include name="${scripts.dir}/**" />
                             <include name="${trans.map.dir}/**" />
                             <include name="jetty/**" />
+                            <include name="lib/**" />
                         </zipfileset>
                     </zip> 
                 </then>
