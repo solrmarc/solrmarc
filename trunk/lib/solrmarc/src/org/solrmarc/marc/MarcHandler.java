@@ -62,11 +62,12 @@ public abstract class MarcHandler {
         {
             for (String arg : args)
             {
+                String lc_arg = arg.toLowerCase();
                 if (arg.endsWith(".properties"))
                 {
                     configProperties = arg;
                 }
-                else if (arg.endsWith(".mrc") || arg.endsWith("marc"))
+                else if (lc_arg.endsWith(".mrc") || lc_arg.endsWith(".marc"))
                 {
                     System.setProperty("marc.path", arg);
                     System.setProperty("marc.source", "FILE");
@@ -75,12 +76,12 @@ public abstract class MarcHandler {
                 {
                     System.setProperty("marc.source", "NONE");
                 }
-                else if (arg.endsWith(".xml"))
+                else if (lc_arg.endsWith(".xml"))
                 {
                     System.setProperty("marc.path", arg);
                     System.setProperty("marc.source", "FILE");
                 }
-                else if (arg.endsWith(".del"))
+                else if (lc_arg.endsWith(".del"))
                 {
                     System.setProperty("marc.ids_to_delete", arg);
                 }
