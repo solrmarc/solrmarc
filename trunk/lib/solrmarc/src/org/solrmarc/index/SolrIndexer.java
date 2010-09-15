@@ -1162,24 +1162,37 @@ public class SolrIndexer
       String combineSubfieldsJoin = null;
       //specified options
       String[] options = optionStr.split(":");
-      for (int i = 0; i < options.length; i++) {
-         String option = options[i];
-         if (option.equals("first")) {
-          first = true;
-         } else if (option.equals("includedLinkedFields")) {
-          includeLinked = true;
-         } else if ( option.equals("removeTrailingPunct")) {
-          removeTrailingPunct = true; 
-         } else if ( option.length() > 4 &&
-                     option.substring(0, 4).equals("map=")) {
-          mapName = option.substring(4, option.length()); 
-         } else if ( option.length() > 8 && 
-                     option.substring(0,8).equals("default=")) {
-          strDefault = option.substring(8, option.length());
-         } else if ( option.length() > 17 &&
-                     option.substring(0, 17).equals("combineSubfields=")) {
-          combineSubfieldsJoin = option.substring(17, option.length());
-         }
+      for (int i = 0; i < options.length; i++)
+      {
+          String option = options[i];
+          if (option.equals("first"))
+          {
+              first = true;
+          }
+          else if (option.equals("includedLinkedFields"))
+          {
+              includeLinked = true;
+          }
+          else if (option.equals("removeTrailingPunct"))
+          {
+              removeTrailingPunct = true;
+          }
+          else if (option.length() > 4 && option.substring(0, 4).equals("map="))
+          {
+              mapName = option.substring(4, option.length());
+          }
+          else if (option.length() > 8 && option.substring(0, 8).equals("default="))
+          {
+              strDefault = option.substring(8, option.length());
+          }
+          else if (option.length() > 17 && option.substring(0, 17).equals("combineSubfields="))
+          {
+              combineSubfieldsJoin = option.substring(17, option.length());
+              if (combineSubfieldsJoin.length() > 2 && combineSubfieldsJoin.startsWith("\"") && combineSubfieldsJoin.endsWith("\""))
+              {
+                  combineSubfieldsJoin = combineSubfieldsJoin.substring(1, combineSubfieldsJoin.length() - 1);
+              }
+          }
       }
       
       
@@ -1440,13 +1453,37 @@ public class SolrIndexer
     }
     
     /**
-     * Stub (to be overridden) default simply calls getDate()
+     * Stub more advanced version of getDate that looks in the 008 field as well as the 260c field
+     * this routine does some simple sanity checking to ensure that the date to return makes sense. 
      * @param record - the marc record object
-     * @return 260c, "cleaned" per org.solrmarc.tools.Utils.cleanDate()
+     * @return 260c or 008[7-10] or 008[11-14], "cleaned" per org.solrmarc.tools.Utils.cleanDate()
      */
     public String getPublicationDate(final Record record)
     {
-        return(getDate(record));
+        String field008 = getFirstFieldVal(record, "008");
+        String pubDateFull = getFieldVals(record, "260c", ", ");
+        String pubDateJustDigits = pubDateFull.replaceAll("[^0-9]", "");       
+        String pubDate260c = getDate(record);
+        if (field008 == null || field008.length() < 16) 
+        {
+            return(pubDate260c);
+        }
+        String field008_d1 = field008.substring(7, 11);
+        String field008_d2 = field008.substring(11, 15);
+        String retVal = null;
+        char dateType = field008.charAt(6);
+        if (dateType == 'r' && field008_d2.equals(pubDate260c)) retVal = field008_d2;
+        else if (field008_d1.equals(pubDate260c))               retVal = field008_d1;
+        else if (field008_d2.equals(pubDate260c))               retVal = field008_d2;
+        else if (pubDateJustDigits.length() == 4 && pubDate260c != null &&
+                 pubDate260c.matches("(20|19|18|17|16|15)[0-9][0-9]"))
+                                                                retVal = pubDate260c;
+        else if (field008_d1.matches("(20|1[98765432])[0-9][0-9]"))        
+                                                                retVal = field008_d1;
+        else if (field008_d2.matches("(20|1[98765432])[0-9][0-9]"))        
+                                                                retVal = field008_d2;
+        else                                                    retVal = pubDate260c;
+        return(retVal);
     }
     
     /**
