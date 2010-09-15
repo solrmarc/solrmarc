@@ -1,8 +1,59 @@
 # These following tests don't seem to be actually running?  Added by jrochkind 
 # 2 March 2010
-# marc record with no 245$a, but a 345$k. Does getTitleSorted still find
+# marc record with no 245$a, but a 245$k. Does getTitleSorted still find
 # the $k?
 +, title_k.mrc, getSortableTitle(rec), morton hoffman papers
-# marc record with no 245$, but a $b. (Bad data). Does getTitleSorted
+
+# marc record with no 245$a, but a $b. (Bad data). Does getTitleSorted
 # not raise, and still come up with something, even if it's weird?
 +, title_b.mrc, getSortableTitle(rec), family physician; or, domestic medical friend
+
+#test of combining reader
++, u55_split.mrc, 999m , ALDERMAN
++marc.combine_records=999, u55_split.mrc, 999m , ALDERMAN|CLEMONS
+
+#Test of Unicode normalization: this line contains the code point 'à' rather than an 'a' followed by the grave accent '̀'
++marc.permissive=true+marc.to_utf_8=true+marc.unicode_normalize=C, u4.mrc(u4), 245a, The princes of Hà-tiên (1682-1867) /
+
+#Test of not using Unicode normalization: this line contains the code points 'a' followed by the grave accent '̀'
++marc.permissive=true+marc.to_utf_8=true, u4.mrc(u4), 245a, The princes of Hà-tiên (1682-1867) /
+
+#test of getEra function with translation map
++, u399.mrc, getEra(rec){composition_era_map.properties}, 1970's|20th Century
+
+#test of getting language with translation map
++, selectedRecs.mrc(u8), 008[35-37]:041a:041d{language_map.properties}, English|Tamil
+
+#test of Jonathan's getWithOptions function
+#many more of these should be written
++marc.permissive=true+marc.to_utf_8=true, u2103_raw.mrc, getWithOptions(rec, 245ab, includedLinkedFields:removeTrailingPunct), Zi jin cheng gong dian|紫禁城宮殿
++, selectedRecs.mrc(u377), getWithOptions(rec, 610[a-z]:651[a-z], combineSubfields=" -- "), Catholic Church -- India|India -- Religion
+
+#testing MarcFilteredReader deleting a particular subfield
++marc.delete_subfields=999o, selectedRecs.mrc(u89), 999o, 
++, selectedRecs.mrc(u89), 999o, .STAFF.   c=   84005276  r=00000000010696454
+
+#testing marc.override to install a sorting/non-sorting MarcReader
++marc.override=org.solrmarc.marcoverride.NoSortMarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
++marc.override=org.mar4jmarc.impl.MarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), 496826 aapl bmain emain
+
+#now verify that the default is being set to non-sorting
++, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
+
+#check permissive reader vs non-permissive reader
++marc.permissive=true+marc.to_utf_8=true, u2103_raw.mrc, getWithOptions(rec, 245ab, includedLinkedFields:removeTrailingPunct), Zi jin cheng gong dian|紫禁城宮殿
++marc.to_utf_8=true, u2103_raw.mrc, getWithOptions(rec, 245ab, includedLinkedFields:removeTrailingPunct), Zi jin cheng gong dian|紫禁城
+
+#test LNK type syntax for specifying linked fields
++marc.permissive=true+marc.to_utf_8=true, u2103_raw.mrc, LNK245ab, 紫禁城宮殿
+
+#test getAllAlphaSubfields
++, selectedRecs.mrc(u8), getAllAlphaSubfields(rec, 260), Madras : Tamil Patippakam, 1982. 
+
++marc.permissive=true+marc.to_utf_8=true+marc.default_encoding=MARC8, non_latin.mrc, 245a, Kepone R effects on development of C̲a̲l̲l̲i̲n̲e̲c̲t̲e̲s̲ s̲a̲p̲i̲d̲u̲s̲ and R̲h̲i̲t̲h̲r̲o̲p̲a̲n̲o̲p̲e̲u̲s̲ h̲a̲r̲[̲r̲]̲i̲s̲i̲i̲ /
+
+# test getPublicationDate
++, selectedRecs.mrc(u8), getPublicationDate(rec), 1982
++, u3412403.mrc, getPublicationDate(rec), 1986
++marc.permissive=true, WPUbadrecords.mrc(101950), getPublicationDate(rec), 1977
++marc.permissive=true, WPUbadrecords.mrc(101573), getPublicationDate(rec), 1980
