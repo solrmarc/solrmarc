@@ -2070,7 +2070,7 @@ public class BlacklightIndexer extends SolrIndexer
                 libraryField = df;
                 if (getSubfieldVal(libraryField, 'z', null) != null)
                 {
-                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, null, getSubfieldVal(libraryField, 'z', ""));
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, "", getSubfieldVal(libraryField, 'z', ""));
                     if (holdingsField != null) result.add(holdingsField);
                 }
             }
