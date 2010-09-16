@@ -730,7 +730,16 @@ public final class Utils {
                 String mappedVal = remap(val, map, allowDefault);
                 if (mappedVal != null)
                 {
-                    result.add(mappedVal);
+                    if (mappedVal.contains("|"))
+                    {
+                        String vals[] = mappedVal.split("[|]");
+                        for (String oneVal : vals)
+                        {
+                            result.add(oneVal);
+                        }
+                    }
+                    else
+                        result.add(mappedVal);
                 }
             }
         }

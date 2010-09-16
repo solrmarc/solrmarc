@@ -1572,6 +1572,7 @@ public class BlacklightIndexer extends SolrIndexer
         {
             String format_007 = getFirstFieldVal(record, mapName2, "007[0]");
             String broadFormat = getFirstFieldVal(record, mapName1, "000[6-7]:000[6]");
+            String broadFormatLetter = getFirstFieldVal(record, null, "000[6]");
             if (format_007 != null) 
             {
                 if (!format_007.equals("Map") || (broadFormat != null && (broadFormat.startsWith("Map") || broadFormat.startsWith("Book"))))
@@ -1593,6 +1594,14 @@ public class BlacklightIndexer extends SolrIndexer
                 }
                 else
                     result.add(broadFormat);
+            }
+            else if (broadFormatLetter.equals("g"))
+            {
+                String Val008_33 = getFirstFieldVal(record, null, "008[33]");
+                if ((Val008_33 != null && Val008_33.equals("v")) || Utils.setItemContains(f245h, "videorecording"))
+                {
+                    result.add("Video");
+                }
             }
            //     if (broadFormat != null && format_007 != null) System.out.println("format diff for item: "+ record.getControlNumber()+" : format_007 = "+format_007+ "  broadFormat = " + broadFormat);
         }
