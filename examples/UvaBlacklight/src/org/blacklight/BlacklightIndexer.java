@@ -1595,13 +1595,17 @@ public class BlacklightIndexer extends SolrIndexer
                 else
                     result.add(broadFormat);
             }
-            else if (broadFormatLetter.equals("g"))
+            int videoness = 0;
+            if (broadFormatLetter.equals("g")) videoness++;
+            String Val008_33 = getFirstFieldVal(record, null, "008[33]");
+            if (Val008_33 != null && Val008_33.equals("v")) videoness++;
+            if (videoness == 1 && Utils.setItemContains(f245h, "videorecording")) videoness++;
+            if (videoness >= 2)
             {
-                String Val008_33 = getFirstFieldVal(record, null, "008[33]");
-                if ((Val008_33 != null && Val008_33.equals("v")) || Utils.setItemContains(f245h, "videorecording"))
-                {
-                    result.add("Video");
-                }
+                result.add("Video");
+                Set<String> field538a = getFieldList(record, "538a");
+                if (Utils.setItemContains(field538a, "VHS")) result.add("VHS");
+                if (Utils.setItemContains(field538a, "DVD")) result.add("DVD");
             }
            //     if (broadFormat != null && format_007 != null) System.out.println("format diff for item: "+ record.getControlNumber()+" : format_007 = "+format_007+ "  broadFormat = " + broadFormat);
         }
