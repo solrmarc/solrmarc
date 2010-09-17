@@ -23,7 +23,7 @@ then
     exit $E_BADARGS
   fi
 fi
-if [[ "$1" == "-*" ]] 
+if [[ "${1:0:1}" == "-" ]] 
 then 
     parm=`echo $1 | sed -e 's/.//'`
     java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPrinter" -Dmarc.include_if_missing="$parm" -Dmarc.combine_records="" -jar $scriptdir/SolrMarc.jar translate $2 $3 
