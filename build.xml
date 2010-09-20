@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Top Level SolrMarc -->
 <project basedir="." default="dist" name="SolrMarc Custom">
 
     <!-- property files -->
@@ -183,5 +184,5 @@
              <property name="dist.path" location="${dist.dir}" />
          </ant>
     </target>
-
+    
 </project>

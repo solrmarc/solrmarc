@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- build_site.xml used to construct build.xml in the site directory -->
 <project name="solrmarc instance" default="build" basedir="." >
 
     <property file="build.properties" />
@@ -190,7 +191,7 @@
 
         <javac destdir="${site.test.build.dir}" 
                srcdir="${site.test.dir}/${src.dir}" 
-               target="${java.compat.version}" source="${java.compat.version}" 
+               target="${java.compat.version}" source="${java.compat.version}"
                debug="on" encoding="utf-8">
             <include name="**/*.java" />
             <classpath>
