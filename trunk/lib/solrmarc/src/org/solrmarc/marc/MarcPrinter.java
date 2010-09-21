@@ -74,7 +74,11 @@ public class MarcPrinter extends MarcHandler
     {
         for (String arg : addnlArgs)
         {
-            if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate") || arg.equals("untranslate"))
+            if (arg.equals("-v")) 
+            {
+                verbose = true;
+            }
+            else if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate") || arg.equals("untranslate"))
             {
                 mode = arg;
             }
