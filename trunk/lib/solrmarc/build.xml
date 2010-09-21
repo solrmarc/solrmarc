@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<project basedir="." default="build" name="Solrmarc">
+<project basedir="." default="build" name="Solrmarc Core">
 
     <!-- property files -->
     <property file="build.properties" />
@@ -10,7 +9,7 @@
     <import file="${buildtools.path}/one-jar-ant-task.xml" />
     <property name="ant_extras.dist.dir" value="${buildtools.path}" />
     <import file="${buildtools.path}/ant_extras.xml" />
-
+    
     <tstamp>
         <format property="year" pattern="yyyy" />
         <format property="DSTAMP" pattern="yyyy-MM-dd" />
@@ -19,7 +18,7 @@
     </tstamp>
 
     <path id="classpath.jars" description="Jars for classpath (but not solr jars)">
-        <fileset dir="${lib.dir}" includes="*.jar" excludes="*/*.jar,junit*.jar" />
+        <fileset dir="${lib.dir}" includes="*.jar" excludes="*/*.jar,solr*/*.jar" /> <!-- ?? also exclude jzkit_client.jar ?? -->
     </path>
 
     <!-- General Targets -->
@@ -29,7 +28,7 @@
         <delete dir="${solrmarc.dist.dir}" />
     </target>
 
-    <target name="init" description="create (empty) generated directories">
+    <target name="init" depends="clean" description="create (empty) generated directories">
         <mkdir dir="${build.dir}" />
         <mkdir dir="${solrmarc.dist.dir}" />
     </target>
@@ -41,55 +40,29 @@
                 debug="true" debuglevel="lines,vars,source" 
                 encoding="utf-8">
             <include name="**/*.java" />
+            <exclude name="**/*Test*.java" />
             <classpath refid="classpath.jars" />
         </javac>
+        
     </target>
-
-    <target name="build" depends="compile" description="create ${jar.name} in the build directory">
+    
+    <target name="build" depends="compile,testInit,testCompilePrivate" description="create ${jar.name} in the build directory">
         <echo message="${ant.project.name}: ${ant.file}" />
 
         <jar destfile="${build.dir}/${jar.name}">
-            <fileset dir="${build.dir}" includes="**/*.class" />
-            <fileset dir="../.." includes="log4j.properties" /> 
+            <fileset dir="${build.dir}" includes="**/*.class" excludes="**/*Test*.class" />
+            <fileset file="../../log4j.properties" /> 
             <manifest>
                 <attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter" />
             </manifest>
         </jar>
-        
-        <path id="classpath.test.jars" description="Jars for classpath (but not solr jars)">
-            <fileset dir="${lib.dir}" includes="*.jar,test/*.jar" excludes="solr*/*.jar" />
-            <fileset dir="${build.dir}" includes="${jar.name}" />
-        </path>
-      
-        <mkdir dir="${test.dir}/${build.dir}" />
-        <javac destdir="${test.dir}/${build.dir}" srcdir="${test.dir}/${src.dir}" 
-                target="${java.compat.version}" 
-                source="${java.compat.version}" 
-                debug="true" debuglevel="lines,vars,source" 
-                encoding="utf-8">
-            <include name="**/*.java" />
-            <classpath refid="classpath.test.jars" />
-        </javac>
-        
-        <jar destfile="${test.dir}/${build.dir}/${junit.test.jar.name}">
-            <fileset dir="${test.dir}/${build.dir}" includes="**/*.class" />
-        </jar>
 
-        <one-jar destfile="${solrmarc.dist.dir}/${one-jar.name}" 
-               manifest="${buildtools.path}/manifest.mf">
-            <main jar="${build.dir}/${jar.name}" />
-            <lib>
-                <fileset dir="${lib.dir}" includes="*.jar" excludes="junit*.jar,jzkit_client.jar" />
-            </lib>
-            <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
-            <fileset dir="${lib.dir}" includes="solr_remote_only/*.jar" />
-            <fileset dir="${lib.dir}" includes="test/*.jar" />
-            <zipfileset dir="${test.dir}/${build.dir}" includes="*.jar" prefix="test" />
-            <!-- <fileset dir="${site.dir}" includes="extra_data/**" /> -->   
-        </one-jar> 
-        
+        <!-- the single jar from the core code needs to include test classes 
+        because the local build tests rely on the core code utility test classes -->
+        <antcall target="testJarPrivate" />        
     </target>
     
+    <!-- naomi asks:  is this a utility target?  should it go to the bottom? -->
     <target name="zclient" depends="compile" description="create ${jar.name} in the build directory">
         <jar destfile="${build.dir}/zclient.jar">
             <fileset dir="${build.dir}" includes="**/ZClient.class,**/MarcTranslatedReader.class" />
@@ -97,6 +70,141 @@
     </target>
 
  
+    <!-- Testing Targets, including Code Coverage -->
+    
+    <target name="testClean" description="clean generated test directories">
+        <delete dir="${core.test.build.dir}" />
+    </target>
+
+    <target name="testInit" depends="testClean" 
+            description="create (empty) generated test directories">
+        <mkdir dir="${core.test.build.dir}" />
+    </target>
+    
+    
+    <path id="test.compile.classpath">
+        <pathelement location="${build.dir}" />
+        <path refid="classpath.jars" />
+        <fileset dir="${lib.dir}" includes="test/*.jar" />
+    </path>
+
+    <!-- private target for compiling test classes;  It is private because it
+     deliberately does NOT depend on compile and testInit targets.  It is used
+     by targets build  and   testCompile.     
+     This approach is an artifact of expecting the "build" target to create a single
+      jar file containing the test classes in addition to the core classes. -->
+    <target name="testCompilePrivate" > 
+        <javac destdir="${build.dir}/test" 
+               srcdir="${test.dir}/src" 
+               target="${java.compat.version}" source="${java.compat.version}" 
+               debug="true" debuglevel="lines,vars,source"  encoding="utf-8">
+            <include name="**/*.java" />
+            <classpath>
+                <path refid="test.compile.classpath" />
+                <fileset file="../../log4j.properties" /> 
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="testCompile" depends="compile,testInit,testCompilePrivate" 
+        description="Compile test source code into test build dir" /> 
+
+    
+    <!-- use the build target to generate the single jar with test files included;
+      it is set up as private because
+      it deliberately does NOT depend on testCompile target.  
+      This approach is an artifact of expecting the "build" target to create a single
+      jar file containing the test classes in addition to the core classes. -->
+    <target name="testJarPrivate">
+        <jar destfile="${build.dir}/test/${junit.test.jar.name}">
+            <fileset dir="${build.dir}/test" includes="**/*.class" />
+        </jar>
+ 
+        <!-- note: naomi wonders if the onejar task should have its own target -->
+        <one-jar destfile="${solrmarc.dist.dir}/${one-jar.name}" 
+               manifest="${buildtools.path}/manifest.mf">
+            <main jar="${build.dir}/${jar.name}" />
+            <lib>
+                <fileset dir="${lib.dir}" includes="*.jar" excludes="jzkit_client.jar" />
+            </lib>
+            <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
+            <fileset dir="${lib.dir}" includes="solr_remote_only/*.jar" />
+            <fileset dir="${lib.dir}" includes="test/*.jar" />
+            <zipfileset dir="${build.dir}" includes="*.jar" />
+            <zipfileset dir="${build.dir}/test" includes="*.jar" prefix="test" />
+       </one-jar> 
+        
+    </target>
+
+
+    <!-- Cobertura (code coverage) targets -->
+        
+    <path id="cobertura.classpath">
+        <fileset dir="${cobertura.jar.dir}">
+            <include name="cobertura.jar" />
+            <include name="lib/**/*.jar" />
+        </fileset>
+    </path>
+    
+    <!-- Load cobertura custom ant tasks -->
+    <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+    
+    <property name="core.instr.dir" value="instr"/>
+    
+    <target name="instrumentCore" depends="testCompile" description="instrument SolrMarc core classes for code coverage reports">
+        <delete dir="${core.instr.dir}" />
+        <mkdir dir="${core.instr.dir}" />
+        <cobertura-instrument todir="${core.instr.dir}" datafile="${core.instr.dir}/cobertura.ser">
+            <fileset dir="${build.dir}">
+                <include name="**/*.class" />
+                <exclude name="**/*Test*" />
+            </fileset>
+        </cobertura-instrument>
+    </target>    
+    
+    <property name="core.coverage.dir" value="${build.dir}/coverage" />
+
+    <target name="runCoreTestsWithCoverage" depends="testCompile, instrumentCore" description="run tests with Cobertura code coverage for Core SolrMarc code">
+        <mkdir dir="${core.coverage.dir}"/>
+
+        <path id="test.compile.classpath">
+            <pathelement location="${build.dir}" />
+            <path refid="classpath.jars" />
+            <fileset dir="${lib.dir}" includes="test/*.jar" />
+        </path>
+        
+        <path id="instrumented.classpath">
+            <pathelement location="${core.instr.dir}" />
+            <pathelement location="${build.dir}/test" />
+            <path refid="test.compile.classpath" />
+            <path refid="cobertura.classpath" />
+        </path>
+         
+        <junit showoutput="yes" printsummary="yes" fork="yes" forkmode="perBatch">
+            <classpath refid="instrumented.classpath" />
+            
+            <!-- name of the coverage metadata file to use.  It must be the same
+                as the coverage data file generated during instrumentation. -->
+            <sysproperty key="net.sourceforge.cobertura.datafile"
+                file="${core.instr.dir}/cobertura.ser" />
+
+<!-- use test element instead of batchtest element if desired
+            <test name="${test.class}" />
+-->
+            <batchtest fork="yes">
+                 <fileset dir="${build.dir}/test" excludes="org/solrmarc/testUtils/**"/>
+            </batchtest>
+            
+        </junit>
+
+<!-- nrdebug 2010-09-20:  once we know which format Hudson uses, we can clean this up -->        
+        <cobertura-report format="html" destdir="${core.coverage.dir}" srcdir="${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/>
+<!--
+        <cobertura-report format="xml" destdir="${core.coverage.dir}" srcdir="${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/>
+-->        
+    </target>    
+
+    
     <!-- Utility Targets -->
 
     <target name="Z3950Client">
@@ -104,5 +212,5 @@
             <classpath refid="classpath.jars" />
         </java>
     </target>
-
+    
 </project>
