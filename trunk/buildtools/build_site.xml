@@ -355,9 +355,9 @@
             <fileset dir="${solr.jar.file.dir}" includes="*.jar" />
         </path>
         
-        <!-- if no junit test class is defined, call the Util Unit test, which merely test some of the 
+        <!-- if no junit test class is defined, call the Util Unit test, which tests some of the 
              utility classes used by SolrMarc. -->
-        <property name="test.class"  value="org.solrmarc.index.UtilUnitTests" />
+        <property name="test.class"  value="org.solrmarc.tools.UtilUnitTests" />
         
         <echo message="test class = ${test.class} " />
         <echo message="solr.data.dir = ${site.test.solr.dir}/data " />
