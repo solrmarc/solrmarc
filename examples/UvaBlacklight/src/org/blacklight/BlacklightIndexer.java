@@ -1608,50 +1608,7 @@ public class BlacklightIndexer extends SolrIndexer
             {
                 if (format_007.equals("Video"))
                 {
-                    Set<String> f300e = getFieldList(record, "300e");
-                    if (broadFormatLetter.equals("o") || broadFormatLetter.equals("a") || broadFormatLetter.equals("j") || broadFormatLetter.equals("m") ||
-                            Utils.setItemContains(f300e, "videocassette") || Utils.setItemContains(f300e, "DVD") || Utils.setItemContains(f300e, "videodisc"))
-                    {
-                        result.add("Includes Video");
-                        if (result.contains("Video")) result.remove("Video");
-                    }
-                    else
-                    {
-                        result.add("Video");
-                        boolean ff = false;  //  ff means found format;
-                        if (result.contains("VHS") || result.contains("DVD") || result.contains("Laser Disc")) ff = true;
-                        if (!ff)
-                        {
-                            Set<String> field538a = getFieldList(record, "538a");
-                            if (Utils.setItemContains(field538a, "VHS")) { result.add("VHS"); ff = true; }
-                            if (Utils.setItemContains(field538a, "DVD")) { result.add("DVD"); ff = true; }
-                        }
-                        if (!ff)
-                        {
-                            Set<String> field300a = getFieldList(record, "300a");
-                            if (Utils.setItemContains(field300a, "videocassette")) 
-                            { 
-                                Set<String> field300c = getFieldList(record, "300c");
-                                if (Utils.setItemContains(field300c, "3/4"))  result.add("U-matic"); 
-                                else result.add("VHS");
-                                ff = true;
-                            }
-                            if (Utils.setItemContains(field300a, "videodisc")) 
-                            {
-                                Set<String> field300c = getFieldList(record, "300c");
-                                if (Utils.setItemContains(field300c, "12"))  result.add("Laser Disc"); 
-                                else result.add("DVD");
-                                ff = true;
-                            }
-                        }
-                        if (!ff)
-                        {
-                            Set<String> field500a = getFieldList(record, "500a");
-                            if (Utils.setItemContains(field500a, "VHS")) { result.add("VHS"); ff = true; }
-                            if (Utils.setItemContains(field500a, "DVD")) { result.add("DVD"); ff = true; }
-                        }
-
-                    }
+                    // handle video-ness from 007 field below
                 }
                 else if (!format_007.equals("Map") || (broadFormat != null && (broadFormat.startsWith("Map") || broadFormat.startsWith("Book"))))
                 {
@@ -1677,7 +1634,7 @@ public class BlacklightIndexer extends SolrIndexer
             if (broadFormatLetter.equals("g")) videoness++;
             String Val008_33 = getFirstFieldVal(record, null, "008[33]");
             Set<String> field300a = null;
-
+            if (format_007.equals("Video")) videoness++;
             if (Val008_33 != null && Val008_33.equals("v")) videoness++;
             if (videoness < 2 && Utils.setItemContains(f245h, "videorecording")) videoness++;
             if (videoness < 2)
@@ -1734,6 +1691,11 @@ public class BlacklightIndexer extends SolrIndexer
                     if (Utils.setItemContains(field500a, "VHS")) { result.add("VHS"); ff = true; }
                     if (Utils.setItemContains(field500a, "DVD")) { result.add("DVD"); ff = true; }
                 }
+            }
+            if (videoness == 1 && format_007.equals("Video"))
+            {
+                result.add("Includes Video");
+                if (result.contains("Video")) result.remove("Video");
             }
            //     if (broadFormat != null && format_007 != null) System.out.println("format diff for item: "+ record.getControlNumber()+" : format_007 = "+format_007+ "  broadFormat = " + broadFormat);
         }
