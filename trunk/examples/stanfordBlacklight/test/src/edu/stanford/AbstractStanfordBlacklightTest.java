@@ -7,8 +7,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import static org.junit.Assert.fail;
-import org.solrmarc.index.IndexTest;
-import org.solrmarc.index.SolrFieldMappingTest;
+import org.solrmarc.testUtils.IndexTest;
+import org.solrmarc.testUtils.SolrFieldMappingTest;
 
 /**
  * Site Specific code used for testing the Stanford Blacklight index

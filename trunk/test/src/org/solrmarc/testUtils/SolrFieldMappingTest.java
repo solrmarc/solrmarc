@@ -1,4 +1,4 @@
-package org.solrmarc.index;
+package org.solrmarc.testUtils;
 
 import java.util.*;
 

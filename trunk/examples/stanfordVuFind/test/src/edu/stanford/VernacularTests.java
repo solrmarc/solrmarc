@@ -8,7 +8,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
-import org.solrmarc.index.IndexTest;
+import org.solrmarc.testUtils.IndexTest;
 
 
 /**

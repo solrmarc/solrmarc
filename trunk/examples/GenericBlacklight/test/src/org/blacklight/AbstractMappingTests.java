@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.junit.*;
 
-import org.solrmarc.index.SolrFieldMappingTest;
+import org.solrmarc.testUtils.SolrFieldMappingTest;
 
 /**
  * Abstract class for junit4 tests for generic Blacklight mapping tests
