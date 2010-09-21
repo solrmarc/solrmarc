@@ -1546,7 +1546,38 @@ public class BlacklightIndexer extends SolrIndexer
             if (other007 != null && other007.startsWith("v")) 
             {
                 if (isOnline) result.add(Utils.remap("v", findMap(mapName1a), true)); // Streaming Video
-                result.add(Utils.remap("v", findMap(mapName2), true));  // Video
+                Set<String> f300e = getFieldList(record, "300e");
+                String broadFormatLetter = getFirstFieldVal(record, null, "000[6]");
+                if (broadFormatLetter.equals("o") || broadFormatLetter.equals("a") || broadFormatLetter.equals("j") || broadFormatLetter.equals("m") ||
+                        Utils.setItemContains(f300e, "videocassette") || Utils.setItemContains(f300e, "DVD") || Utils.setItemContains(f300e, "videodisc"))
+                {
+                    result.add("Includes Video");
+                    if (!result.contains("Video")) result.remove("Video");
+                }
+                else
+                {
+                    result.add("Video");
+                    boolean ff = false;  //  ff means found format;
+                    if (result.contains("VHS") || result.contains("DVD") || result.contains("Laser Disc")) ff = true;
+                    if (!ff)
+                    {
+                        Set<String> field538a = getFieldList(record, "538a");
+                        if (Utils.setItemContains(field538a, "VHS")) { result.add("VHS"); ff = true; }
+                        if (Utils.setItemContains(field538a, "DVD")) { result.add("DVD"); ff = true; }
+                    }
+                    if (!ff)
+                    {
+                        Set<String> field300a = getFieldList(record, "300a");
+                        if (Utils.setItemContains(field300a, "videocassette")) { result.add("VHS"); ff = true; }
+                        if (Utils.setItemContains(field300a, "videodisc"))  { result.add("DVD"); ff = true; }
+                    }
+                    if (!ff)
+                    {
+                        Set<String> field500a = getFieldList(record, "500a");
+                        if (Utils.setItemContains(field500a, "videocassette")) { result.add("VHS"); ff = true; }
+                        if (Utils.setItemContains(field500a, "videodisc")) { result.add("DVD"); ff = true; }
+                    }
+                }
             }
             else if (broadFormat.equals("am")) 
             {
@@ -1575,7 +1606,54 @@ public class BlacklightIndexer extends SolrIndexer
             String broadFormatLetter = getFirstFieldVal(record, null, "000[6]");
             if (format_007 != null) 
             {
-                if (!format_007.equals("Map") || (broadFormat != null && (broadFormat.startsWith("Map") || broadFormat.startsWith("Book"))))
+                if (format_007.equals("Video"))
+                {
+                    Set<String> f300e = getFieldList(record, "300e");
+                    if (broadFormatLetter.equals("o") || broadFormatLetter.equals("a") || broadFormatLetter.equals("j") || broadFormatLetter.equals("m") ||
+                            Utils.setItemContains(f300e, "videocassette") || Utils.setItemContains(f300e, "DVD") || Utils.setItemContains(f300e, "videodisc"))
+                    {
+                        result.add("Includes Video");
+                        if (result.contains("Video")) result.remove("Video");
+                    }
+                    else
+                    {
+                        result.add("Video");
+                        boolean ff = false;  //  ff means found format;
+                        if (result.contains("VHS") || result.contains("DVD") || result.contains("Laser Disc")) ff = true;
+                        if (!ff)
+                        {
+                            Set<String> field538a = getFieldList(record, "538a");
+                            if (Utils.setItemContains(field538a, "VHS")) { result.add("VHS"); ff = true; }
+                            if (Utils.setItemContains(field538a, "DVD")) { result.add("DVD"); ff = true; }
+                        }
+                        if (!ff)
+                        {
+                            Set<String> field300a = getFieldList(record, "300a");
+                            if (Utils.setItemContains(field300a, "videocassette")) 
+                            { 
+                                Set<String> field300c = getFieldList(record, "300c");
+                                if (Utils.setItemContains(field300c, "3/4"))  result.add("U-matic"); 
+                                else result.add("VHS");
+                                ff = true;
+                            }
+                            if (Utils.setItemContains(field300a, "videodisc")) 
+                            {
+                                Set<String> field300c = getFieldList(record, "300c");
+                                if (Utils.setItemContains(field300c, "12"))  result.add("Laser Disc"); 
+                                else result.add("DVD");
+                                ff = true;
+                            }
+                        }
+                        if (!ff)
+                        {
+                            Set<String> field500a = getFieldList(record, "500a");
+                            if (Utils.setItemContains(field500a, "VHS")) { result.add("VHS"); ff = true; }
+                            if (Utils.setItemContains(field500a, "DVD")) { result.add("DVD"); ff = true; }
+                        }
+
+                    }
+                }
+                else if (!format_007.equals("Map") || (broadFormat != null && (broadFormat.startsWith("Map") || broadFormat.startsWith("Book"))))
                 {
                     result.add(format_007);
                 }
@@ -1598,14 +1676,64 @@ public class BlacklightIndexer extends SolrIndexer
             int videoness = 0;
             if (broadFormatLetter.equals("g")) videoness++;
             String Val008_33 = getFirstFieldVal(record, null, "008[33]");
+            Set<String> field300a = null;
+
             if (Val008_33 != null && Val008_33.equals("v")) videoness++;
-            if (videoness == 1 && Utils.setItemContains(f245h, "videorecording")) videoness++;
+            if (videoness < 2 && Utils.setItemContains(f245h, "videorecording")) videoness++;
+            if (videoness < 2)
+            {
+                field300a = getFieldList(record, "300a");
+                if (Utils.setItemContains(field300a, "ideocassette") ||  Utils.setItemContains(field300a, "ideodisc"))  
+                {
+                    videoness++;
+                }
+            }
+            if (videoness < 2)
+            {
+                Set<String> field650a = getFieldList(record, "650a");
+                if (Utils.setItemContains(field650a, "film")) 
+                {
+                    videoness++;
+                }
+            }
+            if (videoness >= 2 && Utils.setItemContains(f245h, "electronic resource")) videoness--;
             if (videoness >= 2)
             {
                 result.add("Video");
-                Set<String> field538a = getFieldList(record, "538a");
-                if (Utils.setItemContains(field538a, "VHS")) result.add("VHS");
-                if (Utils.setItemContains(field538a, "DVD")) result.add("DVD");
+                boolean ff = false;  //  ff means found format;
+                if (result.contains("VHS") || result.contains("DVD") || result.contains("Laser Disc")) ff = true;
+                if (!ff)
+                {
+                    Set<String> field538a = getFieldList(record, "538a");
+                    if (Utils.setItemContains(field538a, "VHS")) { result.add("VHS"); ff = true; }
+                    if (Utils.setItemContains(field538a, "DVD")) { result.add("DVD"); ff = true; }
+                }
+                if (!ff)
+                {
+                    if (field300a == null) field300a = getFieldList(record, "300a");
+                    // omit the v to catch both upper and lower case 
+                    if (Utils.setItemContains(field300a, "ideocassette")) 
+                    { 
+                        Set<String> field300c = getFieldList(record, "300c");
+                        if (Utils.setItemContains(field300c, "3/4"))  result.add("U-matic"); 
+                        else result.add("VHS");
+                        ff = true;
+                    }
+                    // omit the v to catch both upper and lower case 
+                    if (Utils.setItemContains(field300a, "ideodisc"))  
+                    { 
+                        Set<String> field300c = getFieldList(record, "300c");
+                        if (Utils.setItemContains(field300c, "12"))  result.add("Laser Disc"); 
+                        else result.add("DVD");
+                        ff = true;
+                }
+                }
+                if (!ff)
+                {
+                    Set<String> field500a = getFieldList(record, "500a");
+                    if (Utils.setItemContains(field500a, "VHS")) { result.add("VHS"); ff = true; }
+                    if (Utils.setItemContains(field500a, "DVD")) { result.add("DVD"); ff = true; }
+                }
             }
            //     if (broadFormat != null && format_007 != null) System.out.println("format diff for item: "+ record.getControlNumber()+" : format_007 = "+format_007+ "  broadFormat = " + broadFormat);
         }
