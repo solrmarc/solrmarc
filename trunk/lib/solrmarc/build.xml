@@ -197,11 +197,8 @@
             
         </junit>
 
-<!-- nrdebug 2010-09-20:  once we know which format Hudson uses, we can clean this up -->        
         <cobertura-report format="html" destdir="${core.coverage.dir}" srcdir="${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/>
-<!--
         <cobertura-report format="xml" destdir="${core.coverage.dir}" srcdir="${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/>
--->        
     </target>    
 
     
