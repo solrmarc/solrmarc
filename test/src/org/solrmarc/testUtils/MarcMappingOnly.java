@@ -1,7 +1,5 @@
-package org.solrmarc.index;
+package org.solrmarc.testUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 //import org.apache.log4j.Logger;
@@ -9,9 +7,8 @@ import java.util.*;
 import org.marc4j.MarcException;
 import org.marc4j.marc.Record;
 
+import org.solrmarc.index.*;
 import org.solrmarc.marc.MarcHandler;
-import org.solrmarc.tools.GetDefaultConfig;
-import org.solrmarc.tools.SolrMarcIndexerException;
 
 /**
  * Reads in marc records and creates mapping of solr field names to solr field

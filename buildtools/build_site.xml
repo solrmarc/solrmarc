@@ -293,7 +293,7 @@
             </else>
         </if >
         
-        <property name="indextest.class" value="org.solrmarc.index.ParameterizedIndexTest" />
+        <property name="indextest.class" value="org.solrmarc.testUtils.ParameterizedIndexTest" />
         <echo message="indextest class = ${indextest.class} " />
         <echo message="solr.data.dir = ${site.test.solr.dir}/data " />
       

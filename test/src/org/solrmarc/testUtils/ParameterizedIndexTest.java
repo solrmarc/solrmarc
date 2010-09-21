@@ -1,4 +1,4 @@
-package org.solrmarc.index;
+package org.solrmarc.testUtils;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
