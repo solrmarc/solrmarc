@@ -9,7 +9,7 @@ import org.junit.runners.Suite;
         CallNumberTests.class,
         CallNumberLoppingTests.class,
         ItemInfoTests.class,
-        org.solrmarc.index.CallNumberUnitTests.class
+        org.solrmarc.tools.CallNumberUnitTests.class
         })
 
         

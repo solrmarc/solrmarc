@@ -1,4 +1,4 @@
-package org.solrmarc.index;
+package org.solrmarc.tools;
 
 import static org.solrmarc.tools.Utils.*;
 import static org.junit.Assert.*;
