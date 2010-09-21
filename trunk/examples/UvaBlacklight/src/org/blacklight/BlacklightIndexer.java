@@ -1656,6 +1656,10 @@ public class BlacklightIndexer extends SolrIndexer
             if (videoness >= 2 && Utils.setItemContains(f245h, "electronic resource")) videoness--;
             if (videoness >= 2)
             {
+                if (broadFormatLetter.equals("a"))
+                {
+                    result.remove("Book");
+                }
                 result.add("Video");
                 boolean ff = false;  //  ff means found format;
                 if (result.contains("VHS") || result.contains("DVD") || result.contains("Laser Disc")) ff = true;
@@ -1683,7 +1687,7 @@ public class BlacklightIndexer extends SolrIndexer
                         if (Utils.setItemContains(field300c, "12"))  result.add("Laser Disc"); 
                         else result.add("DVD");
                         ff = true;
-                }
+                    }
                 }
                 if (!ff)
                 {
