@@ -1634,7 +1634,7 @@ public class BlacklightIndexer extends SolrIndexer
             if (broadFormatLetter.equals("g")) videoness++;
             String Val008_33 = getFirstFieldVal(record, null, "008[33]");
             Set<String> field300a = null;
-            if (format_007.equals("Video")) videoness++;
+            if (format_007 != null && format_007.equals("Video")) videoness++;
             if (Val008_33 != null && Val008_33.equals("v")) videoness++;
             if (videoness < 2 && Utils.setItemContains(f245h, "videorecording")) videoness++;
             if (videoness < 2)
@@ -1696,7 +1696,7 @@ public class BlacklightIndexer extends SolrIndexer
                     if (Utils.setItemContains(field500a, "DVD")) { result.add("DVD"); ff = true; }
                 }
             }
-            if (videoness == 1 && format_007.equals("Video"))
+            if (videoness == 1 && format_007 != null && format_007.equals("Video"))
             {
                 result.add("Includes Video");
                 if (result.contains("Video")) result.remove("Video");
