@@ -164,7 +164,7 @@
     
     <property name="core.coverage.dir" value="${build.dir}/coverage" />
 
-    <target name="runCoreTestsWithCoverage" depends="testCompile, instrumentCore" description="run tests with Cobertura code coverage for Core SolrMarc code">
+    <target name="runCoreTestsWithCoverage" depends="testCompile, instrumentCore" description="Run tests for Core SolrMarc code with code coverage info">
         <mkdir dir="${core.coverage.dir}"/>
 
         <path id="test.compile.classpath">
