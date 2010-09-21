@@ -119,7 +119,6 @@ public class VernFieldsTests extends AbstractStanfordBlacklightTest {
 	 */
 @Test
 	public final void testUnmatched880sVernacular() 
-			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_uniform_display";
 	    String testFilePath = testDataParentPath + File.separator + "unmatched880sTests.mrc";
@@ -132,7 +131,6 @@ public class VernFieldsTests extends AbstractStanfordBlacklightTest {
 	 */
 @Test
 	public final void testUnmatched880sVernAllAlphaExcept() 
-			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_topic_search";
 	    String testFilePath = testDataParentPath + File.separator + "unmatched880sTests.mrc";
@@ -144,7 +142,6 @@ public class VernFieldsTests extends AbstractStanfordBlacklightTest {
 	 */
 @Test
 	public final void testUnmatched880sVernRemovePunct() 
-			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_author_person_display";
 	    String testFilePath = testDataParentPath + File.separator + "unmatched880sTests.mrc";
