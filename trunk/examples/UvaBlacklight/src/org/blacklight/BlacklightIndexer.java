@@ -2233,7 +2233,7 @@ public class BlacklightIndexer extends SolrIndexer
 
     private String buildHoldingsField(DataField libraryField, String libMapName, String locMapName, String holdingsValue, String publicNote)
     {
-        if ((holdingsValue == null || holdingsValue.length() == 0) && (publicNote.length() == 0 )) return(null);
+        if (libraryField == null || ((holdingsValue == null || holdingsValue.length() == 0) && (publicNote.length() == 0 ))) return(null);
         String libraryName = libraryField.getSubfield('b') != null ? Utils.remap(libraryField.getSubfield('b').getData(), findMap(libMapName), false) : null;
         String locName = libraryField.getSubfield('c') != null ? Utils.remap(libraryField.getSubfield('c').getData(), findMap(locMapName), false) : null;
         return(libraryName +"|"+ locName +"|"+ holdingsValue+"|"+publicNote);
