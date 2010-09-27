@@ -1,5 +1,7 @@
 #summary Details on the config.properties file.
 
+<wiki:toc max_depth="5" />
+
 = Introduction =
 
 The config.properties file is the top-level configuration file for controlling SolrMarc's behavior.  This page describes all of the available settings.  Note that the actual mapping of MARC fields to Solr fields is controlled by a separate index.properties file pointed to by this file -- see the [IndexProperties] page for details on mapping data.
