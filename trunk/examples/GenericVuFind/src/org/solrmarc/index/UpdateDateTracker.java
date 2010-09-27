@@ -152,8 +152,14 @@ public class UpdateDateTracker
             // Are we restoring a previously deleted record, or was the stored 
             // record change date before current record change date?  Either way,
             // we need to update the table!
+            //
+            // Note that we check for a time difference of at least one second in
+            // order to count as a change.  Because dates are stored with second
+            // precision, some of the date conversions have been known to create
+            // minor inaccuracies in the millisecond range, which used to cause
+            // false positives.
             if (deleted != null || 
-                lastRecordChange.getTime() < newRecordChange.getTime()) {
+                Math.abs(lastRecordChange.getTime() - newRecordChange.getTime()) > 999) {
                 updateRow(newRecordChange);
             }
         }
