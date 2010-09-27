@@ -2,7 +2,7 @@
 
 = Introduction =
 
-The config.properties file is used to configure most of SolrMarc's behavior.  This page describes all of the available settings.
+The config.properties file is the top-level configuration file for controlling SolrMarc's behavior.  This page describes all of the available settings.  Note that the actual mapping of MARC fields to Solr fields is controlled by a separate index.properties file pointed to by this file -- see the [IndexProperties] page for details on mapping data.
 
 = Example File =
 
@@ -80,7 +80,7 @@ marc.include_errors = false
 
  * *solr.core.name: * (optional) Name of solr core to use when you are pointing at a multi-core solr configuration.  This property should only be used when you are working with a multi-core solr configuration.
 
- * *solr.indexer.properties:* lists the name of the properties file that defines the mapping from the MARC record fields and sub-fields to the Solr index entries. For details of how this mapping is done, please see below.  Note that multiple property files can be listed here separated by commas. Index specification entries found in the second (or subesequent) file, either add to the Index specification of the first file, or override entries found there.
+ * *solr.indexer.properties:* lists the name of the properties file that defines the mapping from the MARC record fields and sub-fields to the Solr index entries. For details of how this mapping is done, please see the [IndexProperties] page.  Note that multiple property files can be listed here separated by commas. Index specification entries found in the second (or subsequent) file, either add to the Index specification of the first file, or override entries found there.
  
  * *solr.indexer:* (optional); specifies the name of a custom indexing class which defines any custom routines for extracting and mapping data for a particular Solr index field. These custom routines will only be needed in cases where values from several different MARC fields and sub-fields need to be consulted to determine the value to add to the Solr index field. Several examples of these custom indexing routines are given below. If, however, you can handle all of the necessary MARC field-to-Solr index field mappings using the available specification language, you do not need to define a value for this entry, and the default !SolrIndexer class will be used.
 
