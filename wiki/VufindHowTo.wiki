@@ -1,9 +1,15 @@
 #summary How to get started with solrmarc and Vufind
 #labels Phase-Deploy
 
+= Important Note =
+
+Unless you have a very old copy of VuFind (earlier than 1.0RC1), chances are that some version of SolrMarc is already bundled with your installation.  Please see the <a href="http://vufind.org/wiki/importing_records#marc_records">VuFind documentation</a> for all of the necessary information on using the bundled copy of SolrMarc.
+
+If you want to customize or upgrade your copy of SolrMarc, some of the following documentation may be helpful.  However, some details may be out of date.  For most users, the simplest course of action is to upgrade to the latest version of VuFind and use the provided version of SolrMarc.
+
 = Introduction =
 
-SolrMarc makes creating your index for Vufind extremely simple. First, you need to get the latest version of either the Subversion repository, or latest binary. If you're not comfortable with building source code, don't worry, the binary will work on all platforms with Java 1.5 or higher. 
+SolrMarc makes creating your index for VuFind extremely simple. First, you need to get the latest version of either the Subversion repository, or latest binary. If you're not comfortable with building source code, don't worry, the binary will work on all platforms with Java 1.5 or higher. 
 
 To get the Source distribution you can either do a subversion checkout as described on the page [http://code.google.com/p/solrmarc/source/checkout] or download the souce code distribution named SolrMarc_Distribution.tar.gz from the downloads page [http://code.google.com/p/solrmarc/downloads/list].
 
