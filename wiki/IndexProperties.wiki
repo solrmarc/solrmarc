@@ -1,5 +1,7 @@
 #summary Details on the index.properties file.
 
+<wiki:toc max_depth="5" />
+
 = Introduction =
 
 The specification of which MARC fields and subfields are to be mapped to which Solr index fields is handled via an index.properties configuration file, the exact name of which is specified by the {{{solr.indexer.properties}}} entry in the config.properties file as described on the [ConfigProperties] page. Since the field specification configuration file is a properties file, there are certain constraints of how the file is structured. Basically all properties files consist of a number of pairs of values separated by an equals sign. The key values represent the name of the field that will be added to the Solr document. All of these must either match a field definition that occurs in the _schema.xml_ file for the Solr search engine, or they must match a !dynamicField definition in that file.   
@@ -80,8 +82,6 @@ If the value after the equals sign is {{{FullRecordAsMARC}}}, {{{FullRecordAsXML
 
 If the value after the equals sign is not one of these special cases entries, it is assumed to be a list of MARC fields from which to extract the data to use for the index field.
 
-<br />
-
 == Specifying Which Fields and Subfields to Use ==
 
 The syntax for specifying what fields/subfields (or what portion of a field or subfield) is to be looked-at to create the Solr index field(s) consists of one or more field specifications separated by colons (:).  
@@ -104,7 +104,6 @@ TODO: document specification of separator.
 
 There are additional ways to generate Solr fields from your MARC data explained below.
 
-<br />
 === Example Field Specifications ===
 
 {{{full_title_display = 245}}}
@@ -165,7 +164,6 @@ would produce:  all_fruit_text:apricot   and    all_fruit_text:apple banana aard
 
 Or to put it more succinctly, look up character 6 of the 000 field in the map {{{broad_format}}}, if the map contains a mapping for that character, use that value; otherwise, look up character 0 of the 007 field in the map {{{broad_format}}}, if the map contains a mapping for that character use that value. If neither extracted value matches an entry in the translation map, check to see whether the map defines a default value, if so use that default value, otherwise leave the {{{broad_format_facet}}} index entry unassigned.
 
-<br />
 == Mapping "Raw" Values to New Values ==
 
 The process of creating a translation map to translate from the cryptic entries found in the MARC record to more human-readable strings to make searching and faceting more useful to the end-user of the system, is fairly straightforward.  The first thing that you must do is add a second parameter on the field specification entry in the properties file, as shown in the last two of the examples shown above. This parameter specifies either the name of a separate property file that contains the map or the name of a separate property file plus the name of the property key prefix that should be looked for in that file.  For the last example above, a map named {{{broad_format}}} is referenced in the properties file {{{format_maps.properties}}}. Those entries in that file that start with the string {{{broad_format}}} will be used to define the map. The definition for that map:
@@ -266,8 +264,6 @@ eu = Electronic, Unknown
 
 This makes the creation and maintaining of translation map properties files much easier to understand.
 
-<br />
-
 === Defining a Pattern-Based Translation Map ===
 
 The previous section described how to define a translation map for a field.  However, one limitation of it is that it can only map from a fixed, pre-specified set of values.  If the value in the field doesn’t exactly match one of the translation keys, that value will not be mapped to any other value, and usually would then be discarded.  
@@ -348,8 +344,6 @@ Similarly, if you want to trim off everything following the initial letters of a
 
  {{{pattern_map.call_num.pattern_0 = ([A-Za-z]*).*=>$1}}}
 
-<br />
-
 == Custom Indexing Routines ==
 
 If special processing is required for a given Solr index field that cannot be handled by the any of the above indexing specification commands, you can reference a custom-created indexing function, by specifying {{{custom}}} as the second value in the field specification entry as shown in the example below:
@@ -357,8 +351,6 @@ If special processing is required for a given Solr index field that cannot be ha
  {{{recordings_and_scores_facet = custom, getRecordingAndScore}}}
 
 In this case the value after _custom_ specifies the name of a java method to handle this particular bit of indexing.
-
-<br />
 
 === Pre-Defined Custom Indexing Routines ===
 
@@ -579,7 +571,6 @@ The next step to make sure that your main properties file lists that name of you
 
 Note that if you need to define more than one custom indexing function, they *must* all be defined in the same java file.   Also note that all custom indexing functions must be defined as *public*, must return either a {{{String}}} or a {{{Set<String>}}}, and must accept a parameter consisting of the {{{Record}}} being operated upon, followed by zero or more String parameters that can be used for greater control over the operation of the custom function. 
 
-<br />
 ==== Example Custom Indexing Routines ====
 
 *_Create an index entry based on the value in field X, but only if a certain value appears in field Y._*  
@@ -608,7 +599,6 @@ Note that if you need to define more than one custom indexing function, they *mu
 
 Note that the above routine invokes a translation map before it returns its results, you can either handle it this way in a custom indexing routine, or return the values unmapped, and include a third parameter on the field specification entry as described above for the other index specifications.  
 
-<br />
 *_Create an index entry that consists of the first characters from a given field, but only as many characters as are letters._*  
 
  {{{
@@ -625,7 +615,6 @@ Note that the above routine invokes a translation map before it returns its resu
 
 This custom function returns the beginning portion of the call number (extracted from either 999a or 090a or 050a  field) but only up until the first character that is not a letter.
 
-<br />
 *_Create an index entry based on a portion of a given field, but only if the remaining portion of that field contains a certain value._*   
 
  {{{
@@ -658,8 +647,6 @@ The syntax that you need to use in your index.properties file to reference a cus
  {{{callnumber = script(callnumber.bsh), getFullCallNumber}}}
 
 In this case the value in parentheses after _script_ specifies the name the !BeanShell script that contains the custom scripted indexing method that you want to use, and the value following the comma is the name of the scripted method to invoke to handle this particular bit of indexing.
-
-<br />
 
 === Creating Custom Indexing Scripts===
 
@@ -709,7 +696,6 @@ This example gets the first occurance of field 099, 090 or 050 and extract the a
 
 Note that if you want to define more than one scripted custom indexing method, they *can* all be defined in the same !BeanShell custom indexing script file, or they can be separated into several different !BeanShell files.  Also note that all scripted custom indexing methods must return either a {{{String}}} or a {{{Set}}}, and must accept a parameter consisting of the {{{Record}}} being operated upon, followed by zero or more {{{String}}} parameters that can be used for greater control over the operation of the custom function. 
 
-<br />
 ==== Example Scripted Custom Indexing Methods ====
 
 *_Create a facet based on the Dewey Decimal numbers found in the record_*  
