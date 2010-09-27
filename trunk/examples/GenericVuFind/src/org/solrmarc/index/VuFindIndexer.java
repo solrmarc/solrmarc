@@ -804,7 +804,7 @@ public class VuFindIndexer extends SolrIndexer
      * allow the history of our indexing activity to be stored permanently in a
      * fashion that can survive even a total Solr rebuild.
      */
-    public void updateTracker(String core, String id, java.util.Date latestTransaction)
+    public UpdateDateTracker updateTracker(String core, String id, java.util.Date latestTransaction)
     {
         // Initialize date tracker if not already initialized:
         loadUpdateDateTracker();
@@ -818,6 +818,10 @@ public class VuFindIndexer extends SolrIndexer
                 dieWithError("Unexpected database error");
             }
         }
+
+        // Send back the tracker object so the caller can use it (helpful for
+        // use in BeanShell scripts).
+        return tracker;
     }
 
     /**
