@@ -167,12 +167,6 @@
     <target name="runCoreTestsWithCoverage" depends="testCompile, instrumentCore" description="Run tests for Core SolrMarc code with code coverage info">
         <mkdir dir="${core.coverage.dir}"/>
 
-        <path id="test.compile.classpath">
-            <pathelement location="${build.dir}" />
-            <path refid="classpath.jars" />
-            <fileset dir="${lib.dir}" includes="test/*.jar" />
-        </path>
-        
         <path id="instrumented.classpath">
             <pathelement location="${core.instr.dir}" />
             <pathelement location="${build.dir}/test" />
