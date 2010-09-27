@@ -7,9 +7,9 @@ This configuring SolrMarc guide explains the setup of the two configuration file
 
 = About !SolrMarc =
 
-A Configurable Java-based program for indexing MARC records into a Solr index.
+A configurable Java-based program for indexing MARC records into a Solr index.
 
-The !SolrMarc program reads in MARC records stored in standard binary format (ISO 2709) and uses a configurable and customizable script for extracting values from the fields and sub-fields of the MARC record to build an index entry for adding to Solr.  Additionally, so that it can run faster, rather than building the records and POSTing them to a Solr search engine, this program directly writes to the index directory of the Solr search engine.
+The !SolrMarc program reads in MARC records stored in standard binary (ISO 2709) or XML format and uses a configurable and customizable script for extracting values from the fields and sub-fields of the MARC record to build an index entry for adding to Solr.  Additionally, so that it can run faster, rather than building the records and POSTing them to a Solr search engine, this program is capable of writing directly to the index directory of the Solr search engine.  Standard HTTP POSTing is also available if desired.
 
 = config.properties File =
 
