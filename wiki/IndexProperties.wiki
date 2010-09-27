@@ -82,7 +82,7 @@ If the value after the equals sign is {{{FullRecordAsMARC}}}, {{{FullRecordAsXML
 
 If the value after the equals sign is not one of these special cases entries, it is assumed to be a list of MARC fields from which to extract the data to use for the index field.
 
-== Specifying Which Fields and Subfields to Use ==
+= Specifying Which Fields and Subfields to Use =
 
 The syntax for specifying what fields/subfields (or what portion of a field or subfield) is to be looked-at to create the Solr index field(s) consists of one or more field specifications separated by colons (:).  
 
@@ -104,7 +104,7 @@ TODO: document specification of separator.
 
 There are additional ways to generate Solr fields from your MARC data explained below.
 
-=== Example Field Specifications ===
+== Example Field Specifications ==
 
 {{{full_title_display = 245}}}
 
@@ -164,7 +164,7 @@ would produce:  all_fruit_text:apricot   and    all_fruit_text:apple banana aard
 
 Or to put it more succinctly, look up character 6 of the 000 field in the map {{{broad_format}}}, if the map contains a mapping for that character, use that value; otherwise, look up character 0 of the 007 field in the map {{{broad_format}}}, if the map contains a mapping for that character use that value. If neither extracted value matches an entry in the translation map, check to see whether the map defines a default value, if so use that default value, otherwise leave the {{{broad_format_facet}}} index entry unassigned.
 
-== Mapping "Raw" Values to New Values ==
+= Mapping "Raw" Values to New Values =
 
 The process of creating a translation map to translate from the cryptic entries found in the MARC record to more human-readable strings to make searching and faceting more useful to the end-user of the system, is fairly straightforward.  The first thing that you must do is add a second parameter on the field specification entry in the properties file, as shown in the last two of the examples shown above. This parameter specifies either the name of a separate property file that contains the map or the name of a separate property file plus the name of the property key prefix that should be looked for in that file.  For the last example above, a map named {{{broad_format}}} is referenced in the properties file {{{format_maps.properties}}}. Those entries in that file that start with the string {{{broad_format}}} will be used to define the map. The definition for that map:
 
@@ -264,7 +264,7 @@ eu = Electronic, Unknown
 
 This makes the creation and maintaining of translation map properties files much easier to understand.
 
-=== Defining a Pattern-Based Translation Map ===
+== Defining a Pattern-Based Translation Map ==
 
 The previous section described how to define a translation map for a field.  However, one limitation of it is that it can only map from a fixed, pre-specified set of values.  If the value in the field doesn’t exactly match one of the translation keys, that value will not be mapped to any other value, and usually would then be discarded.  
 
@@ -344,7 +344,7 @@ Similarly, if you want to trim off everything following the initial letters of a
 
  {{{pattern_map.call_num.pattern_0 = ([A-Za-z]*).*=>$1}}}
 
-== Custom Indexing Routines ==
+= Custom Indexing Routines =
 
 If special processing is required for a given Solr index field that cannot be handled by the any of the above indexing specification commands, you can reference a custom-created indexing function, by specifying {{{custom}}} as the second value in the field specification entry as shown in the example below:
 
@@ -352,7 +352,7 @@ If special processing is required for a given Solr index field that cannot be ha
 
 In this case the value after _custom_ specifies the name of a java method to handle this particular bit of indexing.
 
-=== Pre-Defined Custom Indexing Routines ===
+== Pre-Defined Custom Indexing Routines ==
 
 Because there are many "special processing" indexing tasks that commonly occur when indexing MARC records, there are several pre-defined "custom" indexing routines that can be referenced from your index specification file without requiring you to write any java code. These pre-defined indexing routines are listed below with a short description of what each of them does.
 
@@ -510,7 +510,7 @@ LEADER 01584cam a2200397 a 4500
 
  The !fieldSpec will be treated in the standard fashion, except _any_ !fieldSpec containing square brackets, such as {{{245[a-c7]}}} will be treated as a regular expression of desired subfields.
 
-=== Creating Custom Indexing Routines ===
+== Creating Custom Indexing Routines ==
 
 If you are still unable to accomplish what you want to do using any of the provided indexing techniques, there is the option to create your own custom indexing functions.
 
@@ -571,7 +571,7 @@ The next step to make sure that your main properties file lists that name of you
 
 Note that if you need to define more than one custom indexing function, they *must* all be defined in the same java file.   Also note that all custom indexing functions must be defined as *public*, must return either a {{{String}}} or a {{{Set<String>}}}, and must accept a parameter consisting of the {{{Record}}} being operated upon, followed by zero or more String parameters that can be used for greater control over the operation of the custom function. 
 
-==== Example Custom Indexing Routines ====
+=== Example Custom Indexing Routines ===
 
 *_Create an index entry based on the value in field X, but only if a certain value appears in field Y._*  
 
@@ -638,7 +638,7 @@ This custom function returns the beginning portion of the call number (extracted
 
 This routine gathers all 035a fields in the MARC record, and scans through them looking for one labeled with the string _(OCoLC)_ indicating that it is an OCLC number, the routine strips out the string _(OCoLC)_ and returns the remaining string which is the OCLC number of the item in the MARC record. If no 035a field containing that label is found, no OCLC number is added to the Solr index record for this item.
 
-== Custom Indexing Scripts ==
+= Custom Indexing Scripts =
 
 A new feature that was recently added to SolrMarc is that ability to have custom indexing scripts in addition to custom indexing routines.  The difference being that the scripts are interpreted at run-time, therefore no compiling is necessary.  So custom indexing scripts are a way to extend !SolrMarc even if you started from a Pre-built binary release, and are unable to compile custom indexing routines.  The syntax of the language [http://www.beanshell.org BeanShell] for creating a custom indexing script is _very_ similar to java.  If you obtain the java source code for a custom indexing routine from someone, and want to implement that routine in a !BeanShell script, it usually takes only about 5 minutes to manually convert.  
 
@@ -648,7 +648,7 @@ The syntax that you need to use in your index.properties file to reference a cus
 
 In this case the value in parentheses after _script_ specifies the name the !BeanShell script that contains the custom scripted indexing method that you want to use, and the value following the comma is the name of the scripted method to invoke to handle this particular bit of indexing.
 
-=== Creating Custom Indexing Scripts===
+== Creating Custom Indexing Scripts==
 
 Note before you go to the work to create a new custom indexing script, see the above section on [#Pre-Defined_Custom_Indexing_Routines Pre-Defined Custom Indexing Routines], because there may already be a custom routine included in SolrMarc to accomplish what you want.  If you are still unable to accomplish what you want to do using any of the provided indexing techniques, there is the option to create your own custom indexing functions.
 
@@ -696,7 +696,7 @@ This example gets the first occurance of field 099, 090 or 050 and extract the a
 
 Note that if you want to define more than one scripted custom indexing method, they *can* all be defined in the same !BeanShell custom indexing script file, or they can be separated into several different !BeanShell files.  Also note that all scripted custom indexing methods must return either a {{{String}}} or a {{{Set}}}, and must accept a parameter consisting of the {{{Record}}} being operated upon, followed by zero or more {{{String}}} parameters that can be used for greater control over the operation of the custom function. 
 
-==== Example Scripted Custom Indexing Methods ====
+=== Example Scripted Custom Indexing Methods ===
 
 *_Create a facet based on the Dewey Decimal numbers found in the record_*  
 
