@@ -52,6 +52,7 @@ public class UpdateDateTracker
         sql.setTimestamp(4, lastIndexed);
         sql.setTimestamp(5, lastRecordChange);
         sql.executeUpdate();
+        sql.close();
     }
 
     /* Private support method: read a row from the change_tracker table.
@@ -65,8 +66,10 @@ public class UpdateDateTracker
         sql.setString(2, id);
         ResultSet result = sql.executeQuery();
         
-        // No results?  Return false:
+        // No results?  Free resources and return false:
         if (!result.first()) {
+            result.close();
+            sql.close();
             return false;
         }
         
@@ -75,6 +78,10 @@ public class UpdateDateTracker
         lastIndexed = result.getTimestamp(2);
         lastRecordChange = result.getTimestamp(3);
         deleted = result.getTimestamp(4);
+
+        // Free resources and report success:
+        result.close();
+        sql.close();
         return true;
     }
 
@@ -103,6 +110,7 @@ public class UpdateDateTracker
         sql.setString(5, core);
         sql.setString(6, id);
         sql.executeUpdate();
+        sql.close();
     }
 
     /* Constructor:
