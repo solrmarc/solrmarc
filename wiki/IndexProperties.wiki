@@ -90,7 +90,9 @@ A field specification consists of a three-digit string (000 – 999) optionally 
 
  * *no subfields specified*, e.g {{{100}}} - all subfields of the specific Marc field, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
 
- * *single letter after the field*, e.g. {{{041a}}} - for each occurrence of the Marc field, each occurrence of the subfield will create a Solr field instance of the contents of the subfield.  Note: if you want the subfield values to be concatenated, repeat the letter, e.g. {{{650aa}}}
+ * *single letter after the field*, e.g. {{{041a}}} - for each occurrence of the Marc field, each occurrence of the subfield will create a Solr field instance of the contents of the subfield.
+
+ * *same single letter after the field repeated*, e.g. {{{650aa}}} - for each occurrence of the Marc field, one space separated concatenation of all occurrences of the subfield will be a Solr field instance in the Solr doc.
 
  * *multiple letters after the field*, e.g. {{{100abcdq}}} - for each occurrence of the field, all the indicated subfields, in order of occurrence in the Marc record, will be concatenated into a single value.  Each occurrence of the Marc field will create separate instance of the Solr field in the Solr document. 
 
