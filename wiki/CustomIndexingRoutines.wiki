@@ -1,4 +1,4 @@
-#summary Custom indexing methods available for use in index.properties.
+#summary Pre-defined Custom Indexing Methods Available for Use in index.properties.
 
 = Introduction =
 
