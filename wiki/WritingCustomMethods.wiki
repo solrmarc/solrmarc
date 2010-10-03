@@ -2,7 +2,7 @@
 
 == Introduction ==
 
-Occasionally you need processing that is not already available in SolrMarc.  This page describes how to write your own custom indexing methods in java. For instructions on how to write custom indexing _scripts_ that don't require compiling, see [WritingCustomScripts].  
+Occasionally you need processing that is not already available in SolrMarc.  This page describes how to write your own custom indexing methods in java. For instructions on how to write custom indexing [http://www.beanshell.org BeanShell] _scripts_ that don't require compiling, see [WritingCustomScripts].  
 
 First, you should check if there is a pre-existing "custom" indexing method (see [CustomIndexingRoutines]) that can do what you need.
 
