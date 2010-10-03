@@ -1,6 +1,6 @@
 #summary Writing Your Own Custom Indexing Scripts
 
-= Introduction =
+== Introduction ==
 
 Occasionally you need processing that is not already available in SolrMarc.  This page describes how to write custom indexing scripts.
 
