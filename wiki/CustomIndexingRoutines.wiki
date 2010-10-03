@@ -1,6 +1,6 @@
 #summary Pre-defined Custom Indexing Methods Available for Use in index.properties.
 
-= Introduction =
+== Introduction ==
 
 It is sometimes necessary to do custom processing of values during indexing.  This page lists some of the pre-defined indexing routines included in SolrMarc to help solve common problems along with a short description of what each of them does.  For more details on how to call these functions, see the [IndexProperties] page.
 
