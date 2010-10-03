@@ -6,7 +6,7 @@ Occasionally you need processing that is not already available in SolrMarc.  Thi
 
 First, you should check if there is a pre-existing "custom" indexing method (see [CustomIndexingRoutines]) that can do what you need.
 
-== Creating Custom Indexing Routines ==
+= Creating Custom Indexing Routines =
 
 If you are unable to accomplish what you want to do using any of the other provided indexing techniques: 
  * Field Specifications [IndexProperties], 
