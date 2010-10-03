@@ -13,9 +13,9 @@ Custom indexing scripts are a way to extend !SolrMarc even if you started from a
 == Creating Custom Indexing Routines ==
 
 If you are unable to accomplish what you want to do using any of the other provided indexing techniques: 
-* Field Specifications [IndexProperties], 
-* Pattern Matching [IndexProperties],
-* pre-defined Custom Indexing Methods [CustomIndexingRoutines])
+ * Field Specifications [IndexProperties], 
+ * Pattern Matching [IndexProperties],
+ * pre-defined Custom Indexing Methods [CustomIndexingRoutines])
 then there is the option to create your own custom indexing functions.
 
 Steps to create a custom indexing function:
