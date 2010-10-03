@@ -6,7 +6,7 @@ It is sometimes necessary to do custom processing of values during indexing.  Th
 
 This page may get out of date - the most complete information can be found in the javadocs (once we have them all written) or in the source code.
 
-= Details =
+= Pre-Defined Custom Indexing Methods =
 
 *getAllAlphaExcept(fieldSpec)*:
   For _each_ occurrence of a MARC field in the !fieldSpec list, concatenate the alphabetic subfield contents _except_ the ones specified, using a space separator.
