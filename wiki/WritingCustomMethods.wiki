@@ -1,4 +1,4 @@
-#summary Writing Your Own Custom indexing methods for use in index.properties.
+#summary Writing Your Own Custom Indexing Methods
 
 = Introduction =
 
