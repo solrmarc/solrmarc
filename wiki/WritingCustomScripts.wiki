@@ -10,7 +10,7 @@ You might want to check if there is a pre-existing "custom" indexing method (see
 
 If you want to write in java, see [WritingCustomMethods]. 
 
-= Custom Indexing Scripts =
+= Writing Custom Indexing Scripts =
 
 If you are unable to accomplish what you want to do using any of the other provided indexing techniques: 
  * Field Specifications [IndexProperties], 
