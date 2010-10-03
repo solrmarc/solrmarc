@@ -12,6 +12,12 @@ If you want to write in java, see [WritingCustomMethods].
 
 = Custom Indexing Scripts =
 
+If you are unable to accomplish what you want to do using any of the other provided indexing techniques: 
+ * Field Specifications [IndexProperties], 
+ * Pattern Matching [IndexProperties],
+ * pre-defined Custom Indexing Methods [CustomIndexingRoutines]
+then there is the option to create your own custom indexing functions.
+
 The syntax of the language [http://www.beanshell.org BeanShell] for creating a custom indexing script is _very_ similar to java.  If you obtain the java source code for a custom indexing routine from someone, and want to implement that routine in a !BeanShell script, it usually takes only about 5 minutes to manually convert.  
 
 The syntax that you need to use in your index.properties file to reference a custom indexing script is very similar to was described above for referencing a custom indexing routine.  You can reference a custom-created indexing script, by specifying {{{script}}} as the second value in the field specification entry as shown in the example below:
