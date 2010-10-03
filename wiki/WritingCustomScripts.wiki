@@ -16,7 +16,7 @@ If you are unable to accomplish what you want to do using any of the other provi
  * Field Specifications [IndexProperties], 
  * Pattern Matching [IndexProperties],
  * pre-defined Custom Indexing Methods [CustomIndexingRoutines]
-then there is the option to create your own custom indexing functions.
+then there is the option to create your own custom indexing with scripts.
 
 The syntax of the language [http://www.beanshell.org BeanShell] for creating a custom indexing script is _very_ similar to java.  If you obtain the java source code for a custom indexing routine from someone, and want to implement that routine in a !BeanShell script, it usually takes only about 5 minutes to manually convert.  
 
