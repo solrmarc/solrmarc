@@ -1,6 +1,6 @@
 #summary Writing Your Own Custom Indexing Methods
 
-= Introduction =
+== Introduction ==
 
 Occasionally you need processing that is not already available in SolrMarc.  This page describes how to write your own custom indexing methods in java. For instructions on how to write custom indexing _scripts_ that don't require compiling, see [WritingCustomScripts].  
 
