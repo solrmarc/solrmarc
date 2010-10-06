@@ -1,5 +1,6 @@
 package org.solrmarc.marc;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -9,6 +10,7 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.VariableField;
 
 
 /**
@@ -245,24 +247,47 @@ public class MarcCombiningReader implements MarcReader
     static public Record combineRecords(Record currentRecord, Record nextRecord, String idsToMerge)
     {
         List fields = nextRecord.getVariableFields();
-        for (Object field : fields)
+        for (Object f : fields)
         {
-            if (field instanceof ControlField)
+            VariableField field = (VariableField)f;
+            if (field.getTag().matches(idsToMerge))
             {
-                ControlField cf = (ControlField) field;
-                if (cf.getTag().matches(idsToMerge))
-                {
-                    currentRecord.addVariableField(cf);
-                }
+                currentRecord.addVariableField(field);
             }
-            else if (field instanceof DataField)
+        }
+        return(currentRecord);
+    }
+    
+    static public Record combineRecords(Record currentRecord, Record nextRecord, String idsToMerge, String fieldInsertBefore)
+    {
+        List existingFields = currentRecord.getVariableFields();
+        List fieldsToMove = new ArrayList();
+        // temporarily remove some existing fields
+        for (Object f : existingFields)
+        {
+            VariableField field = (VariableField)f;
+            if (field.getTag().matches(fieldInsertBefore))
             {
-                DataField df = (DataField) field;
-                if (df.getTag().matches(idsToMerge))
-                {
-                    currentRecord.addVariableField(df);
-                }
+                fieldsToMove.add(field);
+                currentRecord.removeVariableField(field);
             }
+        }
+
+        List fields = nextRecord.getVariableFields();
+        for (Object f : fields)
+        {
+            VariableField field = (VariableField)f;
+            if (field.getTag().matches(idsToMerge))
+            {
+                currentRecord.addVariableField(field);
+            }
+        }
+        
+        // now add back the temporarily removed fields
+        for (Object f : fieldsToMove)
+        {
+            VariableField field = (VariableField)f;
+            currentRecord.addVariableField(field);
         }
         return(currentRecord);
     }
