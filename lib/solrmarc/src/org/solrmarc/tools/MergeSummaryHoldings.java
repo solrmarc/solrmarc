@@ -206,7 +206,7 @@ public class MergeSummaryHoldings implements MarcReader
     
     private static void processMergeSummaryHoldings(RawRecordReader input0, String summaryHoldingsMarcFileName)
     {
-        String fieldsToMerge = "852|866|867|863|853";
+        String fieldsToMerge = "852|866|867|863|853|868";
         MergeSummaryHoldings merger = new MergeSummaryHoldings(input0,  true, false, true, "MARC8", 
                                                                summaryHoldingsMarcFileName, fieldsToMerge);
         RawRecord rec0 = null;
@@ -220,17 +220,24 @@ public class MergeSummaryHoldings implements MarcReader
                 if (rec1 != null)
                 {
                     Record record0 = rec0.getAsRecord(true, false, "999", "MARC8");
+                    Record record0_orig = null;
+                    boolean removedField = false;
                     List<VariableField> lvf = (List<VariableField>)record0.getVariableFields(fieldsToMerge.split("[|]"));
                     for (VariableField vf : lvf)
                     {
                         record0.removeVariableField(vf);
+                        removedField = true;
                     }
+                    if (removedField) record0_orig = rec0.getAsRecord(true, false, "999", "MARC8");
                     Record record1 = rec1.getAsRecord(true, false, fieldsToMerge, "MARC8");
-                    record0 = MarcCombiningReader.combineRecords(record0, record1, fieldsToMerge);
-                    writer.write(record0);
-                    System.out.flush();
+                    record0 = MarcCombiningReader.combineRecords(record0, record1, fieldsToMerge, "999");
+                    if (allRecords == true || !removedField || !record0_orig.toString().equals(record0.toString()))
+                    {
+                        writer.write(record0);
+                        System.out.flush();
+                    }
                 }
-                else if (allRecords != false)
+                else if (allRecords == true)
                 {
                     System.out.write(rec0.getRecordBytes());
                     System.out.flush();
