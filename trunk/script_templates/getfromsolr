@@ -58,11 +58,11 @@ fi
 
 if [[ "$flag" == "-vv" ]] 
 then
-  echo config = $config
-  echo url = $url
-  echo query = $query
-  echo id = $id
-  echo field = $field
+  echo config = $config 1>&2
+  echo url = $url 1>&2
+  echo query = $query 1>&2
+  echo id = $id 1>&2
+  echo field = $field 1>&2
 fi
 
 if [ "$url" == "" ]
