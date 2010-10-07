@@ -157,6 +157,30 @@ do
     mv $file.updated $file
 done
 
+#now update the AllShadowedIds.txt file used for shadowing records and select out records whose shadowed-edness has changed.
+
+shadowedDir=/usr/local/projects/marc/incoming
+shadowedRaw=$shadowedDir/AllShadowedIdsRaw.txt
+shadowedIds=$shadowedDir/AllShadowedIds.txt
+shadowedPrev=$shadowedDir/prev_AllShadowedIds.txt
+patch_dir=/usr/local/projects/marc/patched_debug
+shadowedChangedRecs=$patch_dir/changed_shadow_recs_`date +%Y%m%d`.mrc
+
+if test "$shadowedRaw" -nt "$shadowedIds"
+then
+    mv $shadowedIds $shadowedPrev
+
+    sed -e 's/u//' < $shadowedRaw | sort -n | sed -e 's/^/u/' > $shadowedIds
+
+    cp $shadowedIds /usr/local/projects/solrmarc-2.1/dist
+
+    shadowed_changed_ids=$shadowedDir/AllShadowedChanges_`date +%Y%m%d`.txt
+
+    cat $shadowedPrev $shadowedIds | dos2unix | sed -e 's/u//' | sort -n | uniq -u | sed -e 's/^/u/' | cut -d'|' -f1 | uniq > $shadowed_changed_ids
+
+    cat /usr/local/projects/marc/full_dump_patched/*.mrc | getrecord $shadowed_changed_ids > $shadowedChangedRecs
+fi
+
 
 if [ $verbose -eq "1" ] ; then
     echo move incoming files to processed dir
