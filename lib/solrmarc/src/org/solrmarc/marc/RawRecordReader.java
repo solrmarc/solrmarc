@@ -105,7 +105,7 @@ public class RawRecordReader
             {    
                 reader = new RawRecordReader(new FileInputStream(new File(args[0])));
             }            
-            if (!args[1].equals(".txt"))
+            if (!args[1].endsWith(".txt"))
             {
                 String idRegex = args[1].trim();
                 processInput(reader, idRegex, null);
