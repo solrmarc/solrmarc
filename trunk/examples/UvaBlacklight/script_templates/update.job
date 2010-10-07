@@ -60,10 +60,13 @@ fi
 update.patched.merge.job $verbose
 patch_dir=/usr/local/projects/marc/patched_debug
 patch_out=$patch_dir/location_patch_`date +%Y%m%d`.mrc 
+summary_hold_out=$patch_dir/summary_holdings_`date +%Y%m%d`.mrc 
 
 if [ -f "$patch_out" ] ; then
     cp $patch_out $DATADIR/incoming_debug
     cp $patch_out $DATADIR/incoming_multicore_2
+    cp $summary_hold_out $DATADIR/incoming_debug
+    cp $summary_hold_out $DATADIR/incoming_multicore_2
 fi
 
 if [ "$verbose" == "1" ] ; then
