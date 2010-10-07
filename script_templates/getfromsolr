@@ -22,44 +22,54 @@ id=
 url=
 config=
 flag=
+field=
 
-case $1 in
-http*) url=$1 ;;
-*.properties) config=$1 ;;
-*:*) query=$1 ;;
-[A-Za-z0-9]*) id=$1 ;;
--v) flag=$1 ;;
--vv) flag=$1 ;;
-esac
+handle_arg() {
+  if [ ! -z $1 ]
+  then
+    case $1 in
+      http*) url=$1 ;;
+      *.properties) config=$1 ;;
+      *:*) query=$1 ;;
+      [A-Za-z0-9]*)
+         if [[ "$id" == ""  && "$query" == "" ]]
+         then
+            id=$1
+         else
+            field=$1
+         fi
+         ;;
+      -v) flag=$1 ;;
+     -vv) flag=$1 ;;
+     esac
+   fi
+}
 
-case $2 in
-http*) url=$2 ;;
-*.properties) config=$2 ;;
-*:*) query=$2 ;;
-[A-Za-z0-9]*) id=$2 ;;
--v) flag=$2 ;;
--vv) flag=$2 ;;
-esac
-
-case $3 in
-http*) url=$3 ;;
-*.properties) config=$3 ;;
-*:*) query=$3 ;;
-[A-Za-z0-9]*) id=$3 ;;
--v) flag=$3 ;;
--vv) flag=$3 ;;
-esac
+handle_arg $1
+handle_arg $2
+handle_arg $3
+handle_arg $4
+handle_arg $5
 
 if [[ "$query" == "" && "$id" != "" ]]
 then
     query="id:$id"
 fi
 
+if [[ "$flag" == "-vv" ]] 
+then
+  echo config = $config
+  echo url = $url
+  echo query = $query
+  echo id = $id
+  echo field = $field
+fi
+
 if [ "$url" == "" ]
 then
-    java -Dsolrmarc.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/SolrMarc.jar $config "$query" 2> /dev/null
+    java -Dsolrmarc.main.class="org.solrmarc.marc.SolrReIndexer" -jar $scriptdir/SolrMarc.jar $config "$query" $field 2> /dev/null
 else
-    java -Dsolrmarc.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar $scriptdir/SolrMarc.jar $flag $url "$query" 
+    java -Dsolrmarc.main.class="org.solrmarc.solr.RemoteSolrSearcher" -jar $scriptdir/SolrMarc.jar $flag $url "$query" $field 
 fi
 
 exit 0
