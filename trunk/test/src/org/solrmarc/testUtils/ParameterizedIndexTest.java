@@ -47,6 +47,7 @@ public class ParameterizedIndexTest
      */
     public void verifyIndexingResults() throws Exception 
     {
+        boolean ordered = false;
         MarcMappingOnly marcMappingTest = new MarcMappingOnly();
         marcMappingTest.init(new String[]{config, "NONE", "id"});
         String recordToLookAt = null;  // null means just get the first record from the named file
@@ -58,7 +59,7 @@ public class ParameterizedIndexTest
         }
         String fullRecordFilename = dataDirectory + File.separator + recordFilename;
         Object solrFldValObj;
-        if (fieldToCheck.matches("^[0-9].*"))
+        if (fieldToCheck.matches("^[0-9].*") || fieldToCheck.matches("^LNK[0-9].*"))
         {
             solrFldValObj = marcMappingTest.lookupRawRecordValue(recordToLookAt, fullRecordFilename, fieldToCheck);
         }
@@ -72,6 +73,11 @@ public class ParameterizedIndexTest
             solrFldValObj = solrFldName2ValMap.get(fieldToCheck);
         }
         String expected[];
+        if (expectedValue.startsWith("*ordered*"))
+        {
+            ordered = true;
+            expectedValue = expectedValue.substring(9).trim();
+        }
         if (expectedValue.length() > 0)
             expected = expectedValue.split("[|]");
         else
@@ -100,7 +106,6 @@ public class ParameterizedIndexTest
                 received[i++] = fldVal.toString();
             }
         }
-        
         for (String expect : expected)
         {
             boolean foundIt = false;
@@ -146,6 +151,17 @@ public class ParameterizedIndexTest
             }
             assertTrue("Solr field " + fieldToCheck + " had extra unexpected value " + receive, foundIt);
         }
+        if (ordered) 
+        {
+            for (int i = 0; i < expected.length; i++)
+            {
+                if (!expected[i].equals(received[i]))
+                {
+                    System.out.println("Solr field " + fieldToCheck + " results not in expected order at item #"+ i + " expected " + expected[i] + " but found " + received[i]);
+                    assertTrue("Solr field " + fieldToCheck + " results not in expected order at item #"+ i + " expected " + expected[i] + " but found " + received[i], expected[i].equals(received[i]));
+                }
+            }
+        }
         System.out.println(config + " : " + recordFilename + " : " + fieldToCheck + " --> " + expectedValue);
     }
     
@@ -173,7 +189,22 @@ public class ParameterizedIndexTest
         while (( line = rIn.readLine()) != null)
         {
         	if (line.startsWith("#") || line.trim().length() == 0) continue;
-            String split[] = line.split(", ", 4);
+        	String split[];
+        	if (line.matches(".*[(]rec.?[,].*[)].?,.*"))
+        	{
+        	    split = new String[4];
+        	    String smallSplit[] = line.split(", ?",3);
+        	    split[0] = smallSplit[0];
+        	    split[1] = smallSplit[1];
+        	    int index = smallSplit[2].indexOf("),");
+        	    if (index != -1)
+        	    {
+                    split[2] = smallSplit[2].substring(0, index+1);
+                    split[3] = smallSplit[2].substring(index+2).trim();
+        	    }
+        	}
+            else
+                split = line.split(", ", 4);
             if (split.length == 4) 
                 result.add(split);
         }

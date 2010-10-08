@@ -141,6 +141,9 @@ public class MarcMappingOnly extends MarcHandler
     public Set<String> lookupRawRecordValue(String desiredRecId, String mrcFileName, String fieldSpec)
     {
         loadReader("FILE", mrcFileName);
+        String propertyFilePathStr = System.getProperty("solrmarc.path");
+        String propertyFilePaths[]  = makePropertySearchPath(propertyFilePathStr, null, null, homeDir);
+  //      String propertyFilePaths[] = propertyFilePathStr == null ? new String[0] : propertyFilePathStr.split("[|]");
         while (reader != null && reader.hasNext())
         {
             try
@@ -151,16 +154,33 @@ public class MarcMappingOnly extends MarcHandler
                 if (desiredRecId != null && !thisRecId.equals(desiredRecId)) continue;
 
                 Set<String> result = null;
-                if (fieldSpec.matches("^[0-9].*")) // if it is a standard 245a type field spec
+                String translationMap = null;
+                if (fieldSpec.matches(".*[{].*[}]"))
+                {
+                    translationMap = fieldSpec.replaceAll(".*[{](.*)[}]", "$1");
+                    fieldSpec = fieldSpec.substring(0, fieldSpec.indexOf('{'));
+                }
+                if (fieldSpec.matches("^[0-9].*") || fieldSpec.matches("^LNK[0-9].*")) // if it is a standard 245a type field spec
                 {
                     result = SolrIndexer.getFieldList(record, fieldSpec);
+                    if (translationMap != null)
+                    {
+                        Properties indexingProps = new Properties();
+                        indexingProps.setProperty("marcmappingtest", fieldSpec + ", " + translationMap );
+                        SolrIndexer indexer = SolrIndexer.indexerFromProperties(indexingProps, propertyFilePaths);
+                        String translationMapName = indexer.loadTranslationMap(translationMap);
+                        result = org.solrmarc.tools.Utils.remap(result, indexer.findMap(translationMapName), true);
+                    }
                 }
                 else if (fieldSpec.contains("(rec"))
                 {
                     String indexParm = fieldSpec.replaceFirst("\\(rec ?,?", "(");
                     Properties indexingProps = new Properties();
-                    indexingProps.setProperty("marcmappingtest", "custom, "+ indexParm);
-                    SolrIndexer indexer = SolrIndexer.indexerFromProperties(indexingProps, null);
+                    if (translationMap != null)
+                        indexingProps.setProperty("marcmappingtest", "custom, "+ indexParm + ", " + translationMap);
+                    else
+                        indexingProps.setProperty("marcmappingtest", "custom, "+ indexParm);
+                    SolrIndexer indexer = SolrIndexer.indexerFromProperties(indexingProps, propertyFilePaths);
                     Map<String, Object> indexMap = indexer.map(record);
                     Object tmpResult = indexMap.get("marcmappingtest");
                     if (tmpResult instanceof Set)
