@@ -161,8 +161,14 @@
          </ant>
     </target>
         
-    <target name="junittest" depends="init" description="Run junittest test suite in local build directory">
-         <ant antfile="${site.dir}/build.xml" target="junittest" inheritAll="false" >
+    <target name="core_junittest" depends="init" description="Run junittest test suite in local build directory">
+         <ant antfile="${site.dir}/build.xml" target="core_junittest" inheritAll="false" >
+             <property name="dist.path" location="${dist.dir}" />
+         </ant>
+    </target>
+    
+    <target name="site_junittest" depends="init" description="Run junittest test suite in local build directory">
+         <ant antfile="${site.dir}/build.xml" target="site_junittest" inheritAll="false" >
              <property name="dist.path" location="${dist.dir}" />
          </ant>
     </target>
@@ -173,20 +179,22 @@
          </ant>
     </target>
     
-    <target name="indextest" depends="init" description="Run indextest test suite in local build directory">
-         <ant antfile="${site.dir}/build.xml" target="indextest" inheritAll="false" >
+    <target name="site_indextest" depends="init" description="Run indextest test suite in local build directory">
+         <ant antfile="${site.dir}/build.xml" target="site_indextest" inheritAll="false" >
              <property name="dist.path" location="${dist.dir}" />
          </ant>
     </target>
     
-    <target name="maintest" depends="init" description="Run indextest test suite from top-level directory">
-         <ant antfile="${site.dir}/build.xml" target="maintest" inheritAll="false" >
+    <target name="core_indextest" depends="init" description="Run indextest test suite from top-level directory">
+         <ant antfile="${site.dir}/build.xml" target="core_indextest" inheritAll="false" >
              <property name="dist.path" location="${dist.dir}" />
          </ant>
     </target>
-
-    <target name="runCoreTestsWithCoverage" description="Run tests for Core SolrMarc code with code coverage info">
-         <ant antfile="${lib.dir}/solrmarc/build.xml" target="runCoreTestsWithCoverage" inheritAll="false" />
+    
+    <target name="runCoreTestsWithCoverage" depends="init" description="Run tests for Core SolrMarc code with code coverage info">
+         <ant antfile="${site.dir}/build.xml" target="testCoverage" inheritAll="false" >
+             <property name="dist.path" location="${dist.dir}" />
+         </ant>
     </target>
     
 </project>

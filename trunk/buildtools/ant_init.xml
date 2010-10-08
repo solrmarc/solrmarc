@@ -98,7 +98,7 @@
                                     <equals arg1="c" arg2="${input.continue.processing.with.not.uptodate}"/>
                                     <then>
                                         <copy_files_from_example_directory update="true" />
-                                        <copy_files_from_top_level />
+                                      <!--  <copy_files_from_top_level /> -->
                                     </then>
                                 </elseif>
                             </if>
@@ -106,6 +106,7 @@
                     </if>
                 </then>
             </if>
+            <copy_files_from_top_level />
         </sequential>
     </macrodef>
 
@@ -476,7 +477,15 @@
                 </fileset>
             </copy>
             <copy todir="${site.test.dir}/data" preservelastmodified="true" overwrite="false">
-                <fileset dir="${test.dir}/data" includes="*.mrc,maintest.txt" >
+                <fileset dir="${test.dir}/data" includes="*.mrc,maintest.txt,smoketest/**" >
+                    <depend targetdir="${site.test.dir}/data" />
+                </fileset>
+            </copy>
+            <copy todir="${site.test.dir}/${build.dir}" preservelastmodified="true" overwrite="false">
+                <fileset dir="${lib.dir}/test" includes="**/*.jar,**/*.txt" >
+                    <depend targetdir="${site.test.dir}/data" />
+                </fileset>
+                <fileset dir="${lib.dir}/solrmarc/build/test" includes="**/*.jar" >
                     <depend targetdir="${site.test.dir}/data" />
                 </fileset>
             </copy>

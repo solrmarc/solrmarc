@@ -18,17 +18,17 @@
     </tstamp>
 
     <path id="classpath.jars" description="Jars for classpath (but not solr jars)">
-        <fileset dir="${lib.dir}" includes="*.jar" excludes="*/*.jar,solr*/*.jar" /> <!-- ?? also exclude jzkit_client.jar ?? -->
+        <fileset dir="${lib.dir}" includes="*.jar" excludes="*/*.jar,jzkit_client.jar" /> <!-- ?? also exclude jzkit_client.jar ?? -->
     </path>
 
     <!-- General Targets -->
 
-    <target name="clean" description="clean the generated directories">
+    <target name="clean" depends="testClean" description="clean the generated directories">
         <delete dir="${build.dir}" />
         <delete dir="${solrmarc.dist.dir}" />
     </target>
 
-    <target name="init" depends="clean" description="create (empty) generated directories">
+    <target name="init" description="create (empty) generated directories">
         <mkdir dir="${build.dir}" />
         <mkdir dir="${solrmarc.dist.dir}" />
     </target>
@@ -41,12 +41,13 @@
                 encoding="utf-8">
             <include name="**/*.java" />
             <exclude name="**/*Test*.java" />
+            <exclude name="**/z3950/*.java" />
             <classpath refid="classpath.jars" />
         </javac>
         
     </target>
     
-    <target name="build" depends="compile,testInit,testCompilePrivate" description="create ${jar.name} in the build directory">
+    <target name="build" depends="compile,testJar" description="create ${jar.name} in the build directory">
         <echo message="${ant.project.name}: ${ant.file}" />
 
         <jar destfile="${build.dir}/${jar.name}">
@@ -57,18 +58,23 @@
             </manifest>
         </jar>
 
-        <!-- the single jar from the core code needs to include test classes 
-        because the local build tests rely on the core code utility test classes -->
-        <antcall target="testJarPrivate" />        
-    </target>
-    
-    <!-- naomi asks:  is this a utility target?  should it go to the bottom? -->
-    <target name="zclient" depends="compile" description="create ${jar.name} in the build directory">
-        <jar destfile="${build.dir}/zclient.jar">
-            <fileset dir="${build.dir}" includes="**/ZClient.class,**/MarcTranslatedReader.class" />
-        </jar>
-    </target>
+        <one-jar destfile="${solrmarc.dist.dir}/${one-jar.name}" 
+               manifest="${buildtools.path}/manifest.mf">
+            <main jar="${build.dir}/${jar.name}" />
+            <lib>
+                <fileset dir="${lib.dir}" includes="*.jar" excludes="jzkit_client.jar" />
+            </lib>
+            <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
+            <fileset dir="${lib.dir}" includes="solr_remote_only/*.jar" />
+<!--            <fileset dir="${lib.dir}" includes="test/*.jar" /> -->
+            <zipfileset dir="${build.dir}" includes="*.jar" />
+<!--            <zipfileset dir="${build.dir}/test" includes="*.jar" prefix="test" /> -->
+       </one-jar> 
 
+        <!-- the single jar from the core code needs to include test classes 
+        because the local build tests rely on the core code utility test classes 
+        <antcall target="testJarPrivate" />        -->
+    </target>
  
     <!-- Testing Targets, including Code Coverage -->
     
@@ -76,7 +82,7 @@
         <delete dir="${core.test.build.dir}" />
     </target>
 
-    <target name="testInit" depends="testClean" 
+    <target name="testInit" 
             description="create (empty) generated test directories">
         <mkdir dir="${core.test.build.dir}" />
     </target>
@@ -101,7 +107,7 @@
             <include name="**/*.java" />
             <classpath>
                 <path refid="test.compile.classpath" />
-                <fileset file="../../log4j.properties" /> 
+ <!--               <fileset file="../../log4j.properties" /> --> 
             </classpath>
         </javac>
     </target>
@@ -120,7 +126,7 @@
             <fileset dir="${build.dir}/test" includes="**/*.class" />
         </jar>
  
-        <!-- note: naomi wonders if the onejar task should have its own target -->
+        <!-- note: naomi wonders if the onejar task should have its own target 
         <one-jar destfile="${solrmarc.dist.dir}/${one-jar.name}" 
                manifest="${buildtools.path}/manifest.mf">
             <main jar="${build.dir}/${jar.name}" />
@@ -132,9 +138,11 @@
             <fileset dir="${lib.dir}" includes="test/*.jar" />
             <zipfileset dir="${build.dir}" includes="*.jar" />
             <zipfileset dir="${build.dir}/test" includes="*.jar" prefix="test" />
-       </one-jar> 
+       </one-jar> -->
         
     </target>
+
+    <target name="testJar" depends="testCompile,testJarPrivate" />
 
 
     <!-- Cobertura (code coverage) targets -->
@@ -164,14 +172,14 @@
     
     <property name="core.coverage.dir" value="${build.dir}/coverage" />
 
-    <target name="runCoreTestsWithCoverage" depends="testCompile, instrumentCore" description="Run tests for Core SolrMarc code with code coverage info">
+    <target name="runCoreTestsWithCoverage" depends="testCompile" description="Run tests for Core SolrMarc code with code coverage info">
         <mkdir dir="${core.coverage.dir}"/>
 
         <path id="instrumented.classpath">
             <pathelement location="${core.instr.dir}" />
             <pathelement location="${build.dir}/test" />
             <path refid="test.compile.classpath" />
-            <path refid="cobertura.classpath" />
+      <!--      <path refid="cobertura.classpath" /> -->
         </path>
          
         <junit showoutput="yes" printsummary="yes" fork="yes" forkmode="perBatch">
@@ -190,9 +198,10 @@
             </batchtest>
             
         </junit>
+ 
 
-        <cobertura-report format="html" destdir="${core.coverage.dir}" srcdir="${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/>
-        <cobertura-report format="xml" destdir="${core.coverage.dir}" srcdir="${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/>
+ <!--       <cobertura-report format="html" destdir="${core.coverage.dir}" srcdir="${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/>
+        <cobertura-report format="xml" destdir="${core.coverage.dir}" srcdir="${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/> -->
     </target>    
 
     
@@ -203,5 +212,12 @@
             <classpath refid="classpath.jars" />
         </java>
     </target>
-    
+        
+    <!-- naomi asks:  is this a utility target?  should it go to the bottom? -->
+    <target name="zclient" depends="compile" description="create ${jar.name} in the build directory">
+        <jar destfile="${build.dir}/zclient.jar">
+            <fileset dir="${build.dir}" includes="**/ZClient.class,**/MarcTranslatedReader.class" />
+        </jar>
+    </target>
+   
 </project>
