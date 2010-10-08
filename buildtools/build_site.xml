@@ -141,7 +141,7 @@
         <delete dir="${site.test.build.dir}" />
     </target>
 
-    <target name="testInit" depends="testClean" 
+    <target name="testInit" 
             description="create (empty) generated test directories">
         <mkdir dir="${site.test.build.dir}" />
         <property name="site.test.jar" value="${custom.jar.name}Test.jar" />
@@ -182,7 +182,7 @@
     </target>
 
     <target name="testCompile" depends="testInit,compile" if="test.has.source" description="Compile test source code into test build dir"> 
-        <get_jars_from_solrmarc_onejar junit="test/*.jar" todir="${site.test.dir}/tmp_solrmarc_jars" />
+        <get_jars_from_solrmarc_onejar todir="${site.test.dir}/tmp_solrmarc_jars" />
         <path id="test.compile.classpath.jars" description="Jars for classpath for building/running Test code">
             <fileset dir="${site.lib.dir}" includes="*.jar" excludes="SolrMarc.jar" />
             <fileset file="${site.build.dir}/${custom.jar.name}.jar" />
@@ -203,15 +203,56 @@
     </target>
 
     <target name="testJar" depends="build,testCompile" if="test.has.source" description="jar up test class files">
-         <echo message=" creating test jar :  ${site.test.build.dir}/${site.test.jar}" />
+        <echo message=" creating test jar :  ${site.test.build.dir}/${site.test.jar}" />
         <jar destfile="${site.test.build.dir}/${site.test.jar}" >
               <fileset dir="${site.test.build.dir}" includes="**/*.class" /> 
         </jar>
     </target>
     
-    <target name="test" depends="maintest,smoketest,indextest,junittest" description="run the four types of tests" >
+    <target name="test" depends="core_junittest,core_indextest,smoketest,site_indextest,site_junittest" description="run the four types of tests" >
     </target>
     
+    <target name="testCoverage" depends="dist,testJar" description="run tests with coverage enabled" >
+        <property name="solr.jar.file.dir" value="${site.test.dir}/tmp_solr_war_jars" />
+        <get_jars_from_solr_war src="${jetty.install.dir}/webapps/solr.war" todir="${solr.jar.file.dir}" />
+        <get_jars_from_solrmarc_onejar todir="${site.test.dir}/tmp_solrmarc_jars" />
+
+        <instrumentCore />
+        <property name="core.coverage.dir" value="${core.instr.dir}/output" />
+        <set_path_for_junit_tests />
+        <path id="test.run.classpath.core.only.jars.with.coverage">
+            <path location="${core.instr.dir}/MarcImporter.jar" />
+            <path refid="test.run.classpath.core.only.jars" />
+            <path refid="cobertura.classpath" />
+        </path>
+        <path id="test.run.classpath.include.site.jars.with.coverage">
+            <path location="${core.instr.dir}/MarcImporter.jar" />
+            <path refid="test.run.classpath.include.site.jars" />
+            <path refid="cobertura.classpath" />
+        </path>
+
+        <run_jarfull_of_junit_tests classpathrefid="test.run.classpath.core.only.jars.with.coverage" teststoexclude="org/solrmarc/testUtils/**" 
+             teststorun="${site.test.build.dir}/SolrMarcJunit.jar" coberturaDatafileName="${core.instr.dir}/cobertura.ser" 
+             testConfigDir="${test.data.dir}/smoketest" tesstConfigFile="${test.data.dir}/smoketest/test_config.properties" 
+             solrPath="${test.data.dir}/smoketest/solr" solrDataDir="${test.data.dir}/smoketest/solr" />
+
+        <run_parameterized_junit_tests classpathrefid="test.run.classpath.core.only.jars.with.coverage" datafile="maintest.txt" 
+            coberturaDatafileName="${core.instr.dir}/cobertura.ser" />
+        
+        <!--
+        <run_parameterized_junit_tests classpathrefid="test.run.classpath.include.site.jars.with.coverage" datafile="indextest.txt" 
+            coberturaDatafileName="${core.instr.dir}/cobertura.ser" />
+        -->
+        
+        <cobertura-report format="html" destdir="${core.coverage.dir}" srcdir="../lib/solrmarc/${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/>
+        <cobertura-report format="xml" destdir="${core.coverage.dir}" srcdir="../lib/solrmarc/${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/> 
+        
+        <!--  Now delete the jar files that had to be un-jarred from the solr.war file for the test to run -->
+        <delete dir="${solr.jar.file.dir}" deleteonexit="true" quiet="true" />
+        <delete dir="${site.test.dir}/tmp_solrmarc_jars" deleteonexit="true" quiet="true" />
+
+    </target>
+        
     <target name="smoketest" depends="dist,testInit" description="start jetty pointing at test solr, index file, then look for it.">
         <if>
             <equals arg1="${solr.is.multicore}" arg2="false" />
@@ -266,129 +307,71 @@
         <echo level="warning" message="Smoketest Successful!" />
     </target>
 
-    <target name="indextest" depends="dist,testJar" description="run index acceptance test">
+    <target name="site_indextest" depends="dist,testJar" description="run index acceptance test">
         <echo message="solr.path: ${solr.path}" />
         <echo message="solr.path being used for testing: ${site.test.solr.dir}" />
         <property name="solr.jar.file.dir" value="${site.test.dir}/tmp_solr_war_jars" />
         <get_jars_from_solr_war src="${jetty.install.dir}/webapps/solr.war" todir="${solr.jar.file.dir}" />
-        <get_jars_from_solrmarc_onejar junit="test/*.jar"  todir="${site.test.dir}/tmp_solrmarc_jars" />
-
-        <if >
-            <isset property="top_level_test_only" />
-            <then>
-                <path id="test.run.classpath.jars">
-                    <fileset dir="${site.test.dir}/tmp_solrmarc_jars" includes="*.jar" />
-                    <fileset dir="${solr.jar.file.dir}" includes="*.jar" />
-                </path>
-                <property name="indextest.data.file" value="maintest.txt" /> 
-            </then>
-            <else>
-                <path id="test.run.classpath.jars">
-                    <fileset file="${site.build.dir}/${custom.jar.name}.jar" />
-                    <fileset dir="${site.test.dir}/tmp_solrmarc_jars" includes="*.jar" />
-                    <fileset file="${site.test.build.dir}/${site.test.jar}" />
-                    <fileset dir="${solr.jar.file.dir}" includes="*.jar" />
-                </path>
-                <property name="indextest.data.file" value="indextest.txt" /> 
-            </else>
-        </if >
+        <get_jars_from_solrmarc_onejar todir="${site.test.dir}/tmp_solrmarc_jars" />
         
-        <property name="indextest.class" value="org.solrmarc.testUtils.ParameterizedIndexTest" />
-        <echo message="indextest class = ${indextest.class} " />
-        <echo message="solr.data.dir = ${site.test.solr.dir}/data " />
-      
-        <if >
-            <and> 
-                <isset property="indextest.class" />
-                <available classname="${indextest.class}" classpathref="test.run.classpath.jars" />
-            </and>
-            <then>
-                <if>
-                    <available filepath="${test.data.dir}" file="${indextest.data.file}" type="file" />
-                    <then>
-                        <junit showoutput="yes" printsummary="yes" dir="${dist.path}" fork="yes" forkmode="once" >
-                            <formatter type="xml" usefile="yes" />
-                
-                            <classpath>
-                                <path refid="test.run.classpath.jars" />
-                            </classpath>
-                
-                            <sysproperty key="test.data.path" path="${test.data.dir}" />
-                            <sysproperty key="test.data.file" value="${indextest.data.file}" />
-                            <sysproperty key="solr.path" path="${site.test.solr.dir}" />
-                            <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
-                            <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
-                            <test name="${indextest.class}" />
-                        </junit>
-                    </then>
-                    <else>
-                        <echo message="test data file ${indextest.data.file} not available" />
-                    </else>
-                </if>
-            </then>
-            <else>
-                <echo message="test class ${indextest.class} not defined or not available" />
-            </else>
-        </if> 
+        <set_path_for_junit_tests />
+        <run_parameterized_junit_tests classpathrefid="test.run.classpath.include.site.jars" datafile="indextest.txt" />
+        
         <!--  Now delete the jar files that had to be un-jarred from the solr.war file for the test to run -->
         <delete dir="${solr.jar.file.dir}" deleteonexit="true" quiet="true" />
         <delete dir="${site.test.dir}/tmp_solrmarc_jars" deleteonexit="true" quiet="true" />
     </target>
     
-    <target name="maintest" depends="dist,testJar" description="run indexscript tests for main program">
-        <antcall target="indextest" >
-            <param name="top_level_test_only" value="true" />
-        </antcall>
-    </target>
-    
-    <target name="junittest" depends="dist,testJar" description="run junit tests for bib index">
+    <target name="site_junittest" depends="dist,testJar" description="run junit tests for bib index">
         <echo message="solr.path: ${solr.path}" />
         <echo message="solr.path being used for testing: ${site.test.solr.dir}" />
         <property name="solr.jar.file.dir" value="${site.test.dir}/tmp_solr_war_jars" />
         <get_jars_from_solr_war src="${jetty.install.dir}/webapps/solr.war" todir="${solr.jar.file.dir}" />
-        <get_jars_from_solrmarc_onejar junit="test/*.jar"  todir="${site.test.dir}/tmp_solrmarc_jars" />
+        <get_jars_from_solrmarc_onejar todir="${site.test.dir}/tmp_solrmarc_jars" />
 
-        <path id="test.run.classpath.jars">
-            <fileset file="${site.build.dir}/${custom.jar.name}.jar" />
-            <fileset dir="${site.test.dir}/tmp_solrmarc_jars" includes="*.jar" />
-            <fileset file="${site.test.build.dir}/${site.test.jar}" />
-            <fileset dir="${solr.jar.file.dir}" includes="*.jar" />
-        </path>
+        <set_path_for_junit_tests />
         
         <!-- if no junit test class is defined, call the Util Unit test, which tests some of the 
-             utility classes used by SolrMarc. -->
-        <property name="test.class"  value="org.solrmarc.tools.UtilUnitTests" />
+         utility classes used by SolrMarc. -->
+        <property name="test.jar"  value="${site.test.build.dir}/${site.test.jar}" />
         
-        <echo message="test class = ${test.class} " />
-        <echo message="solr.data.dir = ${site.test.solr.dir}/data " />
-      
-        <if >
-            <and> 
-                <isset property="test.class" />
-                <available classname="${test.class}" classpathref="test.run.classpath.jars" />
-            </and>
-            <then>
-                <junit showoutput="yes" printsummary="yes" fork="yes" forkmode="once" dir="${dist.path}">
-                    <formatter type="xml" usefile="yes" />
+        <run_jarfull_of_junit_tests classpathrefid="test.run.classpath.include.site.jars" teststoexclude="org/solrmarc/testUtils/**" 
+             teststorun="${test.jar}"  testConfigDir="${dist.path}" tesstConfigFile="${default.config}" 
+             solrPath="${site.test.solr.dir}" solrDataDir="${site.test.solr.dir}/data" />
         
-                    <classpath>
-                        <path refid="test.run.classpath.jars" />
-                    </classpath>
+        <!--  Now delete the jar files that had to be un-jarred from the solr.war file for the test to run -->
+        <delete dir="${solr.jar.file.dir}" deleteonexit="true" quiet="true" />
+        <delete dir="${site.test.dir}/tmp_solrmarc_jars" deleteonexit="true" quiet="true" />
+    </target>
+    
+    <target name="core_indextest" depends="dist,testJar" description="run indexscript tests for main program">
+        <echo message="solr.path: ${solr.path}" />
+        <echo message="solr.path being used for testing: ${site.test.solr.dir}" />
+        <property name="solr.jar.file.dir" value="${site.test.dir}/tmp_solr_war_jars" />
+        <get_jars_from_solr_war src="${jetty.install.dir}/webapps/solr.war" todir="${solr.jar.file.dir}" />
+        <get_jars_from_solrmarc_onejar todir="${site.test.dir}/tmp_solrmarc_jars" />
+
+        <set_path_for_junit_tests />
+        <run_parameterized_junit_tests classpathrefid="test.run.classpath.core.only.jars" datafile="maintest.txt" />
         
-                    <sysproperty key="test.data.path" path="${test.data.dir}" />
-                    <sysproperty key="test.data.file" value="${test.data.file}" />
-                    <sysproperty key="test.config.dir" path="${dist.path}" />
-                    <sysproperty key="test.config.file" value="${default.config}" />
-                    <sysproperty key="solr.path" path="${site.test.solr.dir}" />
-                    <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
-                    <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
-                    <test name="${test.class}" />
-                </junit>
-            </then>
-            <else>
-                <echo message="test class ${test.class} not defined or not available" />
-            </else>
-        </if> 
+        <!--  Now delete the jar files that had to be un-jarred from the solr.war file for the test to run -->
+        <delete dir="${solr.jar.file.dir}" deleteonexit="true" quiet="true" />
+        <delete dir="${site.test.dir}/tmp_solrmarc_jars" deleteonexit="true" quiet="true" />
+    </target>
+    
+    <target name="core_junittest" depends="dist,testJar" description="run junit tests for bib index">
+        <echo message="solr.path: ${solr.path}" />
+        <echo message="solr.path being used for testing: ${site.test.solr.dir}" />
+        <property name="solr.jar.file.dir" value="${site.test.dir}/tmp_solr_war_jars" />
+        <get_jars_from_solr_war src="${jetty.install.dir}/webapps/solr.war" todir="${solr.jar.file.dir}" />
+        <get_jars_from_solrmarc_onejar todir="${site.test.dir}/tmp_solrmarc_jars" />
+
+        <set_path_for_junit_tests />
+        <run_jarfull_of_junit_tests classpathrefid="test.run.classpath.core.only.jars" teststoexclude="org/solrmarc/testUtils/**" 
+             teststorun="${site.test.build.dir}/SolrMarcJunit.jar" 
+             testConfigDir="${test.data.dir}/smoketest" tesstConfigFile="${test.data.dir}/smoketest/test_config.properties" 
+             solrPath="${test.data.dir}/smoketest/solr" solrDataDir="${test.data.dir}/smoketest/solr" />
+
         <!--  Now delete the jar files that had to be un-jarred from the solr.war file for the test to run -->
         <delete dir="${solr.jar.file.dir}" deleteonexit="true" quiet="true" />
         <delete dir="${site.test.dir}/tmp_solrmarc_jars" deleteonexit="true" quiet="true" />
@@ -463,7 +446,7 @@
                 </else>
             </if>
             <if>  
-                 <available type="file" file="${site.dir}/solrConf/solr.war" />
+                 <available type="file" file="${site.base.dir}/solrConf/solr.war" />
                  <then>
                      <!-- copy war file from solrConf if it is newer. -->
                      <copy overwrite="true" todir="${site.test.dir}/jetty/webapps" failonerror="false">
@@ -636,7 +619,6 @@
     
     <!-- macro to unbundle all of the necessary jars from the SolrMarc One-Jar so they can be used by junit tests -->
     <macrodef name="get_jars_from_solrmarc_onejar" >
-        <attribute name="junit" default="lib/*.jar" />
         <attribute name="todir" />
         <sequential>
             <mkdir dir="@{todir}" />
@@ -644,7 +626,6 @@
                 <patternset>
                     <include name="main/*.jar"/>
                     <include name="lib/*.jar"/>
-                    <include name="@{junit}"/>
                 </patternset>
                 <flattenmapper />
             </unwar>
@@ -665,5 +646,142 @@
             </unwar>
         </sequential>
     </macrodef>
+    
+    <macrodef name="set_path_for_junit_tests" >
+        <sequential>
+             <path id="test.run.classpath.core.only.jars">
+                 <fileset dir="${site.test.dir}/tmp_solrmarc_jars" includes="*.jar" />
+                 <fileset dir="${solr.jar.file.dir}" includes="*.jar" />
+                 <fileset dir="${site.test.build.dir}" includes="**/*.jar" excludes="${site.test.jar}" />
+             </path>
+             <path id="test.run.classpath.include.site.jars">
+                 <fileset file="${site.build.dir}/${custom.jar.name}.jar" />
+                 <fileset dir="${site.test.dir}/tmp_solrmarc_jars" includes="*.jar" />
+                 <fileset dir="${site.test.build.dir}" includes="**/*.jar" />
+                 <fileset dir="${solr.jar.file.dir}" includes="*.jar" />
+             </path>
+         </sequential>
+    </macrodef>
+    
+    <macrodef name="run_parameterized_junit_tests" >
+        <attribute name="classpathrefid" default="test.run.classpath.include.site.jars" />
+        <attribute name="coberturaDatafileName" default="" />
+        <attribute name="datafile" />
+        <sequential>
+             
+            <property name="indextest.class" value="org.solrmarc.testUtils.ParameterizedIndexTest" />
+            <echo message="indextest class = ${indextest.class} " />
+            <echo message="solr.data.dir = ${site.test.solr.dir}/data " />
+            <mkdir dir="${site.test.dir}/output" />          
+            <if >
+                <and> 
+                    <isset property="indextest.class" />
+                    <available classname="${indextest.class}" classpathref="@{classpathrefid}" />
+                </and>
+                <then>
+                    <if>
+                        <available filepath="${test.data.dir}" file="@{datafile}" type="file" />
+                        <then>
+                            <junit showoutput="yes" printsummary="yes" dir="${dist.path}" fork="yes" forkmode="once" >
+                                <formatter type="xml" usefile="yes" />
+                    
+                                <classpath>
+                                    <path refid="@{classpathrefid}" />
+                                </classpath>
+                    
+                                <sysproperty key="net.sourceforge.cobertura.datafile" file="@{coberturaDatafileName}" />
+                                <sysproperty key="test.data.path" path="${test.data.dir}" />
+                                <sysproperty key="test.data.file" value="@{datafile}" />
+                                <sysproperty key="solr.path" path="${site.test.solr.dir}" />
+                                <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
+                                <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
+                                <test name="${indextest.class}" todir="${site.test.dir}/output" />
+                            </junit>
+                        </then>
+                        <else>
+                            <echo message="test data file ${indextest.data.file} not available" />
+                        </else>
+                    </if>
+                </then>
+                <else>
+                    <echo message="test class ${indextest.class} not defined or not available" />
+                </else>
+            </if> 
+        </sequential>
+    </macrodef>
+    
+    
+    <macrodef name="run_jarfull_of_junit_tests" >
+        <attribute name="classpathrefid" />
+        <attribute name="teststorun" />
+        <attribute name="coberturaDatafileName" default="" />
+        <attribute name="testsToExclude" default="" />
+        <attribute name="testConfigDir" />
+        <attribute name="tesstConfigFile" />
+        <attribute name="solrPath" />
+        <attribute name="solrDataDir" />
+        <sequential>            
+            <!-- if no junit test class is defined, call the Util Unit test, which tests some of the 
+                 utility classes used by SolrMarc. -->
+            <property name="test.jar"  value="${site.test.build.dir}/SolrMarcJunit.jar" />
+            
+            <echo message="test jar = ${test.jar} " />
+            <echo message="solr.data.dir = ${site.test.solr.dir}/data " />
+            <mkdir dir="${site.test.dir}/output" />
+            <if >
+                <and> 
+                    <available file="@{teststorun}" />
+                </and>
+                <then>
+                    <junit showoutput="yes" printsummary="yes" fork="yes" forkmode="perBatch" dir="${dist.path}">
+                        <formatter type="xml" usefile="yes" />
+            
+                        <classpath>
+                            <path refid="@{classpathrefid}" />
+                        </classpath>
+                        <sysproperty key="net.sourceforge.cobertura.datafile" file="@{coberturaDatafileName}" />
+                        <sysproperty key="test.data.path" path="${test.data.dir}" />
+                        <sysproperty key="test.data.file" value="${test.data.file}" />
+                        <sysproperty key="test.config.dir" path="${test.data.dir}/smoketest" />
+                        <sysproperty key="test.config.file" value="${test.data.dir}/smoketest/test_config.properties" />
+                        <sysproperty key="solr.path" path="${test.data.dir}/smoketest/solr" />
+                        <sysproperty key="solr.data.dir" path="${test.data.dir}/smoketest/solr" />
+                        <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
+                        <batchtest fork="yes" todir="${site.test.dir}/output" >
+                            <zipfileset src="@{teststorun}" includes="**/*.class" excludes="@{testsToExclude}"/>
+                        </batchtest>
+                    </junit>
+                </then>
+                <else>
+                    <echo message="test jar ${test.jar} not defined or not available" />
+                </else>
+            </if> 
+
+        </sequential>
+    </macrodef>
+    
+    <!-- Cobertura (code coverage) targets -->
+        
+    
+    <!-- Load cobertura custom ant tasks -->
+      
+    <macrodef name="instrumentCore" description="instrument SolrMarc core classes for code coverage reports">
+        <sequential>
+            <property name="cobertura.jar.dir"  location="${site.test.build.dir}/cobertura-1.9.4.1/" />
+            <path id="cobertura.classpath">
+                <fileset dir="${cobertura.jar.dir}" includes="**/*.jar" />
+            </path>
+            <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+            <property name="core.instr.dir" location="${site.base.dir}/coverage"/>
+            <delete dir="${core.instr.dir}" />
+            <mkdir dir="${core.instr.dir}" />
+            <cobertura-instrument todir="${core.instr.dir}" datafile="${core.instr.dir}/cobertura.ser">
+                <fileset dir="${site.test.dir}/tmp_solrmarc_jars">
+                    <include name="MarcImporter.jar" />
+                </fileset>
+            </cobertura-instrument>
+        </sequential>
+    </macrodef>    
+    
 
 </project>

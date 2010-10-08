@@ -156,7 +156,7 @@
             </if>
         </sequential>
     </macrodef>
-
+    
     <macrodef name="check-record-present" 
               description="Do a HTTP get against a running jetty/solr to test whether the indexed records are there" >
         <attribute name="port" default="8983" />
