@@ -8,6 +8,9 @@
 # not raise, and still come up with something, even if it's weird?
 +, title_b.mrc, getSortableTitle(rec), family physician; or, domestic medical friend
 
+# checking the use of the indicators to remove characters to create the sortable title
++, med_bibs-20sample.mrc(5680749), getSortableTitle(rec), outline of bacteriology and immunity
+
 #test of combining reader
 +, u55_split.mrc, 999m , ALDERMAN
 +marc.combine_records=999, u55_split.mrc, 999m , ALDERMAN|CLEMONS
@@ -49,6 +52,16 @@
 
 #test getAllAlphaSubfields
 +, selectedRecs.mrc(u8), getAllAlphaSubfields(rec, 260), Madras : Tamil Patippakam, 1982. 
+
+#test getAllAlphaExcept
++marc.to_utf_8=true+marc.permissive=true, selectedRecs.mrc(u3), getAllAlphaExcept(rec, 100c), Gontaut-Biron, Élie, 1818?-l890.
+
+#test getLinkedFieldCombined
++marc.to_utf_8=true, u2103_raw.mrc, getLinkedFieldCombined(rec, 245ab), Zi jin cheng gong dian /|紫禁城
+
+#test getSingleIndexEntry
++, double_007.mrc, getSingleIndexEntry(rec, 260a, false), Prince Frederick, MD :
++, double_007.mrc, getSingleIndexEntry(rec, 260a, true), Prince Frederick, MD :
 
 +marc.permissive=true+marc.to_utf_8=true+marc.default_encoding=MARC8, non_latin.mrc, 245a, Kepone R effects on development of C̲a̲l̲l̲i̲n̲e̲c̲t̲e̲s̲ s̲a̲p̲i̲d̲u̲s̲ and R̲h̲i̲t̲h̲r̲o̲p̲a̲n̲o̲p̲e̲u̲s̲ h̲a̲r̲[̲r̲]̲i̲s̲i̲i̲ /
 

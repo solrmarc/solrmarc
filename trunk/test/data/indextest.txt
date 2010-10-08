@@ -10,7 +10,7 @@ ${default.config}, selectedRecs.mrc(u2), id, u2
 # 2 March 2010
 # marc record with no 245$a, but a 345$k. Does getTitleSorted still find
 # the $k?
-${default.config}, title_k.mrc, title_sorted, AAAMorton Hoffman papers.
++, title_k.mrc, getSortableTitle(rec), AAAMorton Hoffman papers.
 # marc record with no 245$, but a $b. (Bad data). Does getTitleSorted
 # not raise, and still come up with something, even if it's weird?
-$(default.config), title_b.mrc, title_sorted, "family physician; or, Domestic medical friend:"
++, title_b.mrc, getSortableTitle(rec), "family physician; or, Domestic medical friend:"
