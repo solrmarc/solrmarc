@@ -147,7 +147,7 @@ public class ParameterizedIndexTest
             }
             if (!foundIt)
             {
-                System.out.println("Solr field " + fieldToCheck + " did not have any value matching " + receive);
+                System.out.println("Solr field " + fieldToCheck + " had extra unexpected value " + receive);
             }
             assertTrue("Solr field " + fieldToCheck + " had extra unexpected value " + receive, foundIt);
         }
