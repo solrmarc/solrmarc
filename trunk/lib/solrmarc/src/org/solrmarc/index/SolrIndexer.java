@@ -343,12 +343,26 @@ public class SolrIndexer
                     parmClasses[i + 1] = String.class;
                 }
                 method = getClass().getMethod(functionName, parmClasses);
-                customMethodMap.put(functionName, method);
+                if (customMethodMap.containsKey(functionName))
+                {
+                    customMethodMap.put(functionName, null);
+                }
+                else
+                {
+                    customMethodMap.put(functionName, method);
+                }
             }
             else
             {    
                 method = getClass().getMethod(indexParm, new Class[] { Record.class });
-                customMethodMap.put(indexParm, method);
+                if (customMethodMap.containsKey(indexParm))
+                {
+                    customMethodMap.put(indexParm, null);
+                }
+                else
+                {
+                    customMethodMap.put(indexParm, method);
+                }
             }
             Class<?> retval = method.getReturnType();
             // if (!method.isAccessible())
@@ -655,14 +669,16 @@ public class SolrIndexer
                     objParms[i + 1] = dequote(parms[i].trim());
                 }
                 method = customMethodMap.get(functionName);
-                // method = getClass().getMethod(functionName, parmClasses);
+                if (method == null)  
+                    method = getClass().getMethod(functionName, parmClasses);
                 returnType = method.getReturnType();
                 retval = method.invoke(this, objParms);
             }
             else
             {
                 method = customMethodMap.get(indexParm);
-                //method = getClass().getMethod(indexParm, new Class[]{Record.class});
+                if (method == null)  
+                    method = getClass().getMethod(indexParm, new Class[]{Record.class});
                 returnType = method.getReturnType();
                 retval = method.invoke(this, new Object[] { record });
             }
@@ -672,11 +688,11 @@ public class SolrIndexer
             // e.printStackTrace();
             logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
         }
-//        catch (NoSuchMethodException e)
-//        {
-//            // e.printStackTrace();
-//            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
-//        }
+        catch (NoSuchMethodException e)
+        {
+            // e.printStackTrace();
+            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+        }
         catch (IllegalArgumentException e)
         {
             // e.printStackTrace();
