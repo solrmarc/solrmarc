@@ -14,6 +14,8 @@
 #test of combining reader
 +, u55_split.mrc, 999m , ALDERMAN
 +marc.combine_records=999, u55_split.mrc, 999m , ALDERMAN|CLEMONS
++marc.combine_records=999+marc.combine_records.left_field=001+marc.combine_records.right_field=001, u55_split.mrc, 999m , ALDERMAN|CLEMONS
++marc.combine_records=999, u55_split.mrc, 999m , ALDERMAN|CLEMONS
 
 #Test of Unicode normalization: this line contains the code point 'à' rather than an 'a' followed by the grave accent '̀'
 +marc.permissive=true+marc.to_utf_8=true+marc.unicode_normalize=C, u4.mrc(u4), 245a, The princes of Hà-tiên (1682-1867) /
@@ -40,7 +42,10 @@
 +marc.override=org.solrmarc.marcoverride.NoSortMarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
 +marc.override=org.mar4jmarc.impl.MarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), 496826 aapl bmain emain
 
-#now verify that the default is being set to non-sorting
+#testing marc.override to install a UVAMarcFactory (should also be sorted)
++marc.override=org.solrmarc.marcoverride.UVAMarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
+
+#now verify that the default is being set to sorted
 +, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
 
 #check permissive reader vs non-permissive reader
@@ -70,3 +75,18 @@
 +, u3412403.mrc, getPublicationDate(rec), 1986
 +marc.permissive=true, WPUbadrecords.mrc(101950), getPublicationDate(rec), 1977
 +marc.permissive=true, WPUbadrecords.mrc(101573), getPublicationDate(rec), 1980
+
+#test reading .xml file (including entity translation (&amp; to & ) and unprettification
++, mods2MarcTest-pretty.xml(eam37.07), 260b, W.C. Peters & Sons
++, mods2MarcTest-pretty.xml(eam37.07), 852a, Special Collections, University of Virginia Library, Charlottesville, Va.
+
+#test MarcFilteredReader class for selecting out specific records or removing certain subfields
++marc.delete_subfields=650z, selectedRecs.mrc(u2), 650axz, Russian literature Translations from foreign languages History and criticism.|Translating and interpreting History.
++marc.include_if_present=082a, selectedRecs.mrc, 245a, Studies in Tamilology /
++marc.include_if_present=999m/DARDEN, selectedRecs.mrc, 245a, Natural resources and the environment :
++marc.include_if_missing=100a, selectedRecs.mrc, 245a, Socialist way of life :
++marc.include_if_missing=999m/ALDERMAN, selectedRecs.mrc, 245a, Busoni /
+
+#test reading way too big record
++marc.permissive=true, bad_too_long_plus_2.mrc(360944), 000[5], n
+
