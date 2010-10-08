@@ -50,7 +50,7 @@ public class MarcCombiningReader implements MarcReader
      * @param leftControlField - string representing a control field in the current record to use for matching purposes (null to default to 001).
      * @param rightControlField - string representing a control field in the next record to use for matching purposes (null to default to 001).
      */
-    MarcCombiningReader(MarcReader reader, String idsToMerge, String leftControlField, String rightControlField)
+    public MarcCombiningReader(MarcReader reader, String idsToMerge, String leftControlField, String rightControlField)
     {
         this.reader = reader;
         this.idsToMerge = idsToMerge;
@@ -78,7 +78,7 @@ public class MarcCombiningReader implements MarcReader
      * @param leftControlField - string representing a control field in the current record to use for matching purposes (null to default to 001).
      * @param rightControlField - string representing a control field in the next record to use for matching purposes (null to default to 001).
      */
-    MarcCombiningReader(MarcReader reader, ErrorHandler currentErrors, ErrorHandler nextErrors, String idsToMerge,
+    public MarcCombiningReader(MarcReader reader, ErrorHandler currentErrors, ErrorHandler nextErrors, String idsToMerge,
         String leftControlField, String rightControlField)
     {
         this.reader = reader;
