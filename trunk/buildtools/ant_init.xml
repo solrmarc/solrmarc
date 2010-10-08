@@ -503,6 +503,19 @@
                     </copy>
                 </then>
             </if>
+            
+            <echo message="checking for 'none' configuration" />
+            <if >
+                <equals arg1="${example.configuration}" arg2="none" />
+                <then>
+                    <echo message="copying maps" />
+                    <copy todir="${site.map.dir}" preservelastmodified="true" overwrite="false">
+                        <fileset dir="${trans.map.dir}"  includes="*.properties" >
+                            <depend targetdir="${site.map.dir}" />
+                        </fileset>
+                    </copy>
+                </then>
+            </if>
         </sequential>
     </macrodef>
     
