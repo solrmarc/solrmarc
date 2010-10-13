@@ -259,7 +259,7 @@ public class MarcMerger
                 delReader = new BufferedReader(new InputStreamReader(deleted));
                 deletedId = getNextDelId(delReader);
             }
-            while (compare.compare(newOrModrec.getRecordId(), segmentMinRecordID) < 0)
+            while (newOrModrec != null && compare.compare(newOrModrec.getRecordId(), segmentMinRecordID) < 0)
             {
                 newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
             }
@@ -349,7 +349,7 @@ public class MarcMerger
         BufferedReader mainReader = new BufferedReader(new InputStreamReader(mainFile));
         String mainDelete = getNextDelId(mainReader);
         
-        RawRecord newOrModrec = newOrModified.next(); //new SimpleRecord(newOrModified);
+        RawRecord newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
         String deletedId = maxRecordID;
         BufferedReader delReader = null;
         if (deleted != null)
@@ -371,7 +371,7 @@ public class MarcMerger
                 // mainrec equals deleteID  AND it equals modifiedRecId,  Delete record.  Although this should not happen.
                 if (verbose) System.err.println("Deleting record "+ deletedId);
                 deletedId = getNextDelId(delReader);
-                newOrModrec.next();
+                newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
                 out.println(mainDelete);
                 mainDelete = getNextDelId(mainReader);
             }
@@ -387,7 +387,7 @@ public class MarcMerger
             {    
                 // mainrec equals modifiedRecId,  Write out modified record.
                 if (verbose) System.err.println("Record added, removing id from  "+ newOrModrec.getRecordId() + " from Mod file");
-                newOrModrec.next();
+                newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
                 mainDelete = getNextDelId(mainReader);
             }
             else // mainrec.id is greater than either newOrModrec.id or deletedId
@@ -403,7 +403,7 @@ public class MarcMerger
                     {    
                         // newOrModrec is a new record,  Write out new record.
                         if (verbose) System.err.println("New record in mod file "+ newOrModrec.getRecordId() + " skipping it.");
-                        newOrModrec.next();
+                        newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
                     }
                     if (compare.compare(mainDelete, deletedId)> 0)
                     {    
