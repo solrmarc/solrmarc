@@ -158,7 +158,7 @@ public class MergeSummaryHoldings implements MarcReader
             System.err.println("Usage: MergeSummaryHoldings [-v] [-a] -s summaryHoldingsFile.mrc  normalMarcFile.mrc");
             System.err.println("   or: cat normalMarcFile.mrc | MergeSummaryHoldings [-v] [-a] -s summaryHoldingsFile.mrc ");
         }
-        while (args[argoffset].startsWith("-"))
+        while (argoffset < args.length && args[argoffset].startsWith("-"))
         {
             if (args[argoffset].equals("-v"))
             {
