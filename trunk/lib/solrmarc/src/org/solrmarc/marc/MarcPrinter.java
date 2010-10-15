@@ -159,8 +159,8 @@ public class MarcPrinter extends MarcHandler
                     {
                         writer = new MarcStreamWriter(System.out, "ISO8859_1", true);
                         writer.setConverter(new UnicodeToAnsel());
-                        record.getLeader().setCharCodingScheme(' ');
                     }
+                    record.getLeader().setCharCodingScheme(' ');
                     writer.write(record);
                 }
                 else if (mode.equals("index"))
@@ -267,7 +267,9 @@ public class MarcPrinter extends MarcHandler
         
         int exitCode = marcPrinter.handleAll();
         if (pOut != null) pOut.flush();
-        System.exit(exitCode);
+        System.clearProperty("marc.path");
+        System.clearProperty("marc.source");
+
     }
 
 
