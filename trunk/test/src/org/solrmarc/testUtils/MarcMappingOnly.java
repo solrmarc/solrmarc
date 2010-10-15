@@ -193,6 +193,41 @@ public class MarcMappingOnly extends MarcHandler
                         result.add((String)tmpResult);
                     }
                 }
+                else if (fieldSpec.startsWith("\""))
+                {
+                    Properties indexingProps = new Properties();
+                    indexingProps.setProperty("marcmappingtest", fieldSpec);
+                    SolrIndexer indexer = SolrIndexer.indexerFromProperties(indexingProps, propertyFilePaths);
+                    Map<String, Object> indexMap = indexer.map(record);
+                    Object tmpResult = indexMap.get("marcmappingtest");
+                    if (tmpResult instanceof Set)
+                    {
+                        result = (Set<String>)tmpResult;
+                    }
+                    else if (tmpResult instanceof String)
+                    {
+                        result = new LinkedHashSet<String>();
+                        result.add((String)tmpResult);
+                    }
+                }
+                else if (fieldSpec.startsWith("'") && fieldSpec.endsWith("'"))
+                {
+                    String indexParm = fieldSpec.substring(1, fieldSpec.length()-1);
+                    Properties indexingProps = new Properties();
+                    indexingProps.setProperty("marcmappingtest", indexParm);
+                    SolrIndexer indexer = SolrIndexer.indexerFromProperties(indexingProps, propertyFilePaths);
+                    Map<String, Object> indexMap = indexer.map(record);
+                    Object tmpResult = indexMap.get("marcmappingtest");
+                    if (tmpResult instanceof Set)
+                    {
+                        result = (Set<String>)tmpResult;
+                    }
+                    else if (tmpResult instanceof String)
+                    {
+                        result = new LinkedHashSet<String>();
+                        result.add((String)tmpResult);
+                    }
+                }
                 return(result);
             }
             catch (MarcException me)

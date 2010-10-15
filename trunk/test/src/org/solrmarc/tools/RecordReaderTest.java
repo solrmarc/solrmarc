@@ -49,7 +49,17 @@ public class RecordReaderTest
             if (reader.hasNext())  rec = reader.next();
             Record rec2 = rawRec.getAsRecord(true, true, null, "MARC8");
             assertRecordsEquals("record read via RawReader different from record read via Permissive reader", rec, rec2);
-        }
+
+            rawReader = new RawRecordReader(new FileInputStream(new File(testDataParentPath, "bad_too_long_plus_2.mrc")));
+            reader = new MarcPermissiveStreamReader(new FileInputStream(new File(testDataParentPath, "bad_too_long_plus_2.mrc")), true, true, "MARC8");
+            
+            rawRec = null;
+            if (rawReader.hasNext()) rawRec = rawReader.next();
+            rec = null;
+            if (reader.hasNext())  rec = reader.next();
+            rec2 = rawRec.getAsRecord(true, true, null, "MARC8");
+            assertRecordsEquals("record read via RawReader different from record read via Permissive reader", rec, rec2);
+}
         catch (FileNotFoundException e)
         {
             fail("unable to read test record  u4.mrc");
