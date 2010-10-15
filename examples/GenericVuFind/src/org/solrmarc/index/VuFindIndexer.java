@@ -97,7 +97,16 @@ public class VuFindIndexer extends SolrIndexer
 
         // Obtain the DSN from the config.ini file:
         Ini ini = new Ini();
-        String configFile = "../web/conf/config.ini";
+
+        // Find VuFind's home directory in the environment; if it's not available,
+        // try using a relative path on the assumption that we are currently in
+        // VuFind's import subdirectory:
+        String vufindHome = System.getenv("VUFIND_HOME");
+        if (vufindHome == null) {
+            vufindHome = "..";
+        }
+
+        String configFile = vufindHome + "/web/conf/config.ini";
         File file = new File(configFile);
         try {
             ini.load(new FileReader(file));
