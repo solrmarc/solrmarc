@@ -811,6 +811,6 @@ public class MarcImporter extends MarcHandler
         }
         
         int exitCode = importer.handleAll();
-        System.exit(exitCode);
+        //System.exit(exitCode);
     }
 }

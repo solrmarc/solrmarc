@@ -629,7 +629,9 @@ public class MarcPatcher extends MarcHandler
         
         int exitCode = marcPatcher.handleAll();
         if (pOut != null) pOut.flush();
-        System.exit(exitCode);
+//        System.exit(exitCode);
+        System.clearProperty("marc.path");
+        System.clearProperty("marc.source");
     }
 
 
