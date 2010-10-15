@@ -169,10 +169,10 @@ public final class Utils {
         {
         InputStream in = null;
         // look for properties file in paths
+  //      String lookedIn = "";
         if (propertyPaths != null)
         {
             File propertyFile = new File(propertyFileName);
-
             int pathCnt = 0;
             do 
             {
@@ -197,6 +197,7 @@ public final class Utils {
                     }
                     break;   // we found it!
                 }
+  //              lookedIn = lookedIn + propertyFile.getAbsolutePath() + "\n";
                 if (propertyPaths != null && pathCnt < propertyPaths.length)
                 {
                     propertyFile = new File(propertyPaths[pathCnt], propertyFileName);
@@ -205,6 +206,7 @@ public final class Utils {
             } while (propertyPaths != null && pathCnt <= propertyPaths.length);
         }
         // if we didn't find it as a file, look for it as a URL
+  //      String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName + "\n Looked in: "+ lookedIn;
         String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
         if (in == null)
         {
