@@ -19,6 +19,7 @@ public class SolrUpdate
 {
 	// Initialize logging category
 	protected static Logger logger = Logger.getLogger(SolrUpdate.class.getName());
+    private static boolean verbose = false;
 
     /**
      * @param args
@@ -36,6 +37,10 @@ public class SolrUpdate
                 {
                     solrServerURL = arg;
                 }
+                if (arg.equals("-v"))
+                {
+                    verbose = true;
+                }
             }
         }
         if (solrServerURL == null)
@@ -52,16 +57,25 @@ public class SolrUpdate
         
         try
         {
-            logger.info("Connecting to solr server at URL: " + solrServerURL);
+            if (verbose) 
+                System.out.println("Connecting to solr server at URL: " + solrServerURL);
+            else 
+                logger.info("Connecting to solr server at URL: " + solrServerURL);
             signalServer(solrServerURL);
         }
         catch (MalformedURLException me)
         {
-            logger.error("Specified URL is malformed: " + solrServerURL);
+            if (verbose) 
+                System.out.println("Specified URL is malformed: " + solrServerURL);
+            else 
+                logger.error("Specified URL is malformed: " + solrServerURL);
         }
         catch (IOException ioe)
         {
-            logger.error("Unable to establish connection to solr server at URL: " + solrServerURL);
+            if (verbose) 
+                System.out.println("Unable to establish connection to solr server at URL: " + solrServerURL);
+            else 
+                logger.error("Unable to establish connection to solr server at URL: " + solrServerURL);
         }
     }
     
@@ -132,7 +146,10 @@ public class SolrUpdate
         String str;
         while (null != ((str = input.readLine())))
         {
-        	logger.info(str);
+            if (verbose) 
+                System.out.println(str);
+            else 
+                logger.info(str);
         }
 
         input.close ();

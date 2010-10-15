@@ -122,9 +122,9 @@ public class RemoteServerTest
         
         // Now test SolrUpdate  
         ByteArrayOutputStream out5 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.SolrUpdate", "main", null, out5, new String[]{urlStr+"/update"});
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.SolrUpdate", "main", null, out5, new String[]{"-v", urlStr+"/update"});
 
-        assertTrue("Remote update was unsuccessful ", out5.toByteArray().toString().contains("<int name=\"status\">0</int>"));
+        assertTrue("Remote update was unsuccessful ", new String(out5.toByteArray()).contains("<int name=\"status\">0</int>"));
         System.out.println("Test4 testRemoteIndexRecord is successful");
 
         
