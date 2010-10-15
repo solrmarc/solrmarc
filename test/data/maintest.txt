@@ -35,8 +35,8 @@
 +, selectedRecs.mrc(u377), getWithOptions(rec, 610[a-z]:651[a-z], combineSubfields=" -- "), Catholic Church -- India|India -- Religion
 
 #testing MarcFilteredReader deleting a particular subfield
-+marc.delete_subfields=999o, selectedRecs.mrc(u89), 999o, 
-+, selectedRecs.mrc(u89), 999o, .STAFF.   c=   84005276  r=00000000010696454
++marc.delete_subfields=999d, selectedRecs.mrc(u2), 999d, 
++, selectedRecs.mrc(u2), 999d, 6/28/1996
 
 #testing marc.override to install a sorting/non-sorting MarcReader
 +marc.override=org.solrmarc.marcoverride.NoSortMarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
@@ -68,6 +68,13 @@
 +, double_007.mrc, getSingleIndexEntry(rec, 260a, false), Prince Frederick, MD :
 +, double_007.mrc, getSingleIndexEntry(rec, 260a, true), Prince Frederick, MD :
 
+#test getURLs
++, url_test_recs.mrc(u740162), getFullTextUrls(rec), http://www.bartleby.com/139
++, url_test_recs.mrc(u18488), getSupplUrls(rec), http://us.imdb.com/title/tt0040897/
++, url_test_recs.mrc(u1563789), getSupplUrls(rec), http://purl.access.gpo.gov/GPO/LPS6762
++, url_test_recs.mrc(u2020731), getFullTextUrls(rec), http://www.unctad.org/en/docs/wir92_en.pdf
++, url_test_recs.mrc(u2020731), getSupplUrls(rec), http://www.unctad.org/en/docs/wir92ove.en.pdf
+
 +marc.permissive=true+marc.to_utf_8=true+marc.default_encoding=MARC8, non_latin.mrc, 245a, Kepone R effects on development of C̲a̲l̲l̲i̲n̲e̲c̲t̲e̲s̲ s̲a̲p̲i̲d̲u̲s̲ and R̲h̲i̲t̲h̲r̲o̲p̲a̲n̲o̲p̲e̲u̲s̲ h̲a̲r̲[̲r̲]̲i̲s̲i̲i̲ /
 
 # test getPublicationDate
@@ -89,4 +96,25 @@
 
 #test reading way too big record
 +marc.permissive=true, bad_too_long_plus_2.mrc(360944), 000[5], n
+
+#test constant specification
++, u4.mrc, "test string", test string
++, u4.mrc, "test string 1|test string 2", test string 1|test string 2
+
+#test single quoted test specification 
++, selectedRecs.mrc(u21), 'custom, getSortableAuthor', Carrington Frank Crime and justice a conservative strategy
+
+#test using beanshell scripting custom indexing method
++, selectedRecs.mrc(u21), 'script(dewey.bsh), getDeweyFacet(dewey_callnumber_map.properties)', 300s - Social Sciences|340s - Law
+
+#test using "first" directive
++, selectedRecs.mrc(u89), '650a, first', Environmental policy
+
+#test using "join" directive
++, selectedRecs.mrc(u233), '650a, join', Cave paintings Paleolithic period Art, Prehistoric
++, selectedRecs.mrc(u233), '650a, join( -- )', Cave paintings -- Paleolithic period -- Art, Prehistoric
+
+#test using "std" directive
++, u399.mrc, 'era, composition_era_map.properties', 1970's|20th Century
+
 

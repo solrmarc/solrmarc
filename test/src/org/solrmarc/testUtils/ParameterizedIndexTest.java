@@ -7,8 +7,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +20,7 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class ParameterizedIndexTest
 {
+    String testNumber;
     String config;
     String recordFilename;
     String fieldToCheck;
@@ -29,8 +28,9 @@ public class ParameterizedIndexTest
     static String dataDirectory;
     static String dataFile;
     
-    public ParameterizedIndexTest(String config, String recordFilename, String fieldToCheck, String expectedValue)
+    public ParameterizedIndexTest(String testNumber, String config, String recordFilename, String fieldToCheck, String expectedValue)
     {
+        this.testNumber = testNumber;
         this.config = config;
         this.recordFilename = recordFilename;
         this.fieldToCheck = fieldToCheck;
@@ -59,7 +59,7 @@ public class ParameterizedIndexTest
         }
         String fullRecordFilename = dataDirectory + File.separator + recordFilename;
         Object solrFldValObj;
-        if (fieldToCheck.matches("^[0-9].*") || fieldToCheck.matches("^LNK[0-9].*"))
+        if (fieldToCheck.matches("^[0-9].*") || fieldToCheck.matches("^LNK[0-9].*") || fieldToCheck.startsWith("\"") || fieldToCheck.startsWith("'"))
         {
             solrFldValObj = marcMappingTest.lookupRawRecordValue(recordToLookAt, fullRecordFilename, fieldToCheck);
         }
@@ -162,7 +162,7 @@ public class ParameterizedIndexTest
                 }
             }
         }
-        System.out.println(config + " : " + recordFilename + " : " + fieldToCheck + " --> " + expectedValue);
+        System.out.println("Test " + testNumber + " : " + config + " : " + recordFilename + " : " + fieldToCheck + " --> " + expectedValue);
     }
     
     @Parameters
@@ -172,10 +172,11 @@ public class ParameterizedIndexTest
      *    test.data.file = indextest.txt
 	 *   and puts the tests indicated there into a collection of arrays, where 
 	 *   each item in the collection has this structure:
-     *     it[0] = config.properties filed
-     *     it[1] = name of file containing marc records to be indexed for test
-     *     it[2] = name of solr field to be checked in resulting solr doc
-     *     it[3] = value expected in solr field
+     *     it[0] = sequentially increasing ordinal number of test
+     *     it[1] = config.properties file  or +  indicating to simply use the default config values
+     *     it[2] = name of file containing marc records to be indexed for test
+     *     it[3] = name of solr field to be checked in resulting solr doc
+     *     it[4] = value expected in solr field
      */
     public static Collection indexValues() throws Exception
     {
@@ -186,6 +187,7 @@ public class ParameterizedIndexTest
         BufferedReader rIn = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
         String line;
         List result = new LinkedList();
+        int testNumber = 0;
         while (( line = rIn.readLine()) != null)
         {
         	if (line.startsWith("#") || line.trim().length() == 0) continue;
@@ -203,10 +205,29 @@ public class ParameterizedIndexTest
                     split[3] = smallSplit[2].substring(index+2).trim();
         	    }
         	}
+        	else if (line.matches(".*[,][ ]*'.*[,].*['],.*"))
+            {
+                split = new String[4];
+                String smallSplit[] = line.split(", ?",3);
+                split[0] = smallSplit[0];
+                split[1] = smallSplit[1];
+                int index = smallSplit[2].indexOf("',");
+                if (index != -1)
+                {
+                    split[2] = smallSplit[2].substring(0, index+1);
+                    split[3] = smallSplit[2].substring(index+2).trim();
+                }
+            }
             else
                 split = line.split(", ", 4);
             if (split.length == 4) 
-                result.add(split);
+            {
+                String testParms[] = new String[5];
+                System.arraycopy(split, 0, testParms, 1, 4);
+                testParms[0] = "" + testNumber;
+                testNumber++;
+                result.add(testParms);
+            }
         }
         return(result);
     
