@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.TreeMap;
 
+import org.solrmarc.tools.RawRecord;
 import org.solrmarc.tools.StringNaturalCompare;
 
 /**
@@ -27,22 +28,6 @@ public class MarcSorter
     static TreeMap<String, byte[]> recordMap = null;
     static boolean verbose = false;
 	 // Initialize logging category
-//    static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
-	
-    private static int parseRecordLength(byte[] leaderData) throws IOException {
-        InputStreamReader isr = new InputStreamReader(new ByteArrayInputStream(
-                leaderData));
-        int length = -1;
-        char[] tmp = new char[5];
-        isr.read(tmp);
-        try {
-            length = Integer.parseInt(new String(tmp));
-        } catch (NumberFormatException e) {
-            throw new IOException("unable to parse record length");
-        }
-        return(length);
-    }
-    
 	/**
 	 * 
 	 * @param args
@@ -50,7 +35,7 @@ public class MarcSorter
     public static void main(String[] args)
     {
     //    try {
-        DataInputStream input;
+        InputStream input;
         recordMap = new TreeMap<String, byte[]>(new StringNaturalCompare());
         int offset = 0;
         if (args[0].equals("-v")) { verbose = true; offset = 1; }
@@ -58,12 +43,12 @@ public class MarcSorter
         {
             if (args[offset].equals("-"))
             {
-                input = new DataInputStream(new BufferedInputStream(System.in));
+                input = System.in;
                 if (verbose)  System.err.println("reading Stdin");
             }
             else
             {    
-                input = new DataInputStream(new BufferedInputStream(new FileInputStream(new File(args[offset]))));
+                input = new FileInputStream(new File(args[offset]));
                 if (verbose)  System.err.println("reading file "+ args[offset]);
             }            
             processInput(input);
@@ -81,69 +66,29 @@ public class MarcSorter
 
     }
 
-    static void processInput(DataInputStream input) 
+    static void processInput(InputStream input) 
     {
-        byte[] byteArray = new byte[24];
-        try {
-            while (true)
+        RawRecordReader rawReader = new RawRecordReader(input);
+        RawRecord rec = rawReader.hasNext() ? rawReader.next() : null;
+        while (rec != null)
+        {
+            String field001 = "Undefined";
+            field001 = rec.getRecordId();
+            byte newRec[] = rec.getRecordBytes();
+            if (recordMap.containsKey(field001))
             {
-                input.readFully(byteArray);
-                int recordLength = parseRecordLength(byteArray);
-                byte[] recordBuf = new byte[recordLength - 24];
-                input.readFully(recordBuf);
-                String recordStr = null;
-                try
-                {
-                    recordStr = new String(recordBuf, "ISO-8859-1");
-                }
-                catch (UnsupportedEncodingException e)
-                {
-                    // e.printStackTrace();
-                    System.err.println(e.getMessage());
-                }
-                String leader = new String(byteArray);
-                int offset = Integer.parseInt(leader.substring(12,17)) - 24;
-                int dirOffset = 0;
-                String fieldNum;
-                String field001 = "Undefined";
-                for (fieldNum = recordStr.substring(dirOffset, dirOffset+3); dirOffset < offset;  
-                      dirOffset += 12, fieldNum = recordStr.substring(dirOffset, dirOffset+3))
-                {
-                    if ( fieldNum.equals("001"))
-                    {
-                        int length = Integer.parseInt(recordStr.substring(dirOffset + 3, dirOffset + 7));
-                        int offset2 = Integer.parseInt(recordStr.substring(dirOffset + 7, dirOffset + 12));
-                        field001 = recordStr.substring(offset+offset2, offset+offset2+length-1).trim();
-                        break;
-                    }
-                }
-                byte[] fullBuf = new byte[recordLength];
-                System.arraycopy(byteArray, 0, fullBuf, 0, byteArray.length);
-                System.arraycopy(recordBuf, 0, fullBuf, byteArray.length, recordBuf.length);
-                if (recordMap.containsKey(field001))
-                {
-                    byte existingRec[] = recordMap.get(field001);
-                    byte newRec[] = new byte[existingRec.length + fullBuf.length];
-                    System.arraycopy(existingRec, 0, newRec, 0, existingRec.length);
-                    System.arraycopy(fullBuf, 0, newRec, existingRec.length, fullBuf.length);
-                    recordMap.put(field001, newRec);
-                }
-                else
-                {
-                    recordMap.put(field001, fullBuf);
-                }
-                if (verbose) System.err.println("Record read : "+ field001);
+                byte existingRec[] = recordMap.get(field001);
+                byte combinedRec[] = new byte[existingRec.length + newRec.length];
+                System.arraycopy(existingRec, 0, combinedRec, 0, existingRec.length);
+                System.arraycopy(newRec, 0, combinedRec, existingRec.length, newRec.length);
+                recordMap.put(field001, combinedRec);
             }
-        }
-        catch (EOFException e)
-        {
-            if (verbose)  System.err.println("EOFException");
-            //  Done Reading input,   Be happy
-        }
-        catch (IOException e)
-        {
-            //  e.printStackTrace();
-            System.err.println(e.getMessage());
+            else
+            {
+                recordMap.put(field001, newRec);
+            }
+            if (verbose) System.err.println("Record read : "+ field001);
+            rec = rawReader.hasNext() ? rawReader.next() : null;
         }
 
         try {
