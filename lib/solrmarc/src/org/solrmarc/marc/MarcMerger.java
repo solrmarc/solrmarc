@@ -312,28 +312,46 @@ public class MarcMerger
                 }
                 else // mainrec.id is greater than either newOrModrec.id or deletedId
                 {
-                    if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())> 0)
-                    {    
-                        // newOrModrec is a new record,  Write out new record.
-                        if (verbose) System.err.println("\nWriting new record "+ newOrModrec.getRecordId() + " from mod file");
-                        out.write(newOrModrec.getRecordBytes());
-                        out.flush();
+                    if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())> 0 && compare.compare(newOrModrec.getRecordId(), deletedId)== 0)
+                    {
+                        // add a record that is not there, and then delete it right away -> net result zero
                         newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
-                    }
-                    if (compare.compare(mainrec.getRecordId(), deletedId)> 0)
-                    {    
-                        // Trying to delete a record that's already not there.  Be Happy.
                         deletedId = getNextDelId(delReader);
+                    }
+                    else 
+                    {
+                        if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())> 0)
+                        {    
+                            // newOrModrec is a new record,  Write out new record.
+                            if (verbose) System.err.println("\nWriting new record "+ newOrModrec.getRecordId() + " from mod file");
+                            out.write(newOrModrec.getRecordBytes());
+                            out.flush();
+                            newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
+                        }
+                        if (compare.compare(mainrec.getRecordId(), deletedId)> 0)
+                        {    
+                            // Trying to delete a record that's already not there.  Be Happy.
+                            deletedId = getNextDelId(delReader);
+                        }
                     }
                 }
             }
             while (newOrModrec != null && compare.compare(newOrModrec.getRecordId(), maxRecordID)< 0 && compare.compare(newOrModrec.getRecordId(), maxID)< 0)
             {
-                // newOrModrec is a new record,  Write out new record.
-                if (verbose) System.err.println("\nWriting record "+ newOrModrec.getRecordId() + " from mod file");
-                out.write(newOrModrec.getRecordBytes());
-                out.flush();
-                newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
+                if (compare.compare(newOrModrec.getRecordId(), deletedId)== 0)
+                {
+                    // add a record that is not there, and then delete it right away -> net result zero
+                    newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
+                    deletedId = getNextDelId(delReader);
+                }
+                else 
+                {
+                    // newOrModrec is a new record,  Write out new record.
+                    if (verbose) System.err.println("\nWriting record "+ newOrModrec.getRecordId() + " from mod file");
+                    out.write(newOrModrec.getRecordBytes());
+                    out.flush();
+                    newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
+                }
             }
         }
         catch (IOException e)
