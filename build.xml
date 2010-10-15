@@ -191,9 +191,26 @@
          </ant>
     </target>
     
-    <target name="runCoreTestsWithCoverage" depends="init" description="Run tests for Core SolrMarc code with code coverage info">
-         <ant antfile="${site.dir}/build.xml" target="testCoverage" inheritAll="false" >
-             <property name="dist.path" location="${dist.dir}" />
+    <target name="runCoreTestsWithCoverage" description="Run tests for Core SolrMarc code with code coverage info">
+        <propertyregex property="site.dir" input="${site.dir}" regexp="local_build" replace="core-only" defaultValue="core-only" override="true" />
+        <antcall target="veryclean" >
+            <param name="site.dir" value="core-only"/>
+            <param name="build.dir" value="core-only/build"/>
+            <param name="dist.dir" value="core-only/dist"/>
+        </antcall>
+        <antcall target="init" inheritAll="false" >
+            <param name="site.dir" value="core-only"/>
+            <param name="input.continue.processing.with.not.uptodate" value="c"/>
+            <param name="example.configuration" value="none"/>
+            <param name="dist.path" value="dist"/>
+            <param name="custom.config.file.prefix" value="core"/>
+            <param name="exe.mem.args" value="-Xmx256m"/>
+            <param name="marc.encoding" value="MARC8"/>
+            <param name="use.builtin.solr" value="builtin"/>
+         </antcall>
+         <ant antfile="core-only/build.xml" target="testCoverage" inheritAll="false" >
+             <property name="site.dir" value="core-only"/>
+             <property name="dist.path" location="core-only/${dist.dir}" />
          </ant>
     </target>
     
