@@ -41,6 +41,7 @@
                 encoding="utf-8">
             <include name="**/*.java" />
             <exclude name="**/*Test*.java" />
+            <exclude name="test/**/*.java" />
             <exclude name="**/z3950/*.java" />
             <classpath refid="classpath.jars" />
         </javac>
@@ -51,7 +52,7 @@
         <echo message="${ant.project.name}: ${ant.file}" />
 
         <jar destfile="${build.dir}/${jar.name}">
-            <fileset dir="${build.dir}" includes="**/*.class" excludes="**/*Test*.class" />
+            <fileset dir="${build.dir}" includes="**/*.class" excludes="**/*Test*.class,test/**/*.class" />
             <fileset file="../../log4j.properties" /> 
             <manifest>
                 <attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter" />
