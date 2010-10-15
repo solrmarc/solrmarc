@@ -218,6 +218,18 @@ public class SolrIndexer
                         fieldDef[2] = values[0];
                         fieldDef[3] = values.length > 1 ? values[1].trim() : null;
                         // NOTE: assuming no translation map here
+                        if (fieldDef[2].equals("era") && fieldDef[3] != null)
+                        {
+                            try
+                            {
+                                fieldDef[3] = loadTranslationMap(props, fieldDef[3]);
+                            }
+                            catch (IllegalArgumentException e)
+                            {
+                                logger.error("Unable to find file containing specified translation map (" + fieldDef[3] + ")");
+                                throw new IllegalArgumentException("Error: Problems reading specified translation map (" + fieldDef[3] + ")");
+                            }
+                        }
                     }
                     else if (values[0].equalsIgnoreCase("FullRecordAsXML") ||
                              values[0].equalsIgnoreCase("FullRecordAsMARC") ||
