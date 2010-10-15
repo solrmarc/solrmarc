@@ -233,11 +233,11 @@
 
         <run_jarfull_of_junit_tests classpathrefid="test.run.classpath.core.only.jars.with.coverage" teststoexclude="org/solrmarc/testUtils/**" 
              teststorun="${site.test.build.dir}/SolrMarcJunit.jar" coberturaDatafileName="${core.instr.dir}/cobertura.ser" 
-             testConfigDir="${test.data.dir}/smoketest" tesstConfigFile="${test.data.dir}/smoketest/test_config.properties" 
-             solrPath="${test.data.dir}/smoketest/solr" solrDataDir="${test.data.dir}/smoketest/solr" />
+             testConfigDir="${test.data.dir}/smoketest" testConfigFile="${test.data.dir}/smoketest/test_config.properties" 
+             solrPath="${test.data.dir}/smoketest/solr" solrDataDir="${test.data.dir}/smoketest/solr/data" />
 
         <run_parameterized_junit_tests classpathrefid="test.run.classpath.core.only.jars.with.coverage" datafile="maintest.txt" 
-            coberturaDatafileName="${core.instr.dir}/cobertura.ser" />
+            coberturaDatafileName="${core.instr.dir}/cobertura.ser" solrmarcPath=".|../test/data/smoketest" />
         
         <!--
         <run_parameterized_junit_tests classpathrefid="test.run.classpath.include.site.jars.with.coverage" datafile="indextest.txt" 
@@ -336,7 +336,7 @@
         <property name="test.jar"  value="${site.test.build.dir}/${site.test.jar}" />
         
         <run_jarfull_of_junit_tests classpathrefid="test.run.classpath.include.site.jars" teststoexclude="org/solrmarc/testUtils/**" 
-             teststorun="${test.jar}"  testConfigDir="${dist.path}" tesstConfigFile="${default.config}" 
+             teststorun="${test.jar}"  testConfigDir="${dist.path}" testConfigFile="${default.config}" 
              solrPath="${site.test.solr.dir}" solrDataDir="${site.test.solr.dir}/data" />
         
         <!--  Now delete the jar files that had to be un-jarred from the solr.war file for the test to run -->
@@ -369,7 +369,7 @@
         <set_path_for_junit_tests />
         <run_jarfull_of_junit_tests classpathrefid="test.run.classpath.core.only.jars" teststoexclude="org/solrmarc/testUtils/**" 
              teststorun="${site.test.build.dir}/SolrMarcJunit.jar" 
-             testConfigDir="${test.data.dir}/smoketest" tesstConfigFile="${test.data.dir}/smoketest/test_config.properties" 
+             testConfigDir="${test.data.dir}/smoketest" testConfigFile="${test.data.dir}/smoketest/test_config.properties" 
              solrPath="${test.data.dir}/smoketest/solr" solrDataDir="${test.data.dir}/smoketest/solr" />
 
         <!--  Now delete the jar files that had to be un-jarred from the solr.war file for the test to run -->
@@ -667,6 +667,7 @@
         <attribute name="classpathrefid" default="test.run.classpath.include.site.jars" />
         <attribute name="coberturaDatafileName" default="" />
         <attribute name="datafile" />
+        <attribute name="solrmarcPath" default="."/>
         <sequential>
              
             <property name="indextest.class" value="org.solrmarc.testUtils.ParameterizedIndexTest" />
@@ -694,6 +695,7 @@
                                 <sysproperty key="test.data.file" value="@{datafile}" />
                                 <sysproperty key="solr.path" path="${site.test.solr.dir}" />
                                 <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
+                                <sysproperty key="solrmarc.path" path="@{solrmarcPath}" />
                                 <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
                                 <test name="${indextest.class}" todir="${site.test.dir}/output" />
                             </junit>
@@ -717,7 +719,7 @@
         <attribute name="coberturaDatafileName" default="" />
         <attribute name="testsToExclude" default="" />
         <attribute name="testConfigDir" />
-        <attribute name="tesstConfigFile" />
+        <attribute name="testConfigFile" />
         <attribute name="solrPath" />
         <attribute name="solrDataDir" />
         <sequential>            
@@ -742,10 +744,10 @@
                         <sysproperty key="net.sourceforge.cobertura.datafile" file="@{coberturaDatafileName}" />
                         <sysproperty key="test.data.path" path="${test.data.dir}" />
                         <sysproperty key="test.data.file" value="${test.data.file}" />
-                        <sysproperty key="test.config.dir" path="${test.data.dir}/smoketest" />
-                        <sysproperty key="test.config.file" value="${test.data.dir}/smoketest/test_config.properties" />
-                        <sysproperty key="solr.path" path="${test.data.dir}/smoketest/solr" />
-                        <sysproperty key="solr.data.dir" path="${test.data.dir}/smoketest/solr" />
+                        <sysproperty key="test.config.dir" path="@{testConfigDir}" />
+                        <sysproperty key="test.config.file" value="@{testConfigFile}" />
+                        <sysproperty key="solr.path" path="@{solrPath}" />
+                        <sysproperty key="solr.data.dir" path="@{solrDataDir}" />
                         <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
                         <batchtest fork="yes" todir="${site.test.dir}/output" >
                             <zipfileset src="@{teststorun}" includes="**/*.class" excludes="@{testsToExclude}"/>
