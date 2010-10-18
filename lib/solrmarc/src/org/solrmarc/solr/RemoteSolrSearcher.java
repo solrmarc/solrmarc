@@ -180,7 +180,7 @@ public class RemoteSolrSearcher
         int charNum;
         if (charCodePoint.startsWith("\\u"))
         {
-            charNum = Integer.parseInt(charCodePoint.substring(1), 16);
+            charNum = Integer.parseInt(charCodePoint.substring(2), 16);
         }
         else
         {

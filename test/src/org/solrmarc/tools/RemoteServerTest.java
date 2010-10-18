@@ -2,7 +2,9 @@ package org.solrmarc.tools;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -67,13 +69,14 @@ public class RemoteServerTest
                                    null, false);
         p = vmspawner.startStdinStderrInstance("JETTY");
 //        p = vmspawner.start();
-        boolean serverIsUp = checkServerIsUp(10000, 100, getServerAddress(), getServerPort());
+        boolean serverIsUp = checkServerIsUp(25000, 100, getServerAddress(), getServerPort());
         assertTrue("Server did not become available",serverIsUp);
         System.out.println("Server is up and running");
     }
 
     /**
-     * unit test for RemoteIndexRecord
+     * unit test for index a number of records via the REMOTE http access methods.
+     * then search for those records using the RemoteSolrSearcher class.
      */
     @Test
     public void testRemoteIndexRecord()
@@ -119,16 +122,46 @@ public class RemoteServerTest
         CommandLineUtils.assertArrayEquals("record via GetFromSolr(raw), and record via GetRecord ", out4.toByteArray(), out3.toByteArray());
         System.out.println("Test testRemoteIndexRecord is successful");
         
+        // now delete all of the records in the index to make test order not matter
+        //    first get the entire contents of index (don't try this at home)
+        ByteArrayOutputStream out6 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err6 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out6, err6, new String[]{urlStr, "id:u*", "marc_display"});
         
-        // Now test SolrUpdate  
+        //    next extract the ids from the returned records 
+        ByteArrayInputStream in7 = new ByteArrayInputStream(out6.toByteArray());
+        ByteArrayOutputStream out7 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in7, out7, new String[]{testConfigFile, "print", "001"});
+        
+        //    now delete all of the records (but don't commit)
+        System.setProperty("marc.delete_record_id_mapper", "001 u?([0-9]*).*->u$1");
+        ByteArrayInputStream in8 = new ByteArrayInputStream(out7.toByteArray());
+        ByteArrayOutputStream out8 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err8 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", in8, out8, err8, new String[]{testConfigFile, "DELETE_ONLY", "-nocommit"});
+
+        //   then check that the index is NOT empty yet (because we didn't commit)
+        ByteArrayOutputStream out9 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err9 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out9, err9, new String[]{urlStr, "id:u*", "marc_display"});
+
+        CommandLineUtils.assertArrayEquals("record dump before and after delete but no commit ", out9.toByteArray(), out6.toByteArray()); 
+        
+        //   now test SolrUpdate  to commit the changes
         ByteArrayOutputStream out5 = new ByteArrayOutputStream();
         CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.SolrUpdate", "main", null, out5, new String[]{"-v", urlStr+"/update"});
 
         assertTrue("Remote update was unsuccessful ", new String(out5.toByteArray()).contains("<int name=\"status\">0</int>"));
-        System.out.println("Test4 testRemoteIndexRecord is successful");
+
+        //   lastly check that the index is NOW empty
+        ByteArrayOutputStream out10 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err10 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out10, err10, new String[]{urlStr, "id:u*", "marc_display"});
 
         
-        
+        CommandLineUtils.assertArrayEquals("record dump via RemoteSolrSearcher, and empty record ", out9.toByteArray(), new byte[0]); 
+
+        System.out.println("Test testRemoteIndexRecord is successful");
     }
     
     @After

@@ -85,6 +85,15 @@ public abstract class MarcHandler {
                 {
                     System.setProperty("marc.ids_to_delete", arg);
                 }
+                else if (arg.equals("DELETE_ONLY"))
+                {
+                    System.setProperty("marc.source", "NONE");
+                    System.setProperty("marc.ids_to_delete", "stdin");
+                }
+                else if (lc_arg.equals("-nocommit"))
+                {
+                    System.setProperty("solr.commit_at_end", "false");
+                }
                 else
                 {
                     addnlArgList.add(arg);

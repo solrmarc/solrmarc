@@ -43,6 +43,8 @@ import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.SolrUpdate;
 import org.solrmarc.tools.Utils;
 
+import bsh.This;
+
 
 /**
  * @author Wayne Graham (wsgrah@wm.edu)
@@ -62,6 +64,7 @@ public class MarcImporter extends MarcHandler
     private String deleteRecordIDMapper = null;
     private String solrHostURL;
     private String solrHostUpdateURL;
+    protected boolean commitAtEnd = true;
     protected boolean optimizeAtEnd = false;
     protected boolean shuttingDown = false;
     protected boolean isShutDown = false;
@@ -161,9 +164,21 @@ public class MarcImporter extends MarcHandler
         
         justIndexDontAdd = Boolean.parseBoolean(Utils.getProperty(configProps, "marc.just_index_dont_add"));
         if (justIndexDontAdd)
+        {
             Utils.setLog4jLogLevel(org.apache.log4j.Level.WARN);
+            optimizeAtEnd = false;
+            commitAtEnd = false;
+        }
+        else
+        {
+            optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(configProps, "solr.optimize_at_end"));
+            if (optimizeAtEnd) commitAtEnd = true;
+            if (Utils.getProperty(configProps, "solr.commit_at_end") != null)
+            {
+                commitAtEnd = Boolean.parseBoolean(Utils.getProperty(configProps, "solr.commit_at_end"));
+            }
+        }
         deleteRecordListFilename = Utils.getProperty(configProps, "marc.ids_to_delete");
-        optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(configProps, "solr.optimize_at_end"));
         
         // Set up Solr core
         boolean useSolrServerProxy = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_solr_server_proxy"));
@@ -201,10 +216,19 @@ public class MarcImporter extends MarcHandler
                 mapReplace = parts[1];
             }
         }
-        File delFile = new File(deleteRecordListFilename);
+        BufferedReader is = null;
+        File delFile = null;
         try
         {
-            BufferedReader is = new BufferedReader(new FileReader(delFile));
+            if (deleteRecordListFilename.equals("stdin"))
+            {
+                is = new BufferedReader(new InputStreamReader(System.in)); 
+            }
+            else
+            {
+                delFile = new File(deleteRecordListFilename);
+                is = new BufferedReader(new FileReader(delFile));
+            }
             String line;
             boolean fromCommitted = true;
             boolean fromPending = true;
@@ -225,11 +249,11 @@ public class MarcImporter extends MarcHandler
         }
         catch (FileNotFoundException fnfe)
         {
-            logger.error("Error: unable to find and open delete-record-id-list: " + delFile, fnfe);
+            logger.error("Error: unable to find and open delete-record-id-list: " + deleteRecordListFilename, fnfe);
         }
         catch (IOException ioe)
         {
-            logger.error("Error: reading from delete-record-id-list: " + delFile, ioe);
+            logger.error("Error: reading from delete-record-id-list: " + deleteRecordListFilename, ioe);
         }
         return recsDeletedCounter;
     }
@@ -414,16 +438,19 @@ public class MarcImporter extends MarcHandler
      */
     public void finish()
     {
-        try {
-            //System.out.println("Calling commit");
-            logger.info("Calling commit");
-            solrProxy.commit(shuttingDown ? false : optimizeAtEnd);
-        } 
-        catch (IOException ioe) {
-            //System.err.println("Final commit and optmization failed");
-            logger.error("Final commit and optimization failed: " + ioe.getMessage());
-            logger.debug(ioe);
-            //e.printStackTrace();
+        if (commitAtEnd)
+        {
+            try {
+                //System.out.println("Calling commit");
+                logger.info("Calling commit");
+                solrProxy.commit(shuttingDown ? false : optimizeAtEnd);
+            } 
+            catch (IOException ioe) {
+                //System.err.println("Final commit and optmization failed");
+                logger.error("Final commit and optimization failed: " + ioe.getMessage());
+                logger.debug(ioe);
+                //e.printStackTrace();
+            }
         }
         
         //System.out.println("Done with commit, closing Solr");
@@ -448,7 +475,7 @@ public class MarcImporter extends MarcHandler
     
     protected void signalServer()
     {
-        if (shuttingDown) return;
+        if (shuttingDown || !commitAtEnd) return;
         // if solrCoreDir == null  and  solrHostUpdateURL != null  then we are talking to a remote 
         // solr server during the main program, so there is no need to separately contact
         // server to tell it to commit,  therefore merely return.
@@ -811,6 +838,8 @@ public class MarcImporter extends MarcHandler
         }
         
         int exitCode = importer.handleAll();
+        System.clearProperty("marc.path");
+        System.clearProperty("marc.source");
         //System.exit(exitCode);
     }
 }
