@@ -98,6 +98,8 @@ public class CommandLineUtils
         }
         catch (InvocationTargetException e)
         {
+            System.setOut(origOut);
+            System.setErr(origErr);
             e.getTargetException().printStackTrace();
             fail("Specified method "+methodName+" threw an exception "+e.getTargetException().getClass().getName());
         }

@@ -402,14 +402,14 @@ public class CommandLineUtilTests
         // index a small set of records
         System.setProperty("solrmarc.use_solr_server_proxy", "true");
         ByteArrayOutputStream out1 = new ByteArrayOutputStream();
-        ByteArrayOutputStream outErr1 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", null, out1, outErr1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  });
+        ByteArrayOutputStream err1 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  });
         System.clearProperty("solrmarc.use_solr_server_proxy");
 
         // retrieve record u3 from the index
         ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-        ByteArrayOutputStream outErr2 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out2, outErr2, new String[]{testConfigFile, "id:u3", "marc_display"});
+        ByteArrayOutputStream err2 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out2, err2, new String[]{testConfigFile, "id:u3", "marc_display"});
         
         // retrieve record u3 from the original input file
         ByteArrayOutputStream out3 = new ByteArrayOutputStream();
@@ -420,29 +420,29 @@ public class CommandLineUtilTests
         
         // retrieve record u3 from the index (from marc_xml_display field) 
         ByteArrayOutputStream out4 = new ByteArrayOutputStream();
-        ByteArrayOutputStream outErr4 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out4, outErr4, new String[]{testConfigFile, "id:u3", "marc_xml_display"});
+        ByteArrayOutputStream err4 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out4, err4, new String[]{testConfigFile, "id:u3", "marc_xml_display"});
         
         // compare the results
         CommandLineUtils.assertArrayEquals("record via GetFromSolr(xml) through filter, and record via GetRecord ", out4.toByteArray(), out3.toByteArray()); 
 
         // index some more records as well as delete some
         ByteArrayOutputStream out6 = new ByteArrayOutputStream();
-        ByteArrayOutputStream outErr6 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", null, out6, outErr6, new String[]{testConfigFile, testDataParentPath+"/mergeMod.mrc", testDataParentPath+"/mergeMod.del"  });
+        ByteArrayOutputStream err6 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", null, out6, err6, new String[]{testConfigFile, testDataParentPath+"/mergeMod.mrc", testDataParentPath+"/mergeMod.del"  });
 
         // now check that record u4 isn't present
         ByteArrayOutputStream out7 = new ByteArrayOutputStream();
-        ByteArrayOutputStream outErr7 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out7, outErr7, new String[]{testConfigFile, "id:u4", "marc_display"});
+        ByteArrayOutputStream err7 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out7, err7, new String[]{testConfigFile, "id:u4", "marc_display"});
 
         // compare the results
         CommandLineUtils.assertArrayEquals("record via GetFromSolr, and empty record ", out7.toByteArray(), new byte[0]); 
         
         // lastly check that the entire contents of index (don't try this at home)
         ByteArrayOutputStream out8 = new ByteArrayOutputStream();
-        ByteArrayOutputStream outErr8 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out8, outErr8, new String[]{testConfigFile, "id:u*", "marc_display"});
+        ByteArrayOutputStream err8 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out8, err8, new String[]{testConfigFile, "id:u*", "marc_display"});
         
         // sort the records returned
         ByteArrayInputStream in9 = new ByteArrayInputStream(out8.toByteArray());
@@ -454,6 +454,24 @@ public class CommandLineUtilTests
 
         // compare the results
         CommandLineUtils.assertArrayEquals("all records via GetFromSolr, all record via MarcMerger ", out9.toByteArray(), out10.toByteArray()); 
+
+        // now delete all of the records in the index to make test order not matter
+        ByteArrayInputStream in11 = new ByteArrayInputStream(out8.toByteArray());
+        ByteArrayOutputStream out11 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in11, out11, new String[]{testConfigFile, "print", "001"});
+        
+        System.setProperty("marc.delete_record_id_mapper", "001 u?([0-9]*).*->u$1");
+        ByteArrayInputStream in12 = new ByteArrayInputStream(out11.toByteArray());
+        ByteArrayOutputStream out12 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err12 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", in12, out12, err12, new String[]{testConfigFile, "DELETE_ONLY"});
+
+        // lastly check that the index is now empty
+        ByteArrayOutputStream out13 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err13 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out13, err13, new String[]{testConfigFile, "id:u*", "marc_display"});
+        
+        CommandLineUtils.assertArrayEquals("record via GetFromSolr, and empty record ", out13.toByteArray(), new byte[0]); 
 
         System.out.println("Test testIndexRecord is successful");
     }
