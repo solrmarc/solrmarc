@@ -61,7 +61,7 @@ marc.default_encoding = MARC8
 #   MARC8 encoding into UTF-8 encoding on output to index
 marc.to_utf_8 = true
 
-# - marc.include_erros - when error in marc record, dump description of error 
+# - marc.include_errors - when error in marc record, dump description of error 
 #   to field in solr index an alternative way to trap the indexing error 
 #   messages that are logged during index time.  Nice for staff b/c they can 
 #   search for errors and see ckey and record fields in discovery portal.  This 
