@@ -221,7 +221,7 @@ public class RemoteServerTest
             String lines[] = outputSoFar.split("\r?\n");
             for (int i = lastLineRead; i < lines.length; i++)
             {
-                System.out.println(lines[i]);
+//                System.out.println(lines[i]);
                 if (lines[i].contains(patternToWatchFor1))
                 {
                     socketStr = lines[i].replaceAll(".*"+patternToWatchFor1 + "([0-9]*).*", "$1");
