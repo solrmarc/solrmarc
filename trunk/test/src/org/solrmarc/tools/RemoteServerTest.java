@@ -46,8 +46,9 @@ public class RemoteServerTest
         testConfigFile = System.getProperty("test.config.file");
         solrPath = System.getProperty("solr.path");
         jettyTestPort = System.getProperty("jetty.test.port");
+        // Specify port 0 to select any available port 
         if (jettyTestPort == null)
-            jettyTestPort = "8983";
+            jettyTestPort = "0";
         if (solrPath == null)
             fail("property solr.path must be defined for the tests to run");
         if (testDataParentPath == null)
@@ -61,15 +62,27 @@ public class RemoteServerTest
         addnlClassPath.add(new File(testDataParentPath, "../jetty/start.jar").getCanonicalPath());
         System.out.println("Properties read, starting server");
 
+        ByteArrayOutputStream serverOut = new ByteArrayOutputStream();
+        ByteArrayOutputStream serverErr = new ByteArrayOutputStream();
+        
         vmspawner = new JavaInvoke("org.mortbay.start.Main",
                                    new File(new File(testDataParentPath, "../jetty").getCanonicalPath()), 
                                    javaProps, 
                                    null,
                                    addnlClassPath,
                                    null, false);
-        p = vmspawner.startStdinStderrInstance("JETTY");
+        p = vmspawner.startStdinStderrInstance("JETTY", serverOut, serverErr);
 //        p = vmspawner.start();
-        boolean serverIsUp = checkServerIsUp(25000, 100, getServerAddress(), getServerPort());
+        boolean serverIsUp = false;
+        if (getServerPort() == 0)
+        {
+            jettyTestPort = waitServerIsUp(25000, 100, serverErr, "INFO:  Started SocketConnector@0.0.0.0:", "INFO:  Started SocketConnector @ 0.0.0.0:");
+            serverIsUp = checkServerIsUp(5000, 100, getServerAddress(), getServerPort());
+        }
+        else
+        {
+            serverIsUp = checkServerIsUp(25000, 100, getServerAddress(), getServerPort());
+        }
         assertTrue("Server did not become available",serverIsUp);
         System.out.println("Server is up and running");
     }
@@ -182,6 +195,54 @@ public class RemoteServerTest
     int getServerPort() 
     {
         return Integer.parseInt(jettyTestPort);
+    }
+    
+    /**
+     * Repeats a TCP connection check every <em>sleepTime</em> milliseconds until it either succeeds
+     * or times out after <em>timeout</em> milliseconds.
+     * 
+     * @see Server#checkServerIsUp(InetAddress, int) An explanation of the TCP checking mechanism.
+     * 
+     * @param timeout If no check is successful after this many milliseconds has passed, fail the 
+     * overall checking process.
+     * @param sleepTime How long to wait (in milliseconds) between checks of the service.
+     * @param server address of server to check.
+     * @param port port to check.
+     * @return true if a connection attempt succeeds, false in the case of error or 
+     * no connection attempt successful.
+     */
+    public static String waitServerIsUp(long timeout, long sleepTime, ByteArrayOutputStream out, String patternToWatchFor1, String patternToWatchFor2  ) 
+    {
+        long start = System.currentTimeMillis();
+        String socketStr = "0";
+        int lastLineRead = 0;
+        while((System.currentTimeMillis() - start) < timeout)
+        {
+            String outputSoFar = new String(out.toByteArray());
+            String lines[] = outputSoFar.split("\r?\n");
+            for (int i = lastLineRead; i < lines.length; i++)
+            {
+                if (lines[i].contains(patternToWatchFor1))
+                {
+                    socketStr = lines[i].replaceAll(".*"+patternToWatchFor1 + "([0-9]*).*", "$1");
+                    return(socketStr);
+                }
+                else if (lines[i].contains(patternToWatchFor2))
+                {
+                    socketStr = lines[i].replaceAll(".*"+patternToWatchFor2 + "([0-9]*).*", "$1");
+                    return(socketStr);
+                }
+            }
+            lastLineRead = lines.length;
+            try {
+                Thread.sleep(sleepTime);
+            } 
+            catch (InterruptedException e) 
+            {
+                return socketStr;
+            }
+        }
+        return socketStr;
     }
     
     /**
