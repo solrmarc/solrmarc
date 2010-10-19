@@ -44,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
@@ -168,20 +169,36 @@ public class ProcessSpawner {
 		return p;
 	}		
 
-	/**
-	 * Like calling start, but uses {@link OutputPiper} classes
-	 * to redirect ouptut back to this JVM's console.
-	 * 
-	 * @param tag to tag the Outpiper's output with
-	 * @return
-	 * @throws IOException
-	 */
-	public Process startStdinStderrInstance(String tag) throws IOException {
-		start();
-		out = OutputPiper.createOutputPiper(tag+ "-stdout", p.getInputStream(), System.out);
-		err = OutputPiper.createOutputPiper(tag+ "-stderr", p.getErrorStream(), System.err);
-		return p;
-	}
+    /**
+     * Like calling start, but uses {@link OutputPiper} classes
+     * to redirect ouptut back to this JVM's console.
+     * 
+     * @param tag to tag the Outpiper's output with
+     * @return
+     * @throws IOException
+     */
+    public Process startStdinStderrInstance(String tag) throws IOException {
+        start();
+        out = OutputPiper.createOutputPiper(tag+ "-stdout", p.getInputStream(), System.out);
+        err = OutputPiper.createOutputPiper(tag+ "-stderr", p.getErrorStream(), System.err);
+        return p;
+    }
+    
+    /**
+     * Like calling start, but uses {@link OutputPiper} classes
+     * to redirect to the provided output streams
+     * 
+     * @param tag to tag the Outpiper's output with
+     * @return
+     * @throws IOException
+     */
+    public Process startStdinStderrInstance(String tag, OutputStream outRedirect, OutputStream errRedirect) throws IOException 
+    {
+        start();
+        out = OutputPiper.createOutputPiper(tag+ "-stdout", p.getInputStream(), new PrintStream(outRedirect));
+        err = OutputPiper.createOutputPiper(tag+ "-stderr", p.getErrorStream(), new PrintStream(errRedirect));
+        return p;
+    }
 	
 	public void waitForProcess() throws Exception {
 		if(p != null) {
