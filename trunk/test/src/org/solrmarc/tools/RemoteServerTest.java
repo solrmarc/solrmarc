@@ -133,7 +133,7 @@ public class RemoteServerTest
         
         // compare the results
         CommandLineUtils.assertArrayEquals("record via GetFromSolr(raw), and record via GetRecord ", out4.toByteArray(), out3.toByteArray());
-        System.out.println("Test testRemoteIndexRecord is successful");
+        //System.out.println("Test testRemoteIndexRecord is successful");
         
         // now delete all of the records in the index to make test order not matter
         //    first get the entire contents of index (don't try this at home)
@@ -170,9 +170,8 @@ public class RemoteServerTest
         ByteArrayOutputStream out10 = new ByteArrayOutputStream();
         ByteArrayOutputStream err10 = new ByteArrayOutputStream();
         CommandLineUtils.runCommandLineUtil2("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out10, err10, new String[]{urlStr, "id:u*", "marc_display"});
-
-        
-        CommandLineUtils.assertArrayEquals("record dump via RemoteSolrSearcher, and empty record ", out9.toByteArray(), new byte[0]); 
+       
+        CommandLineUtils.assertArrayEquals("record dump via RemoteSolrSearcher, and empty record ", out10.toByteArray(), new byte[0]); 
 
         System.out.println("Test testRemoteIndexRecord is successful");
     }
@@ -222,6 +221,7 @@ public class RemoteServerTest
             String lines[] = outputSoFar.split("\r?\n");
             for (int i = lastLineRead; i < lines.length; i++)
             {
+                System.out.println(lines[i]);
                 if (lines[i].contains(patternToWatchFor1))
                 {
                     socketStr = lines[i].replaceAll(".*"+patternToWatchFor1 + "([0-9]*).*", "$1");
