@@ -584,8 +584,9 @@ public class SolrReIndexer extends MarcImporter
         reader.handleAll();
         
         reader.finish();
-        System.clearProperty("marc.path");
-        System.clearProperty("marc.source");
+//        System.clearProperty("marc.path");
+//        System.clearProperty("marc.source");
+        System.exit(0);
 
     }
 

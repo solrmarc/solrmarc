@@ -201,6 +201,7 @@ public class MergeSummaryHoldings implements MarcReader
         }
         System.setProperty("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
         processMergeSummaryHoldings(input0, summaryHoldingsMarcFileName);
+        System.exit(0);
     }
     
     

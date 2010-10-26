@@ -141,6 +141,7 @@ public class RemoteSolrSearcher
                     {
                         result = line.replaceFirst("[^:]*:\"", "");
                         result = result.replaceFirst("\"}]$", "");
+                        result = result.replaceAll("\\\\\"", "\"");
                         result = normalizeUnicode(result);
                     }
                 }
@@ -459,6 +460,6 @@ public class RemoteSolrSearcher
         }
         RemoteSolrSearcher searcher = new RemoteSolrSearcher(baseURLStr, query, field);
         searcher.handleAll();
-        
+        System.exit(0);
     }
 }
