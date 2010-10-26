@@ -363,7 +363,7 @@ public class MarcPatcher extends MarcHandler
             if (line == null) return(null);
             result = line.split("\\|");
             if (changedLocationReader == null) break;
-            if (currentLocationID == null || compare.compare(currentLocationID, result[0]) < 0)
+            while (currentLocationID == null || compare.compare(currentLocationID, result[0]) < 0)
             {
                 try
                 {
@@ -629,9 +629,9 @@ public class MarcPatcher extends MarcHandler
         
         int exitCode = marcPatcher.handleAll();
         if (pOut != null) pOut.flush();
-//        System.exit(exitCode);
-        System.clearProperty("marc.path");
-        System.clearProperty("marc.source");
+        System.exit(exitCode);
+//        System.clearProperty("marc.path");
+//        System.clearProperty("marc.source");
     }
 
 
