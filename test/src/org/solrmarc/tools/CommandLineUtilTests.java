@@ -20,13 +20,25 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.solrmarc.testUtils.CommandLineUtils;
 
 
 public class CommandLineUtilTests
 {
+    @Before
+    public void setUp()
+    {
+        if (!Boolean.parseBoolean(System.getProperty("test.solr.verbose")))
+        {
+            java.util.logging.Logger.getLogger("org.apache.solr").setLevel(java.util.logging.Level.SEVERE);
+            Utils.setLog4jLogLevel(org.apache.log4j.Level.WARN);
+        }
+    }
     /**
      * unit test for MergeSummaryHoldings and PrintWriter
      */
@@ -86,7 +98,8 @@ public class CommandLineUtilTests
 
         ByteArrayInputStream in2 = new ByteArrayInputStream(out1.toByteArray());
         ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in2, out2, new String[]{testConfigFile, "print"}); 
+        ByteArrayOutputStream err2 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in2, out2, err2, new String[]{testConfigFile, "print"}); 
 
         CommandLineUtils.compareUtilOutput(new ByteArrayInputStream(out2.toByteArray()), mergedSummaryHoldingsOutput); 
 
@@ -123,7 +136,6 @@ public class CommandLineUtilTests
             " > 999   $aNA1547 .P6 T9 1982$wLC$c1$iX000815679$d5/19/2008$e4/9/2008$lFA-OVERSZE$mFINE-ARTS$n16$q1$rY$sY$tBOOK$u6/28/1996$xH-NOTIS$o.STAFF.  *arts"
         };
                                      
-        System.setProperty("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
         String testDataParentPath = System.getProperty("test.data.path");
         String testConfigFile = System.getProperty("test.config.file");
         if (testDataParentPath == null)
@@ -131,7 +143,9 @@ public class CommandLineUtilTests
         if (testConfigFile == null)
             fail("property test.config.file be defined for this test to run");
         ByteArrayOutputStream out1 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.MarcDiff", "main", null, out1, new String[]{testDataParentPath+"/u2103.mrc", testDataParentPath+"/u2103_raw.mrc" });
+        Map<String,String> addnlProps = new LinkedHashMap<String,String>();
+        addnlProps.put("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.MarcDiff", "main", null, out1, new String[]{testDataParentPath+"/u2103.mrc", testDataParentPath+"/u2103_raw.mrc" }, addnlProps);
 
         CommandLineUtils.compareUtilOutput(new ByteArrayInputStream(out1.toByteArray()), marcDiffOutput);
         System.out.println("Test testMarcDiff is successful");
@@ -373,9 +387,10 @@ public class CommandLineUtilTests
 
         CommandLineUtils.assertArrayEquals("record via GetRecord with parm, and record via GetRecord with selection file ", out1.toByteArray(), out2.toByteArray()); 
 
-        System.setProperty("marc.include_if_present", "500a/Tamil");
         ByteArrayOutputStream out3 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", null, out3, new String[]{testConfigFile, testDataParentPath+"/selectedRecs.mrc", "untranslate" });
+        Map<String,String> addnlProps3 = new LinkedHashMap<String,String>();
+        addnlProps3.put("marc.include_if_present", "500a/Tamil");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", null, out3, new String[]{testConfigFile, testDataParentPath+"/selectedRecs.mrc", "untranslate" }, addnlProps3);
         System.clearProperty("marc.include_if_present");
 
         CommandLineUtils.assertArrayEquals("record via GetRecord, and record via FilterRecord ", out1.toByteArray(), out3.toByteArray()); 
@@ -399,17 +414,27 @@ public class CommandLineUtilTests
         if (testConfigFile == null)
             fail("property test.config.file be defined for this test to run");
 
+        // ensure we start in a sane state
+        deleteAllRecords(testConfigFile, solrPath );
+        
         // index a small set of records
-        System.setProperty("solrmarc.use_solr_server_proxy", "true");
         ByteArrayOutputStream out1 = new ByteArrayOutputStream();
         ByteArrayOutputStream err1 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  });
-        System.clearProperty("solrmarc.use_solr_server_proxy");
+        Map<String,String> addnlProps1 = new LinkedHashMap<String,String>();
+        addnlProps1.put("solrmarc.use_solr_server_proxy", "true");
+        addnlProps1.put("solr.path", solrPath);
+        addnlProps1.put("solr.log.level", "OFF");
+        addnlProps1.put("solrmarc.log.level", "OFF");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc" }, addnlProps1);
 
         // retrieve record u3 from the index
         ByteArrayOutputStream out2 = new ByteArrayOutputStream();
         ByteArrayOutputStream err2 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out2, err2, new String[]{testConfigFile, "id:u3", "marc_display"});
+        Map<String,String> addnlProps2 = new LinkedHashMap<String,String>();
+        addnlProps2.put("solr.path", solrPath);
+        addnlProps2.put("solr.log.level", "OFF");
+        addnlProps2.put("solrmarc.log.level", "OFF");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out2, err2, new String[]{testConfigFile, "id:u3", "marc_display"}, addnlProps2);
         
         // retrieve record u3 from the original input file
         ByteArrayOutputStream out3 = new ByteArrayOutputStream();
@@ -421,7 +446,7 @@ public class CommandLineUtilTests
         // retrieve record u3 from the index (from marc_xml_display field) 
         ByteArrayOutputStream out4 = new ByteArrayOutputStream();
         ByteArrayOutputStream err4 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out4, err4, new String[]{testConfigFile, "id:u3", "marc_xml_display"});
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out4, err4, new String[]{testConfigFile, "id:u3", "marc_xml_display"}, addnlProps2);
         
         // compare the results
         CommandLineUtils.assertArrayEquals("record via GetFromSolr(xml) through filter, and record via GetRecord ", out4.toByteArray(), out3.toByteArray()); 
@@ -429,12 +454,12 @@ public class CommandLineUtilTests
         // index some more records as well as delete some
         ByteArrayOutputStream out6 = new ByteArrayOutputStream();
         ByteArrayOutputStream err6 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", null, out6, err6, new String[]{testConfigFile, testDataParentPath+"/mergeMod.mrc", testDataParentPath+"/mergeMod.del"  });
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out6, err6, new String[]{testConfigFile, testDataParentPath+"/mergeMod.mrc", testDataParentPath+"/mergeMod.del"  }, addnlProps2);
 
         // now check that record u4 isn't present
         ByteArrayOutputStream out7 = new ByteArrayOutputStream();
         ByteArrayOutputStream err7 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out7, err7, new String[]{testConfigFile, "id:u4", "marc_display"});
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out7, err7, new String[]{testConfigFile, "id:u4", "marc_display"}, addnlProps2);
 
         // compare the results
         CommandLineUtils.assertArrayEquals("record via GetFromSolr, and empty record ", out7.toByteArray(), new byte[0]); 
@@ -442,7 +467,7 @@ public class CommandLineUtilTests
         // lastly check that the entire contents of index (don't try this at home)
         ByteArrayOutputStream out8 = new ByteArrayOutputStream();
         ByteArrayOutputStream err8 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out8, err8, new String[]{testConfigFile, "id:u*", "marc_display"});
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out8, err8, new String[]{testConfigFile, "*:*", "marc_display"}, addnlProps2);
         
         // sort the records returned
         ByteArrayInputStream in9 = new ByteArrayInputStream(out8.toByteArray());
@@ -456,26 +481,106 @@ public class CommandLineUtilTests
         CommandLineUtils.assertArrayEquals("all records via GetFromSolr, all record via MarcMerger ", out9.toByteArray(), out10.toByteArray()); 
 
         // now delete all of the records in the index to make test order not matter
-        ByteArrayInputStream in11 = new ByteArrayInputStream(out8.toByteArray());
-        ByteArrayOutputStream out11 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in11, out11, new String[]{testConfigFile, "print", "001"});
-        
-        System.setProperty("marc.delete_record_id_mapper", "001 u?([0-9]*).*->u$1");
-        ByteArrayInputStream in12 = new ByteArrayInputStream(out11.toByteArray());
-        ByteArrayOutputStream out12 = new ByteArrayOutputStream();
-        ByteArrayOutputStream err12 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", in12, out12, err12, new String[]{testConfigFile, "DELETE_ONLY"});
+        deleteAllRecords(testConfigFile, solrPath );
 
         // lastly check that the index is now empty
-        ByteArrayOutputStream out13 = new ByteArrayOutputStream();
-        ByteArrayOutputStream err13 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.SolrReIndexer", "main", null, out13, err13, new String[]{testConfigFile, "id:u*", "marc_display"});
+        ByteArrayOutputStream out11 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err11 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out11, err11, new String[]{testConfigFile, "*:*", "marc_display"}, addnlProps2);
         
-        CommandLineUtils.assertArrayEquals("record via GetFromSolr, and empty record ", out13.toByteArray(), new byte[0]); 
+        CommandLineUtils.assertArrayEquals("record via GetFromSolr, and empty record ", out11.toByteArray(), new byte[0]); 
 
         System.out.println("Test testIndexRecord is successful");
     }
     
+    /**
+     * unit test for BooklistReader
+     */
+    @Test
+    public void testBooklistReader()
+    {
+        System.setProperty("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
+        String testDataParentPath = System.getProperty("test.data.path");
+        String testConfigFile = System.getProperty("test.config.file");
+        String solrPath = System.getProperty("solr.path");
+        if (solrPath == null)
+            fail("property solr.path must be defined for the tests to run");
+        if (testDataParentPath == null)
+            fail("property test.data.path must be defined for the tests to run");
+        if (testConfigFile == null)
+            fail("property test.config.file be defined for this test to run");
 
-                                   
+        // ensure we start in a sane state
+        deleteAllRecords(testConfigFile, solrPath );
+
+        // index a small set of records (actually one record)
+        ByteArrayOutputStream out1 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err1 = new ByteArrayOutputStream();
+        Map<String,String> addnlProps1 = new LinkedHashMap<String,String>();
+        addnlProps1.put("solr.path", solrPath);
+        addnlProps1.put("solr.log.level", "OFF");
+        addnlProps1.put("solrmarc.log.level", "OFF");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/u5157597.mrc" }, addnlProps1);
+
+        // check that there are no records with funcode_facet of AL-APV-HUMSOC
+        ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err2 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out2, err2, new String[]{testConfigFile, "fund_code_facet:AL-APV-HUMSOC", "marc_display"}, addnlProps1);
+
+        CommandLineUtils.assertArrayEquals("record via GetFromSolr, and empty record ", out2.toByteArray(), new byte[0]); 
+        
+        // now run the booklist reader program that will find and re-index records appearing in the provided sample booklist.txt file
+        ByteArrayOutputStream out3 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err3 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.BooklistReader", "main", null, out3, err3, new String[]{testDataParentPath+"/booklists_sample.txt", testConfigFile}, addnlProps1);
+        
+        // check that there now is one record with funcode_facet of AL-APV-HUMSOC
+        ByteArrayOutputStream out4 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err4 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out4, err4, new String[]{testConfigFile, "fund_code_facet:AL-APV-HUMSOC", "marc_display"}, addnlProps1);
+        
+        // check that there now is one record with funcode_facet of AL-APV-HUMSOC
+        ByteArrayOutputStream out5 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err5 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out5, err5, new String[]{testConfigFile, "id:u5157597", "marc_display"}, addnlProps1);
+
+        CommandLineUtils.assertArrayEquals("record via GetFromSolr by id, and record via GetFromSolr by fund_code_facet ", out4.toByteArray(), out5.toByteArray()); 
+        
+        // now delete all of the records in the index to make test order not matter
+        deleteAllRecords(testConfigFile, solrPath );
+
+        // lastly check that the index is now empty
+        ByteArrayOutputStream out13 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err13 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out13, err13, new String[]{testConfigFile, "*:*", "marc_display"}, addnlProps1);
+        
+        CommandLineUtils.assertArrayEquals("record via GetFromSolr, and empty record ", out13.toByteArray(), new byte[0]); 
+        
+        System.out.println("Test testBooklistReader is successful");
+    }
+    
+    public void deleteAllRecords(String testConfigFile, String solrPath )
+    {
+        // dump the entire contents of index (don't try this at home)
+        ByteArrayOutputStream out1 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err1 = new ByteArrayOutputStream();
+        Map<String,String> addnlProps1 = new LinkedHashMap<String,String>();
+        addnlProps1.put("solr.path", solrPath);
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out1, err1, new String[]{testConfigFile, "*:*", "marc_display"}, addnlProps1);
+        
+        // now extract only the record ids from the records
+        ByteArrayInputStream in2 = new ByteArrayInputStream(out1.toByteArray());
+        ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in2, out2, new String[]{testConfigFile, "print", "001"});
+        
+        // now extract run the indexer to delete all of the records
+        ByteArrayInputStream in3 = new ByteArrayInputStream(out2.toByteArray());
+        ByteArrayOutputStream out3 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err3 = new ByteArrayOutputStream();
+        Map<String,String> addnlProps3 = new LinkedHashMap<String,String>();
+        addnlProps3.put("marc.delete_record_id_mapper", "001 u?([0-9]*).*->u$1");
+        addnlProps3.put("solr.path", solrPath);
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", in3, out3, err3, new String[]{testConfigFile, "DELETE_ONLY"}, addnlProps3);
+
+    }
 }

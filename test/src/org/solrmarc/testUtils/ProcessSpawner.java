@@ -38,6 +38,7 @@ package org.solrmarc.testUtils;
  *
  */ 
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -54,10 +55,11 @@ import org.apache.log4j.Logger;
 
 public class ProcessSpawner {
 
-	static final Logger log = LogManager.getLogger(ProcessSpawner.class);
+//	static final Logger log = LogManager.getLogger(ProcessSpawner.class);
 	
 	ProcessBuilder pb = null;
-	OutputPiper out = null;
+    OutputPiper in = null;
+    OutputPiper out = null;
 	OutputPiper err = null;
 	Process p = null;
 	String[] args;
@@ -75,70 +77,164 @@ public class ProcessSpawner {
 			pb.directory(workingDirectory);	
 		}
 		pb.command(cmdarray);
-		if(log.isInfoEnabled()) {
+	//	if(log.isInfoEnabled()) {
 			StringBuilder cmdLine = new StringBuilder();
 			for(String token : cmdarray) {
 				cmdLine.append(token).append(" ");
 			}
-			log.info("Build process spawner for the following command line:");
-			log.info(cmdLine.toString());
-		}
+	//		log.info("Build process spawner for the following command line:");
+//            log.info(cmdLine.toString());
+//            System.out.println("starting process with command line: "+ cmdLine.toString());
+//		}
 		// deal with the environment
 		Map<String,String> env = pb.environment();
 		if(environmentToMerge != null && environmentToMerge.size() > 0) {
 			env.putAll(environmentToMerge);
 		}
 	
-		if(log.isDebugEnabled()) {
-			log.debug("Environment for new processses: \n");
-			for(Map.Entry<String,String> envEntry : env.entrySet()) {
-				log.debug("\t" + envEntry.getKey() + "\t=\t" + envEntry.getValue() );
-			}
-		}
+//		if(log.isDebugEnabled()) {
+//			log.debug("Environment for new processses: \n");
+//			for(Map.Entry<String,String> envEntry : env.entrySet()) {
+//				log.debug("\t" + envEntry.getKey() + "\t=\t" + envEntry.getValue() );
+//			}
+//		}
 	}
 
 	@SuppressWarnings("unused")
 	private ProcessSpawner() {/**/}
 
-	public static class OutputPiper extends Thread  {
-		InputStream in;
-		PrintStream out;
-		String tag = null;
+    public static class OutputPiper extends Thread  {
+        InputStream in;
+        PrintStream out;
+        OutputStream outraw;
+        String tag = null;
 
-		public OutputPiper(String tag, InputStream in,PrintStream out) {
-			this.in = in;
-			this.out = out;
-			this.tag = tag; 
-			// make sure that we don't keep the VM alive
-			this.setDaemon(true);
-			this.setName("OutputPiper-" + tag);
-			out.println("Starting output piper for tag: " + tag);
-			this.start();
-		}
+        public OutputPiper(String tag, InputStream in, PrintStream out) {
+            this.in = in;
+            this.out = out;
+            this.tag = tag; 
+            // make sure that we don't keep the VM alive
+            this.setDaemon(true);
+            this.setName("OutputPiper-" + tag);
+            out.println("Starting output piper for tag: " + tag);
+            this.start();
+        }
+        
+        public OutputPiper(String tag, InputStream in, OutputStream out) {
+            this.in = in;
+            this.outraw = out;
+            this.tag = tag; 
+            // make sure that we don't keep the VM alive
+            this.setDaemon(true);
+            this.setName("OutputPiper-" + tag);
+          //  out.println("Starting output piper for tag: " + tag);
+            this.start();
+        }
 
-		@Override
-		public void run() {
-			try {
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-				String line = null;
-				do {
-					line = reader.readLine();
-					if(line != null) {
-						out.println(tag + ": " + line);
-					}
-				}while(line != null);
-			}
-			catch (Exception e) {
-				//
-			}
-			out.println("Output piper exiting for tag: " + tag);
-		}
+        @Override
+        public void run() 
+        {
+            if (in == null)
+            {
+                // do nothing, be happy
+            }
+            else if (outraw != null)
+            {
+                try {
+                    BufferedInputStream is = new BufferedInputStream(in);
+                    int charRead;
+                    do {
+                        charRead = is.read();
+                        if(charRead != -1) 
+                        {
+                            outraw.write(charRead);
+                        }
+                    } while(charRead != -1);
+                    outraw.flush();
+                    outraw.close();
+                }
+                catch (Exception e) 
+                {
+                    System.err.println("Error reading from piped input " + e.getMessage());
+                    e.printStackTrace(System.err);
+                }
+            }
+            else
+            {
+                try {
+            
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    String line = null;
+                    do {
+                        line = reader.readLine();
+                        if(line != null) 
+                        {
+                            out.println(tag + ": " + line);
+                        }
+                    } while(line != null);
+                }
+                catch (Exception e) {
+                    //
+                }
+                out.println("Output piper exiting for tag: " + tag);
+                out.close();
+            }
+        }
 
-		public static OutputPiper createOutputPiper(String tag, InputStream in, PrintStream out) {
-			OutputPiper rc = new OutputPiper(tag, in,out);
-			return rc;
-		}
-	}		
+        public static OutputPiper createOutputPiper(String tag, InputStream in, PrintStream out) 
+        {
+            OutputPiper rc = new OutputPiper(tag, in, out);
+            return rc;
+        }
+        public static OutputPiper createRawOutputPiper(String tag, InputStream in, OutputStream out) 
+        {
+            OutputPiper rc = new OutputPiper(tag, in, out);
+            return rc;
+        }
+    }  
+    
+//    public static class InputPiper extends Thread  {
+//        InputStream in;
+//        OutputStream out;
+//        String tag = null;
+//
+//        public InputPiper(String tag, InputStream in, OutputStream out) {
+//            this.in = in;
+//            this.out = out;
+//            this.tag = tag; 
+//            // make sure that we don't keep the VM alive
+//            this.setDaemon(true);
+//            this.setName("InputPiper-" + tag);
+//        //    out.println("Starting input piper for tag: " + tag);
+//            this.start();
+//        }
+//
+//        @Override
+//        public void run() 
+//        {
+//            try {
+//                BufferedInputStream is = new BufferedInputStream(in);
+//                int charRead;
+//                do {
+//                    charRead = is.read();
+//                    if(charRead != -1) 
+//                    {
+//                        out.write(charRead);
+//                    }
+//                } while(charRead != -1);
+//            }
+//            catch (Exception e) {
+//                //
+//            }
+//          //  out.println("Output piper exiting for tag: " + tag);
+//        }
+//
+//        public static InputPiper createInputPiper(String tag, InputStream in, OutputStream out) 
+//        {
+//            InputPiper rc = new InputPiper(tag, in, out);
+//            return rc;
+//        }
+//    }       
 
 	public List<String> command() {
 		return pb.command();
@@ -195,11 +291,28 @@ public class ProcessSpawner {
     public Process startStdinStderrInstance(String tag, OutputStream outRedirect, OutputStream errRedirect) throws IOException 
     {
         start();
-        out = OutputPiper.createOutputPiper(tag+ "-stdout", p.getInputStream(), new PrintStream(outRedirect));
-        err = OutputPiper.createOutputPiper(tag+ "-stderr", p.getErrorStream(), new PrintStream(errRedirect));
+        out = OutputPiper.createRawOutputPiper(tag+ "-stdout", p.getInputStream(), outRedirect);
+        if (errRedirect != null)  err = OutputPiper.createRawOutputPiper(tag+ "-stderr", p.getErrorStream(), errRedirect);
         return p;
     }
-	
+    
+    /**
+     * Like calling start, but uses {@link OutputPiper} classes
+     * to redirect to the provided output streams
+     * 
+     * @param tag to tag the Outpiper's output with
+     * @return
+     * @throws IOException
+     */
+    public Process startStdinStdoutStderrInstance(String tag, InputStream inRedirect, OutputStream outRedirect, OutputStream errRedirect) throws IOException 
+    {
+        start();
+        in = OutputPiper.createRawOutputPiper(tag+ "-stdin", inRedirect, p.getOutputStream());
+        out = OutputPiper.createRawOutputPiper(tag+ "-stdout", p.getInputStream(), outRedirect);
+        if (errRedirect != null)  err = OutputPiper.createRawOutputPiper(tag+ "-stderr", p.getErrorStream(), errRedirect);
+        return p;
+    }
+    
 	public void waitForProcess() throws Exception {
 		if(p != null) {
 			try {

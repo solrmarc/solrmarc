@@ -110,7 +110,7 @@ public class MarcPrinter extends MarcHandler
     {
         // keep track of record count
         int recordCounter = 0;
-        
+
         while(reader != null && reader.hasNext())
         {
             recordCounter++;
@@ -267,8 +267,9 @@ public class MarcPrinter extends MarcHandler
         
         int exitCode = marcPrinter.handleAll();
         if (pOut != null) pOut.flush();
-        System.clearProperty("marc.path");
-        System.clearProperty("marc.source");
+        System.exit(exitCode);
+        //System.clearProperty("marc.path");
+        //System.clearProperty("marc.source");
 
     }
 

@@ -55,7 +55,7 @@ import org.apache.log4j.Logger;
  */
 public class JavaInvoke extends ProcessSpawner {
 
-	static final Logger javaInvokeLog = LogManager.getLogger(JavaInvoke.class);
+	//static final Logger javaInvokeLog = LogManager.getLogger(JavaInvoke.class);
 	
 	/**
 	 * Constructs a new JavaInvoker object. Any of the passed arguments, aside from classToInvoke, may be null.  
@@ -169,10 +169,10 @@ public class JavaInvoke extends ProcessSpawner {
 		}
 		environment.put("CLASSPATH",cpath.toString());
 		
-		if(javaInvokeLog.isInfoEnabled()) 
-		{
-			javaInvokeLog.info("CLASSPATH=" + cpath.toString());
-		}
+//		if(javaInvokeLog.isInfoEnabled()) 
+//		{
+//			javaInvokeLog.info("CLASSPATH=" + cpath.toString());
+//		}
 		return environment;
 	}
 }

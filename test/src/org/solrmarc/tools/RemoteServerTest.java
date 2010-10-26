@@ -7,6 +7,8 @@ import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -55,6 +57,11 @@ public class RemoteServerTest
             fail("property test.data.path must be defined for the tests to run");
         if (testConfigFile == null)
             fail("property test.config.file be defined for this test to run");
+        if (!Boolean.parseBoolean(System.getProperty("test.solr.verbose")))
+        {
+            java.util.logging.Logger.getLogger("org.apache.solr").setLevel(java.util.logging.Level.SEVERE);
+            Utils.setLog4jLogLevel(org.apache.log4j.Level.WARN);
+        }
         Map<String, String> javaProps = new LinkedHashMap<String, String>();
         javaProps.put("solr.solr.home", new File(solrPath).getCanonicalPath());
         javaProps.put("jetty.port", jettyTestPort);
@@ -84,7 +91,7 @@ public class RemoteServerTest
             serverIsUp = checkServerIsUp(25000, 100, getServerAddress(), getServerPort());
         }
         assertTrue("Server did not become available",serverIsUp);
-        System.out.println("Server is up and running");
+        System.out.println("Server is up and running at port "+ getServerPort());
     }
 
     /**
@@ -108,16 +115,22 @@ public class RemoteServerTest
             e.printStackTrace();
         }
         String urlStr = serverURL.toString();
-        System.setProperty("solr.hosturl", urlStr);
-        System.setProperty("solr.path", "REMOTE");
         ByteArrayOutputStream out1 = new ByteArrayOutputStream();
-        ByteArrayOutputStream outErr1 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", null, out1, outErr1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  });
+        ByteArrayOutputStream err1 = new ByteArrayOutputStream();
+        Map<String,String> addnlProps1 = new LinkedHashMap<String,String>();
+        addnlProps1.put("solr.hosturl", urlStr);
+        addnlProps1.put("solr.path", "REMOTE");
+        addnlProps1.put("marc.verbose", "true");
+//        addnlProps1.put("solrmarc.use_binary_request_handler", "true");
+//        addnlProps1.put("solrmarc.use_solr_server_proxy", "true");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
+//        if (out1.toByteArray().length > 0) System.out.println("Importer results: "+ new String (out1.toByteArray()));
+//        if (err1.toByteArray().length > 0) System.out.println("Importer results: "+ new String (err1.toByteArray()));
 
         // retrieve record u3 from the index
         ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-        ByteArrayOutputStream outErr2 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out2, outErr2, new String[]{urlStr, "id:u3", "marc_display"});
+        ByteArrayOutputStream err2 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out2, err2, new String[]{urlStr, "id:u3", "marc_display"});
         
         // retrieve record u3 from the original input file
         ByteArrayOutputStream out3 = new ByteArrayOutputStream();
@@ -128,49 +141,70 @@ public class RemoteServerTest
         
         // retrieve record u3 from the index as XML
         ByteArrayOutputStream out4 = new ByteArrayOutputStream();
-        ByteArrayOutputStream outErr4 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out4, outErr4, new String[]{urlStr, "id:u3", "marc_xml_display"});
+        ByteArrayOutputStream err4 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out4, err4, new String[]{urlStr, "id:u3", "marc_xml_display"});
         
         // compare the results
         CommandLineUtils.assertArrayEquals("record via GetFromSolr(raw), and record via GetRecord ", out4.toByteArray(), out3.toByteArray());
         //System.out.println("Test testRemoteIndexRecord is successful");
         
+        //   now test SolrUpdate  to commit the changes
+        ByteArrayOutputStream out5 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.SolrUpdate", "main", null, out5, new String[]{"-v", urlStr+"/update"});
+        
         // now delete all of the records in the index to make test order not matter
         //    first get the entire contents of index (don't try this at home)
         ByteArrayOutputStream out6 = new ByteArrayOutputStream();
         ByteArrayOutputStream err6 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out6, err6, new String[]{urlStr, "id:u*", "marc_display"});
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out6, err6, new String[]{urlStr, "id:u*", "marc_xml_display"});
+//        if (out6.toByteArray().length > 0) System.out.println("RemoteSolrSearcher results: "+ new String (out6.toByteArray()));
+//        if (err6.toByteArray().length > 0) System.out.println("RemoteSolrSearcher results: "+ new String (err6.toByteArray()));
         
         //    next extract the ids from the returned records 
         ByteArrayInputStream in7 = new ByteArrayInputStream(out6.toByteArray());
         ByteArrayOutputStream out7 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in7, out7, new String[]{testConfigFile, "print", "001"});
-        
+        ByteArrayOutputStream err7 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in7, out7, err7, new String[]{testConfigFile, "print", "001"}, addnlProps1);
+//        if (out7.toByteArray().length > 0) System.out.println("IDs to delete: "+ new String (out7.toByteArray()));
+//        if (err7.toByteArray().length > 0) System.out.println("IDs to delete: "+ new String (err7.toByteArray()));
+
         //    now delete all of the records (but don't commit)
-        System.setProperty("marc.delete_record_id_mapper", "001 u?([0-9]*).*->u$1");
+//        System.setProperty("marc.delete_record_id_mapper", "001 u?([0-9]*).*->u$1");
         ByteArrayInputStream in8 = new ByteArrayInputStream(out7.toByteArray());
         ByteArrayOutputStream out8 = new ByteArrayOutputStream();
         ByteArrayOutputStream err8 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.marc.MarcImporter", "main", in8, out8, err8, new String[]{testConfigFile, "DELETE_ONLY", "-nocommit"});
+        Map<String,String> addnlProps8 = new LinkedHashMap<String,String>();
+        addnlProps8.put("marc.delete_record_id_mapper", "001 u?([0-9]*).*->u$1");
+        addnlProps8.put("solr.hosturl", urlStr);
+        addnlProps8.put("solr.path", "REMOTE");
+        addnlProps8.put("marc.verbose", "true");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", in8, out8, err8, new String[]{testConfigFile, "DELETE_ONLY", "-nocommit"}, addnlProps8);
+//        if (out8.toByteArray().length > 0) System.out.println("Importer results: "+ new String (out8.toByteArray()));
+//        if (err8.toByteArray().length > 0) System.out.println("Importer results: "+ new String (err8.toByteArray()));
 
         //   then check that the index is NOT empty yet (because we didn't commit)
         ByteArrayOutputStream out9 = new ByteArrayOutputStream();
         ByteArrayOutputStream err9 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out9, err9, new String[]{urlStr, "id:u*", "marc_display"});
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out9, err9, new String[]{urlStr, "id:u*", "marc_display"});
 
         CommandLineUtils.assertArrayEquals("record dump before and after delete but no commit ", out9.toByteArray(), out6.toByteArray()); 
         
         //   now test SolrUpdate  to commit the changes
-        ByteArrayOutputStream out5 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.SolrUpdate", "main", null, out5, new String[]{"-v", urlStr+"/update"});
+        ByteArrayOutputStream out11 = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.SolrUpdate", "main", null, out11, new String[]{"-v", urlStr+"/update"});
 
-        assertTrue("Remote update was unsuccessful ", new String(out5.toByteArray()).contains("<int name=\"status\">0</int>"));
+//        if (out11.toByteArray().length > 0) System.out.println("Final record is: "+ new String (out11.toByteArray()));
+        assertTrue("Remote update was unsuccessful ", new String(out11.toByteArray()).contains("<int name=\"status\">0</int>"));
 
         //   lastly check that the index is NOW empty
         ByteArrayOutputStream out10 = new ByteArrayOutputStream();
         ByteArrayOutputStream err10 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil2("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out10, err10, new String[]{urlStr, "id:u*", "marc_display"});
-       
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out10, err10, new String[]{urlStr, "id:u*", "marc_xml_display"});
+//        if (out10.toByteArray().length > 0) System.out.println("RemoteSolrSearcher results: "+ new String (out10.toByteArray()));
+//        if (err10.toByteArray().length > 0) System.out.println("RemoteSolrSearcher results: "+ new String (err10.toByteArray()));
+
+        System.out.println("Final check record size is: "+ out10.toByteArray().length);
+//        if (out10.toByteArray().length > 0) System.out.println("Final record is: "+ new String (out10.toByteArray()));
         CommandLineUtils.assertArrayEquals("record dump via RemoteSolrSearcher, and empty record ", out10.toByteArray(), new byte[0]); 
 
         System.out.println("Test testRemoteIndexRecord is successful");

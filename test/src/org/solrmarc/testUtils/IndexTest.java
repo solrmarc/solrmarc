@@ -19,6 +19,9 @@ public abstract class IndexTest {
 	protected MarcImporter importer;
     protected SolrCoreProxy solrCoreProxy;
 	protected SolrSearcherProxy searcherProxy;
+    protected Map<String,String> allOrigProps;
+    protected Map<String,String> backupProps;
+    protected Map<String,String> addnlProps;
 
 	protected static String docIDfname = "id";
 
@@ -43,14 +46,19 @@ public abstract class IndexTest {
             java.util.logging.Logger.getLogger("org.apache.solr").setLevel(java.util.logging.Level.SEVERE);
             Utils.setLog4jLogLevel(org.apache.log4j.Level.WARN);
         }
+        addnlProps = new LinkedHashMap<String, String>();
+        backupProps = new LinkedHashMap<String, String>();
+        allOrigProps = new LinkedHashMap<String, String>();
+        CommandLineUtils.checkpointProps(allOrigProps);
+
         if (solrPath != null)  
         {
-            System.setProperty("solr.path", solrPath);
+            addnlProps.put("solr.path", solrPath);
             if (solrDataDir == null)
             {
                 solrDataDir = solrPath + File.separator + "data";
             }
-            System.setProperty("solr.data.dir", solrDataDir);
+            addnlProps.put("solr.data.dir", solrDataDir);
         }
         logger.debug("System.getProperty(\"os.name\") : "+System.getProperty("os.name"));
         if (!System.getProperty("os.name").toLowerCase().contains("win"))
@@ -58,6 +66,7 @@ public abstract class IndexTest {
             logger.info("Calling Delete Dir Contents");
             deleteDirContents(solrDataDir);
         }
+        CommandLineUtils.addProps(addnlProps, backupProps);
         importer = new MarcImporter();
         if (configPropFilename != null)
         {
@@ -127,6 +136,8 @@ public abstract class IndexTest {
 	    
 	//    importer.finish();
 	    importer = null;
+        CommandLineUtils.removeProps(addnlProps, backupProps);
+        CommandLineUtils.restoreProps(allOrigProps);
 	}
 	
 //	/**

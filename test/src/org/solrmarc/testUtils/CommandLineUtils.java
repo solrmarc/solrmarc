@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +13,14 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.Permission;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 public class CommandLineUtils
 {
@@ -39,7 +48,21 @@ public class CommandLineUtils
                     // do nothing;
                 }
                 else if (numToCompare > 0 && lineCnt - numLinesToSkip < numToCompare && outputLineExpected.length > lineCnt - numLinesToSkip) 
+                {
+                    if (line.equals("Flushing results...") || line.equals("Flushing results done") || line.startsWith("Cobertura:"))
+                    {
+                        continue;   // skip this line and don't even count it.  I don't know where these "Flushing Results..." lines are coming from.
+                    }
+                    if (! line.equals(outputLineExpected[lineCnt - numLinesToSkip]))
+                    {
+                        System.out.println("output line ["+ line + "]  doesn't match expected ["+ outputLineExpected[lineCnt - numLinesToSkip]+"]" );
+                    }
+//                    else
+//                    {
+//                        System.out.println("output line ["+ line + "]  matches expected ");
+//                    }
                     assertEquals("output line doesn't match expected", line, outputLineExpected[lineCnt - numLinesToSkip] );
+                }
                 lineCnt++;
             }
         }
@@ -60,57 +83,234 @@ public class CommandLineUtils
         compareUtilOutputLines(stdin, outputLinesExpected, 0, outputLinesExpected.length);
     }
     
-    public static void runCommandLineUtil2(String className, String methodName, InputStream stdin, OutputStream stdout, OutputStream stderr, String[] args)
+    private static class ExitException extends SecurityException 
     {
-        InputStream origIn = System.in;
-        PrintStream origOut = System.out;
-        PrintStream origErr = System.err;
-        Class clazz;
-        Method method;
-        try
+        private static final long serialVersionUID = -1982617086752946683L;
+        public final int status;
+
+        public ExitException(int status) 
         {
-            clazz = Class.forName(className);
-            method = clazz.getMethod(methodName, String[].class);
-            if (stdin != null) System.setIn(stdin);
-            if (stdout != null) System.setOut(new PrintStream(stdout));
-            if (stderr != null) System.setErr(new PrintStream(stderr));
-            method.invoke(null, (Object)args);
+            super("There is no escape!");
+            this.status = status;
         }
-        catch (ClassNotFoundException e)
+    }
+
+    private static class NoExitSecurityManager extends SecurityManager 
+    {
+        @Override
+        public void checkPermission(Permission perm) 
         {
-            fail("Unable to find specified class "+className+" to invoke");
+            // allow anything.
         }
-        catch (SecurityException e)
+
+        @Override
+        public void checkPermission(Permission perm, Object context) 
         {
-            fail("Unable to access specified method "+methodName+" to invoke within class "+className+"");
+            // allow anything.
         }
-        catch (NoSuchMethodException e)
+
+        @Override
+        public void checkExit(int status) 
         {
-            fail("Unable to find specified method "+methodName+" to invoke within class "+className+"");
+            super.checkExit(status);
+            throw new ExitException(status);
         }
-        catch (IllegalArgumentException e)
+    }
+
+
+    public static void runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, 
+                                          OutputStream stderr, String[] args, Map<String, String> addnlProps)
+    {
+        if (methodName == null)
         {
-            fail("Illegal arguments for specified method "+methodName+" to invoke within class "+className+"");
+            JavaInvoke vmspawner = null;
+            Process p;
+            try
+            {
+                vmspawner = new JavaInvoke(className,
+                                           new File("."), 
+                                           addnlProps, 
+                                           args,
+                                           null,
+                                           null, true);
+                p = vmspawner.startStdinStdoutStderrInstance(className, stdin, stdout, stderr);
+                p.waitFor();
+            }
+            catch (SecurityException e)
+            {
+                fail("Unable to access specified method "+methodName+" to invoke within class "+className+"");
+            }
+            catch (IllegalArgumentException e)
+            {
+                fail("Illegal arguments for specified method "+methodName+" to invoke within class "+className+"");
+            }
+            catch (IOException e)
+            {
+                fail("Error reading/writing from java process "+methodName+" to invoke within class "+className+"");
+            }
+            catch (InterruptedException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
-        catch (IllegalAccessException e)
+        else
         {
-            fail("Unable to access specified method "+methodName+" to invoke within class "+className+"");
+            InputStream origIn = System.in;
+            PrintStream origOut = System.out;
+            PrintStream origErr = System.err;
+            Class clazz;
+            Method method;
+            if (methodName == null) methodName = "main";
+            Map<String, String> backupProps = new LinkedHashMap<String, String>();
+            Map<String, String> allOrigProps = new LinkedHashMap<String, String>();
+            SecurityManager savedSecurityManager = System.getSecurityManager();
+            System.setSecurityManager(new NoExitSecurityManager());
+            checkpointProps(allOrigProps);
+            addProps(addnlProps, backupProps);
+            try
+            {
+                clazz = Class.forName(className);
+                method = clazz.getMethod(methodName, String[].class);
+                if (stdin != null) System.setIn(stdin);
+                if (stdout != null) System.setOut(new PrintStream(stdout));
+                if (stderr != null) System.setErr(new PrintStream(stderr));
+                method.invoke(null, (Object)args);
+            }
+            catch (ExitException e)
+            {
+                System.setOut(origOut);
+                System.setErr(origErr);
+                System.out.println("class "+ className +" called System.exit("+e.status+")" );
+            }
+            catch (ClassNotFoundException e)
+            {
+                fail("Unable to find specified class "+className+" to invoke");
+            }
+            catch (SecurityException e)
+            {
+                fail("Unable to access specified method "+methodName+" to invoke within class "+className+"");
+            }
+            catch (NoSuchMethodException e)
+            {
+                fail("Unable to find specified method "+methodName+" to invoke within class "+className+"");
+            }
+            catch (IllegalArgumentException e)
+            {
+                fail("Illegal arguments for specified method "+methodName+" to invoke within class "+className+"");
+            }
+            catch (IllegalAccessException e)
+            {
+                fail("Unable to access specified method "+methodName+" to invoke within class "+className+"");
+            }
+            catch (InvocationTargetException e)
+            {
+                System.setOut(origOut);
+                System.setErr(origErr);
+                if (e.getTargetException() instanceof ExitException)
+                {
+//                    System.out.println("class "+ className +" called System.exit("+((ExitException)(e.getTargetException())).status+")" );
+                }
+                else
+                {
+                    e.getTargetException().printStackTrace();
+                    fail("Specified method "+methodName+" threw an exception "+e.getTargetException().getClass().getName());
+                }
+            }
+            finally
+            {
+                System.setSecurityManager(savedSecurityManager);
+                removeProps(addnlProps, backupProps);
+                restoreProps(allOrigProps);
+                System.setIn(origIn);
+                System.setOut(origOut);
+                System.setErr(origErr);
+
+            }
         }
-        catch (InvocationTargetException e)
+        
+
+    }
+
+    public static void checkpointProps(Map<String, String> allOrigProps)
+    {
+        Properties props = System.getProperties();
+        for (Object key : props.keySet())
         {
-            System.setOut(origOut);
-            System.setErr(origErr);
-            e.getTargetException().printStackTrace();
-            fail("Specified method "+methodName+" threw an exception "+e.getTargetException().getClass().getName());
+            String value = System.getProperty(key.toString());
+            allOrigProps.put(key.toString(), value);
+        }       
+    }
+    
+    public static void restoreProps(Map<String, String> allOrigProps)
+    {
+        Properties props = System.getProperties();
+        Set<String> sysPropKeys = new LinkedHashSet<String>();
+        for (Object keyObj : props.keySet())
+        {
+            String key = keyObj.toString();
+            sysPropKeys.add(key);
         }
-        System.setIn(origIn);
-        System.setOut(origOut);
-        System.setErr(origErr);
+        for (String key : sysPropKeys)
+        {
+            String value = System.getProperty(key);
+            if (allOrigProps.containsKey(key))
+            {
+                String origValue = allOrigProps.get(key);
+                if (!value.equals(origValue))
+                {
+                    System.setProperty(key, origValue);
+                }
+            }
+            else
+            {
+                System.clearProperty(key);
+            }
+            allOrigProps.put(key.toString(), value);
+        }       
+    }
+
+    public static void addProps(Map<String, String> addnlProps, Map<String, String> saveProps)
+    {
+        if (addnlProps != null)
+        {
+            for (String key : addnlProps.keySet())
+            {
+                String value = addnlProps.get(key);
+                if (System.getProperty(key) != null) saveProps.put(key, System.getProperty(key));
+                System.setProperty(key, value);
+            }
+        }
+    }
+    
+    public static void removeProps(Map<String, String> addnlProps, Map<String, String> saveProps)
+    {
+        if (addnlProps != null)
+        {
+            for (String key : addnlProps.keySet())
+            {
+                String value = saveProps.get(key);
+                if (value != null) 
+                    System.setProperty(key, value);
+                else
+                    System.clearProperty(key);
+            }
+        }
     }
 
     public static void runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, String[] args)
     {
-        runCommandLineUtil2(className, methodName, stdin, stdout, null, args);
+        runCommandLineUtil(className, methodName, stdin, stdout, null, args, null);
+    }
+    
+    public static void runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, OutputStream stderr, String[] args)
+    {
+        runCommandLineUtil(className, methodName, stdin, stdout, stderr, args, null);
+    }
+    
+    public static void runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, String[] args, Map<String,String> addnlProps)
+    {
+        runCommandLineUtil(className, methodName, stdin, stdout, null, args, addnlProps);
     }
     
     public static void assertArrayEquals(String message, byte[] byteArray1, byte[] byteArray2)

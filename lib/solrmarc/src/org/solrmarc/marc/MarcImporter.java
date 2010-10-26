@@ -25,7 +25,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.log4j.*;
@@ -118,21 +117,34 @@ public class MarcImporter extends MarcHandler
         
         String solrLogLevel = Utils.getProperty(configProps, "solr.log.level");
         
-        Level level = Level.WARNING;
+        java.util.logging.Level solrLevel = java.util.logging.Level.WARNING;
         if (solrLogLevel != null)
         {
-            if (solrLogLevel.equals("OFF"))     level = Level.OFF;
-            if (solrLogLevel.equals("SEVERE"))  level = Level.SEVERE;
-            if (solrLogLevel.equals("WARNING")) level = Level.WARNING;
-            if (solrLogLevel.equals("INFO"))    level = Level.INFO;
-            if (solrLogLevel.equals("FINE"))    level = Level.FINE;
-            if (solrLogLevel.equals("FINER"))   level = Level.FINER;
-            if (solrLogLevel.equals("FINEST"))  level = Level.FINEST;
-            if (solrLogLevel.equals("ALL"))     level = Level.ALL;
+            if (solrLogLevel.equals("OFF"))     solrLevel = java.util.logging.Level.OFF;
+            if (solrLogLevel.equals("SEVERE"))  solrLevel = java.util.logging.Level.SEVERE;
+            if (solrLogLevel.equals("WARNING")) solrLevel = java.util.logging.Level.WARNING;
+            if (solrLogLevel.equals("INFO"))    solrLevel = java.util.logging.Level.INFO;
+            if (solrLogLevel.equals("FINE"))    solrLevel = java.util.logging.Level.FINE;
+            if (solrLogLevel.equals("FINER"))   solrLevel = java.util.logging.Level.FINER;
+            if (solrLogLevel.equals("FINEST"))  solrLevel = java.util.logging.Level.FINEST;
+            if (solrLogLevel.equals("ALL"))     solrLevel = java.util.logging.Level.ALL;
         }
         
-        java.util.logging.Logger.getLogger("org.apache.solr").setLevel(level);
+        java.util.logging.Logger.getLogger("org.apache.solr").setLevel(solrLevel);
 
+        String solrmarcLogLevel = Utils.getProperty(configProps, "solrmarc.log.level");
+        Level solrmarcLevel = Level.INFO;
+        if (solrmarcLogLevel != null)
+        {
+            if (solrLogLevel.equals("OFF"))     solrmarcLevel = Level.OFF;
+            if (solrLogLevel.equals("FATAL"))   solrmarcLevel = Level.FATAL;
+            if (solrLogLevel.equals("WARN"))    solrmarcLevel = Level.WARN;
+            if (solrLogLevel.equals("INFO"))    solrmarcLevel = Level.INFO;
+            if (solrLogLevel.equals("DEBUG"))   solrmarcLevel = Level.DEBUG;
+            if (solrLogLevel.equals("ALL"))     solrmarcLevel = Level.ALL;
+            logger.setLevel(solrmarcLevel);
+        }
+        
         // Specification of how to modify the entries in the delete record file
         // before passing the id onto Solr.   Based on syntax of String.replaceAll
         //  To prepend a 'u' specify the following:  "(.*)->u$1"
@@ -243,6 +255,11 @@ public class MarcImporter extends MarcHandler
                 }                
                 String id = line;
                 idsToDeleteCounter++;
+                if (verbose) 
+                {
+                    System.out.println("Deleting record with id :"+ id);
+                    logger.info("Deleting record with id :"+ id);
+                }
                 solrProxy.delete(id, fromCommitted, fromPending);
                 recsDeletedCounter++;
             }            
@@ -838,8 +855,8 @@ public class MarcImporter extends MarcHandler
         }
         
         int exitCode = importer.handleAll();
-        System.clearProperty("marc.path");
-        System.clearProperty("marc.source");
-        //System.exit(exitCode);
+      //  System.clearProperty("marc.path");
+      //  System.clearProperty("marc.source");
+        System.exit(exitCode);
     }
 }
