@@ -83,7 +83,7 @@ if [ $verbose -eq "1" ] ; then
 fi
 
 # find differences between yesterdays location and todays.
-diff $prev_location_file $location_file | egrep '^[<>]' | sed -e 's/[<>] \([0-9]*\).*/\1/' | uniq > $changed_loc_file
+diff $prev_location_file $location_file | egrep '^[<>]' | sed -e 's/[<>] \([0-9]*\).*/\1/' | sort -n | uniq > $changed_loc_file
 cp $changed_loc_file /usr/local/projects/marc/incoming/changed_`date +%Y%m%d`.txt
 
 for file in `find /usr/local/projects/marc/full_dump_patched -name 'uva_*.mrc' -print | sort`
