@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -225,12 +226,17 @@ public class MarcPatcher extends MarcHandler
         BufferedReader locationReader = null;
         try
         {
-            locationReader = new BufferedReader(new InputStreamReader( new FileInputStream(new File(locationFileName))));
+            locationReader = new BufferedReader(new InputStreamReader( new FileInputStream(new File(locationFileName)), "ISO-8859-1"));
         }
         catch (FileNotFoundException e1)
         {
             // TODO Auto-generated catch block
             e1.printStackTrace();
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         BufferedReader changedLocationReader = null;
         if (changedLocationFileName != null)
@@ -361,7 +367,12 @@ public class MarcPatcher extends MarcHandler
                 e.printStackTrace();
             }
             if (line == null) return(null);
-            result = line.split("\\|");
+            result = new String[8];
+            String first[] = line.split("\\|", 2);
+            result[0] = first[0];
+            result[1] = first[1].substring(0,16);
+            String rest[] = first[1].substring(17).split("\\|");
+            System.arraycopy(rest, 0, result, 2, 6);
             if (changedLocationReader == null) break;
             while (currentLocationID == null || compare.compare(currentLocationID, result[0]) < 0)
             {
