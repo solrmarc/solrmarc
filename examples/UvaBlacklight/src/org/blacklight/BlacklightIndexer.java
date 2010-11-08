@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Leader;
@@ -52,6 +54,8 @@ public class BlacklightIndexer extends SolrIndexer
      */
     Map<String, String> addnlShadowedIds = null;
     String extraIdsFilename = "AllShadowedIds.txt";
+    Set<String> combinedFormat = null;
+    String publicationDate = null;
     Set<String> callNumberFieldList = null;
     Set<String> callNumberFieldListNo050 = null;
     Map<String, Set<String>> callNumberClusterMap = null;
@@ -59,6 +63,7 @@ public class BlacklightIndexer extends SolrIndexer
     Comparator<String> normedComparator = null;
     String bestSingleCallNumber = null;
     List<?> trimmedHoldingsList = null;
+    Pattern releaseDatePattern = null;
     
     public BlacklightIndexer(final String propertiesMapFile, final String propertyPaths[])
     {
@@ -174,6 +179,8 @@ public class BlacklightIndexer extends SolrIndexer
         callNumberClusterMapNo050 =  getCallNumbersCleanedConflated(callNumberFieldListNo050, true);
         callNumberClusterMap =  getCallNumbersCleanedConflated(callNumberFieldList, true);
         bestSingleCallNumber = getBestSingleCallNumber(callNumberClusterMap);
+        combinedFormat = null;
+        publicationDate = null;
     }
     
     private List<?> getTrimmedHoldingsList(Record record, String holdingsTag)
@@ -236,7 +243,7 @@ public class BlacklightIndexer extends SolrIndexer
             {
                 Object field = iter.next();
                 DataField df = (DataField)field;
-                String barcode = df.getSubfield('i').getData();
+                String barcode = df.getSubfield('i') != null ? df.getSubfield('i').getData() : "";
                 if (extraString != null && extraString.contains("|" + barcode + "|"))
                 {
                     iter.remove();
@@ -1491,6 +1498,7 @@ public class BlacklightIndexer extends SolrIndexer
     
     public Set<String> getCombinedFormatNew2(final Record record)
     {    
+        if (combinedFormat != null) return(combinedFormat);
         // part1_format_facet = 000[6]:007[0], format_maps.properties(broad_format), first
         // part2_format_facet = 999t, format_maps.properties(format)
 
@@ -1505,16 +1513,16 @@ public class BlacklightIndexer extends SolrIndexer
 //            removeShadowed999sFromList(record, fields999);
 //        }
         Set<String> result = getSubfieldFromFieldList(fields999, 't');
-        result = Utils.remap(result, findMap(mapName3), false);
+        combinedFormat = Utils.remap(result, findMap(mapName3), false);
 
         Set<String> f245h = getFieldList(record, "245h");
         if (Utils.setItemContains(f245h, "cartographic material"))
         {
-            result.add("Map");
+            combinedFormat.add("Map");
         }
         Set<String> urls = getFieldList(record, "856u");
         Set<String> format_007_raw = getFieldList(record, "007[0-1]");
-        if (Utils.setItemContains(format_007_raw, "cr") || Utils.setItemContains(result, "Online"))
+        if (Utils.setItemContains(format_007_raw, "cr") || Utils.setItemContains(combinedFormat, "Online"))
         {
             String other007 = null;
             String broadFormat = getFirstFieldVal(record, null, "000[6-7]");
@@ -1545,59 +1553,59 @@ public class BlacklightIndexer extends SolrIndexer
             }
             if (other007 != null && other007.startsWith("v")) 
             {
-                if (isOnline) result.add(Utils.remap("v", findMap(mapName1a), true)); // Streaming Video
+                if (isOnline) combinedFormat.add(Utils.remap("v", findMap(mapName1a), true)); // Streaming Video
                 Set<String> f300e = getFieldList(record, "300e");
                 String broadFormatLetter = getFirstFieldVal(record, null, "000[6]");
                 if (broadFormatLetter.equals("o") || broadFormatLetter.equals("a") || broadFormatLetter.equals("j") || broadFormatLetter.equals("m") ||
                         Utils.setItemContains(f300e, "videocassette") || Utils.setItemContains(f300e, "DVD") || Utils.setItemContains(f300e, "videodisc"))
                 {
-                    result.add("Includes Video");
-                    if (!result.contains("Video")) result.remove("Video");
+                    combinedFormat.add("Includes Video");
+                    if (!combinedFormat.contains("Video")) combinedFormat.remove("Video");
                 }
                 else
                 {
-                    result.add("Video");
+                    combinedFormat.add("Video");
                     boolean ff = false;  //  ff means found format;
-                    if (result.contains("VHS") || result.contains("DVD") || result.contains("Laser Disc")) ff = true;
+                    if (combinedFormat.contains("VHS") || combinedFormat.contains("DVD") || combinedFormat.contains("Laser Disc")) ff = true;
                     if (!ff)
                     {
                         Set<String> field538a = getFieldList(record, "538a");
-                        if (Utils.setItemContains(field538a, "VHS")) { result.add("VHS"); ff = true; }
-                        if (Utils.setItemContains(field538a, "DVD")) { result.add("DVD"); ff = true; }
+                        if (Utils.setItemContains(field538a, "VHS")) { combinedFormat.add("VHS"); ff = true; }
+                        if (Utils.setItemContains(field538a, "DVD")) { combinedFormat.add("DVD"); ff = true; }
                     }
                     if (!ff)
                     {
                         Set<String> field300a = getFieldList(record, "300a");
-                        if (Utils.setItemContains(field300a, "videocassette")) { result.add("VHS"); ff = true; }
-                        if (Utils.setItemContains(field300a, "videodisc"))  { result.add("DVD"); ff = true; }
+                        if (Utils.setItemContains(field300a, "videocassette")) { combinedFormat.add("VHS"); ff = true; }
+                        if (Utils.setItemContains(field300a, "videodisc"))     { combinedFormat.add("DVD"); ff = true; }
                     }
                     if (!ff)
                     {
                         Set<String> field500a = getFieldList(record, "500a");
-                        if (Utils.setItemContains(field500a, "videocassette")) { result.add("VHS"); ff = true; }
-                        if (Utils.setItemContains(field500a, "videodisc")) { result.add("DVD"); ff = true; }
+                        if (Utils.setItemContains(field500a, "videocassette")) { combinedFormat.add("VHS"); ff = true; }
+                        if (Utils.setItemContains(field500a, "videodisc"))     { combinedFormat.add("DVD"); ff = true; }
                     }
                 }
             }
             else if (broadFormat.equals("am")) 
             {
-                if (isOnline) result.add(Utils.remap("am", findMap(mapName1a), true)); // eBook
-                result.add(Utils.remap("a", findMap(mapName1), true));  // Book
+                if (isOnline) combinedFormat.add(Utils.remap("am", findMap(mapName1a), true)); // eBook
+                combinedFormat.add(Utils.remap("a", findMap(mapName1), true));  // Book
             }
             else if (broadFormat.equals("as"))
             {
-                if (isOnline) result.add(Utils.remap("as", findMap(mapName1a), true)); // Online
-                result.add(Utils.remap("as", findMap(mapName1), true));  // Journal/Magazine
+                if (isOnline) combinedFormat.add(Utils.remap("as", findMap(mapName1a), true)); // Online
+                combinedFormat.add(Utils.remap("as", findMap(mapName1), true));  // Journal/Magazine
             }
             else if (broadFormat.startsWith("m"))
             {
-                result.add(Utils.remap("m", findMap(mapName1), true));
+                combinedFormat.add(Utils.remap("m", findMap(mapName1), true));
             }
         }
         else if (Utils.setItemContains(urls, "serialssolutions"))
         {
             String serialsFormat = Utils.remap("as", findMap(mapName1), true);
-            if (serialsFormat != null) result.add(serialsFormat);
+            if (serialsFormat != null) combinedFormat.add(serialsFormat);
         }
         else
         {
@@ -1612,7 +1620,7 @@ public class BlacklightIndexer extends SolrIndexer
                 }
                 else if (!format_007.equals("Map") || (broadFormat != null && (broadFormat.startsWith("Map") || broadFormat.startsWith("Book"))))
                 {
-                    result.add(format_007);
+                    combinedFormat.add(format_007);
                 }
                 else
                 {
@@ -1624,11 +1632,11 @@ public class BlacklightIndexer extends SolrIndexer
                 if (broadFormat.contains("|"))
                 {
                     String parts[] = broadFormat.split("[|]", 2);
-                    result.add(parts[0]);
-                    result.add(parts[1]);
+                    combinedFormat.add(parts[0]);
+                    combinedFormat.add(parts[1]);
                 }
                 else
-                    result.add(broadFormat);
+                    combinedFormat.add(broadFormat);
             }
             int videoness = 0;
             if (broadFormatLetter.equals("g")) videoness++;
@@ -1658,16 +1666,16 @@ public class BlacklightIndexer extends SolrIndexer
             {
                 if (broadFormatLetter.equals("a"))
                 {
-                    result.remove("Book");
+                    combinedFormat.remove("Book");
                 }
-                result.add("Video");
+                combinedFormat.add("Video");
                 boolean ff = false;  //  ff means found format;
-                if (result.contains("VHS") || result.contains("DVD") || result.contains("Laser Disc")) ff = true;
+                if (combinedFormat.contains("VHS") || combinedFormat.contains("DVD") || combinedFormat.contains("Laser Disc")) ff = true;
                 if (!ff)
                 {
                     Set<String> field538a = getFieldList(record, "538a");
-                    if (Utils.setItemContains(field538a, "VHS")) { result.add("VHS"); ff = true; }
-                    if (Utils.setItemContains(field538a, "DVD")) { result.add("DVD"); ff = true; }
+                    if (Utils.setItemContains(field538a, "VHS")) { combinedFormat.add("VHS"); ff = true; }
+                    if (Utils.setItemContains(field538a, "DVD")) { combinedFormat.add("DVD"); ff = true; }
                 }
                 if (!ff)
                 {
@@ -1676,34 +1684,34 @@ public class BlacklightIndexer extends SolrIndexer
                     if (Utils.setItemContains(field300a, "ideocassette")) 
                     { 
                         Set<String> field300c = getFieldList(record, "300c");
-                        if (Utils.setItemContains(field300c, "3/4"))  result.add("U-matic"); 
-                        else result.add("VHS");
+                        if (Utils.setItemContains(field300c, "3/4"))  combinedFormat.add("U-matic"); 
+                        else combinedFormat.add("VHS");
                         ff = true;
                     }
                     // omit the v to catch both upper and lower case 
                     if (Utils.setItemContains(field300a, "ideodisc"))  
                     { 
                         Set<String> field300c = getFieldList(record, "300c");
-                        if (Utils.setItemContains(field300c, "12"))  result.add("Laser Disc"); 
-                        else result.add("DVD");
+                        if (Utils.setItemContains(field300c, "12"))  combinedFormat.add("Laser Disc"); 
+                        else combinedFormat.add("DVD");
                         ff = true;
                     }
                 }
                 if (!ff)
                 {
                     Set<String> field500a = getFieldList(record, "500a");
-                    if (Utils.setItemContains(field500a, "VHS")) { result.add("VHS"); ff = true; }
-                    if (Utils.setItemContains(field500a, "DVD")) { result.add("DVD"); ff = true; }
+                    if (Utils.setItemContains(field500a, "VHS")) { combinedFormat.add("VHS"); ff = true; }
+                    if (Utils.setItemContains(field500a, "DVD")) { combinedFormat.add("DVD"); ff = true; }
                 }
             }
             if (videoness == 1 && format_007 != null && format_007.equals("Video"))
             {
-                result.add("Includes Video");
-                if (result.contains("Video")) result.remove("Video");
+                combinedFormat.add("Includes Video");
+                if (combinedFormat.contains("Video")) combinedFormat.remove("Video");
             }
            //     if (broadFormat != null && format_007 != null) System.out.println("format diff for item: "+ record.getControlNumber()+" : format_007 = "+format_007+ "  broadFormat = " + broadFormat);
         }
-        return(result);
+        return(combinedFormat);
     }
 
     private Set<String> getSubfieldFromFieldList(List<?> fields999, char code)
@@ -1992,6 +2000,8 @@ public class BlacklightIndexer extends SolrIndexer
     
     public String getPublicationDate(final Record record)
     {
+        if (publicationDate != null) return(publicationDate);
+        
         String field008 = getFirstFieldVal(record, "008");
         String pubDateFull = getFieldVals(record, "260c", ", ");
         String pubDateJustDigits = pubDateFull.replaceAll("[^0-9]", "");       
@@ -2015,6 +2025,7 @@ public class BlacklightIndexer extends SolrIndexer
         else if (field008_d2.matches("(20|1[98765432])[0-9][0-9]"))        
                                                                 retVal = field008_d2;
         else                                                    retVal = pubDate260c;
+        publicationDate = retVal;
         return(retVal);
     }
     
@@ -2177,19 +2188,24 @@ public class BlacklightIndexer extends SolrIndexer
                 libraryField = df;
                 if (getSubfieldVal(libraryField, 'z', null) != null)
                 {
-                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, "", getSubfieldVal(libraryField, 'z', ""));
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, "", getSubfieldVal(libraryField, 'z', ""), "");
                     if (holdingsField != null) result.add(holdingsField);
                 }
             }
             else if (df.getTag().equals("853"))  continue; // ignore 853's here.
             else if (df.getTag().equals("866"))  
             {
-                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""));
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""), "Library has");
                 if (holdingsField != null) result.add(holdingsField);
             }
             else if (df.getTag().equals("867"))
             {
-                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""));
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""), "Suppl text holdings");
+                if (holdingsField != null) result.add(holdingsField);
+            }
+            else if (df.getTag().equals("868"))
+            {
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""), "Index text holdings");
                 if (holdingsField != null) result.add(holdingsField);
             }
             else if (df.getTag().equals("863"))
@@ -2207,16 +2223,16 @@ public class BlacklightIndexer extends SolrIndexer
                         break;                   
                 }
                 DataField labelField = getLabelField(record, getLinkPrefix(linktag));
-                if (j == i + 1) 
+                if (labelField != null && j == i + 1) 
                 {
-                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField), getSubfieldVal(df, 'z', ""));
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField), getSubfieldVal(df, 'z', ""), "Library has");
                     if (holdingsField != null) result.add(holdingsField);
                 }
-                else if (j > i + 1) 
+                else if (labelField != null && j > i + 1) 
                 {
                     VariableField nvf = fields.get(j-1);
                     DataField ndf = (DataField)nvf;
-                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField) + " - " + processEncodedField(ndf, labelField), getSubfieldVal(df, 'z', ""));
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField) + " - " + processEncodedField(ndf, labelField), getSubfieldVal(df, 'z', ""), "Library has");
                     if (holdingsField != null) result.add(holdingsField);
                     i = j - 1;
                 }
@@ -2231,16 +2247,17 @@ public class BlacklightIndexer extends SolrIndexer
         return result;
     }
 
-    private String buildHoldingsField(DataField libraryField, String libMapName, String locMapName, String holdingsValue, String publicNote)
+    private String buildHoldingsField(DataField libraryField, String libMapName, String locMapName, String holdingsValue, String publicNote, String holdingsType)
     {
         if (libraryField == null || ((holdingsValue == null || holdingsValue.length() == 0) && (publicNote.length() == 0 ))) return(null);
         String libraryName = libraryField.getSubfield('b') != null ? Utils.remap(libraryField.getSubfield('b').getData(), findMap(libMapName), false) : null;
         String locName = libraryField.getSubfield('c') != null ? Utils.remap(libraryField.getSubfield('c').getData(), findMap(locMapName), false) : null;
-        return(libraryName +"|"+ locName +"|"+ holdingsValue+"|"+publicNote);
+        return(libraryName +"|"+ locName +"|"+ holdingsValue+"|"+publicNote+"|"+holdingsType);
     }
 
     private String processEncodedField(DataField df, DataField labelField)
     {
+        if (labelField == null) return(null);
         StringBuffer result = new StringBuffer();
         for (char subfield = 'a'; subfield <= 'f'; subfield++)
         {
@@ -2355,5 +2372,83 @@ public class BlacklightIndexer extends SolrIndexer
             prefix = linktag.substring(0, index);
         return(prefix);
     }
+    
+    public String getOriginalReleaseDate(Record record)
+    {
+        if (releaseDatePattern == null)
+        {
+            releaseDatePattern = Pattern.compile(".*[Rr]eleased|[Vv]ideorecording|[Vv]ideocassette|[Ii]ssued|[Rr]ecorded|[Bb]roadcast|[Ff]ilmed|[Ee]dited|[Pp]roduced|[Mm]ade|[Dd]elivered.*[^0-9]([0-9][0-9][0-9][0-9])([^0-9].*)?$");
+        }
+        Set<String> format = getCombinedFormatNew2(record);
+        if (Utils.setItemContains(format, "Video"))
+        {
+            String date008 = this.getFirstFieldVal(record, null, "008[11-14]");
+            Set<String> notesFields = getFieldList(record, "500a");
+            String date500 = null;
+            for (String note : notesFields)
+            {
+                Matcher match = releaseDatePattern.matcher(note);
+                if (match.matches()) 
+                {
+                    date500 = match.group(1);
+                    break;
+                }
+            }
+            String datePub = this.getPublicationDate(record);
+            boolean validDatePub = false;
+            int iPub = 0;
+            if (datePub != null && datePub.matches("[1-2][0189][0-9][0-9]"))
+            {
+                validDatePub = true;
+                iPub = Integer.parseInt(datePub);
+            }
+            String dateReturn = null;
+            if (date008 != null && date500 != null)
+            {
+                boolean m008 = date008.matches("[1-2][0189][0-9][0-9]");
+                boolean m500 = date500.matches("[1-2][0189][0-9][0-9]");
+                if (m008 && m500) 
+                {
+                    int i008 = Integer.parseInt(date008);
+                    int i500 = Integer.parseInt(date500);
+                    if (i008 <= i500) 
+                        dateReturn = date008;
+                    else if (i008 > i500)
+                        dateReturn = date500;
+                }
+                else if (m008) 
+                {
+                    dateReturn = date008;
+                }
+                else if (m500) 
+                {
+                    dateReturn = date500;
+                }
+            }
+            else if (date008 != null && date008.matches("[1-2][0189][0-9][0-9]"))
+            {
+                dateReturn = date008;
+            }
+            else if (date500 != null && date500.matches("[1-2][0189][0-9][0-9]"))
+            {
+                dateReturn = date500;
+            }
+            if (dateReturn != null)
+            {
+                int iReturn = Integer.parseInt(dateReturn);
+                if (validDatePub && iPub < iReturn)
+                {
+                    dateReturn = datePub;
+                }
+            }
+//            else if (validDatePub)
+//            {
+//                dateReturn = datePub;
+//           }
+            return(dateReturn);
+        }
+        return(null);
+    }
+    
     
 }
