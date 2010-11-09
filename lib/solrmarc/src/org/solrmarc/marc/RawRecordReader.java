@@ -105,10 +105,15 @@ public class RawRecordReader
             {    
                 reader = new RawRecordReader(new FileInputStream(new File(args[0])));
             }            
-            if (!args[1].endsWith(".txt"))
+            if (args[1].equals("-h") && args.length >= 3)
+            {
+                String idRegex = args[2].trim();
+                processInput(reader, null, idRegex, null);
+            }
+            else if (!args[1].endsWith(".txt"))
             {
                 String idRegex = args[1].trim();
-                processInput(reader, idRegex, null);
+                processInput(reader, idRegex, null, null);
             }
             else 
             {
@@ -126,7 +131,7 @@ public class RawRecordReader
                     }
                     idsLookedFor.add(line);
                 }
-                processInput(reader, null, idsLookedFor);
+                processInput(reader, null, null, idsLookedFor);
 
             }
         }
@@ -142,18 +147,29 @@ public class RawRecordReader
 
     }
 
-    static void processInput(RawRecordReader reader, String idRegex, HashSet<String>idsLookedFor) throws IOException
+    static void processInput(RawRecordReader reader, String idRegex, String recordHas, HashSet<String>idsLookedFor) throws IOException
     {
         while (reader.hasNext())
         {
             RawRecord rec = reader.next();
             String id = rec.getRecordId();
-            if ( (idsLookedFor == null && id.matches(idRegex)) ||
+            if ( (idsLookedFor == null && recordHas == null && id.matches(idRegex)) ||
                  (idsLookedFor != null && idsLookedFor.contains(id) ) )
             { 
                 byte recordBytes[] = rec.getRecordBytes();
                 System.out.write(recordBytes);
                 System.out.flush();
+            }
+            else if (idsLookedFor == null && idRegex == null && recordHas != null)
+            {
+                String tag = recordHas.substring(0, 3);
+                String field = rec.getFieldVal(tag);
+                if (field != null)
+                {
+                    byte recordBytes[] = rec.getRecordBytes();
+                    System.out.write(recordBytes);
+                    System.out.flush();
+                }
             }
         }
     }
