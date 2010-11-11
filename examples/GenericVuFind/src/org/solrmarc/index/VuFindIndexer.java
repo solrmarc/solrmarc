@@ -276,7 +276,9 @@ public class VuFindIndexer extends SolrIndexer
         char leaderBit;
         ControlField fixedField = (ControlField) record.getVariableField("008");
         DataField title = (DataField) record.getVariableField("245");
+        String formatString;
         char formatCode = ' ';
+        char formatCode2 = ' ';
 
         // check if there's an h in the 245
         if (title != null) {
@@ -295,10 +297,12 @@ public class VuFindIndexer extends SolrIndexer
             ControlField formatField;
             while(fieldsIter.hasNext()) {
                 formatField = (ControlField) fieldsIter.next();
-                formatCode = formatField.getData().toUpperCase().charAt(0);
+                formatString = formatField.getData().toUpperCase();
+                formatCode = formatString.length() > 0 ? formatString.charAt(0) : ' ';
+                formatCode2 = formatString.length() > 1 ? formatString.charAt(1) : ' ';
                 switch (formatCode) {
                     case 'A':
-                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                        switch(formatCode2) {
                             case 'D':
                                 result.add("Atlas");
                                 break;
@@ -308,7 +312,7 @@ public class VuFindIndexer extends SolrIndexer
                         }
                         break;
                     case 'C':
-                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                        switch(formatCode2) {
                             case 'A':
                                 result.add("TapeCartridge");
                                 break;
@@ -347,7 +351,7 @@ public class VuFindIndexer extends SolrIndexer
                         result.add("Braille");
                         break;
                     case 'G':
-                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                        switch(formatCode2) {
                             case 'C':
                             case 'D':
                                 result.add("Filmstrip");
@@ -364,7 +368,7 @@ public class VuFindIndexer extends SolrIndexer
                         result.add("Microfilm");
                         break;
                     case 'K':
-                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                        switch(formatCode2) {
                             case 'C':
                                 result.add("Collage");
                                 break;
@@ -398,7 +402,7 @@ public class VuFindIndexer extends SolrIndexer
                         }
                         break;
                     case 'M':
-                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                        switch(formatCode2) {
                             case 'F':
                                 result.add("VideoCassette");
                                 break;
@@ -420,7 +424,7 @@ public class VuFindIndexer extends SolrIndexer
                         result.add("SensorImage");
                         break;
                     case 'S':
-                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                        switch(formatCode2) {
                             case 'D':
                                 result.add("SoundDisc");
                                 break;
@@ -433,7 +437,7 @@ public class VuFindIndexer extends SolrIndexer
                         }
                         break;
                     case 'V':
-                        switch(formatField.getData().toUpperCase().charAt(1)) {
+                        switch(formatCode2) {
                             case 'C':
                                 result.add("VideoCartridge");
                                 break;

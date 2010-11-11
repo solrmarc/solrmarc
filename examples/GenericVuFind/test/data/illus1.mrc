@@ -1,1 +1,1 @@
-00227nam a22000971a 45  001001100000008004100011010001300052100001700065245001600082300003100098TestRecord                                          a410046691 aKatz, Demian10aTest Record  axi, 123 p.b ill.;c21 cm.
+00250nam a22000971a 45  001001100000008004100011010001300052100001700065245003900082300003100121TestRecord                                          a410046691 aKatz, Demian10aTest Recordh[electronic resource]  axi, 123 p.b ill.;c21 cm.
