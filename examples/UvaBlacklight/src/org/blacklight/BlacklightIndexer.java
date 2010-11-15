@@ -2171,6 +2171,7 @@ public class BlacklightIndexer extends SolrIndexer
     public Set<String> getSummaryHoldingsInfo(Record record, String libraryMapName, String locationMapName)
     {
         Set<String> result = new LinkedHashSet<String>();
+        Set<String> ivyresult = new LinkedHashSet<String>();
         String fieldsToUseStr = "852|853|863|866|867";
         String fieldsToUse[] = fieldsToUseStr.split("[|]");
         String libMapName = loadTranslationMap(null, libraryMapName);
@@ -2189,24 +2190,24 @@ public class BlacklightIndexer extends SolrIndexer
                 if (getSubfieldVal(libraryField, 'z', null) != null)
                 {
                     holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, "", getSubfieldVal(libraryField, 'z', ""), "");
-                    if (holdingsField != null) result.add(holdingsField);
+                    addHoldingsField(result, ivyresult, holdingsField);
                 }
             }
             else if (df.getTag().equals("853"))  continue; // ignore 853's here.
             else if (df.getTag().equals("866"))  
             {
                 holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""), "Library has");
-                if (holdingsField != null) result.add(holdingsField);
+                addHoldingsField(result, ivyresult, holdingsField);
             }
             else if (df.getTag().equals("867"))
             {
-                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""), "Suppl text holdings");
-                if (holdingsField != null) result.add(holdingsField);
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, "z+a", ""), getSubfieldVal(df, "-z", ""), "Suppl text holdings");
+                addHoldingsField(result, ivyresult, holdingsField);
             }
             else if (df.getTag().equals("868"))
             {
                 holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""), "Index text holdings");
-                if (holdingsField != null) result.add(holdingsField);
+                addHoldingsField(result, ivyresult, holdingsField);
             }
             else if (df.getTag().equals("863"))
             {
@@ -2226,24 +2227,77 @@ public class BlacklightIndexer extends SolrIndexer
                 if (labelField != null && j == i + 1) 
                 {
                     holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField), getSubfieldVal(df, 'z', ""), "Library has");
-                    if (holdingsField != null) result.add(holdingsField);
+                    addHoldingsField(result, ivyresult, holdingsField);
                 }
                 else if (labelField != null && j > i + 1) 
                 {
                     VariableField nvf = fields.get(j-1);
                     DataField ndf = (DataField)nvf;
                     holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField) + " - " + processEncodedField(ndf, labelField), getSubfieldVal(df, 'z', ""), "Library has");
-                    if (holdingsField != null) result.add(holdingsField);
+                    addHoldingsField(result, ivyresult, holdingsField);
                     i = j - 1;
                 }
+            }
+        }
+        if (ivyresult.size() != 0)
+        {
+            for (String ivy : ivyresult)
+            {
+                result.add(ivy);
             }
         }
         return(result);
     }
 
+    private void addHoldingsField(Set<String> result, Set<String> ivyresult, String holdingsField)
+    {
+        if (holdingsField != null)
+        {
+            if (holdingsField.startsWith("Ivy"))
+                ivyresult.add(holdingsField);
+            else
+                result.add(holdingsField);
+        }
+    }
+
+    private String getSubfieldVal(DataField df, String subfieldTags, String defValue)
+    {
+        List<Subfield> subfields = (List<Subfield>)df.getSubfields();
+        if (subfields.size() == 0)  return(defValue);
+        String result = "";
+        boolean found_a = false;
+        boolean getBefore_a = subfieldTags.contains("+");
+        for (Subfield sf : subfields)
+        {
+            if (sf.getCode() == 'a')
+            {
+                if (subfieldTags.contains(""+sf.getCode()))
+                {
+                    result = result + ((result.length() > 0) ? " " : "") + sf.getData();
+                }
+                found_a = true;
+            }
+            else if (getBefore_a && !found_a && sf.getCode() != 'a' && subfieldTags.contains(""+sf.getCode()) ) 
+            {
+                result = result + ((result.length() > 0) ? " " : "") + sf.getData();
+            }
+            else if (!getBefore_a && found_a && sf.getCode() != 'a' && subfieldTags.contains(""+sf.getCode()) )
+            {
+                result = result + ((result.length() > 0) ? " " : "") + sf.getData();
+            }
+        }
+        return result;
+    }
+    
     private String getSubfieldVal(DataField df, char subfieldTag, String defValue)
     {
-        String result = df.getSubfield(subfieldTag) != null ? df.getSubfield(subfieldTag).getData() : defValue;
+        List<Subfield> subfields = (List<Subfield>)df.getSubfields(subfieldTag);
+        if (subfields.size() == 0)  return(defValue);
+        String result = "";
+        for (Subfield sf : subfields)
+        {
+            result = result + sf.getData();
+        }
         return result;
     }
 
@@ -2308,6 +2362,11 @@ public class BlacklightIndexer extends SolrIndexer
             {
                 year = data;
             }
+            else if (label.equalsIgnoreCase("(day)"))
+            {
+                date.append(" ").append(data);
+                if (appendComma) date.append(", ");
+            }
             else
             {
                 date.append(data);
@@ -2317,8 +2376,8 @@ public class BlacklightIndexer extends SolrIndexer
         if (year != null) date.append(year);
         if (date.length() > 0)
         {
-            if (result.length() > 0) result.append(", ");
-            result.append(date);
+            if (result.length() > 0)  result.append(" (").append(date).append(")");
+            else result.append(date);
         }    
         return result.toString();
     }
@@ -2333,7 +2392,7 @@ public class BlacklightIndexer extends SolrIndexer
         data = data.replaceAll("06", "Jun.");
         data = data.replaceAll("07", "Jul.");
         data = data.replaceAll("08", "Aug.");
-        data = data.replaceAll("09", "Sep.");
+        data = data.replaceAll("09", "Sept.");
         data = data.replaceAll("10", "Oct.");
         data = data.replaceAll("11", "Nov.");
         data = data.replaceAll("12", "Dec.");
