@@ -37,6 +37,9 @@ if [ $verbose -eq "1" ] ; then
     echo merging initial nightly updates
 fi
 
+mkdir /usr/local/projects/marc/new_records
+new_today=/usr/local/projects/marc/new_records/new_`date +%Y%m%d`.mrc
+
 for updatefile in `find $INPUTDIR -name '*.mrc' -print | sort`
 do 
     endId=u0
@@ -61,8 +64,9 @@ do
                 endId=`head -c $len $nextfile | printrecord '001'| sed -e 's/001 //'`
         fi
         echo $file  $startId  $endId
-        marcupdate -min $startId -max $endId $file $updatefile > $file.updated
+        marcupdate -min $startId -max $endId -new /usr/local/projects/marc/new_records/tmp.mrc $file $updatefile > $file.updated
         mv $file.updated $file
+        cat /usr/local/projects/marc/new_records/tmp.mrc >> $new_today
     done
 done
 

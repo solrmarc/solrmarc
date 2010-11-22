@@ -8,6 +8,7 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -139,6 +140,7 @@ public class MarcMerger
         DataInputStream input3 = null;
         String segmentMinRecordID = minRecordID;        
         String segmentMaxRecordID = maxRecordID;
+        String newRecordsOut = null;
         int argoffset = 0;
         boolean mergeRecords = true;
         if (args[0].equals("-v"))
@@ -160,6 +162,11 @@ public class MarcMerger
         if (args[0+argoffset].equals("-max"))
         {
             segmentMaxRecordID = args[1+argoffset];
+            argoffset += 2;
+        }
+        if (args[0+argoffset].equals("-new"))
+        {
+            newRecordsOut = args[1+argoffset];
             argoffset += 2;
         }
         if (args[0+argoffset].endsWith(".del"))
@@ -194,6 +201,7 @@ public class MarcMerger
         {
             String modfile = args[1+argoffset];
             String delfile = null;
+            FileOutputStream newRecordsOutStream = null;
             if (modfile.endsWith(".mrc"))
             {
                 delfile = modfile.substring(0, modfile.length()-4) + ".del";
@@ -211,9 +219,19 @@ public class MarcMerger
             {
                 // no del file,  ignore it be happy
             }
+            if (newRecordsOut != null)
+            {
+                try {
+                    newRecordsOutStream = new FileOutputStream(new File(newRecordsOut));
+                }
+                catch (FileNotFoundException e)
+                {
+                    newRecordsOutStream = null;
+                }
+            }
             if (mergeRecords) 
             {
-                processMergeRecords(input0, segmentMaxRecordID, input2, input3, System.out);
+                processMergeRecords(input0, segmentMaxRecordID, input2, input3, System.out, newRecordsOutStream);
             }
             else
             {
@@ -243,7 +261,7 @@ public class MarcMerger
 //        return(newName);
 //    }
 
-    static void processMergeRecords(RawRecordReader mainFile, String maxID, RawRecordReader newOrModified, DataInputStream deleted, OutputStream out) 
+    static void processMergeRecords(RawRecordReader mainFile, String maxID, RawRecordReader newOrModified, DataInputStream deleted, OutputStream out, OutputStream newRecsOut) 
     {
         Comparator<String> compare = new StringNaturalCompare();
         try
@@ -326,6 +344,11 @@ public class MarcMerger
                             if (verbose) System.err.println("\nWriting new record "+ newOrModrec.getRecordId() + " from mod file");
                             out.write(newOrModrec.getRecordBytes());
                             out.flush();
+                            if (newRecsOut != null)
+                            {
+                                newRecsOut.write(newOrModrec.getRecordBytes());
+                                newRecsOut.flush();
+                            }
                             newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
                         }
                         if (compare.compare(mainrec.getRecordId(), deletedId)> 0)
