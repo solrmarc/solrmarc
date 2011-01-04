@@ -37,9 +37,6 @@ if [ $verbose -eq "1" ] ; then
     echo merging initial nightly updates
 fi
 
-mkdir /usr/local/projects/marc/new_records
-new_today=/usr/local/projects/marc/new_records/new_`date +%Y%m%d`.mrc
-
 for updatefile in `find $INPUTDIR -name '*.mrc' -print | sort`
 do 
     endId=u0
@@ -64,7 +61,7 @@ do
                 endId=`head -c $len $nextfile | printrecord '001'| sed -e 's/001 //'`
         fi
         echo $file  $startId  $endId
-        marcupdate -min $startId -max $endId -new /usr/local/projects/marc/new_records/tmp.mrc $file $updatefile > $file.updated
+        marcupdate -min $startId -max $endId $file $updatefile > $file.updated
         mv $file.updated $file
         cat /usr/local/projects/marc/new_records/tmp.mrc >> $new_today
     done
@@ -89,6 +86,10 @@ fi
 # find differences between yesterdays location and todays.
 diff $prev_location_file $location_file | egrep '^[<>]' | sed -e 's/[<>] \([0-9]*\).*/\1/' | sort -n | uniq > $changed_loc_file
 cp $changed_loc_file /usr/local/projects/marc/incoming/changed_`date +%Y%m%d`.txt
+
+cat $prev_location_file | cut -d'|' -f1 | uniq > $prev_location_file.uniq
+cat $location_file | cut -d'|' -f1 | uniq > $location_file.uniq
+diff --side-by-side $location_file.uniq $prev_location_file.uniq | egrep '<' | sed -e's/\(^[0-9]*\)[\t ].*/u\1/' > /usr/local/projects/marc/incoming/new_recs_`date +%Y%m%d`.txt
 
 for file in `find /usr/local/projects/marc/full_dump_patched -name 'uva_*.mrc' -print | sort`
 do
