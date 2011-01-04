@@ -51,7 +51,7 @@ public class SolrReIndexer extends MarcImporter
     public int handleAll()
     {
         verbose = false;
-        output = new MarcStreamWriter(System.out, "UTF8");
+        output = new MarcStreamWriter(System.out, "UTF8", true);
         if (solrFieldContainingEncodedMarcRecord == null) solrFieldContainingEncodedMarcRecord = "marc_display";
         readAllMatchingDocs(queryForRecordsToUpdate);
         output.close();
@@ -225,6 +225,7 @@ public class SolrReIndexer extends MarcImporter
         {
             //System.err.println("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
             logger.warn("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
+            return(null);
         }
         String marcRecordStr = null;
         try
