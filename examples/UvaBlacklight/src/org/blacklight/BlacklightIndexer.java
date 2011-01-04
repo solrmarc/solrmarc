@@ -2509,5 +2509,25 @@ public class BlacklightIndexer extends SolrIndexer
         return(null);
     }
     
+    public Set<String> getJournalTitleText(Record record)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        Set<String> format = getCombinedFormatNew2(record);
+        if (Utils.setItemContains(format, "Journal/Magazine"))
+        {
+            result.addAll(SolrIndexer.getFieldList(record, "245a:LNK245a"));
+        }
+        return(result);
+    }
     
+    public Set<String> getJournalTitleFacet(Record record)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        Set<String> format = getCombinedFormatNew2(record);
+        if (Utils.setItemContains(format, "Journal/Magazine"))
+        {
+            result.add(getSortableTitle(record));
+        }
+        return(result);
+    }
 }
