@@ -336,8 +336,8 @@
         <property name="test.jar"  value="${site.test.build.dir}/${site.test.jar}" />
         
         <run_jarfull_of_junit_tests classpathrefid="test.run.classpath.include.site.jars" teststoexclude="org/solrmarc/testUtils/**" 
-             teststorun="${test.jar}"  testConfigDir="${dist.path}" testConfigFile="${default.config}" 
-             solrPath="${site.test.solr.dir}" solrDataDir="${site.test.solr.dir}/data" />
+             teststorun="${test.jar}"  testConfigDir="${site.test.data.dir}/smoketest" testConfigFile="${site.test.data.dir}/smoketest/test_config.properties" 
+             solrPath="${site.test.data.dir}/smoketest/solr" solrDataDir="${site.test.data.dir}/smoketest/solr/data" />
         
         <!--  Now delete the jar files that had to be un-jarred from the solr.war file for the test to run -->
         <delete dir="${solr.jar.file.dir}" deleteonexit="true" quiet="true" />
