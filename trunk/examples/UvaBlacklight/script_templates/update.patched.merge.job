@@ -90,6 +90,11 @@ cp $changed_loc_file /usr/local/projects/marc/incoming/changed_`date +%Y%m%d`.tx
 cat $prev_location_file | cut -d'|' -f1 | uniq > $prev_location_file.uniq
 cat $location_file | cut -d'|' -f1 | uniq > $location_file.uniq
 diff --side-by-side $location_file.uniq $prev_location_file.uniq | egrep '<' | sed -e's/\(^[0-9]*\)[\t ].*/u\1/' > /usr/local/projects/marc/incoming/new_recs_`date +%Y%m%d`.txt
+datestr=`date +%Y%m%d`
+cat /usr/local/projects/marc/incoming/new_recs_`date +%Y%m%d`.txt | sed -e "s/\(.*\)/\1\t$datestr/" >> /usr/local/projects/marc/incoming/new_recs_dates.txt
+cat /usr/local/projects/marc/incoming/new_recs_dates.txt | sed -e 's/u//' | sort -n -u | sed -e 's/\(.*\)/u\1/' >  /usr/local/projects/marc/incoming/new_recs_dates_sorted.txt
+cp /usr/local/projects/marc/incoming/new_recs_dates_sorted.txt /usr/local/projects/solrmarc-2.1/dist
+
 
 for file in `find /usr/local/projects/marc/full_dump_patched -name 'uva_*.mrc' -print | sort`
 do

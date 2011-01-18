@@ -2,6 +2,8 @@ package org.blacklight;
 
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,6 +55,7 @@ public class BlacklightIndexer extends SolrIndexer
      * @throws Exception
      */
     Map<String, String> addnlShadowedIds = null;
+    Map<String, String> dateFirstAddedMap = null;
     String extraIdsFilename = "AllShadowedIds.txt";
     Set<String> combinedFormat = null;
     String publicationDate = null;
@@ -2500,10 +2503,10 @@ public class BlacklightIndexer extends SolrIndexer
                     dateReturn = datePub;
                 }
             }
-//            else if (validDatePub)
-//            {
-//                dateReturn = datePub;
-//           }
+            else if (validDatePub)
+            {
+                dateReturn = datePub;
+            }
             return(dateReturn);
         }
         return(null);
@@ -2528,6 +2531,38 @@ public class BlacklightIndexer extends SolrIndexer
         {
             result.add(getSortableTitle(record));
         }
+        return(result);
+    }
+    
+    public String getDateFirstAdded(Record record, String dateFirstAddedFilename)
+    {
+        if (dateFirstAddedMap == null)
+        {
+            dateFirstAddedMap = new LinkedHashMap<String,String>();
+            try
+            {
+                InputStream dateFirstAddedStream = Utils.getPropertyFileInputStream(propertyFilePaths, dateFirstAddedFilename);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(dateFirstAddedStream));
+                String line;
+                while ((line = reader.readLine())!= null)
+                {
+                    String parts[] = line.split("[\t ]");
+                    dateFirstAddedMap.put(parts[0], parts[1]);
+                }
+            }
+            catch (FileNotFoundException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        String id = record.getControlNumber();
+        String result = dateFirstAddedMap.get(id);
         return(result);
     }
 }
