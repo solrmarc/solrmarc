@@ -107,7 +107,7 @@ public class MarcImporter extends MarcHandler
         
         // Ths URL of the currently running Solr server
         solrHostUpdateURL = Utils.getProperty(configProps, "solr.updateurl");
-        if (solrHostUpdateURL == null && solrHostURL != null) 
+        if (solrHostUpdateURL == null && solrHostURL != null && solrHostURL.length() > 0) 
         {
             if (solrHostURL.endsWith("/update"))
                 solrHostUpdateURL = solrHostURL;
