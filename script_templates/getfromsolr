@@ -25,31 +25,36 @@ flag=
 field=
 
 handle_arg() {
-  if [ ! -z $1 ]
+  if [ ! -z "$arg" ]
   then
-    case $1 in
-      http*) url=$1 ;;
-      *.properties) config=$1 ;;
-      *:*) query=$1 ;;
+    case "$arg" in
+      http*) url="$arg" ;;
+      *.properties) config="$arg" ;;
+      *:*) query="$arg" ;;
       [A-Za-z0-9]*)
          if [[ "$id" == ""  && "$query" == "" ]]
          then
-            id=$1
+            id="$arg"
          else
-            field=$1
+            field="$arg"
          fi
          ;;
-      -v) flag=$1 ;;
-     -vv) flag=$1 ;;
+      -v) flag="$arg" ;;
+     -vv) flag="$arg" ;;
      esac
    fi
 }
 
-handle_arg $1
-handle_arg $2
-handle_arg $3
-handle_arg $4
-handle_arg $5
+arg=$1
+handle_arg
+arg=$2
+handle_arg
+arg=$3
+handle_arg
+arg=$4
+handle_arg 
+arg=$5
+handle_arg
 
 if [[ "$query" == "" && "$id" != "" ]]
 then
