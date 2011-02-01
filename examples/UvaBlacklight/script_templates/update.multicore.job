@@ -12,11 +12,11 @@ then
   solrmarcdir=$( (cd -P $(dirname $0)/.. && pwd) )
 fi
 
-update.multicore.sub.job blacklight_multicore_config.properties
-update.multicore.sub.job blacklight_multicore_dev_config.properties
+update.multicore.sub.job blacklight_config.properties
+update.multicore.sub.job blacklight_dev_config.properties
 
-solrcore1=`cat $solrmarcdir/blacklight_multicore_config.properties | egrep solr.core.name | sed -e's/.* = //'`
-solrcore2=`cat $solrmarcdir/blacklight_multicore_dev_config.properties | egrep solr.core.name | sed -e's/.* = //'`
+solrcore1=`cat $solrmarcdir/blacklight_config.properties | egrep solr.core.name | sed -e's/.* = //'`
+solrcore2=`cat $solrmarcdir/blacklight_dev_config.properties | egrep solr.core.name | sed -e's/.* = //'`
 
 solrnewcore1=`echo $solrcore1 | sed -e's/_index//'`_`date +%Y%m%d`
 solrnewcore2=`echo $solrcore2 | sed -e's/_index//'`_`date +%Y%m%d`

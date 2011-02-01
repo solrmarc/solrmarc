@@ -1,11 +1,12 @@
 #!/bin/bash
-PATH=/usr/local/projects/solrmarc-2.1/dist/bin:$PATH
+SOLRMARCDISTDIR=/lib_content27/dist
+PATH=$SOLRMARCDISTDIR/bin:$PATH
 export PATH
 num=0
 JAVA_HOME=/usr/java/latest/bin/java
 export JAVA_HOME
 
-DATADIR=/usr/local/projects/marc
+DATADIR=/lib_content27/marc
 INPUTDIR=$DATADIR/incoming_merge_patch
 PROCESSEDDIR=$DATADIR/processed_merge_patch
 RESULTSDIR=$DATADIR/results_merge_patch
@@ -41,12 +42,13 @@ for updatefile in `find $INPUTDIR -name '*.mrc' -print | sort`
 do 
     endId=u0
 
-    for file in /usr/local/projects/marc/full_dump_patched/*.mrc 
+    for file in $DATADIR/full_dump_patched/*.mrc 
     do
         if [ $verbose -eq "1" ] ; then
             echo   merging $file
         fi
         
+        cp $file ../full_dump_patched_prev
         startId=$endId
         file1=`echo $file | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
         file2=`echo $file | sed -e 's/[^0-9]*0*\([1-9][0-9]*\).*/\1/'`
@@ -63,15 +65,14 @@ do
         echo $file  $startId  $endId
         marcupdate -min $startId -max $endId $file $updatefile > $file.updated
         mv $file.updated $file
-        cat /usr/local/projects/marc/new_records/tmp.mrc >> $new_today
     done
 done
 
-location_file=/usr/local/projects/marc/incoming/location.txt
-prev_location_file=/usr/local/projects/marc/incoming/prev_location.txt
-prev_prev_location_file=/usr/local/projects/marc/incoming/prev_prev_location.txt
-changed_loc_file=/usr/local/projects/marc/incoming/changed.txt
-patch_dir=/usr/local/projects/marc/patched_debug
+location_file=$DATADIR/incoming/location.txt
+prev_location_file=$DATADIR/incoming/prev_location.txt
+prev_prev_location_file=$DATADIR/incoming/prev_prev_location.txt
+changed_loc_file=$DATADIR/incoming/changed.txt
+patch_dir=$DATADIR/patched_debug
 
 #make sure patch directory exists
 mkdir $patch_dir 2> /dev/null
@@ -85,23 +86,23 @@ fi
 
 # find differences between yesterdays location and todays.
 diff $prev_location_file $location_file | egrep '^[<>]' | sed -e 's/[<>] \([0-9]*\).*/\1/' | sort -n | uniq > $changed_loc_file
-cp $changed_loc_file /usr/local/projects/marc/incoming/changed_`date +%Y%m%d`.txt
+cp $changed_loc_file $DATADIR/incoming/changed_`date +%Y%m%d`.txt
 
 cat $prev_location_file | cut -d'|' -f1 | uniq > $prev_location_file.uniq
 cat $location_file | cut -d'|' -f1 | uniq > $location_file.uniq
-diff --side-by-side $location_file.uniq $prev_location_file.uniq | egrep '<' | sed -e's/\(^[0-9]*\)[\t ].*/u\1/' > /usr/local/projects/marc/incoming/new_recs_`date +%Y%m%d`.txt
+diff --side-by-side $location_file.uniq $prev_location_file.uniq | egrep '<' | sed -e's/\(^[0-9]*\)[\t ].*/u\1/' > $DATADIR/incoming/new_recs_`date +%Y%m%d`.txt
 datestr=`date +%Y%m%d`
-cat /usr/local/projects/marc/incoming/new_recs_`date +%Y%m%d`.txt | sed -e "s/\(.*\)/\1\t$datestr/" >> /usr/local/projects/marc/incoming/new_recs_dates.txt
-cat /usr/local/projects/marc/incoming/new_recs_dates.txt | sed -e 's/u//' | sort -n -u | sed -e 's/\(.*\)/u\1/' >  /usr/local/projects/marc/incoming/new_recs_dates_sorted.txt
-cp /usr/local/projects/marc/incoming/new_recs_dates_sorted.txt /usr/local/projects/solrmarc-2.1/dist
+cat $DATADIR/incoming/new_recs_`date +%Y%m%d`.txt | sed -e "s/\(.*\)/\1\t$datestr/" >> $DATADIR/incoming/new_recs_dates.txt
+cat $DATADIR/incoming/new_recs_dates.txt | sed -e 's/u//' | sort -n -u | sed -e 's/\(.*\)/u\1/' >  $DATADIR/incoming/new_recs_dates_sorted.txt
+cp $DATADIR/incoming/new_recs_dates_sorted.txt $SOLRMARCDISTDIR
 
 
-for file in `find /usr/local/projects/marc/full_dump_patched -name 'uva_*.mrc' -print | sort`
+for file in `find $DATADIR/full_dump_patched -name 'uva_*.mrc' -print | sort`
 do
     if [ $verbose -eq "1" ] ; then
         echo $file
     fi
-    java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar /usr/local/projects/solrmarc-2.1/dist/SolrMarc.jar $file $location_file $changed_loc_file changesOnly handleAllLocs >> $patch_out
+    java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar $SOLRMARCDISTDIR/SolrMarc.jar $file $location_file $changed_loc_file changesOnly handleAllLocs >> $patch_out
 done 
 
 mv $prev_location_file $prev_prev_location_file
@@ -114,7 +115,7 @@ fi
 updatefile=$patch_out
 endId=u0
 
-for file in /usr/local/projects/marc/full_dump_patched/*.mrc 
+for file in $DATADIR/full_dump_patched/*.mrc 
 do
     startId=$endId
     file1=`echo $file | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
@@ -134,12 +135,12 @@ do
     mv $file.updated $file
 done
 
-summary_hold_file=/usr/local/projects/marc/incoming/allmhlds
+summary_hold_file=$DATADIR/incoming/allmhlds
 summary_hold_out=$patch_dir/summary_holdings_`date +%Y%m%d`.mrc 
 #make sure todays patch file does not exist 
 rm $summary_hold_out 2> /dev/null
 
-for file in /usr/local/projects/marc/full_dump_patched/*.mrc
+for file in $DATADIR/full_dump_patched/*.mrc
 do
     merge_summary_holdings -s $summary_hold_file $file >> $summary_hold_out
 done
@@ -147,7 +148,7 @@ done
 updatefile=$summary_hold_out
 endId=u0
 
-for file in /usr/local/projects/marc/full_dump_patched/*.mrc 
+for file in $DATADIR/full_dump_patched/*.mrc 
 do
     startId=$endId
     file1=`echo $file | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
@@ -169,11 +170,11 @@ done
 
 #now update the AllShadowedIds.txt file used for shadowing records and select out records whose shadowed-edness has changed.
 
-shadowedDir=/usr/local/projects/marc/incoming
+shadowedDir=$DATADIR/incoming
 shadowedRaw=$shadowedDir/AllShadowedIdsRaw.txt
 shadowedIds=$shadowedDir/AllShadowedIds.txt
 shadowedPrev=$shadowedDir/prev_AllShadowedIds.txt
-patch_dir=/usr/local/projects/marc/patched_debug
+patch_dir=$DATADIR/patched_debug
 shadowedChangedRecs=$patch_dir/changed_shadow_recs_`date +%Y%m%d`.mrc
 
 if test "$shadowedRaw" -nt "$shadowedIds"
@@ -182,13 +183,13 @@ then
 
     sed -e 's/u//' < $shadowedRaw | sort -n | sed -e 's/^/u/' > $shadowedIds
 
-    cp $shadowedIds /usr/local/projects/solrmarc-2.1/dist
+    cp $shadowedIds $SOLRMARCDISTDIR
 
     shadowed_changed_ids=$shadowedDir/AllShadowedChanges_`date +%Y%m%d`.txt
 
     cat $shadowedPrev $shadowedIds | dos2unix | sed -e 's/u//' | sort -n | uniq -u | sed -e 's/^/u/' | cut -d'|' -f1 | uniq > $shadowed_changed_ids
 
-    cat /usr/local/projects/marc/full_dump_patched/*.mrc | getrecord $shadowed_changed_ids > $shadowedChangedRecs
+    cat $DATADIR/full_dump_patched/*.mrc | getrecord $shadowed_changed_ids > $shadowedChangedRecs
 fi
 
 
