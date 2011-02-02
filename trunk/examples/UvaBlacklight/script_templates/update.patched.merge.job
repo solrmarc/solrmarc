@@ -1,5 +1,5 @@
 #!/bin/bash
-SOLRMARCDISTDIR=/lib_content27/dist
+SOLRMARCDISTDIR=/lib_content27/solrmarc/dist
 PATH=$SOLRMARCDISTDIR/bin:$PATH
 export PATH
 num=0
@@ -48,7 +48,7 @@ do
             echo   merging $file
         fi
         
-        cp $file ../full_dump_patched_prev
+        cp $file $DATADIR/full_dump_patched_prev
         startId=$endId
         file0=`dirname $file`
         filebase=`basename $file`
