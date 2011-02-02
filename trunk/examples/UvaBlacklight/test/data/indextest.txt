@@ -1,3 +1,4 @@
+blacklight_config.properties, u642.mrc, format_facet, Journal/Magazine
 blacklight_config.properties, u17922.mrc, oclc_text, 10072685
 blacklight_config.properties, u470059.mrc, ports_of_call_facet, Penang|Malaysia
 blacklight_config.properties, u4802090.mrc, linked_responsibility_statement_display, 編著黃仁, 王唯 ; 撰述委員王清華 ... [et al.].
@@ -12,7 +13,7 @@ blacklight_config.properties, u210.mrc, call_number_text, HB2615.V8O23 1983|PD V
 blacklight_config.properties, u60.mrc, call_number_display, DP269.27.S67 H47 1982  V.1, V.2
 blacklight_config.properties, u55.mrc, call_number_display, PR4231.A43 1984 (13 volumes)
 blacklight_config.properties, u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
-blacklight_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (23 volumes)
+blacklight_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (22 volumes)
 blacklight_config.properties, u642.mrc, call_number_display, ML5.G654 (43 volumes)
 blacklight_config.properties, u696140.mrc, call_number_display, ND1489.G4713 1986
 
@@ -52,7 +53,7 @@ blacklight_dev_config.properties, u210.mrc, call_number_text, HB2615.V8O23 1983|
 blacklight_dev_config.properties, u60.mrc, call_number_display, DP269.27.S67 H47 1982  V.1, V.2
 blacklight_dev_config.properties, u55.mrc, call_number_display, PR4231.A43 1984 (13 volumes)
 blacklight_dev_config.properties, u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
-blacklight_dev_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (23 volumes)
+blacklight_dev_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (22 volumes)
 blacklight_dev_config.properties, u642.mrc, call_number_display, ML5.G654 (43 volumes)
 
 blacklight_dev_config.properties, u399.mrc, instrument_facet, Chamber orchestra|Tenor voice
@@ -69,7 +70,11 @@ blacklight_config.properties, u60.mrc, barcode_facet, X000872036|X000872037
 #blacklight_sas_config.properties, u2956.mrc, library_facet, Semester at Sea
 #blacklight_sas_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
 
+blacklight_test_config.properties, u2362477.mrc, release_date_facet, 1992
+blacklight_test_config.properties, u4403509.mrc, release_date_facet, 1998
 
+blacklight_test_config.properties, u4403509.mrc, language_facet, French|English (subtitles in)
+blacklight_test_config.properties, u696140.mrc, language_facet, English|German (translated from)|
 
 
 
