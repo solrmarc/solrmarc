@@ -50,11 +50,13 @@ do
         
         cp $file ../full_dump_patched_prev
         startId=$endId
-        file1=`echo $file | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
-        file2=`echo $file | sed -e 's/[^0-9]*0*\([1-9][0-9]*\).*/\1/'`
-        file3=`echo $file | sed -e 's/[^0-9]*[0-9]*\(.*\)/\1/'`
+        file0=`dirname $file`
+        filebase=`basename $file`
+        file1=`echo $filebase | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
+        file2=`echo $filebase | sed -e 's/[^0-9]*0*\([1-9][0-9]*\).*/\1/'`
+        file3=`echo $filebase | sed -e 's/[^0-9]*[0-9]*\(.*\)/\1/'`
         file2=`echo $((file2+1001)) | sed -e 's/.\(...\)/\1/'`
-        nextfile=$file1$file2$file3
+        nextfile=$file0/$file1$file2$file3
         len=`head -c 5 $nextfile 2> /dev/null`
         if [ $? != 0 ] 
             then
@@ -118,11 +120,13 @@ endId=u0
 for file in $DATADIR/full_dump_patched/*.mrc 
 do
     startId=$endId
-    file1=`echo $file | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
-    file2=`echo $file | sed -e 's/[^0-9]*0*\([1-9][0-9]*\).*/\1/'`
-    file3=`echo $file | sed -e 's/[^0-9]*[0-9]*\(.*\)/\1/'`
+    file0=`dirname $file`
+    filebase=`basename $file`
+    file1=`echo $filebase | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
+    file2=`echo $filebase | sed -e 's/[^0-9]*0*\([1-9][0-9]*\).*/\1/'`
+    file3=`echo $filebase | sed -e 's/[^0-9]*[0-9]*\(.*\)/\1/'`
     file2=`echo $((file2+1001)) | sed -e 's/.\(...\)/\1/'`
-    nextfile=$file1$file2$file3
+    nextfile=$file0/$file1$file2$file3
     len=`head -c 5 $nextfile 2> /dev/null`
     if [ $? != 0 ] 
         then
@@ -151,11 +155,13 @@ endId=u0
 for file in $DATADIR/full_dump_patched/*.mrc 
 do
     startId=$endId
-    file1=`echo $file | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
-    file2=`echo $file | sed -e 's/[^0-9]*0*\([1-9][0-9]*\).*/\1/'`
-    file3=`echo $file | sed -e 's/[^0-9]*[0-9]*\(.*\)/\1/'`
+    file0=`dirname $file`
+    filebase=`basename $file`
+    file1=`echo $filebase | sed -e 's/\([^0-9]*\)[0-9]*.*/\1/'`
+    file2=`echo $filebase | sed -e 's/[^0-9]*0*\([1-9][0-9]*\).*/\1/'`
+    file3=`echo $filebase | sed -e 's/[^0-9]*[0-9]*\(.*\)/\1/'`
     file2=`echo $((file2+1001)) | sed -e 's/.\(...\)/\1/'`
-    nextfile=$file1$file2$file3
+    nextfile=$file0/$file1$file2$file3
     len=`head -c 5 $nextfile 2> /dev/null`
     if [ $? != 0 ] 
         then
