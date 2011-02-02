@@ -1,5 +1,6 @@
 #!/bin/bash
-PATH=/usr/local/projects/solrmarc-2.1/dist/bin:$PATH
+SOLRMARCDISTDIR=/lib_content27/solrmarc/dist
+PATH=$SOLRMARCDISTDIR/bin:$PATH
 export PATH
 num=0
 JAVA_HOME=/usr/java/latest/bin/java

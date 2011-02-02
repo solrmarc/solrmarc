@@ -1,5 +1,5 @@
 #!/bin/bash
-SOLRMARCDISTDIR=/lib_content27/dist
+SOLRMARCDISTDIR=/lib_content27/solrmarc/dist
 PATH=$SOLRMARCDISTDIR/bin:$PATH
 export PATH
 num=0
