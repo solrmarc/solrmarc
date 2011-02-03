@@ -370,6 +370,11 @@ public class CallNumberUnitTests
         // suffix starts with a slash
         callnum = "HE5.215 .N9/PT.A"; // slash
         // assertEquals("PT.A", getFirstLCcutterSuffix(callnum));
+        
+        // test for wacky endless recursion bug
+        callnum = "D400.H23 A35 Hamilton Frederick Spencer Lord 1856"; 
+        assertEquals(null, getFirstLCcutterSuffix(callnum));
+
     }
 
     /**
@@ -446,6 +451,9 @@ public class CallNumberUnitTests
         assertEquals("U5", getSecondLCcutter(callnum));
         callnum = "G3824 .G3 S5 1863 .W5 2002"; // suffix after second cutter
         assertEquals("W5", getSecondLCcutter(callnum));
+        callnum = "D400.H23 A35 Hamilton Frederick Spencer Lord 1856"; 
+        assertEquals("A35", getSecondLCcutter(callnum));
+
     }
 
     /**
