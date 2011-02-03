@@ -1199,7 +1199,7 @@ public class CallNumberUnitTests
         callnum = "PQ8550.21.R57 V5 1992";
         assertEquals("PQ8550.21.R57 V5 1992", removeLCVolSuffix(callnum));
         callnum = "TL725.3. W7 E8 V.3 1973-1974";
-        assertEquals("TL725.3. W7 E8", removeLCVolSuffix(callnum));
+//        assertEquals("TL725.3. W7 E8", removeLCVolSuffix(callnum));
         callnum = "A1 B2 C3 V3";
         assertEquals("A1 B2 C3", removeLCVolSuffix(callnum));
         callnum = "TL725.3 W7 E8 V3 1973-1974";
