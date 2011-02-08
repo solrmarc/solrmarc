@@ -2126,7 +2126,7 @@ public class BlacklightIndexer extends SolrIndexer
                     date1 = getDateFrom045b(sf1.getData());
                 }
                 String date2 = getDateFrom045b(sf2.getData());
-                if (date1 != null || date2 != null)
+                if (date1 != null && date2 != null)
                 {
                     int date1val = Integer.parseInt(date1);
                     int date2val = Integer.parseInt(date2);
@@ -2134,6 +2134,16 @@ public class BlacklightIndexer extends SolrIndexer
                     {
                         addDate(result, (""+(i+10000)).substring(1,5));
                     }
+                }
+                else if (date1 != null)
+                {
+                    int date1val = Integer.parseInt(date1);
+                    addDate(result, (""+(date1val+10000)).substring(1,5));
+                }
+                else if (date2 != null)
+                {
+                    int date2val = Integer.parseInt(date1);
+                    addDate(result, (""+(date2val+10000)).substring(1,5));
                 }
             }
         }
@@ -2143,7 +2153,7 @@ public class BlacklightIndexer extends SolrIndexer
     private String getDateFrom045b(String dateStr)
     {
         String result = dateStr.replaceFirst("[ ]*d[ ]*", "");
-        if (!result.matches("[0-9][0-9][0-9][0-9].*")) return(null);
+        if (!result.matches("([01][0-9]|[2][0])[0-9][0-9].*")) return(null);
         result = result.substring(0, 3) + "0";
         return (result);
     }
