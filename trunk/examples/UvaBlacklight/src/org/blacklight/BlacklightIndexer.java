@@ -2576,4 +2576,11 @@ public class BlacklightIndexer extends SolrIndexer
         String result = dateFirstAddedMap.get(id);
         return(result);
     }
+    
+    public String getSortableAuthor(final Record record)
+    {
+        String result = super.getSortableAuthor(record);
+        result = result.toLowerCase().replaceAll("[^-0-9a-z ]", "");
+        return(result);
+    }
 }
