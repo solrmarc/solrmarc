@@ -1613,15 +1613,23 @@ public class BlacklightIndexer extends SolrIndexer
         else
         {
             String format_007 = getFirstFieldVal(record, mapName2, "007[0]");
-            String broadFormat = getFirstFieldVal(record, mapName1, "000[6-7]:000[6]");
+            String broadFormat2Letters = getFirstFieldVal(record, null, "000[6-7]");
             String broadFormatLetter = getFirstFieldVal(record, null, "000[6]");
+            Set<String> broadFormatTmpSet = new LinkedHashSet<String>();
+            broadFormatTmpSet.add(broadFormat2Letters);
+            Set<String> broadFormat = Utils.remap(broadFormatTmpSet, findMap(mapName1), false);
+            if (broadFormat.isEmpty())
+            {
+                broadFormatTmpSet.add(broadFormatLetter);
+                broadFormat = Utils.remap(broadFormatTmpSet, findMap(mapName1), false);
+            }
             if (format_007 != null) 
             {
                 if (format_007.equals("Video"))
                 {
                     // handle video-ness from 007 field below
                 }
-                else if (!format_007.equals("Map") || (broadFormat != null && (broadFormat.startsWith("Map") || broadFormat.startsWith("Book"))))
+                else if (!format_007.equals("Map") || (!broadFormat.isEmpty() && (broadFormat.contains("Map") || broadFormat.contains("Book"))))
                 {
                     combinedFormat.add(format_007);
                 }
@@ -1630,16 +1638,9 @@ public class BlacklightIndexer extends SolrIndexer
                     format_007 = format_007;
                 }
             }
-            if (broadFormat != null) 
+            if (!broadFormat.isEmpty()) 
             {
-                if (broadFormat.contains("|"))
-                {
-                    String parts[] = broadFormat.split("[|]", 2);
-                    combinedFormat.add(parts[0]);
-                    combinedFormat.add(parts[1]);
-                }
-                else
-                    combinedFormat.add(broadFormat);
+                combinedFormat.addAll(broadFormat);
             }
             int videoness = 0;
             if (broadFormatLetter.equals("g")) videoness++;
