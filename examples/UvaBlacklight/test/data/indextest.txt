@@ -1,4 +1,7 @@
++, u3412403.mrc, 'script(pubDateGroups.bsh), getPubDateGroups()', Last 50 years
++, u3412403.mrc, 'script(pubDateGroups.bsh), getPublicationDate()', 1986
 blacklight_config.properties, u642.mrc, format_facet, Journal/Magazine
+blacklight_config.properties, u10273.mrc, format_facet, Book|Musical Score|Manuscript
 blacklight_config.properties, u17922.mrc, oclc_text, 10072685
 blacklight_config.properties, u470059.mrc, ports_of_call_facet, Penang|Malaysia
 blacklight_config.properties, u4802090.mrc, linked_responsibility_statement_display, 編著黃仁, 王唯 ; 撰述委員王清華 ... [et al.].
@@ -6,6 +9,8 @@ blacklight_config.properties, u235.mrc, location_facet, Biology/Psychology Libra
 blacklight_config.properties, mss-11848.mrc, location_facet, Special Collections SC-STKS
 blacklight_config.properties, u1824938.mrc, author_display, Great Britain. Ordnance Survey
 blacklight_config.properties, u157151.mrc, author_facet, Harley, J. B. (John Brian)
+blacklight_test_config.properties, u10273.mrc, author_facet, Paisiello, Giovanni, 1740-1816|Palomba, Giuseppe, fl. 1769-1825
+blacklight_test_config.properties, u399.mrc, author_sort_facet, lopez p dickson ship of death sound recording
 
 blacklight_config.properties, u151.mrc, call_number_text, DT73.D47 Z5 1979
 blacklight_config.properties, u210.mrc, call_number_text, HB2615.V8O23 1983|PD VIRG.O1536O|UVATM 2/OC 2
