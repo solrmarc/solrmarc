@@ -126,6 +126,19 @@
       </analyzer>
     </fieldType>
     
+    <!-- This is an example of using the KeywordTokenizer along
+         With various TokenFilterFactories to produce a sortable field
+         that does not include some properties of the source text
+      -->
+    <fieldType name="alphaNumOnlySort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+      <analyzer>
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.TrimFilterFactory" />
+        <filter class="solr.PatternReplaceFilterFactory" pattern="([^a-z0-9 ])" replacement="" replace="all"/>
+      </analyzer>
+    </fieldType>
+    
     <fieldtype name="text_zh" class="solr.TextField">
       <analyzer class="org.apache.lucene.analysis.cn.ChineseAnalyzer"/>
     </fieldtype>
@@ -196,6 +209,8 @@
     <field name="author_unstem_text" type="textNoStem" indexed="true" stored="false" multiValued="true" />
     <field name="subject_unstem_text" type="textNoStem" indexed="true" stored="false" multiValued="true" />
     <field name="title_facet" type="lcaseString" indexed="true" stored="true" multiValued="true" />
+    <field name="title_sort_facet" type="alphaNumOnlySort" indexed="true" stored="true" multiValued="false" />
+    <field name="author_sort_facet" type="alphaNumOnlySort" indexed="true" stored="true" multiValued="false" />
   </fields>
 	
   <uniqueKey>id</uniqueKey>

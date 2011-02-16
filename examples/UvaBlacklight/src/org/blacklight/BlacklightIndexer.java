@@ -2575,12 +2575,98 @@ public class BlacklightIndexer extends SolrIndexer
         String id = record.getControlNumber();
         String result = dateFirstAddedMap.get(id);
         return(result);
+    }   
+
+    /**
+     * treats indicator 2 as the number of non-filing indicators to exclude,
+     * removes ascii punctuation
+     * @param DataField with ind2 containing # non-filing chars, or has value ' '
+     * @param skipSubFldc true if subfield c contents should be skipped
+     * @return StringBuffer of the contents of the subfields - with a trailing
+     *         space
+     */
+    @SuppressWarnings("unchecked")
+    protected StringBuffer getAlphaSubfldsAsSortStr(DataField df, boolean skipSubFldc)
+    {
+        StringBuffer result = new StringBuffer();
+        int nonFilingInt = getInd2AsInt(df);
+        boolean firstSubfld = true;
+
+        List<Subfield> subList = df.getSubfields();
+        for (Subfield sub : subList)
+        {
+            char subcode = sub.getCode();
+            if (Character.isLetter(subcode) && (!skipSubFldc || subcode != 'c'))
+            {
+                String data = sub.getData();
+                if (firstSubfld)
+                {
+                    if (nonFilingInt < data.length() - 1)
+                        data = data.substring(nonFilingInt);
+                    firstSubfld = false;
+                }
+                // eliminate ascii punctuation marks from sorting as well
+                result.append(data.replaceAll("( |-)+", " ").replaceAll("\\p{Punct}", "").trim() + ' ');
+            }
+        }
+        return result;
     }
-    
+
+    /**
+     * returns string for author sort:  a string containing
+     *  1. the main entry author, if there is one 
+     *  2. the main entry uniform title (240), if there is one - not including 
+     *    non-filing chars as noted in 2nd indicator
+     * followed by
+     *  3.  the 245 title, not including non-filing chars as noted in ind 2
+     */
+    @SuppressWarnings("unchecked")
     public String getSortableAuthor(final Record record)
     {
-        String result = super.getSortableAuthor(record);
-        result = result.toLowerCase().replaceAll("[^-0-9a-z ]", "");
+        StringBuffer resultBuf = new StringBuffer();
+
+        DataField df = (DataField) record.getVariableField("100");
+        // main entry personal name
+        if (df != null)
+            resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+
+        df = (DataField) record.getVariableField("110");
+        // main entry corporate name
+        if (df != null)
+            resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+
+        df = (DataField) record.getVariableField("111");
+        // main entry meeting name
+        if (df != null)
+            resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+
+        // need to sort fields missing 100/110/111 last
+        if (resultBuf.length() == 0)
+        {
+            return(null);
+        }
+        // Solr field properties should convert to lowercase, but I'll do it here anyway.
+        String result = resultBuf.toString().trim().toLowerCase().replaceAll("[^0-9a-z ]+", "");
         return(result);
     }
+    
+    public String getSortableTitleCleaned(final Record record)
+    {
+        StringBuilder resultBuf = new StringBuilder();
+
+        // uniform title
+        DataField df = (DataField) record.getVariableField("130");
+        if (df != null)
+            resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+
+        // 245 (required) title statement
+        df = (DataField) record.getVariableField("245");
+        if (df != null)
+            resultBuf.append(getAlphaSubfldsAsSortStr(df, true));
+
+        String result = resultBuf.toString().trim().toLowerCase().replaceAll("[^0-9a-z ]", "");
+        return(result);
+    }
+
+    
 }
