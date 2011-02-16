@@ -399,6 +399,10 @@ public final class Utils {
                 {
                     currResult = currResult.substring(0, currResult.length()-1);
                 }
+                else if (currResult.matches(".*\\p{Punct}\\.$"))
+                {
+                    currResult = currResult.substring(0, currResult.length()-1);
+                }
             }
 
             currResult = removeOuterBrackets(currResult);
