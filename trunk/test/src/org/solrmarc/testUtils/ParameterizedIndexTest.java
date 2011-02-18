@@ -88,7 +88,7 @@ public class ParameterizedIndexTest
             if (expected.length != 0)
             {
                 System.out.println("No value assigned for Solr field " + fieldToCheck + " in Solr document " + recordFilename);
-                fail("No value assigned for Solr field " + fieldToCheck + " in Solr document " + recordFilename);
+                fail("Test " + testNumber + " FAILED : No value assigned for Solr field " + fieldToCheck + " in Solr document " + recordFilename);
             }
             received = new String[0];
         }
