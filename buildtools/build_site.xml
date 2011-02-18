@@ -238,12 +238,12 @@
 
         <run_parameterized_junit_tests classpathrefid="test.run.classpath.core.only.jars.with.coverage" datafile="maintest.txt" 
             coberturaDatafileName="${core.instr.dir}/cobertura.ser" solrmarcPath=".|../test/data/smoketest" />
-        
+
         <!--
-        <run_parameterized_junit_tests classpathrefid="test.run.classpath.include.site.jars.with.coverage" datafile="indextest.txt" 
+        <run_parameterized_junit_tests classpathrefid="test.run.classpath.include.site.jars.with.coverage" datafile="indextest.txt"
             coberturaDatafileName="${core.instr.dir}/cobertura.ser" />
         -->
-        
+
         <cobertura-report format="html" destdir="${core.coverage.dir}" srcdir="../lib/solrmarc/${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/>
         <cobertura-report format="xml" destdir="${core.coverage.dir}" srcdir="../lib/solrmarc/${src.dir}" datafile="${core.instr.dir}/cobertura.ser"/> 
         
@@ -683,7 +683,8 @@
                     <if>
                         <available filepath="${test.data.dir}" file="@{datafile}" type="file" />
                         <then>
-                            <junit showoutput="yes" printsummary="yes" dir="${dist.path}" fork="yes" forkmode="once" >
+                            <junit showoutput="yes" printsummary="yes" dir="${dist.path}" fork="yes" forkmode="once"
+                                haltonfailure="no" failureproperty="test.failed" >
                                 <formatter type="xml" usefile="yes" />
                     
                                 <classpath>
@@ -699,6 +700,7 @@
                                 <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
                                 <test name="${indextest.class}" todir="${site.test.dir}/output" />
                             </junit>
+                            <fail message="Test failure detected, check test results." if="test.failed" />
                         </then>
                         <else>
                             <echo message="test data file ${indextest.data.file} not available" />
@@ -735,7 +737,8 @@
                     <available file="@{teststorun}" />
                 </and>
                 <then>
-                    <junit showoutput="yes" printsummary="yes" fork="yes" forkmode="perBatch" dir="${dist.path}">
+                    <junit showoutput="yes" printsummary="yes" fork="yes" forkmode="perBatch" dir="${dist.path}"
+                        haltonfailure="no" failureproperty="test.failed" >
                         <formatter type="xml" usefile="yes" />
             
                         <classpath>
@@ -753,6 +756,7 @@
                             <zipfileset src="@{teststorun}" includes="**/*.class" excludes="@{testsToExclude}"/>
                         </batchtest>
                     </junit>
+                    <fail message="Test failure detected, check test results." if="test.failed" />
                 </then>
                 <else>
                     <echo message="test jar ${test.jar} not defined or not available" />
