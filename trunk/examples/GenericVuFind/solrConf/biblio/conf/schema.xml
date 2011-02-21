@@ -93,6 +93,7 @@
         <filter class="solr.LengthFilterFactory" min="1" max="100" />
       </analyzer>
     </fieldType>
+    <fieldType name="date" class="solr.DateField" sortMissingLast="true" omitNorms="true"/>
   </types>
  <fields>
    <!-- Core Fields  -->
@@ -100,6 +101,9 @@
    <field name="fullrecord" type="string" indexed="false" stored="true"/>
    <field name="marc_error" type="string" indexed="false" stored="true" multiValued="true"/>
    <field name="allfields" type="text" indexed="true" stored="false"/>
+   <field name="allfields_unstemmed" type="textProper" indexed="true" stored="false"/>
+   <field name="fulltext" type="text" indexed="true" stored="false"/>
+   <field name="fulltext_unstemmed" type="textProper" indexed="true" stored="false"/>
    <field name="spelling" type="textSpell" indexed="true" stored="true"/>
    <field name="spellingShingle" type="textSpellShingle" indexed="true" stored="true" multiValued="true"/>
    <!-- Institutional Fields -->
@@ -112,13 +116,12 @@
    <field name="author" type="textProper" indexed="true" stored="true" termVectors="true"/>
    <field name="author-letter" type="string" indexed="true" stored="true"/>
    <field name="authorStr" type="textFacet" indexed="true" stored="false"/>
-   <field name="auth_author" type="textProper" indexed="true" stored="true"/>
-   <field name="auth_authorStr" type="string" indexed="true" stored="true"/>
    <field name="title" type="text" indexed="true" stored="true"/>
    <field name="title_sort" type="string" indexed="true" stored="true"/>
    <field name="title_sub" type="text" indexed="true" stored="true"/>
    <field name="title_short" type="text" indexed="true" stored="true"/>
    <field name="title_full" type="text" indexed="true" stored="true"/>
+   <field name="title_full_unstemmed" type="textProper" indexed="true" stored="true"/>
    <field name="title_fullStr" type="string" indexed="true" stored="true"/>
    <field name="title_auth" type="text" indexed="true" stored="true"/>
    <field name="physical" type="string" indexed="true" stored="true" multiValued="true"/>
@@ -135,6 +138,7 @@
    <field name="ctrlnum" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="isbn" type="isn" indexed="true" stored="true" multiValued="true"/>
    <field name="issn" type="isn" indexed="true" stored="true" multiValued="true"/>
+   <field name="oclc_num" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="callnumber" type="string" indexed="true" stored="true"/>
    <field name="callnumber-a" type="string" indexed="true" stored="true"/>
    <field name="callnumber-first" type="string" indexed="true" stored="true"/>
@@ -150,8 +154,7 @@
    <field name="author2" type="textProper" indexed="true" stored="true" multiValued="true"/>
    <field name="author2Str" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="author2-role" type="string" indexed="true" stored="true" multiValued="true"/>
-   <field name="auth_author2" type="textProper" indexed="true" stored="true" multiValued="true"/>
-   <field name="auth_author2Str" type="string" indexed="true" stored="false" multiValued="true"/>
+   <field name="author_fuller" type="textProper" indexed="true" stored="true" />
    <field name="author_additional" type="textProper" indexed="true" stored="true" multiValued="true"/>
    <field name="author_additionalStr" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="title_alt" type="text" indexed="true" stored="true" multiValued="true"/>
@@ -161,15 +164,22 @@
    <field name="series" type="text" indexed="true" stored="true" multiValued="true"/>
    <field name="series2" type="text" indexed="true" stored="true" multiValued="true"/>
    <field name="topic" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="topic_unstemmed" type="textProper" indexed="true" stored="false" multiValued="true"/>
    <field name="topic_facet" type="textFacet" indexed="true" stored="true" multiValued="true"/>
+   <field name="topic_browse" type="string" indexed="true" stored="false" multiValued="true"/>
+   <field name="author_browse" type="string" indexed="true" stored="false" multiValued="true"/>
    <field name="genre" type="text" indexed="true" stored="true" multiValued="true"/>
    <field name="genre_facet" type="textFacet" indexed="true" stored="true" multiValued="true"/>
    <field name="geographic" type="text" indexed="true" stored="true" multiValued="true"/>
    <field name="geographic_facet" type="textFacet" indexed="true" stored="true" multiValued="true"/>
-   <field name="era" type="textFacet" indexed="true" stored="true" multiValued="true"/>
+   <field name="era" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="era_facet" type="textFacet" indexed="true" stored="true" multiValued="true"/>
    <field name="illustrated" type="string" indexed="true" stored="true" multiValued="false"/>
    <!-- Used for loading correct record driver -->
    <field name="recordtype" type="string" indexed="false" stored="true"/>
+   <!-- Tracking fields to keep track of oldest and most recent index times -->
+   <field name="first_indexed" type="date" indexed="true" stored="true"/>
+   <field name="last_indexed" type="date" indexed="true" stored="true"/>
  </fields>
  <uniqueKey>id</uniqueKey>
  <defaultSearchField>allfields</defaultSearchField>
@@ -184,12 +194,18 @@
  <copyField source="topic"    dest="spellingShingle"/>
  <!-- CopyFields for Faceting on Text -->
  <copyField source="title_full" dest="title_fullStr"/>
+ <copyField source="title_full" dest="title_full_unstemmed"/>
  <copyField source="author" dest="authorStr"/>
- <copyField source="auth_author" dest="auth_authorStr"/>
  <copyField source="author2" dest="author2Str"/>
- <copyField source="auth_author2" dest="auth_author2Str"/>
  <copyField source="author_additional" dest="author_additionalStr"/>
  <copyField source="publisher" dest="publisherStr"/>
+ <copyField source="topic" dest="topic_unstemmed"/>
+ <copyField source="allfields" dest="allfields_unstemmed"/>
+ <copyField source="fulltext" dest="fulltext_unstemmed"/>
+ <!-- CopyFields for Alphabetic Browse -->
+ <copyField source="topic"    dest="topic_browse"/>
+ <copyField source="author"    dest="author_browse"/>
+ <copyField source="author2"    dest="author_browse"/>
  <!-- Default Boolean Operator -->
  <solrQueryParser defaultOperator="AND"/>
 </schema>
