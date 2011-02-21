@@ -449,7 +449,42 @@
       <int name="rows">5</int>
     </lst>
   </requestHandler>
-  
+
+  <requestHandler name="/browse" class="au.gov.nla.solr.handler.BrowseRequestHandler">
+    <str name="authIndexPath">${solr.solr.home:./solr}/authority/index</str>
+    <str name="bibIndexPath">${solr.solr.home:./solr}/biblio/index</str>
+
+    <!-- These definitions should match the field names used in the authority index. -->
+    <str name="preferredHeadingField">heading</str>
+    <str name="useInsteadHeadingField">use_for</str>
+    <str name="seeAlsoHeadingField">see_also</str>
+    <str name="scopeNoteField">scope_note</str>
+
+
+    <str name="sources">topic,author,title</str>
+
+    <lst name="topic">
+      <str name="DBpath">${solr.solr.home:./solr}/alphabetical_browse/topic_browse.db</str>
+      <str name="field">topic_browse</str>
+    </lst>
+
+    <lst name="author">
+      <str name="DBpath">${solr.solr.home:./solr}/alphabetical_browse/author_browse.db</str>
+      <str name="field">author_browse</str>
+    </lst>
+
+    <lst name="title">
+      <str name="DBpath">${solr.solr.home:./solr}/alphabetical_browse/title_browse.db</str>
+      <str name="field">title_fullStr</str>
+    </lst>
+
+  </requestHandler>
+
+  <!-- Request handler for sitemap generation -->
+  <requestHandler name="/sitemap" class="vufind.solr.handler.SitemapRequestHandler">
+     <str name="bibIndexPath">${solr.solr.home:./solr}/biblio/index</str>
+  </requestHandler>
+
   <searchComponent name="spellcheck" class="org.apache.solr.handler.component.SpellCheckComponent">
     <lst name="spellchecker">
       <str name="name">default</str>
