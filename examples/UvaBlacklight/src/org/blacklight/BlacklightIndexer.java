@@ -2586,7 +2586,7 @@ public class BlacklightIndexer extends SolrIndexer
      *         space
      */
     @SuppressWarnings("unchecked")
-    protected StringBuffer getAlphaSubfldsAsSortStr(DataField df, boolean skipSubFldc)
+    protected StringBuffer getAlphaSubfldsAsSortStr(DataField df, String subfieldstoSkip)
     {
         StringBuffer result = new StringBuffer();
         int nonFilingInt = getInd2AsInt(df);
@@ -2596,7 +2596,7 @@ public class BlacklightIndexer extends SolrIndexer
         for (Subfield sub : subList)
         {
             char subcode = sub.getCode();
-            if (Character.isLetter(subcode) && (!skipSubFldc || subcode != 'c'))
+            if (Character.isLetter(subcode) && (subfieldstoSkip == null  || subfieldstoSkip.indexOf(subcode)== -1))
             {
                 String data = sub.getData();
                 if (firstSubfld)
@@ -2628,17 +2628,17 @@ public class BlacklightIndexer extends SolrIndexer
         DataField df = (DataField) record.getVariableField("100");
         // main entry personal name
         if (df != null)
-            resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+            resultBuf.append(getAlphaSubfldsAsSortStr(df, null));
 
         df = (DataField) record.getVariableField("110");
         // main entry corporate name
         if (df != null)
-            resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+            resultBuf.append(getAlphaSubfldsAsSortStr(df, null));
 
         df = (DataField) record.getVariableField("111");
         // main entry meeting name
         if (df != null)
-            resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+            resultBuf.append(getAlphaSubfldsAsSortStr(df, null));
 
         // need to sort fields missing 100/110/111 last
         if (resultBuf.length() == 0)
@@ -2657,12 +2657,12 @@ public class BlacklightIndexer extends SolrIndexer
         // uniform title
         DataField df = (DataField) record.getVariableField("130");
         if (df != null)
-            resultBuf.append(getAlphaSubfldsAsSortStr(df, false));
+            resultBuf.append(getAlphaSubfldsAsSortStr(df, null));
 
         // 245 (required) title statement
         df = (DataField) record.getVariableField("245");
         if (df != null)
-            resultBuf.append(getAlphaSubfldsAsSortStr(df, true));
+            resultBuf.append(getAlphaSubfldsAsSortStr(df, "ch"));
 
         String result = resultBuf.toString().trim().toLowerCase().replaceAll("[^0-9a-z ]", "");
         return(result);
