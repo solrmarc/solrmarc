@@ -15,8 +15,8 @@ verbose=
 cp /usr/local/projects/marc/incoming/location.txt $INPUTDIR
 cp /usr/local/projects/marc/incoming/allmhlds $INPUTDIR
 cp /usr/local/projects/marc/incoming/AllShadowedIdsRaw.txt $INPUTDIR
-cp /usr/local/projects/marc/incoming/*.mrc $INPUTDIR
-cp /usr/local/projects/marc/incoming/*.del $INPUTDIR
+cp /usr/local/projects/marc/incoming/`date --date="-1 days" +%Y%m%d`.mrc $INPUTDIR
+cp /usr/local/projects/marc/incoming/`date --date="-1 days" +%Y%m%d`.del $INPUTDIR
 
 if [ "$1" == "-v" ]  ; then 
     verbose=1
