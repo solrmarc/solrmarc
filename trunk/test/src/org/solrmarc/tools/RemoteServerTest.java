@@ -83,7 +83,7 @@ public class RemoteServerTest
         boolean serverIsUp = false;
         if (getServerPort() == 0)
         {
-            jettyTestPort = waitServerIsUp(25000, 100, serverErr, "INFO:  Started SocketConnector@0.0.0.0:", "INFO:  Started SocketConnector @ 0.0.0.0:");
+            jettyTestPort = waitServerIsUp(60000, 100, serverErr, "INFO:  Started SocketConnector@0.0.0.0:", "INFO:  Started SocketConnector @ 0.0.0.0:");
             serverIsUp = checkServerIsUp(5000, 100, getServerAddress(), getServerPort());
         }
         else
