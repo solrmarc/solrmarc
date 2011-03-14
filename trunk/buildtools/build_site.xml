@@ -352,7 +352,8 @@
         <get_jars_from_solrmarc_onejar todir="${site.test.dir}/tmp_solrmarc_jars" />
 
         <set_path_for_junit_tests />
-        <run_parameterized_junit_tests classpathrefid="test.run.classpath.core.only.jars" datafile="maintest.txt" />
+        <run_parameterized_junit_tests classpathrefid="test.run.classpath.core.only.jars" datafile="maintest.txt" 
+            solrmarcPath=".|${site.test.data.dir}/smoketest" />
         
         <!--  Now delete the jar files that had to be un-jarred from the solr.war file for the test to run -->
         <delete dir="${solr.jar.file.dir}" deleteonexit="true" quiet="true" />
@@ -696,7 +697,7 @@
                                 <sysproperty key="test.data.file" value="@{datafile}" />
                                 <sysproperty key="solr.path" path="${site.test.solr.dir}" />
                                 <sysproperty key="solr.data.dir" path="${site.test.solr.dir}/data" />
-                                <sysproperty key="solrmarc.path" path="@{solrmarcPath}" />
+                                <sysproperty key="solrmarc.path" value="@{solrmarcPath}" />
                                 <sysproperty key="test.solr.verbose" value="${test.solr.verbose}" />
                                 <test name="${indextest.class}" todir="${site.test.dir}/output" />
                             </junit>
