@@ -38,11 +38,20 @@
                 <not><isset property="jetty.not.started" /></not>
                 <then>
                     <waitfor maxwait="40" maxwaitunit="second" checkevery="500" checkeveryunit="millisecond" timeoutproperty="jetty.not.started" >
-                            <http url="http://localhost:@{port}/solr${solrcorearg}/select?q=*%3A*&amp;start=0&amp;rows=100&amp;qt=standard&amp;fl=id&amp;wt=json&amp;indent=true" />
+                            <http url="http://localhost:@{port}/solr${solrcorearg}/select?q=*%3A*&amp;start=0&amp;rows=0&amp;qt=standard&amp;fl=id&amp;wt=json&amp;indent=true" />
                     </waitfor>
                 </then>
             </if>
-            <echo level="warning" message="Jetty started....." />
+            <if>
+                <not><isset property="jetty.not.started" /></not>
+                <then>
+                    <echo level="warning" message="Jetty started....." />
+                </then>
+                <else>
+                    <echo level="error" message="Jetty NOT started....." />
+                    <jetty-stop jettyloc="@{jettyloc}" port="@{port}" />
+                </else>
+            </if>
         </sequential>
     </macrodef>
     
