@@ -407,18 +407,25 @@ public class MarcPatcher extends MarcHandler
             if ((multi_i = df999.getSubfields('i')).size() > 1)
             {
                 // patch to fix problem with multiple 'i' subfields problem
-                // Subfield first_i = (Subfield)multi_i.get(0);
+                Subfield first_i = (Subfield)multi_i.get(0);
                 Subfield second_i = (Subfield)multi_i.get(1);
                 Subfield loc_k = df999.getSubfield('k');
-                if (loc_k.getData().equals(second_i.getData()))
+                if (loc_k != null)
                 {
-                    df999.removeSubfield(second_i);
+                    if (loc_k.getData().equals(second_i.getData()))
+                    {
+                        df999.removeSubfield(second_i);
+                    }
+                    else if (first_i.getData().equals(locationFileLine2[1]))
+                    {
+                        second_i.setCode('k');
+                    }
+                    loc_k.setCode('l');
                 }
-                else
+                else if (second_i.getData().equals(locationFileLine2[1]))
                 {
-                    second_i.setCode('k');
+                    df999.removeSubfield(first_i);
                 }
-                loc_k.setCode('l');
                 changed = true;
             }
             Subfield barcode = df999.getSubfield('i');
