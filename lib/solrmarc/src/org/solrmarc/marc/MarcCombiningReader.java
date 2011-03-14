@@ -10,6 +10,7 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
 
@@ -166,15 +167,27 @@ public class MarcCombiningReader implements MarcReader
      */
     private String findControlField(Record record, String tag)
     {
-        List fields = record.getVariableFields(tag);
+        String tagstart = tag.substring(0,3);
+        List fields = record.getVariableFields(tagstart);
         for (Object field : fields)
         {
             if (field instanceof ControlField)
             {
                 ControlField cf = (ControlField) field;
-                if (cf.getTag().matches(tag))
+                if (cf.getTag().matches(tagstart))
                 {
                     return((String)cf.getData());
+                }
+            }
+            else if (field instanceof DataField)
+            {
+                DataField df = (DataField)field;
+                if (df.getTag().matches(tagstart))
+                {
+                    char subfieldtag = 'a';
+                    if (tag.length() > 3) subfieldtag = tag.charAt(4);
+                    Subfield sf = df.getSubfield(subfieldtag);
+                    if (sf != null) return(sf.getData());
                 }
             }
         }
