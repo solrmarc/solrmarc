@@ -1,0 +1,870 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+  <!-- 600 only -->
+  <record>
+    <leader>00755cam a2200229I  4500</leader>
+    <controlfield tag="001">a3743949</controlfield>
+    <controlfield tag="008">730111s1971    fr f     b    000 0 spa  </controlfield>
+    <datafield tag="245" ind1="1" ind2="3">
+      <subfield code="a">600ad</subfield>
+    </datafield>
+    <datafield tag="600" ind1="2" ind2="0">
+      <subfield code="a">GarcÃ­a Lorca, Federico,</subfield>
+      <subfield code="d">1898-1936.</subfield>
+    </datafield>
+  </record>
+  <!-- 600aqdx -->
+  <record>
+    <leader>00755cam a2200229I  4500</leader>
+    <controlfield tag="001">a600aqdx</controlfield>
+    <controlfield tag="008">730111s1971    fr f     b    000 0 eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="3">
+      <subfield code="a">600aqdx</subfield>
+    </datafield>
+    <datafield tag="600" ind1="1" ind2="0">
+      <subfield code="a">Kennedy, John F.</subfield>
+      <subfield code="q">(John Fitzgerald),</subfield>
+      <subfield code="d">1917-1963</subfield>
+      <subfield code="x">Assassination.</subfield>
+    </datafield>
+  </record>
+  <!-- 600adtpof -->
+  <record>
+    <leader>00755cam a2200229I  4500</leader>
+    <controlfield tag="001">a600adtpof</controlfield>
+    <controlfield tag="008">730111s1971    fr f     b    000 0 eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="3">
+      <subfield code="a">600adtpof</subfield>
+    </datafield>
+    <datafield tag="600" ind1="1" ind2="0">
+      <subfield code="a">Hindemith, Paul,</subfield>
+      <subfield code="d">1895-1963.</subfield>
+      <subfield code="t">Nobilissima visione.</subfield>
+      <subfield code="p">Meditation;</subfield>
+      <subfield code="o">arr.</subfield>
+      <subfield code="f">1977.</subfield>
+    </datafield>
+  </record>
+  <!-- 600-6a, 650 -->
+  <record>
+    <leader>00771cam a22002171a 4500</leader>
+    <controlfield tag="001">a6676531</controlfield>
+    <controlfield tag="008">060727s1982    ja a          000 0ajpn  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">600-6a, 650azv</subfield>
+    </datafield>
+    <datafield tag="600" ind1="1" ind2="0">
+      <subfield code="6">880-04</subfield>
+      <subfield code="a">Harada, TÅmin.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Surgeons</subfield>
+      <subfield code="z">Japan</subfield>
+      <subfield code="v">Biography.</subfield>
+    </datafield>
+  </record>
+  <!-- 600, 650 -->
+  <record>
+    <leader>00880cam a2200217 i 4500</leader>
+    <controlfield tag="001">a919006</controlfield>
+    <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">600ac, 650a</subfield>
+    </datafield>
+    <datafield tag="600" ind1="0" ind2="0">
+      <subfield code="a">Heliodorus,</subfield>
+      <subfield code="c">of Emesa.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Literature, Comparative.</subfield>
+    </datafield>
+  </record>
+  <!-- 600, 650 -->
+  <record>
+    <leader>04473cam a2200313Ia 4500</leader>
+    <controlfield tag="001">a5666387</controlfield>
+    <controlfield tag="008">040202s2003    fi g     b    100 0deng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">600adv, 650av</subfield>
+    </datafield>
+    <datafield tag="600" ind1="1" ind2="0">
+      <subfield code="a">Sibelius, Jean,</subfield>
+      <subfield code="d">1865-1957</subfield>
+      <subfield code="v">Congresses.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Music</subfield>
+      <subfield code="v">Congresses.</subfield>
+    </datafield>
+  </record>
+  <!-- 600, 650, 651 -->
+  <record>
+    <leader>01400nam a2200397 a 4500</leader>
+    <controlfield tag="001">a3027805</controlfield>
+    <controlfield tag="008">950630s1995    it            000 0 ita  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">600ax, 650azx, 651axy</subfield>
+    </datafield>
+    <datafield tag="600" ind1="1" ind2="0">
+      <subfield code="a">Andreotti, Giulio</subfield>
+      <subfield code="x">Interviews.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Presidents</subfield>
+      <subfield code="z">Italy</subfield>
+      <subfield code="x">Interviews.</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Italy</subfield>
+      <subfield code="x">Politics and government</subfield>
+      <subfield code="y">1976-1994.</subfield>
+    </datafield>
+  </record>
+  <!-- 600, 650, 653 -->
+  <record>
+    <leader>00947cam a2200265 a 4500</leader>
+    <controlfield tag="001">a345228</controlfield>
+    <controlfield tag="008">891204s1990    ru            000 0 rus  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">600a, 650azzx, 650azzx, 653aaa</subfield>
+    </datafield>
+    <datafield tag="600" ind1="1" ind2="0">
+      <subfield code="a">Zemnukhov, Ivan.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">World War, 1939-1945</subfield>
+      <subfield code="z">Ukraine</subfield>
+      <subfield code="z">Krasnodon</subfield>
+      <subfield code="x">Underground movements.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Guerrillas</subfield>
+      <subfield code="z">Ukraine</subfield>
+      <subfield code="z">Krasnodon</subfield>
+      <subfield code="x">Biography.</subfield>
+    </datafield>
+    <datafield tag="653" ind1="0" ind2=" ">
+      <subfield code="a">Soviet Union;</subfield>
+      <subfield code="a">soldiers;</subfield>
+      <subfield code="a">biography</subfield>
+    </datafield>
+  </record>
+  <!-- 610 only -->
+  <record>
+    <leader>00941nam a22002651  4500</leader>
+    <controlfield tag="001">a115472</controlfield>
+    <controlfield tag="008">740123s1966    ii a          000 0 eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">610az, 610a</subfield>
+    </datafield>
+    <datafield tag="610" ind1="2" ind2="0">
+      <subfield code="a">European Economic Community</subfield>
+      <subfield code="z">India.</subfield>
+    </datafield>
+    <datafield tag="610" ind1="2" ind2="0">
+      <subfield code="a">European Economic Community.</subfield>
+    </datafield>
+  </record>
+  <!-- 610atpv -->
+  <record>
+    <leader>00941nam a22002651  4500</leader>
+    <controlfield tag="001">a610atpv</controlfield>
+    <controlfield tag="008">740123s1966    ii a          000 0 eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">610atpv</subfield>
+    </datafield>
+    <datafield tag="610" ind1="2" ind2="0">
+      <subfield code="a">United States Strategic Bombing Survey.</subfield>
+      <subfield code="t">Reports.</subfield>
+      <subfield code="p">Pacific war</subfield>
+      <subfield code="v">Indexes.</subfield>
+    </datafield>
+  </record>
+  <!-- 610, 650 -->
+  <record>
+    <leader>01489cam a2200349 a 4500</leader>
+    <controlfield tag="001">a5324531</controlfield>
+    <controlfield tag="008">020410s2002    njub     b    001 0 eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">610ax, 650az, 650azx</subfield>
+    </datafield>
+    <datafield tag="610" ind1="2" ind2="0">
+      <subfield code="a">Zhong yang dian shi tai (Beijing, China)</subfield>
+      <subfield code="x">History.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Television broadcasting of news</subfield>
+      <subfield code="z">China.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Television broadcasting</subfield>
+      <subfield code="z">China</subfield>
+      <subfield code="x">History.</subfield>
+    </datafield>
+    <!-- 610, 651 -->
+    <record>
+      <leader>01027cam a2200265 a 4500</leader>
+      <controlfield tag="001">a6808639</controlfield>
+      <controlfield tag="008">070521s1999    cc            000 0 chi  </controlfield>
+      <datafield tag="245" ind1="0" ind2="0">
+        <subfield code="a">610-6ax, 651axy</subfield>
+      </datafield>
+      <datafield tag="610" ind1="2" ind2="0">
+        <subfield code="6">880-04</subfield>
+        <subfield code="a">Zhongguo gong chan dang</subfield>
+        <subfield code="x">Party work.</subfield>
+      </datafield>
+      <datafield tag="651" ind1=" " ind2="0">
+        <subfield code="a">China</subfield>
+        <subfield code="x">Politics and government</subfield>
+        <subfield code="y">1976-</subfield>
+      </datafield>
+    </record>
+  </record>
+  <!-- 630alsf -->
+  <record>
+    <leader>01184nam a2200277ua 4500</leader>
+    <controlfield tag="001">a630alsf</controlfield>
+    <controlfield tag="008">830224s1982    ilua     b    001 0deng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">630alsf</subfield>
+    </datafield>
+    <datafield tag="630" ind1="0" ind2="#">
+      <subfield code="a">Bible.</subfield>
+      <subfield code="l">Latin.</subfield>
+      <subfield code="s">Vulgate.</subfield>
+      <subfield code="f">1454?</subfield>
+    </datafield>
+  </record>
+  <!-- 630, 600, 610, 650 -->
+  <record>
+    <leader>01669nam a2200289ua 4500</leader>
+    <controlfield tag="001">a1261173</controlfield>
+    <controlfield tag="008">870715r19741700ctu     a     000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">600acdt, 610ab, 630a, 650ax</subfield>
+    </datafield>
+    <datafield tag="600" ind1="1" ind2="0">
+      <subfield code="a">Somers, John Somers,</subfield>
+      <subfield code="c">Baron,</subfield>
+      <subfield code="d">1651-1716.</subfield>
+      <subfield code="t">Letter ballancing the necessity of keeping a land-force in times of peace, with the dangers that may follow on it.</subfield>
+    </datafield>
+    <datafield tag="610" ind1="1" ind2="0">
+      <subfield code="a">England and Wales.</subfield>
+      <subfield code="b">Army.</subfield>
+    </datafield>
+    <datafield tag="630" ind1="0" ind2="0">
+      <subfield code="a">Magna Carta.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Standing army</subfield>
+      <subfield code="x">Early works to 1800.</subfield>
+    </datafield>
+  </record>
+  <!-- 650 only -->
+  <record>
+    <leader>01184nam a2200277ua 4500</leader>
+    <controlfield tag="001">a1033119</controlfield>
+    <controlfield tag="008">830224s1982    ilua     b    001 0deng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">650axz</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Christian saints</subfield>
+      <subfield code="x">Cult</subfield>
+      <subfield code="z">Europe.</subfield>
+    </datafield>
+  </record>
+  <!-- 650 only -->
+  <record>
+    <leader>00974pam a2200253 a 4500</leader>
+    <controlfield tag="001">a3941911</controlfield>
+    <controlfield tag="008">971224s1998    nyu           000 1 eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">650azv</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Jews</subfield>
+      <subfield code="z">New York (State)</subfield>
+      <subfield code="v">Fiction.</subfield>
+    </datafield>
+  </record>
+  <!-- 650 only -->
+  <record>
+    <leader>01247cas a2200337 a 4500</leader>
+    <controlfield tag="001">a460947</controlfield>
+    <controlfield tag="008">830415c19809999vauuu    a    0    0eng  </controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">650axxx</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Hispanic Americans</subfield>
+      <subfield code="x">Social conditions</subfield>
+      <subfield code="x">Abstracts</subfield>
+      <subfield code="x">Periodicals.</subfield>
+    </datafield>
+  </record>
+  <!-- 650 only -->
+  <record>
+    <leader>00928cam a2200229 a 4500</leader>
+    <controlfield tag="001">a229800</controlfield>
+    <controlfield tag="008">870909s1986    enka          000 0 eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">two 650a</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Commodity exchanges.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Foreign exchange.</subfield>
+    </datafield>
+  </record>
+  <!-- 650 only -->
+  <record>
+    <leader>01151cam a2200277 i 4500</leader>
+    <controlfield tag="001">a804724</controlfield>
+    <controlfield tag="008">800812s1979    ilu      b    000 0 eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">650azx, 650azx</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Taxation and government property</subfield>
+      <subfield code="z">United States</subfield>
+      <subfield code="x">Bibliography.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Tax exemption</subfield>
+      <subfield code="z">United States</subfield>
+      <subfield code="x">Bibliography.</subfield>
+    </datafield>
+  </record>
+  <!-- 650 only -->
+  <record>
+    <leader>00829cam a2200241   4500</leader>
+    <controlfield tag="001">a2913114</controlfield>
+    <controlfield tag="008">710329s1971    nyu      b    001 0 eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">650axx, 650az</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">World War, 1939-1945</subfield>
+      <subfield code="x">Jews</subfield>
+      <subfield code="x">Rescue.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Jews</subfield>
+      <subfield code="z">Poland.</subfield>
+    </datafield>
+  </record>
+  <!-- 650 only -->
+  <record>
+    <leader>01346cam a2200325 a 45 0</leader>
+    <controlfield tag="001">a4698973</controlfield>
+    <controlfield tag="008">001107s2000    sa       b    000 0 eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">650ax, 650axx, 650az, 650a2, 650a</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Missions</subfield>
+      <subfield code="x">Biblical teaching.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Multiculturalism</subfield>
+      <subfield code="x">Religious aspects</subfield>
+      <subfield code="x">Christianity.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Missions</subfield>
+      <subfield code="z">Africa.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="7">
+      <subfield code="a">Flyby missions.</subfield>
+      <subfield code="2">nasat</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Christianity and culture.</subfield>
+    </datafield>
+  </record>
+  <!-- 650, 651 -->
+  <record>
+    <leader>00778nam a2200205Ma 4500</leader>
+    <controlfield tag="001">a2099904</controlfield>
+    <controlfield tag="008">850729s1918    ru            000 0 rusod</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">650az, 650az, 651ax</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Revolutions</subfield>
+      <subfield code="z">Soviet Union.</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Soviet Union</subfield>
+      <subfield code="x">History.</subfield>
+    </datafield>
+  </record>
+  <!-- 650 and 651 -->
+  <record>
+    <leader>01823cas a22004457a 4500</leader>
+    <controlfield tag="001">a4114632</controlfield>
+    <controlfield tag="008">961105d19961996dcuuuu       f0    0eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">650azv, 651axxv</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Industrial statistics</subfield>
+      <subfield code="z">United States</subfield>
+      <subfield code="v">Periodicals.</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">United States</subfield>
+      <subfield code="x">Commerce</subfield>
+      <subfield code="x">Statistics</subfield>
+      <subfield code="v">Periodicals.</subfield>
+    </datafield>
+  </record>
+  <!-- 650 and 651 -->
+  <record>
+    <leader>00880cam a2200229K  45 0</leader>
+    <controlfield tag="001">a7651581</controlfield>
+    <controlfield tag="008">870518s1946    bl            000 0 por d</controlfield>
+    <datafield tag="245" ind1="1" ind2="3">
+      <subfield code="a">650a, 650az, 651axv</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Patriotic poetry, Brazilian.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Poetry of places</subfield>
+      <subfield code="z">Brazil.</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Brazil</subfield>
+      <subfield code="x">Description and travel</subfield>
+      <subfield code="v">Poetry.</subfield>
+    </datafield>
+  </record>
+  <!-- 651 only  -->
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a6280316</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">two 651av</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Arkansas</subfield>
+      <subfield code="v">Maps.</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Tennessee</subfield>
+      <subfield code="v">Maps.</subfield>
+    </datafield>
+  </record>
+  <!-- 651 only  -->
+  <record>
+    <leader>01139cam a2200229 i 4500</leader>
+    <controlfield tag="001">a1962398</controlfield>
+    <controlfield tag="008">790220||||||||||||           ||| | eng  </controlfield>
+    <datafield tag="245" ind1="1" ind2="2">
+      <subfield code="a">651axz, 651axzx, 651axzxxx</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Africa, Sub-Saharan</subfield>
+      <subfield code="x">Library resources</subfield>
+      <subfield code="z">United States.</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Portugal</subfield>
+      <subfield code="x">Colonies</subfield>
+      <subfield code="z">Africa</subfield>
+      <subfield code="x">Bibliography.</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Portugal</subfield>
+      <subfield code="x">Colonies</subfield>
+      <subfield code="z">Africa</subfield>
+      <subfield code="x">History</subfield>
+      <subfield code="x">Sources</subfield>
+      <subfield code="x">Bibliography.</subfield>
+    </datafield>
+  </record>
+  <!-- 655 only -->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a6551</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">655cbcbca2</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="c">k</subfield>
+      <subfield code="b">Laminated</subfield>
+      <subfield code="c">m</subfield>
+      <subfield code="b">marblewood</subfield>
+      <subfield code="c">v</subfield>
+      <subfield code="a">bust.</subfield>
+      <subfield code="2">aat</subfield>
+    </datafield>
+  </record>
+  <!-- 655 only -->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a6552</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">655axyz</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="a">Dictionaries</subfield>
+      <subfield code="x">French</subfield>
+      <subfield code="y">18th century.</subfield>
+      <subfield code="2">rbgenr</subfield>
+    </datafield>
+  </record>
+  <!-- 655 only -->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a6553</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">655axzy2, 655-3azy2</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="a">Photoprints</subfield>
+      <subfield code="x">Color</subfield>
+      <subfield code="z">Panama Canal Zone</subfield>
+      <subfield code="y">1900-1950</subfield>
+      <subfield code="2">gmgpc</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="3">Municipal Fire Station records</subfield>
+      <subfield code="a">Fire Reports</subfield>
+      <subfield code="z">Atlanta, Georgia</subfield>
+      <subfield code="y">1978</subfield>
+      <subfield code="2">[thesaurus code]</subfield>
+    </datafield>
+  </record>
+  <!-- 655 (and 650) -->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a7233951</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">650a, two 655a</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">Homeopathy</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">Internet Resource</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">Lectures</subfield>
+    </datafield>
+  </record>
+  <!-- 655 and 650 -->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a111</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">650a, 655ay2, 655azy2</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">Zoology</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="a">Cartoons</subfield>
+      <subfield code="y">1952</subfield>
+      <subfield code="2">gmgpc</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="a">Gampi fibers (Paper)</subfield>
+      <subfield code="z">Japan</subfield>
+      <subfield code="y">1955</subfield>
+      <subfield code="2">rbpap</subfield>
+    </datafield>
+  </record>
+  
+  <!-- 650a nomesh: leave out of subjects-->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a1111</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">650a nomesh: leave out of subjects</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">nomesh</subfield>
+    </datafield>
+  </record>
+  <!-- 650a nomesh with a friend: leave out of subjects-->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a1112</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">650a nomesh with valid 600b: leave nomesh out of subjects</subfield>
+    </datafield>
+    <datafield tag="600" ind1="1" ind2="2">
+      <subfield code="a">muppets</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">nomesh</subfield>
+    </datafield>
+  </record>
+  <!-- 655a "Index not Present": leave out of subjects-->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a1121</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">655a "Index not Present": leave out of subjects</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">Optometry</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">Index not Present</subfield>
+    </datafield>
+  </record>
+  <!-- 655a Fulltext: leave out of subjects-->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a1131</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">655a Fulltext: leave out of subjects</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">kermit the frog</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">Fulltext</subfield>
+    </datafield>
+  </record>
+  <!-- 655a Internet Resource: leave out of subjects-->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a1132</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">655a Internet Resource: leave out of subjects</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">Internet Resource</subfield>
+    </datafield>
+  </record>
+  <!-- mult 655a subjects to ignore-->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a1133</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">mult 655a subjects to ignore</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">Research</subfield>
+      <subfield code="x">methods</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">Fulltext</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">Internet Resource</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">LaneConnex</subfield>
+    </datafield>
+  </record>
+  <!-- noexport 655a to ignore-->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a1141</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">noexport 655a to ignore</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">Miss Piggy</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">NoExport</subfield>
+    </datafield>
+  </record>
+  <!-- collection 655a to ignore-->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a1142</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">Collection 655a to ignore</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">Gonzo</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">Collection</subfield>
+    </datafield>
+  </record>
+  <!-- Reference Material 655a to ignore-->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a1143</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">Reference Material 655a to ignore</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">Fozzie Bear</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">Reference Material</subfield>
+    </datafield>
+  </record>
+  <!-- Programmed Instruction 655a to ignore-->
+  <record>
+    <leader>01102cam a2200289Li 4500</leader>
+    <controlfield tag="001">a1144</controlfield>
+    <controlfield tag="008">980209s1851    ohu     s     00| 0 eng u</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">Programmed Instruction 655a to ignore</subfield>
+    </datafield>
+    <datafield tag="650" ind1="1" ind2="2">
+      <subfield code="a">Doctor Bob</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="4">
+      <subfield code="a">Programmed Instruction</subfield>
+    </datafield>
+  </record>  
+  <!-- Trailing period 651a to ignore in geographic and geographicStr -->
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a651a</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">651a trailing period</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Muppets.</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a651again</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">651a no trailing period</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Muppets</subfield>
+    </datafield>
+  </record>
+  
+  <!-- Trailing punctuation -->
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a600trailingComma</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">600 trailing comma</subfield>
+    </datafield>
+    <datafield tag="600" ind1="1" ind2="0">
+      <subfield code="a">Monroe, Marilyn,</subfield>
+      <subfield code="d">1926-1962,</subfield>
+      <subfield code="e">depicted.</subfield>
+    </datafield>
+  </record>
+
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a610trailing</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">610 trailing goo</subfield>
+    </datafield>
+    <datafield tag="610" ind1="1" ind2="0">
+      <subfield code="a">Augusta (Ga.).</subfield>
+    </datafield>
+  </record>
+  
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a630trailing</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">630 sub p trailing period</subfield>
+    </datafield>
+    <datafield tag="630" ind1="0" ind2="0">
+      <subfield code="a">Bible.</subfield>
+      <subfield code="p">N.T.</subfield> <!-- special case!  leave puncutation in! -->
+      <subfield code="p">Romans</subfield>
+      <subfield code="x">Geography</subfield>
+      <subfield code="x">Maps.</subfield>
+    </datafield>
+  </record>
+  
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a650trailing</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">650 trailing paren</subfield>
+    </datafield>
+    <datafield tag="650" ind1="#" ind2="0">
+      <subfield code="a">BASIC (Computer program language)</subfield>
+    </datafield>
+  </record>
+
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a650trailingComma</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">650 trailing paren then Comma</subfield>
+    </datafield>
+    <datafield tag="650" ind1="#" ind2="0">
+      <subfield code="a">Seabiscuit (Race horse),</subfield>
+      <subfield code="e">depicted.</subfield>
+    </datafield>
+  </record>
+<!-- trailing punctuation 651a geographic string -->
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a651numPeriod</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">651a trailing period after digits</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="7">
+      <subfield code="a">7.150.</subfield>
+      <subfield code="2">gtt</subfield>
+    </datafield>
+  </record>
+  <!-- 651a geographic string parens -->
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a651parens</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">651a parens</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="7">
+      <subfield code="a">Syracuse (N.Y.)</subfield>
+      <subfield code="x">Biography</subfield>
+    </datafield>
+  </record>
+  <!-- 651a geographic period after parens -->
+  <record>
+    <leader>01854nea a2200421Ka 45 0</leader>
+    <controlfield tag="001">a651siberia</controlfield>
+    <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">651a parens period</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">Siberia (Russia).</subfield>
+    </datafield>
+  </record>
+</collection>

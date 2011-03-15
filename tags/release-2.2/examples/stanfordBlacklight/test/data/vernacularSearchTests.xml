@@ -1,0 +1,1182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+
+<!-- Title Search fields - all subfields -->    
+    
+    <!-- 2xx vern except 240, all search subfields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a2xxVernSearch</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="130" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">130a</subfield>
+        </datafield>   
+        <datafield tag="210" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">210a</subfield>
+        </datafield>   
+        <datafield tag="222" ind1="1" ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">222a</subfield>
+        </datafield>   
+        <datafield tag="242" ind1="1" ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">242a</subfield>
+        </datafield>   
+        <datafield tag="243" ind1="1" ind2=" ">
+            <subfield code="6">880-05</subfield>
+            <subfield code="a">243a</subfield>
+        </datafield>   
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="6">880-06</subfield>
+            <subfield code="a">2xx title search fields for vernacular, except for 240 -- all subfields</subfield>
+        </datafield>   
+        <datafield tag="246" ind1="1" ind2=" ">
+            <subfield code="6">880-07</subfield>
+            <subfield code="a">246a</subfield>
+        </datafield>   
+        <datafield tag="247" ind1="1" ind2=" ">
+            <subfield code="6">880-08</subfield>
+            <subfield code="a">247a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">130-01</subfield>
+            <subfield code="a">vern130a</subfield>
+            <subfield code="d">vern130d</subfield>
+            <subfield code="f">vern130f</subfield>
+            <subfield code="g">vern130g</subfield>
+            <subfield code="k">vern130k</subfield>
+            <subfield code="l">vern130l</subfield>
+            <subfield code="m">vern130m</subfield>
+            <subfield code="n">vern130n</subfield>
+            <subfield code="o">vern130o</subfield>
+            <subfield code="p">vern130p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern130r</subfield>
+            <subfield code="s">vern130s</subfield>
+            <subfield code="t">vern130t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">210-02</subfield>
+            <subfield code="a">vern210a</subfield>
+            <subfield code="b">vern210b</subfield>
+            <subfield code="f">nope</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">222-03</subfield>
+            <subfield code="a">vern222a</subfield>
+            <subfield code="b">vern222b</subfield>
+            <subfield code="f">nope</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">242-04</subfield>
+            <subfield code="a">vern242a</subfield>
+            <subfield code="b">vern242b</subfield>
+            <subfield code="f">nope</subfield>
+            <subfield code="n">vern242n</subfield>
+            <subfield code="p">vern242p</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">243-05</subfield>
+            <subfield code="a">vern243a</subfield>
+            <subfield code="d">vern243d</subfield>
+            <subfield code="f">vern243f</subfield>
+            <subfield code="g">vern243g</subfield>
+            <subfield code="k">vern243k</subfield>
+            <subfield code="l">vern243l</subfield>
+            <subfield code="m">vern243m</subfield>
+            <subfield code="n">vern243n</subfield>
+            <subfield code="o">vern243o</subfield>
+            <subfield code="p">vern243p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern243r</subfield>
+            <subfield code="s">vern243s</subfield>
+            <subfield code="t">nope</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">245-06</subfield>
+            <subfield code="a">vern245a</subfield>
+            <subfield code="b">vern245b</subfield>
+            <subfield code="c">nope</subfield>
+            <subfield code="f">vern245f</subfield>
+            <subfield code="g">vern245g</subfield>
+            <subfield code="k">vern245k</subfield>
+            <subfield code="m">nope</subfield>
+            <subfield code="n">vern245n</subfield>
+            <subfield code="o">nope</subfield>
+            <subfield code="p">vern245p</subfield>
+            <subfield code="r">nope</subfield>
+            <subfield code="s">vern245s</subfield>
+            <subfield code="t">nope</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">246-07</subfield>
+            <subfield code="a">vern246a</subfield>
+            <subfield code="b">vern246b</subfield>
+            <subfield code="d">nope</subfield>
+            <subfield code="f">vern246f</subfield>
+            <subfield code="g">vern246g</subfield>
+            <subfield code="n">vern246n</subfield>
+            <subfield code="p">vern246p</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">247-08</subfield>
+            <subfield code="a">vern247a</subfield>
+            <subfield code="b">vern247b</subfield>
+            <subfield code="d">nope</subfield>
+            <subfield code="f">vern247f</subfield>
+            <subfield code="g">vern247g</subfield>
+            <subfield code="n">vern247n</subfield>
+            <subfield code="p">vern247p</subfield>
+        </datafield>
+    </record>
+    <!-- 240 search subfields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a240VernSearch</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="240" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">240a</subfield>
+        </datafield>   
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 240 vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">240-01</subfield>
+            <subfield code="a">vern240a</subfield>
+            <subfield code="d">vern240d</subfield>
+            <subfield code="f">vern240f</subfield>
+            <subfield code="g">vern240g</subfield>
+            <subfield code="k">vern240k</subfield>
+            <subfield code="l">vern240l</subfield>
+            <subfield code="m">vern240m</subfield>
+            <subfield code="n">vern240n</subfield>
+            <subfield code="o">vern240o</subfield>
+            <subfield code="p">vern240p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern240r</subfield>
+            <subfield code="s">vern240s</subfield>
+            <subfield code="t">nope</subfield>
+        </datafield>   
+    </record>   
+    <!-- 4xx search subfields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a4xxVernSearch</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 4xx title vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="440" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">440a</subfield>
+        </datafield>   
+        <datafield tag="490" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">490a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">440-01</subfield>
+            <subfield code="a">vern440a</subfield>
+            <subfield code="d">nope</subfield>
+            <subfield code="n">vern440n</subfield>
+            <subfield code="o">nope</subfield>
+            <subfield code="p">vern440p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="t">nope</subfield>
+            <subfield code="v">vern440v</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">490-02</subfield>
+            <subfield code="a">vern490a</subfield>
+            <subfield code="n">nope</subfield>
+            <subfield code="p">nope</subfield>
+            <subfield code="v">vern490v</subfield>
+        </datafield>   
+    </record>
+    <!-- 700-740 search subfields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a7xxLowVernSearch</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 700-740 title vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="700" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">700a</subfield>
+        </datafield>   
+        <datafield tag="710" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">710a</subfield>
+        </datafield>   
+        <datafield tag="711" ind1="1" ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">711a</subfield>
+        </datafield>   
+        <datafield tag="730" ind1="1" ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">730a</subfield>
+        </datafield>   
+        <datafield tag="740" ind1="1" ind2=" ">
+            <subfield code="6">880-05</subfield>
+            <subfield code="a">740a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">700-01</subfield>
+            <subfield code="f">vern700f</subfield>
+            <subfield code="g">vern700g</subfield>
+            <subfield code="h">nope</subfield>
+            <subfield code="j">vern700j</subfield>
+            <subfield code="k">vern700k</subfield>
+            <subfield code="l">vern700l</subfield>
+            <subfield code="m">vern700m</subfield>
+            <subfield code="n">vern700n</subfield>
+            <subfield code="o">vern700o</subfield>
+            <subfield code="p">vern700p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern700r</subfield>
+            <subfield code="s">vern700s</subfield>
+            <subfield code="t">vern700t</subfield>
+            <subfield code="v">nope</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">710-02</subfield>
+            <subfield code="d">vern710d</subfield>
+            <subfield code="f">vern710f</subfield>
+            <subfield code="g">vern710g</subfield>
+            <subfield code="h">nope</subfield>
+            <subfield code="j">nope</subfield>
+            <subfield code="k">vern710k</subfield>
+            <subfield code="l">vern710l</subfield>
+            <subfield code="m">vern710m</subfield>
+            <subfield code="n">vern710n</subfield>
+            <subfield code="o">vern710o</subfield>
+            <subfield code="p">vern710p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern710r</subfield>
+            <subfield code="s">vern710s</subfield>
+            <subfield code="t">vern710t</subfield>
+            <subfield code="v">nope</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">711-03</subfield>
+            <subfield code="f">vern711f</subfield>
+            <subfield code="g">vern711g</subfield>
+            <subfield code="j">nope</subfield>
+            <subfield code="k">vern711k</subfield>
+            <subfield code="l">vern711l</subfield>
+            <subfield code="m">nope</subfield>
+            <subfield code="n">vern711n</subfield>
+            <subfield code="o">npe</subfield>
+            <subfield code="p">vern711p</subfield>
+            <subfield code="r">nope</subfield>
+            <subfield code="s">vern711s</subfield>
+            <subfield code="t">vern711t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">730-04</subfield>
+            <subfield code="f">vern730a</subfield>
+            <subfield code="f">vern730d</subfield>
+            <subfield code="f">vern730f</subfield>
+            <subfield code="g">vern730g</subfield>
+            <subfield code="j">nope</subfield>
+            <subfield code="k">vern730k</subfield>
+            <subfield code="l">vern730l</subfield>
+            <subfield code="m">vern730m</subfield>
+            <subfield code="n">vern730n</subfield>
+            <subfield code="o">vern730o</subfield>
+            <subfield code="p">vern730p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern730r</subfield>
+            <subfield code="s">vern730s</subfield>
+            <subfield code="t">vern730t</subfield>
+            <subfield code="v">nope</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">740-05</subfield>
+            <subfield code="a">vern740a</subfield>
+            <subfield code="d">nope</subfield>
+            <subfield code="n">vern740n</subfield>
+            <subfield code="p">vern740p</subfield>
+        </datafield>   
+    </record>    
+    <!-- 76x search subfields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a76xVernSearch</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 76x title vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="760" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">760a</subfield>
+        </datafield>   
+        <datafield tag="762" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">762a</subfield>
+        </datafield>   
+        <datafield tag="765" ind1="1" ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">765a</subfield>
+        </datafield>   
+        <datafield tag="767" ind1="1" ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">767a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">760-01</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern760s</subfield>
+            <subfield code="t">vern760t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">762-02</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern762s</subfield>
+            <subfield code="t">vern762t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">765-03</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern765s</subfield>
+            <subfield code="t">vern765t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">767-04</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern767s</subfield>
+            <subfield code="t">vern767t</subfield>
+        </datafield>   
+    </record>    
+    <!-- 77x search subfields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a77xVernSearch</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 77x title vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="770" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">770a</subfield>
+        </datafield>   
+        <datafield tag="772" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">772a</subfield>
+        </datafield>   
+        <datafield tag="773" ind1="1" ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">773a</subfield>
+        </datafield>   
+        <datafield tag="774" ind1="1" ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">774a</subfield>
+        </datafield>   
+        <datafield tag="775" ind1="1" ind2=" ">
+            <subfield code="6">880-06</subfield>
+            <subfield code="a">775a</subfield>
+        </datafield>   
+        <datafield tag="776" ind1="1" ind2=" ">
+            <subfield code="6">880-06</subfield>
+            <subfield code="a">776a</subfield>
+        </datafield>   
+        <datafield tag="777" ind1="1" ind2=" ">
+            <subfield code="6">880-07</subfield>
+            <subfield code="a">777a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">770-01</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern770s</subfield>
+            <subfield code="t">vern770t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">772-02</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern772s</subfield>
+            <subfield code="t">vern772t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">773-03</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern773s</subfield>
+            <subfield code="t">vern773t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">774-04</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern774s</subfield>
+            <subfield code="t">vern774t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">775-05</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern775s</subfield>
+            <subfield code="t">vern775t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">776-06</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern776s</subfield>
+            <subfield code="t">vern776t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">777-07</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern777s</subfield>
+            <subfield code="t">vern777t</subfield>
+        </datafield>   
+    </record>
+    <!-- 78x search subfields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a78xVernSearch</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 78x title vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="780" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">780a</subfield>
+        </datafield>   
+        <datafield tag="785" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">785a</subfield>
+        </datafield>   
+        <datafield tag="786" ind1="1" ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">786a</subfield>
+        </datafield>   
+        <datafield tag="787" ind1="1" ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">787a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">780-01</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern780s</subfield>
+            <subfield code="t">vern780t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">785-02</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern785s</subfield>
+            <subfield code="t">vern785t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">786-03</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern786s</subfield>
+            <subfield code="t">vern786t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">787-04</subfield>
+            <subfield code="a">nope</subfield>
+            <subfield code="s">vern787s</subfield>
+            <subfield code="t">vern787t</subfield>
+        </datafield>   
+    </record>
+    <!-- 79x search subfields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a79xVernSearch</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 79x title vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="796" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">796a</subfield>
+        </datafield>   
+        <datafield tag="797" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">797a</subfield>
+        </datafield>   
+        <datafield tag="798" ind1="1" ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">798a</subfield>
+        </datafield>   
+        <datafield tag="799" ind1="1" ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">799a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">796-01</subfield>
+            <subfield code="f">vern796f</subfield>
+            <subfield code="g">vern796g</subfield>
+            <subfield code="h">nope</subfield>
+            <subfield code="j">vern796j</subfield>
+            <subfield code="k">vern796k</subfield>
+            <subfield code="l">vern796l</subfield>
+            <subfield code="m">vern796m</subfield>
+            <subfield code="n">vern796n</subfield>
+            <subfield code="o">vern796o</subfield>
+            <subfield code="p">vern796p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern796r</subfield>
+            <subfield code="s">vern796s</subfield>
+            <subfield code="t">vern796t</subfield>
+            <subfield code="v">nope</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">797-02</subfield>
+            <subfield code="d">vern797d</subfield>
+            <subfield code="f">vern797f</subfield>
+            <subfield code="g">vern797g</subfield>
+            <subfield code="j">nope</subfield>
+            <subfield code="k">vern797k</subfield>
+            <subfield code="l">vern797l</subfield>
+            <subfield code="m">vern797m</subfield>
+            <subfield code="n">vern797n</subfield>
+            <subfield code="o">vern797o</subfield>
+            <subfield code="p">vern797p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern797r</subfield>
+            <subfield code="s">vern797s</subfield>
+            <subfield code="t">vern797t</subfield>
+            <subfield code="v">nope</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">798-03</subfield>
+            <subfield code="f">vern798f</subfield>
+            <subfield code="g">vern798g</subfield>
+            <subfield code="j">nope</subfield>
+            <subfield code="k">vern798k</subfield>
+            <subfield code="l">vern798l</subfield>
+            <subfield code="m">nope</subfield>
+            <subfield code="n">vern798n</subfield>
+            <subfield code="o">npe</subfield>
+            <subfield code="p">vern798p</subfield>
+            <subfield code="r">nope</subfield>
+            <subfield code="s">vern798s</subfield>
+            <subfield code="t">vern798t</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">799-04</subfield>
+            <subfield code="f">vern799a</subfield>
+            <subfield code="f">vern799d</subfield>
+            <subfield code="f">vern799f</subfield>
+            <subfield code="g">vern799g</subfield>
+            <subfield code="j">nope</subfield>
+            <subfield code="k">vern799k</subfield>
+            <subfield code="l">vern799l</subfield>
+            <subfield code="m">vern799m</subfield>
+            <subfield code="n">vern799n</subfield>
+            <subfield code="o">vern799o</subfield>
+            <subfield code="p">vern799p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern799r</subfield>
+            <subfield code="s">vern799s</subfield>
+            <subfield code="t">vern799t</subfield>
+            <subfield code="v">nope</subfield>
+        </datafield>   
+    </record>
+    <!-- 800-840 search subfields -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a8xxVernSearch</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 800-840 title vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="800" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">800a</subfield>
+        </datafield>   
+        <datafield tag="810" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">810a</subfield>
+        </datafield>   
+        <datafield tag="811" ind1="1" ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">811a</subfield>
+        </datafield>   
+        <datafield tag="830" ind1="1" ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">830a</subfield>
+        </datafield>   
+        <datafield tag="840" ind1="1" ind2=" ">
+            <subfield code="6">880-05</subfield>
+            <subfield code="a">840a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">800-01</subfield>
+            <subfield code="f">vern800f</subfield>
+            <subfield code="g">vern800g</subfield>
+            <subfield code="h">nope</subfield>
+            <subfield code="j">vern800j</subfield>
+            <subfield code="k">vern800k</subfield>
+            <subfield code="l">vern800l</subfield>
+            <subfield code="m">vern800m</subfield>
+            <subfield code="n">vern800n</subfield>
+            <subfield code="o">vern800o</subfield>
+            <subfield code="p">vern800p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern800r</subfield>
+            <subfield code="s">vern800s</subfield>
+            <subfield code="t">vern800t</subfield>
+            <subfield code="v">vern800v</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">810-02</subfield>
+            <subfield code="d">vern810d</subfield>
+            <subfield code="f">vern810f</subfield>
+            <subfield code="g">vern810g</subfield>
+            <subfield code="j">nope</subfield>
+            <subfield code="k">vern810k</subfield>
+            <subfield code="l">vern810l</subfield>
+            <subfield code="m">vern810m</subfield>
+            <subfield code="n">vern810n</subfield>
+            <subfield code="o">vern810o</subfield>
+            <subfield code="p">vern810p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern810r</subfield>
+            <subfield code="s">vern810s</subfield>
+            <subfield code="t">vern810t</subfield>
+            <subfield code="v">vern810v</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">811-03</subfield>
+            <subfield code="f">vern811f</subfield>
+            <subfield code="g">vern811g</subfield>
+            <subfield code="j">nope</subfield>
+            <subfield code="k">vern811k</subfield>
+            <subfield code="l">vern811l</subfield>
+            <subfield code="m">nope</subfield>
+            <subfield code="n">vern811n</subfield>
+            <subfield code="o">npe</subfield>
+            <subfield code="p">vern811p</subfield>
+            <subfield code="r">nope</subfield>
+            <subfield code="s">vern811s</subfield>
+            <subfield code="t">vern811t</subfield>
+            <subfield code="v">vern811v</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">830-04</subfield>
+            <subfield code="f">vern830a</subfield>
+            <subfield code="f">vern830d</subfield>
+            <subfield code="f">vern830f</subfield>
+            <subfield code="g">vern830g</subfield>
+            <subfield code="j">nope</subfield>
+            <subfield code="k">vern830k</subfield>
+            <subfield code="l">vern830l</subfield>
+            <subfield code="m">vern830m</subfield>
+            <subfield code="n">vern830n</subfield>
+            <subfield code="o">vern830o</subfield>
+            <subfield code="p">vern830p</subfield>
+            <subfield code="q">nope</subfield>
+            <subfield code="r">vern830r</subfield>
+            <subfield code="s">vern830s</subfield>
+            <subfield code="t">vern830t</subfield>
+            <subfield code="v">vern830v</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">840-05</subfield>
+            <subfield code="a">vern840a</subfield>
+            <subfield code="d">nope</subfield>
+            <subfield code="v">vern840v</subfield>
+        </datafield>   
+    </record>    
+        
+<!-- Author Search Fields - all Subfields -->    
+    
+    <!-- 100 search subfields-->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a100VernSearch</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+        <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">100a</subfield>
+        </datafield>   
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 100 author vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">100-01</subfield>
+            <subfield code="a">vern100a</subfield>
+            <subfield code="b">vern100b</subfield>
+            <subfield code="c">vern100c</subfield>
+            <subfield code="d">vern100d</subfield>
+            <subfield code="e">vern100e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">vern100g</subfield>
+            <subfield code="j">vern100j</subfield>
+            <subfield code="q">vern100q</subfield>
+            <subfield code="u">vern100u</subfield>
+        </datafield>
+    </record>
+    <!-- 110 search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a110VernSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="110" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">110a</subfield>
+        </datafield>   
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 110 author vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">110-01</subfield>
+            <subfield code="a">vern110a</subfield>
+            <subfield code="b">vern110b</subfield>
+            <subfield code="c">vern110c</subfield>
+            <subfield code="d">vern110d</subfield>
+            <subfield code="e">vern110e</subfield>
+            <subfield code="f">vern110f</subfield>
+            <subfield code="g">vern110g</subfield>
+            <subfield code="k">vern110k</subfield>
+            <subfield code="n">vern110n</subfield>
+            <subfield code="q">none</subfield>
+            <subfield code="u">vern110u</subfield>
+        </datafield>
+    </record>
+    <!-- 111 search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a111VernSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="111" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">111a</subfield>
+        </datafield>   
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 111 author vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">111-01</subfield>
+            <subfield code="a">vern111a</subfield>
+            <subfield code="b">none</subfield>
+            <subfield code="c">vern111c</subfield>
+            <subfield code="d">vern111d</subfield>
+            <subfield code="e">vern111e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">vern111g</subfield>
+            <subfield code="j">vern111j</subfield>
+            <subfield code="n">vern111n</subfield>
+            <subfield code="q">vern111q</subfield>
+            <subfield code="u">vern111u</subfield>
+        </datafield>
+    </record>
+    <!-- 7xx personal name search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a7xxVernPersonSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 7xx personal name author vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="700" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">700a</subfield>
+        </datafield>   
+        <datafield tag="720" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">720a</subfield>
+        </datafield>   
+        <datafield tag="796" ind1="1" ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">796a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">700-01</subfield>
+            <subfield code="a">vern700a</subfield>
+            <subfield code="b">vern700b</subfield>
+            <subfield code="c">vern700c</subfield>
+            <subfield code="d">vern700d</subfield>
+            <subfield code="e">vern700e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">vern700g</subfield>
+            <subfield code="j">vern700j</subfield>
+            <subfield code="q">vern700q</subfield>
+            <subfield code="u">vern700u</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">720-02</subfield>
+            <subfield code="a">vern720a</subfield>
+            <subfield code="b">none</subfield>
+            <subfield code="e">vern720e</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">796-03</subfield>
+            <subfield code="a">vern796a</subfield>
+            <subfield code="b">vern796b</subfield>
+            <subfield code="c">vern796c</subfield>
+            <subfield code="d">vern796d</subfield>
+            <subfield code="e">vern796e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">vern796g</subfield>
+            <subfield code="j">vern796j</subfield>
+            <subfield code="q">vern796q</subfield>
+            <subfield code="u">vern796u</subfield>
+        </datafield>
+    </record>
+    <!-- 7xx corp name search subfields-->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a7xxVernCorpSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 7xx corporate name author vernacular - all searching subfields</subfield>
+        </datafield>   
+        <datafield tag="710" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">710a</subfield>
+        </datafield>   
+        <datafield tag="797" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">797a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">710-01</subfield>
+            <subfield code="a">vern710a</subfield>
+            <subfield code="b">vern710b</subfield>
+            <subfield code="c">vern710c</subfield>
+            <subfield code="d">vern710d</subfield>
+            <subfield code="e">vern710e</subfield>
+            <subfield code="f">vern710f</subfield>
+            <subfield code="g">vern710g</subfield>
+            <subfield code="k">vern710k</subfield>
+            <subfield code="n">vern710n</subfield>
+            <subfield code="q">none</subfield>
+            <subfield code="u">vern710u</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">797-02</subfield>
+            <subfield code="a">vern797a</subfield>
+            <subfield code="b">vern797b</subfield>
+            <subfield code="c">vern797c</subfield>
+            <subfield code="d">vern797d</subfield>
+            <subfield code="e">vern797e</subfield>
+            <subfield code="f">vern797f</subfield>
+            <subfield code="g">vern797g</subfield>
+            <subfield code="k">vern797k</subfield>
+            <subfield code="n">vern797n</subfield>
+            <subfield code="q">none</subfield>
+            <subfield code="u">vern797u</subfield>
+        </datafield>
+    </record>
+    <!-- 7xx meeting name search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a7xxVernMeetingSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="a">testing 7xx meeting name author vernacular - all searching subfields</subfield>
+        </datafield>
+        <datafield tag="711" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">711a</subfield>
+        </datafield>   
+        <datafield tag="798" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">798a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">711-01</subfield>
+            <subfield code="a">vern711a</subfield>
+            <subfield code="b">none</subfield>
+            <subfield code="c">vern711c</subfield>
+            <subfield code="d">vern711d</subfield>
+            <subfield code="e">vern711e</subfield>
+            <subfield code="g">vern711g</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="j">vern711j</subfield>
+            <subfield code="n">vern711n</subfield>
+            <subfield code="q">vern711q</subfield>
+            <subfield code="u">vern711u</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">798-02</subfield>
+            <subfield code="a">vern798a</subfield>
+            <subfield code="b">none</subfield>
+            <subfield code="c">vern798c</subfield>
+            <subfield code="d">vern798d</subfield>
+            <subfield code="e">vern798e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">vern798g</subfield>
+            <subfield code="j">vern798j</subfield>
+            <subfield code="n">vern798n</subfield>
+            <subfield code="q">vern798q</subfield>
+            <subfield code="u">vern798u</subfield>
+        </datafield>
+    </record>
+    <!-- 800 -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a800VernSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">800 vernacular search subfields</subfield>
+        </datafield>
+        <datafield tag="800" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">800a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">800-01</subfield>
+            <subfield code="a">vern800a</subfield>
+            <subfield code="b">vern800b</subfield>
+            <subfield code="c">vern800c</subfield>
+            <subfield code="d">vern800d</subfield>
+            <subfield code="e">vern800e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">vern800g</subfield>
+            <subfield code="j">vern800j</subfield>
+            <subfield code="q">vern800q</subfield>
+            <subfield code="u">vern800u</subfield>
+        </datafield>
+    </record>
+    <!-- 810 -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a810VernSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">810 vernacular search subfields</subfield>
+        </datafield>
+        <datafield tag="810" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">810a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">810-01</subfield>
+            <subfield code="a">vern810a</subfield>
+            <subfield code="b">vern810b</subfield>
+            <subfield code="c">vern810c</subfield>
+            <subfield code="d">vern810d</subfield>
+            <subfield code="e">vern810e</subfield>
+            <subfield code="f">vern810f</subfield>
+            <subfield code="g">vern810g</subfield>
+            <subfield code="k">vern810k</subfield>
+            <subfield code="n">vern810n</subfield>
+            <subfield code="q">none</subfield>
+            <subfield code="u">vern810u</subfield>
+        </datafield>
+    </record>
+    <!-- 811 search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a811VernSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">811 vernacular search subfields</subfield>
+        </datafield>
+        <datafield tag="811" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">811a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">811-01</subfield>
+            <subfield code="a">vern811a</subfield>
+            <subfield code="b">none</subfield>
+            <subfield code="c">vern811c</subfield>
+            <subfield code="d">vern811d</subfield>
+            <subfield code="e">vern811e</subfield>
+            <subfield code="f">none</subfield>
+            <subfield code="g">vern811g</subfield>
+            <subfield code="j">vern811j</subfield>
+            <subfield code="n">vern811n</subfield>
+            <subfield code="q">vern811q</subfield>
+            <subfield code="u">vern811u</subfield>
+        </datafield>
+    </record>
+
+    <!-- 300 (physical) search subfields -->
+    <record>
+        <leader>00880cam a2200217 i 4500</leader>
+        <controlfield tag="001">a300VernSearch</controlfield>
+        <controlfield tag="008">770207r19771901gw       b    001 0 ger d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">300 (physical) vernacular search subfields</subfield>
+        </datafield>
+        <datafield tag="300" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">300a</subfield>
+        </datafield>   
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">300-01</subfield>
+            <subfield code="a">vern300a</subfield>
+            <subfield code="b">vern300b</subfield>
+            <subfield code="c">vern300c</subfield>
+            <subfield code="e">vern300e</subfield>
+            <subfield code="f">vern300f</subfield>
+            <subfield code="g">vern300g</subfield>
+        </datafield>
+    </record>
+    
+    <!-- chinese 880s, with repeated occurence of same field -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">a4160530</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    chi d</controlfield>
+        <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">Xiao, Qian,</subfield>
+            <subfield code="d">1910-</subfield>
+        </datafield>    
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">Xiao Qian shu xin ji /</subfield>
+            <subfield code="c">[Bian zhe Fu Guangming ; ze ren bian ji Zhang Yulin].</subfield>
+        </datafield>
+        <datafield tag="250" ind1=" " ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">Di 1 ban.</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">[Zhengzhou] : </subfield>
+            <subfield code="b">Henan jiao yu chu ban she : </subfield>
+            <subfield code="b">Henan sheng xin hua shu dian fa xing,</subfield>
+            <subfield code="c">1991.</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">100-01</subfield>
+            <subfield code="a">萧乾,</subfield>
+            <subfield code="d">1910-</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2="0">
+            <subfield code="6">245-02</subfield>
+            <subfield code="a">萧乾书信集 /</subfield>
+            <subfield code="c">[编者傅光明;责任编辑张玉林].</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">250-03</subfield>
+            <subfield code="a">第1版.</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">260-04</subfield>
+            <subfield code="a">[郑州]:</subfield>
+            <subfield code="b">河南教育出版社:</subfield>
+            <subfield code="b">河南省新华书店发行,</subfield>
+            <subfield code="c">1991.</subfield>
+        </datafield>
+    </record>
+
+<!-- fake right to left language -->
+    <record>
+        <controlfield tag="001">aRtoL</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    heb d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">a is for alligator /</subfield>
+            <subfield code="c">c is for crocodile,</subfield>
+            <subfield code="d">1980</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">245-01</subfield>
+            <subfield code="a">alligator for is a /</subfield>
+            <subfield code="c">crocodile for is c,</subfield>
+            <subfield code="d">1980</subfield>
+        </datafield>
+    </record>
+    <record>
+        <controlfield tag="001">aRtoL2</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    ara d</controlfield>
+        <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">LTR a :</subfield>
+            <subfield code="b">LTR b,</subfield>
+            <subfield code="c">LTR c</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">a first /</subfield>
+            <subfield code="c">c second,</subfield>
+            <subfield code="d">1980</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">100-01</subfield>
+            <subfield code="a">vern (RTL?) a (first) :</subfield>
+            <subfield code="b">vern (RTL?) b (second),</subfield>
+            <subfield code="c">vern (RTL?) c (third)</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">245-02</subfield>
+            <subfield code="a">vern (RTL?) a /</subfield>
+            <subfield code="c">vern (RTL?) c followed by number,</subfield>
+            <subfield code="d">1980</subfield>
+        </datafield>
+    </record>
+    <!-- hebrew 880s -->
+    <record>
+        <controlfield tag="001">ahebrew1</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    yid d</controlfield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">Alef bet shel Yahadut.</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">Yerushalayim :</subfield>
+            <subfield code="b">Mosad ha-Rav Ḳuḳ, </subfield>
+            <subfield code="c">c1983.</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2="0">
+            <subfield code="6">245-02//r</subfield>
+            <subfield code="a">אל״ף בי״ת של יהדות /</subfield>
+            <subfield code="c">הלל צייטלין ; תירגם וערך מנחם ברש־רועי</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">260-03//r</subfield>
+            <subfield code="a">ירושלים : </subfield>
+            <subfield code="b">מוסד הרב קוק, </subfield>
+            <subfield code="c">c1983</subfield>
+        </datafield>
+    </record>
+
+    <!-- hebrew 880s -->
+    <record>
+        <leader>66662cim  2200457Ia 45í0</leader>
+        <controlfield tag="001">ahebrew2</controlfield>
+        <controlfield tag="008">041202s2000    mdunnn  s      f    heb d</controlfield>
+        <datafield tag="100" ind1="1" ind2=" ">
+            <subfield code="6">880-01</subfield>
+            <subfield code="a">Zeitlin, Hillel</subfield>
+            <subfield code="d">1871-1942.</subfield>
+        </datafield>
+        <datafield tag="245" ind1="1" ind2=" ">
+            <subfield code="6">880-02</subfield>
+            <subfield code="a">Alef bet shel Yahadut.</subfield>
+        </datafield>
+        <datafield tag="260" ind1=" " ind2=" ">
+            <subfield code="6">880-03</subfield>
+            <subfield code="a">Yerushalayim :</subfield>
+            <subfield code="b">Mosad ha-Rav Ḳuḳ, </subfield>
+            <subfield code="c">c1983.</subfield>
+        </datafield>
+        <datafield tag="490" ind1=" " ind2=" ">
+            <subfield code="6">880-04</subfield>
+            <subfield code="a">Sifriyat targumim ṿa-asupot me-ḥokhmat Yiśraʼel ;\</subfield>
+            <subfield code="v">47</subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2=" ">
+            <subfield code="6">100-01//r</subfield>
+            <subfield code="a">צייטלין, הלל. </subfield>
+        </datafield>
+        <datafield tag="880" ind1="1" ind2="0">
+            <subfield code="6">245-02//r</subfield>
+            <subfield code="a">אל״ף בי״ת של יהדות /</subfield>
+            <subfield code="c">הלל צייטלין ; תירגם וערך מנחם ברש־רועי</subfield>
+        </datafield>
+        <datafield tag="880" ind1=" " ind2=" ">
+            <subfield code="6">260-03//r</subfield>
+            <subfield code="a">ירושלים : </subfield>
+            <subfield code="b">מוסד הרב קוק, </subfield>
+            <subfield code="c">c1983</subfield>
+        </datafield>
+        <datafield tag="880" ind1="0" ind2=" ">
+            <subfield code="6">490-04//r</subfield>
+            <subfield code="a">ספרית תרגומים ואסופות מחכמת ישראל ;</subfield>
+            <subfield code="v">47</subfield>
+        </datafield>
+    </record>
+    
+</collection>
