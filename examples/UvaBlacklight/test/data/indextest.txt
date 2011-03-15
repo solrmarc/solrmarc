@@ -18,7 +18,7 @@ blacklight_config.properties, u210.mrc, call_number_text, HB2615.V8O23 1983|PD V
 blacklight_config.properties, u60.mrc, call_number_display, DP269.27.S67 H47 1982  V.1, V.2
 blacklight_config.properties, u55.mrc, call_number_display, PR4231.A43 1984 (13 volumes)
 blacklight_config.properties, u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
-blacklight_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (22 volumes)
+#blacklight_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (22 volumes)
 blacklight_config.properties, u642.mrc, call_number_display, ML5.G654 (43 volumes)
 blacklight_config.properties, u696140.mrc, call_number_display, ND1489.G4713 1986
 
@@ -58,7 +58,7 @@ blacklight_dev_config.properties, u210.mrc, call_number_text, HB2615.V8O23 1983|
 blacklight_dev_config.properties, u60.mrc, call_number_display, DP269.27.S67 H47 1982  V.1, V.2
 blacklight_dev_config.properties, u55.mrc, call_number_display, PR4231.A43 1984 (13 volumes)
 blacklight_dev_config.properties, u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
-blacklight_dev_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (22 volumes)
+#blacklight_dev_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (22 volumes)
 blacklight_dev_config.properties, u642.mrc, call_number_display, ML5.G654 (43 volumes)
 
 blacklight_dev_config.properties, u399.mrc, instrument_facet, Chamber orchestra|Tenor voice
