@@ -480,11 +480,6 @@
 
   </requestHandler>
 
-  <!-- Request handler for sitemap generation -->
-  <requestHandler name="/sitemap" class="vufind.solr.handler.SitemapRequestHandler">
-     <str name="bibIndexPath">${solr.solr.home:./solr}/biblio/index</str>
-  </requestHandler>
-
   <searchComponent name="spellcheck" class="org.apache.solr.handler.component.SpellCheckComponent">
     <lst name="spellchecker">
       <str name="name">default</str>
@@ -505,6 +500,9 @@
   </searchComponent>
   <queryConverter name="queryConverter" class="org.apache.solr.spelling.SpellingQueryConverter"/>
 
+  <!-- Search component for extracting terms (useful for sitemap generation) -->
+  <searchComponent name="term" class="org.apache.solr.handler.component.TermsComponent">
+  </searchComponent>
 
   <!--
    
@@ -555,6 +553,13 @@
     </arr>
   </requestHandler>
   
+  <!-- Request handler to extract terms (useful for sitemap generation) -->
+  <requestHandler name="/term" class="org.apache.solr.handler.component.SearchHandler">
+    <arr name="components">
+      <str>term</str>
+    </arr>
+  </requestHandler>
+
   <searchComponent name="elevator" class="org.apache.solr.handler.component.QueryElevationComponent" >
     <!-- pick a fieldType to analyze queries -->
     <str name="queryFieldType">string</str>

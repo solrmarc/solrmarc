@@ -437,6 +437,10 @@
       </lst>
     </requestHandler>
     
+    <!-- Search component for extracting terms -->
+    <searchComponent name="term" class="org.apache.solr.handler.component.TermsComponent">
+    </searchComponent>
+    
     <!--
       
       Search components are registered to SolrCore and used by Search Handlers
@@ -479,6 +483,13 @@
         </arr>
         
       -->
+    </requestHandler>
+
+    <!-- Request handler to extract terms -->
+    <requestHandler name="/term" class="org.apache.solr.handler.component.SearchHandler">
+      <arr name="components">
+        <str>term</str>
+      </arr>
     </requestHandler>
 
     <!-- Update request handler.
