@@ -150,12 +150,26 @@ public class ProcessSpawner {
                             outraw.write(charRead);
                         }
                     } while(charRead != -1);
+                }
+                catch (Exception e) 
+                {
+                    if (e.getMessage().equals("Bad file descriptor"))
+                    {
+                        // do nothing;
+                    }
+                    else 
+                    {
+                        System.err.println("Error reading from piped input "+ this.getName() + e.getMessage());
+                        e.printStackTrace(System.err);
+                    }
+                }
+                try { 
                     outraw.flush();
                     outraw.close();
                 }
                 catch (Exception e) 
                 {
-                    System.err.println("Error reading from piped input " + e.getMessage());
+                    System.err.println("Error closing and flushing "+ this.getName() + e.getMessage());
                     e.printStackTrace(System.err);
                 }
             }
