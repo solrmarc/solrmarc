@@ -1,5 +1,40 @@
 <?xml version="1.0"?>
 <project>
+    <macrodef name="get-random" description="find an unused port to used for the test server" >
+        <sequential>
+            <math result="result" datatype="int" >
+                <op op="rint">
+                    <op op="+">
+                        <num value="2000"/>
+                        <op op="*">
+                            <num value="10000"/>
+                            <op op="random"/>
+                        </op>
+                    </op>
+                </op>
+            </math>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="get-available-port" description="find an unused port to used for the test server" >
+        <attribute name="port-property" default="jetty.port" />
+        <sequential>
+            <var name="tmpport" value="0" />
+            <get-random />
+            <var name="tmpport" value="${result}" />
+            <echo message="trying port ${tmpport}" />
+            <if >
+                <socket server="localhost" port="${tmpport}"/> 
+                <then>
+                    <get-available-port port-property="@{port-property}" />
+                </then>
+                <else>
+                    <propertyregex property="@{port-property}" input="${tmpport}" regexp="(.+)" replace="${tmpport}" defaultValue="${tmpport}" override="true" />
+                </else>
+            </if>
+        </sequential>
+    </macrodef>
+    
     <macrodef name="jetty-start" description="check whether jetty is running at a particular port, if so, stop it, then start a new one there, possibly with a different solr home">
         <attribute name="port" default="8983" />
         <attribute name="solrhome" />
@@ -30,16 +65,21 @@
                     </java>
                 </daemons>
             </parallel>
-            <echo level="warning" message="Waiting for Jetty to start....." />
-            <waitfor maxwait="40" maxwaitunit="second" checkevery="500" checkeveryunit="millisecond" timeoutproperty="jetty.not.started" >
-                    <http url="http://localhost:@{port}/solr${solrcorearg}/admin/ping" />
+            <echo level="warning" message="Waiting for Jetty to start..... at URL http://localhost:@{port}/solr${solrcorearg}/admin/ping" />
+            <waitfor maxwait="60" maxwaitunit="second" checkevery="500" checkeveryunit="millisecond" timeoutproperty="jetty.not.started" >
+                <http url="http://localhost:@{port}/solr${solrcorearg}/admin/ping" />
             </waitfor>
+            <echo message="Jetty may be started" />
             <if>
                 <not><isset property="jetty.not.started" /></not>
                 <then>
+                    <echo level="warning" message="Waiting for Jetty to start to be ready at URL http://localhost:@{port}/solr${solrcorearg}/select?q=*%3A*&amp;start=0&amp;rows=0&amp;qt=standard&amp;fl=id&amp;wt=json&amp;indent=true" />
+
                     <waitfor maxwait="40" maxwaitunit="second" checkevery="500" checkeveryunit="millisecond" timeoutproperty="jetty.not.started" >
                             <http url="http://localhost:@{port}/solr${solrcorearg}/select?q=*%3A*&amp;start=0&amp;rows=0&amp;qt=standard&amp;fl=id&amp;wt=json&amp;indent=true" />
                     </waitfor>
+                    <echo level="warning" message="jetty ready" />
+
                 </then>
             </if>
             <if>

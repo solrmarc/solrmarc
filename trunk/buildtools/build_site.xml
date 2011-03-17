@@ -263,7 +263,7 @@
                 <property name="smoketest.solr.data.dir" value="" />
             </else>
         </if>
-        <property name="jetty.test.port" value="8983" />
+        <get-available-port port-property="jetty.test.port" />
 
         <!-- start a jetty server at the port defined by property  jetty.test.port  -->
         <echo level="warning" message="Starting Jetty for testing at URL:  http://localhost:${jetty.test.port} ..." />
