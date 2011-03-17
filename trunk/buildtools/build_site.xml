@@ -168,8 +168,8 @@
                         <tokenfilter>
                             <containsregex pattern="solr.core.name" />
                         </tokenfilter>
+                        <prefixlines prefix="test." />
                     </filterchain>
-                     <prefixlines prefix="test." />
                 </loadproperties>
                 <property name="solr.is.multicore" value="true" />
             </then>
