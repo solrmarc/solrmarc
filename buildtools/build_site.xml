@@ -169,15 +169,16 @@
                             <containsregex pattern="solr.core.name" />
                         </tokenfilter>
                     </filterchain>
+                     <prefixlines prefix="test." />
                 </loadproperties>
                 <property name="solr.is.multicore" value="true" />
             </then>
             <else>  <!-- normal single core configuration -->
-                <property name="solr.core.name" value="" />
+                <property name="test.solr.core.name" value="" />
                 <property name="solr.is.multicore" value="false" />
             </else>
         </if>
-        <echo message="solr.core.name = ${solr.core.name} " />
+        <echo message="test.solr.core.name = ${test.solr.core.name} " />
         <echo message="solr.is.multicore = ${solr.is.multicore} " />
     </target>
 
@@ -267,33 +268,33 @@
 
         <!-- start a jetty server at the port defined by property  jetty.test.port  -->
         <echo level="warning" message="Starting Jetty for testing at URL:  http://localhost:${jetty.test.port} ..." />
-        <jetty-start jettyloc="${jetty.install.dir}" solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" port="${jetty.test.port}" solrcore="${solr.core.name}" />
+        <jetty-start jettyloc="${jetty.install.dir}" solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" port="${jetty.test.port}" solrcore="${test.solr.core.name}" />
 
         <!-- check whether index in jetty server contains more than a certain number of records -->
         <!-- this is done because the next step deletes ALL of the records there, and we don't want -->
         <!-- delete your production index by mistake. -->
         <property name="maximum.expected.recs.in.test.solr" value="20" />
-        <check-record-present port="${jetty.test.port}" solrcore="${solr.core.name}" numfoundprop="smoketest.initial.num.found" expectmaxcount="${maximum.expected.recs.in.test.solr}" />
+        <check-record-present port="${jetty.test.port}" solrcore="${test.solr.core.name}" numfoundprop="smoketest.initial.num.found" expectmaxcount="${maximum.expected.recs.in.test.solr}" />
 
         <!-- Now delete all of the records in the test solr index -->
         <echo level="warning" message="Deleting all records from test jetty via URL:  http://localhost:${jetty.test.port}/solr/update " />
-        <jetty-delete-all returnproperty="test.smoke.delete.all" port="${jetty.test.port}" solrcore="${solr.core.name}" />
+        <jetty-delete-all returnproperty="test.smoke.delete.all" port="${jetty.test.port}" solrcore="${test.solr.core.name}" />
         <echo message="${test.smoke.delete.all}" />
 
         <!-- Index a sample file containing a single record -->
         <property name="smoketest.index.run.1.marcfile" location="${site.test.dir}/data/u399.mrc" />
         <echo level="warning" message="Indexing file: ${smoketest.index.run.1.marcfile}" /> 
-        <indexfile solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" marcfile="${smoketest.index.run.1.marcfile}" port="${jetty.test.port}" solrcore="${solr.core.name}" returnproperty="smoketest.index.run.1" />   
+        <indexfile solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" marcfile="${smoketest.index.run.1.marcfile}" port="${jetty.test.port}" solrcore="${test.solr.core.name}" returnproperty="smoketest.index.run.1" />   
         <echo level="warning" message="${smoketest.index.run.1}" /> 
 
         <!-- Index a sample file containing about a dozen records -->
         <property name="smoketest.index.run.2.marcfile" location="${site.test.dir}/data/selectedRecs.mrc" />
         <echo level="warning" message="Indexing file: ${smoketest.index.run.2.marcfile}" /> 
-        <indexfile solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" marcfile="${smoketest.index.run.2.marcfile}" port="${jetty.test.port}" solrcore="${solr.core.name}" returnproperty="smoketest.index.run.2" />   
+        <indexfile solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" marcfile="${smoketest.index.run.2.marcfile}" port="${jetty.test.port}" solrcore="${test.solr.core.name}" returnproperty="smoketest.index.run.2" />   
         <echo level="warning" message="${smoketest.index.run.2}" /> 
 
         <!-- Check number of records in index after the to sample index files are added -->
-        <check-record-present port="${jetty.test.port}" solrcore="${solr.core.name}" recordlistprop="smoketest.record.list" numfoundprop="smoketest.num.found" />
+        <check-record-present port="${jetty.test.port}" solrcore="${test.solr.core.name}" recordlistprop="smoketest.record.list" numfoundprop="smoketest.num.found" />
         <echo level="warning" message="num found: ${smoketest.num.found} :  ${smoketest.record.list}" /> 
         <jetty-stop port="${jetty.test.port}" /> 
 
