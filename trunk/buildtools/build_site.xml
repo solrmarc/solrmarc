@@ -210,7 +210,7 @@
         </jar>
     </target>
     
-    <target name="test" depends="core_junittest,core_indextest,smoketest,site_indextest,site_junittest" description="run the four types of tests" >
+    <target name="test" depends="core_junittest,core_indextest,site_indextest,site_junittest,smoketest" description="run the four types of tests" >
     </target>
     
     <target name="testCoverage" depends="dist,testJar" description="run tests with coverage enabled" >
@@ -265,10 +265,11 @@
             </else>
         </if>
         <get-available-port port-property="jetty.test.port" />
+        <get-available-port port-property="jetty.test.stop.port" />
 
         <!-- start a jetty server at the port defined by property  jetty.test.port  -->
         <echo level="warning" message="Starting Jetty for testing at URL:  http://localhost:${jetty.test.port} ..." />
-        <jetty-start jettyloc="${jetty.install.dir}" solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" port="${jetty.test.port}" solrcore="${test.solr.core.name}" />
+        <jetty-start jettyloc="${jetty.install.dir}" solrhome="${site.test.solr.dir}" solrdata="${smoketest.solr.data.dir}" port="${jetty.test.port}" stopport="${jetty.test.stop.port}" solrcore="${test.solr.core.name}" />
 
         <!-- check whether index in jetty server contains more than a certain number of records -->
         <!-- this is done because the next step deletes ALL of the records there, and we don't want -->
@@ -296,7 +297,7 @@
         <!-- Check number of records in index after the to sample index files are added -->
         <check-record-present port="${jetty.test.port}" solrcore="${test.solr.core.name}" recordlistprop="smoketest.record.list" numfoundprop="smoketest.num.found" />
         <echo level="warning" message="num found: ${smoketest.num.found} :  ${smoketest.record.list}" /> 
-        <jetty-stop port="${jetty.test.port}" /> 
+        <jetty-stop port="${jetty.test.port}" stopport="${jetty.test.stop.port}" /> 
 
         <!-- Fail and exit if the wrong number of documents was found-->
         <property name="smoketest.expected.num" value="12" />

@@ -37,6 +37,7 @@
     
     <macrodef name="jetty-start" description="check whether jetty is running at a particular port, if so, stop it, then start a new one there, possibly with a different solr home">
         <attribute name="port" default="8983" />
+        <attribute name="stopport" default="8079" />
         <attribute name="solrhome" />
         <attribute name="solrdata" default="" />
         <attribute name="solrcore" default="" />
@@ -57,7 +58,7 @@
                 <daemons>
                     <java jar="@{jettyloc}/start.jar" fork="true" dir="@{jettyloc}" spawn="true" >
                         <jvmarg value="-Dfile.encoding=UTF-8"/>
-                        <jvmarg value="-DSTOP.PORT=8079"/>
+                        <jvmarg value="-DSTOP.PORT=@{stopport}"/>
                         <jvmarg value="-DSTOP.KEY=secret"/>
                         <jvmarg value="-Djetty.port=@{port}"/>
                         <jvmarg value="${solrhomearg}"/>
@@ -89,7 +90,7 @@
                 </then>
                 <else>
                     <echo level="error" message="Jetty NOT started....." />
-                    <jetty-stop jettyloc="@{jettyloc}" port="@{port}" />
+                    <jetty-stop jettyloc="@{jettyloc}" port="@{port}" stopport="@{stopport}" />
                 </else>
             </if>
         </sequential>
@@ -97,13 +98,14 @@
     
     <macrodef name="jetty-stop" description="check whether jetty is running at a particular port, if so, stop it, and wait 3 secords for it to terminate" >
         <attribute name="port" default="8983" />
+        <attribute name="stopport" default="8079" />
         <attribute name="jettyloc" default="${site.test.dir}/jetty" />
         <sequential>
             <if> 
                 <socket server="localhost" port="@{port}"/>
                 <then>
                     <java jar="@{jettyloc}/start.jar" fork="true" dir="@{jettyloc}">
-                        <jvmarg value="-DSTOP.PORT=8079"/>
+                        <jvmarg value="-DSTOP.PORT=@{stopport}"/>
                         <jvmarg value="-DSTOP.KEY=secret"/>
                         <arg value="--stop"/>
                     </java>
