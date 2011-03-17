@@ -1,5 +1,5 @@
-+, u3412403.mrc, 'script(pubDateGroups.bsh), getPubDateGroups()', Last 50 years
-+, u3412403.mrc, 'script(pubDateGroups.bsh), getPublicationDate()', 1986
++, u3412403.mrc, 'script(PubDateGroups.bsh), getPubDateGroups()', Last 50 years
++, u3412403.mrc, 'script(PubDateGroups.bsh), getPublicationDate()', 1986
 blacklight_config.properties, u642.mrc, format_facet, Journal/Magazine
 blacklight_config.properties, u10273.mrc, format_facet, Book|Musical Score|Manuscript
 blacklight_config.properties, u17922.mrc, oclc_text, 10072685
