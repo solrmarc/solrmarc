@@ -11,6 +11,18 @@
     <taskdef name="propertyregex" classname="net.sf.antcontrib.property.RegexTask" 
         classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
 
+    <taskdef name="var" classname="net.sf.antcontrib.property.Variable" 
+        classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
+
+    <typedef name="op" classname="net.sf.antcontrib.math.Operation" 
+        classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
+
+    <typedef name="num" classname="net.sf.antcontrib.math.Numeric" 
+        classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
+
+    <taskdef name="math" classname="net.sf.antcontrib.math.MathTask" 
+        classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
+
     <taskdef name="urlencode" classname="net.sf.antcontrib.property.URLEncodeTask" 
         classpath="${ant_extras.dist.dir}/ant_extras.jar" onerror="report" />
 
