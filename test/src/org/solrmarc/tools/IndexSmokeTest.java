@@ -24,6 +24,7 @@ public class IndexSmokeTest extends IndexTest
         docIDfname = "id";
 
         String solrPath = System.getProperty("solr.path");
+        String solrDataDir = System.getProperty("solr.data.dir");
         if (solrPath == null)
             fail("property solr.path must be defined for the tests to run");
 
@@ -35,7 +36,7 @@ public class IndexSmokeTest extends IndexTest
         if (testConfigFname == null)
             fail("property test.config.file must be defined for the tests to run");
 
-        createIxInitVars(testConfigFname, solrPath, null, testDataParentPath, testDataFname);
+        createIxInitVars(testConfigFname, solrPath, solrDataDir, testDataParentPath, testDataFname);
 
 //      createNewTestIndex(testDataParentPath + File.separator + testDataFname, configPropFile, solrPath, solrDataDir, solrmarcPath, siteSpecificPath);
 //      solrCore = getSolrCore(solrPath, solrDataDir);
