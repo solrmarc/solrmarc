@@ -8,8 +8,8 @@
     <property name="dist.exe.dir" value="bin" />
     <property name="dist.exe.path" location="${dist.path}/${dist.exe.dir}" />
     <property name="solrmarc.core.one-jar.name" value="SolrMarc.jar" /> 
-    <property name="jetty.install.dir" value="${dist.path}/jetty" />
-    <property name="solr.install.dir" value="${dist.path}/jetty/solr" />
+    <property name="jetty.install.dir" location="${dist.path}/jetty" />
+    <property name="solr.install.dir" location="${dist.path}/jetty/solr" />
     <property name="buildtools.path" location="buildtools" />
 
     <!-- import ant extras macros (skips import if file already included) -->
@@ -545,7 +545,7 @@
         </sequential>
     </macrodef>
     
-   <macrodef name="copy_solr"  description="Copy Solr from from site test config to distribution jetty dir" >
+    <macrodef name="copy_solr"  description="Copy Solr from from site test config to distribution jetty dir" >
         <sequential>
             <copy todir="${solr.install.dir}" overwrite="false" >
                 <fileset dir="${site.test.dir}/solr" includes="**" excludes="**/data/**,**/index" />

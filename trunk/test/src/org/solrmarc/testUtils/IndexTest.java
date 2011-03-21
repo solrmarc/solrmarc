@@ -63,8 +63,10 @@ public abstract class IndexTest {
         logger.debug("System.getProperty(\"os.name\") : "+System.getProperty("os.name"));
         if (!System.getProperty("os.name").toLowerCase().contains("win"))
         {
-            logger.info("Calling Delete Dir Contents");
-            deleteDirContents(solrDataDir);
+            //   comment out these two lines since if the solr data dir is set the same as the solr home, the conf directory would be deleted as well.
+            //   for that matter, if the solr data dir is accidently pointed at a valued directory, that directory, and all of its children, would be wiped out.  
+ //           logger.info("Calling Delete Dir Contents");
+ //           deleteDirContents(solrDataDir);
         }
         CommandLineUtils.addProps(addnlProps, backupProps);
         importer = new MarcImporter();
