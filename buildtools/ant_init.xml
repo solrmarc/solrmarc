@@ -107,6 +107,7 @@
                 </then>
             </if>
             <copy_files_from_top_level />
+            <copy_test_solr_configuration />
         </sequential>
     </macrodef>
 
