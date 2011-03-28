@@ -123,8 +123,30 @@
       This approach is an artifact of expecting the "build" target to create a single
       jar file containing the test classes in addition to the core classes. -->
     <target name="testJarPrivate">
+        <echo level="debug" message="test.dir/src  = ${test.dir}/src" />
+        <pathconvert pathsep="," property="test.classes.in.core.jar" >
+            <fileset  dir="${test.dir}/src" includes="**/*.java">
+                <and>
+                    <contains text="@Test" />
+                    <not> <contains text="@Parameters" /> </not>
+                </and>
+            </fileset>
+            <chainedmapper>
+                <regexpmapper from="^.*?[\\/]test[\\/]src[\\/](.*)\.java" to="\1.class" />
+                <filtermapper>
+                    <tokenfilter>
+                        <replaceregex pattern="[\\/]" flags="g" replace="."/>
+                    </tokenfilter>
+                </filtermapper>
+            </chainedmapper>
+        </pathconvert>
+        <echo level="debug" message="fileset test.classes.in.core.jar = ${test.classes.in.core.jar}" />
+
         <jar destfile="${build.dir}/test/${junit.test.jar.name}">
             <fileset dir="${build.dir}/test" includes="**/*.class" />
+            <manifest>
+                <attribute name="TestClasses" value="${test.classes.in.core.jar}"/>
+            </manifest>
         </jar>
  
         <!-- note: naomi wonders if the onejar task should have its own target 
