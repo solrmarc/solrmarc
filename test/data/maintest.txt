@@ -128,20 +128,20 @@
 #test single quoted test specification 
 +, selectedRecs.mrc(u21), 'custom, getSortableAuthor', Carrington Frank Crime and justice a conservative strategy
 
-# Test ?? (was 48, disabled now) isValidDewey() uses a new regex and this fails
+# Test 48 
 #test using beanshell scripting custom indexing method
-###+, selectedRecs.mrc(u21), 'script(dewey.bsh), getDeweyFacet(dewey_callnumber_map.properties)', 300s - Social Sciences|340s - Law
++, selectedRecs.mrc(u21), 'script(deweyfacet.bsh), getDeweyFacet(dewey_callnumber_map.properties)', 300s - Social Sciences|340s - Law
 
-# Test 48
+# Test 49
 #test using "first" directive
 +, selectedRecs.mrc(u89), '650a, first', Environmental policy
 
-# Test 59-50
+# Test 50-51
 #test using "join" directive
 +, selectedRecs.mrc(u233), '650a, join', Cave paintings Paleolithic period Art, Prehistoric
 +, selectedRecs.mrc(u233), '650a, join( -- )', Cave paintings -- Paleolithic period -- Art, Prehistoric
 
-# Test 51
+# Test 52
 #test using "std" directive
 +, u399.mrc, 'era, composition_era_map.properties', 1970's|20th Century
 
