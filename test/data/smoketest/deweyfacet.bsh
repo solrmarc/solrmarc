@@ -19,7 +19,7 @@ Set getDeweyFacet(Record record, String propertiesMapName)
 
     for (String dewey : values)
     {
-       // if (! CallNumUtils.isValidDewey(dewey))  continue;
+        if (! CallNumUtils.isValidDewey(dewey))  continue;
         String hundreds = dewey.substring(0, 1) + "00";
         String tens = dewey.substring(0,2) + "0";
         String hundredsMapped = Utils.remap(hundreds, indexer.findMap(mapName), true);
