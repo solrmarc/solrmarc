@@ -40,6 +40,7 @@ public final class CallNumUtils {
      */ 
     private CallNumUtils(){ }
     
+    public static final Pattern DEWEY_PATTERN = Pattern.compile("^\\d{1,3}(\\.\\d+)?.*");
     /**
      * regular expression string for the required portion of the LC classification
      *  LC classification is 
@@ -166,9 +167,20 @@ public final class CallNumUtils {
      * given a possible Dewey call number value, determine if it
      *  matches the pattern of an Dewey call number
      */
-    public static final boolean isValidDewey(String possDeweyVal)
+    public static final boolean isValidDeweyWithCutter(String possDeweyVal)
     {
         if (possDeweyVal != null && DEWEY_CLASS_N_CUTTER_PATTERN.matcher(possDeweyVal.trim()).matches())
+            return true;
+        return false;
+    }
+   
+   /**
+     * given a possible Dewey call number value, determine if it
+     *  matches the pattern of an Dewey call number
+     */
+    public static final boolean isValidDewey(String possDeweyVal)
+    {
+        if (possDeweyVal != null && DEWEY_PATTERN.matcher(possDeweyVal.trim()).matches())
             return true;
         return false;
     }

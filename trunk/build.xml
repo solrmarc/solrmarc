@@ -122,7 +122,7 @@
         <packageprebuilt example="none" binprefix="bin" acceptpromptdefaults="true" version="${version}" /> 
     </target>
     
-    <target name="upload" depends="package" description="Upload prebuilt binary distributions and a source distribution to googlecode" >
+    <target name="upload" description="Upload prebuilt binary distributions and a source distribution to googlecode" >
         <if> 
             <available file="build.credentials.properties" />
             <then>
@@ -190,7 +190,7 @@
              <property name="dist.path" location="${dist.dir}" />
          </ant>
     </target>
-    
+
     <target name="runCoreTestsWithCoverage" description="Run tests for Core SolrMarc code with code coverage info">
         <propertyregex property="site.dir" input="${site.dir}" regexp="local_build" replace="core-only" defaultValue="core-only" override="true" />
         <antcall target="veryclean" >
@@ -213,5 +213,5 @@
              <property name="dist.path" location="core-only/${dist.dir}" />
          </ant>
     </target>
-    
+
 </project>
