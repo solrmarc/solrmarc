@@ -114,7 +114,7 @@
 
     <target name="package" description="Create both prebuilt binary distributions and a source distribution" >
         <property name="package.dir" value="package" />
-        <property name="version" value="2.2" />
+        <property name="version" value="2.2.1" />
         <mkdir dir="${package.dir}" />
         <packagesrc version="${version}" />
         <packageprebuilt example="GenericBlacklight" binprefix="bin" version="${version}" />
