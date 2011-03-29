@@ -1,0 +1,29 @@
+# Test isIllustrated method
+import.properties, notillus1.mrc, illustrated, Not Illustrated
+import.properties, notillus2.mrc, illustrated, Not Illustrated
+import.properties, notillus3.mrc, illustrated, Not Illustrated
+import.properties, illus1.mrc, illustrated, Illustrated
+import.properties, illus2.mrc, illustrated, Illustrated
+import.properties, illus3.mrc, illustrated, Illustrated
+import.properties, illus4.mrc, illustrated, Illustrated
+import.properties, illus5.mrc, illustrated, Illustrated
+import.properties, illus6.mrc, illustrated, Illustrated
+
+# Test Dewey Decimal functionality
+import.properties, dewey01.mrc, dewey-hundreds, 000 - Computer science, information & general works
+import.properties, dewey01.mrc, dewey-tens, 000 - Computer science, knowledge & systems
+import.properties, dewey01.mrc, dewey-ones, 001 - Knowledge
+import.properties, dewey01.mrc, dewey-full, 1.I39
+import.properties, dewey01.mrc, dewey-sort, 001.00000000 I39
+import.properties, dewey02.mrc, dewey-hundreds, 300 - Social sciences
+import.properties, dewey02.mrc, dewey-tens, 320 - Political science
+import.properties, dewey02.mrc, dewey-ones, 323 - Civil & political rights
+import.properties, dewey02.mrc, dewey-full, 323.A512RENO.23-28
+import.properties, dewey02.mrc, dewey-sort, 323.00000000 A512RE NO.000023-000028
+
+# Test format determination
+import.properties, dewey01.mrc, format, Book
+import.properties, dewey02.mrc, format, Book
+import.properties, notillus1.mrc, format, VHS
+import.properties, illus1.mrc, format, Electronic
+import.properties, short007.mrc, format, Audio

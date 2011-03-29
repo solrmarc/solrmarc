@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+  
+<!-- 505 -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a505</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">five-oh-five</subfield>
+    </datafield>
+    <datafield tag="505" ind1=" " ind2=" ">
+      <subfield code="6">880-01</subfield>
+      <subfield code="a">505a</subfield>
+      <subfield code="g">nope</subfield>
+      <subfield code="r">505r</subfield>
+      <subfield code="t">505t</subfield>
+      <subfield code="u">nope</subfield>
+    </datafield>
+    <datafield tag="880" ind1="1" ind2=" ">
+      <subfield code="6">505-01</subfield>
+      <subfield code="a">vern505a</subfield>
+      <subfield code="g">nope</subfield>
+      <subfield code="r">vern505r</subfield>
+      <subfield code="t">vern505t</subfield>
+      <subfield code="u">nope</subfield>
+    </datafield>
+  </record>
+  
+<!-- 518 -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a518</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">five-eighteen</subfield>
+    </datafield>
+    <datafield tag="518" ind1=" " ind2=" ">
+      <subfield code="6">880-01</subfield>
+      <subfield code="a">518a</subfield>
+      <subfield code="3">nope</subfield>
+    </datafield>
+    <datafield tag="880" ind1="1" ind2=" ">
+      <subfield code="6">518-01</subfield>
+      <subfield code="a">vern518a</subfield>
+      <subfield code="3">nope</subfield>
+    </datafield>
+  </record>
+  
+<!-- 520 -->
+  <record>
+    <leader>66662cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a520</controlfield>
+    <controlfield tag="008">041202s2000    mdunnn  s      f    eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">five-twenty</subfield>
+    </datafield>
+    <datafield tag="520" ind1=" " ind2=" ">
+      <subfield code="6">880-01</subfield>
+      <subfield code="a">520a</subfield>
+      <subfield code="b">520b</subfield>
+      <subfield code="c">nope</subfield>
+      <subfield code="u">nope</subfield>
+    </datafield>
+    <datafield tag="880" ind1="1" ind2=" ">
+      <subfield code="6">520-01</subfield>
+      <subfield code="a">vern520a</subfield>
+      <subfield code="b">vern520b</subfield>
+      <subfield code="c">nope</subfield>
+      <subfield code="u">nope</subfield>
+    </datafield>
+  </record>
+  
+</collection>

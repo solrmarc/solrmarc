@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SolrMarc site initialization add-ons" >
+    
+    <macrodef name="build_solrmarc" description="Build the core SolrMarc code" >
+        <attribute name="defaultconfig" default="" />
+        <sequential>
+            <property name="distribution.jar.name" value="SolrMarc.jar" />
+            <ant dir="${lib.dir}/solrmarc" target="build" inheritAll="false" />
+            <loadproperties srcfile="${lib.dir}/solrmarc/build.properties">
+                <filterchain>
+                    <tokenfilter>
+                        <containsregex pattern="(build.dir|jar.name|solrmarc.dist.dir|one-jar.name)" />
+                    </tokenfilter>
+                    <prefixlines prefix="solrmarc.core." />
+                </filterchain>
+            </loadproperties>
+            <echo message="#### onejar name = ${solrmarc.core.one-jar.name} ####" />
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="check_site_dir_created" description="check whether the site dir is already created and contains a *_config.properties file and a *_index.properties file">
+        <attribute name="propertytoset" />
+        <sequential>
+            <if>
+                <and>
+                    <available file="${site.dir}" />
+                    <resourcecount count="2" when="ge">
+                        <fileset dir="${site.dir}" includes="*_config.properties,*_index.properties,import.properties,marc*.properties" />
+                    </resourcecount>
+                </and>
+                <then>
+                    <property name="@{propertytoset}" value="true" />
+                </then>
+            </if>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="init_site_props">
+        <sequential>
+            <property file="${site.dir}/build_override.properties" />
+            
+            <property name="site.src.dir" location="${site.dir}/${src.dir}" />
+            <property name="site.lib.dir" location="${site.dir}/${lib.dir}" />
+            <property name="site.build.dir" location="${site.dir}/${build.dir}" />
+            <property name="site.test.dir" location="${site.dir}/${test.dir}" />
+            <property name="site.test.src.dir" location="${site.test.dir}/${src.dir}" />
+            <property name="site.test.build.dir" location="${site.test.dir}/${build.dir}" />
+            <property name="site.test.data.dir" location="${site.test.dir}/data" />
+            <property name="site.test.solr.dir" location="${site.test.dir}/solr" />
+            <property name="site.map.dir" location="${site.dir}/${trans.map.dir}" />
+            <property name="site.script.template.dir" location="${site.dir}/${script.template.dir}" />
+            <property name="site.scripts.dir" location="${site.dir}/${scripts.dir}" />
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="check_up_to_date_vs_example" description="Check whether any newer files are available in the example" >
+        <attribute name="response" default="" />
+        <sequential>
+            <if>
+                <and>
+                    <isset property="example.configuration" />
+                    <not><equals arg1="${example.configuration}" arg2="none" /></not>
+                </and>
+                <then>
+                    <union id="nonuptodatecopies">
+                        <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps/*.properties,index_scripts/*,script_templates/*,test/**,log4j.properties,extra_data/**,*_config.properties,*_index.properties,import.properties,marc*.properties,solrConf/**" excludes="test/bin/**" >
+                            <depend targetdir="${site.dir}" />
+                            <different targetdir="${site.dir}" />
+                        </fileset>
+                        <fileset dir="${basedir}" includes="${script.template.dir}/*,${buildtools.dir}/ant_extra*,${buildtools.dir}/ant_jetty_test.xml,${test.dir}/data/*" >
+                            <depend targetdir="${site.dir}" />
+                            <different targetdir="${site.dir}" />
+                        </fileset>
+                        <fileset file="${buildtools.dir}/build_site.xml" >
+                            <depend targetdir="${site.dir}">
+                                <mapper><chainedmapper><flattenmapper/><globmapper from="*_site.xml" to="*.xml"/></chainedmapper></mapper>
+                            </depend>
+                            <different targetdir="${site.dir}">
+                                <mapper><chainedmapper><flattenmapper/><globmapper from="*_site.xml" to="*.xml"/></chainedmapper></mapper>
+                            </different>
+                        </fileset>
+                    </union>
+                    <if>
+                        <resourcecount refid="nonuptodatecopies" when="greater" count="0" /> 
+                        <then>
+                            <echo level="warning" message="Warning: One or more of the example files your site is based on have changed:" />
+                            <pathconvert pathsep="${line.separator}" property="filelist.nonuptodatecopies" refid="nonuptodatecopies">
+                                <map from="${basedir}/examples/${example.configuration}/" to="    Changed example file:  " />
+                            </pathconvert>
+                            <echo message="${filelist.nonuptodatecopies}" /> 
+                            <input message="[C]opy changed files, [I]gnore changes and continue, [S]top build (c, i, s)?" defaultvalue="s" validargs="c,i,s" addproperty="input.continue.processing.with.not.uptodate"/>
+                            <if >
+                                <equals arg1="s" arg2="${input.continue.processing.with.not.uptodate}"/>
+                                <then>
+                                    <fail unless="input.continue" message="Build aborted by user." />
+                                </then>
+                                <elseif>
+                                    <equals arg1="c" arg2="${input.continue.processing.with.not.uptodate}"/>
+                                    <then>
+                                        <copy_files_from_example_directory update="true" />
+                                      <!--  <copy_files_from_top_level /> -->
+                                    </then>
+                                </elseif>
+                            </if>
+                        </then>
+                    </if>
+                </then>
+            </if>
+            <copy_files_from_top_level />
+            <copy_test_solr_configuration />
+        </sequential>
+    </macrodef>
+
+    <macrodef name="get_indexer_class">
+        <sequential>
+            <fileset id="custom_indexer_source" dir="${site.dir}" includes="${src.dir}/**/*.java">
+                <or>
+                    <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+SolrIndexer" />
+                    <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+org[.]solrmarc[.]index[.]SolrIndexer" />
+                </or>
+            </fileset>
+
+            <condition property="custom.index.source.exists">
+                <or>
+                    <resourcecount count="0" when="gt" refid="custom_indexer_source" />
+                    <isset property="solr.indexer" />
+                </or>
+            </condition>
+
+            <property name="custom.indexer.source" refid="custom_indexer_source" />
+
+            <if>
+                <isset property="solr.indexer" />
+                <then>
+                    <property name="custom.indexer.class" value="${solr.indexer}" />
+                </then>
+                <elseif>
+                    <resourcecount count="0" when="gt" refid="custom_indexer_source" />
+                    <then>
+                        <pathconvert property="custom.indexer.class" refid="custom_indexer_source">
+                            <chainedmapper>
+                                <regexpmapper from="^.*src[/\\](.*java)$$" to="\1" />
+                                <packagemapper from="*.java" to="*" />
+                            </chainedmapper>
+                        </pathconvert>
+                        <pathconvert property="custom.jar.name" refid="custom_indexer_source">
+                            <chainedmapper>
+                                <regexpmapper from="^.*src[/\\]([A-Za-z0-9_]*[/\\])*(.*)[.]java$$" to="\2" />
+                            </chainedmapper>
+                        </pathconvert>
+                    </then>
+                </elseif>
+                <else>
+                    <property name="custom.indexer.class" value="org.solrmarc.index.SolrIndexer" />
+                </else>
+            </if>
+
+            <echo message="custom.indexer.source = ${custom.indexer.source}" />
+            <echo message="custom.indexer.class = ${custom.indexer.class}" />
+            <echo message="custom.jar.name = ${custom.jar.name}" />
+        </sequential>
+    </macrodef>
+
+    <macrodef name="copy_files_from_example_directory">
+        <attribute name="update" default="false" />
+        <sequential>
+            <copy todir="${site.dir}" preservelastmodified="true">
+                <fileset dir="examples/${example.configuration}" includes="src/**/*.java,lib/**,translation_maps,script_templates/*,index_scripts/*,test/**,log4j.properties,extra_data/**,solrConf/**" >
+                    <depend targetdir="${site.dir}" />
+                </fileset>
+            </copy>
+            <copy todir="${site.dir}" filtering="false" preservelastmodified="true">
+                 <fileset dir="examples/${example.configuration}" includes="*config*.properties,*index*.properties,import.properties,marc*.properties" >
+                     <depend targetdir="${site.dir}" >
+                     </depend>
+                 </fileset>
+                 <filterchain>
+                     <fixcrlf />
+                 </filterchain>
+            </copy>
+            <if>
+                <equals arg1="@{update}" arg2="false" />
+                <then>
+                    <merge_maps/>
+                    <copy todir="${site.dir}/${trans.map.dir}" preservelastmodified="true" >
+                        <fileset dir="${build.dir}/tmp_map_dir" includes="*" >
+                        </fileset>
+                    </copy>
+                    <copy todir="${site.dir}/${trans.map.dir}" preservelastmodified="true" overwrite="false" file="${buildtools.path}/README_MAPS" />
+                    <delete_merged_maps />
+                </then>
+                <else>
+                    <copy todir="${site.dir}" preservelastmodified="true">
+                        <fileset dir="examples/${example.configuration}" includes="translation_maps/*" >
+                            <depend targetdir="${site.dir}" />
+                        </fileset>
+                    </copy>
+                </else>
+            </if>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="merge_maps"  description="copy and merge translation maps" >
+        <sequential>
+            <delete_merged_maps />
+            <!-- copy standard translation maps and site-specific translation maps to the same 
+                 temporary directory.  If there are files with duplicate names only keep the 
+                 site-specific version, but warn the user that duplicates are present. -->
+            <copy todir="${build.dir}/tmp_map_dir" >
+                <fileset dir="${trans.map.dir}" includes="*.properties" />
+            </copy>
+            
+            <copy todir="${build.dir}/tmp_map_dir" overwrite="true">
+                <fileset dir="examples/${example.configuration}/${trans.map.dir}" includes="*.properties" />
+            </copy>
+            
+            <pathconvert pathsep=" "  property="std_maps" >
+                <fileset dir="${trans.map.dir}" includes="*.properties" />
+                <flattenmapper />
+            </pathconvert>
+            
+            <pathconvert pathsep=" "  property="site_maps" >
+                <fileset dir="examples/${example.configuration}/${trans.map.dir}" includes="*.properties" />
+                <flattenmapper />
+            </pathconvert>
+            
+            <resources id="intersect_std_maps_with_site_maps" >
+                <intersect>
+                    <resources>
+                        <tokens>
+                            <string value="${std_maps}" />
+                            <stringtokenizer />
+                        </tokens>
+                    </resources>
+                    <resources>
+                        <tokens>
+                            <string value="${site_maps}" />
+                            <stringtokenizer />
+                        </tokens>
+                  </resources>
+                </intersect>
+            </resources>
+    
+            <pathconvert pathsep=", "  property="both_maps" refid="intersect_std_maps_with_site_maps" />
+    
+            <if >
+                <resourcecount refid="intersect_std_maps_with_site_maps" when="greater" count="0" />
+                <then>
+                    <echo level="error" message="-----------------------------------------------------------------------------------------" />
+                    <echo level="error" message="Warning: Site specific translation map replaces standard translation map of the same name" />
+                    <echo level="error" message="         Duplicate map names = ${both_maps} " />
+                    <echo level="error" message="-----------------------------------------------------------------------------------------" />
+                </then>
+            </if>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="delete_merged_maps" >
+        <sequential>
+            <delete dir="${build.dir}/tmp_map_dir" />
+        </sequential>
+    </macrodef>
+    
+    
+    <macrodef name="copy_solrmarc" description="Copy core SolrMarc code to the site dir, if its newer" >
+        <attribute name="defaultconfig" default="" />
+        <sequential>
+            <if> 
+                <not><uptodate srcfile="${lib.dir}/solrmarc/${solrmarc.core.solrmarc.dist.dir}/${solrmarc.core.one-jar.name}"
+                               targetfile="${site.lib.dir}/${solrmarc.core.one-jar.name}" /></not>
+                <then>
+                    <copy file="${lib.dir}/solrmarc/${solrmarc.core.solrmarc.dist.dir}/${solrmarc.core.one-jar.name}"
+                          todir="${site.lib.dir}" />
+                </then>
+            </if>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="copy_test_solr_configuration" description="create a example solr configuration based on files in the example directory" >
+        <sequential>
+            <!-- copy files from the conf directory and lib directory from the solr.path/conf  and /lib directories
+                 if they exist, otherwise copy files from the conf directory and lib directory as specified by the 
+                 properties ${site.test.solr.conf.override} and  ${site.test.solr.lib.override}   -->
+            <property name="test.solr.dir" value="${test.dir}/solr" />
+            <if>
+                <available type="dir" file="${site.dir}/solrConf" />
+                <then>
+                    <if>  <!--  if it is a multicore-solr configuration -->
+                        <available type="file" file="${site.dir}/solrConf/solr.xml" />
+                        <then>
+                            <!-- create a solr directory for testing by copying a boilerplate solr directory -->
+                            <copy overwrite="false" todir="${site.test.solr.dir}">
+                                <fileset dir="${test.solr.dir}" includes="lib/*.jar" excludes="conf" />
+                            </copy>
+                            <copy overwrite="true" todir="${site.test.solr.dir}" failonerror="false">
+                                <fileset dir="${site.dir}/solrConf" includes="**" excludes="*.war" />
+                            </copy>
+                            <property name="solr.core.name" value="${example.default.solr.core.name}" />
+                            <loadproperties srcfile="${site.dir}/${default.config}" >
+                                <filterchain>
+                                    <tokenfilter>
+                                        <containsregex pattern="solr.core.name" />
+                                    </tokenfilter>
+                                </filterchain>
+                            </loadproperties>
+                            <property name="solr.is.multicore" value="true" />
+                        </then>
+                        <else>  <!-- normal single core configuration -->
+                            <!-- create a solr directory for testing by copying a boilerplate solr directory -->
+                            <copy overwrite="false" todir="${site.test.solr.dir}">
+                                <fileset dir="${test.solr.dir}" includes="lib/*.jar,conf/**,data" />
+                            </copy>
+                            <copy overwrite="true" todir="${site.test.solr.dir}/conf" failonerror="false">
+                                <fileset dir="${site.dir}/solrConf" includes="*" excludes="*.jar,*.war" />
+                            </copy>
+                            <copy overwrite="true" todir="${site.test.solr.dir}/lib" failonerror="false">
+                                <fileset dir="${site.dir}/solrConf" includes="*.jar" />
+                            </copy>
+                            <property name="solr.core.name" value="" />
+                            <property name="solr.is.multicore" value="false" />
+                        </else>
+                    </if>
+                </then>
+                <else>
+                    <!-- create a solr directory for testing by copying a boilerplate solr directory -->
+                    <copy overwrite="false" todir="${site.test.solr.dir}">
+                        <fileset dir="${test.solr.dir}" includes="lib/*.jar,conf/**,data" />
+                    </copy>
+                    <property name="solr.core.name" value="" />
+                    <property name="solr.is.multicore" value="false" />
+                </else>
+            </if>
+            <property name="jetty.install.dir" value="jetty" />
+            <property name="jetty.site.location" location="${site.test.dir}/${jetty.install.dir}" />
+            <property name="jetty.install.to.copy" value="${test.dir}/jetty" />
+            <if>
+                <available file="${site.dir}/solrConf/solr.war" />
+                <then>
+                    <property name="jetty.solr.war.to.copy" location="${site.dir}/solrConf/solr.war" />
+                </then>
+                <else>
+                    <property name="jetty.solr.war.to.copy" value="${test.dir}/solr/war/apache-solr-1.4.0.war" />
+                </else>
+            </if>
+            <copy overwrite="false" todir="${jetty.site.location}" >
+                <fileset dir="${jetty.install.to.copy}" includes="**" />
+            </copy>
+            <copy overwrite="false" tofile="${jetty.site.location}/webapps/solr.war" file="${jetty.solr.war.to.copy}" />
+        </sequential>
+    </macrodef>
+
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+    <macrodef name="get_example_config_to_use" description="Determine which of the available examples to base your local site on" >
+        <attribute name="property" />
+        <sequential>
+            <pathconvert property="example.dir.list" pathsep=",">
+                 <path>
+                     <dirset dir="examples" includes="*" />
+                 </path>
+                 <flattenmapper />
+             </pathconvert>
+             <input message="Enter name of example configuration to start from (or 'none'):"  addproperty="@{property}"
+                    validargs="${example.dir.list},none" defaultvalue="none" />
+        </sequential>
+    </macrodef>
+
+    <macrodef name="init_from_example" description="Initialize a local site based on an example">
+        <attribute name="example" />
+        <sequential>
+            <echo message="Initing from example = @{example}" />
+            <loadproperties srcfile="examples/@{example}/build.properties">
+                 <filterchain>
+                     <tokenfilter>
+                         <containsregex pattern="(exe.mem.args|marc.default_encoding|test.class|default.config)" />
+                     </tokenfilter>
+                     <prefixlines prefix="example.default." />
+                 </filterchain>
+            </loadproperties>
+            <copy_files_from_example_directory />
+            <property name="example.default.exe.mem.args" value="-Xmx256m" />            
+            <property name="exe.mem.args" value="${example.default.exe.mem.args}" />
+            <determine_defaultconfig />
+            <create_build_properties_file source="examples/@{example}/build.properties" />
+            <copy_files_from_top_level />
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="determine_defaultconfig" description="Select the default config" >
+        <sequential>
+            <path id="config.file.set">
+                <fileset dir="${site.dir}" includes="*_config.properties,import.properties" />
+            </path>
+            <resourcecount property="config.file.cnt" refid="config.file.set" />
+            <if>
+                <equals arg1="${config.file.cnt}" arg2="0" />
+                <then>
+                    <property name="default.config" value="" />
+                </then>
+                <else>
+                    <pathconvert property="config.file.list" pathsep=",">
+                        <path refid="config.file.set" />
+                        <flattenmapper />
+                    </pathconvert>
+                    <if>
+                        <equals arg1="${config.file.cnt}" arg2="1" />
+                        <then>
+                            <property name="default.config" value="${config.file.list}" />
+                        </then>
+                        <else>
+                            <if>
+                                <isset property="example.default.default.config" />
+                                <then>
+                                    <property name="default.config" value="${example.default.default.config}" />
+                                </then>
+                                <else>
+                                    <property name="example.default.default.config" value="" />
+                                    <input message="Select the default config file to use if no such file is specified on the command line:" 
+                                        validargs="${config.file.list}" defaultvalue="${example.default.default.config}" 
+                                        addproperty="default.config" />
+                                </else>
+                            </if>
+                        </else>
+                    </if>
+                </else>
+            </if>
+            <echo message="default.config = ${default.config} " />
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="create_build_properties_file" >
+        <attribute name="source" default="${buildtools.path}/template_build.properties" />
+        <sequential>
+            <property name="dist.path" location="${dist.dir}" />
+            <concat destfile="${site.dir}/build.properties" >
+                <filelist dir="${basedir}" files="build.properties" />
+                <filterchain>
+                    <fixcrlf />
+                </filterchain> 
+            </concat>
+            <concat destfile="${site.dir}/build.properties" append="true" >
+                <filelist dir="${buildtools.dir}" files="example_config_def.xml" />
+                <filterchain>
+                    <expandproperties />
+                    <fixcrlf />
+                </filterchain> 
+            </concat>
+            <concat destfile="${site.dir}/build.properties" append="true" >
+                <fileset file="@{source}" />
+                <filterchain>
+                    <expandproperties />
+                    <fixcrlf />
+                </filterchain> 
+            </concat>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="copy_files_from_top_level" >
+        <sequential>
+            <if>
+                <not><uptodate srcfile="${buildtools.path}/build_site.xml" targetfile="${site.dir}/build.xml"/></not>
+                <then>
+                    <copy tofile="${site.dir}/build.xml" file="${buildtools.path}/build_site.xml">
+                        <filterchain>
+                            <fixcrlf />
+                        </filterchain> 
+                    </copy>
+                </then>
+            </if>
+            <copy todir="${site.dir}/${buildtools.dir}" >
+                <fileset dir="${buildtools.path}" includes="ant_extras.*,ant_jetty_test.xml,delete_all.xml,post.jar" >
+                    <depend targetdir="${site.dir}/${buildtools.dir}" />
+                </fileset>
+            </copy>
+            <copy todir="${site.dir}" preservelastmodified="true" overwrite="false">
+                <fileset dir="${basedir}" includes="script_templates/*" >
+                    <depend targetdir="${site.dir}" />
+                </fileset>
+            </copy>
+            <copy todir="${site.test.dir}/data" preservelastmodified="true" overwrite="false">
+                <fileset dir="${test.dir}/data" includes="*.mrc,*.txt,smoketest/**,*.xml,*.del,*.properties,*.bsh" >
+                    <depend targetdir="${site.test.dir}/data" />
+                </fileset>
+            </copy>
+            <copy todir="${site.test.dir}/${build.dir}" preservelastmodified="true" overwrite="false">
+                <fileset dir="${lib.dir}/test" includes="**/*.jar,**/*.txt" >
+                    <depend targetdir="${site.test.dir}/data" />
+                </fileset>
+                <fileset dir="${lib.dir}/solrmarc/build/test" includes="**/*.jar" >
+                    <depend targetdir="${site.test.dir}/data" />
+                </fileset>
+            </copy>
+
+            <if >
+                <not><available file="${site.test.dir}/data/indextest.txt" /></not>
+                <then>
+                    <copy todir="${site.test.dir}/data" overwrite="false">
+                        <fileset dir="${test.dir}/data" includes="indextest.txt" >
+                        </fileset>
+                        <filterchain>
+                            <expandproperties />
+                            <fixcrlf />
+                        </filterchain> 
+                    </copy>
+                </then>
+            </if>
+            
+            <echo message="checking for 'none' configuration" />
+            <if >
+                <equals arg1="${example.configuration}" arg2="none" />
+                <then>
+                    <echo message="copying maps" />
+                    <copy todir="${site.map.dir}" preservelastmodified="true" overwrite="false">
+                        <fileset dir="${trans.map.dir}"  includes="*.properties" >
+                            <depend targetdir="${site.map.dir}" />
+                        </fileset>
+                    </copy>
+                </then>
+            </if>
+        </sequential>
+    </macrodef>
+    
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+    <macrodef name="init_from_empty_config" description="Initialize an empty configuration, not based on an example" >
+        <sequential>
+            <make_site_dirs />
+            <get_site_specific_settings />
+            <determine_defaultconfig />
+            <copy_files_from_top_level />
+            <create_build_properties_file source="${buildtools.path}/template_build.properties" />
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="make_site_dirs"> <!-- TODO: check/change directories created -->
+        <sequential>
+            <mkdir dir="${site.src.dir}" />
+            <mkdir dir="${site.build.dir}" />
+            <mkdir dir="${site.lib.dir}" />
+            <mkdir dir="${site.test.dir}" />
+            <mkdir dir="${site.test.src.dir}" />
+            <mkdir dir="${site.test.solr.dir}" />
+            <mkdir dir="${site.map.dir}" />
+            <mkdir dir="${site.script.template.dir}" />
+            <mkdir dir="${site.scripts.dir}" />
+            <mkdir dir="${site.dir}/solrConf" />
+            <copy todir="${site.scripts.dir}" file="${buildtools.path}/README_SCRIPTS" />
+            <copy todir="${site.map.dir}" file="${buildtools.path}/README_MAPS" />   
+            <copy todir="${site.src.dir}" file="${buildtools.path}/README_SRC" />
+            <copy todir="${site.dir}/solrConf" file="${buildtools.path}/README_SOLRCONF" />
+            <copy todir="${site.dir}/solrConf">
+                <fileset dir="${test.dir}/solr/conf" includes="s*.xml" />
+            </copy>
+        </sequential>
+    </macrodef>
+        
+    <macrodef name="get_site_specific_settings">
+        <sequential>
+            <property name="default.custom.config.file.prefix" value="myprefix" />
+            <input-default message="Enter prefix for site-specific config and index properties file names:${line.separator}(ie. for  myprefix_config.properties  and   myprefix_index.properties  enter  myprefix)"       
+                addproperty="custom.config.file.prefix" defaultvalue="${default.custom.config.file.prefix}"  />
+                    
+            <property name="default.exe.mem.args" value="-Xmx256m" />            
+            <!-- <property name="exe.mem.args" value="${default.exe.mem.args}" /> -->            
+            <input-default message="Enter java heap size to use in generated scripts for running site-specific SolrMarc Indexer:"
+                addproperty="exe.mem.args" defaultvalue="${default.exe.mem.args}" /> 
+            
+            <property name="default.marc.default_encoding" value="MARC8" />
+            <input-default message="Enter encoding of MARC records:${line.separator}MARC8 - Longstanding standard encoding scheme used by U.S. libraries${line.separator}UNIMARC - Encoding scheme used in many places in Europe${line.separator}UTF8 - Unicode character encoding scheme, used in some newer systems${line.separator}BESTGUESS - You want the program to try to determine the encoding${line.separator}" 
+                addproperty="marc.encoding"  validargs="MARC8,UNIMARC,UTF-8,BESTGUESS" 
+                defaultvalue="${default.marc.default_encoding}" />
+            
+            <input-default message="Do you want to use the 'builtin' solr configuration, jetty configuration and solr.war file${line.separator}or do you want to use a 'custom' one you have already installed.${line.separator}Note: You can start from the builtin version and modify to suit your needs. Or you can change the one used later by modifying the build.properties file." 
+                addproperty="use.builtin.solr"  validargs="builtin,custom"  defaultvalue="builtin" />
+            
+            <if>
+                <equals arg1="${use.builtin.solr}" arg2="builtin" />
+                <then>
+                    <property name="build.properties.solr.path" value="jetty/solr" />
+                    <property name="build.properties.solrmarc.solr.war.path" value="jetty/webapps/solr.war" />
+                    <property name="build.properties.solr.hosturl" value="http://localhost:8983/solr" />
+                </then>
+                <else>
+                    <input message="Enter URL of your Solr server:" addproperty="build.properties.solr.hosturl"  
+                        defaultvalue="http://localhost:8983/solr"  />
+                    <input-filepath message="Enter full path of Solr home directory: ${line.separator}(Note: directory should contain 'conf' directory containing solrconfig.xml and schema.xml) " 
+                        addproperty="build.properties.solr.path"  />          
+                    <input-filepath message="Enter full path of where solr.war file is located (include solr.war at end):" 
+                        addproperty="build.properties.solrmarc.solr.war.path" />
+                </else>
+            </if>
+            
+            <copy tofile="${site.dir}/${custom.config.file.prefix}_config.properties" file="${buildtools.path}/template_config.properties" >
+                <filterchain>
+                    <expandproperties/>
+                    <fixcrlf />
+                </filterchain>
+            </copy>
+            <copy tofile="${site.dir}/${custom.config.file.prefix}_index.properties" file="${buildtools.path}/template_index.properties" >
+                <filterchain>
+                    <fixcrlf />
+                </filterchain>
+            </copy>
+        </sequential>
+    </macrodef>
+
+</project>

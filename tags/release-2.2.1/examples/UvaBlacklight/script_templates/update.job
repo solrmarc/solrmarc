@@ -1,0 +1,129 @@
+#!/bin/bash
+SOLRMARCDISTDIR=/lib_content27/solrmarc/dist
+PATH=$SOLRMARCDISTDIR/bin:$PATH
+export PATH
+num=0
+JAVA_HOME=/usr/java/latest/bin/java
+export JAVA_HOME
+
+DATADIR=/lib_content27/marc
+INPUTDIR=$DATADIR/incoming
+PROCESSEDDIR=$DATADIR/processed
+RESULTSDIR=$DATADIR/results
+verbose=
+
+cp /usr/local/projects/marc/incoming/location.txt $INPUTDIR
+cp /usr/local/projects/marc/incoming/allmhlds $INPUTDIR
+cp /usr/local/projects/marc/incoming/AllShadowedIdsRaw.txt $INPUTDIR
+cp /usr/local/projects/marc/incoming/`date --date="-1 days" +%Y%m%d`.mrc $INPUTDIR
+cp /usr/local/projects/marc/incoming/`date --date="-1 days" +%Y%m%d`.del $INPUTDIR
+
+if [ "$1" == "-v" ]  ; then 
+    verbose=1
+fi
+
+if [ "$verbose" == "1" ] ; then
+    echo copying files from incoming directory
+fi
+
+# first move auth files to another directory
+for file in `find $INPUTDIR -name '*.auth*' -print`
+do
+    mv $file $DATADIR/not_processed
+done
+
+#make sure directories exist
+for dir in prod merge debug dev merge_patch
+do
+    mkdir $DATADIR/incoming_$dir 2> /dev/null
+    mkdir $DATADIR/processed_$dir 2> /dev/null
+    mkdir $DATADIR/results_$dir 2> /dev/null
+done
+
+for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
+do
+     fname=`basename $file`
+     for dir in prod merge debug dev merge_patch
+     do
+        ln $file $DATADIR/incoming_$dir/$fname
+     done
+done
+
+if [ "$verbose" == "1" ] ; then
+    echo processing location.txt file to update full_dump_patched
+fi
+
+update.patched.merge.job $verbose
+
+patch_dir=$DATADIR/patched_debug
+patch_out=$patch_dir/location_patch_`date +%Y%m%d`.mrc 
+summary_hold_out=$patch_dir/summary_holdings_`date +%Y%m%d`.mrc 
+shadowed_changed_recs=$patch_dir/changed_shadow_recs_`date +%Y%m%d`.mrc
+
+if [ -f "$patch_out" ] ; then
+    cp $patch_out $DATADIR/incoming_debug
+    cp $patch_out $DATADIR/incoming_prod
+    cp $patch_out $DATADIR/incoming_dev
+    cp $summary_hold_out $DATADIR/incoming_debug
+    cp $summary_hold_out $DATADIR/incoming_prod
+    cp $summary_hold_out $DATADIR/incoming_dev
+    cp $shadowed_changed_recs $DATADIR/incoming_debug 2> /dev/null
+    cp $shadowed_changed_recs $DATADIR/incoming_dev  2> /dev/null
+    cp $shadowed_changed_recs $DATADIR/incoming_prod  2> /dev/null
+fi
+
+if [ "$verbose" == "1" ] ; then
+    echo updating multicore index at solrpowr:18983/solr/blacklight_index
+fi
+update.index.job prod blacklight_config.properties
+
+if [ "$verbose" == "1" ] ; then
+    echo updating multicore dev index at solrpowr:18983/solr/blacklight_dev_index
+fi
+update.index.job dev blacklight_dev_config.properties
+
+if [ "$verbose" == "1" ] ; then
+    echo copying blacklight_indexes to datastamped indexes to use for searching
+fi
+update.multicore.job
+
+
+if [ "$verbose" == "1" ] ; then
+    echo updating full_dump_updated files with new incoming records.
+fi
+update.merge.job
+
+
+if [ "$verbose" == "1" ] ; then
+    echo updating development index at solrpowr.lib:8983/solr
+fi
+update.index.job debug blacklight_test_config.properties
+
+
+if [ "$verbose" == "1" ] ; then
+    echo cleaning up incoming directories
+fi
+for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -print | sort`
+do
+#     echo $file
+     fname=`basename $file`
+     found=1
+     for dir in prod sorted debug dev merge_patch
+     do     
+         if [ ! -f $DATADIR/processed_$dir/$fname ] 
+         then
+#             echo "not found in dir $dir"
+             found=0
+         fi
+     done
+     if [ $found == "1" ]
+     then
+#         echo " moving $file to $DATADIR/processed"
+         cp $file $DATADIR/processed
+     fi
+done
+
+for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
+do
+    rm $file
+done
