@@ -170,7 +170,7 @@
                 </fileset>
             </copy>
             <copy todir="${site.dir}" filtering="false" preservelastmodified="true">
-                 <fileset dir="examples/${example.configuration}" includes="*_config.properties,*_index.properties,import.properties,marc*.properties" >
+                 <fileset dir="examples/${example.configuration}" includes="*config*.properties,*index*.properties,import.properties,marc*.properties" >
                      <depend targetdir="${site.dir}" >
                      </depend>
                  </fileset>

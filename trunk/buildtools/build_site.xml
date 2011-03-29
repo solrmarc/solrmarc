@@ -106,7 +106,7 @@
         <copy todir="${dist.path}" >
             <flattenmapper/>
             <fileset dir="${site.build.dir}" includes="*.jar" />
-            <fileset dir="${site.base.dir}" includes="*_index.properties,marc*.properties" />
+            <fileset dir="${site.base.dir}" includes="*index*.properties,marc*.properties" />
         </copy>
         <if >
             <available file="${site.build.dir}/${custom.jar.name}.jar" />
@@ -119,7 +119,7 @@
         </if>
         <copy_libs_set_property />
         <copy todir="${dist.path}" overwrite="true" >
-            <fileset dir="${site.base.dir}" includes="*_config.properties,import.properties" />
+            <fileset dir="${site.base.dir}" includes="*config*.properties,import.properties" />
             <filterchain>
                   <expandproperties />
                   <tokenfilter>
