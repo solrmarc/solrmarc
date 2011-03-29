@@ -11,97 +11,97 @@
 # and from Eclipse (my development environment). - Naomi)
 
 # smoke test
-demo_config.properties, 00282214.mrc, id, 00282214
+config.properties, 00282214.mrc, id, 00282214
 
 # author fields mapping tests
-demo_config.properties, 00282371.mrc, author_t, Ayaz, Shaikh,
-demo_config.properties, 43037890.mrc, author_t, Vi︠a︡tkin, M. P. (Mikhail Porfirʹevich),
-demo_config.properties, 53029833.mrc, author_t, Korea (North)
-demo_config.properties, 2007020969.mrc, author_addl_t, Strong Medicine,
-demo_config.properties, 86207417.mrc, author_display, Finkel, Chaim Jacob
-demo_config.properties, 92828023.mrc, author_display, Israel Meir, ha-Kohen, 1838-1933
-demo_config.properties, 43037890.mrc, author_display, Vi︠a︡tkin, M. P. (Mikhail Porfirʹevich), 1895-1967
-demo_config.properties, 53029833.mrc, author_display, Korea (North)
-demo_config.properties, 00313831.mrc, author_vern_display, ‏نورى، عبد الله
-demo_config.properties, 94120425.mrc, author_vern_display, 김　홍신, 1947-
-demo_config.properties, 2008543486.mrc, author_vern_display, 吉田一, 1934-
-demo_config.properties, 00314247.mrc, author_sort, Yoshida Hajime 1934 Kubo Sakae Kazanbaichi o yomu
+config.properties, 00282371.mrc, author_t, Ayaz, Shaikh,
+config.properties, 43037890.mrc, author_t, Vi︠a︡tkin, M. P. (Mikhail Porfirʹevich),
+config.properties, 53029833.mrc, author_t, Korea (North)
+config.properties, 2007020969.mrc, author_addl_t, Strong Medicine,
+config.properties, 86207417.mrc, author_display, Finkel, Chaim Jacob
+config.properties, 92828023.mrc, author_display, Israel Meir, ha-Kohen, 1838-1933
+config.properties, 43037890.mrc, author_display, Vi︠a︡tkin, M. P. (Mikhail Porfirʹevich), 1895-1967
+config.properties, 53029833.mrc, author_display, Korea (North)
+config.properties, 00313831.mrc, author_vern_display, ‏نورى، عبد الله
+config.properties, 94120425.mrc, author_vern_display, 김　홍신, 1947-
+config.properties, 2008543486.mrc, author_vern_display, 吉田一, 1934-
+config.properties, 00314247.mrc, author_sort, Yoshida Hajime 1934 Kubo Sakae Kazanbaichi o yomu
 
 # call number fields mapping tests
-demo_config.properties, 00282214.mrc, lc_callnum_display, PK2788.9.A9 F55 1998
-demo_config.properties, 86207417.mrc, lc_callnum_display, G535 .F54 1984
-demo_config.properties, 92117465.mrc, lc_callnum_display, KPC13 .K67 1990
-demo_config.properties, 92828023.mrc, lc_callnum_display, BM520.88.A53 I88 1992b
-demo_config.properties, 00282371.mrc, lc_callnum_display, MLCME 2002/02660 (D)
-demo_config.properties, 85910001.mrc, lc_callnum_display, Microfiche 90/61328 (P)
-demo_config.properties, 90142413.mrc, lc_callnum_display, MLCSN 96/3906 (H)
-demo_config.properties, 00282214.mrc, lc_1letter_facet, P - Language & Literature
-demo_config.properties, 86207417.mrc, lc_1letter_facet, G - Geography, Anthropology, Recreation
-demo_config.properties, 92117465.mrc, lc_1letter_facet, K - Law
-demo_config.properties, 92828023.mrc, lc_1letter_facet, B - Philosophy, Psychology, Religion
-demo_config.properties, 00282214.mrc, lc_alpha_facet, PK
-demo_config.properties, 86207417.mrc, lc_alpha_facet, G
-demo_config.properties, 92117465.mrc, lc_alpha_facet, KPC
-demo_config.properties, 92828023.mrc, lc_alpha_facet, BM
-demo_config.properties, 00282214.mrc, lc_b4cutter_facet, PK2788.9.A9
-demo_config.properties, 86207417.mrc, lc_b4cutter_facet, G535
-demo_config.properties, 92117465.mrc, lc_b4cutter_facet, KPC13
-demo_config.properties, 92828023.mrc, lc_b4cutter_facet, BM520.88.A53
-demo_config.properties, 00282371.mrc, lc_b4cutter_facet, MLCME 2002/02660 (D)
-demo_config.properties, 85910001.mrc, lc_b4cutter_facet, Microfiche 90/61328 (P)
-demo_config.properties, 90142413.mrc, lc_b4cutter_facet, MLCSN 96/3906 (H)
+config.properties, 00282214.mrc, lc_callnum_display, PK2788.9.A9 F55 1998
+config.properties, 86207417.mrc, lc_callnum_display, G535 .F54 1984
+config.properties, 92117465.mrc, lc_callnum_display, KPC13 .K67 1990
+config.properties, 92828023.mrc, lc_callnum_display, BM520.88.A53 I88 1992b
+config.properties, 00282371.mrc, lc_callnum_display, MLCME 2002/02660 (D)
+config.properties, 85910001.mrc, lc_callnum_display, Microfiche 90/61328 (P)
+config.properties, 90142413.mrc, lc_callnum_display, MLCSN 96/3906 (H)
+config.properties, 00282214.mrc, lc_1letter_facet, P - Language & Literature
+config.properties, 86207417.mrc, lc_1letter_facet, G - Geography, Anthropology, Recreation
+config.properties, 92117465.mrc, lc_1letter_facet, K - Law
+config.properties, 92828023.mrc, lc_1letter_facet, B - Philosophy, Psychology, Religion
+config.properties, 00282214.mrc, lc_alpha_facet, PK
+config.properties, 86207417.mrc, lc_alpha_facet, G
+config.properties, 92117465.mrc, lc_alpha_facet, KPC
+config.properties, 92828023.mrc, lc_alpha_facet, BM
+config.properties, 00282214.mrc, lc_b4cutter_facet, PK2788.9.A9
+config.properties, 86207417.mrc, lc_b4cutter_facet, G535
+config.properties, 92117465.mrc, lc_b4cutter_facet, KPC13
+config.properties, 92828023.mrc, lc_b4cutter_facet, BM520.88.A53
+config.properties, 00282371.mrc, lc_b4cutter_facet, MLCME 2002/02660 (D)
+config.properties, 85910001.mrc, lc_b4cutter_facet, Microfiche 90/61328 (P)
+config.properties, 90142413.mrc, lc_b4cutter_facet, MLCSN 96/3906 (H)
 
 # publication fields mapping tests
-demo_config.properties, 43037890.mrc, published_display, Moskva
-demo_config.properties, 2009373513.mrc, published_vern_display, 臺北縣板橋市
-demo_config.properties, 00282214.mrc, pub_date, 1998
-demo_config.properties, 79930185.mrc, pub_date, 1978
-demo_config.properties, 85910001.mrc, pub_date, 1946
-demo_config.properties, 86207417.mrc, pub_date, 1984
-demo_config.properties, 87931798.mrc, pub_date, 1986
-demo_config.properties, 92828023.mrc, pub_date, 1992
-demo_config.properties, 96933325.mrc, pub_date, 1994
-demo_config.properties, 2005553155.mrc, pub_date, 1962
+config.properties, 43037890.mrc, published_display, Moskva
+config.properties, 2009373513.mrc, published_vern_display, 臺北縣板橋市
+config.properties, 00282214.mrc, pub_date, 1998
+config.properties, 79930185.mrc, pub_date, 1978
+config.properties, 85910001.mrc, pub_date, 1946
+config.properties, 86207417.mrc, pub_date, 1984
+config.properties, 87931798.mrc, pub_date, 1986
+config.properties, 92828023.mrc, pub_date, 1992
+config.properties, 96933325.mrc, pub_date, 1994
+config.properties, 2005553155.mrc, pub_date, 1962
 
 # subject fields mapping tests
-demo_config.properties, 92117465.mrc, subject_t, Law
-demo_config.properties, 2004310986.mrc, subject_t, Bon-brgya (China)
-demo_config.properties, 90142413.mrc, subject_t, Industrial workers; life style
-demo_config.properties, 78908283.mrc, subject_addl_t, Poetry
-demo_config.properties, 2008308202.mrc, subject_addl_t, History Miscellanea
-demo_config.properties, 92117465.mrc, subject_topic_facet, Law
-demo_config.properties, 90142413.mrc, subject_topic_facet, Industrial workers; life style
-demo_config.properties, 2008543486.mrc, subject_era_facet, 20th century
-demo_config.properties, 2004310986.mrc, subject_geo_facet, Bon-brgya (China)
-demo_config.properties, 2005553155.mrc, subject_geo_facet, Israel
-demo_config.properties, 2008543486.mrc, subject_geo_facet, Japan
+config.properties, 92117465.mrc, subject_t, Law
+config.properties, 2004310986.mrc, subject_t, Bon-brgya (China)
+config.properties, 90142413.mrc, subject_t, Industrial workers; life style
+config.properties, 78908283.mrc, subject_addl_t, Poetry
+config.properties, 2008308202.mrc, subject_addl_t, History Miscellanea
+config.properties, 92117465.mrc, subject_topic_facet, Law
+config.properties, 90142413.mrc, subject_topic_facet, Industrial workers; life style
+config.properties, 2008543486.mrc, subject_era_facet, 20th century
+config.properties, 2004310986.mrc, subject_geo_facet, Bon-brgya (China)
+config.properties, 2005553155.mrc, subject_geo_facet, Israel
+config.properties, 2008543486.mrc, subject_geo_facet, Japan
 
 # title fields mapping tests
-demo_config.properties, 2009373513.mrc, title_t, Ci an zhou bian /|次按驟變
-demo_config.properties, 2008543486.mrc, title_t, Kubo Sakae 'Kazanbaichi' o yomu /|久保栄「火山灰地」を読む
-demo_config.properties, 00314247.mrc, title_display, Kubo Sakae "Kazanbaichi" o yomu
-demo_config.properties, 86207417.mrc, title_display, Shodede-yam Yehudiyim
-demo_config.properties, 94120425.mrc, title_vern_display, 아직도　그럭　저럭　사십니까
-demo_config.properties, 2007020969.mrc, subtitle_t, a Native American elder has her say : an oral history /
-demo_config.properties, 90142413.mrc, subtitle_t, tʻeoriul-metʻoduri narkvevi /
-demo_config.properties, 2007020969.mrc, subtitle_display, a Native American elder has her say : an oral history
-demo_config.properties, 90142413.mrc, subtitle_display, tʻeoriul-metʻoduri narkvevi
-demo_config.properties, 94120425.mrc, subtitle_vern_display, 강남　여인　과　신　팔불출 : 金　洪信　세태　르포
-demo_config.properties, 2005461726.mrc, subtitle_vern_display, من جلد الذات إلى صدق الشرح
-demo_config.properties, 53029833.mrc, title_added_entry_t, Constitution
-demo_config.properties, 86207417.mrc, title_added_entry_t, Jewish pirates.
-demo_config.properties, 2009373513.mrc, title_series_t, Lin Xingzhi zuo pin ji ; 51|林行止作品集 ; 51
+config.properties, 2009373513.mrc, title_t, Ci an zhou bian /|次按驟變
+config.properties, 2008543486.mrc, title_t, Kubo Sakae 'Kazanbaichi' o yomu /|久保栄「火山灰地」を読む
+config.properties, 00314247.mrc, title_display, Kubo Sakae "Kazanbaichi" o yomu
+config.properties, 86207417.mrc, title_display, Shodede-yam Yehudiyim
+config.properties, 94120425.mrc, title_vern_display, 아직도　그럭　저럭　사십니까
+config.properties, 2007020969.mrc, subtitle_t, a Native American elder has her say : an oral history /
+config.properties, 90142413.mrc, subtitle_t, tʻeoriul-metʻoduri narkvevi /
+config.properties, 2007020969.mrc, subtitle_display, a Native American elder has her say : an oral history
+config.properties, 90142413.mrc, subtitle_display, tʻeoriul-metʻoduri narkvevi
+config.properties, 94120425.mrc, subtitle_vern_display, 강남　여인　과　신　팔불출 : 金　洪信　세태　르포
+config.properties, 2005461726.mrc, subtitle_vern_display, من جلد الذات إلى صدق الشرح
+config.properties, 53029833.mrc, title_added_entry_t, Constitution
+config.properties, 86207417.mrc, title_added_entry_t, Jewish pirates.
+config.properties, 2009373513.mrc, title_series_t, Lin Xingzhi zuo pin ji ; 51|林行止作品集 ; 51
 
 # other fields
-demo_config.properties, 00282214.mrc, id, 00282214
-demo_config.properties, 85910001.mrc, format, Book
-demo_config.properties, 00282214.mrc, format, Book
-demo_config.properties, 2001417245.mrc, language_facet, Sanskrit
-demo_config.properties, 2007020969.mrc, url_suppl_display, http://www.loc.gov/catdir/toc/ecip0719/2007020969.html|http://www.loc.gov/catdir/enhancements/fy0808/2007020969-s.html|http://www.loc.gov/catdir/enhancements/fy0808/2007020969-d.html
-demo_config.properties, 00282214.mrc, material_type_display, 375 p.
-demo_config.properties, 86207417.mrc, material_type_display, 283 p.
-demo_config.properties, 43037890.mrc, material_type_display, v.
-demo_config.properties, 78908283.mrc, material_type_display, 24, 128, 2 p.
-demo_config.properties, 2001417245.mrc, material_type_display, v. <1   >
-demo_config.properties, 2005553155.mrc, material_type_display, items 1-<13> of <13>
-demo_config.properties, 2007020969.mrc, isbn_t, 9780743297790|0743297792
+config.properties, 00282214.mrc, id, 00282214
+config.properties, 85910001.mrc, format, Microform
+config.properties, 00282214.mrc, format, Book
+config.properties, 2001417245.mrc, language_facet, Sanskrit
+config.properties, 2007020969.mrc, url_suppl_display, http://www.loc.gov/catdir/toc/ecip0719/2007020969.html|http://www.loc.gov/catdir/enhancements/fy0808/2007020969-s.html|http://www.loc.gov/catdir/enhancements/fy0808/2007020969-d.html
+config.properties, 00282214.mrc, material_type_display, 375 p.
+config.properties, 86207417.mrc, material_type_display, 283 p.
+config.properties, 43037890.mrc, material_type_display, v.
+config.properties, 78908283.mrc, material_type_display, 24, 128, 2 p.
+config.properties, 2001417245.mrc, material_type_display, v. <1   >
+config.properties, 2005553155.mrc, material_type_display, items 1-<13> of <13>
+config.properties, 2007020969.mrc, isbn_t, 9780743297790|0743297792
