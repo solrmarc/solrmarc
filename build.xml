@@ -20,6 +20,9 @@
     <!-- import ant_package.xml which defines all of the macros used to create the source and binary distribution packages -->
     <property name="ant_package.dist.dir" location="${buildtools.path}" />   
     <import file="${buildtools.path}/ant_package.xml" />
+    
+    <property name="package.dir" value="package" />
+    <property name="version" value="2.2.1" />
 
     <tstamp>
         <format property="year" pattern="yyyy" />
@@ -113,8 +116,6 @@
     </target>
 
     <target name="package" description="Create both prebuilt binary distributions and a source distribution" >
-        <property name="package.dir" value="package" />
-        <property name="version" value="2.2.1" />
         <mkdir dir="${package.dir}" />
         <packagesrc version="${version}" />
         <packageprebuilt example="GenericBlacklight" binprefix="bin" version="${version}" />
