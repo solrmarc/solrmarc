@@ -63,8 +63,8 @@ echo  writing output to %outfile%
 
 pushd %JETTY_HOME%
 
-move /Y %outfile% %outfile%.bak > NUL 2>&1
-start /B java %JETTY_MEM_ARGS% -DSTOP.PORT=0 -Dsolr.solr.home="%JETTY_SOLR_HOME%" -Djetty.port=%JETTY_SOLR_PORT% -jar start.jar > %outfile% 2>&1
+::move /Y %outfile% %outfile%.bak > NUL 2>&1
+start /B java %JETTY_MEM_ARGS% -DSTOP.PORT=0 -Dsolr.solr.home="%JETTY_SOLR_HOME%" -Djetty.port=%JETTY_SOLR_PORT% -jar start.jar etc\jetty-logging.xml etc\jetty.xml > %outfile% 
 
 :: sleep for 2 seconds
 ping 1.1.1.1 -n 2 -w 1000 > NUL 2>&1

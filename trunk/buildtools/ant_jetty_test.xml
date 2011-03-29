@@ -55,7 +55,7 @@
             <propertyregex property="solrcorearg" input="@{solrcore}" regexp="(.+)" replace="/\1" defaultValue="" override="true" />
             <echo message="about to run java....."/>
             <echo message="java -Dfile.encoding=UTF-8 -DSTOP.PORT=@{stopport} -DSTOP.KEY=secret -Djetty.port=@{port} ${solrhomearg} 
-${solrdataarg} -jar @{jettyloc}/start.jar @{jettyloc}/etc/jetty-logging.xml @{jettyloc}/etc/jetty.xml" />
+${solrdataarg} -jar @{jettyloc}/start.jar @{jettyloc}/etc/jetty-smoketest-logging.xml @{jettyloc}/etc/jetty.xml" />
             <parallel >
                 <daemons>
                     <java jar="@{jettyloc}/start.jar" fork="true" dir="@{jettyloc}" spawn="true" >
@@ -65,7 +65,7 @@ ${solrdataarg} -jar @{jettyloc}/start.jar @{jettyloc}/etc/jetty-logging.xml @{je
                         <jvmarg value="-Djetty.port=@{port}"/>
                         <jvmarg value="${solrhomearg}"/>
                         <jvmarg value="${solrdataarg}"/>
-                        <arg value="@{jettyloc}/etc/jetty-logging.xml"/>
+                        <arg value="@{jettyloc}/etc/jetty-smoketest-logging.xml"/>
                         <arg value="@{jettyloc}/etc/jetty.xml"/>
                     </java>
                 </daemons>
