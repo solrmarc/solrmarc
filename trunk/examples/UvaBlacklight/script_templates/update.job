@@ -8,15 +8,12 @@ export JAVA_HOME
 
 DATADIR=/lib_content27/marc
 INPUTDIR=$DATADIR/incoming
+INPUTDIRTMP=$DATADIR/incoming_tmp
 PROCESSEDDIR=$DATADIR/processed
 RESULTSDIR=$DATADIR/results
 verbose=
 
-cp /usr/local/projects/marc/incoming/location.txt $INPUTDIR
-cp /usr/local/projects/marc/incoming/allmhlds $INPUTDIR
-cp /usr/local/projects/marc/incoming/AllShadowedIdsRaw.txt $INPUTDIR
-cp /usr/local/projects/marc/incoming/`date --date="-1 days" +%Y%m%d`.mrc $INPUTDIR
-cp /usr/local/projects/marc/incoming/`date --date="-1 days" +%Y%m%d`.del $INPUTDIR
+mkdir $INPUTDIRTMP 2> /dev/null
 
 if [ "$1" == "-v" ]  ; then 
     verbose=1
@@ -25,6 +22,27 @@ fi
 if [ "$verbose" == "1" ] ; then
     echo copying files from incoming directory
 fi
+
+#copy files from old nightly update drop location to new location
+cp /usr/local/projects/marc/incoming/location.txt $INPUTDIR
+cp /usr/local/projects/marc/incoming/allmhlds $INPUTDIR
+cp /usr/local/projects/marc/incoming/AllShadowedIdsRaw.txt $INPUTDIR
+
+update=`date --date="-1 days" +%Y%m%d`
+if [ -e /usr/local/projects/marc/incoming/$update.mrc ] ; then
+    cp /usr/local/projects/marc/incoming/$update.mrc $INPUTDIRTMP
+    cp /usr/local/projects/marc/incoming/$update.del $INPUTDIRTMP
+
+    marcsort $INPUTDIRTMP/$update.mrc > $INPUTDIRTMP/$update.sort.mrc
+    #use location.txt file to tweak locations found in the nightly update
+    java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar $SOLRMARCDISTDIR/SolrMarc.jar $INPUTDIRTMP/$update.sort.mrc $INPUTDIR/location.txt changesOnly handleAllLocs > $INPUTDIRTMP/$update.patch.mrc
+    marcupdate $INPUTDIRTMP/$update.sort.mrc $INPUTDIRTMP/$update.patch.mrc > $INPUTDIR/$update.mrc
+
+    sort -n $INPUTDIRTMP/$update.del > $INPUTDIR/$update.del
+else
+    echo "No nightly update found for date: $update" | mail -s "Message from update cron job" rh9ec@virginia.edu
+fi
+
 
 # first move auth files to another directory
 for file in `find $INPUTDIR -name '*.auth*' -print`
