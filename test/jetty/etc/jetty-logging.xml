@@ -4,7 +4,7 @@
     <New id="ServerLog" class="java.io.PrintStream">
       <Arg>
         <New class="org.mortbay.util.RolloverFileOutputStream">
-          <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.stderrout.log</Arg>
+          <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.stderrout.<SystemProperty name="jetty.port" default="tmp"/>.log</Arg>
           <Arg type="boolean">false</Arg>
           <Arg type="int">90</Arg>
           <Arg><Call class="java.util.TimeZone" name="getTimeZone"><Arg>GMT</Arg></Call></Arg>
