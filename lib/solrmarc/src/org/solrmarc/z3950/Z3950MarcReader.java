@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -69,16 +70,26 @@ public class Z3950MarcReader implements MarcReader
         recids = new Vector<String>();
         for (int i = 0; i < args.length; i++)
         {
-            if (args[i].matches("u[0-9]+"))
+            if (args[i].matches("u?[0-9]+"))
             {
                 recids.add(args[i]);
             }
             else
             {
-                File recFile = new File(args[i]);
+                String filename = null;
                 try
                 {
-                    is = new BufferedReader(new FileReader(recFile));
+                    if (args[i].equals("-"))
+                    {
+                        is = new BufferedReader(new InputStreamReader(System.in));
+                        filename = "Stdin";
+                    }
+                    else 
+                    {
+                        File recFile = new File(args[i]);
+                        is = new BufferedReader(new FileReader(recFile));
+                        filename = args[i];
+                    }
                     curLine = readRecId(); 
                     while (curLine != null)
                     {
@@ -87,11 +98,11 @@ public class Z3950MarcReader implements MarcReader
                 }
                 catch (FileNotFoundException e)
                 {
-                    System.err.println("Error: unable to find and open record-id-list: "+ recFile);
+                    System.err.println("Error: unable to find and open record-id-list: "+ filename);
                 }
                 catch (IOException e)
                 {
-                    System.err.println("Error: reading from record-id-list: "+ recFile);
+                    System.err.println("Error: reading from record-id-list: "+ filename);
                 }
             }
         }
