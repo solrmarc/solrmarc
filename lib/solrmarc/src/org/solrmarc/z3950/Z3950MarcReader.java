@@ -20,11 +20,18 @@ package org.solrmarc.z3950;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.Vector;
 
 import org.marc4j.MarcReader;
+import org.marc4j.MarcStreamWriter;
 import org.marc4j.marc.Record;
 
 /**
@@ -39,8 +46,11 @@ public class Z3950MarcReader implements MarcReader
     private BufferedReader is = null;
     private String curLine = null;
     private boolean opened = false;
+    private Vector<String> recids = null;
+    private int curRecNum = 0;
+    private Record curRec = null;
     
-    public Z3950MarcReader(String hostPort, String recIdsFilename)
+    public Z3950MarcReader(String hostPort, String[] args)
     {
         newclient = new ZClient();
         Package ir_package = Package.getPackage("com.k_int.IR");
@@ -56,23 +66,57 @@ public class Z3950MarcReader implements MarcReader
         }
         newclient.cmdElements("F");
         newclient.cmdFormat("usmarc");
-
-        File recFile = new File(recIdsFilename);
-        try
+        recids = new Vector<String>();
+        for (int i = 0; i < args.length; i++)
         {
-            is = new BufferedReader(new FileReader(recFile));
-            curLine = readRecId();              
-        }
-        catch (FileNotFoundException e)
-        {
-            System.err.println("Error: unable to find and open record-id-list: "+ recFile);
-        }
-        catch (IOException e)
-        {
-            System.err.println("Error: reading from record-id-list: "+ recFile);
+            if (args[i].matches("u[0-9]+"))
+            {
+                recids.add(args[i]);
+            }
+            else
+            {
+                File recFile = new File(args[i]);
+                try
+                {
+                    is = new BufferedReader(new FileReader(recFile));
+                    curLine = readRecId(); 
+                    while (curLine != null)
+                    {
+                        recids.add(curLine);
+                    }
+                }
+                catch (FileNotFoundException e)
+                {
+                    System.err.println("Error: unable to find and open record-id-list: "+ recFile);
+                }
+                catch (IOException e)
+                {
+                    System.err.println("Error: reading from record-id-list: "+ recFile);
+                }
+            }
         }
     }
 
+    private int getIdFromIdString(String idstr)
+    {
+        int idnum = -1;
+        if (idstr.matches("u[0-9]+"))
+        {
+            idnum = Integer.parseInt(idstr.substring(1));
+        }
+        else if (idstr.matches("[0-9]+"))
+        {
+            idnum = Integer.parseInt(idstr);
+        }
+        return(idnum);
+    }
+
+    public void close()
+    {
+        newclient.disconnect();
+        newclient = null;
+    }
+    
     private String readRecId()
     {
         String line;
@@ -93,38 +137,83 @@ public class Z3950MarcReader implements MarcReader
 
     public boolean hasNext()
     {
-        return (opened && curLine != null);
+        if (curRec == null) 
+        {
+            curRec = next();
+        }
+        return(curRec != null);
     }
 
     public Record next()
     {
-        int recNo;
-        if (curLine.toLowerCase().startsWith("u"))
+        Record record = null;
+        if (curRec != null)
         {
-            recNo = Integer.parseInt(curLine.substring(1));
+            Record tmprec = curRec;
+            curRec = null;
+            return(tmprec);
         }
-        else
+        while (record == null)
         {
-            recNo = Integer.parseInt(curLine);
+            String nextRecStr = (curRecNum < recids.size()) ? recids.elementAt(curRecNum++) : null;
+            if (nextRecStr == null) return(null);
+            int recNo = getIdFromIdString(nextRecStr);
+            record = newclient.getRecordByIDNum(recNo);
         }
-        Record rec = newclient.getRecordByIDNum(recNo);
-        
-        curLine = readRecId();
-        if (curLine == null)
-        {
-            newclient.disconnect();
-        }
-        return(rec);
+        return(record);
     }
     
     public static void main(String args[])
     {
-        MarcReader reader = new Z3950MarcReader("virgo.lib.virginia.edu:2200", "delete_ids.txt");
+        String server = "virgo.lib.virginia.edu:2200";
+        if (args.length > 0 && args[0].matches("[A-Za-z0-9]+[.][A-Za-z0-9]+[.][A-Za-z0-9]+[.][A-Za-z0-9]+:[0-9]+"))
+        {
+            server = args[0];
+            String[] tmpArgs = args;
+            args = new String[tmpArgs.length - 1];
+            System.arraycopy(tmpArgs, 1, args, 0, tmpArgs.length-1);
+        }
+        
+        MarcReader reader = new Z3950MarcReader(server, args);
+        OutputStream marcOutput = null;
+        PrintStream output = null;
+//        if (args.length >= 2)
+//        {
+//            try
+//            {
+//                marcOutput = new FileOutputStream(args[1]);
+//                output = System.out;
+//            }
+//            catch (FileNotFoundException e)
+//            {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
+//        }
+//        else
+        {
+            marcOutput = System.out;
+            output = null;
+        }
+        MarcStreamWriter writer = new MarcStreamWriter(marcOutput);
         while (reader.hasNext())
         {
             Record rec = reader.next();
-            System.out.println(rec.toString());
+            if (rec == null)
+                continue; 
+            writer.write(rec);
+            try
+            {
+                marcOutput.flush();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+ //           if (output != null) output.write(rec.toString());
         }
+        ((Z3950MarcReader)reader).close();
         System.exit(0);
     }      
     
