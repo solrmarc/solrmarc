@@ -52,7 +52,7 @@
         <echo message="${ant.project.name}: ${ant.file}" />
 
         <jar destfile="${build.dir}/${jar.name}">
-            <fileset dir="${build.dir}" includes="**/*.class" excludes="**/*Test*.class,test/**/*.class" />
+            <fileset dir="${build.dir}" includes="**/*.class" excludes="**/*Test*.class,test/**/*.class,**/z3950/*.class" />
             <fileset file="../../log4j.properties" /> 
             <manifest>
                 <attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter" />
@@ -70,6 +70,52 @@
 <!--            <fileset dir="${lib.dir}" includes="test/*.jar" /> -->
             <zipfileset dir="${build.dir}" includes="*.jar" />
 <!--            <zipfileset dir="${build.dir}/test" includes="*.jar" prefix="test" /> -->
+       </one-jar> 
+
+        <!-- the single jar from the core code needs to include test classes 
+        because the local build tests rely on the core code utility test classes 
+        <antcall target="testJarPrivate" />        -->
+    </target>
+    
+    <target name="compilez3950" depends="init" description="Compile source code into the build directory">
+        <javac destdir="${build.dir}" srcdir="${src.dir}" 
+                target="${java.compat.version}" 
+                source="${java.compat.version}" 
+                debug="true" debuglevel="lines,vars,source" 
+                encoding="utf-8">
+            <include name="**/z3950/*.java" />
+            <exclude name="**/Z3950Importer.java" />
+            <classpath >
+                <path refid="classpath.jars" />
+                <path>
+                    <fileset dir="${lib.dir}" includes="jzkit_client.jar" /> <!-- ?? also exclude jzkit_client.jar ?? -->
+                </path>
+            </classpath>
+        </javac>
+        
+    </target>
+    
+    <target name="buildz3950" depends="compilez3950" description="create ${jar.name} in the build directory">
+        <echo message="${ant.project.name}: ${ant.file}" />
+
+        <jar destfile="${build.dir}/Z3950.jar">
+            <fileset dir="${build.dir}" includes="**/z3950/*.class" />
+            <fileset file="../../log4j.properties" /> 
+            <manifest>
+                <attribute name="Main-Class" value="org.solrmarc.z3950.Z3950MarcReader" />
+            </manifest>
+        </jar>
+
+        <one-jar destfile="${solrmarc.dist.dir}/MarcFetch.jar" >
+            <manifest>
+                <attribute name="Main-Class" value="com.simontuffs.onejar.Boot" />
+                <attribute name="One-Jar-Main-Class" value="org.solrmarc.z3950.Z3950MarcReader" />
+            </manifest>
+
+            <main jar="${build.dir}/Z3950.jar" />
+            <lib>
+                <fileset dir="${lib.dir}" includes="marc4j.jar,jzkit_client.jar,log4j*.jar" />
+            </lib>
        </one-jar> 
 
         <!-- the single jar from the core code needs to include test classes 
