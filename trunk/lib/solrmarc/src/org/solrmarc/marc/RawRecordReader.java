@@ -105,7 +105,11 @@ public class RawRecordReader
             {    
                 reader = new RawRecordReader(new FileInputStream(new File(args[0])));
             }            
-            if (args[1].equals("-h") && args.length >= 3)
+            if (args[1].equals("-id"))
+            {
+                printIds(reader);
+            }
+            else if (args[1].equals("-h") && args.length >= 3)
             {
                 String idRegex = args[2].trim();
                 processInput(reader, null, idRegex, null);
@@ -145,6 +149,16 @@ public class RawRecordReader
             logger.error(e.getMessage());
         }
 
+    }
+    
+    static void printIds(RawRecordReader reader) throws IOException
+    {
+        while (reader.hasNext())
+        {
+            RawRecord rec = reader.next();
+            String id = rec.getRecordId();
+            System.out.println(id);
+        }
     }
 
     static void processInput(RawRecordReader reader, String idRegex, String recordHas, HashSet<String>idsLookedFor) throws IOException
