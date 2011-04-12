@@ -94,6 +94,7 @@ public class Z3950MarcReader implements MarcReader
                     while (curLine != null)
                     {
                         recids.add(curLine);
+                        curLine = readRecId(); 
                     }
                 }
                 catch (FileNotFoundException e)
