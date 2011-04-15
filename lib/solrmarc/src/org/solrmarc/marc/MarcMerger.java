@@ -288,7 +288,7 @@ public class MarcMerger
             
             while (mainrec != null && compare.compare(mainrec.getRecordId(), maxRecordID)< 0)
             {
-                if (newOrModrec == null)
+                if ((newOrModrec == null || compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())< 0) && compare.compare(mainrec.getRecordId(), deletedId) < 0)
                 {
                     // mainrec unchanged, just write it out.
                     if (veryverbose) System.err.println("\nWriting original record "+ mainrec.getRecordId() + " from input file");
@@ -296,15 +296,7 @@ public class MarcMerger
                     out.flush();
                     mainrec = mainFile.hasNext() ? mainFile.next() : null;
                 }
-                else if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())< 0  && compare.compare(mainrec.getRecordId(), deletedId) < 0)
-                {
-                    // mainrec unchanged, just write it out.
-                    if (veryverbose) System.err.println("\nWriting original record "+ mainrec.getRecordId() + " from input file");
-                    out.write(mainrec.getRecordBytes());
-                    out.flush();
-                    mainrec = mainFile.hasNext() ? mainFile.next() : null;
-                }
-                else if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())== 0  && compare.compare(mainrec.getRecordId(), deletedId)== 0)
+                else if (newOrModrec != null && compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())== 0  && compare.compare(mainrec.getRecordId(), deletedId)== 0)
                 {   
                     // mainrec equals deleteID  AND it equals modifiedRecId,  Delete record.  Although this should not happen.
                     if (verbose) System.err.println("\nDeleting record "+ deletedId);
@@ -312,14 +304,14 @@ public class MarcMerger
                     newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
                     mainrec = mainFile.hasNext() ? mainFile.next() : null;
                 }
-                else if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())< 0  && compare.compare(mainrec.getRecordId(), deletedId)== 0)
+                else if ((newOrModrec == null || compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())< 0)  && compare.compare(mainrec.getRecordId(), deletedId)== 0)
                 {    
                     // mainrec equals deleteID,   Delete record.  
                     if (verbose) System.err.println("\nDeleting record "+ deletedId);
                     deletedId = getNextDelId(delReader);
                     mainrec = mainFile.hasNext() ? mainFile.next() : null;
                 }
-                else if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())== 0  && compare.compare(mainrec.getRecordId(), deletedId)< 0)
+                else if (newOrModrec != null && compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())== 0  && compare.compare(mainrec.getRecordId(), deletedId)< 0)
                 {    
                     // mainrec equals modifiedRecId,  Write out modified record.
                     if (verbose) System.err.println("\nWriting changed record "+ newOrModrec.getRecordId() + " from Mod file");
@@ -330,7 +322,7 @@ public class MarcMerger
                 }
                 else // mainrec.id is greater than either newOrModrec.id or deletedId
                 {
-                    if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())> 0 && compare.compare(newOrModrec.getRecordId(), deletedId)== 0)
+                    if (newOrModrec != null && compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())> 0 && compare.compare(newOrModrec.getRecordId(), deletedId)== 0)
                     {
                         // add a record that is not there, and then delete it right away -> net result zero
                         newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null;
@@ -338,7 +330,7 @@ public class MarcMerger
                     }
                     else 
                     {
-                        if (compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())> 0)
+                        if (newOrModrec != null && compare.compare(mainrec.getRecordId(), newOrModrec.getRecordId())> 0)
                         {    
                             // newOrModrec is a new record,  Write out new record.
                             if (verbose) System.err.println("\nWriting new record "+ newOrModrec.getRecordId() + " from mod file");
