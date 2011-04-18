@@ -2,6 +2,7 @@ package org.solrmarc.tools;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -42,7 +43,24 @@ public class RawRecord implements MarcReader
             ds.reset();
             ds.mark(length*2);
             rawRecordData = new byte[length];
-            ds.readFully(rawRecordData);
+            try {
+                ds.readFully(rawRecordData);
+            }
+            catch (EOFException e)
+            {
+                ds.reset();
+                int c;
+                int cnt=0;
+                while ((c = ds.read()) != -1)
+                {
+                    rawRecordData[cnt++] = (byte)c;                    
+                }
+                int location = byteArrayContains(rawRecordData, Constants.RT);
+                if (location != -1) 
+                    length = location + 1;
+                else  
+                    throw(e);
+            }
             if (rawRecordData[length-1] != Constants.RT)
             {
                 int location = byteArrayContains(rawRecordData, Constants.RT);
@@ -76,6 +94,7 @@ public class RawRecord implements MarcReader
         catch (IOException e)
         {
             try {
+                rawRecordData = null;
                 ds.reset();
             }
             catch(IOException e1)
