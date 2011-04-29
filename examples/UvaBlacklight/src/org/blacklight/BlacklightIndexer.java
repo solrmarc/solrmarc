@@ -372,6 +372,7 @@ public class BlacklightIndexer extends SolrIndexer
                 String numberScheme = (df.getSubfield('w') != null) ? df.getSubfield('w').getData() : "";
                 if (numberScheme.equals("MONO-SER") || numberScheme.equals("LCPER"))  numberScheme = "LC";
                 String callNumber = (df.getSubfield('a') != null) ? df.getSubfield('a').getData() : "";
+                if (callNumber.startsWith("MSS")) callNumber = "MSS " + callNumber.substring(3);
                 if (extraString == null || extraString.equals("") || !extraString.contains("|" + barCode + "|"))
                 {
                     if (numberScheme.length() > 0 && callNumber.length() > 0) 
@@ -449,7 +450,7 @@ public class BlacklightIndexer extends SolrIndexer
             }
             String val = callNumPart.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
             String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
-            if (!nVal.equals(val))
+            if (!nVal.equals(val) && !val.startsWith("MSS"))
             {
                 val = nVal;
             }
@@ -2333,6 +2334,7 @@ public class BlacklightIndexer extends SolrIndexer
             String data = getSubfieldVal(df, subfield, null);
             if (label == null || data == null) break;
             if (subfield != 'a')  result.append(", ");
+            if (label.startsWith("(") && label.endsWith(")")) label = "";
             result.append(label);
             result.append(data);
         }
