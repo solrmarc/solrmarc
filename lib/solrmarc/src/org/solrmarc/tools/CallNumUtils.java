@@ -20,7 +20,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.*;
 
-import schema.UnicodeCharUtil;
+import com.solrmarc.icu.lang.UCharacter;
 
 /**
  * Call number utility functions for solrmarc
@@ -864,8 +864,9 @@ public final class CallNumUtils {
                         
                         // map latin chars with diacritic to char without
                         char foldC;
-                        if (!UnicodeCharUtil.isCombiningCharacter(c) &&  
-                             !UnicodeCharUtil.isSpacingModifier(c) &&
+                        
+                        if (UCharacter.UnicodeBlock.of(c) != UCharacter.UnicodeBlock.COMBINING_DIACRITICAL_MARKS &&  
+                            UCharacter.UnicodeBlock.of(c) != UCharacter.UnicodeBlock.SPACING_MODIFIER_LETTERS &&
                              (foldC = Utils.foldDiacriticLatinChar(c)) != 0x00)
                             // we mapped a latin char w diacritic to plain ascii 
                             reverse.append(alphanumReverseMap.get(foldC));
