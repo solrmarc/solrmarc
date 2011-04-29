@@ -25,8 +25,6 @@ import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcXmlReader;
 import org.marc4j.marc.Record;
 
-import com.ibm.icu.text.Normalizer;
-
 public class RemoteSolrSearcher
 {
     static boolean verbose = false;
