@@ -37,7 +37,7 @@ import org.marc4j.MarcStreamReader;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.impl.ControlFieldImpl;
-import org.solrmarc.marc.MarcTranslatedReader;
+//import org.solrmarc.marc.MarcTranslatedReader;
 
 import com.k_int.IR.SearchException;
 import com.k_int.IR.InvalidQueryException;
@@ -269,38 +269,38 @@ public class ZClient extends SynchronousOriginBean
         return(null);
     }
     
-    public String getStringByIDNum(int idnum)
-    {
-        if (verbose) System.err.println("Calling getStringByIDNum id="+ idnum);
-    	cmdFind("@attrset bib-1 @attr 1=1016 \"^C"+idnum+"\"");
-    	if (verbose) System.err.println("Calling getString id="+ idnum);
-        byte[] rec = getBytes(1);
-        if (verbose) System.err.println("bytes count="+ rec.length);
-        ByteArrayInputStream bs = new ByteArrayInputStream(rec);
-        if (verbose) System.err.println("made ByteArrayInputStream");
-        MarcStreamReader m1 = new MarcStreamReader(bs);
-        if (verbose) System.err.println("made MarcStreamReader");
-        MarcTranslatedReader mr = new MarcTranslatedReader(m1, true);
-        System.err.println("made MarcTranslatedReader");
-        String result = null;
-        if (verbose) System.err.println("checking for next");
-        if (mr.hasNext())
-        {
-            if (verbose) System.err.println("Getting next");
-        	try {
-        		Record marc = mr.next();
-        		if (verbose) System.err.println("got Record: "+ marc.toString());
-                result = marc.toString();
-                if (verbose) System.err.println("String len="+ result.length());
-        	}
-        	catch (Throwable e)
-        	{
-        	    if (verbose) System.err.println("Exception: "+ e.getMessage());
-        		e.printStackTrace();
-        	}
-        }
-        return(result);
-    }
+//    public String getStringByIDNum(int idnum)
+//    {
+//        if (verbose) System.err.println("Calling getStringByIDNum id="+ idnum);
+//    	cmdFind("@attrset bib-1 @attr 1=1016 \"^C"+idnum+"\"");
+//    	if (verbose) System.err.println("Calling getString id="+ idnum);
+//        byte[] rec = getBytes(1);
+//        if (verbose) System.err.println("bytes count="+ rec.length);
+//        ByteArrayInputStream bs = new ByteArrayInputStream(rec);
+//        if (verbose) System.err.println("made ByteArrayInputStream");
+//        MarcStreamReader m1 = new MarcStreamReader(bs);
+//        if (verbose) System.err.println("made MarcStreamReader");
+//        MarcTranslatedReader mr = new MarcTranslatedReader(m1, true);
+//        System.err.println("made MarcTranslatedReader");
+//        String result = null;
+//        if (verbose) System.err.println("checking for next");
+//        if (mr.hasNext())
+//        {
+//            if (verbose) System.err.println("Getting next");
+//        	try {
+//        		Record marc = mr.next();
+//        		if (verbose) System.err.println("got Record: "+ marc.toString());
+//                result = marc.toString();
+//                if (verbose) System.err.println("String len="+ result.length());
+//        	}
+//        	catch (Throwable e)
+//        	{
+//        	    if (verbose) System.err.println("Exception: "+ e.getMessage());
+//        		e.printStackTrace();
+//        	}
+//        }
+//        return(result);
+//    }
     
     public byte[] getBytesByIDNum(int idnum)
     {
