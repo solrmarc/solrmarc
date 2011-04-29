@@ -6,9 +6,11 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServer;
+import org.xml.sax.InputSource;
 
 public class SolrCoreLoader
 {
@@ -37,6 +39,7 @@ public class SolrCoreLoader
         try{
             boolean has_1_3_libs = false;
             boolean has_1_2_libs = false;
+            boolean has_3_1_libs = false;
             System.setProperty("solr.solr.home", solrCoreDir);
             try
             {
@@ -120,8 +123,16 @@ public class SolrCoreLoader
                         solrDataDir = solrCoreDir + "/" + "data";
                     }
                     System.setProperty("solr.data.dir", solrDataDir);
+                    
                     Class<?> solrConfigClass = Class.forName("org.apache.solr.core.SolrConfig");
-                    Constructor<?> solrConfigConstructor = solrConfigClass.getConstructor(String.class, String.class, InputStream.class);
+                    Constructor<?> solrConfigConstructor = null;
+                    try {
+                        solrConfigConstructor = solrConfigClass.getConstructor(String.class, String.class, InputStream.class);
+                    }
+                    catch (NoSuchMethodException e)
+                    {
+                        solrConfigConstructor = solrConfigClass.getConstructor(String.class, String.class, InputSource.class);
+                    }
                     Object solrConfig = solrConfigConstructor.newInstance(solrCoreDir, "solrconfig.xml", null);
                     //SolrConfig solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
                     FileInputStream schemaFile = new FileInputStream(solrCoreDir+"/conf/schema.xml");
@@ -137,8 +148,15 @@ public class SolrCoreLoader
                     Object genericCoreDesc = coreDescCtor.newInstance(genericCoreContainerObject1, "Solr", solrCoreDir+"/conf");
                     
                     Class<?> indexSchemaClass = Class.forName("org.apache.solr.schema.IndexSchema");
-                    Constructor<?> IndexSchemaConstructor = indexSchemaClass.getConstructor(solrConfigClass, String.class, InputStream.class);
-                    Object  solrSchema = IndexSchemaConstructor.newInstance(solrConfig, "Solr", schemaFile);
+                    Constructor<?> IndexSchemaConstructor = null;
+                    try {
+                        IndexSchemaConstructor = indexSchemaClass.getConstructor(solrConfigClass, String.class, InputStream.class);
+                    }
+                    catch (NoSuchMethodException e)
+                    {
+                        IndexSchemaConstructor = indexSchemaClass.getConstructor(solrConfigClass, String.class, InputSource.class);
+                    }
+                    Object  solrSchema = IndexSchemaConstructor.newInstance(solrConfig, "schema.xml", null);
                     
                     // solrCore = new SolrCore(solrCoreName, solrDataDir, solrConfig, solrSchema, desc);  
                     Class<?> solrCoreClass = Class.forName("org.apache.solr.core.SolrCore");
@@ -157,7 +175,7 @@ public class SolrCoreLoader
         }
         catch (Exception e)
         {
-            System.err.println("Error: Problem instantiating SolrCore");               
+            System.err.println("Error: Problem instantiating SolrCore");
             logger.error("Error: Problem instantiating SolrCore");
             e.printStackTrace();
             System.exit(1);
@@ -241,7 +259,14 @@ public class SolrCoreLoader
                 }
                 System.setProperty("solr.data.dir", solrDataDir);
                 Class<?> solrConfigClass = Class.forName("org.apache.solr.core.SolrConfig");
-                Constructor<?> solrConfigConstructor = solrConfigClass.getConstructor(String.class, String.class, InputStream.class);
+                Constructor<?> solrConfigConstructor = null;
+                try {
+                    solrConfigConstructor = solrConfigClass.getConstructor(String.class, String.class, InputStream.class);
+                }
+                catch (NoSuchMethodException e)
+                {
+                    solrConfigConstructor = solrConfigClass.getConstructor(String.class, String.class, InputSource.class);
+                }
                 Object solrConfig = solrConfigConstructor.newInstance(solrCoreDir, "solrconfig.xml", null);
                 //SolrConfig solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
                 FileInputStream schemaFile = new FileInputStream(solrCoreDir+"/conf/schema.xml");
@@ -257,8 +282,15 @@ public class SolrCoreLoader
                 Object genericCoreDesc = coreDescCtor.newInstance(genericCoreContainerObject1, "Solr", solrCoreDir+"/conf");
                 
                 Class<?> indexSchemaClass = Class.forName("org.apache.solr.schema.IndexSchema");
-                Constructor<?> IndexSchemaConstructor = indexSchemaClass.getConstructor(solrConfigClass, String.class, InputStream.class);
-                Object  solrSchema = IndexSchemaConstructor.newInstance(solrConfig, "Solr", schemaFile);
+                Constructor<?> IndexSchemaConstructor = null;
+                try {
+                    IndexSchemaConstructor = indexSchemaClass.getConstructor(solrConfigClass, String.class, InputStream.class);
+                }
+                catch (NoSuchMethodException e)
+                {
+                    IndexSchemaConstructor = indexSchemaClass.getConstructor(solrConfigClass, String.class, InputSource.class);
+                }
+                Object  solrSchema = IndexSchemaConstructor.newInstance(solrConfig, "schema.xml", null);
                 
                 // solrCore = new SolrCore(solrCoreName, solrDataDir, solrConfig, solrSchema, desc);  
                 Class<?> solrCoreClass = Class.forName("org.apache.solr.core.SolrCore");
