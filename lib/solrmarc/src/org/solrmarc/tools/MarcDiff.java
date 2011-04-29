@@ -14,7 +14,6 @@ import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcWriter;
 import org.marc4j.marc.Record;
-import org.solrmarc.marc.MarcTranslatedReader;
 import org.solrmarc.marc.RawRecordReader;
 
 public class MarcDiff
