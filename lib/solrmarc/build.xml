@@ -68,7 +68,7 @@
             <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
             <fileset dir="${lib.dir}" includes="solr_remote_only/*.jar" />
 <!--            <fileset dir="${lib.dir}" includes="test/*.jar" /> -->
-            <zipfileset dir="${build.dir}" includes="*.jar" />
+<!--           <zipfileset dir="${build.dir}" includes="*.jar" /> -->
 <!--            <zipfileset dir="${build.dir}/test" includes="*.jar" prefix="test" /> -->
        </one-jar> 
 
