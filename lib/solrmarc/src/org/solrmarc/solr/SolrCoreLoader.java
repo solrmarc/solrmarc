@@ -269,7 +269,7 @@ public class SolrCoreLoader
                 }
                 Object solrConfig = solrConfigConstructor.newInstance(solrCoreDir, "solrconfig.xml", null);
                 //SolrConfig solrConfig = new SolrConfig(solrCoreDir, "solrconfig.xml", null);
-                FileInputStream schemaFile = new FileInputStream(solrCoreDir+"/conf/schema.xml");
+      //          FileInputStream schemaFile = new FileInputStream(solrCoreDir+"/conf/schema.xml");
                 
                 //cc = new CoreContainer();
                 Class<?> coreContainerClass = Class.forName("org.apache.solr.core.CoreContainer");
