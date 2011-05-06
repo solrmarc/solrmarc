@@ -51,7 +51,7 @@ do
 done
 
 #make sure directories exist
-for dir in prod merge debug dev merge_patch
+for dir in prod merge debug dev merge_patch bibcore
 do
     mkdir $DATADIR/incoming_$dir 2> /dev/null
     mkdir $DATADIR/processed_$dir 2> /dev/null
@@ -61,7 +61,7 @@ done
 for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
 do
      fname=`basename $file`
-     for dir in prod merge debug dev merge_patch
+     for dir in prod merge debug dev merge_patch bibcore
      do
         ln $file $DATADIR/incoming_$dir/$fname
      done
@@ -82,12 +82,15 @@ if [ -f "$patch_out" ] ; then
     cp $patch_out $DATADIR/incoming_debug
     cp $patch_out $DATADIR/incoming_prod
     cp $patch_out $DATADIR/incoming_dev
+    cp $patch_out $DATADIR/incoming_bibcore
     cp $summary_hold_out $DATADIR/incoming_debug
     cp $summary_hold_out $DATADIR/incoming_prod
     cp $summary_hold_out $DATADIR/incoming_dev
+    cp $summary_hold_out $DATADIR/incoming_bibcore
     cp $shadowed_changed_recs $DATADIR/incoming_debug 2> /dev/null
     cp $shadowed_changed_recs $DATADIR/incoming_dev  2> /dev/null
     cp $shadowed_changed_recs $DATADIR/incoming_prod  2> /dev/null
+    cp $shadowed_changed_recs $DATADIR/incoming_bibcore  2> /dev/null
 fi
 
 if [ "$verbose" == "1" ] ; then
@@ -117,6 +120,11 @@ if [ "$verbose" == "1" ] ; then
 fi
 update.index.job debug blacklight_test_config.properties
 
+if [ "$verbose" == "1" ] ; then
+    echo updating multicore development index at solrpowr.lib:8984/solr/bib
+fi
+update.index.job bibcore bib_core_config.properties
+/usr/local/projects/multicoremerge/bin/mergecores > results_bibcore/results_mergecores
 
 if [ "$verbose" == "1" ] ; then
     echo cleaning up incoming directories
