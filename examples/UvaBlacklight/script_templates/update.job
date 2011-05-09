@@ -124,7 +124,7 @@ if [ "$verbose" == "1" ] ; then
     echo updating multicore development index at solrpowr.lib:8984/solr/bib
 fi
 update.index.job bibcore bib_core_config.properties
-/usr/local/projects/multicoremerge/bin/mergecores > results_bibcore/results_mergecores
+/usr/local/projects/multicoremerge/bin/mergecores > $DATADIR/results_bibcore/results_mergecores
 
 if [ "$verbose" == "1" ] ; then
     echo cleaning up incoming directories
