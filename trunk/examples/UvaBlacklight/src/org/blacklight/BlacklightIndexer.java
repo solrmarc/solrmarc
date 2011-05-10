@@ -2238,7 +2238,8 @@ public class BlacklightIndexer extends SolrIndexer
                     if (linktag == null || nlinktag == null || !getLinkPrefix(linktag).equals(getLinkPrefix(nlinktag))) 
                         break;                   
                 }
-                DataField labelField = getLabelField(record, getLinkPrefix(linktag));
+                DataField labelField = null;
+                if (linktag != null) labelField = getLabelField(record, getLinkPrefix(linktag));
                 if (labelField != null && j == i + 1) 
                 {
                     holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField), getSubfieldVal(df, 'z', ""), "Library has");
@@ -2248,7 +2249,7 @@ public class BlacklightIndexer extends SolrIndexer
                 {
                     VariableField nvf = fields.get(j-1);
                     DataField ndf = (DataField)nvf;
-                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField) + " - " + processEncodedField(ndf, labelField), getSubfieldVal(df, 'z', ""), "Library has");
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedFieldRange(df, ndf, labelField), getSubfieldVal(df, 'z', ""), "Library has");
                     addHoldingsField(result, ivyresult, holdingsField);
                     i = j - 1;
                 }
@@ -2326,6 +2327,7 @@ public class BlacklightIndexer extends SolrIndexer
 
     private String processEncodedField(DataField df, DataField labelField)
     {
+        boolean normalize_date = false;
         if (labelField == null) return(null);
         StringBuffer result = new StringBuffer();
         for (char subfield = 'a'; subfield <= 'f'; subfield++)
@@ -2354,42 +2356,75 @@ public class BlacklightIndexer extends SolrIndexer
         }
         String year = null;
         StringBuffer date = new StringBuffer();
-        for (char subfield = 'i'; subfield <= 'm'; subfield++)
+        if (normalize_date)
         {
-            boolean appendComma = false;
-            String label = getSubfieldVal(labelField, subfield, null);
-            String data = getSubfieldVal(df, subfield, null);
-            if (label == null || data == null) break;
-        //    if (subfield != 'i')  result.append(", ");
-            if (label.equalsIgnoreCase("(month)") || label.equalsIgnoreCase("(season)"))
+            for (char subfield = 'i'; subfield <= 'm'; subfield++)
             {
-                data = expandMonthOrSeason(data);
+                boolean appendComma = false;
+                String label = getSubfieldVal(labelField, subfield, null);
+                String data = getSubfieldVal(df, subfield, null);
+                if (label == null || data == null) break;
+            //    if (subfield != 'i')  result.append(", ");
+                if (label.equalsIgnoreCase("(month)") || label.equalsIgnoreCase("(season)"))
+                {
+                    data = expandMonthOrSeason(data);
+                }
+                else if (year != null && !label.equalsIgnoreCase("(day)"))
+                {
+                    date.append(year);
+                    year = null;
+                }
+                else
+                {
+                    appendComma = true;
+                }
+                if (label.equalsIgnoreCase("(year)"))
+                {
+                    year = data;
+                }
+                else if (label.equalsIgnoreCase("(day)"))
+                {
+                    date.append(" ").append(data);
+                    if (appendComma) date.append(", ");
+                }
+                else
+                {
+                    date.append(data);
+                    if (appendComma) date.append(", ");
+                }
             }
-            else if (year != null && !label.equalsIgnoreCase("(day)"))
+            if (year != null) date.append(year);
+        }
+        else
+        {
+            boolean prependStr = false;
+            String strToPrepend = "";
+            for (char subfield = 'i'; subfield <= 'm'; subfield++)
             {
-                date.append(year);
-                year = null;
-            }
-            else
-            {
-                appendComma = true;
-            }
-            if (label.equalsIgnoreCase("(year)"))
-            {
-                year = data;
-            }
-            else if (label.equalsIgnoreCase("(day)"))
-            {
-                date.append(" ").append(data);
-                if (appendComma) date.append(", ");
-            }
-            else
-            {
-                date.append(data);
-                if (appendComma) date.append(", ");
+                String label = getSubfieldVal(labelField, subfield, null);
+                String data = getSubfieldVal(df, subfield, null);
+                if (label == null || data == null) break;
+                if (label.equalsIgnoreCase("(month)") || label.equalsIgnoreCase("(season)"))
+                {
+                    data = expandMonthOrSeason(data);
+                    strToPrepend = ":";
+                }
+                else if (label.equalsIgnoreCase("(day)"))
+                {
+                    data = expandMonthOrSeason(data);
+                    strToPrepend = " ";
+                }
+                if (prependStr)
+                {
+                    date.append(strToPrepend).append(data);
+                }
+                else
+                {
+                    date.append(data);
+                }
+                prependStr = true;
             }
         }
-        if (year != null) date.append(year);
         if (date.length() > 0)
         {
             if (result.length() > 0)  result.append(" (").append(date).append(")");
@@ -2397,21 +2432,138 @@ public class BlacklightIndexer extends SolrIndexer
         }    
         return result.toString();
     }
+    
+    private String processEncodedFieldRange(DataField df1, DataField df2, DataField labelField)
+    {
+        boolean normalize_date = false;
+        if (labelField == null) return(null);
+        StringBuffer result = new StringBuffer();
+        StringBuffer vol1 = new StringBuffer();
+        StringBuffer vol2 = new StringBuffer();
+        for (char subfield = 'a'; subfield <= 'f'; subfield++)
+        {
+            String label = getSubfieldVal(labelField, subfield, null);
+            String data1 = getSubfieldVal(df1, subfield, null);
+            String data2 = getSubfieldVal(df2, subfield, null);
+            if (label == null || data1 == null || data2 == null) break;
+            if (subfield != 'a')  
+            {
+                vol1.append(", ");
+                vol2.append(", ");
+            }
+            if (label.startsWith("(") && label.endsWith(")")) label = "";
+            vol1.append(label);
+            vol1.append(data1);
+            vol2.append(label);
+            vol2.append(data2);
+        }
+        result.append(rangify(vol1.toString(), vol2.toString()));
+        StringBuffer alt = new StringBuffer();
+        for (char subfield = 'g'; subfield <= 'h'; subfield++)
+        {
+            String label = getSubfieldVal(labelField, subfield, null);
+            String data1 = getSubfieldVal(df1, subfield, null);
+            String data2 = getSubfieldVal(df2, subfield, null);
+            if (label == null || data1 == null || data2 == null) break;
+            if (subfield != 'g')  alt.append(", ");
+            alt.append(label);
+            alt.append(rangify(data1, data2));
+        }
+        if (alt.length() != 0)
+        {
+            result.append(" ("+alt+")");
+        }
+        StringBuffer date1 = new StringBuffer();
+        StringBuffer date2 = new StringBuffer();
+        {
+            boolean prependStr = false;
+            String strToPrepend = "";
+            for (char subfield = 'i'; subfield <= 'm'; subfield++)
+            {
+                String label = getSubfieldVal(labelField, subfield, null);
+                String data1 = getSubfieldVal(df1, subfield, null);
+                String data2 = getSubfieldVal(df2, subfield, null);
+                if (label == null || data1 == null || data2 == null) break;
+                if (label.equalsIgnoreCase("(month)") || label.equalsIgnoreCase("(season)"))
+                {
+                    data1 = expandMonthOrSeason(data1);
+                    data2 = expandMonthOrSeason(data2);
+                    strToPrepend = ":";
+                }
+                else if (label.equalsIgnoreCase("(day)"))
+                {
+                    strToPrepend = " ";
+                }
+                if (prependStr)
+                {
+                    date1.append(strToPrepend).append(data1);
+                    date2.append(strToPrepend).append(data2);
+                }
+                else
+                {
+                    date1.append(data1);
+                    date2.append(data2);
+                }
+                prependStr = true;
+            }
+        }
+        if (date1.length() > 0 && date2.length() > 0)
+        {
+            if (result.length() > 0)  result.append(" (").append(rangify(date1.toString(), date2.toString())).append(")");
+            else result.append(rangify(date1.toString(), date2.toString()));
+        }    
+        return result.toString();
+    }
+
+    private Object rangify(String data1, String data2)
+    {
+        int i;
+        if (data1.equals(data2)) return(data1);
+        for (i = 0; i < data1.length() && i < data2.length(); i++)
+        {
+            if (data1.charAt(i) != data2.charAt(i)) break;
+        }
+        int preBackstep = i;
+        if ( i < data1.length() && i < data2.length() && Character.isDigit(data1.charAt(i)) && Character.isDigit(data2.charAt(i)))
+        {
+            while (Character.isDigit(data1.charAt(i)) && Character.isDigit(data2.charAt(i)) &&
+                i > 0 && Character.isDigit(data1.charAt(i-1)) && Character.isDigit(data2.charAt(i-1)))
+            {
+                i--;
+            }
+        }
+        else if ( i < data1.length() && i < data2.length() && Character.isLetter(data1.charAt(i)) && Character.isLetter(data2.charAt(i)))
+        {
+            while (Character.isLetter(data1.charAt(i)) && Character.isLetter(data2.charAt(i)) &&
+                i > 0 && Character.isLetter(data1.charAt(i-1)) && Character.isLetter(data2.charAt(i-1)))
+            {
+                i--;
+            }
+        }
+        String result;
+        if (i <= 3 && data1.length() > 6  && data2.length() > 6 && preBackstep < 6)
+            result = data1 + "-" + data2;
+        else if ( i < data1.length() && i < data2.length())
+            result = data1.substring(0, i) + data1.substring(i) + "-" + data2.substring(i);
+        else 
+            result = data1;
+        return result;
+    }
 
     private String expandMonthOrSeason(String data)
     {
-        data = data.replaceAll("01", "Jan.");
-        data = data.replaceAll("02", "Feb.");
-        data = data.replaceAll("03", "Mar.");
-        data = data.replaceAll("04", "Apr.");
+        data = data.replaceAll("01", "Jan");
+        data = data.replaceAll("02", "Feb");
+        data = data.replaceAll("03", "Mar");
+        data = data.replaceAll("04", "Apr");
         data = data.replaceAll("05", "May");
-        data = data.replaceAll("06", "Jun.");
-        data = data.replaceAll("07", "Jul.");
-        data = data.replaceAll("08", "Aug.");
-        data = data.replaceAll("09", "Sept.");
-        data = data.replaceAll("10", "Oct.");
-        data = data.replaceAll("11", "Nov.");
-        data = data.replaceAll("12", "Dec.");
+        data = data.replaceAll("06", "Jun");
+        data = data.replaceAll("07", "Jul");
+        data = data.replaceAll("08", "Aug");
+        data = data.replaceAll("09", "Sept");
+        data = data.replaceAll("10", "Oct");
+        data = data.replaceAll("11", "Nov");
+        data = data.replaceAll("12", "Dec");
         data = data.replaceAll("21", "Spring");
         data = data.replaceAll("22", "Summer");
         data = data.replaceAll("23", "Autumn");
