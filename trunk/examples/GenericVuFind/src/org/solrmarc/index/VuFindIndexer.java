@@ -115,6 +115,14 @@ public class VuFindIndexer extends SolrIndexer
         }
         String dsn = ini.get("Database", "database");
 
+        // Strip wrapping quotes if necessary (the ini reader won't do this for us):
+        if (dsn.startsWith("\"")) {
+            dsn = dsn.substring(1, dsn.length());
+        }
+        if (dsn.endsWith("\"")) {
+            dsn = dsn.substring(0, dsn.length() - 1);
+        }
+
         try {
             // Parse key settings from the PHP-style DSN:
             String username = "";
