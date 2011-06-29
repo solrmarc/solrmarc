@@ -99,9 +99,10 @@ fi
 update.index.job prod blacklight_config.properties
 
 if [ "$verbose" == "1" ] ; then
-    echo updating multicore dev index at solrpowr:18983/solr/blacklight_dev_index
+    echo updating multicore dev index at solrpowr:18983/solr/bib
 fi
-update.index.job dev blacklight_dev_config.properties
+update.index.job dev bib_core_prod_config.properties
+/lib_content27/solr/multicoremerge/bin/mergecores > $DATADIR/results_dev/results_mergecores
 
 if [ "$verbose" == "1" ] ; then
     echo copying blacklight_indexes to datastamped indexes to use for searching

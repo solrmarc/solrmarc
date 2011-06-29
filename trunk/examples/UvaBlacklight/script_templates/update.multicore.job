@@ -14,13 +14,13 @@ then
 fi
 
 update.multicore.sub.job blacklight_config.properties
-update.multicore.sub.job blacklight_dev_config.properties
+update.multicore.sub.job bib_core_prod_config.properties all
 
 solrcore1=`cat $solrmarcdir/blacklight_config.properties | egrep solr.core.name | sed -e's/.* = //'`
-solrcore2=`cat $solrmarcdir/blacklight_dev_config.properties | egrep solr.core.name | sed -e's/.* = //'`
+solrcore2=all
 
 solrnewcore1=`echo $solrcore1 | sed -e's/_index//'`_`date +%Y%m%d`
-solrnewcore2=`echo $solrcore2 | sed -e's/_index//'`_`date +%Y%m%d`
+solrnewcore2=blacklight_all_`date +%Y%m%d`
 
 #copy the file solr.xml.template to solr.xml  replacing 
 #the strings @@blacklight_index@@ and @@blacklight_dev_index@@ 

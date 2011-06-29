@@ -13,14 +13,21 @@ then
   solrmarcdir=$( (cd -P $(dirname $0)/.. && pwd) )
 fi
 config=$1
+arg2=$2
+if [ "$arg2" == "" ] 
+then
+    solrcore=`cat $solrmarcdir/$config | egrep solr.core.name | sed -e's/.* = //'`
+    solrnewcore=`echo $solrcore | sed -e's/_index//'`_`date +%Y%m%d`
+    solroldcore=`echo $solrcore | sed -e's/_index//'`_`date --date="-3 days" +%Y%m%d`
+else
+    solrcore=$arg2
+    solrnewcore=blacklight_${arg2}_`date +%Y%m%d`
+    solroldcore=blacklight_${arg2}_`date --date="-3 days" +%Y%m%d`
+fi
 
 solrhome=`cat $solrmarcdir/$config | egrep solr.path | sed -e's/.* = //'`
-solrhomeparent=$( (cd -P $solrhome && cd .. && pwd) )
-solrcore=`cat $solrmarcdir/$config | egrep solr.core.name | sed -e's/.* = //'`
-solrurlstart=`cat $solrmarcdir/$config | egrep solr.hosturl | sed -e's/.* = //' -e's:/[A-Za-z0-9_]*$::'`
-
-solrnewcore=`echo $solrcore | sed -e's/_index//'`_`date +%Y%m%d`
-solroldcore=`echo $solrcore | sed -e's/_index//'`_`date --date="-3 days" +%Y%m%d`
+solrhomeparent=/lib_content27/solr
+#solrurlstart=`cat $solrmarcdir/$config | egrep solr.hosturl | sed -e's/.* = //' -e's:/[A-Za-z0-9_]*$::'`
 
 solrdir=$solrhome/$solrcore
 solrnewdir=$solrhomeparent/$solrnewcore
@@ -53,5 +60,10 @@ if [ ! -e $solrnewdir ] ; then
 fi
 
 # now delete the solr data directory from three days ago
+if [[ ! -e $solrolddir  && `echo $solrolddir | grep 'all'` != "" ]] 
+then
+   solrolddir=`echo $solrolddir | sed -e 's/all/dev/'`
+fi
+
 rm -rf $solrolddir
 
