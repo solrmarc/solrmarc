@@ -607,7 +607,23 @@ public class SolrIndexer
                 }
                 catch(SolrMarcIndexerException e)
                 {
-                    throw(e);
+                    String recCntlNum = null;
+                    try {
+                        recCntlNum = record.getControlNumber();
+                    }
+                    catch (NullPointerException npe) { /* ignore */ }
+
+                    if (e.getLevel() == SolrMarcIndexerException.DELETE)
+                    {
+                        throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE, 
+                                "Record " + (recCntlNum != null ? recCntlNum : "") + " purposely not indexed because " + key + " field is empty");
+//                      logger.error("Record " + (recCntlNum != null ? recCntlNum : "") + " not indexed because " + key + " field is empty -- " + e.getMessage(), e);
+                    }
+                    else
+                    {
+                        logger.error("Unable to index record " + (recCntlNum != null ? recCntlNum : "") + " due to field " + key + " -- " + e.getMessage(), e);
+                        throw(e);
+                    }
                 }
             }
             else if (indexType.startsWith("script"))
@@ -617,7 +633,21 @@ public class SolrIndexer
                 }
                 catch(SolrMarcIndexerException e)
                 {
-                    throw(e);
+                    String recCntlNum = null;
+                    try {
+                        recCntlNum = record.getControlNumber();
+                    }
+                    catch (NullPointerException npe) { /* ignore */ }
+
+                    if (e.getLevel() == SolrMarcIndexerException.DELETE)
+                    {
+                        logger.error("Record " + (recCntlNum != null ? recCntlNum : "") + " purposely not indexed because " + key + " field is empty -- " + e.getMessage(), e);
+                    }
+                    else
+                    {
+                        logger.error("Unable to index record " + (recCntlNum != null ? recCntlNum : "") + " due to field " + key + " -- " + e.getMessage(), e);
+                        throw(e);
+                    }
                 }
             }
         }
@@ -661,6 +691,11 @@ public class SolrIndexer
     {
         Object retval = null;
         Class<?> returnType = null;
+        String recCntlNum = null;
+        try {
+        	recCntlNum = record.getControlNumber();
+        }
+        catch (NullPointerException npe) { /* ignore as this is for error msgs only*/ }
         try
         {
             Method method;
@@ -698,22 +733,26 @@ public class SolrIndexer
         catch (SecurityException e)
         {
             // e.printStackTrace();
-            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+//            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+            logger.error("Error while indexing " + indexField + " for record " + (recCntlNum != null ? recCntlNum : "") + " -- " + e.getCause());
         }
         catch (NoSuchMethodException e)
         {
             // e.printStackTrace();
-            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+//            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+            logger.error("Error while indexing " + indexField + " for record " + (recCntlNum != null ? recCntlNum : "") + " -- " + e.getCause());
         }
         catch (IllegalArgumentException e)
         {
             // e.printStackTrace();
-            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+//            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+            logger.error("Error while indexing " + indexField + " for record " + (recCntlNum != null ? recCntlNum : "") + " -- " + e.getCause());
         }
         catch (IllegalAccessException e)
         {
             // e.printStackTrace();
-            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+//            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+            logger.error("Error while indexing " + indexField + " for record " + (recCntlNum != null ? recCntlNum : "") + " -- " + e.getCause());
         }
         catch (InvocationTargetException e)
         {
@@ -721,8 +760,9 @@ public class SolrIndexer
             {
                 throw((SolrMarcIndexerException)e.getTargetException());
             }
-            //e.printStackTrace();
-            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+            e.printStackTrace();   // DEBUG
+//            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
+            logger.error("Error while indexing " + indexField + " for record " + (recCntlNum != null ? recCntlNum : "") + " -- " + e.getCause());
         }
         boolean deleteIfEmpty = false;
         if (indexType.equals("customDeleteRecordIfFieldEmpty")) 
@@ -1535,7 +1575,7 @@ public class SolrIndexer
     @SuppressWarnings("unchecked")
     public Set<String> getFullTextUrls(final Record record)
     {
-        Set<String> resultSet = new HashSet<String>();
+        Set<String> resultSet = new LinkedHashSet<String>();
 
         List<VariableField> list856 = record.getVariableFields("856");
         for (VariableField vf : list856)
@@ -1573,7 +1613,7 @@ public class SolrIndexer
     @SuppressWarnings("unchecked")
     public Set<String> getSupplUrls(final Record record)
     {
-        Set<String> resultSet = new HashSet<String>();
+        Set<String> resultSet = new LinkedHashSet<String>();
 
         List<VariableField> list856 = record.getVariableFields("856");
         for (VariableField vf : list856)
@@ -1925,8 +1965,7 @@ public class SolrIndexer
      * separator and add the string to the result set. Each instance of each
      * marc field will be put in a separate result.
      * 
-     * @param record -
-     *            the marc record
+     * @param record - the marc record
      * @param fieldSpec -
      *            the marc fields (e.g. 600:655) in which we will grab the
      *            alphabetic subfield contents for the result set. The field may
@@ -1988,8 +2027,7 @@ public class SolrIndexer
      * separator and add the string to the result set, handling multiple
      * occurrences as indicated
      * 
-     * @param record -
-     *            the marc record
+     * @param record - the marc record
      * @param fieldSpec -
      *            the marc fields (e.g. 600:655) in which we will grab the
      *            alphabetic subfield contents for the result set. The field may
