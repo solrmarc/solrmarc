@@ -204,18 +204,44 @@ public class SolrCoreProxy implements SolrProxy
     {
         try
         {
-            Method closeMethod = solrCore.getClass().getMethod("close");
-            closeMethod.invoke(solrCore);
+          	if (solrCore != null) 
+        	{
+	        	// close SolrCore
+	            Method closeSolrCoreMethod = solrCore.getClass().getMethod("close");
+	            closeSolrCoreMethod.invoke(solrCore);            
+        	}
+
+            // close CoreContainer object
             if (genericCoreContainerObject != null)
             {
                 Method shutdownMethod = genericCoreContainerObject.getClass().getMethod("shutdown");
                 shutdownMethod.invoke(genericCoreContainerObject);
+            }
+            else
+            {
+                Method getCoreDescriptorMethod = solrCore.getClass().getMethod("getCoreDescriptor");
+                Object coreDescriptorObj = getCoreDescriptorMethod.invoke(solrCore);
+                if (coreDescriptorObj != null) 
+                {
+                    Method getCoreContainerMethod = coreDescriptorObj.getClass().getMethod("getCoreContainer");
+                    Object coreContainerObj = getCoreContainerMethod.invoke(coreDescriptorObj);
+                    if (coreContainerObj != null)
+                    {
+                    	Method shutdownMethod = coreContainerObj.getClass().getMethod("shutdown");
+                        shutdownMethod.invoke(coreContainerObj);
+                    }
+                }
             }
         }
         catch (Exception e)
         {
             System.err.println("Error: Problem invoking close in SolrCoreProxy");             
             throw new SolrRuntimeException("Error: Problem invoking close  in SolrCoreProxy", e);
+        }
+        finally {
+        	solrCore = null;
+        	genericCoreContainerObject = null;
+        	documentBuilder = null;
         }
     }
 
