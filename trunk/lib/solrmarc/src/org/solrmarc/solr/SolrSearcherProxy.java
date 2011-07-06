@@ -7,21 +7,20 @@ import java.util.concurrent.Future;
 
 public class SolrSearcherProxy
 {
-    Object solrSearcher = null;
+    Object solrSearcherObj = null;
+    Object solrCoreObj = null;
     
     public SolrSearcherProxy(SolrCoreProxy solrCoreProxy)
     {
-//      refedSolrSearcher = solrCore.getSearcher();
-//      solrSearcher = refedSolrSearcher.get();
-
-        Object solrCore = solrCoreProxy.getCore();
-        Object refedSolrSearcher;
+        solrCoreObj = solrCoreProxy.getCore();
         try
         {     
+//      refedSolrSearcher = solrCore.getSearcher();
+//      solrSearcher = refedSolrSearcher.get();
             Future waitSearcher[] = new Future[]{null};
-            refedSolrSearcher = solrCore.getClass().getMethod("getSearcher", boolean.class, boolean.class, waitSearcher.getClass()).
-                                                    invoke(solrCore, false, true, waitSearcher);
-            solrSearcher = refedSolrSearcher.getClass().getMethod("get").invoke(refedSolrSearcher);
+            Object refCountedSolrSearcher = solrCoreObj.getClass().getMethod("getSearcher", boolean.class, boolean.class, waitSearcher.getClass()).
+                                                    invoke(solrCoreObj, false, true, waitSearcher);
+            solrSearcherObj = refCountedSolrSearcher.getClass().getMethod("get").invoke(refCountedSolrSearcher);
             if (waitSearcher[0] != null)
             {
                 waitSearcher[0].get();
@@ -31,7 +30,7 @@ public class SolrSearcherProxy
         {
             if (e instanceof java.lang.NoSuchMethodException)
             {
-                Method methods[] = solrCore.getClass().getMethods();
+                Method methods[] = solrCoreObj.getClass().getMethods();
                 for (Method method : methods)
                 {
                     if (method.getName().equals("getSearcher"))
@@ -54,14 +53,14 @@ public class SolrSearcherProxy
     {
         try 
         {
-            solrSearcher.getClass().getMethod("close").invoke(solrSearcher);
+        	solrSearcherObj.getClass().getMethod("close").invoke(solrSearcherObj);
+        	solrCoreObj.getClass().getMethod("closeSearcher").invoke(solrCoreObj);
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } 
-        solrSearcher = null;
+        solrSearcherObj = null;
    }
     
     /**
@@ -217,7 +216,7 @@ public class SolrSearcherProxy
         Object termQueryObj = termQueryClass.getConstructor(termClass).newInstance(termObj);
         
 		Class solrIndexSearcherClass = Class.forName("org.apache.solr.search.SolrIndexSearcher");
-        Object solrIndexSearchObj = solrIndexSearcherClass.cast(solrSearcher);
+        Object solrIndexSearchObj = solrIndexSearcherClass.cast(solrSearcherObj);
         Class queryClass = Class.forName("org.apache.lucene.search.Query");
         Object queryObj = queryClass.cast(termQueryObj);
 		Object docSetObj = solrIndexSearcherClass.getMethod("getDocSet", queryClass).invoke(solrIndexSearchObj, queryObj);
@@ -307,13 +306,13 @@ public class SolrSearcherProxy
     /** needs comment */
     private Object getSolrDocSet(String field, String value) throws IllegalArgumentException, SecurityException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException 
     {
-        Object schema = solrSearcher.getClass().getMethod("getSchema").invoke(solrSearcher);
+        Object schema = solrSearcherObj.getClass().getMethod("getSchema").invoke(solrSearcherObj);
         Class queryClass = Class.forName("org.apache.lucene.search.Query");
         Class parser = Class.forName("org.apache.solr.search.QueryParsing");
         Object query = parser.getMethod("parseQuery", String.class, String.class, schema.getClass())
                              .invoke(null, value, field, schema);
 
-        return solrSearcher.getClass().getMethod("getDocSet", queryClass).invoke(solrSearcher, query);
+        return solrSearcherObj.getClass().getMethod("getDocSet", queryClass).invoke(solrSearcherObj, query);
     }
     
     /** needs comment */
@@ -359,7 +358,7 @@ public class SolrSearcherProxy
         try
         {
             int docNo = (Integer)(docSetIterator.getClass().getInterfaces()[0].getMethod("next").invoke(docSetIterator));
-            docProxyObj = solrSearcher.getClass().getMethod("doc", int.class).invoke(solrSearcher, docNo);
+            docProxyObj = solrSearcherObj.getClass().getMethod("doc", int.class).invoke(solrSearcherObj, docNo);
         }
         catch (Exception e)
         {
@@ -388,9 +387,9 @@ public class SolrSearcherProxy
         try
         {
             Class solrIndexSearcherClass = Class.forName("org.apache.solr.search.SolrIndexSearcher");
-            Object solrIndexSearchObj = solrIndexSearcherClass.cast(solrSearcher);
+            Object solrIndexSearchObj = solrIndexSearcherClass.cast(solrSearcherObj);
 
-            Object docObj = solrSearcher.getClass().getMethod("doc", int.class).invoke(solrSearcher, docNo);
+            Object docObj = solrSearcherObj.getClass().getMethod("doc", int.class).invoke(solrSearcherObj, docNo);
             Object fieldObj = docObj.getClass().getMethod("getField", String.class).invoke(docObj, docIdField);
 			if (fieldObj != null) 
                 id = fieldObj.getClass().getMethod("stringValue").invoke(fieldObj).toString();
@@ -418,7 +417,7 @@ public class SolrSearcherProxy
         Object docProxyObj = null;
         try
         {
-            docProxyObj = solrSearcher.getClass().getMethod("doc", int.class).invoke(solrSearcher, docNo);
+            docProxyObj = solrSearcherObj.getClass().getMethod("doc", int.class).invoke(solrSearcherObj, docNo);
         }
         catch (Exception e)
         {
