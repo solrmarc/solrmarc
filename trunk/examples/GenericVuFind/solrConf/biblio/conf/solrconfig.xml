@@ -461,7 +461,7 @@
     <str name="scopeNoteField">scope_note</str>
 
 
-    <str name="sources">topic,author,title</str>
+    <str name="sources">topic,author,title,lcc,dewey</str>
 
     <lst name="topic">
       <str name="DBpath">${solr.solr.home:./solr}/alphabetical_browse/topic_browse.db</str>
@@ -476,6 +476,17 @@
     <lst name="title">
       <str name="DBpath">${solr.solr.home:./solr}/alphabetical_browse/title_browse.db</str>
       <str name="field">title_fullStr</str>
+    </lst>
+
+    <lst name="lcc">
+      <str name="DBpath">${solr.solr.home:./solr}/alphabetical_browse/lcc_browse.db</str>
+      <str name="field">callnumber-a</str>
+    </lst>
+
+    <lst name="dewey">
+      <str name="DBpath">${solr.solr.home:./solr}/alphabetical_browse/dewey_browse.db</str>
+      <str name="field">dewey-raw</str>
+      <str name="ignoreDiacritics">yes</str>
     </lst>
 
   </requestHandler>
