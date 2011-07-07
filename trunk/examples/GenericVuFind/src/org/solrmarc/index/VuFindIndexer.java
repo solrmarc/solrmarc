@@ -20,11 +20,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -37,9 +40,15 @@ import org.marc4j.marc.Subfield;
 import org.solrmarc.tools.CallNumUtils;
 import org.solrmarc.tools.SolrMarcIndexerException;
 import org.ini4j.Ini;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
- * 
+ *
  * @author Robert Haschart
  * @version $Id: VuFindIndexer.java 224 2008-11-05 19:33:21Z asnagy $
  *
@@ -65,7 +74,7 @@ public class VuFindIndexer extends SolrIndexer
      * @throws Exception
      */
     /*
-    public VuFindIndexer(final String propertiesMapFile) throws FileNotFoundException, IOException, ParseException 
+    public VuFindIndexer(final String propertiesMapFile) throws FileNotFoundException, IOException, ParseException
     {
         super(propertiesMapFile);
     }
@@ -543,7 +552,7 @@ public class VuFindIndexer extends SolrIndexer
         if (result.isEmpty()) {
             result.add("Unknown");
         }
-        
+
         return result;
     }
 
@@ -578,20 +587,20 @@ public class VuFindIndexer extends SolrIndexer
      * @param record
      * @return Call number label
      */
-    public String getCallNumberLabel(final Record record) {       
-    
+    public String getCallNumberLabel(final Record record) {
+
         return getCallNumberLabel(record, "090a:050a");
     }
-    
+
     /**
      * Extract the call number label from a record
      * @param record
      * @return Call number label
      */
     public String getCallNumberLabel(final Record record, String fieldSpec) {
-        
+
         String val = getFirstFieldVal(record, fieldSpec);
-        
+
         if (val != null) {
             int dotPos = val.indexOf(".");
             if (dotPos > 0) {
@@ -602,7 +611,7 @@ public class VuFindIndexer extends SolrIndexer
             return val;
         }
     }
-    
+
     /**
      * Extract the subject component of the call number
      *
@@ -615,7 +624,7 @@ public class VuFindIndexer extends SolrIndexer
 
         return(getCallNumberSubject(record, "090a:050a"));
     }
-    
+
     /**
      * Extract the subject component of the call number
      *
@@ -721,8 +730,8 @@ public class VuFindIndexer extends SolrIndexer
      *
      * @param record
      * @param fieldSpec - which MARC fields / subfields need to be analyzed
-     * @param precisionStr - a decimal number (represented in string format) showing the 
-     *  desired precision of the returned number; i.e. 100 to round to nearest hundred, 
+     * @param precisionStr - a decimal number (represented in string format) showing the
+     *  desired precision of the returned number; i.e. 100 to round to nearest hundred,
      *  10 to round to nearest ten, 0.1 to round to nearest tenth, etc.
      * @return Set containing requested numeric portions of Dewey decimal call numbers
      */
@@ -730,7 +739,7 @@ public class VuFindIndexer extends SolrIndexer
         // Initialize our return value:
         Set<String> result = new LinkedHashSet<String>();
 
-        // Precision comes in as a string, but we need to convert it to a float:        
+        // Precision comes in as a string, but we need to convert it to a float:
         float precision = Float.parseFloat(precisionStr);
 
         // Loop through the specified MARC fields:
@@ -919,5 +928,172 @@ public class VuFindIndexer extends SolrIndexer
      */
     public String getLastIndexed(Record record) {
         return getLastIndexed(record, "001", "biblio");
+    }
+
+    /**
+     * Extract full-text from the documents referenced in the tags
+     *
+     * @param Record record
+     * @param String field spec to search for URLs
+     * @param String only harvest files matching this extension (null for all)
+     * @return String The full-text
+     */
+    public String getFulltext(Record record, String fieldSpec, String extension) {
+        String result = "";
+
+        // Get the path to Aperture web crawler (and return no text if it is unavailable)
+        String aperturePath = getAperturePath();
+        if (aperturePath == null) {
+            return null;
+        }
+
+        // Loop through the specified MARC fields:
+        Set<String> fields = getFieldList(record, fieldSpec);
+        Iterator<String> fieldsIter = fields.iterator();
+        if (fields != null) {
+            while(fieldsIter.hasNext()) {
+                // Get the current string to work on:
+                String current = fieldsIter.next();
+                // Filter by file extension
+                if (extension == null || current.endsWith(extension)) {
+                    // Load the aperture output for each tag into a string
+                    result = result + harvestWithAperture(current, aperturePath);
+                }
+            }
+        }
+        // return string to SolrMarc
+        return result;
+    }
+
+    /**
+     * Extract full-text from the documents referenced in the tags
+     *
+     * @param Record record
+     * @param String field spec to search for URLs
+     * @return String The full-text
+     */
+    public String getFulltext(Record record, String fieldSpec) {
+        return getFulltext(record, fieldSpec, null);
+    }
+
+    /**
+     * Extract full-text from the documents referenced in the tags
+     *
+     * @param Record record
+     * @return String The full-text
+     */
+    public String getFulltext(Record record) {
+        return getFulltext(record, "856u", null);
+    }
+
+    /**
+     * Extract the Aperture path from fulltext.ini
+     *
+     * @return String          Path to Aperture executables
+     */
+    public String getAperturePath() {
+        // Obtain path to Aperture from the fulltext.ini file:
+        Ini ini = new Ini();
+
+        // Find VuFind's home directory in the environment; if it's not available,
+        // try using a relative path on the assumption that we are currently in
+        // VuFind's root directory:
+        String vufindHome = System.getenv("VUFIND_HOME");
+        if (vufindHome == null) {
+            vufindHome = "";
+        }
+
+        String fulltextIniFile = vufindHome + "/web/conf/fulltext.ini";
+        File file = new File(fulltextIniFile);
+        try {
+            ini.load(new FileReader(fulltextIniFile));
+        } catch (Throwable e) {
+            dieWithError("Unable to access " + fulltextIniFile);
+        }
+        String aperturePath = ini.get("Aperture", "webcrawler");
+        if (aperturePath == null) {
+            return null;
+        }
+
+        // Drop comments if necessary:
+        int pos = aperturePath.indexOf(';');
+        if (pos >= 0) {
+            aperturePath = aperturePath.substring(0, pos).trim();
+        }
+
+        // Strip wrapping quotes if necessary (the ini reader won't do this for us):
+        if (aperturePath.startsWith("\"")) {
+            aperturePath = aperturePath.substring(1, aperturePath.length());
+        }
+        if (aperturePath.endsWith("\"")) {
+            aperturePath = aperturePath.substring(0, aperturePath.length() - 1);
+        }
+
+        return aperturePath;
+    }
+
+    /**
+     * Harvest the contents of a document file (PDF, Word, etc.) using Aperture.
+     * This method will only work if Aperture is properly configured in the
+     * web/conf/fulltext.ini file.  Without proper configuration, this will
+     * simply return an empty string.
+     *
+     * @param String The url extracted from the MARC tag.
+     * @param String The path to Aperture
+     * @return String The full-text
+     */
+    public String harvestWithAperture(String url, String aperturePath) {
+        String plainText = "";
+        // Create temp file.
+        File f = null;
+        try {
+            f = File.createTempFile("apt", ".txt");
+        } catch (Throwable e) {
+            dieWithError("Unable to create temporary file for full text harvest.");
+        }
+
+        // Delete temp file when program exits.
+        f.deleteOnExit();
+
+        // Construct the command to call Aperture
+        String cmd = aperturePath + " -o " + f.getAbsolutePath().toString()  + " -x " + url;
+
+        // Call Aperture
+        //System.out.println("Loading fulltext from " + url + ". Please wait ...");
+        try {
+            Process p = Runtime.getRuntime().exec(cmd);
+            BufferedReader stdInput = new BufferedReader(new
+                InputStreamReader(p.getInputStream()));
+            String s;
+            while ((s = stdInput.readLine()) != null) {
+                //System.out.println(s);
+            }
+            // Wait for Aperture to finish
+            p.waitFor();
+        } catch (Throwable e) {
+            dieWithError("Problem executing Aperture -- " + e.getMessage());
+        }
+
+        // Parse Aperture XML output
+        Document xmlDoc = null;
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            xmlDoc = db.parse(f);
+        } catch (Throwable e) {
+            dieWithError("Problem parsing Aperture XML -- " + e.getMessage());
+        }
+        NodeList nl = xmlDoc.getElementsByTagName("plainTextContent");
+        if(nl != null && nl.getLength() > 0) {
+            Node node = nl.item(0);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                plainText = plainText + node.getTextContent();
+            }
+        }
+
+        String badChars = "[^\\x0009\\x000A\\x000D\\x0020-\\xD7FF\\xE000-\\xFFFD]";
+        plainText =  Pattern.compile(badChars).matcher(plainText).replaceAll(" ");
+
+        return plainText;
     }
 }
