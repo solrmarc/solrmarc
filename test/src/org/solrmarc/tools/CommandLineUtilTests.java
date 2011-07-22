@@ -65,7 +65,7 @@ public class CommandLineUtilTests
             "599   $a2$b(YR.) 2008 NO. 34;$b(YR.) 2008 NO. 33;$bNR. 32 2007;",
             "596   $a2",
             "515   $aNone published 1980-1981.",
-            "852   $bALDERMAN$cALD-STKS$xpat#169090$x2x$xbind 4N=2 or 3yrs$xex.:  Nr. 15-18 1988-93$xindex ?$xuse copyright year for dating$zCURRENT ISSUES HELD IN THE PERIODICALS ROOM $=5071",
+            "852   $bALDERMAN$cALD-STKS$xpat#169090$x2x$xbind 4N=2 or 3yrs$xex.:  Nr. 15-18 1988-93$xindex ?$xuse copyright year for dating$zCURRENT ISSUES HELD IN THE PERIODICALS ROOM $x5071",
             "853 2 $82$anr.",
             "853 2 $83$anr.$i(year)$j(unit)",
             "853 2 $84$a(yr.)$bno.$u2$vc",
