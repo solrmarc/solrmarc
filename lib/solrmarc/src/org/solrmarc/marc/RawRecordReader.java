@@ -31,9 +31,16 @@ public class RawRecordReader
     private DataInputStream input;
     RawRecord nextRec = null;
     RawRecord afterNextRec = null;
+    boolean mergeRecords = true;
     
     public RawRecordReader(InputStream is)
     {
+        input = new DataInputStream(new BufferedInputStream(is));
+    }
+    
+    public RawRecordReader(InputStream is, boolean mergeRecords)
+    {
+        this.mergeRecords = mergeRecords;
         input = new DataInputStream(new BufferedInputStream(is));
     }
     
@@ -48,10 +55,13 @@ public class RawRecordReader
             if (afterNextRec == null)
             {
                 afterNextRec = new RawRecord(input);
-                while (afterNextRec != null && afterNextRec.getRecordBytes() != null && afterNextRec.getRecordId().equals(nextRec.getRecordId()))
+                if (mergeRecords)
                 {
-                    nextRec = new RawRecord(nextRec, afterNextRec);
-                    afterNextRec = new RawRecord(input);
+                    while (afterNextRec != null && afterNextRec.getRecordBytes() != null && afterNextRec.getRecordId().equals(nextRec.getRecordId()))
+                    {
+                        nextRec = new RawRecord(nextRec, afterNextRec);
+                        afterNextRec = new RawRecord(input);
+                    }
                 }
            }
             return(true);
