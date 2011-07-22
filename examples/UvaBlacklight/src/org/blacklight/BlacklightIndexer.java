@@ -1875,10 +1875,15 @@ public class BlacklightIndexer extends SolrIndexer
                 if (mappedCurVis.equals("HIDDEN")) continue; // this copy of the item is Hidden, go no further
                 if (mappedCurLoc != null) 
                 {
-                    if (mappedCurLoc.contains("$m"))
+                    if (mappedCurLoc.contains("$m") && mappedLib != null)
                     {
           //              mappedCurLoc.replaceAll("$l", mappedHomeLoc);
                         mappedCurLoc = mappedCurLoc.replaceAll("[$]m", mappedLib);
+                    }
+                    else if (mappedCurLoc.contains("$m") && mappedLib == null)
+                    {
+          //              mappedCurLoc.replaceAll("$l", mappedHomeLoc);
+                        mappedCurLoc = mappedCurLoc.replaceAll("[$]m[ ]?", "");
                     }
                     resultSet.add(mappedCurLoc);
                     continue;   // Used
@@ -2622,7 +2627,7 @@ public class BlacklightIndexer extends SolrIndexer
             Set<String> target = removeTrailingPunct(record, "521a");
             if (target == null || target.size() == 0)
             {
-                return ("None Listed");
+                return (null);
             }
             return(target.iterator().next());
         }
