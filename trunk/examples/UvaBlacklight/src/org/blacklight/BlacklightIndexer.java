@@ -2600,6 +2600,303 @@ public class BlacklightIndexer extends SolrIndexer
         return(prefix);
     }
     
+    public String getVideoRunTime(Record record)
+    {
+        Set<String> format = getCombinedFormatNew2(record);
+        if (Utils.setItemContains(format, "Video"))
+        {
+            String runtime = this.getFirstFieldVal(record, null, "008[18-20]");
+            if (runtime != null && runtime.matches("[0-9][0-9][0-9]"))
+            {
+                return(runtime.replaceAll("^0*", ""));
+            }
+        }
+        return(null);
+    }
+
+    public String getVideoTargetAudience(Record record)
+    {
+        Set<String> format = getCombinedFormatNew2(record);
+        if (Utils.setItemContains(format, "Video"))
+        {
+            Set<String> target = removeTrailingPunct(record, "521a");
+            if (target == null || target.size() == 0)
+            {
+                return ("None Listed");
+            }
+            return(target.iterator().next());
+        }
+        return(null);
+    }
+
+    public String getVideoRating(Record record)
+    {
+        Set<String> format = getCombinedFormatNew2(record);
+        if (Utils.setItemContains(format, "Video"))
+        {
+            Set<String> target = removeTrailingPunct(record, "521a");
+            if (target == null || target.size() == 0)
+            {
+                return ("None Listed");
+            }
+            String ratingString = target.iterator().next();
+            String rating = getRating(ratingString);
+            return(rating);
+        }
+        return(null);
+    }
+
+    private String getRating(String ratingString)
+    {
+        String rating = "Can't Determine";
+        if (ratingString.matches(".*PG[- ]?13.*"))  rating = "Rated: PG-13";
+        else if (ratingString.matches(".*TV[- ]?14.*"))  rating = "Rated: TV-14";
+        else if (ratingString.matches(".*TV[- ]?G.*"))  rating = "Rated: TV-G";
+        else if (ratingString.matches(".*TV[- ]?PG.*"))  rating = "Rated: TV-PG";
+        else if (ratingString.matches(".*TV[- ]?Y7.*"))  rating = "Rated: TV-Y7";
+        else if (ratingString.matches(".*TV[- ]?Y.*"))  rating = "Rated: TV-Y";
+        else if (ratingString.matches(".*TV[- ]?MA.*"))  rating = "Rated: TV-MA";
+        else if (ratingString.matches(".*NC[- ]?17.*"))  rating = "Rated: NC-17";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*UR.*"))  rating = "Unrated";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*NR.*"))  rating = "Not Rated";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*13([ ]?(and )?)[Uu][Pp].*"))  rating = "Rated: PG-13";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*X[^A-Za-z].*"))  rating = "Rated: X ";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*M[^A-Za-z].*"))  rating = "Rated: M";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)?[^A-Za-z]*R[^A-Za-z].*"))  rating = "Rated: R";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)?[^A-Za-z]*R"))  rating = "Rated: R";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*PG.*"))  rating = "Rated: PG";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*18.*"))  rating = "Rated: 18+ years";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*T[^A-Za-z].*"))  rating = "Rated: T";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*T"))  rating = "Rated: T";
+        else if (ratingString.matches(".*R [Rr]at(ed|ing).*"))  rating = "Rated: R";
+        else if (ratingString.matches(".*: R[^A-Za-z].*"))  rating = "Rated: R";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*G[^A-Za-z].*"))  rating = "Rated: G";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*U[^A-Za-z].*"))  rating = "Rated: G";
+        else if (ratingString.matches(".*[Rr]at(ed|ing)[^A-Za-z]*G"))  rating = "Rated: G";
+        else if (ratingString.matches(".*[Uu]n[-]?rated.*"))  rating = "Unrated";
+        else if (ratingString.matches(".*PG.*"))  rating = "Rated: PG";
+        else if (ratingString.matches(".*NR.*"))  rating = "Not Rated";
+        else if (ratingString.matches(".*[Nn]ot [Rr]ated.*"))  rating = "Not Rated";
+        else if (ratingString.matches(".*[Gg]rade[s]?( level)?[^0-9A-Za-z]*[K0-9]+.*"))  
+        {
+            rating = ratingString.replaceAll(".*[Gg]rade[s]?( level)?[^0-9A-Za-z]*([K0-9]+).*", "Rated: $2+ grade" );
+        }
+        else if (ratingString.matches(".*[Nn]o[t]? (be )?[Rr]ecom[m]?[ea]nd[^0-9]*[0-9]+.*"))  
+        {
+            rating = ratingString.replaceAll(".*[Nn]o[t]? (be )?[Rr]ecom[m]?[ea]nd[^0-9]*([0-9]+).*", "Rated: $2+ years" );
+        }
+        else if (ratingString.matches(".*([Ss]uitable|[Rr]ecommended|[Ii]tended|[Ss]uggested).*[Ff]or[^0-9]*[0-9]+.*"))  
+        {
+            rating = ratingString.replaceAll(".*([Ss]uitable|[Rr]ecommended|[Ii]tended|[Ss]uggested).*[Ff]or[^0-9]*([0-9]+).*", "Rated: $2+ years" );
+        }
+        else if (ratingString.matches(".*[Rr]estricted.*[Tt]o[^0-9]*[0-9]+.*"))  
+        {
+            rating = ratingString.replaceAll(".*[Rr]estricted.*[Tt]o[^0-9]*([0-9]+).*", "Rated: $1+ years" );
+        }
+        else if (ratingString.matches(".*[Mm]ayores [Dd]e[^0-9]*[0-9]+.*"))  
+        {
+            rating = ratingString.replaceAll(".*[Mm]ayores [Dd]e[^0-9]*([0-9]+).*", "Rated: $1+ years" );
+        }
+        else if (ratingString.matches(".*[Ff]reigegeben [Aa]b[^0-9]*[0-9]+.*"))  
+        {
+            rating = ratingString.replaceAll(".*[Ff]reigegeben [Aa]b[^0-9]*([0-9]+).*", "Rated: $1+ years" );
+        }
+        else if (ratingString.matches(".*[Jj]unior.*([Hh]igh.*|[Aa]dult|[Cc]ollege).*"))  rating = "Rated: Junior High+";
+        else if (ratingString.matches(".*[Hh]igh.*([Ss]chool|[Aa]dult|[Cc]ollege).*"))  rating = "Rated: High School+";
+        else if (ratingString.matches(".*([Cc]ollege).*"))  rating = "Rated: College+";
+        else if (ratingString.matches(".*[Oo]ver [0-9]+ [Yy]ears.*"))  
+        {
+            rating = ratingString.replaceAll(".*[Oo]ver ([0-9]+) [Yy]ears.*", "Rated: $1+ years" );
+        }
+        else if (ratingString.matches(".*[Aa]ge[sd]? [0-9]+.*([Aa]bove|[Aa]dult|[Oo]lder|[Oo]ver|[Uu]p).*"))  
+        {
+            rating = ratingString.replaceAll(".*[Aa]ge[sd]? ([0-9]+).*", "Rated: $1+ years" );
+        }
+        else if (ratingString.matches("[0-9]+(years)?.*([Aa]dult|[Oo]lder|[Oo]ver|[Uu]p).*"))  
+        {
+            rating = ratingString.replaceAll("([0-9]+).*", "Rated: $1+ years" );
+        }
+        else if (ratingString.matches(".* [0-9]+(years)?.*([^A-Za-z])([Aa]dult|[Oo]lder|[Oo]ver|[Uu]p).*"))  
+        {
+            rating = ratingString.replaceAll(".* ([0-9]+).*", "Rated: $1+ years" );
+        }
+        else if (ratingString.matches(".*[Ss]uggested[^0-9]*[0-9]*[+]"))  
+        {
+            rating = ratingString.replaceAll(".*[Ss]uggested[^0-9]*([0-9]+).*", "Rated: $1+ years" );
+        }
+        else if (ratingString.matches("^General.*"))  rating = "Rated: G";
+        else if (ratingString.matches("^Ge.?ne.?ral.*"))  rating = "Rated: G";
+        else if (ratingString.matches(".*: General.*"))  rating = "Rated: G";
+        else if (ratingString.matches(".*Universal.*"))  rating = "Rated: G";
+        else if (ratingString.matches(".*[Pp]er [Tt]utti.*"))  rating = "Rated: G";
+        else if (ratingString.matches("^[\"]?Restricted.*"))  rating = "Rated: R";
+        else if (ratingString.matches("^R[^A-Za-z].*"))  rating = "Rated: R";
+        else if (ratingString.matches(".*(:|[Ff]or) [Aa]dult.*"))  rating = "Rated: Adult";
+        else if (ratingString.matches("^Adult.*"))  rating = "Rated: Adult";
+        else if (ratingString.matches("^Mature.*"))  rating = "Rated: Mature";
+        else if (ratingString.matches(".*(:|[Ff]or) [Mm]ature.*"))  rating = "Rated: Mature";
+        else if (ratingString.matches(".*14A.*"))  rating = "Rated: 14A";
+        else if (ratingString.matches(".*15A.*"))  rating = "Rated: 15A";
+        else if (ratingString.matches(".*18A.*"))  rating = "Rated: 18A";
+        else if (ratingString.matches(".*[0-9]+.*([Uu]p|[Oo]lder|[+])A.*"))  
+        {
+            rating = ratingString.replaceAll(".*([0-9]+).*75k", "Rated: $1+ years" );
+        }
+        else if (ratingString.matches(".*[Vv]iewer [Dd]iscretion.*"))  rating = "Discretion Advised";
+        else if (ratingString.matches(".*[Pp]arental ([Dd]iscretion|[Gg]uidance).*"))  rating = "Discretion Advised";
+        else if (ratingString.matches(".*[Ss]uitable.*[Ff]or.*([Gg]eneral|[Aa]ll).*") &&
+                 !ratingString.matches("[Nn]ot.*[Ss]uitable.*[Ff]or.*([Gg]eneral|[Aa]ll).*"))  rating = "Rated: G";
+        else if (ratingString.matches(".*[Aa]ll [Aa]ge[s]?.*"))  rating = "Rated: G";
+        else if (ratingString.matches(".*G [Rr]at(ed|ing).*"))  rating = "Rated: G";
+
+        return(rating);
+    }
+
+    public Set<String> getVideoDirector(Record record)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        Set<String> format = getCombinedFormatNew2(record);
+        if (Utils.setItemContains(format, "Video"))
+        {
+            String responsibility = getFirstFieldVal(record, null, "245c");
+            if (responsibility != null)
+            {
+                Set<String> directors = getVideoDirectorsFrom245c(responsibility);
+                result.addAll(directors);
+            }
+            List<VariableField> personalNames = record.getVariableFields("700");
+            for (VariableField vf : personalNames)
+            {
+                DataField df = (DataField)vf;
+                if (ChkSubfield(df, '4', "drt") || ChkSubfield(df, 'c', ".*director.*") || ChkSubfield(df, 'e', ".*direct.*"))
+                {
+                    String name = df.getSubfield('a').getData();
+                    name = Utils.cleanData(name);
+                    name = name.replaceAll("([A-Z][^,]*),[ ]?(.*)", "$2 $1");
+                    result.add(name);
+                }
+            }
+        }
+        return(result);
+    }
+    
+    private boolean ChkSubfield(DataField df, char c, String pattern)
+    {
+        List<Subfield> sfs = df.getSubfields(c);
+        for (Subfield sf : sfs)
+        {
+            if (sf.getData().matches(pattern))  return(true);
+        }
+        return false;
+    }
+
+    public static Set<String> getVideoDirectorsFrom245c(String responsibility)
+    {
+        Set<String> result = new LinkedHashSet<String>();;
+        String semiparts[] = responsibility.split(";");
+        boolean respHasDirected = responsibility.matches(".*[Dd]irect(ed|or|ion).*");
+        for (String part : semiparts)
+        {
+            part = part.trim();
+            if (part.matches(".*[Dd]irect(ed|or|ion).*") || (!respHasDirected && part.matches(".*a film by.*")))
+            {
+                String trimmed;
+                if (part.matches(".*[Dd]irector[^A-Z]*"))
+                {
+                    part = part.replaceAll(" *[\\[]", ", ");
+                    part = part.replaceAll("[\\]]", "");
+                    part = part.replaceAll("director.*", "director");
+                    part = part.replaceAll(" [a-z/]+/director", " director");
+                    part = part.replaceAll(" [a-z ,]+ director", " director");
+                    part = part.replaceFirst(".* (of|by)", "by");
+                    part = part.replaceFirst("by ", "");
+                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|III|IV)", "* $1");
+                    part = part.replaceFirst("[,]?[ ]?director", "");
+                    part = part.replaceAll("([,][ ]| & )", "#");
+                    part = part.replaceAll("[*]", ",");
+
+                    String commaparts[] = part.split("#");
+                    for (String subpart : commaparts)
+                    {
+                        subpart = nameClean(subpart);
+                        if (subpart != null) result.add(subpart);
+                    }
+                }
+                else if (part.matches(".*[Dd]irect(ed|ion).*?by.*")|| part.matches(".*a film by.*"))
+                {
+                    part = part.replaceFirst(".*[Dd]irect(ed|ion).*?by[],]? ", "directified by ");
+                    part = part.replaceFirst(".*a film by", "directified by ");
+                    part = part.replaceAll("[]]", "");
+                    part = part.replaceAll(" (and|with|et) ", " & ");
+                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|III|IV)", "* $1");
+                    part = part.replaceAll("([A-Z][^ .][^ .][^ .]+)[.].*", "$1");
+                    part = part.replaceAll("brothers", "Brothers");
+                    part = part.replaceAll("directified by[ ]*(([\"]?[A-Z][^ ]+[\"]?[,]?[ ]*|[ ]?&[ ]|von |de |the )+).*", "$1");
+                    part = part.replaceAll("^([A-Z][^ .]+) & ([A-Z][^ .]+) ([A-Z][^ .]+)", "$1 $3 & $2 $3");
+                    part = part.replaceAll("([,][ ]| & )", "#");
+                    part = part.replaceAll("[*]", ",");
+                    part = part.replaceAll("[ ][ ]+", " ");
+                    String commaparts[] = part.split("#");
+                    for (String subpart : commaparts)
+                    {
+                        subpart = nameClean(subpart);
+                        if (subpart != null) result.add(subpart);
+                    }
+                }
+                else if (part.matches(".*[Dd]irector[^a-rt-z\'].*[A-Z].*"))
+                {
+                    part = part.replaceFirst(".*[Dd]irector", "director");
+                    part = part.replaceAll("[ ]?([.][.][.])?[ ]?[\\[][^\\]]*[\\]]", "");
+                    part = part.replaceAll("[]]", "");
+                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|III|IV)", "* $1");
+                    part = part.replaceFirst("director[^A-Z]*", "director: ");
+                    part = part.replaceAll(" (and|with|et) ", " & ");
+                    part = part.replaceAll(",[ ]?[a-z].*", "");
+                    part = part.replaceAll(": [^(]*[)], ", ": ");
+                    part = part.replaceAll("([,][ ]| & )", "#");
+                    part = part.replaceAll("[*]", ",");
+                    part = part.replaceAll("[ ][ ]+", " ");
+                    part = part.replaceFirst("director: ", "");
+                    String commaparts[] = part.split("#");
+                    for (String subpart : commaparts)
+                    {
+                        subpart = nameClean(subpart);
+                        if (subpart != null) result.add(subpart);
+                    }
+                }
+                else if (part.matches(".*direction.*"))
+                {
+                    part = part.replaceFirst(".*direction[^A-Z]*", "direction: ");
+                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|III|IV)", "* $1");
+                    part = part.replaceAll(" (and|with|et) ", " & ");
+                    part = part.replaceAll("[\\]]", "");
+                    part = part.replaceAll("([,][ ]| & )", "#");
+                    part = part.replaceAll("[*]", ",");
+                    part = part.replaceAll("[ ][ ]+", " ");
+                    part = part.replaceFirst("direction: ", "");
+                    String commaparts[] = part.split("#");
+                    for (String subpart : commaparts)
+                    {
+                        subpart = nameClean(subpart);
+                        if (subpart != null) result.add(subpart);
+                    }
+                }
+            }
+        }
+        return(result);
+    }
+
+    private static String nameClean(String subpart)
+    {
+        if (subpart.matches(".*(.*)"));
+            subpart = subpart.replaceAll("(.*)[(].*[)]", "$1");
+        if (subpart.matches(".*, Inc[.]"))
+            return(null);
+        subpart = Utils.cleanData(subpart);
+        if (subpart.length() == 0) return(null);
+        return(subpart);
+    }
+
     public String getOriginalReleaseDate(Record record)
     {
         if (releaseDatePattern == null)
