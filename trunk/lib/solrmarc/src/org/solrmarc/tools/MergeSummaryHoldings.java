@@ -7,6 +7,7 @@ import org.marc4j.*;
 import org.marc4j.marc.*;
 import org.solrmarc.marc.*;
 import org.solrmarc.marcoverride.MarcSplitStreamWriter;
+import org.solrmarc.testUtils.RecordTestingUtils;
 
 
 /**
@@ -18,16 +19,41 @@ import org.solrmarc.marcoverride.MarcSplitStreamWriter;
  * Note that the MHLD file must have records in StringNaturalCompare ascending
  *  order.
  *  
- * @author naomi
+ * Note that Naomi worked with this code to make it more testable; see
+ *  org.solrmarc.tools.MergeSummaryHoldingsTests
+ *  
+ * But she forked this class for her own use,  ultimately, and did not
+ *  continue all the way down this path.
+ *  
+ * @author Bob Haschart, revised by Naomi Dushay
  *
  */
 public class MergeSummaryHoldings implements MarcReader
 {
     /** default list of MHLD fields to be merged into the bib record, separated by '|' char */
-    public static String mhldFldsToMergeDefault = "852|866|867|863|853|868";
+    public static String DEFAULT_MHLD_FLDS_TO_MERGE = "852|853|863|866|867|868";
+    
+    public static Comparator ID_COMPARATOR = new StringNaturalCompare();
 
     static boolean verbose = false;
     static boolean veryverbose = false;
+
+    /** true if we want to attempt to use marc records if they are invalid in ways we can safely ignore 
+     * used when reading bib and mhld records */
+    private boolean permissive;
+
+    /** true if records should be converted to UTF-8 when they become Record objects
+    * used when reading bib and mhld records */
+    private boolean toUtf8;
+    
+    /** the encoding to use as a default for reading the records; usually MARC8
+    * used when reading bib and mhld records */
+    private String defaultEncoding = null;
+
+    /** list of MHLD fields to be merged into the bib record, separated by '|' char */
+    private String mhldFldsToMerge = null;
+
+
 
     /** for the file of MARC bib records */
     private RawRecordReader bibRecsRawRecRdr = null;
@@ -41,6 +67,13 @@ public class MergeSummaryHoldings implements MarcReader
     
     /** for the file of MARC MHLD records */
     private RawRecordReader mhldRawRecRdr = null;
+
+    /**
+     * the last mhld record read, but not yet compared with a bib record
+     */
+    private RawRecord currentMhldRec = null;
+    
+    
 
     /**
      * used to find an MHLD record matching the current bib record
@@ -62,23 +95,7 @@ public class MergeSummaryHoldings implements MarcReader
      * */
     private String prevMhldRecID = null;
 
-    /** true if we want to attempt to use marc records if they are invalid in ways we can safely ignore 
-     * used when reading bib and mhld records */
-    private boolean permissive;
-
-    /** true if records should be converted to UTF-8 when they become Record objects
-    * used when reading bib and mhld records */
-    private boolean toUtf8;
-    
-    /** the encoding to use as a default for reading the records; usually MARC8
-    * used when reading bib and mhld records */
-    private String defaultEncoding = null;
-
-    /** list of MHLD fields to be merged into the bib record, separated by '|' char */
-    private String mhldFldsToMerge = null;
-
-
-    
+   
     public MergeSummaryHoldings(RawRecordReader bibRecsRawRecRdr, boolean permissive, boolean toUtf8, String defaultEncoding, 
                                 String mhldRecsFileName, String mhldFldsToMerge)
     {
@@ -89,6 +106,7 @@ public class MergeSummaryHoldings implements MarcReader
         this.toUtf8 = toUtf8;
         this.defaultEncoding = defaultEncoding;
         this.mhldFldsToMerge = mhldFldsToMerge;
+        System.setProperty("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
         readMhldFileFromBeginning(mhldRecsFileName);
     }
     
@@ -120,14 +138,17 @@ public class MergeSummaryHoldings implements MarcReader
         }
         catch (FileNotFoundException e)
         {
+			System.err.println("No file found at " + mhldRecsFileName);
         	mhldRawRecRdr = null;           
         }
         prevMhldRecID = null;
         unmatchedPrevMhldRec = null;
+//    	currentMhldRec = getNextMhld();
     }
 
     /**
-     * return true if there is another record in the bib records file
+     * NOTE: not used by main()
+     * @return true if there is another record in the bib records file
      */
     public boolean hasNext()
     {
@@ -139,11 +160,14 @@ public class MergeSummaryHoldings implements MarcReader
     }
     
     /**
-     * Since this class is a MarcReader, it must implement the next() method.
+     * NOTE: not used by main();
+     *   Since this class is a MarcReader, it must implement the next() method.
      * Get the next bib record from the file of MARC bib records, then look 
      *  for a matching MARC MHLD record in the MHLD recs file, and if found, 
      *  merge the MHLD fields specified in mhldFldsToMerge into the bib 
      *  record and then return the bib record.
+     * @return Record object containing fields merged from matching mhld 
+     *  record, if there was one
      */
     public Record next()
     {
@@ -158,11 +182,98 @@ public class MergeSummaryHoldings implements MarcReader
             bibRec = bibRecsMarcReader.next();
         }
         RawRecord matchingRawMhldRec = getMatchingMhldRawRec(bibRec.getControlNumber());
-        bibRec = addMhldFieldsToBibRec(bibRec, matchingRawMhldRec);
+        if (matchingRawMhldRec != null)
+        {
+            bibRec = addMhldFieldsToBibRec(bibRec, matchingRawMhldRec);
+        }
+        
+// Naomi's failed experiment - Mhld reader needs to be a combining reader
+/*        
+        if (bibRecsRawRecRdr != null && bibRecsRawRecRdr.hasNext()) 
+        {
+            RawRecord rawBibRec = bibRecsRawRecRdr.next();
+            bibRec = rawBibRec.getAsRecord(permissive, toUtf8, "999", defaultEncoding);
+            if (bibRec != null)
+            {
+                Set<RawRecord> matchingRawMhldRecs = getMatchingMhldRawRecs(rawBibRec.getRecordId());
+                for (Iterator iter = matchingRawMhldRecs.iterator(); iter.hasNext();) 
+                {
+                    RawRecord matchingRawMhldRec = (RawRecord) iter.next();
+                    bibRec = addMhldFieldsToBibRec(bibRec, matchingRawMhldRec);
+                }
+            }
+        }
+*/        
+        
         return(bibRec);
     }
 
     
+    /**
+     * FIXME:  doesn't work:  mhld reader needs to be a (non-existent) RawRecordCombiningReader
+     * NOTE: not used by main(); new method by Naomi Dushay 
+     * Look for records in the MHLD file that match the bibId, returning all
+     *  matching records as a Set of RawRecord objects.  Not that "matching"
+     *  means the Ids match, where id is from RawRecord.getRecordId.
+     *  
+     * @param bibRecID - the id to match
+     * @return Set of RawRecord objects corresponding to MHLD records that match
+     *  the bibId
+     */
+    private Set<RawRecord> getMatchingMhldRawRecs(String bibRecID)
+    {
+        Set<RawRecord> result = new LinkedHashSet<RawRecord>();
+        
+        int compareResult = ID_COMPARATOR.compare(currentMhldRec.getRecordId(), bibRecID);
+        
+        if (compareResult > 0)
+            // MHLD id is after bib id:  we're done and we do not advance in MHLD file
+            return result;
+        else
+        {
+            if (compareResult == 0)
+                // current MHLD matches the bibRec: keep it and look for more matches
+                result.add(currentMhldRec);
+
+            // proceed to next MHLD record and look for another match
+            //  but only if it's not the last MHLD in the file
+            // NOTE:  THIS is where the assumption that the bib file is in ascending ID order is made
+            if (mhldRawRecRdr.hasNext())
+            {
+                currentMhldRec = getNextMhld();
+                result.addAll(getMatchingMhldRawRecs(bibRecID));
+            }
+        }
+
+        return result;
+    }
+    
+    /**
+     * NOTE: not used by main(); new method by Naomi Dushay 
+     * NOTE: only call this method if:
+     *  1) you are sure there is a next record in the file
+     *    OR
+     *  2) you want to start over from the beginning of the MHLD file if there
+     *    are no more records to read from the file 
+     * @return the next record in the MHLD file, if there is one.  Otherwise
+     *  start reading the mhld file from the beginning, and return the first record.
+     */
+    private RawRecord getNextMhld()
+    {
+    	if (mhldRawRecRdr != null)
+    	{
+        	if (mhldRawRecRdr.hasNext())
+        		// there is another record
+                currentMhldRec = mhldRawRecRdr.next(); 
+        	else
+        		readMhldFileFromBeginning(mhldRecsFileName); // sets currentMhldRec
+
+        	return currentMhldRec;
+    	}
+
+    	return null;
+    }
+
     
     /**
      * given a bib record ID, find the next MHLD record with a matching id.  
@@ -175,11 +286,9 @@ public class MergeSummaryHoldings implements MarcReader
      */
     private RawRecord getMatchingMhldRawRec(String bibRecID)
     {
-    	Comparator<String> comparator = new StringNaturalCompare();
-    	
     	// if the id before the last read MHLD id is bigger than the bib id to be 
     	//   matched, then start over in the mhld file
-        if (prevMhldRecID != null && comparator.compare(prevMhldRecID, bibRecID) > 0)
+        if (prevMhldRecID != null && ID_COMPARATOR.compare(prevMhldRecID, bibRecID) > 0)
         {
         	readMhldFileFromBeginning(mhldRecsFileName);
         }
@@ -194,7 +303,7 @@ public class MergeSummaryHoldings implements MarcReader
         
         // look for an MHLD record that matches the bib rec id, up until the MHLD record id comes after the bib record id;  
         // also keep track of the prior MHLD rec id while searching 
-        while (mhldRawRecRdr != null && mhldRawRecRdr.hasNext() && comparator.compare(unmatchedPrevMhldRec.getRecordId(), bibRecID) < 0)
+        while (mhldRawRecRdr != null && mhldRawRecRdr.hasNext() && ID_COMPARATOR.compare(unmatchedPrevMhldRec.getRecordId(), bibRecID) < 0)
         {
         	// keep the previous MHLD id before we get the new MHLD record
             prevMhldRecID = unmatchedPrevMhldRec.getRecordId();
@@ -203,7 +312,7 @@ public class MergeSummaryHoldings implements MarcReader
         
         // if we have a matching mhld, then set prevMhldRecID to the matching record and set unmatchedPrevMhldRec to null
         //  before returning the matching MHLD record
-        if (unmatchedPrevMhldRec != null && comparator.compare(unmatchedPrevMhldRec.getRecordId(), bibRecID) == 0)
+        if (unmatchedPrevMhldRec != null && ID_COMPARATOR.compare(unmatchedPrevMhldRec.getRecordId(), bibRecID) == 0)
         {
             RawRecord matchingMhldRec = unmatchedPrevMhldRec; 
             unmatchedPrevMhldRec = null;
@@ -211,18 +320,19 @@ public class MergeSummaryHoldings implements MarcReader
             return(matchingMhldRec);
         }
         
-        // booby prize
-        return(null);
+        return(null);		// booby prize
     }
     
     /**
+     * NOTE: not used by main() - only used by next()
+     * 
      * given a MARC bib record as a Record object, and a MARC MHLD record as
      *  a RawRecord object, merge the MHLD fields indicated in class var
      *  mhldFldsToMerge into the bib record, first removing any of those fields
      *  already existing in the bib record.
      * @param bibRecord
      * @param rawMhldRecord
-     * @return the bib record with the MHLD fields merged in
+     * @return the bib record with the MHLD fields merged in prior to the 999
      */
     private Record addMhldFieldsToBibRec(Record bibRecord, RawRecord rawMhldRecord)
     {
@@ -232,11 +342,144 @@ public class MergeSummaryHoldings implements MarcReader
         {
             bibRecord.removeVariableField(vf);
         }
-        bibRecord = MarcCombiningReader.combineRecords(bibRecord, mhldRecord, mhldFldsToMerge);
+        bibRecord = MarcCombiningReader.combineRecords(bibRecord, mhldRecord, mhldFldsToMerge, "999");
         return(bibRecord);
     }
 
     /**
+     * this is a Naomi Dushay rewrite method, not called by main(), written
+     *   basically for testing 
+     * for each bib record in the bib rec file 
+     *  look for a corresponding mhld record.  If a match is found, 
+     *    1) remove any existing fields in the bib record that duplicate the mhld fields to be merged into the bib record
+     *    2) merge the mhld fields into the bib record
+     * then add the bib record (whether it had a match or not) to the List of records
+     * @param bibRecsFileName - the name of the file containing MARC Bibliographic records
+     * @param mhldRecsFileName - the name of the file containing MARC MHLD records
+     * @return Map of ids -> Record objects for the bib records, which will include mhld fields if a match was found
+     */
+    public static Map<String, Record> mergeMhldsIntoBibRecordsAsMap(String bibRecsFileName, String mhldRecsFileName)
+        throws IOException
+    {
+        Map<String, Record> results = new HashMap<String, Record>();
+        RawRecordReader bibsRawRecRdr = new RawRecordReader(new FileInputStream(new File(bibRecsFileName)));
+
+        boolean permissive = true;
+        boolean toUtf8 = false;
+        MergeSummaryHoldings merger = new MergeSummaryHoldings(bibsRawRecRdr, permissive, toUtf8, "MARC8", 
+                                                               mhldRecsFileName, DEFAULT_MHLD_FLDS_TO_MERGE);
+        verbose = true;
+        veryverbose = true;
+        while (merger.hasNext()) 
+        {
+            Record bibRecWithPossChanges = merger.next();
+            results.put(RecordTestingUtils.getRecordIdFrom001(bibRecWithPossChanges), bibRecWithPossChanges);
+        }
+        return results;
+    }
+
+    
+    /**
+     * this is a Naomi Dushay rewrite method, not called by main()
+     * for each bib record in the bib rec file 
+     *  look for a corresponding mhld record.  If a match is found, 
+     *    1) remove any existing fields in the bib record that duplicate the mhld fields to be merged into the bib record
+     *    2) merge the mhld fields into the bib record
+     * then write the bib record (whether it had a match or not) to stdout
+     * @param bibRecsFileName - the name of the file containing MARC Bibliographic records
+     * @param mhldRecsFileName - the name of the file containing MARC MHLD records
+     * @return void, but the bib records will be written to standard out
+     */
+    public static void mergeMhldRecsIntoBibRecsAsStdOut2(String bibRecsFileName, String mhldRecsFileName)
+        throws IOException
+    {
+        RawRecordReader bibsRawRecRdr = new RawRecordReader(new FileInputStream(new File(bibRecsFileName)));
+        
+        boolean permissive = true;
+        boolean toUtf8 = false;
+        MergeSummaryHoldings merger = new MergeSummaryHoldings(bibsRawRecRdr, permissive, toUtf8, "MARC8", 
+                                                               mhldRecsFileName, DEFAULT_MHLD_FLDS_TO_MERGE);
+        verbose = true;
+        veryverbose = true;
+        MarcWriter writer = new MarcSplitStreamWriter(System.out, "ISO-8859-1", 70000, "999");
+        while (merger.hasNext()) 
+        {
+            Record bibRecWithPossChanges = merger.next();
+            writer.write(bibRecWithPossChanges);
+            System.out.flush();
+        }
+    }
+
+    
+    
+    /**
+     * called from main()
+     * 
+     * for each bib record in the "file" that has a corresponding mhld record
+     *  1) remove any existing fields in the bib record that duplicate the mhld fields to be merged into the bib record
+     *  2) merge the mhld fields into the bib record
+     *  3) write the resulting record to stdout (always if allRecords = true;  only if bib record changed if allRecords = false)
+     * 
+     * @param bibsRawRecRdr - a RawRecordReader instantiated for a file of MARC bibliographic records
+     * @param mhldRecsFileName - the name of the file containing MARC MHLD records
+     * @param outputAllBibs - write the bib record to stdout even if it wasn't changed
+     */
+    private static void mergeMhldsIntoBibRecsAsStdOut(RawRecordReader bibsRawRecRdr, String mhldRecsFileName, boolean outputAllBibs)
+    {
+        MergeSummaryHoldings merger = new MergeSummaryHoldings(bibsRawRecRdr, true, false, "MARC8", 
+                                                               mhldRecsFileName, DEFAULT_MHLD_FLDS_TO_MERGE);
+        RawRecord rawBibRecCurrent = null;
+        RawRecord matchingRawMhldRec = null;
+        MarcWriter writer = new MarcSplitStreamWriter(System.out, "ISO-8859-1", 70000, "999");
+        while (bibsRawRecRdr.hasNext())
+        {
+        	rawBibRecCurrent = bibsRawRecRdr.next();
+            matchingRawMhldRec = merger.getMatchingMhldRawRec(rawBibRecCurrent.getRecordId());
+            try
+            {
+                if (matchingRawMhldRec != null)
+                {
+                	// remove any existing fields in the bib record that duplicate mhld fields to be merged into the bib record
+                    Record bibRecWithChanges = rawBibRecCurrent.getAsRecord(true, false, "999", "MARC8");
+                    Record bibRecWithoutChanges = null;                    
+                    boolean removedField = false;
+                    List<VariableField> lvf = (List<VariableField>) bibRecWithChanges.getVariableFields(DEFAULT_MHLD_FLDS_TO_MERGE.split("[|]"));
+                    for (VariableField vf : lvf)
+                    {
+                        bibRecWithChanges.removeVariableField(vf);
+                        removedField = true;
+                    }
+                    
+                    // we will ensure that there is a difference between the orig record and the rec with removed field(s)
+                    if (removedField) 
+                    	bibRecWithoutChanges = rawBibRecCurrent.getAsRecord(true, false, "999", "MARC8");
+
+                    Record matchingMhldRec = matchingRawMhldRec.getAsRecord(true, false, DEFAULT_MHLD_FLDS_TO_MERGE, "MARC8");
+                    
+                    // prepare the merged record
+                    bibRecWithChanges = MarcCombiningReader.combineRecords(bibRecWithChanges, matchingMhldRec, DEFAULT_MHLD_FLDS_TO_MERGE, "999");
+                    
+                    // only keep the merged record if it is different from the original record, or if we are retaining all bibs
+                    if (outputAllBibs == true || !removedField || !bibRecWithoutChanges.toString().equals(bibRecWithChanges.toString()))
+                    {
+                        writer.write(bibRecWithChanges);
+                        System.out.flush();
+                    }
+                }
+                else if (outputAllBibs == true)
+                {
+                    System.out.write(rawBibRecCurrent.getRecordBytes());
+                    System.out.flush();
+                }
+            }
+            catch (IOException e) 
+            {
+                System.err.println("Error writing record " + rawBibRecCurrent.getRecordId());
+            }
+        }
+    }
+
+     /**
      * Given a file of MARC MHLD records and a file of MARC Bibliographic records,
      *  merge selected fields from the MHLD records into matching MARC Bib records.  
      *  Ignores MHLD records with no matching bib record.
@@ -290,7 +533,6 @@ public class MergeSummaryHoldings implements MarcReader
             }
             catch (FileNotFoundException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
                 System.exit(1);
             }
@@ -299,79 +541,10 @@ public class MergeSummaryHoldings implements MarcReader
         {
             bibsRawRecRdr = new RawRecordReader(System.in);
         }
-        
+
         System.setProperty("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
-        mergeMhldRecsIntoBibRecs(bibsRawRecRdr, mhldRecsFileName, outputAllBibs);
+        mergeMhldsIntoBibRecsAsStdOut(bibsRawRecRdr, mhldRecsFileName, outputAllBibs);
         System.exit(0);
     }
     
-    
-    /**
-     * called from main()
-     * 
-     * for each bib record in the "file" that has a corresponding mhld record
-     *  1) remove any existing fields in the bib record that duplicate the mhld fields to be merged into the bib record
-     *  2) merge the mhld fields into the bib record
-     *  3) write the resulting record to stdout (always if allRecords = true;  only if bib record changed if allRecords = false)
-     * 
-     * @param bibsRawRecRdr - a RawRecordReader instantiated for a file of MARC bibliographic records
-     * @param mhldRecsFileName - the name of the file containing MARC MHLD records
-     * @param outputAllBibs - write the bib record to stdout even if it wasn't changed
-     */
-    private static void mergeMhldRecsIntoBibRecs(RawRecordReader bibsRawRecRdr, String mhldRecsFileName, boolean outputAllBibs)
-    {
-        MergeSummaryHoldings merger = new MergeSummaryHoldings(bibsRawRecRdr, true, false, "MARC8", 
-                                                               mhldRecsFileName, mhldFldsToMergeDefault);
-        RawRecord rawBibRecCurrent = null;
-        RawRecord matchingRawMhldRec = null;
-        MarcWriter writer = new MarcSplitStreamWriter(System.out, "ISO-8859-1", 70000, "999");
-        while (bibsRawRecRdr.hasNext())
-        {
-// FIXME:  we may need a loop within this loop in case there is more than one MHLD record matching the same bib record
-
-        	rawBibRecCurrent = bibsRawRecRdr.next();
-            matchingRawMhldRec = merger.getMatchingMhldRawRec(rawBibRecCurrent.getRecordId());
-            try
-            {
-                if (matchingRawMhldRec != null)
-                {
-                	// remove any existing fields in the bib record that duplicate mhld fields to be merged into the bib record
-                    Record bibRecWithChanges = rawBibRecCurrent.getAsRecord(true, false, "999", "MARC8");
-                    Record bibRecWithoutChanges = null;                    
-                    boolean removedField = false;
-                    List<VariableField> lvf = (List<VariableField>) bibRecWithChanges.getVariableFields(mhldFldsToMergeDefault.split("[|]"));
-                    for (VariableField vf : lvf)
-                    {
-                        bibRecWithChanges.removeVariableField(vf);
-                        removedField = true;
-                    }
-                    
-                    // we will ensure that there is a difference between the orig record and the rec with removed field(s)
-                    if (removedField) 
-                    	bibRecWithoutChanges = rawBibRecCurrent.getAsRecord(true, false, "999", "MARC8");
-
-                    Record matchMhldRec = matchingRawMhldRec.getAsRecord(true, false, mhldFldsToMergeDefault, "MARC8");
-                    
-                    // prepare the merged record
-                    bibRecWithChanges = MarcCombiningReader.combineRecords(bibRecWithChanges, matchMhldRec, mhldFldsToMergeDefault, "999");
-                    
-                    // only keep the merged record if it is different from the original record, or if we are retaining all bibs
-                    if (outputAllBibs == true || !removedField || !bibRecWithoutChanges.toString().equals(bibRecWithChanges.toString()))
-                    {
-                        writer.write(bibRecWithChanges);
-                        System.out.flush();
-                    }
-                }
-                else if (outputAllBibs == true)
-                {
-                    System.out.write(rawBibRecCurrent.getRecordBytes());
-                    System.out.flush();
-                }
-            }
-            catch (IOException e) 
-            {
-                System.err.println("Error writing record " + rawBibRecCurrent.getRecordId());
-            }
-        }
-    }
 }
