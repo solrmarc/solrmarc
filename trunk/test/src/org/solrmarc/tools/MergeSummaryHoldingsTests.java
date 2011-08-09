@@ -83,6 +83,8 @@ public class MergeSummaryHoldingsTests
             java.util.logging.Logger.getLogger("org.apache.solr").setLevel(java.util.logging.Level.SEVERE);
             Utils.setLog4jLogLevel(org.apache.log4j.Level.WARN);
         }
+        testDataParentPath = System.getProperty("test.data.path");
+        testConfigFname = System.getProperty("test.config.file");
     }
         
     /**
