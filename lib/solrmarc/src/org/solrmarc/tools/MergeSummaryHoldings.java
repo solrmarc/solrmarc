@@ -7,7 +7,7 @@ import org.marc4j.*;
 import org.marc4j.marc.*;
 import org.solrmarc.marc.*;
 import org.solrmarc.marcoverride.MarcSplitStreamWriter;
-import org.solrmarc.testUtils.RecordTestingUtils;
+//import org.solrmarc.testUtils.RecordTestingUtils;
 
 
 /**
@@ -373,7 +373,8 @@ public class MergeSummaryHoldings implements MarcReader
         while (merger.hasNext()) 
         {
             Record bibRecWithPossChanges = merger.next();
-            results.put(RecordTestingUtils.getRecordIdFrom001(bibRecWithPossChanges), bibRecWithPossChanges);
+// FIXME:  won't currently work w/o next line, but causes a compile error due to dependency on test code
+//            results.put(RecordTestingUtils.getRecordIdFrom001(bibRecWithPossChanges), bibRecWithPossChanges);
         }
         return results;
     }
