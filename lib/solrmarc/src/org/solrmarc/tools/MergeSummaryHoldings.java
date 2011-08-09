@@ -7,7 +7,6 @@ import org.marc4j.*;
 import org.marc4j.marc.*;
 import org.solrmarc.marc.*;
 import org.solrmarc.marcoverride.MarcSplitStreamWriter;
-//import org.solrmarc.testUtils.RecordTestingUtils;
 
 
 /**
@@ -373,10 +372,29 @@ public class MergeSummaryHoldings implements MarcReader
         while (merger.hasNext()) 
         {
             Record bibRecWithPossChanges = merger.next();
-// FIXME:  won't currently work w/o next line, but causes a compile error due to dependency on test code
-//            results.put(RecordTestingUtils.getRecordIdFrom001(bibRecWithPossChanges), bibRecWithPossChanges);
+            results.put(getRecordIdFrom001(bibRecWithPossChanges), bibRecWithPossChanges);
         }
         return results;
+    }
+    
+    /**
+     * NOTE: this is used for mergeMhldsIntoBibRecordsAsMap, which is used for testing
+     * Assign id of record to be the ckey. Our ckeys are in 001 subfield a. 
+     * Marc4j is unhappy with subfields in a control field so this is a kludge 
+     * work around.
+     */
+    private static String getRecordIdFrom001(Record record)
+    {
+        String id = null;
+        ControlField fld = (ControlField) record.getVariableField("001");
+        if (fld != null && fld.getData() != null) 
+        {
+            String rawVal = fld.getData();
+            // 'u' is for testing
+            if (rawVal.startsWith("a") || rawVal.startsWith("u"))
+                id = rawVal.substring(1);
+        }
+        return id;
     }
 
     
