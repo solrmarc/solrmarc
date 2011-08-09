@@ -20,10 +20,22 @@ import org.solrmarc.testUtils.RecordTestingUtils;
 public class MergeSummaryHoldingsTests
 {
     static String testDir = "test";
-    static String testDataParentPath =  testDir + File.separator + "data";
-    static String smokeTestDir = testDataParentPath + File.separator + "smoketest";
-    static String testConfigFile = smokeTestDir + File.separator + "test_config.properties";
 
+    static String testDataParentPath = System.getProperty("test.data.path");
+    static String testConfigFname = System.getProperty("test.config.file");
+    {
+        if (testDataParentPath == null)
+            fail("property test.data.path must be defined for the tests to run");
+//      static String testDataParentPath =  testDir + File.separator + "data";
+        if (testConfigFname == null)
+            fail("property test.config.file must be defined for the tests to run");
+//      static String testConfigFile = smokeTestDir + File.separator + "test_config.properties";
+    }
+
+    static String smokeTestDir = testDataParentPath + File.separator + "smoketest";
+
+    
+    
     static String MERGE_MHLD_CLASS_NAME = "org.solrmarc.tools.MergeSummaryHoldings";
     static String MARC_PRINTER_CLASS_NAME = "org.solrmarc.marc.MarcPrinter";
     static String MAIN_METHOD_NAME = "main";
