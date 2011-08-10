@@ -335,7 +335,7 @@ public class MergeSummaryHoldings implements MarcReader
      */
     private Record addMhldFieldsToBibRec(Record bibRecord, RawRecord rawMhldRecord)
     {
-        Record mhldRecord = rawMhldRecord.getAsRecord(permissive, toUtf8, null, defaultEncoding);
+        Record mhldRecord = rawMhldRecord.getAsRecord(permissive, toUtf8, mhldFldsToMerge, defaultEncoding);
         List<VariableField> lvf = (List<VariableField>) bibRecord.getVariableFields(mhldFldsToMerge.split("[|]"));
         for (VariableField vf : lvf)
         {
@@ -372,11 +372,13 @@ public class MergeSummaryHoldings implements MarcReader
         while (merger.hasNext()) 
         {
             Record bibRecWithPossChanges = merger.next();
-            results.put(getRecordIdFrom001(bibRecWithPossChanges), bibRecWithPossChanges);
+            //results.put(getRecordIdFrom001(bibRecWithPossChanges), bibRecWithPossChanges);
+// FIXME:  won't currently work w/o next line, but causes a compile error due to dependency on test code
+            results.put(bibRecWithPossChanges.getControlNumber(), bibRecWithPossChanges);
         }
         return results;
     }
-    
+        
     /**
      * NOTE: this is used for mergeMhldsIntoBibRecordsAsMap, which is used for testing
      * Assign id of record to be the ckey. Our ckeys are in 001 subfield a. 
@@ -396,6 +398,7 @@ public class MergeSummaryHoldings implements MarcReader
         }
         return id;
     }
+    
 
     
     /**
