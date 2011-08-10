@@ -21,9 +21,10 @@ import org.solrmarc.tools.RawRecord;
 public class RecordTestingUtils 
 {
     private static String testDir = "test";
-    private static String testDataParentPath = testDir + File.separator + "data";
+    private static String testDataParentPath = System.getProperty("test.data.path", /*default to */testDir + File.separator + "data");
     private static String smokeTestDir = testDataParentPath + File.separator + "smoketest";
-    private static String testConfigFile = smokeTestDir + File.separator + "test_config.properties";
+    private static String testConfigFile = System.getProperty("test.config.file", /*default to */smokeTestDir + File.separator + "test_config.properties");
+ //   private static String testConfigFile = smokeTestDir + File.separator + testConfigFname;
 
     private static final String MARC_PRINTER_CLASS_NAME = "org.solrmarc.marc.MarcPrinter";
     private static final String MAIN_METHOD_NAME = "main";
@@ -194,8 +195,8 @@ public class RecordTestingUtils
 	 */
 	public static void assertSubfieldHasExpectedValues(Record record, String fieldTag, char subfieldCode, Set<String> expectedVals)
 	{
-		int count = 0;
 	    List<VariableField> vfList = record.getVariableFields(fieldTag);
+	    Set<String> resultSet = new LinkedHashSet<String>();
 	    for (Iterator iter = vfList.iterator(); iter.hasNext();)
 	    {
 	    	DataField df = (DataField) iter.next();
@@ -204,11 +205,11 @@ public class RecordTestingUtils
 	    	{
 	    		Subfield sf = (Subfield) iter2.next();
 	    		String val = sf.getData();
-	    		count = count + 1;
+	    		resultSet.add(val);
     			assertTrue("Got unexpected value " + val, expectedVals.contains(val));
 			}
 	    }
-	    org.junit.Assert.assertEquals("Number of values doesn't match", expectedVals.size(), count);
+	    org.junit.Assert.assertEquals("Number of values doesn't match", expectedVals.size(), resultSet.size());
 	}
 	
 	
