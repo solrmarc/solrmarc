@@ -2769,6 +2769,12 @@ public class BlacklightIndexer extends SolrIndexer
                 Set<String> directors = getVideoDirectorsFrom245c(responsibility);
                 result.addAll(directors);
             }
+            Set<String> credits = getFieldList(record, "508a");
+            for (String credit : credits)
+            {
+                Set<String> directors = getVideoDirectorsFrom245c(credit);
+                result.addAll(directors);
+            }
             List<VariableField> personalNames = record.getVariableFields("700");
             for (VariableField vf : personalNames)
             {
@@ -2906,7 +2912,7 @@ public class BlacklightIndexer extends SolrIndexer
     {
         if (releaseDatePattern == null)
         {
-            releaseDatePattern = Pattern.compile(".*[Rr]eleased|[Vv]ideorecording|[Vv]ideocassette|[Ii]ssued|[Rr]ecorded|[Bb]roadcast|[Ff]ilmed|[Ee]dited|[Pp]roduced|[Mm]ade|[Dd]elivered.*[^0-9]([0-9][0-9][0-9][0-9])([^0-9].*)?$");
+            releaseDatePattern = Pattern.compile(".*?([Rr]eleased|[Vv]ideorecording|[Vv]ideocassette|[Ii]ssued|[Rr]ecorded|[Bb]roadcast|[Ff]ilmed|[Ee]dited|[Pp]roduced|[Mm]ade|[Dd]elivered).*?[^0-9]([0-9][0-9][0-9][0-9])([^0-9].*)?$");
         }
         Set<String> format = getCombinedFormatNew2(record);
         if (Utils.setItemContains(format, "Video"))
@@ -2919,7 +2925,7 @@ public class BlacklightIndexer extends SolrIndexer
                 Matcher match = releaseDatePattern.matcher(note);
                 if (match.matches()) 
                 {
-                    date500 = match.group(1);
+                    date500 = match.group(2);
                     break;
                 }
             }
