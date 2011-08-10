@@ -118,6 +118,7 @@ public class RawRecord implements MarcReader
         rawRecordData = new byte[rec1.getRecordBytes().length + rec2.getRecordBytes().length];
         System.arraycopy(rec1.getRecordBytes(), 0, rawRecordData, 0, rec1.getRecordBytes().length);
         System.arraycopy(rec2.getRecordBytes(), 0, rawRecordData, rec1.getRecordBytes().length, rec2.getRecordBytes().length);
+        id =  getRecordId();
     }
     
     public String getRecordId()
