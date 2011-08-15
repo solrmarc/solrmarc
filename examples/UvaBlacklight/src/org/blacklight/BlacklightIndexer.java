@@ -2803,8 +2803,17 @@ public class BlacklightIndexer extends SolrIndexer
 
     public static Set<String> getVideoDirectorsFrom245c(String responsibility)
     {
-        Set<String> result = new LinkedHashSet<String>();;
-        String semiparts[] = responsibility.split(";");
+        Set<String> result = new LinkedHashSet<String>();
+        Set<String> squeezedresult = new LinkedHashSet<String>();
+        String responsibility1 = responsibility.replaceAll("\\[sic[.]?[]]", "");
+        responsibility1 = responsibility1.replaceAll("([a-z][a-z][a-z])[.]", "$1;");
+        responsibility1 = responsibility1.replaceAll("([a-z][a-z])[.]  ", "$1;  ");
+        responsibility1 = responsibility1.replaceAll("Dirigido", "Director");
+        if (!responsibility1.equals(responsibility))
+        {
+            responsibility = responsibility1;
+        }
+        String semiparts[] = responsibility.split(";|--| : ");
         boolean respHasDirected = responsibility.matches(".*[Dd]irect(ed|or|ion).*");
         for (String part : semiparts)
         {
@@ -2812,84 +2821,109 @@ public class BlacklightIndexer extends SolrIndexer
             if (part.matches(".*[Dd]irect(ed|or|ion).*") || (!respHasDirected && part.matches(".*a film by.*")))
             {
                 String trimmed;
-                if (part.matches(".*[Dd]irector[^A-Z]*"))
+            //    part = part.replaceAll("\\[sic[.][]]", "");
+                String part1 = part.replaceAll("[ ]?[(][^)]*[)]", "");
+                if (!part.equals(part1))
                 {
+                    part = part1;
+                }
+                if (part.matches(".*[Dd]irector for .*"))
+                {
+                    part = part.replaceFirst("[Dd]irector for [A-Za-z ]*", "director");
+                }
+                if (part.matches(".*[Dd]irector[^A-Z]*") )
+                {
+                    if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotography|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical) [Dd]irector.*" ) ||
+                            part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de la fotografia)).*"))
+                        continue;
                     part = part.replaceAll(" *[\\[]", ", ");
                     part = part.replaceAll("[\\]]", "");
                     part = part.replaceAll("director.*", "director");
+                    part = part.replaceAll(" [-A-Za-z/]*director[-A-Za-z]*", " director");
                     part = part.replaceAll(" [a-z/]+/director", " director");
+                    part = part.replaceAll(" co-director", " director");
                     part = part.replaceAll(" [a-z ,]+ director", " director");
+                    part = part.replaceAll(".*: (([A-Z][a-z.]*)+)(, )?director", "$1, director");
                     part = part.replaceFirst(".* (of|by)", "by");
+                    part = part.replaceAll(" (and) ", " & ");
                     part = part.replaceFirst("by ", "");
-                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|III|IV)", "* $1");
+                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "* $1");
                     part = part.replaceFirst("[,]?[ ]?director", "");
-                    part = part.replaceAll("([,][ ]| & )", "#");
+                    part = part.replaceAll("([,][ ]?|[ ]?&[ ]?)", "|");
                     part = part.replaceAll("[*]", ",");
 
-                    String commaparts[] = part.split("#");
+                    String commaparts[] = part.split("[|]+");
                     for (String subpart : commaparts)
                     {
-                        subpart = nameClean(subpart);
-                        if (subpart != null) result.add(subpart);
+                        addCleanedName(result, squeezedresult, subpart);
                     }
                 }
                 else if (part.matches(".*[Dd]irect(ed|ion).*?by.*")|| part.matches(".*a film by.*"))
                 {
-                    part = part.replaceFirst(".*[Dd]irect(ed|ion).*?by[],]? ", "directified by ");
+                    part = part.replaceFirst(".*[Dd]irect(ed|ion).*?by[]:,)]? ", "directified by ");
                     part = part.replaceFirst(".*a film by", "directified by ");
                     part = part.replaceAll("[]]", "");
+                    part = part.replaceFirst("et al", "");
                     part = part.replaceAll(" (and|with|et) ", " & ");
-                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|III|IV)", "* $1");
+                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "* $1");
                     part = part.replaceAll("([A-Z][^ .][^ .][^ .]+)[.].*", "$1");
                     part = part.replaceAll("brothers", "Brothers");
-                    part = part.replaceAll("directified by[ ]*(([\"]?[A-Z][^ ]+[\"]?[,]?[ ]*|[ ]?&[ ]|von |de |the )+).*", "$1");
-                    part = part.replaceAll("^([A-Z][^ .]+) & ([A-Z][^ .]+) ([A-Z][^ .]+)", "$1 $3 & $2 $3");
-                    part = part.replaceAll("([,][ ]| & )", "#");
+                    part = part.replaceAll("directified by[ ]*(([\"]?([A-Z]|\\p{Lu})[^ ]+[\"]?[,]?[ ]*|[ ]?&[ ]|von |van |de[rl]?[ ]?|the |d[']|al-)+).*", "$1");
+                    part = part.replaceAll("^([A-Z][^ .]+) & ([A-Z][^ .,]+) ([A-Z][^ .,]+)", "$1 $3 & $2 $3");
+                    part = part.replaceAll("([,][ ]?|[ ]?&[ ]?)", "|");
                     part = part.replaceAll("[*]", ",");
                     part = part.replaceAll("[ ][ ]+", " ");
-                    String commaparts[] = part.split("#");
+                    String commaparts[] = part.split("[|]+");
                     for (String subpart : commaparts)
                     {
-                        subpart = nameClean(subpart);
-                        if (subpart != null) result.add(subpart);
+                        addCleanedName(result, squeezedresult, subpart);
                     }
                 }
                 else if (part.matches(".*[Dd]irector[^a-rt-z\'].*[A-Z].*"))
                 {
+                    if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotography|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical) [Dd]irector.*" ) ||
+                            part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de la fotografia)).*"))
+                        continue;
+                    part = part.replaceFirst("Writer", "writer");
+                    part = part.replaceFirst("Producer", "producer");
+                    part = part.replaceFirst("Researcher", "researcher");
                     part = part.replaceFirst(".*[Dd]irector", "director");
                     part = part.replaceAll("[ ]?([.][.][.])?[ ]?[\\[][^\\]]*[\\]]", "");
                     part = part.replaceAll("[]]", "");
-                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|III|IV)", "* $1");
-                    part = part.replaceFirst("director[^A-Z]*", "director: ");
+                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "* $1");
+                    part = part.replaceAll("director[-A-Za-z/]*", "director");
+                    part = part.replaceAll("director (for|and|of)( [A-Z][A-Za-z]*)+", "director");
+                    part = part.replaceFirst("director[^A-Z]*", "director= ");
+                    part = part.replaceFirst("with the [a-z][A-Za-z ]*", "");
+                    part = part.replaceFirst("et al", "");
                     part = part.replaceAll(" (and|with|et) ", " & ");
                     part = part.replaceAll(",[ ]?[a-z].*", "");
-                    part = part.replaceAll(": [^(]*[)], ", ": ");
-                    part = part.replaceAll("([,][ ]| & )", "#");
+                    part = part.replaceAll("= [^(]*[)], ", ": ");
+                    part = part.replaceFirst("director= ", "");
+                    part = part.replaceAll("^([A-Z][^ .]+) & ([A-Z][^ .]+) ([A-Z][^ .]+)", "$1 $3 & $2 $3");
+                    part = part.replaceAll("([,][ ]?|[ ]?&[ ]?)", "|");
                     part = part.replaceAll("[*]", ",");
                     part = part.replaceAll("[ ][ ]+", " ");
-                    part = part.replaceFirst("director: ", "");
-                    String commaparts[] = part.split("#");
+                    String commaparts[] = part.split("[|]+");
                     for (String subpart : commaparts)
                     {
-                        subpart = nameClean(subpart);
-                        if (subpart != null) result.add(subpart);
+                        addCleanedName(result, squeezedresult, subpart);
                     }
                 }
                 else if (part.matches(".*direction.*"))
                 {
                     part = part.replaceFirst(".*direction[^A-Z]*", "direction: ");
-                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|III|IV)", "* $1");
+                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "* $1");
                     part = part.replaceAll(" (and|with|et) ", " & ");
                     part = part.replaceAll("[\\]]", "");
-                    part = part.replaceAll("([,][ ]| & )", "#");
+                    part = part.replaceAll("([,][ ]?|[ ]?&[ ]?)", "|");
                     part = part.replaceAll("[*]", ",");
                     part = part.replaceAll("[ ][ ]+", " ");
                     part = part.replaceFirst("direction: ", "");
-                    String commaparts[] = part.split("#");
+                    String commaparts[] = part.split("[|]+");
                     for (String subpart : commaparts)
                     {
-                        subpart = nameClean(subpart);
-                        if (subpart != null) result.add(subpart);
+                        addCleanedName(result, squeezedresult, subpart);
                     }
                 }
             }
@@ -2897,11 +2931,42 @@ public class BlacklightIndexer extends SolrIndexer
         return(result);
     }
 
+    private static void addCleanedName(Set<String> result, Set<String> squeezedresult, String subpart)
+    {
+        subpart = nameClean(subpart);
+        if (subpart == null) return;
+        String squeezedpart = subpart.replaceAll(" ", "");
+        if (!squeezedresult.contains(squeezedpart))
+        {
+            squeezedresult.add(squeezedpart);
+            result.add(subpart);
+        }
+    }
+
     private static String nameClean(String subpart)
     {
         if (subpart.matches(".*(.*)"));
             subpart = subpart.replaceAll("(.*)[(].*[)]", "$1");
+        if (subpart.matches(".* for .*"))
+            subpart = subpart.replaceAll("(.*) for .*", "$1");
         if (subpart.matches(".*, Inc[.]"))
+            return(null);
+        if (subpart.matches(".*( of | a | in ).*"))
+            return(null);
+        if (subpart.matches(".*? [a-z][a-z ]*"))
+            subpart = subpart.replaceAll("(.*?) [a-z][a-z ]*", "$1");
+        if (subpart.matches("[a-z]*"))
+            return(null);
+        if (subpart.matches(".*[ .]+$"))
+            subpart = subpart.replaceAll("(.*?)[ .][ .]+$", "$1");
+        if (subpart.equalsIgnoreCase("Writer")) return(null);
+        if (subpart.equalsIgnoreCase("Editor")) return(null);
+        if (subpart.equalsIgnoreCase("Executive")) return(null);
+        if (subpart.equalsIgnoreCase("Story")) return(null);
+        if (subpart.matches(".*[Pp]roducer.*")) return(null);
+        if (subpart.matches("[Dd]irector[s]?")) return(null);
+        if (subpart.equalsIgnoreCase("Screenplay")) return(null);
+        if (subpart.contains(":")|| subpart.replaceAll("[^ ]", "").length() > 5)
             return(null);
         subpart = Utils.cleanData(subpart);
         if (subpart.length() == 0) return(null);
