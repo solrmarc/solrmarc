@@ -68,6 +68,32 @@ public class HathiJsonToMarc implements MarcReader
         }
     }
     
+    public HathiJsonToMarc(InputStream in)
+    {
+        if (mf == null) 
+        {
+            if(System.getProperty("org.marc4j.marc.MarcFactory") == null)
+            {
+                System.setProperty("org.marc4j.marc.MarcFactory", "org.marc4j.marc.impl.NoSortMarcFactoryImpl");
+            }
+            mf = MarcFactory.newInstance();
+        }
+        parser = new JsonParser(0);
+        parser.setInput("input", in, "UTF8", false);
+        toMarcXML = new PipedWriter();
+        try
+        {
+            usedInMarcXML = new PipedReader(toMarcXML);
+            reader = new MarcXmlReader(new InputSource(usedInMarcXML));
+            toMarcXML.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><collection xmlns=\"http://www.loc.gov/MARC21/slim\">");
+        }
+        catch (IOException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
+    
     public HathiJsonToMarc(Reader in, boolean rawXML)
     {
         
