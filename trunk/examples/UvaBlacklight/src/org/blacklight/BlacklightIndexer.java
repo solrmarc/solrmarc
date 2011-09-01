@@ -372,7 +372,7 @@ public class BlacklightIndexer extends SolrIndexer
                 String numberScheme = (df.getSubfield('w') != null) ? df.getSubfield('w').getData() : "";
                 if (numberScheme.equals("MONO-SER") || numberScheme.equals("LCPER"))  numberScheme = "LC";
                 String callNumber = (df.getSubfield('a') != null) ? df.getSubfield('a').getData() : "";
-                if (callNumber.startsWith("MSS")) callNumber = "MSS " + callNumber.substring(3);
+                if (callNumber.startsWith("MSS") || callNumber.startsWith("Mss")) callNumber = callNumber.replaceFirst("MSS[ ]?", "M@");
                 if (extraString == null || extraString.equals("") || !extraString.contains("|" + barCode + "|"))
                 {
                     if (numberScheme.length() > 0 && callNumber.length() > 0) 
@@ -714,6 +714,8 @@ public class BlacklightIndexer extends SolrIndexer
        String resultParts[] = result.split(":", 2);
        if (sortableFlag && ( resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1]))))
            result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumberField().getData());
+       else if (resultParts[1].startsWith("M@"))
+           result = result.replaceAll("M@", "MSS ");
        return(result);
 
    }
@@ -760,6 +762,7 @@ public class BlacklightIndexer extends SolrIndexer
                 {
                     val = nVal;
                 }
+                val = val.replaceFirst("M@", "MSS ");
                 resultNormed.add(val);
             }
             return resultNormed;
@@ -780,7 +783,7 @@ public class BlacklightIndexer extends SolrIndexer
                 }
                 if (valueArr.length == 1)
                 {
-                    results.add(valueArr[0]);
+                    results.add(valueArr[0].replaceAll("M@", "MSS "));
                 }
                 else
                 {
@@ -809,13 +812,30 @@ public class BlacklightIndexer extends SolrIndexer
                             sep = ",";
                         }
                     }
-                    if (sb.length() > 100 || valueArr.length > 10)
+                    if (prefix.startsWith("M@"))
                     {
-                        results.add(prefix + " (" + valueArr.length + " volumes)");
+                        if (sb.length() > 100 || valueArr.length > 10)
+                        {
+                            prefix = prefix.replaceFirst("M@", "MSS ");
+                            results.add(prefix + " (" + valueArr.length + " Boxes)");
+                        }
+                        else
+                        {
+                            String value = sb.toString();
+                            value = value.replaceAll("M@", "MSS ");
+                            results.add(value);
+                        }
                     }
                     else
                     {
-                        results.add(sb.toString());
+                        if (sb.length() > 100 || valueArr.length > 10)
+                        {
+                            results.add(prefix + " (" + valueArr.length + " volumes)");
+                        }
+                        else
+                        {
+                            results.add(sb.toString());
+                        }
                     }
                 }
             }
@@ -1461,16 +1481,19 @@ public class BlacklightIndexer extends SolrIndexer
             }
             if (other007 != null && other007.startsWith("v")) 
             {
+                result.add("Online"); // Online
                 result.add(Utils.remap("v", findMap(mapName1a), true)); // Streaming Video
                 result.add(Utils.remap("v", findMap(mapName2), true));  // Video
             }
             else if (broadFormat.equals("am")) 
             {
+                result.add("Online"); // Online
                 result.add(Utils.remap("am", findMap(mapName1a), true)); // eBook
                 result.add(Utils.remap("a", findMap(mapName1), true));  // Book
             }
             else if (broadFormat.equals("as"))
             {
+                result.add("Online"); // Online
                 result.add(Utils.remap("as", findMap(mapName1a), true)); // Online
                 result.add(Utils.remap("as", findMap(mapName1), true));  // Journal/Magazine
             }
