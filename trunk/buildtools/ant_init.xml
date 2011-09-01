@@ -478,7 +478,7 @@
                 </fileset>
             </copy>
             <copy todir="${site.test.dir}/data" preservelastmodified="true" overwrite="false">
-                <fileset dir="${test.dir}/data" includes="*.mrc,*.txt,smoketest/**,*.xml,*.del,*.properties,*.bsh" >
+                <fileset dir="${test.dir}/data" includes="*.mrc,*.txt,smoketest/**,*.xml,*.del,*.properties,*.bsh,*.json" >
                     <depend targetdir="${site.test.dir}/data" />
                 </fileset>
             </copy>
