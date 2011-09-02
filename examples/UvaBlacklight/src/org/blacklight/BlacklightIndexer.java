@@ -814,10 +814,20 @@ public class BlacklightIndexer extends SolrIndexer
                     }
                     if (prefix.startsWith("M@"))
                     {
-                        if (sb.length() > 100 || valueArr.length > 10)
+                        if (sb.length() > 100 || valueArr.length > 2)
                         {
+                            int cntBoxes = 0, cntFolders = 0, cntVolumes = 0;
+                            for (int i = 0; i < valueArr.length; i++)
+                            {
+                                if (valueArr[i].contains("Box")) cntBoxes++;
+                                if (valueArr[i].contains("Folder")) cntFolders++;   
+                                if (valueArr[i].contains("Volume")) cntVolumes++;   
+                            }
+                            String label = "Boxes";
+                            if (cntFolders > cntBoxes && cntFolders > cntVolumes) label = "Folders";
+                            else if (cntVolumes > cntBoxes && cntVolumes > cntFolders) label = "Volumes";
                             prefix = prefix.replaceFirst("M@", "MSS ");
-                            results.add(prefix + " (" + valueArr.length + " Boxes)");
+                            results.add(prefix + " (" + valueArr.length + " " + label + ")");
                         }
                         else
                         {
