@@ -1,8 +1,10 @@
 package org.solrmarc.tools;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -54,6 +56,31 @@ public class HathiJsonReaderTest
         {
             fail("unable to read test record  009888737.json  or  009888737.mrc");
         }
+    }
+    /**
+     * unit test for org.solrmarc.marc.RawRecordReader and org.solrmarc.tools.RawRecord
+     */
+    @Test
+    public void testHathiPlunderer()
+    {
+        String testDataParentPath = System.getProperty("test.data.path");
+        if (testDataParentPath == null)
+            fail("property test.data.path must be defined for the tests to run");
+        BufferedReader hathiRecNumList = HathiPlunderer.initReader(new String[]{ testDataParentPath+"/hathi_upd_list.txt", testDataParentPath+"/hathi_upd_20110911.txt", testDataParentPath+"/hathi_upd_20110904.txt.gz"} );
+        
+        HathiPlunderer hathiPlunderer = new HathiPlunderer(hathiRecNumList, 15, 15, 6);
+        MarcReader hathiReader = new HathiJsonToMarc(hathiPlunderer);
+        int cnt = 0;
+        while (hathiReader.hasNext())
+        {
+            Record record = hathiReader.next();
+            if (cnt == 0)  assertTrue("Error: ID of first record actually read should be 009706555 it actually is "+ record.getControlNumber() , record.getControlNumber().equals("009706555"));
+            if (cnt == 5)  assertTrue("Error: ID of 6th record actually read should be 001446104 it actually is "+ record.getControlNumber() , record.getControlNumber().equals("001446104"));
+            if (cnt == 9)  assertTrue("Error: ID of 10th record actually read should be 010157869 it actually is "+ record.getControlNumber() , record.getControlNumber().equals("010157869"));
+            if (cnt == 13) assertTrue("Error: ID of 14th record actually read should be 008884485 it actually is "+ record.getControlNumber() , record.getControlNumber().equals("008884485"));
+            cnt++;
+        }
+        assertTrue("Error: Should have read 15 records, actually read: "+ cnt +" record", cnt == 15);
     }
     
     private void assertRecordsEquals(String message, Record rec1, Record rec2)
