@@ -25,12 +25,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import org.marc4j.MarcStreamWriter;
 import org.marc4j.marc.Record;
 
 public class HathiPlunderer extends InputStream
 {
     private static boolean debug = false;
-    private static boolean gzipped = false;
+    private static boolean print = false;
     private static BufferedReader in;
     private int fetchCount = 0;
     private static int numInBuf = 0;
@@ -454,7 +455,11 @@ public class HathiPlunderer extends InputStream
             int skip = 1;
             if (args[0].equals("-d"))
             {
-                debug  = true;
+                debug = true;
+            }
+            else if (args[0].equals("-d"))
+            {
+                print = true;
             }
             else if (args[0].equals("-n"))
             {
@@ -475,10 +480,6 @@ public class HathiPlunderer extends InputStream
                     skip = 2;
                 }
             }
-            else if (args[0].equals("-g"))
-            {
-                gzipped = true;
-            }
             String newArgs[] = new String[args.length - skip];
             System.arraycopy(args, skip, newArgs, 0, args.length-skip);
             args = newArgs;
@@ -494,10 +495,19 @@ public class HathiPlunderer extends InputStream
         else
         {
             HathiJsonToMarc hathiReader = new HathiJsonToMarc(reader);
+            MarcStreamWriter writer = new MarcStreamWriter(out, "UTF8");
             while (hathiReader.hasNext())
             {
                 Record record = hathiReader.next();
-                System.out.println(record.toString());
+                if (print) 
+                {
+                    System.out.println(record.toString());
+                }
+                else
+                {
+                    writer.write(record);
+                    out.flush();
+                }
             }
         }
     }
