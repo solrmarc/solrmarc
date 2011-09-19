@@ -193,16 +193,19 @@ public class HathiJsonToMarc implements MarcReader
             }
             else if (parserCode == JsonParser.EVT_OBJECT_ENDED)
             {
-                level--;
-                if (mnameStack[level+1] != null && mnameStack[level+1].equals("items"))  
+                if (level > 0) 
                 {
-                    if (toMarcXML != null)
+                    level--;
+                    if (mnameStack[level+1] != null && mnameStack[level+1].equals("items"))  
                     {
-                        return(curRecord);
-                    }
-                    else 
-                    {
-                        return null;
+                        if (toMarcXML != null)
+                        {
+                            return(curRecord);
+                        }
+                        else 
+                        {
+                            return null;
+                        }
                     }
                 }
 //                  if (items != null && itemdata != null)
