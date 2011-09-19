@@ -495,7 +495,7 @@ public class HathiPlunderer extends InputStream
         else
         {
             HathiJsonToMarc hathiReader = new HathiJsonToMarc(reader);
-            MarcStreamWriter writer = new MarcStreamWriter(out, "UTF8");
+            MarcStreamWriter writer = new MarcStreamWriter(out, "UTF8", true);
             while (hathiReader.hasNext())
             {
                 Record record = hathiReader.next();

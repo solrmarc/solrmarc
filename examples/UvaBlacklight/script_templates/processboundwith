@@ -1,0 +1,22 @@
+#!/usr/bin/perl
+# invoke this with 
+# cat /lib_content27/marc/incoming/bdwiths.txt | sort -t'|' -k2 -n |  perl processboundwith /lib_content27/marc/incoming/location.txt | sort -t'|' -n -k1,1 > /lib_content27/solrmarc/dist/BoundWith.txt
+open LOCATIONFILE, "<", $ARGV[0] or die("Cannot open location file");
+my $boundWithLine = <STDIN>;
+my $locationLine = <LOCATIONFILE>;
+my @boundWithID;
+my @locationVal;
+while ($boundWithLine) {
+  @boundWithID = split(/[|]/, $boundWithLine);
+  @locationVal = split(/[|]/, $locationLine, 2);
+  while ($locationVal[0] < $boundWithID[1])
+  {
+    $locationLine = <LOCATIONFILE>;
+    @locationVal = split(/[|]/, $locationLine, 2);
+  }
+  if ($locationVal[0] == $boundWithID[1])
+  {
+    print $boundWithID[0],"|",$locationLine;
+    $boundWithLine = <STDIN>;
+  }
+}

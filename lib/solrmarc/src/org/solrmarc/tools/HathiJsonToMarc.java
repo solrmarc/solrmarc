@@ -40,6 +40,7 @@ public class HathiJsonToMarc implements MarcReader
     MarcReader reader = null;
     PipedWriter toMarcXML = null;
     PipedReader usedInMarcXML = null;
+    Record nextRecord = null;
     private int parserCode;
 
     public HathiJsonToMarc(Reader in)
@@ -124,11 +125,19 @@ public class HathiJsonToMarc implements MarcReader
     public boolean hasNext()
     {
         parserCode = parser.getEventCode();
-        while (parserCode == 0 || parserCode == JsonParser.EVT_OBJECT_ENDED)
+        while (nextRecord == null && parserCode != JsonParser.EVT_INPUT_ENDED)
         {
-            parserCode = parser.next();
+            if (parserCode == 0 || parserCode == JsonParser.EVT_OBJECT_ENDED)
+                parserCode = parser.next();
+            else if (parserCode == JsonParser.EVT_OBJECT_BEGIN) 
+            {
+                nextRecord = next();
+            }
         }
-        if (parserCode == JsonParser.EVT_OBJECT_BEGIN) return(true);
+        if (nextRecord != null)
+        {
+            return(true);
+        }
         if (parserCode == JsonParser.EVT_INPUT_ENDED)  
         {
             if (toMarcXML != null)
@@ -157,13 +166,19 @@ public class HathiJsonToMarc implements MarcReader
     
     public Record next()
     {
+        if (nextRecord != null)
+        {
+            Record tmpRecord = nextRecord;
+            nextRecord = null;
+            return(tmpRecord);
+        }
         int arrlevel = 0;
         int level = 0;
         String value = null;
         String mname = null;
         Record curRecord = null;
         String mnameStack[] = new String[20];
-        
+         
         do {
             mname = parser.getMemberName();
             if (parserCode == JsonParser.EVT_OBJECT_BEGIN)
