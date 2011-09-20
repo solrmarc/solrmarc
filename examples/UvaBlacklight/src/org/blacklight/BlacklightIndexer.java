@@ -26,6 +26,8 @@ import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
+import org.marc4j.marc.impl.DataFieldImpl;
+import org.marc4j.marc.impl.SubfieldImpl;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.tools.CallNumUtils;
 import org.solrmarc.tools.StringNaturalCompare;
@@ -55,8 +57,10 @@ public class BlacklightIndexer extends SolrIndexer
      * @throws Exception
      */
     Map<String, String> addnlShadowedIds = null;
+    Map<String, String> boundWithIds = null;
     Map<String, String> dateFirstAddedMap = null;
     String extraIdsFilename = "AllShadowedIds.txt";
+    String boundWithsFilename = "BoundWith.txt";
     Set<String> combinedFormat = null;
     String publicationDate = null;
     Set<String> callNumberFieldList = null;
@@ -189,18 +193,44 @@ public class BlacklightIndexer extends SolrIndexer
     private List<?> getTrimmedHoldingsList(Record record, String holdingsTag)
     {
         List<?> result = record.getVariableFields(holdingsTag);
-        loadExtraShadowedIds(extraIdsFilename);
+        loadExtraShadowedIds(extraIdsFilename, boundWithsFilename);
+        addBoundWithHoldings(record, result);
         removeShadowed999sFromList(record, result);
         removeLostHoldings(result);
         return result;
     }
     
-    private void loadExtraShadowedIds(String filename)
+    private void addBoundWithHoldings(Record record, List<?> fields999)
+    {
+        String boundWithStr = boundWithIds.get(record.getControlNumber().substring(1));
+        if (boundWithStr != null)
+        {
+            String holdingsParts[] = boundWithStr.split("\\|");
+            DataField df = new DataFieldImpl();
+            df.addSubfield(new SubfieldImpl('a', holdingsParts[7]));
+            df.addSubfield(new SubfieldImpl('w', holdingsParts[6]));
+            df.addSubfield(new SubfieldImpl('i', holdingsParts[1]));
+            if (!holdingsParts[2].equals(holdingsParts[3]))
+            {
+                df.addSubfield(new SubfieldImpl('k', holdingsParts[2]));
+            }
+            df.addSubfield(new SubfieldImpl('l', holdingsParts[3]));
+            df.addSubfield(new SubfieldImpl('m', holdingsParts[4]));
+            df.addSubfield(new SubfieldImpl('t', holdingsParts[5]));
+            df.setId(new Long(2));
+            df.setTag("999");
+            df.setIndicator1(' ');
+            df.setIndicator2(' ');
+            ((List<VariableField>)fields999).add(df);
+        }
+    }
+
+    private void loadExtraShadowedIds(String addnlShadowedFilename, String boundWithFilename)
     {
         if (addnlShadowedIds == null)
         {
             addnlShadowedIds = new LinkedHashMap<String, String>();
-            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(propertyFilePaths, filename);
+            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(propertyFilePaths, addnlShadowedFilename);
             BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
             String line;
             try
@@ -218,6 +248,31 @@ public class BlacklightIndexer extends SolrIndexer
                         if (existing == null) addnlShadowedIds.put(linepts[0], "|" + linepts[1] + "|"); 
                         else if (existing.equals("")) continue;
                         else addnlShadowedIds.put(linepts[0], existing + linepts[1] + "|");
+                    }
+                }
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        if (boundWithIds == null)
+        {
+            boundWithIds = new LinkedHashMap<String, String>();
+            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(propertyFilePaths, boundWithFilename);
+            BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
+            String line;
+            try
+            {
+                while ((line = addnlIdsReader.readLine()) != null)
+                {
+                    String linepts[] = line.split("\\|", 2);
+                    String existing = boundWithIds.get(linepts[0]);
+                    if (existing == null) boundWithIds.put(linepts[0], linepts[1]); 
+                    else 
+                    {
+                        //addnlShadowedIds.put(linepts[0], existing + linepts[1] + "|");
                     }
                 }
             }
@@ -284,7 +339,7 @@ public class BlacklightIndexer extends SolrIndexer
 
         }
     }
-
+    
     private String getBestSingleCallNumber(Map<String, Set<String>>resultNormed)
     {
         if (resultNormed == null || resultNormed.size() == 0) {
@@ -362,7 +417,7 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> fieldList = new LinkedHashSet<String>();
         if (processExtraShadowedIds)
         {
-            loadExtraShadowedIds(extraIdsFilename);
+            loadExtraShadowedIds(extraIdsFilename, boundWithsFilename);
             String extraString = addnlShadowedIds.get(record.getControlNumber());
           
             for (Object field : fields999)
@@ -920,7 +975,7 @@ public class BlacklightIndexer extends SolrIndexer
         }
         if (processExtraShadowedIds)
         {
-            loadExtraShadowedIds(extraIdsFilename);
+            loadExtraShadowedIds(extraIdsFilename, boundWithsFilename);
             Set<String> newFieldList = new LinkedHashSet<String>();
             String extraString = addnlShadowedIds.get(record.getControlNumber());
           
@@ -1992,7 +2047,7 @@ public class BlacklightIndexer extends SolrIndexer
         boolean processExtraShadowedIds = processExtra.startsWith("extraIds");
         if (processExtraShadowedIds)
         {
-            loadExtraShadowedIds(extraIdsFilename);
+            loadExtraShadowedIds(extraIdsFilename, boundWithsFilename);
         }
         boolean returnHiddenRecs = returnHidden.startsWith("return");
         String mapName = loadTranslationMap(null, propertiesMap);
@@ -2000,14 +2055,27 @@ public class BlacklightIndexer extends SolrIndexer
         Set<String> fields = getFieldList(record, "999ikl';'");
         boolean visible = false;
         String extraString = null;
-        if (processExtraShadowedIds && addnlShadowedIds.containsKey(record.getControlNumber()))
+        if (processExtraShadowedIds && boundWithIds != null && boundWithIds.containsKey(record.getControlNumber().substring(1)))
         {
-            extraString = addnlShadowedIds.get(record.getControlNumber());
-        }  
-        if ("".equals(extraString))  visible = false;
-        else
+            String boundWithHolding = boundWithIds.get(record.getControlNumber().substring(1));
+            String fparts[] = boundWithHolding.split("\\|");
+            String mappedFpartCurrent = Utils.remap(fparts[2], findMap(mapName), true);
+            String mappedFpartHome = Utils.remap(fparts[3], findMap(mapName), true);
+            if (mappedFpartCurrent.equals("VISIBLE") && mappedFpartHome.equals("VISIBLE"))
+            {
+                visible = true;
+            }
+        }
+        else 
         {
-            for (String field : fields)
+            if (processExtraShadowedIds && addnlShadowedIds.containsKey(record.getControlNumber()))
+            {
+                extraString = addnlShadowedIds.get(record.getControlNumber());
+            }  
+            if ("".equals(extraString))  visible = false;
+            else
+            {
+                for (String field : fields)
                 {
                     String fparts[] = field.split(";");
                     if (extraString != null && extraString.contains("|" + fparts[0] + "|"))
@@ -2032,6 +2100,7 @@ public class BlacklightIndexer extends SolrIndexer
                         }
                     }
                 }
+            }
         }
         String result = (visible ? "VISIBLE" : "HIDDEN"); 
         if (!visible && !returnHiddenRecs)
