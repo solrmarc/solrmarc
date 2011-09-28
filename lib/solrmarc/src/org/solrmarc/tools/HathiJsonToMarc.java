@@ -13,6 +13,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -327,6 +328,7 @@ public class HathiJsonToMarc implements MarcReader
     private static void fix880field(Record curRecord)
     {
         List<DataField> dfs = (List<DataField>)curRecord.getDataFields(); 
+        List<DataField> todelete = new ArrayList<DataField>();
         for (DataField df : dfs)
         {
             Subfield sf = null;
@@ -349,14 +351,18 @@ public class HathiJsonToMarc implements MarcReader
                         }
                         else // duplicate ? -- delete it
                         {
-                            curRecord.removeVariableField(dfother);
+                            //mark for deletion
+                            todelete.add(dfother); 
                         }
                         break;
                     }
                 }
             }
         }
-
+        for (DataField del : todelete)
+        {
+            curRecord.removeVariableField(del);
+        }
     }
 
     private static void retag(DataField df, DataField dfother)
@@ -372,11 +378,13 @@ public class HathiJsonToMarc implements MarcReader
     private static int hasOtherScript(DataField df1, DataField df2)
     {
         int sum1 = 0, sum2 = 0;
+        int count1 = 0, count2 = 0;
         for (Subfield sf : (List<Subfield>)df1.getSubfields())
         {
             for (char c : sf.getData().toCharArray())
             {
                 sum1 += (int)c;
+                if ((int)c > 0x7f) count1++;
             }
         }
         for (Subfield sf : (List<Subfield>)df2.getSubfields())
@@ -384,10 +392,15 @@ public class HathiJsonToMarc implements MarcReader
             for (char c : sf.getData().toCharArray())
             {
                 sum2 += (int)c;
+                if ((int)c > 0x7f) count2++;
             }
         }
-        if (sum1 > sum2) return(1);
-        else if (sum1 < sum2) return(2);
+        if (sum1 > sum2 && count1 > count2) return(1);
+        else if (sum1 < sum2 && count1 < count2) return(2);
+        else if (sum1 == sum2 && count1 > count2) return(1);
+        else if (sum1 == sum2 && count1 < count2) return(2);
+        else if (count1 > count2) return(1);
+        else if (count1 < count2) return(2);
         else return(0);
     }
 
