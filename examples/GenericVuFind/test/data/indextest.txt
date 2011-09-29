@@ -27,3 +27,6 @@ import.properties, dewey02.mrc, format, Book
 import.properties, notillus1.mrc, format, VHS
 import.properties, illus1.mrc, format, Electronic
 import.properties, short007.mrc, format, Audio
+
+# Test latitude/longitude
+import.properties, latlong01.mrc, long_lat, -7.1469,53.505

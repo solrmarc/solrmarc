@@ -829,6 +829,43 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
+     * Determine the longitude and latitude of the items location.
+     *
+     * @param  Record    record
+     * @return String    "longitude, latitude"
+     */
+    public String getLongLat(Record record) {
+        // Check 034 subfield d and f
+        List<ControlField> fields = record.getVariableFields("034");
+        Iterator<ControlField> fieldsIter = fields.iterator();
+        if (fields != null) {
+            DataField physical;
+            while(fieldsIter.hasNext()) {
+                physical = (DataField) fieldsIter.next();
+                String val = null;
+
+                List<Subfield> subfields_d = physical.getSubfields('d');
+                Iterator<Subfield> subfieldsIter_d = subfields_d.iterator();
+                if (subfields_d != null) {
+                    while (subfieldsIter_d.hasNext()) {
+                        val = subfieldsIter_d.next().getData();
+                    }
+                }
+                List<Subfield> subfields_f = physical.getSubfields('f');
+                Iterator<Subfield> subfieldsIter_f = subfields_f.iterator();
+                if (subfields_f != null) {
+                    while (subfieldsIter_f.hasNext()) {
+                        val = val + ',' + subfieldsIter_f.next().getData();
+                    }
+                }
+            return val;
+            }
+        }
+        //otherwise return null
+        return null;
+    }
+
+    /**
      * Update the index date in the database for the specified core/ID pair.  We
      * maintain a database of "first/last indexed" times separately from Solr to
      * allow the history of our indexing activity to be stored permanently in a
