@@ -29,4 +29,10 @@ import.properties, illus1.mrc, format, Electronic
 import.properties, short007.mrc, format, Audio
 
 # Test latitude/longitude
-import.properties, latlong01.mrc, long_lat, -7.1469,53.505
+# the following test would fail by default because the definition of long_lat is commented out in marc_local.properties by default
+# the subsequent three tests directly invoke and test the getLongLat method in different ways without it being included in the marc_local.properties
+#import.properties, latlong01.mrc, long_lat, -7.1469,53.505
+import.properties, latlong01.mrc, 'custom, getLongLat', -7.1469,53.505
+import.properties, latlong01.mrc, getLongLat(rec), -7.1469,53.505
++solr.indexer=org.solrmarc.index.VuFindIndexer, latlong01.mrc, getLongLat(rec), -7.1469,53.505
+
