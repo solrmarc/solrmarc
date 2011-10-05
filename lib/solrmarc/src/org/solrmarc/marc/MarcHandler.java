@@ -27,7 +27,8 @@ public abstract class MarcHandler {
 	protected String indexerName;
 	protected String addnlArgs[] = null;
 	protected Properties configProps;
-	protected boolean inputTypeXML = false;
+    protected boolean inputTypeXML = false;
+    protected boolean inputTypeJSON = false;
 	protected boolean permissiveReader;
 	protected String defaultEncoding;
     protected boolean to_utf_8;
@@ -68,6 +69,11 @@ public abstract class MarcHandler {
                     configProperties = arg;
                 }
                 else if (lc_arg.endsWith(".mrc") || lc_arg.endsWith(".marc"))
+                {
+                    System.setProperty("marc.path", arg);
+                    System.setProperty("marc.source", "FILE");
+                }
+                else if (lc_arg.endsWith(".json") )
                 {
                     System.setProperty("marc.path", arg);
                     System.setProperty("marc.source", "FILE");
@@ -173,7 +179,8 @@ public abstract class MarcHandler {
  
         // class name of SolrIndexer or the subclass to be used
         indexerName = Utils.getProperty(configProps, "solr.indexer");
-
+        if (indexerName == null) indexerName = SolrIndexer.class.getName();
+        
         // _index.properties file
         indexerProps = Utils.getProperty(configProps, "solr.indexer.properties");
 
@@ -341,8 +348,10 @@ public abstract class MarcHandler {
         	InputStream is = null;
         	if (source.equals("FILE")) 
         	{
-        		if (fName != null && fName.toLowerCase().endsWith(".xml")) 
-        		    inputTypeXML = true;
+                if (fName != null && fName.toLowerCase().endsWith(".xml")) 
+                    inputTypeXML = true;
+                else if (fName != null && fName.toLowerCase().endsWith(".json")) 
+                    inputTypeJSON = true;
         		try {
                     if (showInputFile)
                         logger.info("Attempting to open data file: "+ new File(fName).getAbsolutePath());
@@ -374,11 +383,16 @@ public abstract class MarcHandler {
                     logger.error("Fatal error: Exception reading from stdin");
                     throw new IllegalArgumentException("Fatal error: Exception reading from stdin");
         		}
-        		if (b == '<') inputTypeXML = true;        		
+        		if (b == '<') inputTypeXML = true;
+        		else if (b == '{') inputTypeJSON = true;              
         	}
             if (inputTypeXML)
             {
                 reader = new MarcUnprettyXmlReader(is);
+            }
+            else if (inputTypeJSON)
+            {
+                reader = new MarcJsonReader(is);
             }
             else if (permissiveReader)
             {

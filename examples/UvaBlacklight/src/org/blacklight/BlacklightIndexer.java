@@ -202,6 +202,7 @@ public class BlacklightIndexer extends SolrIndexer
     
     private void addBoundWithHoldings(Record record, List<?> fields999)
     {
+        if (record.getControlNumber() == null || record.getControlNumber().length() < 2) return;
         String boundWithStr = boundWithIds.get(record.getControlNumber().substring(1));
         if (boundWithStr != null)
         {
@@ -260,11 +261,11 @@ public class BlacklightIndexer extends SolrIndexer
         if (boundWithIds == null)
         {
             boundWithIds = new LinkedHashMap<String, String>();
-            InputStream addnlIdsStream = Utils.getPropertyFileInputStream(propertyFilePaths, boundWithFilename);
-            BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
-            String line;
-            try
-            {
+            InputStream addnlIdsStream = null;
+            try {
+                addnlIdsStream = Utils.getPropertyFileInputStream(propertyFilePaths, boundWithFilename);
+                BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
+                String line;
                 while ((line = addnlIdsReader.readLine()) != null)
                 {
                     String linepts[] = line.split("\\|", 2);
@@ -275,6 +276,11 @@ public class BlacklightIndexer extends SolrIndexer
                         //addnlShadowedIds.put(linepts[0], existing + linepts[1] + "|");
                     }
                 }
+
+            }
+            catch (IllegalArgumentException iae)
+            {
+                // couldn't find BoundWith.txt file, but don't have a cow man
             }
             catch (IOException e)
             {
@@ -647,12 +653,12 @@ public class BlacklightIndexer extends SolrIndexer
             if (partNum-1 >= resultParts.length) return(null);
             return(prefix.substring(0,1) + " - " + resultParts[partNum-1]);
         }
-        else // deatiled call number map
+        else // detailed call number map
         {
             if (result == null) return(result);
             if (result.startsWith("{"))
             {
-                String shelfKey = CallNumUtils.getLCShelfkey(valParts[1], record.getControlNumberField().getData());
+                String shelfKey = CallNumUtils.getLCShelfkey(valParts[1], record.getControlNumber(), super.getErrorHandler());
                 String keyDigits = shelfKey.substring(4, 8);
                 String ranges[] = result.replaceAll("[{]", "").split("[}]");
                 for (String range : ranges)
@@ -768,7 +774,7 @@ public class BlacklightIndexer extends SolrIndexer
        if (result == null) return(result);
        String resultParts[] = result.split(":", 2);
        if (sortableFlag && ( resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1]))))
-           result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumberField().getData());
+           result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber(), super.getErrorHandler());
        else if (resultParts[1].startsWith("M@"))
            result = result.replaceAll("M@", "MSS ");
        return(result);
@@ -952,7 +958,7 @@ public class BlacklightIndexer extends SolrIndexer
        result = result.trim().replaceAll(":", " ").replaceAll("\\s\\s+", " ")
                              .replaceAll("\\s?\\.\\s?", ".").replaceAll("[(][0-9]* volumes[)]", "");
        if (sortableFlag) 
-           result = CallNumUtils.getLCShelfkey(result, null);
+           result = CallNumUtils.getLCShelfkey(result, null, super.getErrorHandler());
        return(result);
 
    }
@@ -2044,6 +2050,7 @@ public class BlacklightIndexer extends SolrIndexer
 
     public String getShadowedLocation(final Record record, String propertiesMap, String returnHidden, String processExtra)
     {
+        if (record.getControlNumber()== null || record.getControlNumber().length() < 2) return(null);
         boolean processExtraShadowedIds = processExtra.startsWith("extraIds");
         if (processExtraShadowedIds)
         {

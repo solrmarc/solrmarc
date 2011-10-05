@@ -2,97 +2,83 @@ package org.solrmarc.tools;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.Socket;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.net.SocketFactory;
-
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.solrmarc.testUtils.CommandLineUtils;
-import org.solrmarc.testUtils.JavaInvoke;
+import org.solrmarc.testUtils.SolrJettyProcess;
 
 
 public class RemoteServerTest
 {
-    JavaInvoke vmspawner;
-    String testDataParentPath;
-    String testConfigFile;
-    String solrPath;
-    Process p = null;
-    String jettyTestPort;
+    static SolrJettyProcess solrJettyProcess = null; 
+    static int jettyProcessPort; 
+    static String testDataParentPath;
+    static String testConfigFile;
+    static String solrPath;
 
     /**
      * Start a Jetty driven solr server running in a separate JVM at port jetty.test.port
      */
-    @Before
-    public void setUp() throws Exception
+    @BeforeClass
+    public static void setUp() 
     {
+        String jettyTestPortStr;
+
         testDataParentPath = System.getProperty("test.data.path");
         testConfigFile = System.getProperty("test.config.file");
         solrPath = System.getProperty("solr.path");
-        jettyTestPort = System.getProperty("jetty.test.port");
+        jettyTestPortStr = System.getProperty("jetty.test.port");
         // Specify port 0 to select any available port 
-        if (jettyTestPort == null)
-            jettyTestPort = "0";
+        if (jettyTestPortStr == null)
+            jettyTestPortStr = "0";
         if (solrPath == null)
             fail("property solr.path must be defined for the tests to run");
         if (testDataParentPath == null)
             fail("property test.data.path must be defined for the tests to run");
         if (testConfigFile == null)
             fail("property test.config.file be defined for this test to run");
-        if (!Boolean.parseBoolean(System.getProperty("test.solr.verbose")))
-        {
-            java.util.logging.Logger.getLogger("org.apache.solr").setLevel(java.util.logging.Level.SEVERE);
-            Utils.setLog4jLogLevel(org.apache.log4j.Level.WARN);
-        }
-        Map<String, String> javaProps = new LinkedHashMap<String, String>();
-        javaProps.put("solr.solr.home", new File(solrPath).getCanonicalPath());
-        javaProps.put("jetty.port", jettyTestPort);
-        List<String> addnlClassPath = new ArrayList<String>();
-        addnlClassPath.add(new File(testDataParentPath, "../jetty/start.jar").getCanonicalPath());
-        System.out.println("Properties read, starting server");
-
-        ByteArrayOutputStream serverOut = new ByteArrayOutputStream();
-        ByteArrayOutputStream serverErr = new ByteArrayOutputStream();
         
-        vmspawner = new JavaInvoke("org.mortbay.start.Main",
-                                   new File(new File(testDataParentPath, "../jetty").getCanonicalPath()), 
-                                   javaProps, 
-                                   null,
-                                   addnlClassPath,
-                                   null, false);
-        p = vmspawner.startStdinStderrInstance("JETTY", serverOut, serverErr);
-//        p = vmspawner.start();
+        solrJettyProcess = new SolrJettyProcess(solrPath, testDataParentPath, testConfigFile, jettyTestPortStr);
         boolean serverIsUp = false;
-        if (getServerPort() == 0)
+        try
         {
-            jettyTestPort = waitServerIsUp(60000, 100, serverErr, "INFO:  Started SocketConnector@0.0.0.0:", "INFO:  Started SocketConnector @ 0.0.0.0:");
-            serverIsUp = checkServerIsUp(5000, 100, getServerAddress(), getServerPort());
+            serverIsUp = solrJettyProcess.startProcessWaitUntilSolrIsReady();
         }
-        else
+        catch (IOException e)
         {
-            serverIsUp = checkServerIsUp(25000, 100, getServerAddress(), getServerPort());
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        assertTrue("Server did not become available",serverIsUp);
-        System.out.println("Server is up and running at port "+ getServerPort());
+        
+        assertTrue("Server did not become available", serverIsUp);
+        // If you need to see the output of the solr server after the server is up and running, call 
+        // solrJettyProcess.outputReset() here to empty the buffer so the later output is visible in the Eclipse variable viewer
+        //solrJettyProcess.outputReset();
+        System.out.println("Server is up and running at port "+ solrJettyProcess.getJettyPort());
     }
+    
+    
+    @AfterClass
+    public static void tearDown() throws Exception
+    {
+        if (solrJettyProcess != null && solrJettyProcess.isServerIsUp())
+        {
+            solrJettyProcess.stopServer();
+        }
+    }
+    
 
     /**
      * unit test for index a number of records via the REMOTE http access methods.
@@ -101,31 +87,39 @@ public class RemoteServerTest
     @Test
     public void testRemoteIndexRecord()
     {
-        System.setProperty("org.marc4j.marc.MarcFactory", "org.solrmarc.marcoverride.NoSortMarcFactoryImpl");
-
         // index a small set of records
         URL serverURL =  null;
         try
         {
-            serverURL = new URL("http", "localhost", getServerPort(), "/solr");
+            serverURL = new URL("http", "localhost", solrJettyProcess.getJettyPort(), "/solr");
         }
         catch (MalformedURLException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        
         String urlStr = serverURL.toString();
         ByteArrayOutputStream out1 = new ByteArrayOutputStream();
         ByteArrayOutputStream err1 = new ByteArrayOutputStream();
         Map<String,String> addnlProps1 = new LinkedHashMap<String,String>();
         addnlProps1.put("solr.hosturl", urlStr);
         addnlProps1.put("solr.path", "REMOTE");
-        addnlProps1.put("marc.verbose", "true");
-//        addnlProps1.put("solrmarc.use_binary_request_handler", "true");
-//        addnlProps1.put("solrmarc.use_solr_server_proxy", "true");
+       // addnlProps1.put("marc.verbose", "true");
+        addnlProps1.put("solrmarc.use_binary_request_handler", "true");
+        addnlProps1.put("solrmarc.use_solr_server_proxy", "true");
+        addnlProps1.put("solrmarc.use_streaming_proxy", "true");
         CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
-//        if (out1.toByteArray().length > 0) System.out.println("Importer results: "+ new String (out1.toByteArray()));
-//        if (err1.toByteArray().length > 0) System.out.println("Importer results: "+ new String (err1.toByteArray()));
+        if (out1.toByteArray().length > 0) System.out.println("Importer results: "+ new String (out1.toByteArray()));
+        if (err1.toByteArray().length > 0) System.out.println("Importer results: "+ new String (err1.toByteArray()));
+        
+        ByteArrayOutputStream out1a = new ByteArrayOutputStream();
+        ByteArrayOutputStream err1a = new ByteArrayOutputStream();
+        addnlProps1.put("solrmarc.use_binary_request_handler", "false");
+        addnlProps1.put("solrmarc.use_streaming_proxy", "false");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1a, err1a, new String[]{testConfigFile, testDataParentPath+"/u2103.mrc"  }, addnlProps1);
+        if (out1a.toByteArray().length > 0) System.out.println("Importer results: "+ new String (out1a.toByteArray()));
+        if (err1a.toByteArray().length > 0) System.out.println("Importer results: "+ new String (err1a.toByteArray()));
 
         // retrieve record u3 from the index
         ByteArrayOutputStream out2 = new ByteArrayOutputStream();
@@ -145,7 +139,15 @@ public class RemoteServerTest
         CommandLineUtils.runCommandLineUtil("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out4, err4, new String[]{urlStr, "id:u3", "marc_xml_display"});
         
         // compare the results
-        CommandLineUtils.assertArrayEquals("record via GetFromSolr(raw), and record via GetRecord ", out4.toByteArray(), out3.toByteArray());
+        CommandLineUtils.assertArrayEquals("record via GetFromSolr(XML), and record via GetRecord ", out3.toByteArray(), out4.toByteArray());
+        
+        // retrieve record u3 from the index as JSON
+        ByteArrayOutputStream out4a = new ByteArrayOutputStream();
+        ByteArrayOutputStream err4a = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.solr.RemoteSolrSearcher", "main", null, out4a, err4a, new String[]{urlStr, "id:u3", "marc_json_display"});
+        
+        // compare the results
+        CommandLineUtils.assertArrayEquals("record via GetFromSolr(JSON), and record via GetRecord ", out3.toByteArray(), out4a.toByteArray());
         //System.out.println("Test testRemoteIndexRecord is successful");
         
         //   now test SolrUpdate  to commit the changes
@@ -165,6 +167,13 @@ public class RemoteServerTest
         ByteArrayOutputStream out7 = new ByteArrayOutputStream();
         ByteArrayOutputStream err7 = new ByteArrayOutputStream();
         CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in7, out7, err7, new String[]{testConfigFile, "print", "001"}, addnlProps1);
+        String printidsResult = new String(out7.toByteArray());
+        if (!printidsResult.matches("001 u1[\\r]?[\\n]001 u3[\\r]?[\\n]001 u4[\\r]?[\\n]001 u7[\\r]?[\\n]001 u8[\\r]?[\\n]001 u10[\\r]?[\\n]001 u2103[\\r]?[\\n]"))
+        {
+            System.out.println("Index should contain records u1, u3, u4, u7, u8, u10 and u2103, instead it has "+printidsResult.replaceAll("[\\r]?[\\n]", "").replaceFirst("001 ", "").replaceAll("001", ","));
+        }
+        assertTrue("Index should contain records u1, u3, u4, u7, u8, u10 and u2103, instead it has "+printidsResult.replaceAll("[\\r]?[\\n]", "").replaceFirst("001 ", "").replaceAll("001", ","),
+                   (printidsResult.matches("001 u1[\\r]?[\\n]001 u3[\\r]?[\\n]001 u4[\\r]?[\\n]001 u7[\\r]?[\\n]001 u8[\\r]?[\\n]001 u10[\\r]?[\\n]001 u2103[\\r]?[\\n]")));                                                           
 //        if (out7.toByteArray().length > 0) System.out.println("IDs to delete: "+ new String (out7.toByteArray()));
 //        if (err7.toByteArray().length > 0) System.out.println("IDs to delete: "+ new String (err7.toByteArray()));
 
@@ -210,145 +219,132 @@ public class RemoteServerTest
         System.out.println("Test testRemoteIndexRecord is successful");
     }
     
-    @After
-    public void tearDown() throws Exception
+    @Test
+    public void testSolrjBinaryAndNonBinary()
     {
-        if (p != null)
+        // index a small set of records
+        URL serverURL =  null;
+        try
         {
-            p.destroy();
-            p.waitFor();
+            serverURL = new URL("http", "localhost", solrJettyProcess.getJettyPort(), "/solr");
         }
+        catch (MalformedURLException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        String urlStr = serverURL.toString();
+        ByteArrayOutputStream out1 = new ByteArrayOutputStream();
+        ByteArrayOutputStream err1 = new ByteArrayOutputStream();
+        Map<String,String> addnlProps1 = new LinkedHashMap<String,String>();
+        addnlProps1.put("solr.hosturl", urlStr);
+        addnlProps1.put("solr.path", "REMOTE");
+        addnlProps1.put("solrmarc.use_binary_request_handler", "true");
+        addnlProps1.put("solrmarc.use_solr_server_proxy", "true");
+        addnlProps1.put("solrmarc.use_streaming_proxy", "false");
+        
+        // Add several records using remote non-streaming binary solrj 
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
+        
+        // Check whether record was written as binary 
+        String results = getRawFieldByID(urlStr, "u3", "marc_display");
+        assertTrue("Record added using remote binary request handler doesn't contain \\u001e", results.contains("\\u001e"));
+        assertTrue("Record added using remote non-binary request handler does contain #30;", !results.contains("#30;"));
+
+        out1.reset();
+        err1.reset();
+        // Add several records using remote non-streaming non-binary solrj 
+        addnlProps1.put("solrmarc.use_binary_request_handler", "false");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
+        
+        // Check whether record was not written as binary 
+        results = getRawFieldByID(urlStr, "u3", "marc_display");
+        assertTrue("Record added using remote non-binary request handler does contain \\u001e", !results.contains("\\u001e"));
+        assertTrue("Record added using remote non-binary request handler doesn't contain #30;", results.contains("#30;"));
+
+        out1.reset();
+        err1.reset();
+        // Add several records using remote streaming binary solrj 
+        addnlProps1.put("solrmarc.use_binary_request_handler", "true");
+        addnlProps1.put("solrmarc.use_streaming_proxy", "true");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
+        
+        results = getRawFieldByID(urlStr, "u3", "marc_display");
+        assertTrue("Record added using remote non-binary request handler doesn't contain \\u001e", results.contains("\\u001e"));
+        assertTrue("Record added using remote non-binary request handler does contain #30;", !results.contains("#30;"));
+
+        out1.reset();
+        err1.reset();
+        // Add several records using remote streaming non-binary solrj 
+        addnlProps1.put("solrmarc.use_binary_request_handler", "false");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
+        
+        // Check whether record was not written as binary 
+        results = getRawFieldByID(urlStr, "u3", "marc_display");
+        assertTrue("Record added using remote non-binary request handler does contain \\u001e", !results.contains("\\u001e"));
+        assertTrue("Record added using remote non-binary request handler doesn't contain #30;", results.contains("#30;"));
+        
+        out1.reset();
+        err1.reset();
+        // Add several records using local binary solrj 
+        addnlProps1.put("solr.path", new File(solrPath).getAbsolutePath());
+        addnlProps1.put("solrmarc.use_binary_request_handler", "true");
+        addnlProps1.put("solrmarc.use_streaming_proxy", "false");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
+        
+        results = getRawFieldByID(urlStr, "u3", "marc_display");
+        assertTrue("Record added using remote non-binary request handler doesn't contain \\u001e", results.contains("\\u001e"));
+        assertTrue("Record added using remote non-binary request handler does contain #30;", !results.contains("#30;"));
+
+        out1.reset();
+        err1.reset();
+        // Add several records using local non-binary solrj 
+        addnlProps1.put("solrmarc.use_binary_request_handler", "false");
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
+        
+        // Check whether record was not written as binary 
+        results = getRawFieldByID(urlStr, "u3", "marc_display");
+        assertTrue("Record added using remote non-binary request handler does contain \\u001e", !results.contains("\\u001e"));
+        assertTrue("Record added using remote non-binary request handler doesn't contain #30;", results.contains("#30;"));
+
+        System.out.println("Test testSolrjBinaryAndNonBinary is successful");
     }
-    
-    InetAddress getServerAddress() throws UnknownHostException 
-    {
-        return InetAddress.getLocalHost();
-    }
-    
-    int getServerPort() 
-    {
-        return Integer.parseInt(jettyTestPort);
-    }
-    
+
     /**
-     * Repeats a TCP connection check every <em>sleepTime</em> milliseconds until it either succeeds
-     * or times out after <em>timeout</em> milliseconds.
-     * 
-     * @see Server#checkServerIsUp(InetAddress, int) An explanation of the TCP checking mechanism.
-     * 
-     * @param timeout If no check is successful after this many milliseconds has passed, fail the 
-     * overall checking process.
-     * @param sleepTime How long to wait (in milliseconds) between checks of the service.
-     * @param server address of server to check.
-     * @param port port to check.
-     * @return true if a connection attempt succeeds, false in the case of error or 
-     * no connection attempt successful.
+     *   getRawFieldByID - Talk to solr jetty server at specificed URL, search for record with id, 
+     *   and return the raw value of the field in the field "fieldToFetch" 
+     *   If the record with that id doesn't exist id or the record doesn't contain that field return null
      */
-    public static String waitServerIsUp(long timeout, long sleepTime, ByteArrayOutputStream out, String patternToWatchFor1, String patternToWatchFor2  ) 
+    public static String getRawFieldByID(String serverURL, String id, String fieldToFetch)
     {
-        long start = System.currentTimeMillis();
-        String socketStr = "0";
-        int lastLineRead = 0;
-        while((System.currentTimeMillis() - start) < timeout)
+        String fieldValue = null;
+        String select = "select/?q=id%3A%ID%&version=2.2&start=0&rows=1&indent=on&fl=%FIELD%&wt=json";
+        URL selectURL;
+        try
         {
-            String outputSoFar = new String(out.toByteArray());
-            String lines[] = outputSoFar.split("\r?\n");
-            for (int i = lastLineRead; i < lines.length; i++)
+            selectURL = new URL(serverURL + "/" + select.replace("%ID%", id).replace("%FIELD%", fieldToFetch));
+            InputStream is = selectURL.openStream();
+            String selectInfo = Utils.readStreamIntoString(is);
+            String findAtStart = "\""+fieldToFetch+"\":";
+            int fieldStart = selectInfo.indexOf(findAtStart);
+            int fieldEnd = selectInfo.indexOf("\"}]");
+            if (fieldStart != -1 && fieldEnd != -1)
             {
-//                System.out.println(lines[i]);
-                if (lines[i].contains(patternToWatchFor1))
-                {
-                    socketStr = lines[i].replaceAll(".*"+patternToWatchFor1 + "([0-9]*).*", "$1");
-                    return(socketStr);
-                }
-                else if (lines[i].contains(patternToWatchFor2))
-                {
-                    socketStr = lines[i].replaceAll(".*"+patternToWatchFor2 + "([0-9]*).*", "$1");
-                    return(socketStr);
-                }
-            }
-            lastLineRead = lines.length;
-            try {
-                Thread.sleep(sleepTime);
-            } 
-            catch (InterruptedException e) 
-            {
-                return socketStr;
+                fieldValue = selectInfo.substring(fieldStart+findAtStart.length(), fieldEnd);
             }
         }
-        return socketStr;
-    }
-    
-    /**
-     * Repeats a TCP connection check every <em>sleepTime</em> milliseconds until it either succeeds
-     * or times out after <em>timeout</em> milliseconds.
-     * 
-     * @see Server#checkServerIsUp(InetAddress, int) An explanation of the TCP checking mechanism.
-     * 
-     * @param timeout If no check is successful after this many milliseconds has passed, fail the 
-     * overall checking process.
-     * @param sleepTime How long to wait (in milliseconds) between checks of the service.
-     * @param server address of server to check.
-     * @param port port to check.
-     * @return true if a connection attempt succeeds, false in the case of error or 
-     * no connection attempt successful.
-     */
-    public static boolean checkServerIsUp(long timeout, long sleepTime, InetAddress server, int port ) 
-    {
-        long start = System.currentTimeMillis();
-        while((System.currentTimeMillis() - start) < timeout)
+        catch (MalformedURLException e)
         {
-            if(!checkServerIsUp(server, port))
-            {
-                try {
-                    Thread.sleep(sleepTime);
-                } 
-                catch (InterruptedException e) 
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return true;
-            }
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        return false;
-    }
-    
-    /**
-     * Performs a simple TCP connection check to the specified address and port.
-     * 
-     * @param server address of the server to contact.
-     * @param port TCP port to connect to on the specified server.
-     * @return true if that port is accepting connections, 
-     * false in all other cases: not listening and/or connection error.
-     */
-    public static boolean checkServerIsUp(InetAddress server, int port) 
-    {
-        Socket sock = null;
-        try {
-            sock = SocketFactory.getDefault().createSocket(server, port);
-            sock.setSoLinger(true, 0);
-            return true;
-        } 
-        catch (IOException e) 
-        { 
-            return false;
-        }
-        finally
+        catch (IOException e)
         {
-            if(sock != null)
-            {
-                try {
-                    sock.close();
-                } 
-                catch (IOException e) 
-                {
-                    // don't care
-                }
-            }
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
+        return(fieldValue);
     }
+        
 }
 

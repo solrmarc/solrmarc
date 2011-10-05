@@ -20,6 +20,8 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.*;
 
+import org.marc4j.ErrorHandler;
+
 import com.solrmarc.icu.lang.UCharacter;
 
 /**
@@ -687,12 +689,19 @@ public final class CallNumUtils {
 
 
 // TODO:  method to normalize year and immediate following chars (no space)?   <-- stupid?
-    
     /**
      * given a raw LC call number, return the shelf key - a sortable version
      *  of the call number
      */
     public static String getLCShelfkey(String rawLCcallnum, String recid) {
+        return(getLCShelfkey(rawLCcallnum, recid, null));
+    }
+
+    /**
+     * given a raw LC call number, return the shelf key - a sortable version
+     *  of the call number
+     */
+    public static String getLCShelfkey(String rawLCcallnum, String recid, ErrorHandler errors) {
         StringBuilder resultBuf = new StringBuilder();
         String upcaseLCcallnum = rawLCcallnum.toUpperCase();
         
@@ -742,7 +751,16 @@ public final class CallNumUtils {
         } catch (NumberFormatException e) {
 //              if (recid != null)
             if ( (recid != null) && (!rawLCcallnum.startsWith("XX")) ) // Stanford mod
-                System.err.println("Problem creating shelfkey for record " + recid + "; call number: " + rawLCcallnum);
+            {
+                if (errors == null)
+                {
+                    System.err.println("Problem creating shelfkey for record " + recid + "; call number: " + rawLCcallnum);
+                }
+                else
+                {
+                    errors.addError(ErrorHandler.ERROR_TYPO, "Problem creating shelfkey for record " + recid + "; call number: " + rawLCcallnum);
+                }
+            }
             //e.printStackTrace();
             resultBuf = new StringBuilder();
         }

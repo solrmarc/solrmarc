@@ -457,7 +457,7 @@ public class HathiPlunderer extends InputStream
             {
                 debug = true;
             }
-            else if (args[0].equals("-d"))
+            else if (args[0].equals("-v"))
             {
                 print = true;
             }

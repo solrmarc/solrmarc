@@ -18,6 +18,7 @@ package org.solrmarc.index;
  */
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
@@ -57,8 +58,12 @@ public class SolrIndexer
     private Map<String, Map<String, String>> transMapMap = null;
 
     /** map of custom methods.  keys are names of custom methods; 
-     *  values are the translation maps (hence, it's a map of maps) */
+     *  values are the methods to call for that custom method */
     private Map<String, Method> customMethodMap = null;
+
+    /** map of custom mixin classes that contain additional indexing functions 
+     *  values are the translation maps (hence, it's a map of maps) */
+    private Map<String, SolrIndexerMixin> customMixinMap = null;
 
     /** map of script interpreters.  keys are names of scripts; 
      *  values are the Interpterers  */
@@ -71,7 +76,7 @@ public class SolrIndexer
     protected String propertyFilePaths[];
 
     /** Error Handler used for reporting errors */
-    private ErrorHandler errors;
+    protected ErrorHandler errors;
 
     // Initialize logging category
     protected static Logger logger = Logger.getLogger(MarcImporter.class.getName());
@@ -86,6 +91,7 @@ public class SolrIndexer
         transMapMap = new HashMap<String, Map<String, String>>();
         scriptMap = new HashMap<String, Interpreter>();
         customMethodMap = new HashMap<String, Method>();
+        customMixinMap = new HashMap<String, SolrIndexerMixin>();
         indexDate = new Date();
     }
 
@@ -99,12 +105,15 @@ public class SolrIndexer
     {
         this();
         propertyFilePaths = propertyDirs;
-        String indexingPropsFiles[] = indexingPropsFile.split("[;,]");
-        for (String indexProps : indexingPropsFiles)
+        if (indexingPropsFile != null)
         {
-            indexProps = indexProps.trim();
-            Properties indexingProps = Utils.loadProperties(propertyFilePaths, indexProps);
-            fillMapFromProperties(indexingProps);
+            String indexingPropsFiles[] = indexingPropsFile.split("[;,]");
+            for (String indexProps : indexingPropsFiles)
+            {
+                indexProps = indexProps.trim();
+                Properties indexingProps = Utils.loadProperties(propertyFilePaths, indexProps);
+                fillMapFromProperties(indexingProps);
+            }
         }
     }
     
@@ -128,7 +137,28 @@ public class SolrIndexer
         
         return indexer;
      }
+          
+     /* Attempt to reinitialize an indexer given an INDEXER Properties object,
+      * and a search path (possibly empty). This is used by SolrMarc tests, may not
+      * work as you might expect right in actual program use, not sure.
+      *
+      *  You can re-init an indexer for unit testing like so:
+      *  indexer.reinitFromProperties(new Properties())
+      *
+      * @param indexingProperties a Properties mapping solr
+      *  field names to values in the marc records
+      * UNTESTED SO COMMENTED OUT FOR THE FUTURE
+      */
+      public void reinitFromProperties(Properties indexingProperties) 
+      {
+         this.fieldMap.clear();
+         this.transMapMap.clear();
+         this.customMethodMap.clear();
+         this.customMixinMap.clear();
 
+         this.fillMapFromProperties(indexingProperties);
+      }
+           
     /**
      * Parse the properties file and load parameters into fieldMap. Also
      * populate transMapMap and indexDate
@@ -161,7 +191,7 @@ public class SolrIndexer
                 {
                     // split it into two pieces at first comma or space
                     String values[] = propValue.split("[, ]+", 2);
-                    if (values[0].equals("custom") || values[0].equals("customDeleteRecordIfFieldEmpty") ||
+                    if (values[0].startsWith("custom") || values[0].equals("customDeleteRecordIfFieldEmpty") ||
                         values[0].startsWith("script"))
                     {
                         fieldDef[1] = values[0];
@@ -211,6 +241,8 @@ public class SolrIndexer
                     else if (values[0].equals("xml") ||
                              values[0].equals("raw") ||
                              values[0].equals("date") ||
+                             values[0].equals("json") ||
+                             values[0].equals("json2") ||
                              values[0].equals("index_date") ||
                              values[0].equals("era"))
                     {
@@ -233,6 +265,8 @@ public class SolrIndexer
                     }
                     else if (values[0].equalsIgnoreCase("FullRecordAsXML") ||
                              values[0].equalsIgnoreCase("FullRecordAsMARC") ||
+                             values[0].equalsIgnoreCase("FullRecordAsJson") ||
+                             values[0].equalsIgnoreCase("FullRecordAsJson2") ||
                              values[0].equalsIgnoreCase("FullRecordAsText") ||
                              values[0].equalsIgnoreCase("DateOfPublication") ||
                              values[0].equalsIgnoreCase("DateRecordIndexed"))
@@ -318,7 +352,9 @@ public class SolrIndexer
             String mapName = fieldMapVal[3];
 
             if (indexType.startsWith("custom"))
-                verifyCustomMethodExists(indexParm);
+            {
+                verifyCustomMethodExists(indexType, indexParm);
+            }
 
             // check that translation maps are present in transMapMap
             if (mapName != null && findMap(mapName) == null)
@@ -335,10 +371,77 @@ public class SolrIndexer
      * present and accounted for
      * @param indexParm - name of custom function plus args
      */
-    private void verifyCustomMethodExists(String indexParm)
+    private void verifyCustomMethodExists(String indexType, String indexParm)
     {
+        String className = null;
+        Class<?> classToLookIn = this.getClass();
         try
         {
+//            if (!indexType.equals("custom"))
+//            {
+//                className = null;
+//            }
+            if (indexType.matches("custom[(][a-zA-Z0-9.]+[)]"))
+            {
+                className = indexType.substring(7, indexType.length()-1).trim();
+                if (customMixinMap.containsKey(className))
+                {
+                    classToLookIn = customMixinMap.get(className).getClass();
+                }
+                else
+                {
+                    classToLookIn = Class.forName(className);
+                    if (SolrIndexerMixin.class.isAssignableFrom(classToLookIn))
+                    {
+                       Constructor<?> classConstructor = classToLookIn.getConstructor();
+                       SolrIndexerMixin instance = (SolrIndexerMixin)classConstructor.newInstance((Object[])null);
+                       instance.setMainIndexer(this);
+                       customMixinMap.put(className, instance);
+                    }
+                }
+            }
+        }
+        catch (ClassNotFoundException e)
+        {
+            logger.error("Unable to find indexer mixin class "  + className + " which should defing the custom indexing function " + indexParm);
+            logger.debug(e.getCause());
+            throw new IllegalArgumentException("Unable to find indexer mixin class "  + className + " which should defing the custom indexing function " + indexParm);
+        }
+        catch (SecurityException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IllegalArgumentException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IllegalAccessException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (InvocationTargetException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (InstantiationException e)
+        {
+            logger.error("Unable to find no argument constructor in indexer mixin class "  + className);
+            logger.debug(e.getCause());
+            throw new IllegalArgumentException("Unable to find no argument constructor in indexer mixin class "  + className);
+        }
+        catch (NoSuchMethodException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        try
+        {
+
             Method method = null;
             int parenIx = indexParm.indexOf("(");
             if (parenIx != -1)
@@ -354,7 +457,7 @@ public class SolrIndexer
                 {
                     parmClasses[i + 1] = String.class;
                 }
-                method = getClass().getMethod(functionName, parmClasses);
+                method = classToLookIn.getMethod(functionName, parmClasses);
                 if (customMethodMap.containsKey(functionName))
                 {
                     customMethodMap.put(functionName, null);
@@ -366,7 +469,7 @@ public class SolrIndexer
             }
             else
             {    
-                method = getClass().getMethod(indexParm, new Class[] { Record.class });
+                method = classToLookIn.getMethod(indexParm, new Class[] { Record.class });
                 if (customMethodMap.containsKey(indexParm))
                 {
                     customMethodMap.put(indexParm, null);
@@ -545,7 +648,7 @@ public class SolrIndexer
     public Map<String, Object> map(Record record, ErrorHandler errors)
     {
         this.errors = errors;
-        perRecordInit(record);
+        perRecordInitMaster(record);
         Map<String, Object> indexMap = new HashMap<String, Object>();
 
         for (String key : fieldMap.keySet())
@@ -656,7 +759,25 @@ public class SolrIndexer
     }
 
     /**
-     * This routine can be overridden in a sub-class to perform some processing that need to be done once 
+     * This routine CANNOT be overridden in a sub-class.  Its is called to perform some processing that needs 
+     * to be done once for each record, and which may be needed by several indexing specifications.  Basically all 
+     * this method does is call the override-able method perRecordInit for the SolrIndexer class, and the perRecordInit 
+     * methods of any SolrIndexerMixin that are in use.
+     * 
+     * @param record -  The MARC record that is being indexed.
+     */
+    private final void perRecordInitMaster(Record record)
+    {
+        perRecordInit(record);
+        for (String key : customMixinMap.keySet())
+        {
+            SolrIndexerMixin mixin = customMixinMap.get(key);
+            mixin.perRecordInit(record);
+        }
+    }
+    
+    /**
+     * This routine can be overridden in a sub-class to perform some processing that needs to be done once 
      * for each record, and which may be needed by several indexing specifications, especially custom methods.
      * The default version does nothing.
      * 
@@ -696,8 +817,21 @@ public class SolrIndexer
         	recCntlNum = record.getControlNumber();
         }
         catch (NullPointerException npe) { /* ignore as this is for error msgs only*/ }
+        String className = null;
+        Class<?> classThatContainsMethod = this.getClass();
+        Object objectThatContainsMethod = this;
         try
         {
+            if (indexType.matches("custom[(][a-zA-Z0-9.]+[)]"))
+            {
+                className = indexType.substring(7, indexType.length()-1).trim();
+                if (customMixinMap.containsKey(className))
+                {
+                    objectThatContainsMethod = customMixinMap.get(className);
+                    classThatContainsMethod = objectThatContainsMethod.getClass();
+                }
+            }
+
             Method method;
             if (indexParm.indexOf("(") != -1)
             {
@@ -717,17 +851,17 @@ public class SolrIndexer
                 }
                 method = customMethodMap.get(functionName);
                 if (method == null)  
-                    method = getClass().getMethod(functionName, parmClasses);
+                    method = classThatContainsMethod.getMethod(functionName, parmClasses);
                 returnType = method.getReturnType();
-                retval = method.invoke(this, objParms);
+                retval = method.invoke(objectThatContainsMethod, objParms);
             }
             else
             {
                 method = customMethodMap.get(indexParm);
                 if (method == null)  
-                    method = getClass().getMethod(indexParm, new Class[]{Record.class});
+                    method = classThatContainsMethod.getMethod(indexParm, new Class[]{Record.class});
                 returnType = method.getReturnType();
-                retval = method.invoke(this, new Object[] { record });
+                retval = method.invoke(objectThatContainsMethod, new Object[] { record });
             }
         }
         catch (SecurityException e)
@@ -970,6 +1104,12 @@ public class SolrIndexer
         else if (indexParm.equals("xml")
                 || indexParm.equalsIgnoreCase("FullRecordAsXML"))
             return writeXml(record);
+        else if (indexParm.equals("json")
+                || indexParm.equalsIgnoreCase("FullRecordAsJSON"))
+            return writeJson(record, true);
+        else if (indexParm.equals("json2")
+                || indexParm.equalsIgnoreCase("FullRecordAsJSON2"))
+            return writeJson(record, false);
         else if (indexParm.equals("xml")
                 || indexParm.equalsIgnoreCase("FullRecordAsText"))
             return (record.toString().replaceAll("\n", "<br/>"));
@@ -1852,6 +1992,32 @@ public class SolrIndexer
     }
 
     /**
+     * Write a marc record as a json string to the
+     * @param record marc record object to be written
+     * @return string containing binary (UTF-8 encoded) representation of marc
+     *         record object.
+     */
+    protected String writeJson(Record record, boolean MARCinJSON)
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        MarcWriter writer = new MarcJsonWriter(out, (MARCinJSON) ? MarcJsonWriter.MARC_IN_JSON : MarcJsonWriter.MARC_JSON);
+        writer.write(record);
+        writer.close();
+
+        String result = null;
+        try
+        {
+            result = out.toString("UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            // e.printStackTrace();
+            logger.error(e.getCause());
+        }
+        return result;
+    }
+
+    /**
      * Write a marc record as a string containing MarcXML
      * @param record marc record object to be written
      * @return String containing MarcXML representation of marc record object
@@ -2469,6 +2635,11 @@ public class SolrIndexer
         if (Character.isDigit(ind2char))
             result = Integer.valueOf(String.valueOf(ind2char));
         return result;
+    }
+
+    public ErrorHandler getErrorHandler()
+    {
+        return errors;
     }
 
 }

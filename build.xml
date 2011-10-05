@@ -22,7 +22,7 @@
     <import file="${buildtools.path}/ant_package.xml" />
     
     <property name="package.dir" value="package" />
-    <property name="version" value="2.2.1" />
+    <property name="version" value="2.3" />
 
     <tstamp>
         <format property="year" pattern="yyyy" />
@@ -152,6 +152,10 @@
         <echo message="Use 'ant package-src' to build a gzipped tarball of the source code for distribution" />
         <echo message="Use 'ant package-prebuilt' to build a gzipped tarball of a pre-built, pre-configured, binary release" />
         <echo message="Use 'ant test' to run unit tests" />
+        <echo message="To build and test an example configuration in its own sub directory do the following:" />
+        <echo message="      ant -Dsite.dir=test-GenericBlacklight -Ddist.path=dist dist test" />
+
+
     </target>
 
     <!-- Site Testing Targets -->

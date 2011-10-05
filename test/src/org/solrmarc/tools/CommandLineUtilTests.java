@@ -421,7 +421,8 @@ public class CommandLineUtilTests
         ByteArrayOutputStream out1 = new ByteArrayOutputStream();
         ByteArrayOutputStream err1 = new ByteArrayOutputStream();
         Map<String,String> addnlProps1 = new LinkedHashMap<String,String>();
-        addnlProps1.put("solrmarc.use_solr_server_proxy", "true");
+        addnlProps1.put("solrmarc.use_binary_request_handler", "true");
+        addnlProps1.put("solrmarc.use_solr_server_proxy", "false");
         addnlProps1.put("solr.path", solrPath);
         addnlProps1.put("solr.log.level", "OFF");
         addnlProps1.put("solrmarc.log.level", "OFF");
@@ -450,6 +451,14 @@ public class CommandLineUtilTests
         
         // compare the results
         CommandLineUtils.assertArrayEquals("record via GetFromSolr(xml) through filter, and record via GetRecord ", out4.toByteArray(), out3.toByteArray()); 
+
+        // retrieve record u3 from the index (from marc_json_display field) 
+        ByteArrayOutputStream out4a = new ByteArrayOutputStream();
+        ByteArrayOutputStream err4a = new ByteArrayOutputStream();
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out4a, err4a, new String[]{testConfigFile, "id:u3", "marc_json_display"}, addnlProps2);
+        
+        // compare the results
+        CommandLineUtils.assertArrayEquals("record via GetFromSolr(xml) through filter, and record via GetRecord ", out4a.toByteArray(), out3.toByteArray()); 
 
         // index some more records as well as delete some
         ByteArrayOutputStream out6 = new ByteArrayOutputStream();
@@ -559,28 +568,40 @@ public class CommandLineUtilTests
         System.out.println("Test testBooklistReader is successful");
     }
     
-    public void deleteAllRecords(String testConfigFile, String solrPath )
+    public static void deleteAllRecords(String testConfigFile, String solrPath )
+    {
+        byte[] listOfRecordsToDelete = getListOfAllRecordIds(testConfigFile, solrPath, false);
+        
+        ByteArrayInputStream in = new ByteArrayInputStream(listOfRecordsToDelete);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        Map<String,String> addnlProps3 = new LinkedHashMap<String,String>();
+//        addnlProps3.put("marc.delete_record_id_mapper", "001 [ ]*([A-Za-z0-9]*).*->$1");
+        addnlProps3.put("solr.path", solrPath);
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", in, out, err, new String[]{testConfigFile, "DELETE_ONLY"}, addnlProps3);
+    }
+    
+    public static byte[] getListOfAllRecordIds(String testConfigFile, String solrPath, boolean show)
     {
         // dump the entire contents of index (don't try this at home)
         ByteArrayOutputStream out1 = new ByteArrayOutputStream();
         ByteArrayOutputStream err1 = new ByteArrayOutputStream();
         Map<String,String> addnlProps1 = new LinkedHashMap<String,String>();
         addnlProps1.put("solr.path", solrPath);
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out1, err1, new String[]{testConfigFile, "*:*", "marc_display"}, addnlProps1);
-        
-        // now extract only the record ids from the records
-        ByteArrayInputStream in2 = new ByteArrayInputStream(out1.toByteArray());
-        ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in2, out2, new String[]{testConfigFile, "print", "001"});
-        
-        // now extract run the indexer to delete all of the records
-        ByteArrayInputStream in3 = new ByteArrayInputStream(out2.toByteArray());
-        ByteArrayOutputStream out3 = new ByteArrayOutputStream();
-        ByteArrayOutputStream err3 = new ByteArrayOutputStream();
-        Map<String,String> addnlProps3 = new LinkedHashMap<String,String>();
-        addnlProps3.put("marc.delete_record_id_mapper", "001 u?([0-9]*).*->u$1");
-        addnlProps3.put("solr.path", solrPath);
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", in3, out3, err3, new String[]{testConfigFile, "DELETE_ONLY"}, addnlProps3);
-
+        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.SolrReIndexer", "main", null, out1, err1, new String[]{testConfigFile, "-id", "*:*", "marc_display"}, addnlProps1);
+                
+        // now show the list all of the records
+        if (show)
+        {
+            try
+            {
+                System.out.println("testConfigFile= "+ testConfigFile + "    solrPath="+solrPath);
+                System.out.println(out1.toString("UTF8"));
+            }
+            catch (UnsupportedEncodingException e)
+            {
+            }
+        }
+        return(out1.toByteArray());
     }
 }

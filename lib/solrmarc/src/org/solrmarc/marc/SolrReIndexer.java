@@ -1,23 +1,22 @@
 package org.solrmarc.marc;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
-import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.marc4j.*;
 import org.marc4j.marc.Record;
-import org.solrmarc.index.SolrIndexer;
-
-import org.solrmarc.solr.DocumentProxy;
-import org.solrmarc.solr.SolrCoreLoader;
-import org.solrmarc.solr.SolrCoreProxy;
-import org.solrmarc.solr.SolrSearcherProxy;
+import org.solrmarc.solr.SolrServerProxy;
 import org.solrmarc.tools.Utils;
 
 import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 
 
 /**
@@ -28,12 +27,14 @@ import org.apache.log4j.Logger;
  */
 public class SolrReIndexer extends MarcImporter
 {
-    protected SolrSearcherProxy solrSearcherProxy;
+ //   protected SolrSearcherProxy solrSearcherProxy;
     private String queryForRecordsToUpdate;
     protected String solrFieldContainingEncodedMarcRecord;
     protected boolean doUpdate = true;
     protected MarcWriter output = null;
- 
+    protected SolrServer solrServer= null;
+    private boolean getIdsOnly = false;
+    
     // Initialize logging category
     static Logger logger = Logger.getLogger(SolrReIndexer.class.getName());
     
@@ -53,7 +54,14 @@ public class SolrReIndexer extends MarcImporter
         verbose = false;
         output = new MarcStreamWriter(System.out, "UTF8", true);
         if (solrFieldContainingEncodedMarcRecord == null) solrFieldContainingEncodedMarcRecord = "marc_display";
-        readAllMatchingDocs(queryForRecordsToUpdate);
+        if (getIdsOnly)
+        {
+            readAllMatchingIds(queryForRecordsToUpdate);
+        }
+        else
+        {
+            readAllMatchingDocs(queryForRecordsToUpdate);
+        }
         output.close();
         return 0;
     }
@@ -61,6 +69,8 @@ public class SolrReIndexer extends MarcImporter
     @Override
     protected void loadLocalProperties()
     {
+  //      configProps.setProperty("solrmarc.use_binary_request_handler", "false");
+//        configProps.setProperty("solrmarc.use_streaming_proxy", "false");
         super.loadLocalProperties();
         solrFieldContainingEncodedMarcRecord = Utils.getProperty(configProps, "solr.fieldname");
         queryForRecordsToUpdate = Utils.getProperty(configProps, "solr.query");
@@ -71,17 +81,72 @@ public class SolrReIndexer extends MarcImporter
     @Override
     protected void processAdditionalArgs() 
     {
-        if (queryForRecordsToUpdate == null && addnlArgs.length > 0)
+        int argOffset = 0;
+        if (addnlArgs.length > 0 && addnlArgs[0].equals("-id"))
         {
-            queryForRecordsToUpdate = addnlArgs[0];
+            getIdsOnly = true;
+            argOffset = 1;
         }
-        if (solrFieldContainingEncodedMarcRecord == null && addnlArgs.length > 1)
+        if (queryForRecordsToUpdate == null && addnlArgs.length > argOffset)
         {
-            solrFieldContainingEncodedMarcRecord = addnlArgs[1];
+            queryForRecordsToUpdate = addnlArgs[argOffset];
         }
-        solrSearcherProxy = new SolrSearcherProxy((SolrCoreProxy)solrProxy);
+        if (solrFieldContainingEncodedMarcRecord == null && addnlArgs.length > argOffset+1)
+        {
+            solrFieldContainingEncodedMarcRecord = addnlArgs[argOffset+1];
+        }
+        solrServer = ((SolrServerProxy)solrProxy).getSolrServer();
     }
 
+    
+    /**
+     * Read matching records from the index
+     * @param queryForRecordsToUpdate
+     */
+    public void readAllMatchingIds(String queryForRecordsToUpdate)
+    {
+        String queryparts[] = queryForRecordsToUpdate.split(":");
+        if (queryparts.length != 2) 
+        {
+            //System.err.println("Error query must be of the form    field:term");
+            logger.error("Error query must be of the form    field:term");
+            System.out.println("Error: query must be of the form    field:term  " + queryForRecordsToUpdate);
+            return;
+        }
+        
+        SolrQuery query = new SolrQuery();
+        query.setQuery(queryForRecordsToUpdate);
+        query.setQueryType("standard");
+        query.setFacet(false);
+        query.setRows(1000);
+        query.setFields("id");
+        int totalHits = -1;
+        int totalProcessed = 0;
+        try
+        {
+            do {
+                query.setStart(totalProcessed);
+                QueryResponse response = solrServer.query(query); 
+                SolrDocumentList sdl = response.getResults();
+                if (totalHits == -1) totalHits = (int)sdl.getNumFound();
+                for (SolrDocument doc : sdl)
+                {
+                    String id = doc.getFieldValue("id").toString();
+                    totalProcessed++;
+                    if (output != null && id != null) 
+                    {
+                        System.out.println(id);
+                        System.out.flush();
+                    }
+                }
+            } while (totalProcessed < totalHits);
+        }
+        catch (SolrServerException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }  
+    }
     
     /**
      * Read matching records from the index
@@ -97,21 +162,35 @@ public class SolrReIndexer extends MarcImporter
             System.out.println("Error: query must be of the form    field:term  " + queryForRecordsToUpdate);
             return;
         }
+        
+        // grab them 1000 at a time
+        SolrQuery query = new SolrQuery();
+        query.setQuery(queryForRecordsToUpdate);
+        query.setQueryType("standard");
+        query.setFacet(false);
+        query.setRows(1000);
+        int totalHits = -1;
+        int totalProcessed = 0;
         try
         {
-            int solrDocNums[] = solrSearcherProxy.getDocSet(queryparts[0], queryparts[1]);
-            for (int docNum : solrDocNums)
-            {
-                DocumentProxy doc = solrSearcherProxy.getDocumentProxyBySolrDocNum(docNum);
-                Record record = getRecordFromDocument(doc);
-                if (output != null && record != null) 
+            do {
+                query.setStart(totalProcessed);
+                QueryResponse response = solrServer.query(query); 
+                SolrDocumentList sdl = response.getResults();
+                if (totalHits == -1) totalHits = (int)sdl.getNumFound();
+                for (SolrDocument doc : sdl)
                 {
-                    output.write(record);
-                    System.out.flush();
+                    totalProcessed++;
+                    Record record = getRecordFromDocument(doc);
+                    if (output != null && record != null) 
+                    {
+                        output.write(record);
+                        System.out.flush();
+                    }
                 }
-             }
+            } while (totalProcessed < totalHits);
         }
-        catch (IOException e)
+        catch (SolrServerException e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -127,20 +206,17 @@ public class SolrReIndexer extends MarcImporter
      */
     public Map<String, Object> readAndIndexDoc(String field, String term, boolean update)
     {
-        try 
+        SolrQuery query = new SolrQuery();
+        query.setQuery(field+":"+term);
+        query.setQueryType("standard");
+        query.setFacet(false);
+
+        try
         {
-            int solrDocNums[] = solrSearcherProxy.getDocSet(field, term);
-            Object docSetIterator = solrSearcherProxy.getDocSetIterator(field, term);
-            int count = 0;
-            while (solrSearcherProxy.iteratorHasNext(docSetIterator))
+            QueryResponse response = solrServer.query(query); //)solrSearcherProxy.getDocSet(queryparts[0], queryparts[1]);
+            SolrDocumentList sdl = response.getResults();
+            for (SolrDocument doc : sdl)
             {
-                DocumentProxy doc = solrSearcherProxy.iteratorGetNextDoc(docSetIterator);
-    //            count ++;
-    //            if (count == 100 || count == 1000 || count == 10000 || count % 10000 == 0)
-    //            {
-    //                System. out.println("Done handling "+ count +" record out of "+ totalSize);
-    //            }
-                    
                 Record record = getRecordFromDocument(doc);
                     
                 if (record != null)
@@ -158,10 +234,10 @@ public class SolrReIndexer extends MarcImporter
                 }
             }
         }
-        catch (IOException e)
+        catch (SolrServerException e)
         {
-            logger.error(e.getMessage());
-            //e.printStackTrace();
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         return(null);
     }
@@ -171,7 +247,7 @@ public class SolrReIndexer extends MarcImporter
      * @param doc
      * @param map
      */
-    protected void addExtraInfoFromDocToMap(DocumentProxy doc, Map<String, Object> docMap)
+    protected void addExtraInfoFromDocToMap(SolrDocument doc, Map<String, Object> docMap)
     {
         addExtraInfoFromDocToMap(doc, docMap, "fund_code_facet");
         addExtraInfoFromDocToMap(doc, docMap, "date_received_facet");   
@@ -184,15 +260,15 @@ public class SolrReIndexer extends MarcImporter
      * @param map Map to add information to
      * @param keyVal Value to add
      */
-    protected void addExtraInfoFromDocToMap(DocumentProxy doc, Map<String, Object> map, String keyVal)
+    protected void addExtraInfoFromDocToMap(SolrDocument doc, Map<String, Object> map, String keyVal)
     {
-        String fieldVals[] = null;
-        fieldVals = doc.getValuesForField(keyVal);
-        if (fieldVals != null && fieldVals.length > 0)
+        Collection<Object> fieldVals = null;
+        fieldVals = doc.getFieldValues(keyVal);
+        if (fieldVals != null && fieldVals.size() > 0)
         {
-            for (int i = 0; i < fieldVals.length; i++)
+            for (Object fieldValObj : fieldVals)
             {
-                String fieldVal = fieldVals[i];
+                String fieldVal = fieldValObj.toString();
                 addToMap(map, keyVal, fieldVal);
             }
         }           
@@ -217,36 +293,77 @@ public class SolrReIndexer extends MarcImporter
      * @return marc4j Record
      * @throws IOException
      */
-    public Record getRecordFromDocument(DocumentProxy doc) throws IOException
+    public Record getRecordFromDocument(SolrDocument doc) //throws IOException
     {
-        String fields[] = null;
-        fields = doc.getValuesForField(solrFieldContainingEncodedMarcRecord);
-        if (fields == null || fields.length == 0)
+        String field = null;
+        field = doc.getFirstValue(solrFieldContainingEncodedMarcRecord).toString();
+        if (field == null || field.length() == 0)
         {
             //System.err.println("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
             logger.warn("field: "+ solrFieldContainingEncodedMarcRecord + " not found in solr document");
             return(null);
         }
-        String marcRecordStr = null;
-        try
-        {
-            if (fields[0] != null) marcRecordStr = fields[0];
-        }
-        catch (Exception e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        String marcRecordStr = field;
         if (marcRecordStr.startsWith("<?xml version"))
         {
             return (getRecordFromXMLString(marcRecordStr));            
+        }
+        else if (marcRecordStr.startsWith("{"))
+        {
+            return (getRecordFromJSONString(marcRecordStr));            
         }
         else
         {
             return (getRecordFromRawMarc(marcRecordStr));
         }
     }
-        
+    
+    /**
+     * Extract the marc record from JSON String
+     * @param marcRecordStr
+     * @return
+     */
+    private Record getRecordFromJSONString(String marcRecordStr)
+    {
+        MarcJsonReader reader;
+        int tries = 0;
+        boolean tryAgain = false;
+        do {
+            try {
+                tries++;
+                tryAgain = false;
+                reader = new MarcJsonReader(new ByteArrayInputStream(marcRecordStr.getBytes("UTF8")));
+                if (reader.hasNext())
+                {
+                    Record record = reader.next(); 
+                    if (verbose)
+                    {
+                        System.out.println(record.toString());
+                    }
+                    return(record);
+                }
+            }
+            catch( MarcException me)
+            {
+//                if (tries == 1)
+//                {
+//                    tryAgain = true; 
+//                    marcRecordStr = normalizeUnicode(marcRecordStr);
+//                }
+//                else 
+//                {
+//                    me.printStackTrace();
+//                }
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                e.printStackTrace();
+            }
+        } while (tryAgain);
+        return(null);
+    }
+    
+    
     /**
      * Extract the marc record from binary marc
      * @param marcRecordStr

@@ -48,10 +48,10 @@
 # Test 15-16
 #testing marc.override to install a sorting/non-sorting MarcReader
 +marc.override=org.solrmarc.marcoverride.NoSortMarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
-+marc.override=org.mar4jmarc.impl.MarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), 496826 aapl bmain emain
++marc.override=org.marc4j.marc.impl.SortedMarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), 496826 aapl bmain emain
 
 # Test 17
-#testing marc.override to install a UVAMarcFactory (should also be sorted)
+#testing marc.override to install a UVAMarcFactory (should also be non-sorted)
 +marc.override=org.solrmarc.marcoverride.UVAMarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
 
 # Test 18
@@ -145,4 +145,15 @@
 #test using "std" directive
 +, u399.mrc, 'era, composition_era_map.properties', 1970's|20th Century
 
+# Test 53 
+#test using mixin custom indexing method
++, 009888737.mrc, 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes', EBook|Book|ComputerFile|Online
+
+# Test 54 
+#test using mixin custom indexing method
++, selectedRecs.mrc(u8), 'custom(org.solrmarc.index.GetFormatMixin), getPrimaryContentTypePlusOnline', Book
+
+# Test 55 
+#test reading JSON encoded marc record method
++, u1669079.json, getSortableTitle(rec), tender is the night:the confessions of f. scott fitzgerald
 
