@@ -25,17 +25,17 @@
     <!-- General Targets -->
 
     <target name="clean" depends="testClean" description="clean the generated directories">
-        <delete dir="${build.dir}" />
+        <delete dir="${solrmarc.build.dir}" />
         <delete dir="${solrmarc.dist.dir}" />
     </target>
 
     <target name="init" description="create (empty) generated directories">
-        <mkdir dir="${build.dir}" />
+        <mkdir dir="${solrmarc.build.dir}" />
         <mkdir dir="${solrmarc.dist.dir}" />
     </target>
 
     <target name="compile" depends="init" description="Compile source code into the build directory">
-        <javac destdir="${build.dir}" srcdir="${src.dir}" 
+        <javac destdir="${solrmarc.build.dir}" srcdir="${src.dir}" 
                 target="${java.compat.version}" 
                 source="${java.compat.version}" 
                 debug="true" debuglevel="lines,vars,source" 
@@ -52,8 +52,8 @@
     <target name="build" depends="compile,testJar" description="create ${jar.name} in the build directory">
         <echo message="${ant.project.name}: ${ant.file}" />
 
-        <jar destfile="${build.dir}/${jar.name}">
-            <fileset dir="${build.dir}" includes="**/*.class" excludes="**/*Test*.class,test/**/*.class,**/z3950/*.class" />
+        <jar destfile="${solrmarc.build.dir}/${jar.name}">
+            <fileset dir="${solrmarc.build.dir}" includes="**/*.class" excludes="**/*Test*.class,test/**/*.class,**/z3950/*.class" />
             <fileset file="../../log4j.properties" /> 
             <manifest>
                 <attribute name="Main-Class" value="org.solrmarc.marc.MarcImporter" />
@@ -62,15 +62,15 @@
 
         <one-jar destfile="${solrmarc.dist.dir}/${one-jar.name}" 
                manifest="${buildtools.path}/manifest.mf">
-            <main jar="${build.dir}/${jar.name}" />
+            <main jar="${solrmarc.build.dir}/${jar.name}" />
             <lib>
                 <fileset dir="${lib.dir}" includes="*.jar" excludes="jzkit_client.jar" />
             </lib>
             <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
             <fileset dir="${lib.dir}" includes="solr_remote_only/*.jar" />
 <!--            <fileset dir="${lib.dir}" includes="test/*.jar" /> -->
-<!--           <zipfileset dir="${build.dir}" includes="*.jar" /> -->
-<!--            <zipfileset dir="${build.dir}/test" includes="*.jar" prefix="test" /> -->
+<!--           <zipfileset dir="${solrmarc.build.dir}" includes="*.jar" /> -->
+<!--            <zipfileset dir="${solrmarc.build.dir}/test" includes="*.jar" prefix="test" /> -->
        </one-jar> 
 
         <!-- the single jar from the core code needs to include test classes 
@@ -79,7 +79,7 @@
     </target>
     
     <target name="compilez3950" depends="init" description="Compile source code into the build directory">
-        <javac destdir="${build.dir}" srcdir="${src.dir}" 
+        <javac destdir="${solrmarc.build.dir}" srcdir="${src.dir}" 
                 target="${java.compat.version}" 
                 source="${java.compat.version}" 
                 debug="true" debuglevel="lines,vars,source" 
@@ -99,8 +99,8 @@
     <target name="buildz3950" depends="compilez3950" description="create ${jar.name} in the build directory">
         <echo message="${ant.project.name}: ${ant.file}" />
 
-        <jar destfile="${build.dir}/Z3950.jar">
-            <fileset dir="${build.dir}" includes="**/z3950/*.class" />
+        <jar destfile="${solrmarc.build.dir}/Z3950.jar">
+            <fileset dir="${solrmarc.build.dir}" includes="**/z3950/*.class" />
             <fileset file="../../log4j.properties" /> 
             <manifest>
                 <attribute name="Main-Class" value="org.solrmarc.z3950.Z3950MarcReader" />
@@ -113,7 +113,7 @@
                 <attribute name="One-Jar-Main-Class" value="org.solrmarc.z3950.Z3950MarcReader" />
             </manifest>
 
-            <main jar="${build.dir}/Z3950.jar" />
+            <main jar="${solrmarc.build.dir}/Z3950.jar" />
             <lib>
                 <fileset dir="${lib.dir}" includes="marc4j.jar,jzkit_client.jar,log4j*.jar" />
             </lib>
@@ -137,7 +137,7 @@
     
     
     <path id="test.compile.classpath">
-        <pathelement location="${build.dir}" />
+        <pathelement location="${solrmarc.build.dir}" />
         <path refid="classpath.jars" />
         <fileset dir="${lib.dir}" includes="test/*.jar" />
     </path>
@@ -148,7 +148,7 @@
      This approach is an artifact of expecting the "build" target to create a single
       jar file containing the test classes in addition to the core classes. -->
     <target name="testCompilePrivate" > 
-        <javac destdir="${build.dir}/test" 
+        <javac destdir="${solrmarc.build.dir}/test" 
                srcdir="${test.dir}/src" 
                target="${java.compat.version}" source="${java.compat.version}" 
                debug="true" debuglevel="lines,vars,source"  encoding="utf-8">
@@ -189,8 +189,8 @@
         </pathconvert>
         <echo level="debug" message="fileset test.classes.in.core.jar = ${test.classes.in.core.jar}" />
 
-        <jar destfile="${build.dir}/test/${junit.test.jar.name}">
-            <fileset dir="${build.dir}/test" includes="**/*.class" />
+        <jar destfile="${solrmarc.build.dir}/test/${junit.test.jar.name}">
+            <fileset dir="${solrmarc.build.dir}/test" includes="**/*.class" />
             <manifest>
                 <attribute name="TestClasses" value="${test.classes.in.core.jar}"/>
             </manifest>
@@ -199,15 +199,15 @@
         <!-- note: naomi wonders if the onejar task should have its own target 
         <one-jar destfile="${solrmarc.dist.dir}/${one-jar.name}" 
                manifest="${buildtools.path}/manifest.mf">
-            <main jar="${build.dir}/${jar.name}" />
+            <main jar="${solrmarc.build.dir}/${jar.name}" />
             <lib>
                 <fileset dir="${lib.dir}" includes="*.jar" excludes="jzkit_client.jar" />
             </lib>
             <fileset dir="${buildtools.path}" includes="JarUtils.jar" />
             <fileset dir="${lib.dir}" includes="solr_remote_only/*.jar" />
             <fileset dir="${lib.dir}" includes="test/*.jar" />
-            <zipfileset dir="${build.dir}" includes="*.jar" />
-            <zipfileset dir="${build.dir}/test" includes="*.jar" prefix="test" />
+            <zipfileset dir="${solrmarc.build.dir}" includes="*.jar" />
+            <zipfileset dir="${solrmarc.build.dir}/test" includes="*.jar" prefix="test" />
        </one-jar> -->
         
     </target>
@@ -233,21 +233,21 @@
         <delete dir="${core.instr.dir}" />
         <mkdir dir="${core.instr.dir}" />
         <cobertura-instrument todir="${core.instr.dir}" datafile="${core.instr.dir}/cobertura.ser">
-            <fileset dir="${build.dir}">
+            <fileset dir="${solrmarc.build.dir}">
                 <include name="**/*.class" />
                 <exclude name="**/*Test*" />
             </fileset>
         </cobertura-instrument>
     </target>    
     
-    <property name="core.coverage.dir" value="${build.dir}/coverage" />
+    <property name="core.coverage.dir" value="${solrmarc.build.dir}/coverage" />
 
     <target name="runCoreTestsWithCoverage" depends="testCompile" description="Run tests for Core SolrMarc code with code coverage info">
         <mkdir dir="${core.coverage.dir}"/>
 
         <path id="instrumented.classpath">
             <pathelement location="${core.instr.dir}" />
-            <pathelement location="${build.dir}/test" />
+            <pathelement location="${solrmarc.build.dir}/test" />
             <path refid="test.compile.classpath" />
       <!--      <path refid="cobertura.classpath" /> -->
         </path>
@@ -264,7 +264,7 @@
             <test name="${test.class}" />
 -->
             <batchtest fork="yes">
-                 <fileset dir="${build.dir}/test" excludes="org/solrmarc/testUtils/**"/>
+                 <fileset dir="${solrmarc.build.dir}/test" excludes="org/solrmarc/testUtils/**"/>
             </batchtest>
             
         </junit>
@@ -285,8 +285,8 @@
         
     <!-- naomi asks:  is this a utility target?  should it go to the bottom? -->
     <target name="zclient" depends="compile" description="create ${jar.name} in the build directory">
-        <jar destfile="${build.dir}/zclient.jar">
-            <fileset dir="${build.dir}" includes="**/ZClient.class,**/MarcTranslatedReader.class" />
+        <jar destfile="${solrmarc.build.dir}/zclient.jar">
+            <fileset dir="${solrmarc.build.dir}" includes="**/ZClient.class,**/MarcTranslatedReader.class" />
         </jar>
     </target>
    
