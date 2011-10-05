@@ -19,6 +19,7 @@
 
     <path id="classpath.jars" description="Jars for classpath (but not solr jars)">
         <fileset dir="${lib.dir}" includes="*.jar" excludes="*/*.jar,jzkit_client.jar" /> <!-- ?? also exclude jzkit_client.jar ?? -->
+        <fileset dir="${lib.dir}" includes="solr_remote_only/*.jar"  /> 
     </path>
 
     <!-- General Targets -->
