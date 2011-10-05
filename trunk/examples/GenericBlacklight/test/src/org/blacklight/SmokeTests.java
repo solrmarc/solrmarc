@@ -31,10 +31,10 @@ public class SmokeTests extends org.blacklight.DemoIxTest
             SAXException, IOException
     {
         String fldName = "id";
-        assertStringFieldProperties(fldName);
-        assertFieldNotMultiValued(fldName);
-        assertFieldStored(fldName);
-        assertFieldIndexed(fldName);
+//        assertStringFieldProperties(fldName);
+//        assertFieldNotMultiValued(fldName);
+//        assertFieldStored(fldName);
+//        assertFieldIndexed(fldName);
 
         assertDocPresent("00282214");
 

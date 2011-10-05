@@ -30,6 +30,7 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import org.marc4j.MarcException;
+import org.marc4j.MarcJsonWriter;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.MarcXmlWriter;
@@ -78,7 +79,7 @@ public class MarcPrinter extends MarcHandler
             {
                 verbose = true;
             }
-            else if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate") || arg.equals("untranslate"))
+            else if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate") || arg.equals("untranslate") || arg.equals("to_json") )
             {
                 mode = arg;
             }
@@ -110,6 +111,7 @@ public class MarcPrinter extends MarcHandler
     {
         // keep track of record count
         int recordCounter = 0;
+        java.util.Set<String> contentMap = new java.util.LinkedHashSet<String>();
 
         while(reader != null && reader.hasNext())
         {
@@ -145,6 +147,14 @@ public class MarcPrinter extends MarcHandler
                     }
                     writer.write(record);
                 }
+                else if (mode.equals("to_json"))
+                {
+                    if (writer == null)
+                    {
+                        writer = new MarcJsonWriter(System.out, MarcJsonWriter.MARC_IN_JSON);
+                    }
+                    writer.write(record);
+                }
                 else if (mode.equals("translate"))
                 {
                     if (writer == null)
@@ -166,7 +176,6 @@ public class MarcPrinter extends MarcHandler
                 else if (mode.equals("index"))
                 {
                     String recStr = record.toString();
-                        
                     if (verbose) out.println(recStr);
                     try {
                         Map<String,Object> indexMap = indexer.map(record, errors);
@@ -192,7 +201,12 @@ public class MarcPrinter extends MarcHandler
                             {
                                 if (value instanceof String)
                                 {
-                                    out.println(recordID+ " : "+ key + " = "+ value);
+                                    if (!contentMap.contains(value.toString()))
+                                    {
+                                        contentMap.add(value.toString());
+                                        out.println(recordID+ " : "+ key + " = "+ value);
+
+                                    }
                                 }
                                 else if (value instanceof Collection)
                                 {
@@ -200,7 +214,12 @@ public class MarcPrinter extends MarcHandler
                                     while (valIter.hasNext())
                                     {
                                         String collVal = valIter.next().toString();
-                                        out.println(recordID+ " : "+ key + " = "+ collVal);
+                                        if (!contentMap.contains(collVal))
+                                        {
+                                            contentMap.add(collVal);
+                                            out.println(recordID+ " : "+ key + " = "+ collVal);
+
+                                        }
                                     }
                                 }
                             }

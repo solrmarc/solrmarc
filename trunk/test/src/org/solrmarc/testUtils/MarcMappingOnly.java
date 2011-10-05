@@ -167,7 +167,7 @@ public class MarcMappingOnly extends MarcHandler
                     {
                         Properties indexingProps = new Properties();
                         indexingProps.setProperty("marcmappingtest", fieldSpec + ", " + translationMap );
-                        SolrIndexer indexer = SolrIndexer.indexerFromProperties(indexingProps, propertyFilePaths);
+                        indexer.reinitFromProperties(indexingProps);
                         String translationMapName = indexer.loadTranslationMap(translationMap);
                         result = org.solrmarc.tools.Utils.remap(result, indexer.findMap(translationMapName), true);
                     }
@@ -180,7 +180,7 @@ public class MarcMappingOnly extends MarcHandler
                         indexingProps.setProperty("marcmappingtest", "custom, "+ indexParm + ", " + translationMap);
                     else
                         indexingProps.setProperty("marcmappingtest", "custom, "+ indexParm);
-                    SolrIndexer indexer = SolrIndexer.indexerFromProperties(indexingProps, propertyFilePaths);
+                    indexer.reinitFromProperties(indexingProps);
                     Map<String, Object> indexMap = indexer.map(record);
                     Object tmpResult = indexMap.get("marcmappingtest");
                     if (tmpResult instanceof Set)
@@ -197,7 +197,7 @@ public class MarcMappingOnly extends MarcHandler
                 {
                     Properties indexingProps = new Properties();
                     indexingProps.setProperty("marcmappingtest", fieldSpec);
-                    SolrIndexer indexer = SolrIndexer.indexerFromProperties(indexingProps, propertyFilePaths);
+                    indexer.reinitFromProperties(indexingProps);
                     Map<String, Object> indexMap = indexer.map(record);
                     Object tmpResult = indexMap.get("marcmappingtest");
                     if (tmpResult instanceof Set)
@@ -215,7 +215,7 @@ public class MarcMappingOnly extends MarcHandler
                     String indexParm = fieldSpec.substring(1, fieldSpec.length()-1);
                     Properties indexingProps = new Properties();
                     indexingProps.setProperty("marcmappingtest", indexParm);
-                    SolrIndexer indexer = SolrIndexer.indexerFromProperties(indexingProps, propertyFilePaths);
+                    indexer.reinitFromProperties(indexingProps);
                     Map<String, Object> indexMap = indexer.map(record);
                     Object tmpResult = indexMap.get("marcmappingtest");
                     if (tmpResult instanceof Set)

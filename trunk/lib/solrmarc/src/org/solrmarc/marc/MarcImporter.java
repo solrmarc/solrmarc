@@ -19,30 +19,22 @@ package org.solrmarc.marc;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.log4j.*;
-import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.marc4j.ErrorHandler;
 import org.marc4j.marc.Record;
 import org.solrmarc.solr.SolrCoreLoader;
 import org.solrmarc.solr.SolrProxy;
-import org.solrmarc.solr.SolrRemoteProxy;
 import org.solrmarc.solr.SolrRuntimeException;
-import org.solrmarc.solr.SolrServerProxy;
 import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.SolrUpdate;
 import org.solrmarc.tools.Utils;
 
-import bsh.This;
 
 
 /**
@@ -73,6 +65,7 @@ public class MarcImporter extends MarcHandler
     private int idsToDeleteCounter = 0;
     private int recsDeletedCounter = 0;
     private boolean useBinaryRequestHandler = false;
+    private boolean useStreamingServer = false;
     // Initialize logging category
     protected static Logger logger = Logger.getLogger(MarcImporter.class.getName());
     
@@ -193,9 +186,10 @@ public class MarcImporter extends MarcHandler
         deleteRecordListFilename = Utils.getProperty(configProps, "marc.ids_to_delete");
         
         // Set up Solr core
-        boolean useSolrServerProxy = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_solr_server_proxy"));
-        useBinaryRequestHandler = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_binary_request_handler"));
-        if (useSolrServerProxy) 
+        boolean useSolrServerProxy = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_solr_server_proxy", "true"));
+        useBinaryRequestHandler = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_binary_request_handler", "true"));
+        useStreamingServer = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_streaming_proxy", "true"));
+        if (useSolrServerProxy || useStreamingServer) 
             solrProxy = getSolrServerProxy();
         else
             solrProxy = getSolrProxy();
@@ -650,8 +644,10 @@ public class MarcImporter extends MarcHandler
             }
             if (solrProxyIsRemote)
             {
+//                logger.info(" Connecting to remote Solr server at URL " + solrHostUpdateURL);
+//                solrProxy = new SolrRemoteProxy(solrHostUpdateURL, useBinaryRequestHandler);
                 logger.info(" Connecting to remote Solr server at URL " + solrHostUpdateURL);
-                solrProxy = new SolrRemoteProxy(solrHostUpdateURL, useBinaryRequestHandler); 
+                solrProxy = SolrCoreLoader.loadRemoteSolrServer(solrHostUpdateURL, useBinaryRequestHandler, false);
             }
             else 
             {
@@ -751,28 +747,7 @@ public class MarcImporter extends MarcHandler
             if (solrProxyIsRemote)
             {
                 logger.info(" Connecting to remote Solr server at URL " + solrHostUpdateURL);
-                SolrServer solrserver;
-                try
-                {
-                    String URL = solrHostUpdateURL.replaceAll("[/\\\\]update$", "");
-                    CommonsHttpSolrServer httpsolrserver = new CommonsHttpSolrServer(URL);
-//                    Class<?> clazz = httpsolrserver.getClass();
-//                    Method methods[] = clazz.getMethods();
-//                    for (Method m : methods)
-//                    {
-//                        System.out.println(m.toString());
-//                    }
-                    if (useBinaryRequestHandler)
-                    {
-                        httpsolrserver.setRequestWriter(new BinaryRequestWriter());
-                    }
-                    solrProxy = new SolrServerProxy(httpsolrserver); 
-                }
-                catch (MalformedURLException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                solrProxy = SolrCoreLoader.loadRemoteSolrServer(solrHostUpdateURL, useBinaryRequestHandler, useStreamingServer );
             }
             else 
             {

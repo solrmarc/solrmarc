@@ -2,11 +2,16 @@ package org.solrmarc.tools;
 
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
+import org.marc4j.MarcStreamReader;
+import org.marc4j.marc.Record;
 import org.solrmarc.testUtils.IndexTest;
 import org.xml.sax.SAXException;
 
@@ -19,7 +24,6 @@ public class IndexSmokeTest extends IndexTest
      *  necessary variables
      */
     public void createIxInitVars(String testDataFname) 
-        throws ParserConfigurationException, IOException, SAXException 
     {
         docIDfname = "id";
 
@@ -48,9 +52,32 @@ public class IndexSmokeTest extends IndexTest
      */
 @Test
     public final void testForSmoke() 
-            throws IOException, ParserConfigurationException, SAXException 
     {
         createIxInitVars(testDataFname);
+        String testDataParentPath = System.getProperty("test.data.path");
+        if (testDataParentPath == null)
+            fail("property test.data.path must be defined for the tests to run");
+
+        MarcStreamReader reader = null;
+        try
+        {
+            reader = new MarcStreamReader(new FileInputStream(testDataParentPath + File.separator + testDataFname));
+        }
+        catch (FileNotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        while (reader != null && reader.hasNext())
+        {
+            Record rec = reader.next();
+            String id = rec.getControlNumber();
+            if (id != null)
+            {
+                assertDocPresent(id);
+            }
+        }
+        System.out.println("Test testForSmoke is successful");
     }
 
 }

@@ -62,6 +62,11 @@ public class SolrServerProxy implements SolrProxy
         // do nothing
     }
 
+    public SolrServer getSolrServer()
+    {
+        return(solrserver);        
+    }
+    
     public void commit(boolean optimize) throws IOException
     {
         try

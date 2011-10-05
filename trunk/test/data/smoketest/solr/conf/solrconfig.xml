@@ -699,7 +699,7 @@
   <requestHandler name="/update" class="solr.XmlUpdateRequestHandler" />
 
 
-  <!-- <requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" /> -->
+  <requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" />
 
   <!--
    Analysis request handler.  Since Solr 1.3.  Use to returnhow a document is analyzed.  Useful
