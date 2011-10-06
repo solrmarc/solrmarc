@@ -162,6 +162,8 @@ public class GetFormatMixin extends SolrIndexerMixin
         SoundCassette,
         SoundCylinder,
         SoundDisc,
+        SoundDiscCD,
+        SoundDiscLP,
         SoundRecordingOther,
         SoundRoll,
         SoundTapeReel,
@@ -195,7 +197,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         VideoSuperVHS,
         VideoTypeC,
         VideoUMatic,
-        VideoVHS
+        VideoVHS, 
     }
 
     private enum CombinedType
@@ -219,7 +221,7 @@ public class GetFormatMixin extends SolrIndexerMixin
     {
         Set<String> formats = getContentTypes(record);
         formats.addAll( getMediaTypes(record));
-        formats =  addOnlineTypes(record, formats); 
+        formats = addOnlineTypes(record, formats); 
         return(formats);
     }
     
@@ -327,9 +329,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
     public Set<String> getContentTypes(final Record record)
     {
-        Set<String> materialType = new LinkedHashSet<String>(); // the list of
-                                                                // material
-                                                                // types
+        Set<String> materialType = new LinkedHashSet<String>(); // the list of material types
 
         // // Leader ////
 
@@ -337,12 +337,8 @@ public class GetFormatMixin extends SolrIndexerMixin
 
         // get main type and profile from leader/06
 
-        String leaderType = extractType(leader, "leader"); // main material
-                                                            // type, based on
-                                                            // leader
-        String leaderProfile = extractProfile(leader, "leader"); // 008
-                                                                    // profile
-                                                                    // to use
+        String leaderType = extractType(leader, "leader"); // main material type, based on leader
+        String leaderProfile = extractProfile(leader, "leader"); // 008 profile to use
 
         // // 008 & 006 ////
 
@@ -603,7 +599,8 @@ public class GetFormatMixin extends SolrIndexerMixin
                     case 'l': // l - Updating loose-leaf
 
                         materialType.add(ContentType.LooseLeaf.toString());
-
+                        break;
+                        
                     case 'm': // Monographic series
 
                         materialType.add(ContentType.BookSeries.toString());
@@ -663,7 +660,8 @@ public class GetFormatMixin extends SolrIndexerMixin
                     case 'a': // a - Art original
 
                         materialType.add(ContentType.Art.toString());
-
+                        break;
+                        
                     case 'b': // b - Kit
 
                         materialType.add(ContentType.Kit.toString());
@@ -677,7 +675,8 @@ public class GetFormatMixin extends SolrIndexerMixin
                     case 'd': // d - Diorama
 
                         materialType.add(ContentType.Diorama.toString());
-
+                        break;
+                        
                     case 'f': // f - Filmstrip
 
                         materialType.add(ContentType.Filmstrip.toString());
@@ -686,7 +685,8 @@ public class GetFormatMixin extends SolrIndexerMixin
                     case 'g': // g - Game
 
                         materialType.add(ContentType.Game.toString());
-
+                        break;
+                        
                     case 'i': // i - Picture
 
                         materialType.add(ContentType.Picture.toString());
@@ -854,7 +854,8 @@ public class GetFormatMixin extends SolrIndexerMixin
 
             if (field007.getData().length() > 2)
             {
-                if (field007.getData().toLowerCase().charAt(2) != ' ')
+                char field007_02 = field007.getData().toLowerCase().charAt(2);
+                if (field007_02 != ' ' && field007_02 != '|' && field007_02 != '-')
                 {
                     continue;
                 }
@@ -1351,6 +1352,14 @@ public class GetFormatMixin extends SolrIndexerMixin
                         case 'd': // d - Sound disc
 
                             form.add(MediaType.SoundDisc.toString());
+                            
+                            //  check subtype of sound disc f in 007/03 means CD  one of abde means LP
+                            char subSpecific = (field007.getData().length() > 3) ? field007.getData().toLowerCase().charAt(3) : ' ';
+                            if (subSpecific == 'f')
+                                form.add(MediaType.SoundDiscLP.toString());
+                            else if ("abde".indexOf(subSpecific) != -1)
+                                form.add(MediaType.SoundDiscLP.toString());
+                            
                             break;
 
                         case 'c': // c - Cylinder [OBSOLETE]
@@ -1594,7 +1603,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
             // determine the profile
 
-            if (fieldFormat.getTag() == "008")
+            if (fieldFormat.getTag().equals("008"))
             {
                 profile = extractProfile(record.getLeader().toString(), "leader");
             }
