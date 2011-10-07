@@ -4,11 +4,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.marc4j.ErrorHandler;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
-import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.Utils;
 
 public class GetFormatMixin extends SolrIndexerMixin
@@ -409,6 +409,10 @@ public class GetFormatMixin extends SolrIndexerMixin
                 if (field.length() - 1 < position)
                 {
                     materialType.add(type);
+                    if (indexer != null && indexer.errors != null)
+                    {
+                        indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
+                    }
                     continue;
                 }
 
@@ -502,6 +506,10 @@ public class GetFormatMixin extends SolrIndexerMixin
                 if (field.length() - 1 < position)
                 {
                     materialType.add(type);
+                    if (indexer != null && indexer.errors != null)
+                    {
+                        indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
+                    }
                     continue;
                 }
 
@@ -587,6 +595,10 @@ public class GetFormatMixin extends SolrIndexerMixin
                 if (field.length() - 1 < position)
                 {
                     materialType.add(type);
+                    if (indexer != null && indexer.errors != null)
+                    {
+                        indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
+                    }
                     continue;
                 }
 
@@ -653,6 +665,10 @@ public class GetFormatMixin extends SolrIndexerMixin
                 if (field.length() - 1 < position)
                 {
                     materialType.add(type);
+                    if (indexer != null && indexer.errors != null)
+                    {
+                        indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
+                    }
                     continue;
                 }
 
@@ -771,6 +787,11 @@ public class GetFormatMixin extends SolrIndexerMixin
             }
             else
             {
+                if (indexer != null && indexer.errors != null)
+                {
+                    String field = tag.equals("006") ? "006/00" : "LEADER/06";
+                    indexer.errors.addError(record.getControlNumber(), field, "n/a", ErrorHandler.MINOR_ERROR, "Unknown item profile specified in "+ field);
+                }
                 //throw new SolrMarcIndexerException(1, "bad profile: " + profile);
             }
         }
@@ -783,8 +804,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             // set the first (primary) type as thesis
 
-            materialType =
-                    addToTop(materialType, ContentType.Thesis.toString());
+            materialType = addToTop(materialType, ContentType.Thesis.toString());
 
             // nix manuscript so we can distinguish actual manuscripts
 
@@ -852,11 +872,15 @@ public class GetFormatMixin extends SolrIndexerMixin
             // first, check to make sure this is a post-1981 007 by looking at
             // position 2, which should be undefined
 
-            if (field007.getData().length() > 2)
-            {
-                char field007_02 = field007.getData().toLowerCase().charAt(2);
-                if (field007_02 != ' ' && field007_02 != '|' && field007_02 != '-')
+            char field007_02 = '?';
+            if (field007.getData().length() <= 2 || 
+                (field007_02 = field007.getData().toLowerCase().charAt(2)) != ' ' && field007_02 != '|' && field007_02 != '-')
+            { 
                 {
+                    if (indexer != null && indexer.errors != null)
+                    {
+                        indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "Malformed 007 fixed field");
+                    }
                     continue;
                 }
             }
@@ -1356,7 +1380,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                             //  check subtype of sound disc f in 007/03 means CD  one of abde means LP
                             char subSpecific = (field007.getData().length() > 3) ? field007.getData().toLowerCase().charAt(3) : ' ';
                             if (subSpecific == 'f')
-                                form.add(MediaType.SoundDiscLP.toString());
+                                form.add(MediaType.SoundDiscCD.toString());
                             else if ("abde".indexOf(subSpecific) != -1)
                                 form.add(MediaType.SoundDiscLP.toString());
                             
@@ -1449,143 +1473,137 @@ public class GetFormatMixin extends SolrIndexerMixin
                     {
                         // 04 - Videorecording format
 
-                        char videoFormat =
-                                field007.getData().toLowerCase().charAt(4);
-
+                        char videoFormat = field007.getData().toLowerCase().charAt(4);
+                        String formToAdd = null;
+                        String id = record.getControlNumber();
                         switch (videoFormat) {
                             case 'a': // a - Beta (1/2 in., videocassette)
 
-                                form.add(MediaType.VideoBeta.toString());
+                                formToAdd = MediaType.VideoBeta.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
                                 break;
 
                             case 'b': // b - VHS (1/2 in., videocassette)
 
-                                form.add(MediaType.VideoVHS.toString());
+                                formToAdd = MediaType.VideoVHS.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
                                 break;
 
                             case 'c': // c - U-matic (3/4 in., videocasstte)
 
-                                form.add(MediaType.VideoUMatic.toString());
+                                formToAdd = MediaType.VideoUMatic.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
                                 break;
 
                             case 'd': // d - EIAJ (1/2 in., reel)
 
-                                form.add(MediaType.VideoEIAJ.toString());
+                                formToAdd = MediaType.VideoEIAJ.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'r', formToAdd);
                                 break;
 
                             case 'e': // e - Type C (1 in., reel)
 
-                                form.add(MediaType.VideoTypeC.toString());
+                                formToAdd = MediaType.VideoTypeC.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'r', formToAdd);
                                 break;
 
                             case 'f': // f - Quadruplex (1 in. or 2 in., reel)
 
-                                form.add(MediaType.VideoQuadruplex.toString());
+                                formToAdd = MediaType.VideoQuadruplex.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'r', formToAdd);
                                 break;
 
                             case 'g': // g - Laserdisc
 
-                                form.add(MediaType.VideoLaserdisc.toString());
+                                formToAdd = MediaType.VideoLaserdisc.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'd', formToAdd);
                                 break;
 
                             case 'h': // h - CED (Capacitance Electronic Disc)
                                         // videodisc
 
-                                form.add(MediaType.VideoCapacitance.toString());
+                                formToAdd = MediaType.VideoCapacitance.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'd', formToAdd);
                                 break;
 
                             case 'i': // i - Betacam (1/2 in., videocassette)
 
-                                form.add(MediaType.VideoBetacam.toString());
+                                formToAdd = MediaType.VideoBetacam.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
                                 break;
 
                             case 'j': // j - Betacam SP (1/2 in.,
                                         // videocassette)
 
-                                form.add(MediaType.VideoBetacamSP.toString());
+                                formToAdd = MediaType.VideoBetacamSP.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
                                 break;
 
                             case 'k': // k - Super-VHS (1/2 in.,
                                         // videocassette)
 
-                                form.add(MediaType.VideoSuperVHS.toString());
+                                formToAdd = MediaType.VideoSuperVHS.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
                                 break;
 
                             case 'm': // m - M-II (1/2 in., videocassette)
 
-                                form.add(MediaType.VideoMII.toString());
+                                formToAdd = MediaType.VideoMII.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
                                 break;
 
                             case 'o': // o - D-2 (3/4 in., videocassette)
 
-                                form.add(MediaType.VideoD2.toString());
+                                formToAdd = MediaType.VideoD2.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
                                 break;
 
                             case 'p': // p - 8 mm.
 
-                                form.add(MediaType.Video8mm.toString());
+                                formToAdd = MediaType.Video8mm.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
                                 break;
 
                             case 'q': // q - Hi-8 mm.
 
-                                form.add(MediaType.VideoHi8.toString());
+                                formToAdd = MediaType.VideoHi8.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
                                 break;
 
                             case 's': // s - Blu-ray disc
 
-                                form.add(MediaType.VideoBluRay.toString());
+                                formToAdd = MediaType.VideoBluRay.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'd', formToAdd);
                                 break;
 
                             // u - Unknown
 
                             case 'v': // v - DVD
 
-                                form.add(MediaType.VideoDVD.toString());
+                                formToAdd = MediaType.VideoDVD.toString();
+                                checkTypeOfVideo(id, materialSpecific, 'd', formToAdd);
                                 break;
 
                             // z - Other
 
                             default:
 
-                                form.add(MediaType.VideoOther.toString());
+                                formToAdd = MediaType.VideoOther.toString();
                                 break;
                         }
+                        form.add(formToAdd);
                     }
                     else
                     {
-                        switch (materialSpecific) {
-                            case 'c': // c - Videocartridge
-
-                                form.add(MediaType.VideoCartridge.toString());
-                                break;
-
-                            case 'd': // d - Videodisc
-
-                                form.add(MediaType.VideoDisc.toString());
-                                break;
-
-                            case 'f': // f - Videocassette
-
-                                form.add(MediaType.VideoCassette.toString());
-                                break;
-
-                            case 'r': // r - Videoreel
-
-                                form.add(MediaType.VideoReel.toString());
-                                break;
-
-                            // # - Not applicable or no attempt to code
-                            // [OBSOLETE, 1980]
-                            // n - Not applicable [OBSOLETE, 1981]
-                            // u - Unspecified
-                            // z - Other
-
-                            default:
-                                form.add(MediaType.VideoOther.toString());
-                                break;
+                        if (indexer != null && indexer.errors != null)
+                        {
+                            indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "Malformed 007 fixed field (too short) "+ field007.getData());
                         }
-                        break;
+                        String formToAdd = getVideoMediaForm(materialSpecific);
+                        form.add(formToAdd);
                     }
+                    break;
+
             }
         }
 
@@ -1602,8 +1620,8 @@ public class GetFormatMixin extends SolrIndexerMixin
             int position = 0; // position we'll use
 
             // determine the profile
-
-            if (fieldFormat.getTag().equals("008"))
+            String tag = fieldFormat.getTag();
+            if (tag.equals("008"))
             {
                 profile = extractProfile(record.getLeader().toString(), "leader");
             }
@@ -1631,7 +1649,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
             // 006 follows same positions as 008, only shifted down seven spots
 
-            if (fieldFormat.equals("006"))
+            if (tag.equals("006"))
             {
                 position = position - 7;
             }
@@ -1642,6 +1660,10 @@ public class GetFormatMixin extends SolrIndexerMixin
 
             if (field.length() - 1 < position)
             {
+                if (indexer != null && indexer.errors != null)
+                {
+                    indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
+                }
                 continue;
             }
 
@@ -1697,6 +1719,77 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
 
         return form;
+    }
+
+    /**
+     * Return the type of video item (cartridge, disc, reel, cassette) given the single letter from 007/01 that encodes this value.
+     * 
+     * @param materialSpecific 
+     *              letter for the form of the video (taken from 007/01)
+     * @returns string
+     */
+    private String getVideoMediaForm(char materialSpecific)
+    {
+        String form = null;
+        switch (materialSpecific) 
+        {
+            case 'c': // c - Videocartridge
+
+                form = MediaType.VideoCartridge.toString();
+                break;
+
+            case 'd': // d - Videodisc
+
+                form = MediaType.VideoDisc.toString();
+                break;
+
+            case 'f': // f - Videocassette
+
+                form = MediaType.VideoCassette.toString();
+                break;
+
+            case 'r': // r - Videoreel
+
+                form = MediaType.VideoReel.toString();
+                break;
+
+            // # - Not applicable or no attempt to code
+            // [OBSOLETE, 1980]
+            // n - Not applicable [OBSOLETE, 1981]
+            // u - Unspecified
+            // z - Other
+
+            default:
+                form = MediaType.VideoOther.toString();
+                break;
+        }
+        return form;
+    }
+
+    /**
+     * Compare the type of video item (cartridge, disc, reel, cassette) with the expected value for the type given the assigned form
+     * For instance is the assigned form is DVD and the type if video item is cassette, it's probably an error.
+     * 
+     * @param id
+     *              id of the record being processed
+     * @param materialSpecific 
+     *              letter for the form of the video (taken from 007/01)
+     * @param expectedVal 
+     *              letter for expected form of the video (based on the assignedForm)
+     * @param assignedForm 
+     *              String for the type of video (assigned based on 007/04)
+     */
+    private void checkTypeOfVideo(String id, char materialSpecific, char expectedVal, String assignedForm)
+    {
+        String videoMediaForm = getVideoMediaForm(materialSpecific);
+        if (materialSpecific != expectedVal)
+        {
+            if (indexer != null && indexer.errors != null)
+            {
+                String errMsg = "Mismatch between form of video (007/01)" + videoMediaForm + " and type of video (007/04)" + assignedForm;
+                indexer.errors.addError(id, "007", "n/a", ErrorHandler.ERROR_TYPO, errMsg);
+            }
+        }      
     }
 
     /**
@@ -1763,10 +1856,10 @@ public class GetFormatMixin extends SolrIndexerMixin
 
         switch (recordType) {
             case 'a': // a - Language material
-
+            case 't': // t - Manuscript language material
                 if (source.equals("006"))
                 {
-                    type = ContentType.Book.toString();
+                    type = recordType == 'a' ? ContentType.Book.toString() : ContentType.Manuscript.toString();
                     profile = "books";
                 }
                 else if (source.equals("leader"))
@@ -1801,8 +1894,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
                         case 'i': // i - Integrating resource
 
-                            type =
-                                    ContentType.SerialIntegratingResource.toString();
+                            type = ContentType.SerialIntegratingResource.toString();
                             profile = "serial";
                             break;
 
@@ -1932,11 +2024,9 @@ public class GetFormatMixin extends SolrIndexerMixin
                     profile = "serial";
                 }
 
-            case 't': // t - Manuscript language material
+            //case 't': // t - Manuscript language material
 
-                type = ContentType.Manuscript.toString();
-                profile = "books";
-                break;
+                //combined above with case 'a'
         }
 
         String[] result = { type, profile };

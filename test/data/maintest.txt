@@ -151,9 +151,17 @@
 
 # Test 54 
 #test using mixin custom indexing method
-+, selectedRecs.mrc(u8), 'custom(org.solrmarc.index.GetFormatMixin), getPrimaryContentTypePlusOnline', Book
++, formatRecs.mrc(u3514547), 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes', Video|VideoDVD
 
 # Test 55 
+#test using mixin custom indexing method
++, formatRecs.mrc(u3514547), 'custom(org.solrmarc.index.GetFormatMixin), getPrimaryContentTypePlusOnline', Video
+
+# Test 56 
+#test using mixin custom indexing method with translation map
++, formatRecs.mrc(u3591589), 'custom(org.solrmarc.index.GetFormatMixin), getPrimaryContentTypePlusOnline, getformat_mixin_map.properties', Map|Online
+
+# Test 57 
 #test reading JSON encoded marc record method
 +, u1669079.json, getSortableTitle(rec), tender is the night:the confessions of f. scott fitzgerald
 
