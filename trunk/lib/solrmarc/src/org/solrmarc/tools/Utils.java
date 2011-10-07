@@ -169,7 +169,9 @@ public final class Utils {
         {
         InputStream in = null;
         // look for properties file in paths
-  //      String lookedIn = "";
+        String verboseStr = System.getProperty("marc.verbose");
+        boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
+        String lookedIn = "";
         if (propertyPaths != null)
         {
             File propertyFile = new File(propertyFileName);
@@ -197,7 +199,7 @@ public final class Utils {
                     }
                     break;   // we found it!
                 }
-  //              lookedIn = lookedIn + propertyFile.getAbsolutePath() + "\n";
+                if (verbose)  lookedIn = lookedIn + propertyFile.getAbsolutePath() + "\n";
                 if (propertyPaths != null && pathCnt < propertyPaths.length)
                 {
                     propertyFile = new File(propertyPaths[pathCnt], propertyFileName);
@@ -206,8 +208,8 @@ public final class Utils {
             } while (propertyPaths != null && pathCnt <= propertyPaths.length);
         }
         // if we didn't find it as a file, look for it as a URL
-  //      String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName + "\n Looked in: "+ lookedIn;
         String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
+        if (verbose) errmsg = errmsg + "\n Looked in: "+ lookedIn;
         if (in == null)
         {
             Utils utilObj = new Utils();
