@@ -43,9 +43,16 @@ public class HathiJsonToMarc implements MarcReader
     PipedReader usedInMarcXML = null;
     Record nextRecord = null;
     private int parserCode;
+    boolean add856 = false;
 
     public HathiJsonToMarc(Reader in)
     {
+        this(in, false);
+    }
+    
+    public HathiJsonToMarc(Reader in, boolean add856)
+    {
+        this.add856 = add856;
         if (mf == null) 
         {
             if(System.getProperty("org.marc4j.marc.MarcFactory") == null)
@@ -72,6 +79,12 @@ public class HathiJsonToMarc implements MarcReader
     
     public HathiJsonToMarc(InputStream in)
     {
+        this(in, false);
+    }
+    
+    public HathiJsonToMarc(InputStream in, boolean add856)
+    {
+        this.add856 = add856;
         if (mf == null) 
         {
             if(System.getProperty("org.marc4j.marc.MarcFactory") == null)
@@ -96,32 +109,32 @@ public class HathiJsonToMarc implements MarcReader
         }
     }
     
-    public HathiJsonToMarc(Reader in, boolean rawXML)
-    {
-        
-        if (mf == null) 
-        {
-            if(System.getProperty("org.marc4j.marc.MarcFactory") == null)
-            {
-                System.setProperty("org.marc4j.marc.MarcFactory", "org.marc4j.marc.impl.NoSortMarcFactoryImpl");
-            }
-            mf = MarcFactory.newInstance();
-        }
-        parser = new JsonParser(0);
-        parser.setInput("input", in, false);
-    //    toMarcXML = System.out;
-        try
-        {
-            PrintStream out = new PrintStream(System.out, true, "UTF-8");
-            System.setOut(out);
-            System.out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?><collection xmlns=\"http://www.loc.gov/MARC21/slim\">");
-        }
-        catch (UnsupportedEncodingException e1)
-        {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-    }
+//    public HathiJsonToMarc(Reader in, boolean rawXML)
+//    {
+//        
+//        if (mf == null) 
+//        {
+//            if(System.getProperty("org.marc4j.marc.MarcFactory") == null)
+//            {
+//                System.setProperty("org.marc4j.marc.MarcFactory", "org.marc4j.marc.impl.NoSortMarcFactoryImpl");
+//            }
+//            mf = MarcFactory.newInstance();
+//        }
+//        parser = new JsonParser(0);
+//        parser.setInput("input", in, false);
+//    //    toMarcXML = System.out;
+//        try
+//        {
+//            PrintStream out = new PrintStream(System.out, true, "UTF-8");
+//            System.setOut(out);
+//            System.out.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?><collection xmlns=\"http://www.loc.gov/MARC21/slim\">");
+//        }
+//        catch (UnsupportedEncodingException e1)
+//        {
+//            // TODO Auto-generated catch block
+//            e1.printStackTrace();
+//        }
+//    }
     
     public boolean hasNext()
     {
@@ -272,7 +285,7 @@ public class HathiJsonToMarc implements MarcReader
                     {
                         curRecord = reader.next();
                         fix880field(curRecord);
-                        make856fields(curRecord);
+                        if (add856) make856fields(curRecord);
                     }
                 }
 //                  if (items != null && itemdata != null)

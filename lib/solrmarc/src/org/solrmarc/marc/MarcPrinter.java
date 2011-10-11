@@ -63,6 +63,7 @@ public class MarcPrinter extends MarcHandler
     private String indexkeyprefix = null;
     private MarcWriter writer = null;
     private PrintWriter out;
+    private boolean unique = false;
     
     public MarcPrinter(PrintWriter out)
     {
@@ -77,6 +78,11 @@ public class MarcPrinter extends MarcHandler
         {
             if (arg.equals("-v")) 
             {
+                verbose = true;
+            }
+            else if (arg.equals("-unique")) 
+            {
+                unique = true;
                 verbose = true;
             }
             else if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate") || arg.equals("untranslate") || arg.equals("to_json") )
@@ -201,9 +207,9 @@ public class MarcPrinter extends MarcHandler
                             {
                                 if (value instanceof String)
                                 {
-                                    if (!contentMap.contains(value.toString()))
+                                    if (!unique || !contentMap.contains(value.toString()))
                                     {
-                                        contentMap.add(value.toString());
+                                        if (unique) contentMap.add(value.toString());
                                         out.println(recordID+ " : "+ key + " = "+ value);
 
                                     }
@@ -214,9 +220,9 @@ public class MarcPrinter extends MarcHandler
                                     while (valIter.hasNext())
                                     {
                                         String collVal = valIter.next().toString();
-                                        if (!contentMap.contains(collVal))
+                                        if (!unique || !contentMap.contains(collVal))
                                         {
-                                            contentMap.add(collVal);
+                                            if (unique) contentMap.add(collVal);
                                             out.println(recordID+ " : "+ key + " = "+ collVal);
 
                                         }

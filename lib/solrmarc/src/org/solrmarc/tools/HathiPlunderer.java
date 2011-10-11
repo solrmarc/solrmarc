@@ -32,6 +32,7 @@ public class HathiPlunderer extends InputStream
 {
     private static boolean debug = false;
     private static boolean print = false;
+    private static boolean add856 = false;
     private static BufferedReader in;
     private int fetchCount = 0;
     private static int numInBuf = 0;
@@ -461,6 +462,10 @@ public class HathiPlunderer extends InputStream
             {
                 print = true;
             }
+            else if (args[0].equals("-856"))
+            {
+                add856 = true;
+            }
             else if (args[0].equals("-n"))
             {
                 maxToFetch  = Integer.parseInt(args[1]);
@@ -494,7 +499,7 @@ public class HathiPlunderer extends InputStream
         }
         else
         {
-            HathiJsonToMarc hathiReader = new HathiJsonToMarc(reader);
+            HathiJsonToMarc hathiReader = new HathiJsonToMarc(reader, add856);
             MarcStreamWriter writer = new MarcStreamWriter(out, "UTF8", true);
             while (hathiReader.hasNext())
             {
