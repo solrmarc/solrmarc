@@ -83,7 +83,6 @@ public class MarcPrinter extends MarcHandler
             else if (arg.equals("-unique")) 
             {
                 unique = true;
-                verbose = true;
             }
             else if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate") || arg.equals("untranslate") || arg.equals("to_json") )
             {
@@ -211,7 +210,6 @@ public class MarcPrinter extends MarcHandler
                                     {
                                         if (unique) contentMap.add(value.toString());
                                         out.println(recordID+ " : "+ key + " = "+ value);
-
                                     }
                                 }
                                 else if (value instanceof Collection)
@@ -224,7 +222,6 @@ public class MarcPrinter extends MarcHandler
                                         {
                                             if (unique) contentMap.add(collVal);
                                             out.println(recordID+ " : "+ key + " = "+ collVal);
-
                                         }
                                     }
                                 }
