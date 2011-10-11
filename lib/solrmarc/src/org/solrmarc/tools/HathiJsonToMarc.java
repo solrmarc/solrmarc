@@ -310,7 +310,7 @@ public class HathiJsonToMarc implements MarcReader
         for (DataField df : dfs)
         {
             Subfield rights = null;
-            if ((rights = df.getSubfield('r')) != null && rights.getData().startsWith("pd"))
+            if ((rights = df.getSubfield('r')) != null && (rights.getData().startsWith("pd") || rights.getData().equals("world")))
             {
                 Subfield labelField = df.getSubfield('z');
                 Subfield identField = df.getSubfield('u');

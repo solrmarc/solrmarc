@@ -130,22 +130,30 @@ public class MarcFilteredReader implements MarcReader
                 for (String fieldSpec : fieldSpecs)
                 {
                     String tag = fieldSpec.substring(0,3);
-                    String subfield = fieldSpec.substring(3);                    
+                    String subfield = null;
+                    if (fieldSpec.length() > 3)  subfield = fieldSpec.substring(3);                    
                     List<VariableField> list = (List<VariableField>)rec.getVariableFields(tag);
                     for (VariableField field : list)
                     {
                         if (field instanceof DataField)
                         {
                             DataField df = ((DataField)field);
-                            List<Subfield> sfs = (List<Subfield>)df.getSubfields(subfield.charAt(0));
-                            if (sfs != null && sfs.size() != 0)
+                            if (subfield != null) 
+                            {
+                                List<Subfield> sfs = (List<Subfield>)df.getSubfields(subfield.charAt(0));
+                                if (sfs != null && sfs.size() != 0)
+                                {
+                                    rec.removeVariableField(df);
+                                    for (Subfield sf : sfs)
+                                    {
+                                        df.removeSubfield(sf);
+                                    }
+                                    rec.addVariableField(df);
+                                }
+                            }
+                            else
                             {
                                 rec.removeVariableField(df);
-                                for (Subfield sf : sfs)
-                                {
-                                    df.removeSubfield(sf);
-                                }
-                                rec.addVariableField(df);
                             }
                         }
                     }
