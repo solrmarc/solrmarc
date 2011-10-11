@@ -109,7 +109,7 @@ public class HathiIndexer extends BlacklightIndexer
         if (broadFormat != null) result.add(broadFormat);
         result.add("Online"); // Online
 
-        if (broadFormat.equals("am")) 
+        if (broadFormat.equals("Book")) 
         {
             result.add(Utils.remap("am", findMap(mapName1a), true)); // eBook
         }
