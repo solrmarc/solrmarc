@@ -42,7 +42,7 @@ public class HathiJsonReaderTest
         MarcReader reader = null;
         try
         {
-            hathiReader = new HathiJsonToMarc(new FileInputStream(new File(testDataParentPath, "009888737.json")));
+            hathiReader = new HathiJsonToMarc(new FileInputStream(new File(testDataParentPath, "009888737.json")), true);
             reader = new MarcPermissiveStreamReader(new FileInputStream(new File(testDataParentPath, "009888737.mrc")), true, true, "UTF8");
             
             Record hathiRec = null;
@@ -69,7 +69,7 @@ public class HathiJsonReaderTest
         BufferedReader hathiRecNumList = HathiPlunderer.initReader(new String[]{ testDataParentPath+"/hathi_upd_list.txt", testDataParentPath+"/hathi_upd_20110911.txt", testDataParentPath+"/hathi_upd_20110904.txt.gz"} );
         
         HathiPlunderer hathiPlunderer = new HathiPlunderer(hathiRecNumList, 15, 15, 6);
-        MarcReader hathiReader = new HathiJsonToMarc(hathiPlunderer);
+        MarcReader hathiReader = new HathiJsonToMarc(hathiPlunderer, true);
         int cnt = 0;
         while (hathiReader.hasNext())
         {
