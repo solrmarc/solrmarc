@@ -5,6 +5,14 @@ export PATH
 num=0
 JAVA_HOME=/usr/java/latest/bin/java
 export JAVA_HOME
+verbose=
+
+mkdir $INPUTDIRTMP 2> /dev/null
+
+if [ "$1" == "-v" ]  ; then 
+    shift
+    verbose=-v
+fi
 
 dirname=$1
 configname=$2
@@ -31,15 +39,27 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
                 # than the new incoming one, make backup and index new file
             mv $PROCESSEDDIR/$fname $PROCESSEDDIR/$fname-`date +%Y%m%e`
             cp $file $PROCESSEDDIR
+            if [ "$verbose" == "-v" ]
+            then
+                echo indexing file $file (again) using config $configname
+            fi
             indexfile ${configname} $file > $output 2>&1
             let "num += 1"
         else
             # incoming file already processed, just delete it
+            if [ "$verbose" == "-v" ]
+            then
+                echo skipping file $file (already processed)
+            fi
             rm $file
         fi
     else
         # file doesnt exist in processed dir, index it normally
         cp $file $PROCESSEDDIR
+        if [ "$verbose" == "-v" ]
+        then
+            echo indexing file $file using config $configname
+        fi
         indexfile ${configname} $file  > $output 2>&1
         let "num += 1"
     fi
@@ -53,15 +73,27 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
                     # than the new incoming one, make backup and index new file
                 mv $PROCESSEDDIR/$delfname $PROCESSEDDIR/$delfname-`date +%Y%m%e`
                 cp $delfile $PROCESSEDDIR
+                if [ "$verbose" == "-v" ]
+                then
+                    echo indexing file $delfile (again) using config $configname
+                fi
                 indexfile ${configname} NONE $delfile >> $output 2>&1
                 let "num += 1"
             else
                 # incoming file already processed, just delete it
+                if [ "$verbose" == "-v" ]
+                then
+                    echo skipping file $file (already processed)
+                fi
                 rm $delfile
             fi
         else
             # file doesnt exist in processed dir, index it normally
             cp $delfile $PROCESSEDDIR
+            if [ "$verbose" == "-v" ]
+            then
+                echo indexing file $delfile using config $configname
+            fi
             indexfile ${configname} NONE $delfile >> $output 2>&1
             let "num += 1"
         fi
@@ -77,6 +109,10 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
 # run booklist daily update
 if [ "$num" -ne 0 ] 
     then
+    if [ "$verbose" == "-v" ]
+    then
+        echo running booklist monthly and daily
+    fi
     runbooklist monthly ${configname} > $RESULTSDIR/results_booklists_$froot 2>&1
     runbooklist daily ${configname} >> $RESULTSDIR/results_booklists_$froot 2>&1
 fi
@@ -84,6 +120,10 @@ fi
 # if any files were indexed, optimize solr index
 if [ "$num" -ne 0 ] 
     then
+    if [ "$verbose" == "-v" ]
+    then
+        echo running booklist monthly and daily
+    fi
     optimizesolr ${configname} > $RESULTSDIR/results_optimize 2>&1
 fi
 

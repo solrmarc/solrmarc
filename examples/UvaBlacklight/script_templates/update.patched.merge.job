@@ -10,12 +10,12 @@ DATADIR=/lib_content27/marc
 INPUTDIR=$DATADIR/incoming_merge_patch
 PROCESSEDDIR=$DATADIR/processed_merge_patch
 RESULTSDIR=$DATADIR/results_merge_patch
-verbose=0
+verbose=
 if [ "$1" == "-v" ]  ; then 
-    verbose=1
+    verbose=-v
 fi
 
-if [ $verbose -eq "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo sort initial night updates
 fi
 
@@ -34,7 +34,7 @@ do
     mv $delfile.sorted $delfile
 done
 
-if [ $verbose -eq "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo merging initial nightly updates
 fi
 
@@ -82,7 +82,7 @@ patch_out=$patch_dir/location_patch_`date +%Y%m%d`.mrc
 #make sure todays patch file does not exist 
 rm $patch_out 2> /dev/null
 
-if [ $verbose -eq "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo processing location.txt
 fi
 
@@ -101,7 +101,7 @@ cp $DATADIR/incoming/new_recs_dates_sorted.txt $SOLRMARCDISTDIR
 
 for file in `find $DATADIR/full_dump_patched -name 'uva_*.mrc' -print | sort`
 do
-    if [ $verbose -eq "1" ] ; then
+    if [ "$verbose" == "-v" ] ; then
         echo $file
     fi
     java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar $SOLRMARCDISTDIR/SolrMarc.jar $file $location_file $changed_loc_file changesOnly handleAllLocs >> $patch_out
@@ -110,7 +110,7 @@ done
 mv $prev_location_file $prev_prev_location_file
 cp $location_file $prev_location_file
 
-if [ $verbose -eq "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo merging patch file
 fi
 
@@ -199,7 +199,7 @@ then
 fi
 
 
-if [ $verbose -eq "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo move incoming files to processed dir
 fi
 
