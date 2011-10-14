@@ -41,7 +41,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
             cp $file $PROCESSEDDIR
             if [ "$verbose" == "-v" ]
             then
-                echo indexing file $file (again) using config $configname
+                echo "indexing file $file (again) using config $configname"
             fi
             indexfile ${configname} $file > $output 2>&1
             let "num += 1"
@@ -49,7 +49,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
             # incoming file already processed, just delete it
             if [ "$verbose" == "-v" ]
             then
-                echo skipping file $file (already processed)
+                echo "skipping file $file (already processed)"
             fi
             rm $file
         fi
@@ -58,7 +58,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
         cp $file $PROCESSEDDIR
         if [ "$verbose" == "-v" ]
         then
-            echo indexing file $file using config $configname
+            echo "indexing file $file using config $configname"
         fi
         indexfile ${configname} $file  > $output 2>&1
         let "num += 1"
@@ -75,7 +75,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
                 cp $delfile $PROCESSEDDIR
                 if [ "$verbose" == "-v" ]
                 then
-                    echo indexing file $delfile (again) using config $configname
+                    echo "indexing file $delfile (again) using config $configname"
                 fi
                 indexfile ${configname} NONE $delfile >> $output 2>&1
                 let "num += 1"
@@ -83,7 +83,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
                 # incoming file already processed, just delete it
                 if [ "$verbose" == "-v" ]
                 then
-                    echo skipping file $file (already processed)
+                    echo "skipping file $file (already processed)"
                 fi
                 rm $delfile
             fi
@@ -92,7 +92,7 @@ for file in `find $INPUTDIR -name '*.mrc' -print | sort`
             cp $delfile $PROCESSEDDIR
             if [ "$verbose" == "-v" ]
             then
-                echo indexing file $delfile using config $configname
+                echo "indexing file $delfile using config $configname"
             fi
             indexfile ${configname} NONE $delfile >> $output 2>&1
             let "num += 1"
@@ -111,7 +111,7 @@ if [ "$num" -ne 0 ]
     then
     if [ "$verbose" == "-v" ]
     then
-        echo running booklist monthly and daily
+        echo "running booklist monthly and daily"
     fi
     runbooklist monthly ${configname} > $RESULTSDIR/results_booklists_$froot 2>&1
     runbooklist daily ${configname} >> $RESULTSDIR/results_booklists_$froot 2>&1
@@ -122,8 +122,13 @@ if [ "$num" -ne 0 ]
     then
     if [ "$verbose" == "-v" ]
     then
-        echo running booklist monthly and daily
+        echo "running optimize"
     fi
     optimizesolr ${configname} > $RESULTSDIR/results_optimize 2>&1
+fi
+
+if [ "$verbose" == "-v" ]
+then
+    echo "Done!!"
 fi
 
