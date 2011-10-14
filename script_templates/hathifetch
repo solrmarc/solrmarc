@@ -28,6 +28,6 @@ then
   fi
 fi
 
-java -Dsolrmarc.main.class="org.solrmarc.tools.HathiPlunderer" -jar $scriptdir/SolrMarc.jar $1 $2 $3 $4 $5 $6 $7 $8 $9 $10 $11 $12
+java -Dsolrmarc.main.class="org.solrmarc.tools.HathiPlunderer" -jar $scriptdir/SolrMarc.jar $1 $2 $3 $4 $5 $6 $7 $8 $9
 
 exit 0

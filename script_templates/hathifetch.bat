@@ -28,6 +28,6 @@ GOTO done
 
 :doit
 
-java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPrinter" -jar %scriptdir%SolrMarc.jar index %1 %2 %3
+java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPrinter" -jar %scriptdir%SolrMarc.jar index %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 :done
