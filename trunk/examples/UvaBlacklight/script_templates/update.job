@@ -16,10 +16,10 @@ verbose=
 mkdir $INPUTDIRTMP 2> /dev/null
 
 if [ "$1" == "-v" ]  ; then 
-    verbose=1
+    verbose=-v
 fi
 
-if [ "$verbose" == "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo copying files from incoming directory
 fi
 
@@ -67,7 +67,7 @@ do
      done
 done
 
-if [ "$verbose" == "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo processing location.txt file to update full_dump_patched
 fi
 
@@ -93,41 +93,41 @@ if [ -f "$patch_out" ] ; then
     cp $shadowed_changed_recs $DATADIR/incoming_bibcore  2> /dev/null
 fi
 
-if [ "$verbose" == "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo updating multicore index at solrpowr:18983/solr/blacklight_index
 fi
-update.index.job prod blacklight_config.properties
+update.index.job $verbose prod blacklight_config.properties
 
-if [ "$verbose" == "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo updating multicore dev index at solrpowr:18983/solr/bib
 fi
-update.index.job dev bib_core_prod_config.properties
+update.index.job $verbose dev bib_core_prod_config.properties
 /lib_content27/solr/multicoremerge/bin/mergecores > $DATADIR/results_dev/results_mergecores
 
-if [ "$verbose" == "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo copying blacklight_indexes to datastamped indexes to use for searching
 fi
 update.multicore.job
 
 
-if [ "$verbose" == "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo updating full_dump_updated files with new incoming records.
 fi
 update.merge.job
 
 
-if [ "$verbose" == "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo updating development index at solrpowr.lib:8983/solr
 fi
-update.index.job debug blacklight_test_config.properties
+update.index.job $verbose debug blacklight_test_config.properties
 
-if [ "$verbose" == "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo updating multicore development index at solrpowr.lib:8984/solr/bib
 fi
-update.index.job bibcore bib_core_config.properties
+update.index.job $verbose bibcore bib_core_config.properties
 /usr/local/projects/multicoremerge/bin/mergecores > $DATADIR/results_bibcore/results_mergecores
 
-if [ "$verbose" == "1" ] ; then
+if [ "$verbose" == "-v" ] ; then
     echo cleaning up incoming directories
 fi
 for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -print | sort`
