@@ -1,0 +1,30 @@
+#!/bin/bash
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+if ! [ -e $scriptdir/SolrMarc.jar ] 
+then
+  scriptdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
+
+location_file=/usr/local/projects/marc/incoming/location.txt
+
+out_dir=/usr/local/projects/marc/full_dump_patched
+tmp_out_dir=/usr/local/projects/marc/full_dump_patched_tmp
+patch_dir=/usr/local/projects/marc/patched
+
+mkdir $tmp_out_dir 2> /dev/null
+
+for file in `find /usr/local/projects/marc/full_dump_updated -name '*.mrc' -print | sort`
+do 
+    echo $file
+    fname=`basename $file`
+    froot=`basename $file .mrc`
+    dir=`dirname $file`
+    if [ -e $out_dir/$fname ]
+    then
+        java -Dsolrmarc.main.class="org.solrmarc.marc.MarcMerger" -jar $scriptdir/SolrMarc.jar $file $out_dir/$fname > $tmp_out_dir/$fname  
+        java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar $scriptdir/SolrMarc.jar $tmp_out_dir/$fname  $location_file handleAllLocs $patch_dir/${froot}_patched.mrc $out_dir/$fname 
+    else
+        java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar $scriptdir/SolrMarc.jar $file  $location_file handleAllLocs $patch_dir/${froot}_patched.mrc $out_dir/$fname 
+    fi
+done

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+  <record>
+    <leader>00197cy  a22000853  4500</leader>
+    <controlfield tag="001">a1</controlfield>
+    <controlfield tag="008">081027                eng 081027        </controlfield>
+    <datafield tag="852" ind1=" " ind2=" ">
+      <subfield code="a">CSt</subfield>
+      <subfield code="b">Location1</subfield>
+      <subfield code="c">mhld1 first</subfield>
+    </datafield>
+    <datafield tag="853" ind1="2" ind2=" ">
+      <subfield code="8">2</subfield>
+      <subfield code="a">(year)</subfield>
+      <subfield code="b">(month)</subfield>
+    </datafield>
+    <datafield tag="853" ind1="2" ind2=" ">
+      <subfield code="8">3</subfield>
+      <subfield code="a">(year)</subfield>
+      <subfield code="b">(season)</subfield>
+    </datafield>
+    <datafield tag="863" ind1=" " ind2="1">
+      <subfield code="8">2.1</subfield>
+      <subfield code="a">2007</subfield>
+      <subfield code="b">22</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>00197cy  a22000853  4500</leader>
+    <controlfield tag="001">a1</controlfield>
+    <controlfield tag="008">081027                eng 081027        </controlfield>
+    <datafield tag="852" ind1=" " ind2=" ">
+      <subfield code="a">CSt</subfield>
+      <subfield code="b">Location2</subfield>
+      <subfield code="c">mhld1 second</subfield>
+    </datafield>
+    <datafield tag="866" ind1="3" ind2="1">
+      <subfield code="8">1</subfield>
+      <subfield code="a">2009-</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>00197cy  a22000853  4500</leader>
+    <controlfield tag="001">a1</controlfield>
+    <controlfield tag="008">081027                eng 081027        </controlfield>
+    <datafield tag="852" ind1=" " ind2=" ">
+      <subfield code="a">CSt</subfield>
+      <subfield code="b">Location1</subfield>
+      <subfield code="c">mhld1 third</subfield>
+    </datafield>
+    <datafield tag="853" ind1="2" ind2=" ">
+      <subfield code="8">1</subfield>
+      <subfield code="a">(year)</subfield>
+      <subfield code="b">(month)</subfield>
+    </datafield>
+    <datafield tag="863" ind1=" " ind2="1">
+      <subfield code="8">1.1</subfield>
+      <subfield code="a">2001</subfield>
+      <subfield code="b">SPR</subfield>
+    </datafield>
+  </record>
+</collection>
