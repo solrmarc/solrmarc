@@ -176,12 +176,12 @@ public class MarcImporter extends MarcHandler
         }
         else
         {
-            optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(configProps, "solr.optimize_at_end"));
-            if (optimizeAtEnd) commitAtEnd = true;
             if (Utils.getProperty(configProps, "solr.commit_at_end") != null)
             {
                 commitAtEnd = Boolean.parseBoolean(Utils.getProperty(configProps, "solr.commit_at_end"));
             }
+            optimizeAtEnd = Boolean.parseBoolean(Utils.getProperty(configProps, "solr.optimize_at_end"));
+            if (optimizeAtEnd) commitAtEnd = true;
         }
         deleteRecordListFilename = Utils.getProperty(configProps, "marc.ids_to_delete");
         
@@ -453,7 +453,7 @@ public class MarcImporter extends MarcHandler
         {
             try {
                 //System.out.println("Calling commit");
-                logger.info("Calling commit");
+                logger.info("Calling commit (with optimize set to "+(shuttingDown ? "false" : optimizeAtEnd ? "true" : "false")+")");
                 solrProxy.commit(shuttingDown ? false : optimizeAtEnd);
             } 
             catch (IOException ioe) {

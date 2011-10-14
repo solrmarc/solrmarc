@@ -25,13 +25,80 @@ public class HathiIndexer extends BlacklightIndexer
     public Set<String> getHathiURL(final Record record, String defaultURL, String defaultLabel)
     {
         Set<String> result = new LinkedHashSet<String>();
+//        List<?> field856s = record.getVariableFields("856");
+//        if (field856s.size() > 0)
+//        {
+//            for (DataField df : (List<DataField>) field856s)
+//            {
+//                Subfield rights = df.getSubfield('r');
+//                if (rights != null && (rights.getData().equals("pd") || rights.getData().equals("pdus") || rights.getData().equals("world")))
+//                {
+//                    Subfield labelField = df.getSubfield('z');
+//                    Subfield urlField = df.getSubfield('u');
+//                    if (urlField == null) continue;
+//                    String label = (labelField != null) ? labelField.getData() : "";
+//                    if (defaultLabel.contains("%"))
+//                    {
+//                        label = defaultLabel.replaceFirst("%", label);
+//                        label = label.replaceAll(" [ ]+", " ");
+//                    }
+//                    else 
+//                    {
+//                        label = defaultLabel + label;
+//                    }
+//                    // default URL prefix is   http://hdl.handle.net/2027/
+//                    String value = urlField.getData().trim() + "||" + label;
+//                    result.add(value);
+//                }
+//            }
+//        }
+//        else 
+        {
+            Map<String, String> sortedMap = new TreeMap<String, String>(compare);
+            List<?> field974s = record.getVariableFields("974");
+            for (DataField df : (List<DataField>) field974s)
+            {
+                Subfield rights = df.getSubfield('r');
+                if (rights != null && (rights.getData().equals("pd") || rights.getData().equals("pdus") || rights.getData().equals("world")))
+                {
+                    Subfield labelField = df.getSubfield('z');
+                    Subfield identField = df.getSubfield('u');
+                    if (identField == null) continue;
+                    String label = (labelField != null) ? labelField.getData() : "";
+                    String sortlabel = (labelField != null) ? labelField.getData() : identField.getData();
+                    if (defaultLabel.contains("%"))
+                    {
+                        label = defaultLabel.replaceFirst("%", label);
+                        label = label.replaceAll(" [ ]+", " ");
+                    }
+                    else 
+                    {
+                        label = defaultLabel + label;
+                    }
+                    // default URL prefix is   http://hdl.handle.net/2027/
+                    String value = defaultURL + identField.getData().trim() + "||" + label;
+                    sortedMap.put(sortlabel, value);
+                }
+            }
+            for (String key : sortedMap.keySet())
+            {
+                String value = sortedMap.get(key);
+                result.add(value);
+            }
+        }
+        return(result);
+    }
+    
+    public Set<String> getHathiURLUse856(final Record record, String defaultURL, String defaultLabel)
+    {
+        Set<String> result = new LinkedHashSet<String>();
         List<?> field856s = record.getVariableFields("856");
         if (field856s.size() > 0)
         {
             for (DataField df : (List<DataField>) field856s)
             {
                 Subfield rights = df.getSubfield('r');
-                if (rights != null && (rights.getData().equals("pd") || rights.getData().equals("pdus")))
+                if (rights != null && (rights.getData().equals("pd") || rights.getData().equals("pdus") || rights.getData().equals("world")))
                 {
                     Subfield labelField = df.getSubfield('z');
                     Subfield urlField = df.getSubfield('u');
@@ -59,7 +126,7 @@ public class HathiIndexer extends BlacklightIndexer
             for (DataField df : (List<DataField>) field974s)
             {
                 Subfield rights = df.getSubfield('r');
-                if (rights != null && (rights.getData().equals("pd") || rights.getData().equals("pdus")))
+                if (rights != null && (rights.getData().equals("pd") || rights.getData().equals("pdus") || rights.getData().equals("world")))
                 {
                     Subfield labelField = df.getSubfield('z');
                     Subfield identField = df.getSubfield('u');
