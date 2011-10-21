@@ -366,6 +366,13 @@ public class SolrIndexer
         }
     }
 
+    public SolrIndexerMixin findMixin(String className)
+    {
+        if (customMixinMap.containsKey(className))
+            return( customMixinMap.get(className));
+        return(null);
+    }
+
     /**
      * verify that custom methods defined in the _index properties file are
      * present and accounted for
