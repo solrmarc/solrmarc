@@ -594,10 +594,15 @@
                 <available file="${site.src.dir}" type="dir" />
                 <then>
                     <fileset id="custom_indexer_source" dir="${site.src.dir}" includes="**/*.java">
-                        <or>
-                            <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+SolrIndexer" />
-                            <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+org[.]solrmarc[.]index[.]SolrIndexer" />
-                        </or>
+                        <and>
+                            <or>
+                                <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+SolrIndexer" />
+                                <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+org[.]solrmarc[.]index[.]SolrIndexer" />
+                            </or>
+                            <not>
+                                <containsregexp expression="extends.*SolrIndexerMixin" />
+                            </not>
+                        </and>
                     </fileset>
 
                     <condition property="custom.index.source.exists">
