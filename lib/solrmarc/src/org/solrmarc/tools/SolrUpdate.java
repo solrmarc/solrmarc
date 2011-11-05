@@ -155,7 +155,7 @@ public class SolrUpdate
         input.close ();
 
         // Display response.
-        System.exit(0);
+       // System.exit(0);
      }
 
 

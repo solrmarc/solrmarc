@@ -773,14 +773,14 @@ public abstract class IndexTest {
 //	}
     
 
-//	public final void assertDocInList(String[] docIdList, String doc_id, String msgPrefix) 
-//			throws ParserConfigurationException, SAXException, IOException 
-//	{
-//		for (String id : docIdList)
-//		{
-//		    if (id.equals(doc_id))  return;
-//		}
-//		fail(msgPrefix + "doc \"" + doc_id + "\" missing from list");
-//	}
+	public final void assertDocInList(SolrDocumentList docList, String doc_id, String msgPrefix) 
+			throws ParserConfigurationException, SAXException, IOException 
+	{
+		for (SolrDocument doc : docList)
+		{
+		    if (doc.getFieldValue(docIDfname).toString().equals(doc_id))  return;
+		}
+		fail(msgPrefix + "doc \"" + doc_id + "\" missing from list");
+	}
 	
 }

@@ -118,9 +118,10 @@ public class CommandLineUtils
     }
 
 
-    public static void runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, 
+    public static int runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, 
                                           OutputStream stderr, String[] args, Map<String, String> addnlProps)
     {
+        int status = 0;
         if (methodName == null)
         {
             JavaInvoke vmspawner = null;
@@ -210,6 +211,7 @@ public class CommandLineUtils
                 if (e.getTargetException() instanceof ExitException)
                 {
 //                    System.out.println("class "+ className +" called System.exit("+((ExitException)(e.getTargetException())).status+")" );
+                    status = ((ExitException)e.getTargetException()).status;
                 }
                 else
                 {
@@ -225,10 +227,9 @@ public class CommandLineUtils
                 System.setIn(origIn);
                 System.setOut(origOut);
                 System.setErr(origErr);
-
             }
         }
-        
+        return(status);
 
     }
 
@@ -298,19 +299,19 @@ public class CommandLineUtils
         }
     }
 
-    public static void runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, String[] args)
+    public static int runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, String[] args)
     {
-        runCommandLineUtil(className, methodName, stdin, stdout, null, args, null);
+        return(runCommandLineUtil(className, methodName, stdin, stdout, null, args, null));
     }
     
-    public static void runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, OutputStream stderr, String[] args)
+    public static int runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, OutputStream stderr, String[] args)
     {
-        runCommandLineUtil(className, methodName, stdin, stdout, stderr, args, null);
+        return(runCommandLineUtil(className, methodName, stdin, stdout, stderr, args, null));
     }
     
-    public static void runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, String[] args, Map<String,String> addnlProps)
+    public static int runCommandLineUtil(String className, String methodName, InputStream stdin, OutputStream stdout, String[] args, Map<String,String> addnlProps)
     {
-        runCommandLineUtil(className, methodName, stdin, stdout, null, args, addnlProps);
+        return(runCommandLineUtil(className, methodName, stdin, stdout, null, args, addnlProps));
     }
     
     public static void assertArrayEquals(String message, byte[] byteArray1, byte[] byteArray2)

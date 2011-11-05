@@ -9,6 +9,7 @@ import org.marc4j.marc.Record;
 
 import org.solrmarc.index.*;
 import org.solrmarc.marc.MarcHandler;
+import org.solrmarc.tools.SolrMarcIndexerException;
 
 /**
  * Reads in marc records and creates mapping of solr field names to solr field
@@ -114,6 +115,22 @@ public class MarcMappingOnly extends MarcHandler
                 Object thisRecId = solrFldName2ValMap.get(idFldName);
                 if (thisRecId.equals(desiredRecId))
                     return solrFldName2ValMap;
+            }
+            catch (SolrMarcIndexerException e)
+            {
+                if (e.getLevel() == SolrMarcIndexerException.IGNORE)
+                {
+                    System.err.println("Indexing routine says record should be ignored");                                   
+                }
+                else if (e.getLevel() == SolrMarcIndexerException.DELETE)
+                {
+                    System.err.println("Indexing routine says record should be deleted");                                   
+                }
+                if (e.getLevel() == SolrMarcIndexerException.EXIT)
+                {
+                    System.err.println("Indexing routine says processing should be terminated"); 
+                    break;
+                }
             }
             catch (MarcException me)
             {
