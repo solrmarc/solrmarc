@@ -6,7 +6,6 @@ import java.util.HashSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.solrmarc.solr.SolrSearcherProxy;
 import org.xml.sax.SAXException;
 
 import org.junit.*;

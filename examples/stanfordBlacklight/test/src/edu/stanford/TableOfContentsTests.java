@@ -24,7 +24,7 @@ public class TableOfContentsTests extends AbstractStanfordBlacklightTest {
     {
         String fldName = "toc_search";
 	    createIxInitVars("summaryTests.mrc");
-        assertSearchFldMultValProps(fldName);
+//        assertSearchFldMultValProps(fldName);
 
         assertSingleResult("505", fldName, "505a");
         assertSingleResult("505", fldName, "505r");
@@ -42,7 +42,7 @@ public class TableOfContentsTests extends AbstractStanfordBlacklightTest {
 	{
 		String fldName = "vern_toc_search";
 		createIxInitVars("summaryTests.mrc");
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 
 		assertSingleResult("505", fldName, "vern505a");
         assertSingleResult("505", fldName, "vern505r");
@@ -61,7 +61,7 @@ public class TableOfContentsTests extends AbstractStanfordBlacklightTest {
 	{
 	    String fldName = "context_search";
 	    createIxInitVars("summaryTests.mrc");
-	    assertSearchFldMultValProps(fldName);
+//	    assertSearchFldMultValProps(fldName);
 
 	    assertSingleResult("518", fldName, "518a");
 
@@ -77,7 +77,7 @@ public class TableOfContentsTests extends AbstractStanfordBlacklightTest {
 	{
 	    String fldName = "vern_context_search";
 	    createIxInitVars("summaryTests.mrc");
-	    assertSearchFldMultValProps(fldName);
+//	    assertSearchFldMultValProps(fldName);
 
 	    assertSingleResult("518", fldName, "vern518a");
 
@@ -94,7 +94,7 @@ public class TableOfContentsTests extends AbstractStanfordBlacklightTest {
 	{
 	    String fldName = "summary_search";
 	    createIxInitVars("summaryTests.mrc");
-	    assertSearchFldMultValProps(fldName);
+//	    assertSearchFldMultValProps(fldName);
 	    
 		assertSingleResult("520", fldName, "520a");
 		assertSingleResult("520", fldName, "520b");
@@ -111,7 +111,7 @@ public class TableOfContentsTests extends AbstractStanfordBlacklightTest {
 	{
 	    String fldName = "vern_summary_search";
 	    createIxInitVars("summaryTests.mrc");
-	    assertSearchFldMultValProps(fldName);
+//	    assertSearchFldMultValProps(fldName);
 
 	    assertSingleResult("520", fldName, "vern520a");
 		assertSingleResult("520", fldName, "vern520b");
