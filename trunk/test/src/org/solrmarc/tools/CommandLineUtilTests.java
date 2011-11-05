@@ -94,12 +94,12 @@ public class CommandLineUtilTests
         if (testConfigFile == null)
             fail("property test.config.file be defined for this test to run");
         ByteArrayOutputStream out1 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.MergeSummaryHoldings", "main", null, out1, new String[]{"-s", testDataParentPath+"/summaryHld_1-1000.mrc", testDataParentPath+"/u335.mrc" });
+        int status = CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.MergeSummaryHoldings", "main", null, out1, new String[]{"-s", testDataParentPath+"/summaryHld_1-1000.mrc", testDataParentPath+"/u335.mrc" });
 
         ByteArrayInputStream in2 = new ByteArrayInputStream(out1.toByteArray());
         ByteArrayOutputStream out2 = new ByteArrayOutputStream();
         ByteArrayOutputStream err2 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in2, out2, err2, new String[]{testConfigFile, "print"}); 
+        status = CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in2, out2, err2, new String[]{testConfigFile, "print"}); 
 
         CommandLineUtils.compareUtilOutput(new ByteArrayInputStream(out2.toByteArray()), mergedSummaryHoldingsOutput); 
 
@@ -107,12 +107,12 @@ public class CommandLineUtilTests
 
         ByteArrayInputStream in3 = new ByteArrayInputStream(out1.toByteArray());
         ByteArrayOutputStream out3 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.MergeSummaryHoldings", "main", in3, out3, new String[]{"-s", testDataParentPath+"/summaryHld_1-1000.mrc" } );
+        status = CommandLineUtils.runCommandLineUtil("org.solrmarc.tools.MergeSummaryHoldings", "main", in3, out3, new String[]{"-s", testDataParentPath+"/summaryHld_1-1000.mrc" } );
         
         
         ByteArrayInputStream in4 = new ByteArrayInputStream(out3.toByteArray());
         ByteArrayOutputStream out4 = new ByteArrayOutputStream();
-        CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in4, out4, new String[]{testConfigFile, "print"}); 
+        status = CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcPrinter", "main", in4, out4, new String[]{testConfigFile, "print"}); 
 
         CommandLineUtils.compareUtilOutput(new ByteArrayInputStream(out4.toByteArray()), mergedSummaryHoldingsOutput); 
         System.out.println("Test testMergeSummaryHoldings is successful");
