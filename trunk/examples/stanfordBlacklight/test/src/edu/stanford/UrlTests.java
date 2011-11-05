@@ -33,10 +33,10 @@ public class UrlTests extends AbstractStanfordBlacklightTest {
 			throws ParserConfigurationException, IOException, SAXException
 	{
 		String fldName = "url_sfx";
-		assertFieldMultiValued(fldName);
-		assertStringFieldProperties(fldName);
-		assertFieldNotIndexed(fldName);
-		assertFieldStored(fldName);
+//		assertFieldMultiValued(fldName);
+//		assertStringFieldProperties(fldName);
+//		assertFieldNotIndexed(fldName);
+//		assertFieldStored(fldName);
 			
 		// 956 SFX fields
 		assertDocHasFieldValue("mult856and956", fldName, "http://caslon.stanford.edu:3210/sfxlcl3?superLongURL"); 
@@ -57,10 +57,10 @@ public class UrlTests extends AbstractStanfordBlacklightTest {
 	public final void testFullTextUrls() throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "url_fulltext";
-		assertFieldMultiValued(fldName);
-		assertStringFieldProperties(fldName);
-		assertFieldNotIndexed(fldName);
-		assertFieldStored(fldName);
+//		assertFieldMultiValued(fldName);
+//		assertStringFieldProperties(fldName);
+//		assertFieldNotIndexed(fldName);
+//		assertFieldStored(fldName);
 	
 		// fulltext url(s) in docs 
 		assertDocHasFieldValue("856ind2is0", fldName, "http://www.netLibrary.com/urlapi.asp?action=summary&v=1&bookid=122436"); 
@@ -101,10 +101,10 @@ public class UrlTests extends AbstractStanfordBlacklightTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "url_suppl";
-		assertFieldMultiValued(fldName);
-		assertStringFieldProperties(fldName);
-		assertFieldNotIndexed(fldName);
-		assertFieldStored(fldName);
+//		assertFieldMultiValued(fldName);
+//		assertStringFieldProperties(fldName);
+//		assertFieldNotIndexed(fldName);
+//		assertFieldStored(fldName);
 			
 		// book
 		assertDocHasFieldValue("856ind2is1TocSubz", fldName, "http://www.url856.com/ind2_1/toc_subz"); 
@@ -144,8 +144,8 @@ public class UrlTests extends AbstractStanfordBlacklightTest {
 		urlFields.add("url_sfx"); 
 		for (String fldName : urlFields) 
 		{
-		    assertDisplayFieldProperties(fldName);
-		    assertFieldMultiValued(fldName);
+//		    assertDisplayFieldProperties(fldName);
+//		    assertFieldMultiValued(fldName);
 		}
 	}
 

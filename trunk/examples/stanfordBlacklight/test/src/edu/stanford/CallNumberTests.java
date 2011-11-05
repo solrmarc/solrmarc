@@ -38,8 +38,8 @@ public class CallNumberTests extends AbstractStanfordBlacklightTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "callnum_top_facet";
-		assertFacetFieldProperties(fldName);
-		assertFieldMultiValued(fldName);
+//		assertFacetFieldProperties(fldName);
+//		assertFieldMultiValued(fldName);
 		
 		// LC values
 		// single char LC classification
@@ -84,8 +84,8 @@ public class CallNumberTests extends AbstractStanfordBlacklightTest {
 		throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "lc_alpha_facet";
-		assertFacetFieldProperties(fldName);
-		assertFieldMultiValued(fldName);
+//		assertFacetFieldProperties(fldName);
+//		assertFieldMultiValued(fldName);
 		
 		// single char LC classification
 		assertSingleResult("6661112", fldName, "\"Z - Bibliography, Library Science, Information Resources\"");
@@ -133,8 +133,8 @@ public class CallNumberTests extends AbstractStanfordBlacklightTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "lc_b4cutter_facet";
-		assertFacetFieldProperties(fldName);
-		assertFieldMultiValued(fldName);
+//		assertFacetFieldProperties(fldName);
+//		assertFieldMultiValued(fldName);
 	
 		// bad values should not be found
 		assertZeroResults(fldName, "NO CALL NUMBER");
@@ -181,11 +181,11 @@ public class CallNumberTests extends AbstractStanfordBlacklightTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "callnum_search";
-		assertFieldMultiValued(fldName);
-		assertTextFieldProperties(fldName);
-		assertFieldOmitsNorms(fldName);
-		assertFieldIndexed(fldName); 
-		assertFieldNotStored(fldName); 
+//		assertFieldMultiValued(fldName);
+//		assertTextFieldProperties(fldName);
+//		assertFieldOmitsNorms(fldName);
+//		assertFieldIndexed(fldName); 
+//		assertFieldNotStored(fldName); 
 	
 		// LC 999 one letter
 		assertSingleResult("6661112", fldName, "Z3871.Z8");
@@ -250,8 +250,8 @@ public class CallNumberTests extends AbstractStanfordBlacklightTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "callnum_top_facet";
-		assertFacetFieldProperties(fldName);
-		assertFieldMultiValued(fldName);
+//		assertFacetFieldProperties(fldName);
+//		assertFieldMultiValued(fldName);
 		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("690002");
@@ -280,8 +280,8 @@ public class CallNumberTests extends AbstractStanfordBlacklightTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey_1digit_facet";
-		assertFacetFieldProperties(fldName);
-		assertFieldMultiValued(fldName);
+//		assertFacetFieldProperties(fldName);
+//		assertFieldMultiValued(fldName);
 		
 		assertSingleResult("690002", fldName, "\"100s - Philosophy & Psychology\"");
 		assertSingleResult("2328381", fldName, "\"800s - Literature\"");
@@ -311,8 +311,8 @@ public class CallNumberTests extends AbstractStanfordBlacklightTest {
 		throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey_2digit_facet";
-		assertFacetFieldProperties(fldName);
-		assertFieldMultiValued(fldName);
+//		assertFacetFieldProperties(fldName);
+//		assertFieldMultiValued(fldName);
 		
 		assertSingleResult("690002", fldName, "\"150s - Psychology\"");
 		assertSingleResult("2328381", fldName, "\"820s - English & Old English Literatures\"");
@@ -342,8 +342,8 @@ public class CallNumberTests extends AbstractStanfordBlacklightTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "dewey_b4cutter_facet";
-		assertFacetFieldProperties(fldName);
-		assertFieldMultiValued(fldName);
+//		assertFacetFieldProperties(fldName);
+//		assertFieldMultiValued(fldName);
 		
 		assertZeroResults(fldName, "159");
 		assertSingleResult("690002", fldName, "159.32");
@@ -372,11 +372,11 @@ public class CallNumberTests extends AbstractStanfordBlacklightTest {
 			throws IOException, ParserConfigurationException, SAXException 
 	{
 		String fldName = "callnum_search";
-		assertFieldMultiValued(fldName);
-		assertTextFieldProperties(fldName);
-		assertFieldOmitsNorms(fldName);
-		assertFieldIndexed(fldName); 
-		assertFieldNotStored(fldName);  
+//		assertFieldMultiValued(fldName);
+//		assertTextFieldProperties(fldName);
+//		assertFieldOmitsNorms(fldName);
+//		assertFieldIndexed(fldName); 
+//		assertFieldNotStored(fldName);  
 		
 		assertSingleResult("690002", fldName, "\"159.32 .W211\""); 
 		assertSingleResult("2328381", fldName, "\"827.5 .S97TG\""); 

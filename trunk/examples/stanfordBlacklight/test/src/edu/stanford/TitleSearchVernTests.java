@@ -31,7 +31,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_245a_search";
-		assertSearchFldOneValProps(fldName);
+//		assertSearchFldOneValProps(fldName);
 		
 		assertSingleResult("2xxVernSearch", fldName, "vern245a");
 
@@ -47,7 +47,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_245_search";
-		assertSearchFldOneValProps(fldName);
+//		assertSearchFldOneValProps(fldName);
 
 		assertSingleResult("2xxVernSearch", fldName, "vern245a");
 		assertSingleResult("2xxVernSearch", fldName, "vern245b");
@@ -70,7 +70,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 			throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_uniform_search";
-		assertSearchFldOneValProps(fldName);
+//		assertSearchFldOneValProps(fldName);
 		
 		assertSingleResult("2xxVernSearch", fldName, "vern130a");
 		assertSingleResult("2xxVernSearch", fldName, "vern130d");
@@ -110,7 +110,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_variant_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 
 		assertSingleResult("2xxVernSearch", fldName, "vern210a");
 		assertSingleResult("2xxVernSearch", fldName, "vern210b");
@@ -132,7 +132,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_variant_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("2xxVernSearch", fldName, "vern243a");
 		assertSingleResult("2xxVernSearch", fldName, "vern243d");
@@ -159,7 +159,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_variant_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("2xxVernSearch", fldName, "vern246a");
 		assertSingleResult("2xxVernSearch", fldName, "vern246b");
@@ -188,7 +188,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 	{
 		String fldName = "vern_title_related_search";
 		createIxInitVars("summaryTests.mrc");
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 		assertSingleResult("505", fldName, "vern505t");
 		assertZeroResults(fldName, "nope");
 	}
@@ -201,7 +201,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("7xxLowVernSearch", fldName, "vern700f");
 		assertSingleResult("7xxLowVernSearch", fldName, "vern700k");
@@ -232,7 +232,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("7xxLowVernSearch", fldName, "vern710l");
 		assertSingleResult("7xxLowVernSearch", fldName, "vern710m");
@@ -264,7 +264,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("7xxLowVernSearch", fldName, "vern711f");
 		assertSingleResult("7xxLowVernSearch", fldName, "vern711k");
@@ -291,7 +291,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("7xxLowVernSearch", fldName, "vern730a");
 		assertSingleResult("7xxLowVernSearch", fldName, "vern730d");
@@ -318,7 +318,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("7xxLowVernSearch", fldName, "vern740a");
 		assertSingleResult("7xxLowVernSearch", fldName, "vern740n");
@@ -335,7 +335,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("76xVernSearch", fldName, "vern760s");
 		assertSingleResult("76xVernSearch", fldName, "vern760t");
@@ -356,7 +356,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("77xVernSearch", fldName, "vern770s");
 		assertSingleResult("77xVernSearch", fldName, "vern770t");
@@ -383,7 +383,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("78xVernSearch", fldName, "vern780s");
 		assertSingleResult("78xVernSearch", fldName, "vern780t");
@@ -404,7 +404,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("79xVernSearch", fldName, "vern796f");
 		assertSingleResult("79xVernSearch", fldName, "vern796k");
@@ -434,7 +434,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 //		assertSingleResult("79xVernSearch", fldName, "vern797d");
 //		assertSingleResult("79xVernSearch", fldName, "vern797f");
@@ -470,7 +470,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("79xVernSearch", fldName, "vern798f");
 //		assertSingleResult("79xVernSearch", fldName, "vern798g");
@@ -498,7 +498,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_related_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("79xVernSearch", fldName, "vern799a");
 		assertSingleResult("79xVernSearch", fldName, "vern799d");
@@ -525,7 +525,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("4xxVernSearch", fldName, "vern440a");
 		assertSingleResult("4xxVernSearch", fldName, "vern440n");
@@ -544,7 +544,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("8xxVernSearch", fldName, "vern800f");
 		assertSingleResult("8xxVernSearch", fldName, "vern800k");
@@ -575,7 +575,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 //		assertSingleResult("8xxVernSearch", fldName, "vern810d");
 //		assertSingleResult("8xxVernSearch", fldName, "vern810f");
@@ -612,7 +612,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("8xxVernSearch", fldName, "vern811f");
 //		assertSingleResult("8xxVernSearch", fldName, "vern811g");
@@ -641,7 +641,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 	
 		assertSingleResult("8xxVernSearch", fldName, "vern830a");
 		assertSingleResult("8xxVernSearch", fldName, "vern830d");
@@ -668,7 +668,7 @@ public class TitleSearchVernTests extends AbstractStanfordBlacklightTest {
 		throws ParserConfigurationException, IOException, SAXException 
 	{
 		String fldName = "vern_title_series_search";
-		assertSearchFldMultValProps(fldName);
+//		assertSearchFldMultValProps(fldName);
 		assertSingleResult("8xxVernSearch", fldName, "vern840a");
 		assertSingleResult("8xxVernSearch", fldName, "vern840v");
 		assertZeroResults(fldName, "nope");

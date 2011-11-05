@@ -1,6 +1,8 @@
 package edu.stanford;
 
 import java.io.IOException;
+import java.util.Collection;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.*;
@@ -41,9 +43,9 @@ public class CallNumberLoppingTests extends AbstractStanfordBlacklightTest {
 		String recId = "cutterEndsLetLCSerial";
 		String volSort = CallNumUtils.getVolumeSortCallnum(callnum, lopped, isSerial);
 
-		String[] values = getDocument(recId).getValues(fldName);
-		for (String val : values) {
-			if (val.startsWith("36105049317907")) {
+		Collection<Object> values = getDocument(recId).getFieldValues(fldName);
+		for (Object val : values) {
+			if (val.toString().startsWith("36105049317907")) {
 				assertTrue("volSort doesn't reverse vol number for serial", !volSort.contains("V.2"));
 				assertTrue("volSort doesn't reverse vol number for serial", volSort.contains("4~ZZZZZX"));
 			}

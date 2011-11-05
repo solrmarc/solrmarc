@@ -23,11 +23,11 @@ public class PhysicalTests extends AbstractStanfordBlacklightTest {
 	{
 		String fldName = "physical";
 		createIxInitVars("physicalTests.mrc");
-		assertTextFieldProperties(fldName);
-		assertFieldHasNorms(fldName);
-		assertFieldStored(fldName);
-		assertFieldIndexed(fldName);
-		assertFieldMultiValued(fldName);
+//		assertTextFieldProperties(fldName);
+//		assertFieldHasNorms(fldName);
+//		assertFieldStored(fldName);
+//		assertFieldIndexed(fldName);
+//		assertFieldMultiValued(fldName);
 
 		// 300abc
 	    assertDocHasFieldValue("300111", fldName, "1 sound disc (20 min.); analog, 33 1/3 rpm, stereo. ; 12 in."); 
@@ -64,11 +64,11 @@ public class PhysicalTests extends AbstractStanfordBlacklightTest {
 	{
 		String fldName = "vern_physical";
 		createIxInitVars("vernacularSearchTests.mrc");
-		assertTextFieldProperties(fldName);
-		assertFieldHasNorms(fldName);
-		assertFieldStored(fldName);
-		assertFieldIndexed(fldName);
-		assertFieldMultiValued(fldName);
+//		assertTextFieldProperties(fldName);
+//		assertFieldHasNorms(fldName);
+//		assertFieldStored(fldName);
+//		assertFieldIndexed(fldName);
+//		assertFieldMultiValued(fldName);
 		
 		assertDocHasFieldValue("300VernSearch", fldName, "vern300a vern300b vern300c vern300e vern300f vern300g");		
 		assertDocHasNoFieldValue("300VernSearch", fldName, "none");

@@ -28,8 +28,8 @@ public class ItemInfoTests extends AbstractStanfordBlacklightTest {
 	{
 		String fldName = "building_facet";
 		createIxInitVars("buildingTests.mrc");
-		assertFacetFieldProperties(fldName);
-		assertFieldMultiValued(fldName);
+//		assertFacetFieldProperties(fldName);
+//		assertFieldMultiValued(fldName);
 		
 	    assertSingleResult("229800", fldName, "\"Archive of Recorded Sound\"");
 	    assertSingleResult("345228", fldName, "\"Art & Architecture\"");
@@ -156,11 +156,11 @@ public class ItemInfoTests extends AbstractStanfordBlacklightTest {
 	{
 		String fldName = "barcode_search";
 		createIxInitVars("locationTests.mrc");
-		assertTextFieldProperties(fldName);
-		assertFieldOmitsNorms(fldName);
-		assertFieldIndexed(fldName);
-		assertFieldNotStored(fldName);
-		assertFieldMultiValued(fldName);
+//		assertTextFieldProperties(fldName);
+//		assertFieldOmitsNorms(fldName);
+//		assertFieldIndexed(fldName);
+//		assertFieldNotStored(fldName);
+//		assertFieldMultiValued(fldName);
 
 		// single barcode in the record
 		assertSingleResult("115472", fldName, "36105033811451");
@@ -189,8 +189,8 @@ public class ItemInfoTests extends AbstractStanfordBlacklightTest {
 	{
 		String fldName = "item_display";
 		createIxInitVars("buildingTests.mrc");
-		assertDisplayFieldProperties(fldName);
-		assertFieldMultiValued(fldName);
+//		assertDisplayFieldProperties(fldName);
+//		assertFieldMultiValued(fldName);
 		
 		// APPLIEDPHY ignored for building facet, but not here
 		String callnum = "HC241.25 .I4 D47";

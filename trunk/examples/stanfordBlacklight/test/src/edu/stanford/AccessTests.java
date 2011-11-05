@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.*;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.solr.common.SolrDocumentList;
 import org.junit.*;
 import org.xml.sax.SAXException;
 
@@ -31,8 +32,8 @@ public class AccessTests extends AbstractStanfordBlacklightTest {
 	public final void testFldProperties() 
 		throws ParserConfigurationException, IOException, SAXException
 	{
-		assertFacetFieldProperties(fldName);
-		assertFieldMultiValued(fldName);
+//		assertFacetFieldProperties(fldName);
+//		assertFieldMultiValued(fldName);
 		assertEquals("accessMethod string incorrect: ", "Online", Access.ONLINE.toString());
 		assertEquals("accessMethod string incorrect: ", "At the Library", Access.AT_LIBRARY.toString());
 	}
@@ -123,7 +124,8 @@ public class AccessTests extends AbstractStanfordBlacklightTest {
 	 	String fldVal = "\"" + Access.AT_LIBRARY.toString() + "\"";
 	 	// don't want to check *all* of them ...
 //	 	List<DocumentProxy> docList = getAllMatchingDocs(fldName, fldVal);
-	 	String[] docList = getDocIDList(fldName, fldVal);
+	 	SolrDocumentList docList = getDocList(fldName, fldVal);
+	 	//String[] docList = getDocIDList(fldName, fldVal);
 	 	String msg = fldName + " " + Access.AT_LIBRARY.toString() + ": ";
 	 	// formerly "On campus"
 	 	assertDocInList(docList, "115472", msg); 
