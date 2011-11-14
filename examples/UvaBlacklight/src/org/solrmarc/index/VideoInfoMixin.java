@@ -464,7 +464,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
     {
         if (releaseDatePattern == null)
         {
-            releaseDatePattern = Pattern.compile(".*?([Rr]eleased|[Vv]ideorecording|[Vv]ideocassette|[Ii]ssued|[Rr]ecorded|[Bb]roadcast|[Ff]ilmed|[Ee]dited|[Pp]roduced|[Mm]ade|[Dd]elivered).*?[^0-9]([0-9][0-9][0-9][0-9])([^0-9].*)?$");
+            releaseDatePattern = Pattern.compile(".*?([Rr]eleased|[Rr]elease [Oo]f|[Vv]ideorecording|[Vv]ideocassette|[Ii]ssued|[Rr]ecorded|[Bb]roadcast|[Ff]ilmed|[Ee]dited|[Pp]roduced|[Mm]ade|[Dd]elivered).*?[^0-9]([0-9][0-9][0-9][0-9])([^0-9].*)?$");
         }
         if (isVideo)
         {
