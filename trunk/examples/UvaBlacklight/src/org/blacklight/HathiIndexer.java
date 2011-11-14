@@ -59,7 +59,8 @@ public class HathiIndexer extends BlacklightIndexer
             for (DataField df : (List<DataField>) field974s)
             {
                 Subfield rights = df.getSubfield('r');
-                if (rights != null && (rights.getData().equals("pd") || rights.getData().equals("pdus") || rights.getData().equals("world")))
+                if (rights != null && (rights.getData().equals("pd") || rights.getData().equals("pdus") || 
+                    rights.getData().equals("world") || rights.getData().startsWith("cc")))
                 {
                     Subfield labelField = df.getSubfield('z');
                     Subfield identField = df.getSubfield('u');
@@ -98,7 +99,8 @@ public class HathiIndexer extends BlacklightIndexer
             for (DataField df : (List<DataField>) field856s)
             {
                 Subfield rights = df.getSubfield('r');
-                if (rights != null && (rights.getData().equals("pd") || rights.getData().equals("pdus") || rights.getData().equals("world")))
+                if (rights != null && (rights.getData().equals("pd") || rights.getData().equals("pdus") ||
+                    rights.getData().equals("world") || rights.getData().startsWith("cc")))
                 {
                     Subfield labelField = df.getSubfield('z');
                     Subfield urlField = df.getSubfield('u');
