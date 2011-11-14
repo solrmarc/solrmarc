@@ -22,17 +22,17 @@ public class DiacriticAcuteTests extends AbstractStanfordBlacklightTest {
 	// contains the diacritics in our test data
 	private String fldName = "author_person_search";
 	
-@Before
+//@Before
 	public final void initVars() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		createIxInitVars("diacriticTests.mrc");
+//		createIxInitVars("diacriticTests.mrc");
 	}
 
 	/**
 	 * Test searching of text that has acute: query has acute
 	 */
-@Test
+//Test
 	public final void testAcuteExact() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -49,7 +49,7 @@ public class DiacriticAcuteTests extends AbstractStanfordBlacklightTest {
 	/**
 	 * Test searching of text that has acute: query without diacritics
 	 */
-@Test
+//Test
 	public final void testPlainText() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -67,7 +67,7 @@ public class DiacriticAcuteTests extends AbstractStanfordBlacklightTest {
 	/**
 	 * Test searching of text that has acute: query looks like raw xml in oxygen
 	 */
-//@Test
+//Test
 	public final void testWeirdLooking() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -84,7 +84,7 @@ public class DiacriticAcuteTests extends AbstractStanfordBlacklightTest {
 	/**
 	 * Test searching of text with multiple acute - different combinations
 	 */
-@Test
+//Test
 	public final void testMultiple() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{

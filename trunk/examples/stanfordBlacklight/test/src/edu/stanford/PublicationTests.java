@@ -233,15 +233,6 @@ public class PublicationTests extends AbstractStanfordBlacklightTest
 		// list of doc ids in correct publish date sort order
 		List<String> expectedOrderList = new ArrayList<String>(50);
 		
-		// TODO: invalid/missing dates are designated as last or first in solr
-		//  schema file, but are first here (as this is lucene context).
-		//  "ties" show up in document order here (order of occurrence in data 
-		// file)
-		expectedOrderList.add("pubDate6666"); 
-		expectedOrderList.add("pubDate1uuu"); 
-		expectedOrderList.add("pubDate9999"); 
-		expectedOrderList.add("pubDate0000"); 
-		expectedOrderList.add("pubDate0019"); 
 		
 		expectedOrderList.add("pubDate00uu");   // "1st century"
 		expectedOrderList.add("pubDate01uu");   // "2nd century"
@@ -252,7 +243,8 @@ public class PublicationTests extends AbstractStanfordBlacklightTest
 		expectedOrderList.add("pubDate0801");   // 0801
 		expectedOrderList.add("pubDate09uu");   // "10th century"
 		expectedOrderList.add("pubDate0960");   // 0960
-		expectedOrderList.add("pubDate0963");   // 0963
+        expectedOrderList.add("pubDate0963");   // 0963
+        expectedOrderList.add("pubDate0965");   // 0963
 		expectedOrderList.add("pubDate10uu");   // "11th century" 
 		expectedOrderList.add("pubDate11uu");   // "12th century" 
 		expectedOrderList.add("pubDate12uu");   // "13th century" 
@@ -289,6 +281,17 @@ public class PublicationTests extends AbstractStanfordBlacklightTest
 		expectedOrderList.add("b2008");   // "2008"
 		expectedOrderList.add("z2009");   // "2009"
 		expectedOrderList.add("pubDate2010");   // "2010"
+        
+		// TODO: invalid/missing dates are designated as last or first in solr
+        //  schema file, but are first here (as this is lucene context).
+        //  "ties" show up in document order here (order of occurrence in data 
+        // file)
+        expectedOrderList.add("pubDate1uuu"); 
+        expectedOrderList.add("pubDate9999"); 
+        expectedOrderList.add("pubDate6666"); 
+        expectedOrderList.add("pubDate0000"); 
+        expectedOrderList.add("pubDate0019"); 
+        expectedOrderList.add("410024"); 
 		
 		// get search results sorted by pub_date_sort field
 		// pub_date_sort isn't stored, so we must look at id field		
@@ -310,7 +313,7 @@ public class PublicationTests extends AbstractStanfordBlacklightTest
 			{
 				// we haven't found all docs in the expected list yet
 			    String docId = doc.getFieldValue(docIDfname).toString();
-	            if (docId.equals(expectedOrderList.get(expDocIx + 1))) 
+	            if (docId.equals(expectedOrderList.get(expDocIx ))) 
 	                expDocIx++;
 			}
 			else break;  // we found all the documents in the expected order list
@@ -388,11 +391,12 @@ public class PublicationTests extends AbstractStanfordBlacklightTest
 		//  schema file, but are last here in forward sort order (as this is 
 		//  lucene context).  In this test, we are doing a "reverse" lucene
 		//  sort, so they show as last for this test, in rever doc id order.
-		expectedOrderList.add("pubDate1uuu"); 
-		expectedOrderList.add("pubDate9999"); 
-		expectedOrderList.add("pubDate6666"); 
-		expectedOrderList.add("pubDate0000"); 
-		expectedOrderList.add("pubDate0019"); 			
+        expectedOrderList.add("pubDate1uuu"); 
+        expectedOrderList.add("pubDate9999"); 
+        expectedOrderList.add("pubDate6666"); 
+        expectedOrderList.add("pubDate0000"); 
+        expectedOrderList.add("pubDate0019"); 
+        expectedOrderList.add("410024"); 
 		
         // get search results sorted by pub_date_sort field
         // pub_date_sort isn't stored, so we must look at id field      
@@ -441,23 +445,23 @@ public class PublicationTests extends AbstractStanfordBlacklightTest
 		
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("pubDate2010");
-		docIds.add("z2009");
-		docIds.add("b2008");
 		assertSearchResults(fldName, "\"" + PubDateGroup.THIS_YEAR.toString() + "\"", docIds);
-		docIds.add("v2007");
-		docIds.add("z2006");
+        docIds.add("z2009");
+        docIds.add("b2008");
 		assertSearchResults(fldName, "\"" + PubDateGroup.LAST_3_YEARS.toString() + "\"", docIds);
+        docIds.add("v2007");
+        docIds.add("z2006");
 		docIds.add("j2005");
 		docIds.add("q2001");
-		docIds.add("f2000");
-		docIds.add("firstDateOnly008"); //2000
-		docIds.add("w1999");
 		docIds.add("x200u");
 		docIds.add("pubDate20uu");  
 		docIds.add("o20uu");
 		docIds.add("pubDate0059");  // 2005
 		docIds.add("pubDate0204");  // 2004
 		assertSearchResults(fldName, "\"" + PubDateGroup.LAST_10_YEARS.toString() + "\"", docIds);
+		docIds.add("f2000");
+		docIds.add("firstDateOnly008"); //2000
+		docIds.add("w1999");
 		docIds.add("c1998");
 		docIds.add("e1997");
 		docIds.add("m1991");
@@ -466,9 +470,10 @@ public class PublicationTests extends AbstractStanfordBlacklightTest
 		docIds.add("y1989");
 		docIds.add("contRes");  // 1984
 		docIds.add("bothDates008"); // 1964
-		docIds.add("w1959");
-		docIds.add("pubDate19uu");
-		docIds.add("p19uu");
+        docIds.add("pubDate19uu");
+        docIds.add("pubDate195u");
+        docIds.add("p19uu");
+        docIds.add("s195u");
 		docIds.add("pubDate0197-1");
 		docIds.add("pubDate0197-2");
 		assertSearchResults(fldName, "\"" + PubDateGroup.LAST_50_YEARS.toString() + "\"", docIds);
@@ -488,14 +493,15 @@ public class PublicationTests extends AbstractStanfordBlacklightTest
 		docIds.add("s190u");   // "1900s"
 		docIds.add("b1899"); 
 		docIds.add("r1900");
-		docIds.add("pubDate195u");   // "1950s"
-		docIds.add("s195u");   // "1950s"
+//		docIds.add("pubDate195u");   // "1950s"
+//		docIds.add("s195u");   // "1950s"
 		docIds.add("g1958");
+        docIds.add("w1959");
 		docIds.add("pubDate0500");
 		docIds.add("pubDate0801");
 		docIds.add("pubDate0960");
-		docIds.add("pubDate0963");
-		// TODO: would like to correct these (see autocorrect test)
+        docIds.add("pubDate0963");
+//		// TODO: would like to correct these (see autocorrect test)
 		docIds.add("pubDate0965"); // should be 1965
 		docIds.add("pubDate0980"); // should be 1980
 		docIds.add("pubDate0999"); // should be 1999

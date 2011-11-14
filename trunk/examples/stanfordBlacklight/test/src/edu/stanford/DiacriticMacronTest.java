@@ -22,17 +22,17 @@ public class DiacriticMacronTest extends AbstractStanfordBlacklightTest {
 	// contains the diacritics in our test data
 	private String fldName = "author_person_search";
 	
-@Before
+//@Before
 	public final void initVars() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		createIxInitVars("diacriticTests.mrc");
+//		createIxInitVars("diacriticTests.mrc");
 	}
 
 	/**
 	 * Test searching of text that has ring above: query exact match
 	 */
-@Test
+//Test
 	public final void testMacronExact() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -42,7 +42,7 @@ public class DiacriticMacronTest extends AbstractStanfordBlacklightTest {
 	/**
 	 * Test searching of text that has ring above: query without diacritics
 	 */
-@Test
+//Test
 	public final void testMacronText() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
