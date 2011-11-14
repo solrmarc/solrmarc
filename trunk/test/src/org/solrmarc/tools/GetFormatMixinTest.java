@@ -14,6 +14,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -49,6 +50,7 @@ public class GetFormatMixinTest
         Properties indexingProps = new Properties();
         indexingProps.setProperty("getformatmixin", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes");
         indexingProps.setProperty("getformatmixinmapped", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_map.properties");
+        indexingProps.setProperty("getformatmixinunmapped", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_unmap_map.properties");
         String verboseStr = System.getProperty("marc.verbose");
         boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
         ErrorHandler errors = new ErrorHandler();
@@ -72,17 +74,23 @@ public class GetFormatMixinTest
                 Record record = reader.next();
                 Map<String,Object> indexedRecord = testIndexer.map(record, errors);
                 String id = record.getControlNumber();
-                Object result = indexedRecord.get("getformatmixin");
-                showResults(result, "raw   ", verbose, out, id);
-                result = indexedRecord.get("getformatmixinmapped");
-                showResults(result, "mapped", verbose, out, id);
+                Object resultraw = indexedRecord.get("getformatmixin");
+                Object resultmapped = indexedRecord.get("getformatmixinunmapped");
+                Object resultmerged = mergeresults(resultraw, resultmapped);
+                showResults(resultmerged, "raw   ", verbose, out, id);
+
+                resultmapped = indexedRecord.get("getformatmixinmapped");
+                showResults(resultmapped, "mapped", verbose, out, id);
                 if (verbose) 
                 {
                     if (errors.hasErrors())
                     {
+                        Object prevError = "";
                         for (Object error : errors.getErrors())
                         {
-                            out.println(error.toString());                            
+                            if (!error.toString().equals(prevError.toString()))
+                                out.println(error.toString());
+                            prevError = error;
                         }
                     }
                     out.println(record.toString());
@@ -96,6 +104,36 @@ public class GetFormatMixinTest
             fail("unable to read test recordfile  formatTests.mrc");
         }
         System.out.println("Test testRemoteIndexRecord is successful");
+    }
+
+    private Object mergeresults(Object resultraw, Object resultmapped)
+    {
+        if (resultraw instanceof Set && resultmapped instanceof Set)
+        {
+            String[] resraw = ((Set<String>)resultraw).toArray(new String[0]);
+            String[] resmapped = ((Set<String>)resultmapped).toArray(new String[0]);
+            if (resraw.length != resmapped.length)
+            {
+                fail("merging failure, results sets different size");
+            }
+            
+            Set<String> resmerged = new LinkedHashSet<String>();
+            for (int i = 0; i < resraw.length; i++)
+            {
+                resmerged.add(resraw[i] + "\t--\t" + resmapped[i]);
+            }
+            return(resmerged);
+        }
+        else if (resultraw instanceof String && resultmapped instanceof String)
+        {
+            String resmerged = resultraw + "\t--\t" + resultmapped;
+            return(resmerged);
+        }
+        else
+        {
+            fail("merging failure, results not both sets");
+        }
+        return(null);
     }
 
     private void showResults(Object result, String label, boolean verbose, PrintStream out, String id)

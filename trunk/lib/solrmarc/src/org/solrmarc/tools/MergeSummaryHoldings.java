@@ -412,7 +412,7 @@ public class MergeSummaryHoldings implements MarcReader
      * @param mhldRecsFileName - the name of the file containing MARC MHLD records
      * @return void, but the bib records will be written to standard out
      */
-    public static void mergeMhldRecsIntoBibRecsAsStdOut2(String bibRecsFileName, String mhldRecsFileName)
+    public static void mergeMhldRecsIntoBibRecsAsStdOut2(String bibRecsFileName, String mhldRecsFileName, OutputStream outstream)
         throws IOException
     {
         RawRecordReader bibsRawRecRdr = new RawRecordReader(new FileInputStream(new File(bibRecsFileName)));
@@ -423,12 +423,12 @@ public class MergeSummaryHoldings implements MarcReader
                                                                mhldRecsFileName, DEFAULT_MHLD_FLDS_TO_MERGE);
         verbose = true;
         veryverbose = true;
-        MarcWriter writer = new MarcSplitStreamWriter(System.out, "ISO-8859-1", 70000, "999");
+        MarcWriter writer = new MarcSplitStreamWriter(outstream, "ISO-8859-1", 70000, "999");
         while (merger.hasNext()) 
         {
             Record bibRecWithPossChanges = merger.next();
             writer.write(bibRecWithPossChanges);
-            System.out.flush();
+            outstream.flush();
         }
     }
 

@@ -18,7 +18,6 @@ public class GetFormatMixin extends SolrIndexerMixin
     {
         Art,
         ArtReproduction,
-        Atlas,
         Book,
         BookCollection,
         BookComponentPart,
@@ -42,14 +41,15 @@ public class GetFormatMixin extends SolrIndexerMixin
         Filmstrip,
         FlashCard,
         Game,
-        Globe,
         Graphic,
         Image,
         Kit,
         LooseLeaf,
         Manuscript,
         Map,
+        MapAtlas,
         MapBound,
+        MapGlobe,
         MapManuscript,
         MapSeparate,
         MapSerial,
@@ -80,7 +80,12 @@ public class GetFormatMixin extends SolrIndexerMixin
         Toy,
         Transparency,
         Video,
-        Website
+        VisualKit,
+        Website;
+        @Override public String toString()
+        {
+            return "ContentType." + name();
+        }
     }
 
     private enum MediaType
@@ -104,9 +109,13 @@ public class GetFormatMixin extends SolrIndexerMixin
         ComputerTapeReel,
         Drawing,
         Electronic,
+        Electronic245,
         ElectronicDirect,
+        FilmCartridge, 
         FilmCassette,
         FilmOther,
+        FilmRoll, 
+        FilmReel, 
         Filmslip,
         Filmstrip,
         FilmstripCartridge,
@@ -174,6 +183,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         TactileMoon,
         TactileNoWritingSystem,
         TactileOther,
+        TechnicalDrawing,
         TextOther,
         Transparency,
         Video8mm,
@@ -197,18 +207,47 @@ public class GetFormatMixin extends SolrIndexerMixin
         VideoSuperVHS,
         VideoTypeC,
         VideoUMatic,
-        VideoVHS, 
+        VideoVHS;
+        @Override public String toString()
+        {
+            return "MediaType." + name();
+        }
     }
 
+    private enum FormOfItem
+    {
+        Microfilm, 
+        Microfiche, 
+        Microopaque, 
+        PrintLarge, 
+        Braille, 
+        Online, 
+        ElectronicDirect, 
+        Electronic, 
+        Print;
+        @Override public String toString()
+        {
+            return "FormOfItem." + name();
+        }
+    }
+    
     private enum CombinedType
     {
         EBook,
-        EJournal
+        EJournal;
+        @Override public String toString()
+        {
+            return "CombinedType." + name();
+        }
     }
 
     private enum ControlType
     {
-        Archive
+        Archive;
+        @Override public String toString()
+        {
+            return "ControlType." + name();
+        }
     }
     
     /**
@@ -262,7 +301,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
         // if so, and this is a book, add e-book as well
 
-        if (formats.contains("Book") && online == true)
+        if (formats.contains(ContentType.Book.toString()) && online == true)
         {
             formats = addToTop(formats, CombinedType.EBook.toString());
         }
@@ -531,12 +570,12 @@ public class GetFormatMixin extends SolrIndexerMixin
 
                     case 'd': // d - Globe
 
-                        materialType.add(ContentType.Globe.toString());
+                        materialType.add(ContentType.MapGlobe.toString());
                         break;
 
                     case 'e': // e - Atlas
 
-                        materialType.add(ContentType.Atlas.toString());
+                        materialType.add(ContentType.MapAtlas.toString());
                         break;
 
                     case 'f': // f - Separate supplement to another work
@@ -680,7 +719,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                         
                     case 'b': // b - Kit
 
-                        materialType.add(ContentType.Kit.toString());
+                        materialType.add(ContentType.VisualKit.toString());
                         break;
 
                     case 'c': // c - Art reproduction
@@ -859,7 +898,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             // general material designator in title 245|h
             if (title.getSubfield('h').getData().toLowerCase().contains("[electronic resource]"))
             {
-                form.add(MediaType.Electronic.toString());
+                form.add(MediaType.Electronic245.toString());
             }
         }
 
@@ -881,7 +920,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                     {
                         indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "Malformed 007 fixed field");
                     }
-                    continue;
+                //    continue;
                 }
             }
 
@@ -1274,7 +1313,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
                         case 'l': // l - Technical drawing
 
-                            form.add(MediaType.Drawing.toString());
+                            form.add(MediaType.TechnicalDrawing.toString());
                             break;
 
                         case 'n': // n - Chart
@@ -1328,7 +1367,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                     switch (materialSpecific) {
                         case 'c': // c - Film cartridge
 
-                            form.add(MediaType.FilmstripCartridge.toString());
+                            form.add(MediaType.FilmCartridge.toString());
                             break;
 
                         case 'f': // f - Film cassette
@@ -1338,12 +1377,12 @@ public class GetFormatMixin extends SolrIndexerMixin
 
                         case 'o': // o - Film roll
 
-                            form.add(MediaType.FilmstripRoll.toString());
+                            form.add(MediaType.FilmRoll.toString());
                             break;
 
                         case 'r': // r - Film reel
 
-                            form.add(MediaType.Filmstrip.toString());
+                            form.add(MediaType.FilmReel.toString());
                             break;
 
                         // u - Unspecified
@@ -1646,7 +1685,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             {
                 continue; // bad profile?
             }
-
+            int raw_position = position;
             // 006 follows same positions as 008, only shifted down seven spots
 
             if (tag.equals("006"))
@@ -1673,47 +1712,47 @@ public class GetFormatMixin extends SolrIndexerMixin
             {
                 case 'a': // a - Microfilm
 
-                    form.add(MediaType.Microfilm.toString());
+                    form.add(FormOfItem.Microfilm.toString());
                     break;
 
                 case 'b': // b - Microfiche
 
-                    form.add(MediaType.Microfiche.toString());
+                    form.add(FormOfItem.Microfiche.toString());
                     break;
 
                 case 'c': // c - Microopaque
 
-                    form.add(MediaType.Microopaque.toString());
+                    form.add(FormOfItem.Microopaque.toString());
                     break;
 
                 case 'd': // d - Large print
 
-                    form.add(MediaType.PrintLarge.toString());
+                    form.add(FormOfItem.PrintLarge.toString());
                     break;
 
                 case 'f': // f - Braille
 
-                    form.add(MediaType.Braille.toString());
+                    form.add(FormOfItem.Braille.toString());
                     break;
 
                 case 'o': // o - Online
 
-                    form.add(MediaType.Online.toString());
+                    form.add(FormOfItem.Online.toString());
                     break;
 
                 case 'q': // q - Direct electronic
 
-                    form.add(MediaType.ElectronicDirect.toString());
+                    form.add(FormOfItem.ElectronicDirect.toString());
                     break;
 
                 case 's': // s - Electronic
 
-                    form.add(MediaType.Electronic.toString());
+                    form.add(FormOfItem.Electronic.toString());
                     break;
 
                 case 'r': // r - Regular print reproduction
 
-                    form.add(MediaType.Print.toString());
+                    form.add(FormOfItem.Print.toString());
                     break;
             }
         }

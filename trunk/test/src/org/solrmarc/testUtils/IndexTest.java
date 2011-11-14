@@ -2,6 +2,11 @@ package org.solrmarc.testUtils;
 
 import static org.junit.Assert.*;
 import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.MethodRule;
+import org.junit.rules.TestWatchman;
+import org.junit.runners.model.FrameworkMethod;
 import org.marc4j.marc.Record;
 
 import java.io.*;
@@ -19,6 +24,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.solrmarc.marc.MarcImporter;
 import org.solrmarc.solr.*;
+import org.solrmarc.tools.CommandLineUtilTests;
 import org.solrmarc.tools.Utils;
 import org.xml.sax.SAXException;
 
@@ -30,7 +36,14 @@ public abstract class IndexTest {
 //    protected Map<String,String> allOrigProps;
 //    protected Map<String,String> backupProps;
 //    protected Map<String,String> addnlProps;
-
+	protected String curTestName;
+	protected TestResult curTestResult;
+	enum TestResult {
+	    Unknown,
+	    Successful,
+	    Failed
+	};
+	
 	protected static String docIDfname = "id";
 
     static Logger logger = Logger.getLogger(MarcImporter.class.getName());
@@ -75,7 +88,9 @@ public abstract class IndexTest {
 // //           logger.info("Calling Delete Dir Contents");
 // //           deleteDirContents(solrDataDir);
 //        }
+        
         // index a small set of records (actually one record)
+        deleteAllRecordsFromSolrIndex(configPropFilename, solrPath, solrDataDir);
         ByteArrayOutputStream out1 = new ByteArrayOutputStream();
         ByteArrayOutputStream err1 = new ByteArrayOutputStream();
         Map<String,String> addnlProps = new LinkedHashMap<String,String>();
@@ -118,19 +133,10 @@ public abstract class IndexTest {
 //        searcherProxy = new SolrSearcherProxy(solrCoreProxy);
 	}
 	
-//	private void deleteAllRecordsFromSolrIndex(String configPropFilename) throws IOException
-//    {
-//        if (configPropFilename != null)
-//        {
-//            importer = new MarcImporter(new String[]{configPropFilename, "NONE"});
-//        }
-//        else 
-//        {
-//            importer = new MarcImporter(new String[]{"NONE"});
-//        }
-//
-//        importer = null;
-//    }
+	protected void deleteAllRecordsFromSolrIndex(String configPropFilename, String solrPath, String solrDataDir) 
+    {
+	    CommandLineUtilTests.deleteAllRecords(configPropFilename, solrPath, solrDataDir);
+	}
 //
 //    protected SolrSearcherProxy getSearcherProxy()
 //	{
@@ -140,6 +146,23 @@ public abstract class IndexTest {
 //	    }
 //	    return(searcherProxy);
 //	}
+	
+	@Rule 
+	public MethodRule watchman = new TestWatchman() 
+	{
+        @Override
+        public void failed(Throwable e, FrameworkMethod method) 
+        {
+            System.out.println("Test  "+method.getName() + " failed with " + e.getClass().getSimpleName()+ " "+ e.getMessage());
+        }
+
+        @Override
+        public void succeeded(FrameworkMethod method) 
+        {
+            System.out.println("Test  "+method.getName() + " successful");
+        }
+    };
+	
 		
 	/**
 	 * ensure IndexSearcher and SolrCore are reset for next test
@@ -147,15 +170,23 @@ public abstract class IndexTest {
 	@After
 	public void tearDown()
 	{
-	    // avoid "already closed" exception
-	    logger.info("Calling teardown to close importer");
-        if (solrProxy != null)
-        {
-            logger.info("Closing solr");
-            solrProxy.close();
-            solrProxy = null;
-        }
-	}
+//	    if (!curTestName.equals("UnnamedTest") && curTestResult != TestResult.Unknown)
+//	    {
+//	        System.out.println("Test "+curTestName+" "+ curTestResult.toString());
+//	    }
+//	    // avoid "already closed" exception
+//	    logger.info("Calling teardown to close importer");
+//        if (solrProxy != null)
+//        {
+//            logger.info("Closing solr");
+//            solrProxy.close();
+//            solrProxy = null;
+//        }
+//        if (solrServer != null)
+//        {
+//            solrServer = null;
+//        }
+    }
 	
 //	/**
 //	 * The import code expects to find these system properties populated.
@@ -218,7 +249,6 @@ public abstract class IndexTest {
      * @param fldVal - field value to be found
      */
     public final void assertSingleResult(String docId, String fldName, String fldVal) 
-            throws ParserConfigurationException, SAXException, IOException 
     {
         SolrDocumentList sdl = getDocList(fldName, fldVal);
         if (sdl.size() == 1) 
@@ -271,17 +301,56 @@ public abstract class IndexTest {
      */
 	public final SolrDocumentList getDocList(String field, String value)
 	{
-	    SolrQuery query = new SolrQuery(field+":"+value);
-	    query.setQueryType("standard");
-	    query.setFacet(false);
-	    try {
-	        QueryResponse response = solrServer.query(query); 
-	        return(response.getResults());
-	    }
-	    catch (SolrServerException e)
-	    {
-	    }
-	    return(new SolrDocumentList());
+        SolrQuery query = new SolrQuery();
+        query.setQuery(field+":"+value);
+        query.setQueryType("standard");
+        return (getDocList(query));
+	}
+	
+	public final SolrDocumentList getDocList(SolrQuery query)
+	{
+        // grab them 1000 at a time
+        int retry = 5;
+        SolrDocumentList result = null;
+        query.setQueryType("standard");
+        query.setFacet(false);
+        query.setRows(1000);
+        while (retry > 0)
+        {
+            int totalHits = -1;
+            int totalProcessed = 0;
+            result = new SolrDocumentList();
+            try
+            {
+                do {
+                    query.setStart(totalProcessed);
+                    QueryResponse response = solrServer.query(query); 
+                    SolrDocumentList sdl = response.getResults();
+                    if (totalHits == -1) totalHits = (int)sdl.getNumFound();
+                    result.addAll(sdl);
+                    totalProcessed += sdl.size();
+                } while (totalProcessed < totalHits);
+                result.setNumFound(totalHits);
+                break;
+            }
+            catch (SolrServerException e)
+            {
+                retry--;
+                try
+                {
+                    //System.out.println("retrying search");
+                    Thread.sleep(1000);
+                }
+                catch (InterruptedException e1)
+                {
+                }
+            }
+        }
+        if (retry == 0)
+        {
+            System.out.println("retrying search failed");
+        }
+        return(result);
 	}
 	
 	/**
@@ -433,13 +502,16 @@ public abstract class IndexTest {
 		{
 		    SolrDocument doc = sdl.get(0);
 		    Collection<Object> fields = doc.getFieldValues(fldName);
-		    for (Object field : fields)
+		    if (fields != null)
 		    {
-		        if (field.toString().equals(fldVal))
-		        {
-		            // found field with desired value
-		            return;
-		        }
+		        for (Object field : fields)
+    		    {
+    		        if (field.toString().equals(fldVal))
+    		        {
+    		            // found field with desired value
+    		            return;
+    		        }
+    		    }
 		    }
 	        fail("Field " + fldName + " did not contain value \"" + fldVal + "\" in doc " + doc_id);
 		}
@@ -455,11 +527,14 @@ public abstract class IndexTest {
         {
             SolrDocument doc = sdl.get(0);
             Collection<Object> fields = doc.getFieldValues(fldName);
-            for (Object field : fields)
+            if (fields != null)
             {
-                if (field.toString().equals(fldVal))
+                for (Object field : fields)
                 {
-                    fail("Field " + fldName + " contained value \"" + fldVal + "\" in doc " + doc_id);
+                    if (field.toString().equals(fldVal))
+                    {
+                        fail("Field " + fldName + " contained value \"" + fldVal + "\" in doc " + doc_id);
+                    }
                 }
             }
             return;
@@ -603,14 +678,7 @@ public abstract class IndexTest {
         query.setQueryType("standard");
         query.setFacet(false);
         query.setSortField(sortfld, SolrQuery.ORDER.asc);
-        try {
-            QueryResponse response = solrServer.query(query); 
-            return(response.getResults());
-        }
-        catch (SolrServerException e)
-        {
-        }
-        return(new SolrDocumentList());
+        return(getDocList(query));
 	}
 	
 	/**
@@ -629,14 +697,7 @@ public abstract class IndexTest {
         query.setQueryType("standard");
         query.setFacet(false);
         query.setSortField(sortfld, SolrQuery.ORDER.desc);
-        try {
-            QueryResponse response = solrServer.query(query); 
-            return(response.getResults());
-        }
-        catch (SolrServerException e)
-        {
-        }
-        return(new SolrDocumentList());
+        return(getDocList(query));
 	}
 		
 	/**
@@ -774,7 +835,6 @@ public abstract class IndexTest {
     
 
 	public final void assertDocInList(SolrDocumentList docList, String doc_id, String msgPrefix) 
-			throws ParserConfigurationException, SAXException, IOException 
 	{
 		for (SolrDocument doc : docList)
 		{
