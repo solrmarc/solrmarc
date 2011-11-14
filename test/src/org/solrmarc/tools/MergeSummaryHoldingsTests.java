@@ -98,24 +98,18 @@ public class MergeSummaryHoldingsTests
             throws IOException 
     {
         // bib46, mhld235
-        System.out.println("Starting testNoMatches()");
         String bibFilePath = testDataParentPath + File.separator + "mhldMergeBibs46.mrc";
         String mhldFilePath = testDataParentPath + File.separator + "mhldMergeMhlds235.mrc";
-        System.out.println("processing testNoMatches()");
         Map<String, Record> mergedRecs = MergeSummaryHoldings.mergeMhldsIntoBibRecordsAsMap(bibFilePath, mhldFilePath);
         Set<String> mergedRecIds = mergedRecs.keySet();
-        System.out.println("mergedRecIds.size() = "+mergedRecIds.size());
         assertEquals(2, mergedRecIds.size());
-        System.out.println("processing2 testNoMatches()");
 
         // result bibs should match the bib input because there was no merge
         String id = "a4";
         RecordTestingUtils.assertEquals(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
-        System.out.println("processing2 testNoMatches()");
         id = "a6";
         RecordTestingUtils.assertEquals(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
-        System.out.println("Finishing testNoMatches()");
-
+        System.out.println("Test testNoMatches() successful");
     }
     
     /**
@@ -126,24 +120,17 @@ public class MergeSummaryHoldingsTests
             throws IOException 
     {
         // bib46, mhld235
-        System.out.println("Starting testNoOutputMessagesWhenNoMatches()");
-     //   String commandLinePathPrefix = ".." + File.separator + ".." + File.separator;
         String bibFilePath =  testDataParentPath + File.separator + "mhldMergeBibs46.mrc";
         String mhldFilePath = testDataParentPath + File.separator + "mhldMergeMhlds235.mrc";
     
         // ensure no error message was printed
         ByteArrayOutputStream sysBAOS = new ByteArrayOutputStream();
-    //    PrintStream sysMsgs = new PrintStream(sysBAOS);
-    //    System.setErr(sysMsgs);
-    //    System.setOut(sysMsgs);
     
         mergeBibAndMhldFiles(bibFilePath, mhldFilePath, sysBAOS);
     
         // ensure no error message was printed
-        assertTrue("Output messages unexpectedly written: " + sysBAOS.toString(),  sysBAOS.size() == 0);
-    //  System.setOut(System.out);
-    //  System.setErr(System.err);
-        System.out.println("Finishing testNoOutputMessagesWhenNoMatches()");
+        assertTrue("Output messages written when none were expected: " + sysBAOS.toString(),  sysBAOS.size() == 0);
+        System.out.println("Test testNoOutputMessagesWhenNoMatches() successful");
     }
 
 
@@ -156,7 +143,6 @@ public class MergeSummaryHoldingsTests
             throws IOException 
     {
         // bib346, mhld34
-        System.out.println("Starting testBothFirstRecsMatch()");
         String bibFilePath = testDataParentPath + File.separator + "mhldMergeBibs346.mrc";
         String mhldFilePath = testDataParentPath + File.separator + "mhldMergeMhlds34.mrc";
         Map<String, Record> mergedRecs = MergeSummaryHoldings.mergeMhldsIntoBibRecordsAsMap(bibFilePath, mhldFilePath);
@@ -173,7 +159,7 @@ public class MergeSummaryHoldingsTests
         // result bib 6 should not be changed
         id = "a6";
         RecordTestingUtils.assertEquals(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
-        System.out.println("Finishing testBothFirstRecsMatch()");
+        System.out.println("Test testBothFirstRecsMatch() successful");
     }
 
     /**
@@ -184,7 +170,6 @@ public class MergeSummaryHoldingsTests
             throws IOException
     {
         //bib346, mhld235
-        System.out.println("Starting testFirstBibMatchesNonFirstMhld()");
         String bibFilePath = testDataParentPath + File.separator + "mhldMergeBibs346.mrc";
         String mhldFilePath = testDataParentPath + File.separator + "mhldMergeMhlds235.mrc";
         Map<String, Record> mergedRecs = MergeSummaryHoldings.mergeMhldsIntoBibRecordsAsMap(bibFilePath, mhldFilePath);
@@ -201,7 +186,7 @@ public class MergeSummaryHoldingsTests
         RecordTestingUtils.assertEqualsIgnoreLeader(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
         id = "a6";
         RecordTestingUtils.assertEquals(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
-        System.out.println("Finishing testFirstBibMatchesNonFirstMhld()");
+        System.out.println("Test testFirstBibMatchesNonFirstMhld() successful");
     }
 
     /**
@@ -227,6 +212,7 @@ public class MergeSummaryHoldingsTests
         RecordTestingUtils.assertEqualsIgnoreLeader(ALL_MERGED_BIB_RESULTS.get(id), mergedRecs.get(id));
         id = "a4";
         RecordTestingUtils.assertEqualsIgnoreLeader(ALL_MERGED_BIB_RESULTS.get(id), mergedRecs.get(id));
+        System.out.println("Test testNonFirstBibMatchesFirstMhld() successful");
     }
 
 // last record in file tests ------------
@@ -248,9 +234,10 @@ public class MergeSummaryHoldingsTests
     
         // result bib 6 only should have the mhld fields
         String id = "a4";
-           RecordTestingUtils.assertEqualsIgnoreLeader(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
+        RecordTestingUtils.assertEqualsIgnoreLeader(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
         id = "a6";
-           RecordTestingUtils.assertEqualsIgnoreLeader(ALL_MERGED_BIB_RESULTS.get(id), mergedRecs.get(id));
+        RecordTestingUtils.assertEqualsIgnoreLeader(ALL_MERGED_BIB_RESULTS.get(id), mergedRecs.get(id));
+        System.out.println("Test testBothLastRecsMatch() successful");
     }
 
     /**
@@ -271,11 +258,12 @@ public class MergeSummaryHoldingsTests
     
         // result bibs 3 and 4 only should have the mhld fields
         String id = "a1";
-           RecordTestingUtils.assertEqualsIgnoreLeader(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
+        RecordTestingUtils.assertEqualsIgnoreLeader(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
         id = "a3";
         RecordTestingUtils.assertEqualsIgnoreLeader(ALL_MERGED_BIB_RESULTS.get(id), mergedRecs.get(id));
         id = "a4";
         RecordTestingUtils.assertEqualsIgnoreLeader(ALL_MERGED_BIB_RESULTS.get(id), mergedRecs.get(id));
+        System.out.println("Test testLastBibMatchesNonLastMhld() successful");
     }
 
     /**
@@ -296,9 +284,10 @@ public class MergeSummaryHoldingsTests
     
         // result bib 6 only should have the mhld fields
         String id = "a4";
-           RecordTestingUtils.assertEqualsIgnoreLeader(ALL_MERGED_BIB_RESULTS.get(id), mergedRecs.get(id));
+        RecordTestingUtils.assertEqualsIgnoreLeader(ALL_MERGED_BIB_RESULTS.get(id), mergedRecs.get(id));
         id = "a6";
-           RecordTestingUtils.assertEqualsIgnoreLeader(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
+        RecordTestingUtils.assertEqualsIgnoreLeader(ALL_UNMERGED_BIBS.get(id), mergedRecs.get(id));
+        System.out.println("Test testLastBibMatchesNonLastMhld() successful");
     }
 
     
@@ -330,6 +319,7 @@ public class MergeSummaryHoldingsTests
         assertEquals("Expected one 863", 2, mergedRec.getVariableFields("863").size());
         assertEquals("Expected one 866", 1, mergedRec.getVariableFields("866").size());
         //fail("Implement me");
+        System.out.println("Test testMultMHLDsWithSameID() successful");
     }
     
     /**
@@ -501,6 +491,7 @@ String mergedSummaryHoldingsOutputNoUmlaut[] = {
         CommandLineUtils.runCommandLineUtil(MERGE_MHLD_CLASS_NAME, MAIN_METHOD_NAME, mergedMarcBibRecAsInStream, resultMrcOutStream, new String[]{"-s", mhldRecFileName } );
         
         RecordTestingUtils.assertMarcRecsEqual(mergedSummaryHoldingsOutput, resultMrcOutStream);
+        System.out.println("Test origTestOfRewritingMHLDtoSameBib() successful");
     }
 
 
@@ -522,6 +513,7 @@ String mergedSummaryHoldingsOutputNoUmlaut[] = {
         
         Record resultRec = mergedRecs.get(expId);
         RecordTestingUtils.assertEqualsIgnoreLeader(mergedSummaryHoldingsOutputNoUmlaut, resultRec);        
+        System.out.println("Test testGettingOutputAsMapOfRecords() successful");
     }
 
 
@@ -537,11 +529,11 @@ String mergedSummaryHoldingsOutputNoUmlaut[] = {
     
         ByteArrayOutputStream sysBAOS = new ByteArrayOutputStream();
         PrintStream sysMsgs = new PrintStream(sysBAOS);
-        System.setOut(sysMsgs);
 
-        MergeSummaryHoldings.mergeMhldRecsIntoBibRecsAsStdOut2(bibRecFileName, mhldRecFileName);
+        MergeSummaryHoldings.mergeMhldRecsIntoBibRecsAsStdOut2(bibRecFileName, mhldRecFileName, sysMsgs);
     
         RecordTestingUtils.assertMarcRecsEqual(mergedSummaryHoldingsOutput, sysBAOS);
+        System.out.println("Test testMergeToStdOut2() successful");
     }
 
 

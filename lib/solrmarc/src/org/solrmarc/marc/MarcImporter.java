@@ -75,8 +75,17 @@ public class MarcImporter extends MarcHandler
      */
     public MarcImporter()
     {
-        showConfig = true;
-        showInputFile = true;
+        String solrmarcLogLevel = Utils.getProperty(configProps, "solrmarc.log.level");
+        if (solrmarcLogLevel != null && solrmarcLogLevel.equals("OFF"))     
+        {
+            showConfig = false;
+            showInputFile = false;
+        }
+        else 
+        {    
+            showConfig = true;
+            showInputFile = true;
+        }
     }
         
     /**
@@ -129,12 +138,12 @@ public class MarcImporter extends MarcHandler
         Level solrmarcLevel = Level.INFO;
         if (solrmarcLogLevel != null)
         {
-            if (solrLogLevel.equals("OFF"))     solrmarcLevel = Level.OFF;
-            if (solrLogLevel.equals("FATAL"))   solrmarcLevel = Level.FATAL;
-            if (solrLogLevel.equals("WARN"))    solrmarcLevel = Level.WARN;
-            if (solrLogLevel.equals("INFO"))    solrmarcLevel = Level.INFO;
-            if (solrLogLevel.equals("DEBUG"))   solrmarcLevel = Level.DEBUG;
-            if (solrLogLevel.equals("ALL"))     solrmarcLevel = Level.ALL;
+            if (solrmarcLogLevel.equals("OFF"))     solrmarcLevel = Level.OFF;
+            if (solrmarcLogLevel.equals("FATAL"))   solrmarcLevel = Level.FATAL;
+            if (solrmarcLogLevel.equals("WARN"))    solrmarcLevel = Level.WARN;
+            if (solrmarcLogLevel.equals("INFO"))    solrmarcLevel = Level.INFO;
+            if (solrmarcLogLevel.equals("DEBUG"))   solrmarcLevel = Level.DEBUG;
+            if (solrmarcLogLevel.equals("ALL"))     solrmarcLevel = Level.ALL;
             logger.setLevel(solrmarcLevel);
         }
         

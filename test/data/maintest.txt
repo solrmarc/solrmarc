@@ -147,15 +147,15 @@
 
 # Test 53 
 #test using mixin custom indexing method
-+, 009888737.mrc, 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes', EBook|Book|ComputerFile|Online
++, 009888737.mrc, 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes', CombinedType.EBook|ContentType.Book|ContentType.ComputerFile|MediaType.Online
 
 # Test 54 
 #test using mixin custom indexing method
-+, formatRecs.mrc(u3514547), 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes', Video|VideoDVD
++, formatRecs.mrc(u3514547), 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes', ContentType.Video|MediaType.VideoDVD
 
 # Test 55 
 #test using mixin custom indexing method
-+, formatRecs.mrc(u3514547), 'custom(org.solrmarc.index.GetFormatMixin), getPrimaryContentTypePlusOnline', Video
++, formatRecs.mrc(u3514547), 'custom(org.solrmarc.index.GetFormatMixin), getPrimaryContentTypePlusOnline', ContentType.Video
 
 # Test 56 
 #test using mixin custom indexing method with translation map

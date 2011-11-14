@@ -27,6 +27,7 @@ public class RemoteServerTest
     static String testDataParentPath;
     static String testConfigFile;
     static String solrPath;
+    static String solrDataDir;
 
     /**
      * Start a Jetty driven solr server running in a separate JVM at port jetty.test.port
@@ -39,18 +40,21 @@ public class RemoteServerTest
         testDataParentPath = System.getProperty("test.data.path");
         testConfigFile = System.getProperty("test.config.file");
         solrPath = System.getProperty("solr.path");
+        solrDataDir = System.getProperty("solr.data.dir");
         jettyTestPortStr = System.getProperty("jetty.test.port");
         // Specify port 0 to select any available port 
         if (jettyTestPortStr == null)
             jettyTestPortStr = "0";
         if (solrPath == null)
             fail("property solr.path must be defined for the tests to run");
+        if (solrDataDir == null)
+            fail("property solr.data.dir must be defined for the tests to run");
         if (testDataParentPath == null)
             fail("property test.data.path must be defined for the tests to run");
         if (testConfigFile == null)
             fail("property test.config.file be defined for this test to run");
-        
-        solrJettyProcess = new SolrJettyProcess(solrPath, testDataParentPath, testConfigFile, jettyTestPortStr);
+
+        solrJettyProcess = new SolrJettyProcess(solrPath, solrDataDir, testDataParentPath, testConfigFile, jettyTestPortStr);
         boolean serverIsUp = false;
         try
         {
@@ -289,16 +293,17 @@ public class RemoteServerTest
         results = getRawFieldByID(urlStr, "u3", "marc_display");
         assertTrueMsg("Record added using remote non-binary request handler does contain \\u001e", !results.contains("\\u001e"));
         assertTrueMsg("Record added using remote non-binary request handler doesn't contain #30;", results.contains("#30;"));
-        
+
         out1.reset();
         err1.reset();
         // Add several records using local binary solrj 
         addnlProps1.put("solr.path", new File(solrPath).getAbsolutePath());
         addnlProps1.put("solrmarc.use_binary_request_handler", "true");
         addnlProps1.put("solrmarc.use_streaming_proxy", "false");
+        addnlProps1.put("solr.data.dir", solrDataDir);
         status = CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
         assertTrueMsg("MarcImporter run returned status="+status, status==0);
-        
+
         results = getRawFieldByID(urlStr, "u3", "marc_display");
         assertTrueMsg("Record added using local binary request handler doesn't contain \\u001e", results.contains("\\u001e"));
         assertTrueMsg("Record added using local binary request handler does contain #30;", !results.contains("#30;"));

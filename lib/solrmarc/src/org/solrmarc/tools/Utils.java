@@ -95,7 +95,7 @@ public final class Utils {
         {
             return(prop);
         }
-        if ((prop = props.getProperty(propname)) != null)
+        if (props != null && (prop = props.getProperty(propname)) != null)
         {
             return(prop);
         }
@@ -139,7 +139,14 @@ public final class Utils {
         Properties props = new Properties();
         try
         {
-            props.load(in);
+            if (propertyFileName.endsWith(".xml") || propertyFileName.endsWith(".XML"))
+            {
+                props.loadFromXML(in);
+            }
+            else
+            {
+                props.load(in);
+            }
             in.close();
             if (filenameProperty != null && inputStreamSource[0] != null)
             {
@@ -169,7 +176,7 @@ public final class Utils {
         {
         InputStream in = null;
         // look for properties file in paths
-        String verboseStr = System.getProperty("marc.verbose");
+        String verboseStr = System.getProperty("marc.test.verbose");
         boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
         String lookedIn = "";
         if (propertyPaths != null)
