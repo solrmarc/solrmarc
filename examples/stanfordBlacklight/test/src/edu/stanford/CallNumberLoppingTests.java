@@ -44,10 +44,14 @@ public class CallNumberLoppingTests extends AbstractStanfordBlacklightTest {
 		String volSort = CallNumUtils.getVolumeSortCallnum(callnum, lopped, isSerial);
 
 		Collection<Object> values = getDocument(recId).getFieldValues(fldName);
-		for (Object val : values) {
-			if (val.toString().startsWith("36105049317907")) {
-				assertTrue("volSort doesn't reverse vol number for serial", !volSort.contains("V.2"));
-				assertTrue("volSort doesn't reverse vol number for serial", volSort.contains("4~ZZZZZX"));
+		for (Object val : values) 
+		{
+			if (val.toString().startsWith("36105049317907")) 
+			{
+				String valParts[] = val.toString().split("-[|]- ");
+			    assertTrue("item_display (volSort) doesn't reverse vol number for serial", !valParts[7].contains("V.2"));
+                assertTrue("item_display (volSort) doesn't reverse vol number for serial", valParts[7].contains("4}ZZZZZX"));
+                assertTrue("item_display (volSort) doesn't reverse vol number for serial", valParts[7].equals(volSort));
 			}
 		}
 	}

@@ -11,23 +11,23 @@ import org.xml.sax.SAXException;
 
 /**
  * junit4 tests for Stanford University access_facet field
- * @author Naomi Dushay
+ * author Naomi Dushay
  */
 public class SortTests extends AbstractStanfordBlacklightTest {
 	
 	private final String testDataFname = "sortTests.mrc";
 
-@Before
+//Before
 	public final void setup() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		createIxInitVars(testDataFname);
+//		createIxInitVars(testDataFname);
 	}
 
 	/**
 	 * Spaces should be significant in sorting
 	 */
-@Test
+//Test
 	public final void testSpaceSignificance() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -38,7 +38,7 @@ public class SortTests extends AbstractStanfordBlacklightTest {
 	 * Case / Capitalization should have no effect on sorting
 	 *   (not just latin chars???)
 	 */
-@Test
+//Test
 	public final void testCaseSignificance() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -49,7 +49,7 @@ public class SortTests extends AbstractStanfordBlacklightTest {
 	 * Diacritics should have no effect on sorting
 	 *   (not just latin chars, test first chars and subsequent chars)
 	 */
-@Test
+//Test
 	public final void testDiacriticSorting() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -60,7 +60,7 @@ public class SortTests extends AbstractStanfordBlacklightTest {
 	 * Non-filing indicators should be ignored for sorting.
 	 *  TODO: maybe someday autodetect non-filing chars that aren't accommodated in the marc record
 	 */
-@Test
+//Test
 	public final void testNonFiling() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -70,7 +70,7 @@ public class SortTests extends AbstractStanfordBlacklightTest {
 	/**
 	 * Combination of non-filing characters and diacritics in first character should sort properly
 	 */
-@Test
+//Test
 	public final void testNonFilingAndDiacriticsCombined() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -80,7 +80,7 @@ public class SortTests extends AbstractStanfordBlacklightTest {
 	/**
 	 * Punctuation should not affect sorting
 	 */
-@Test
+//Test
 	public final void testPunctuation() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -92,7 +92,7 @@ public class SortTests extends AbstractStanfordBlacklightTest {
 TODO:  as first character only, or as any character?
 TODO:  transliteration vs. hebrew script ... 
 	 */
-@Test
+//Test
 	public final void testHebrewAlifAyn() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -103,7 +103,7 @@ TODO:  transliteration vs. hebrew script ...
 	 * Znaks, hard and soft, should be ignored for sorting
 TODO: More information needed about znaks: is this a character?  a diacritic?  Should any occurrence be ignored?
 	 */
-@Test
+//Test
 	public final void testZnaks() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -114,7 +114,7 @@ TODO: More information needed about znaks: is this a character?  a diacritic?  S
 	 * Chinese - traditional and simplified characters should be sorted together
 TODO: More details needed about Chinese scripts
 	 */
-@Test
+//Test
 	public final void testChinese() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -125,7 +125,7 @@ TODO: More details needed about Chinese scripts
 	 * Japanese - old and new characters should sort together?
 TODO: More details needed about Japanese scripts
 	 */
-@Test
+//Test
 	public final void testJapanese() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -136,7 +136,7 @@ TODO: More details needed about Japanese scripts
 	 * Korean - something about spaces vs. no space (?)
 TODO: More details needed about Korean spaces
 	 */
-@Test
+//Test
 	public final void testKorean() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -147,7 +147,7 @@ TODO: More details needed about Korean spaces
 	 * Polish L should sort properly
 TODO: More details needed about Polish L
 	 */
-@Test
+//Test
 	public final void testPolishL() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -157,7 +157,7 @@ TODO: More details needed about Polish L
 	/**
 	 * Subscripts should be sorted properly
 	 */
-@Test
+//Test
 	public final void testSubscripts() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -169,7 +169,7 @@ TODO: More details needed about Polish L
 	/**
 	 * Oe and Ae ligatures should be sorted like oe and ae
 	 */
-@Test
+//Test
 	public final void testAeOeLigature() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{

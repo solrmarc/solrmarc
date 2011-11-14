@@ -112,11 +112,14 @@ public abstract class AbstractStanfordBlacklightTest extends IndexTest {
 	 *  necessary variables
 	 */
 	public void createIxInitVars(String testDataFname) 
-		throws ParserConfigurationException, IOException, SAXException 
 	{
 		docIDfname = "id";
 
-		String solrPath = System.getProperty("solr.path");
+        String solrPath = System.getProperty("solr.path");
+        if (solrPath == null)
+            fail("property solr.path must be defined for the tests to run");
+        String solrDataDir = System.getProperty("solr.data.dir");
+        
         if (solrPath == null)
             fail("property solr.path must be defined for the tests to run");
 
@@ -128,7 +131,7 @@ public abstract class AbstractStanfordBlacklightTest extends IndexTest {
         if (testConfigFname == null)
             fail("property test.config.file must be defined for the tests to run");
 
-        createIxInitVars(testConfigFname, solrPath, null, testDataParentPath, testDataFname);
+        createIxInitVars(testConfigFname, solrPath, solrDataDir, testDataParentPath, testDataFname);
 
 //		createNewTestIndex(testDataParentPath + File.separator + testDataFname, configPropFile, solrPath, solrDataDir, solrmarcPath, siteSpecificPath);
 //		solrCore = getSolrCore(solrPath, solrDataDir);

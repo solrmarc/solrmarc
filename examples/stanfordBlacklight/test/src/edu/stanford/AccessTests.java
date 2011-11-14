@@ -18,19 +18,17 @@ import edu.stanford.StanfordIndexer.Access;
  */
 public class AccessTests extends AbstractStanfordBlacklightTest {
 	
-	private final String testDataFname = "onlineFormat.mrc";
 	private String fldName = "access_facet";
 
 @Before
 	public final void setup() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		createIxInitVars(testDataFname);
+		//createIxInitVars(testDataFname);
 	}
 
 @Test
 	public final void testFldProperties() 
-		throws ParserConfigurationException, IOException, SAXException
 	{
 //		assertFacetFieldProperties(fldName);
 //		assertFieldMultiValued(fldName);
@@ -45,9 +43,9 @@ public class AccessTests extends AbstractStanfordBlacklightTest {
 	 */
 @Test
 	public final void testAccessFromFulltextURL() 
-			throws IOException, ParserConfigurationException, SAXException 
 	{
-	    String fldVal =  Access.ONLINE.toString();
+        createIxInitVars("onlineFormat.mrc");
+        String fldVal =  Access.ONLINE.toString();
 		
 		Set<String> docIds = new HashSet<String>();
 		// 
@@ -71,7 +69,6 @@ public class AccessTests extends AbstractStanfordBlacklightTest {
 	 */
 @Test
 	public final void testAccessFromSfxURL() 
-			throws IOException, ParserConfigurationException, SAXException 
 	{
         createIxInitVars("formatTests.mrc");
 	
@@ -88,9 +85,9 @@ public class AccessTests extends AbstractStanfordBlacklightTest {
 	 */
 @Test
 	public final void testGSBRequestUrl() 
-			throws IOException, ParserConfigurationException, SAXException 
 	{
-		String fldVal =  "\"" + Access.AT_LIBRARY.toString() + "\"";
+        createIxInitVars("onlineFormat.mrc");
+        String fldVal =  "\"" + Access.AT_LIBRARY.toString() + "\"";
 	
 		Set<String> docIds = new HashSet<String>();
 		docIds.add("123http"); 
@@ -112,7 +109,6 @@ public class AccessTests extends AbstractStanfordBlacklightTest {
 	 */
 @Test
 	public final void testAccessFrom999() 
-			throws ParserConfigurationException, IOException, SAXException
 	{
 		createIxInitVars("buildingTests.mrc");
 
@@ -143,7 +139,7 @@ public class AccessTests extends AbstractStanfordBlacklightTest {
 	 	assertDocInList(docList, "7651581", msg);  
 	 	assertDocInList(docList, "2214009", msg);  
 	 	// SAL-NEWARK
-	 	assertDocInList(docList, "804724", msg); 
+	 	assertDocInList(docList, "804724", msg);
 	}
 
 }

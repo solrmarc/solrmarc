@@ -21,17 +21,17 @@ public class DiacriticCedillaTildeTests extends AbstractStanfordBlacklightTest {
 	// contains the diacritics in our test data
 	private String fldName = "author_person_search";
 	
-@Before
+//@Before
 	public final void initVars() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
-		createIxInitVars("diacriticTests.mrc");
+//		createIxInitVars("diacriticTests.mrc");
 	}
 
 	/**
 	 * Test searching of text with cedilla and tilde present
 	 */
-	@Test
+//Test
 	public final void testExact() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -41,7 +41,7 @@ public class DiacriticCedillaTildeTests extends AbstractStanfordBlacklightTest {
 	/**
 	 * Test searching of text in plain text
 	 */
-@Test
+//Test
 	public final void testPlainText() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -51,7 +51,7 @@ public class DiacriticCedillaTildeTests extends AbstractStanfordBlacklightTest {
 	/**
 	 * Test searching of text with tilde present, cedilla not
 	 */
-	@Test
+//Test
 	public final void testCedillaPlainTildeExact() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -61,7 +61,7 @@ public class DiacriticCedillaTildeTests extends AbstractStanfordBlacklightTest {
 	/**
 	 * Test searching of chars with cedilla present, tilde not
 	 */
-@Test
+//Test
 	public final void testCedillaExactTildePlain() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
@@ -71,7 +71,7 @@ public class DiacriticCedillaTildeTests extends AbstractStanfordBlacklightTest {
 	/**
 	 * Test searching of text with weird chars as they appear in oxygen
 	 */
-//@Test
+//Test
 	public final void testWeirdLooking() 
 			throws ParserConfigurationException, IOException, SAXException 
 	{
