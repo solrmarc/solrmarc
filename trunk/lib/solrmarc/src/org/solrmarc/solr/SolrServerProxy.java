@@ -1,6 +1,8 @@
 package org.solrmarc.solr;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,9 +15,17 @@ import org.apache.solr.common.SolrInputField;
 public class SolrServerProxy implements SolrProxy
 {
     SolrServer solrserver;
+    Object coreContainerObject = null;
+    
     public SolrServerProxy(SolrServer solrserver)
     {
         this.solrserver = solrserver;
+    }
+    
+    public SolrServerProxy(SolrServer solrserver, Object coreContainerObject)
+    {
+        this.solrserver = solrserver;
+        this.coreContainerObject = coreContainerObject;
     }
     
     public String addDoc(Map<String, Object> fieldsMap, boolean verbose, boolean addDocToIndex) throws IOException
@@ -59,7 +69,39 @@ public class SolrServerProxy implements SolrProxy
 
     public void close()
     {
-        // do nothing
+        if (coreContainerObject != null)
+        {
+            try
+            {
+                Class<?> coreContainerClass = Class.forName("org.apache.solr.core.CoreContainer");
+                Method shutdownMethod = coreContainerClass.getMethod("shutdown", (Class[])null);
+                shutdownMethod.invoke(coreContainerObject, (Object[])null);
+            }
+            catch (ClassNotFoundException e)
+            {
+                //e.printStackTrace();
+            }
+            catch (SecurityException e)
+            {
+                //e.printStackTrace();
+            }
+            catch (NoSuchMethodException e)
+            {
+                //e.printStackTrace();
+            }
+            catch (IllegalArgumentException e)
+            {
+                //e.printStackTrace();
+            }
+            catch (IllegalAccessException e)
+            {
+                //e.printStackTrace();
+            }
+            catch (InvocationTargetException e)
+            {
+                //e.printStackTrace();
+            }
+        }
     }
 
     public SolrServer getSolrServer()
