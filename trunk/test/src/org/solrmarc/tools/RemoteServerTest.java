@@ -23,6 +23,7 @@ import org.solrmarc.testUtils.SolrJettyProcess;
 public class RemoteServerTest
 {
     static SolrJettyProcess solrJettyProcess = null; 
+    static String jettyHomeDir; 
     static int jettyProcessPort; 
     static String testDataParentPath;
     static String testConfigFile;
@@ -41,6 +42,7 @@ public class RemoteServerTest
         testConfigFile = System.getProperty("test.config.file");
         solrPath = System.getProperty("solr.path");
         solrDataDir = System.getProperty("solr.data.dir");
+        jettyHomeDir = System.getProperty("jetty.home");
         jettyTestPortStr = System.getProperty("jetty.test.port");
         // Specify port 0 to select any available port 
         if (jettyTestPortStr == null)
@@ -53,8 +55,19 @@ public class RemoteServerTest
             fail("property test.data.path must be defined for the tests to run");
         if (testConfigFile == null)
             fail("property test.config.file be defined for this test to run");
+        if (jettyHomeDir == null)
+        {
+            try
+            {
+                jettyHomeDir = new File(testDataParentPath, "../jetty").getCanonicalPath();
+            }
+            catch (IOException e)
+            {
+                jettyHomeDir = new File(testDataParentPath, "../jetty").getAbsolutePath();
+            }
+        }
 
-        solrJettyProcess = new SolrJettyProcess(solrPath, solrDataDir, testDataParentPath, testConfigFile, jettyTestPortStr);
+        solrJettyProcess = new SolrJettyProcess(solrPath, solrDataDir, testDataParentPath, testConfigFile, jettyHomeDir, jettyTestPortStr);
         boolean serverIsUp = false;
         try
         {
@@ -118,16 +131,16 @@ public class RemoteServerTest
         addnlProps1.put("solrmarc.use_solr_server_proxy", "true");
         addnlProps1.put("solrmarc.use_streaming_proxy", "true");
         CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
-        if (out1.toByteArray().length > 0) System.out.println("Importer results: "+ new String (out1.toByteArray()));
-        if (err1.toByteArray().length > 0) System.out.println("Importer results: "+ new String (err1.toByteArray()));
+//        if (out1.toByteArray().length > 0) System.out.println("Importer results: "+ new String (out1.toByteArray()));
+//        if (err1.toByteArray().length > 0) System.out.println("Importer results: "+ new String (err1.toByteArray()));
         
         ByteArrayOutputStream out1a = new ByteArrayOutputStream();
         ByteArrayOutputStream err1a = new ByteArrayOutputStream();
         addnlProps1.put("solrmarc.use_binary_request_handler", "false");
         addnlProps1.put("solrmarc.use_streaming_proxy", "false");
         CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1a, err1a, new String[]{testConfigFile, testDataParentPath+"/u2103.mrc"  }, addnlProps1);
-        if (out1a.toByteArray().length > 0) System.out.println("Importer results: "+ new String (out1a.toByteArray()));
-        if (err1a.toByteArray().length > 0) System.out.println("Importer results: "+ new String (err1a.toByteArray()));
+//        if (out1a.toByteArray().length > 0) System.out.println("Importer results: "+ new String (out1a.toByteArray()));
+//        if (err1a.toByteArray().length > 0) System.out.println("Importer results: "+ new String (err1a.toByteArray()));
 
         // retrieve record u3 from the index
         ByteArrayOutputStream out2 = new ByteArrayOutputStream();
