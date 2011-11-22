@@ -312,7 +312,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                 if (part.matches(".*[Dd]irector[^A-Z]*") )
                 {
                     if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotography|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical) [Dd]irector.*" ) ||
-                            part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de la fotografia)).*"))
+                            part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotografia)).*"))
                         continue;
                     part = part.replaceAll(" *[\\[]", ", ");
                     part = part.replaceAll("[\\]]", "");
@@ -391,9 +391,12 @@ public class VideoInfoMixin extends SolrIndexerMixin
                     }
                 }
                 //  Pattern matching when the subpart is of the form:   Direction Some Name 
-                else if (part.matches(".*direction.*"))
+                else if (part.matches(".*[Dd]irection.*"))
                 {
-                    part = part.replaceFirst(".*direction[^A-Z]*", "direction: ");
+                    if (part.matches(".*([Aa]rt|[Mm]usic(al)?|[Ss]tage|[Pp]roject|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical) [Dd]irectoion.*" ))
+                        continue;
+
+                    part = part.replaceFirst(".*[Dd]irection[^A-Z]*", "direction: ");
                     part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "* $1");
                     part = part.replaceAll(" (and|with|et) ", " & ");
                     part = part.replaceAll("[\\]]", "");
