@@ -32,7 +32,10 @@ public class TestDirectors
         int numLines = 0;
         int numLinesPerfect = 0;
         int numLinesImperfect = 0;
+        Set<String> extraNames = new LinkedHashSet<String>();
+        Set<String> missedNames = new LinkedHashSet<String>();
         
+        boolean verbose = Boolean.getBoolean(System.getProperty("solrmarc.test.verbose", "false"));
         BufferedReader in = null;
         try
         {
@@ -48,25 +51,27 @@ public class TestDirectors
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        PrintWriter out1 = null;
-        PrintWriter out2 = null;
-        try
-        {
-            out1 = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File("video_director_test_out1.txt")),"UTF8"));
-            out2 = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File("video_director_test_out2.txt")),"UTF8"));
-        }
-        catch (UnsupportedEncodingException e1)
-        {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        catch (FileNotFoundException e1)
-        {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
+//        PrintWriter out1 = null;
+//        PrintWriter out2 = null;
+//        if (verbose)
+//        {
+//            try
+//            {
+//                out1 = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File("video_director_test_out1.txt")),"UTF8"));
+//                out2 = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File("video_director_test_out2.txt")),"UTF8"));
+//            }
+//            catch (UnsupportedEncodingException e1)
+//            {
+//                // TODO Auto-generated catch block
+//                e1.printStackTrace();
+//            }
+//            catch (FileNotFoundException e1)
+//            {
+//                // TODO Auto-generated catch block
+//                e1.printStackTrace();
+//            }
+//        }
         String line;
-        String prevline = "";
         try {
             while ((line = in.readLine()) != null)
             {
@@ -85,7 +90,7 @@ public class TestDirectors
                 if (answerStr.startsWith("~"))
                 {
                     expectToFix = false;
-                    answerStr = lineparts[0].substring(1);
+                    answerStr = answerStr.substring(1);
                 }
                 String answers[] = answerStr.split("[|]");
                 Set<String> directors = VideoInfoMixin.getVideoDirectorsFromTextField(lineparts[1]);
@@ -119,6 +124,7 @@ public class TestDirectors
                     {
                         linePerfect = false;
                         numberExtra++;
+                        extraNames.add(director);
                     }
                 }
                 for (String answer : answerSet)
@@ -127,39 +133,54 @@ public class TestDirectors
                     {
                         numberNotFound++;
                         linePerfect = false;
+                        missedNames.add(answer);
                     }
                 }
                 if (linePerfect) 
                 {
                     numLinesPerfect++;
-                    out1.println(line);
+//                    if (out1 != null)  out1.println(line);
                 }
                 else
                 {
                     numLinesImperfect++;
-                    out2.println((expectPerfection?"!":"")+line);
+//                    if (out2 != null)  out2.println((expectPerfection?"!":"")+line);
                 }
                 if (expectPerfection && !linePerfect)
                 {
                     System.err.println("Failure on expected perfection"+ line);
+                }
+                else if (!expectPerfection && linePerfect)
+                {
+                    System.err.println("Success on expected failure"+ line);
                 }
             }
         }
         catch (IOException e)
         {
         }
-        out1.flush();
-        out1.close();
-        out2.flush();
-        out2.close();
+//        if (out1 != null) { out1.flush();  out1.close();}
+//        if (out2 != null) { out2.flush();  out2.close();}
         System.out.println("Out of a total of "+numLines+ " Marc record fields, containing an expected "+ numberToFind+ " directors");
         System.out.println("                  "+numLinesPerfect+ " had the correct answer ");
         System.out.println(numberFoundCorrect+" directors, were correctly extracted");
         System.out.println(numberNotFound +" directors, were not found");
+        showNameList(missedNames);
         System.out.println(numberExtra +" extra additional directors, were found");
+        showNameList(extraNames);
         System.out.println(numberIffy +" may have been due to data errors");
         
         
     }
-
+    
+    static void showNameList(Set<String> list)
+    {
+        int i = 0;
+        for (String name : list)
+        {
+            System.out.print("  "+name+", ");
+            if (++i % 5 == 0) System.out.println();
+        }
+        System.out.println();
+    }
 }
