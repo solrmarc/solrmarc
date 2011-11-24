@@ -292,36 +292,82 @@ public class VideoInfoMixin extends SolrIndexerMixin
         // Now split the string into subparts separated by ;  (or -- or  : )
         String semiparts[] = responsibility.split(";|--| : ");
         boolean respHasDirected = responsibility.matches(".*[Dd]irect(ed|or|ion).*");
-        for (String part : semiparts)
+        for (String part0 : semiparts)
         {
+            String part = part0;
             part = part.trim();
             if (part.matches(".*[Dd]irect(ed|or|ion).*") || (!respHasDirected && part.matches(".*a film by.*")))
             {
                 String trimmed;
             //    part = part.replaceAll("\\[sic[.][]]", "");
-                String part1 = part.replaceAll("[ ]?[(][^)]*[)]", "");
+                // Try to split apart "brothers" ie.  the Hughes Brothers  becomes  Albert Hughes and Allen Hughes
+                if (part.matches(".*(the )?[A-Z][^ ]* [Bb]rothers.*"))
+                {
+                    String name = part.replaceFirst(".*(the )?([A-Z][^ ]*) [Bb]rothers.*", "$2");
+                    if (part.matches(".*(the )?[A-Z][^ ]* [Bb]rothers(, | \\()[A-Z][a-z]* and [A-Z][a-z]* "+name+".*"))
+                    {
+                        part = part.replaceFirst("((the )?([A-Z][^ ]*) [Bb]rothers)(, | \\()([A-Z][a-z]*) and ([A-Z][a-z]*) "+name+"\\)?", "$5 $3 and $6 $3");
+                    }
+                    else if (part.matches(".*(the )?[A-Z][^ ]* [Bb]rothers(, | \\()[A-Z][a-z]* and [A-Z][a-z]*.*"))
+                    {
+                        part = part.replaceFirst("((the )?([A-Z][^ ]*) [Bb]rothers)(, | \\()([A-Z][a-z]*) and ([A-Z][a-z]*)\\)?", "$5 $3 and $6 $3");
+                    }
+                    else 
+                    {
+                        for (String otherPart : semiparts)
+                        {
+                            if (otherPart.equals(part0)) continue;
+                            if (otherPart.matches(".*[A-Z][^ ]* "+name+".*[A-Z][^ ]* "+name+".*"))
+                            {
+                                String names = otherPart.replaceFirst(".*([A-Z]([a-z]*|[.]) )+"+name+"[, ].*([A-Z]([a-z]*|[.]) )+"+name+"[^A-Za-z].*",
+                                                                    "$1"+name+" and $3"+name);
+                                part = part.replaceFirst("(.*?)([Tt]he )?([A-Z][^ ]*) [Bb]rothers(.*)", "$1"+names+"$4");
+                                break;
+                            }
+                        }
+                    }
+                }
+                String part1 = part.replaceAll("[ ]?[(][ ]*([a-z]*[/]|assistant )?[Dd]irector([/][a-z]*)?[ ]*[)]", " director"); // change (director)  to director
+                part1 = part1.replaceAll("[ ]?[(][^)]*[)]", ""); // throw away parenthetical phrases
                 if (!part.equals(part1))
                 {
                     part = part1;
                 }
-                if (part.matches(".*[Dd]irector for .*"))
+                if (part.matches(".*[Dd]irector[s]? of [Pp]hotography.*"))
                 {
-                    part = part.replaceFirst("[Dd]irector for [A-Za-z ]*", "director");
+                    continue;
+                }
+                else if (part.matches(".*, [Dd]irector[s]? (of|for) .*"))
+                {
+                    part = part.replaceFirst("[Dd]irector[s]? (of|for)((( ([A-Z][a-z]*|the|of|and|a))+)[,]?)+", "director");
+                }
+                else if (part.matches(".*[Dd]irector[s]?( and writer)? (of|for) .*"))
+                {
+                    part = part.replaceFirst("[Dd]irector[s]?( and writer)? (of|for) [A-Za-z' ]*", "director");
+                }
+                if (part.contains("collaboration") || part.contains("participation"))
+                {
+                    part = part.replaceAll("(in collaboration with)|(with the collaboration of)|(with the participation of)", "with");
+                }
+                if (part.contains("Tasriṭ u-vimui"))
+                {
+                    part = part.replaceAll("Tasriṭ u-vimui", "");
                 }
                 //  Pattern matching when the subpart is of the form:   Some Name Director
                 if (part.matches(".*[Dd]irector[^A-Z]*") )
                 {
-                    if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotography|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical) [Dd]irector.*" ) ||
+                    if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotography|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Dd]ance|[Ee]diting) [Dd]irector.*" ) ||
                             part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotografia)).*"))
                         continue;
                     part = part.replaceAll(" *[\\[]", ", ");
+                    part = part.replaceAll("^\"", "");
                     part = part.replaceAll("[\\]]", "");
                     part = part.replaceAll("director.*", "director");
                     part = part.replaceAll(" [-A-Za-z/]*director[-A-Za-z]*", " director");
                     part = part.replaceAll(" [a-z/]+/director", " director");
                     part = part.replaceAll(" co-director", " director");
                     part = part.replaceAll(" [a-z ,]+ director", " director");
-                    part = part.replaceAll(".*: (([A-Z][a-z.]*)+)(, )?director", "$1, director");
+                    part = part.replaceAll(".*: (([A-Z][A-Za-z.]* )*[A-Z][A-Za-z.]*)(, )?director", "$1, director");
                     part = part.replaceFirst(".* (of|by)", "by");
                     part = part.replaceAll(" (and) ", " & ");
                     part = part.replaceFirst("by ", "");
@@ -339,19 +385,25 @@ public class VideoInfoMixin extends SolrIndexerMixin
                 //  Pattern matching when the subpart is of the form:   Directed by Some Name 
                 else if (part.matches(".*[Dd]irect(ed|ion).*?by.*")|| part.matches(".*a film by.*"))
                 {
-                    part = part.replaceFirst(".*[Dd]irect(ed|ion).*?by[]:,)]? ", "directified by ");
+                    if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotographic|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Dd]ance|[Ee]diting) [Dd]irection.*?by.*" ) ||
+                            part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotografia)).*"))
+                        continue;
+                    part = part.replaceFirst(".*[Dd]irect(ed|ion).*?by[]:,)]?[ ]?", "directified by ");
                     part = part.replaceFirst(".*a film by", "directified by ");
-                    part = part.replaceAll("[]]", "");
+                    part = part.replaceAll("/", " & ");
+                    part = part.replaceAll("\\[|\\]", "");
                     part = part.replaceFirst("et al", "");
                     part = part.replaceAll(" (and|with|et) ", " & ");
-                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "* $1");
+                    part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "% $1");
+                    part = part.replaceAll("[.][.][.]", "");
                     part = part.replaceAll("([A-Z][^ .][^ .][^ .]+)[.].*", "$1");
                     part = part.replaceAll("brothers", "Brothers");
-                    part = part.replaceAll("directified by[ ]*(([\"]?([A-Z]|\\p{Lu})[^ ]+[\"]?[,]?[ ]*|[ ]?&[ ]|von |van |de[rl]?[ ]?|the |d[']|al-)+).*", "$1");
+                    part = part.replaceAll("directified by[ ]*(([\"]?([A-Z]|\\p{Lu}|[*]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|von |van |de[rl]?[ ]?|the |d[']|al-)+).*", "$1");
                     part = part.replaceAll("^([A-Z][^ .]+) & ([A-Z][^ .,]+) ([A-Z][^ .,]+)", "$1 $3 & $2 $3");
                     part = part.replaceAll("([,][ ]?|[ ]?&[ ]?)", "|");
-                    part = part.replaceAll("[*]", ",");
+                    part = part.replaceAll("[%]", ",");
                     part = part.replaceAll("[ ][ ]+", " ");
+                    part = part.replaceFirst("directified by", "");
                     String commaparts[] = part.split("[|]+");
                     for (String subpart : commaparts)
                     {
@@ -361,11 +413,14 @@ public class VideoInfoMixin extends SolrIndexerMixin
                 //  Pattern matching when the subpart is of the form:   Director Some Name 
                 else if (part.matches(".*[Dd]irector[^a-rt-z\'].*[A-Z].*"))
                 {
-                    if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotography|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical) [Dd]irector.*" ) ||
-                            part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de la fotografia)).*"))
+                    if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotography|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Dd]ance|[Ee]diting) [Dd]irector.*" ) ||
+                            part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotografia)).*"))
                         continue;
+                    part = part.replaceFirst("Executive", "executive");
                     part = part.replaceFirst("Writer", "writer");
+                    part = part.replaceFirst("Story", "story");
                     part = part.replaceFirst("Producer", "producer");
+                    part = part.replaceFirst("Produced", "produced");
                     part = part.replaceFirst("Researcher", "researcher");
                     part = part.replaceFirst(".*[Dd]irector", "director");
                     part = part.replaceAll("[ ]?([.][.][.])?[ ]?[\\[][^\\]]*[\\]]", "");
@@ -393,7 +448,8 @@ public class VideoInfoMixin extends SolrIndexerMixin
                 //  Pattern matching when the subpart is of the form:   Direction Some Name 
                 else if (part.matches(".*[Dd]irection.*"))
                 {
-                    if (part.matches(".*([Aa]rt|[Mm]usic(al)?|[Ss]tage|[Pp]roject|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical) [Dd]irectoion.*" ))
+                    if (part.matches(".*([Aa]rt|[Mm]usic(al)?|[Ss]tage|[Pp]roject|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Ee]diting) [Dd]irection.*" )||
+                            part.matches(".*[Dd]irection (de )?((la )?(f|ph)otogra(f|ph)ie|production|artistique|musicale).*"))
                         continue;
 
                     part = part.replaceFirst(".*[Dd]irection[^A-Z]*", "direction: ");
@@ -443,10 +499,17 @@ public class VideoInfoMixin extends SolrIndexerMixin
             return(null);
         if (subpart.matches(".*[ .]+$"))
             subpart = subpart.replaceAll("(.*?)[ .][ .]+$", "$1");
+        if (subpart.matches("[Tt]he( .*|$)"))
+            subpart = subpart.replaceFirst("[Tt]he[ ]?", "");
+        if (subpart.endsWith("Productions")) return(null);
         if (subpart.equalsIgnoreCase("Writer")) return(null);
+        if (subpart.equalsIgnoreCase("Various")) return(null);
         if (subpart.equalsIgnoreCase("Editor")) return(null);
         if (subpart.equalsIgnoreCase("Executive")) return(null);
         if (subpart.equalsIgnoreCase("Story")) return(null);
+        if (subpart.equalsIgnoreCase("voice-over")) return(null);
+        if (subpart.startsWith("English")) return(null);
+        if (subpart.startsWith("Company")) return(null);
         if (subpart.matches(".*[Pp]roducer.*")) return(null);
         if (subpart.matches("[Dd]irector[s]?")) return(null);
         if (subpart.equalsIgnoreCase("Screenplay")) return(null);
