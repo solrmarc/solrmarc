@@ -114,10 +114,15 @@
     <macrodef name="get_indexer_class">
         <sequential>
             <fileset id="custom_indexer_source" dir="${site.dir}" includes="${src.dir}/**/*.java">
-                <or>
-                    <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+SolrIndexer" />
-                    <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+org[.]solrmarc[.]index[.]SolrIndexer" />
-                </or>
+                 <and>
+                     <or>
+                        <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+SolrIndexer" />
+                        <containsregexp expression="public[ ]+class[ ]+[A-Za-z][A-Za-z0-9_]*[ ]+extends[ ]+org[.]solrmarc[.]index[.]SolrIndexer" />
+                    </or>
+                    <not>
+                         <containsregexp expression="extends.*SolrIndexerMixin" />
+                    </not>
+                 </and> 
             </fileset>
 
             <condition property="custom.index.source.exists">
