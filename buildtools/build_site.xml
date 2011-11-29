@@ -685,6 +685,7 @@
                 <flattenmapper/>
                 <patternset>
                     <include name="**/*.jar"/>
+                    <exclude name="**/*solrj*.jar" />
                 </patternset>
             </unwar>
         </sequential>
@@ -792,15 +793,16 @@
                                 <replaceregex pattern="\.class" flags="g" replace="#class"/>
                                 <replaceregex pattern="\." flags="g" replace="/" />
                                 <replaceregex pattern="#class" flags="g" replace=".class"/>
-                                <replaceregex pattern="([^,]+\.class)" flags="g" replace="**/\1"/>
+                                <!--  Add another entry at the end, because the zipfileset seems to lose the last entry  -->
+                                <replaceregex pattern=".class.?.?.?$" flags="" replace=".class,placeholder.class"/>
                             </tokenfilter>
                         </filterchain>
                     </loadresource>
-                    <echo level="debug" message="test classes = ${@{teststorun}.testlist}" />
+                    <echo level="info" message="test classes = ${@{teststorun}.testlist}" />
                     <zipfileset id="jartestfiles" src="@{teststorun}" includes="${@{teststorun}.testlist}" />
                     <pathconvert property="jartestfileslist" refid="jartestfiles" pathsep="  " >
                     </pathconvert>
-                    <echo level="debug" message="zip file entries = ${jartestfileslist}" />
+                    <echo level="info" message="zip file entries = ${jartestfileslist}" />
 
                     <junit showoutput="yes" printsummary="yes" fork="yes" forkmode="perTest" dir="${dist.path}"
                         haltonfailure="no" failureproperty="test.failed" maxmemory="256m" >

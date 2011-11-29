@@ -7,7 +7,7 @@ David Udris|James Der Derian|Michael Udris		UDRIS Film and OXYOPIA Productions p
 Paolo Guglielmotti		Luke Schiller (line producer); Paolo Guglielmotti (assistant director); Lucy Bevan (casting director); David Mitchell (sound recordist); Jovan Ajder (sound designer); Ed Rutherford (director of photography); Helle le Fevre (editor).
 !??Associates in Science|Lew Baldwin|Daydream|Jonathan Turner|Weworkforthem		KNBS artists, Yoshi Sodeoka (aka C505) and Sean Rooney ; guest directors, Associates in Science, Lew Baldwin, Daydream, Jonathan Turner and Weworkforthem ; produced by Youworkforthem.
 W.S. Van Dyke|Richard Thorpe|Edward Buzzell|Richard Schickel		W.S. Van Dyke, director for The Thin Man, After the Thin Man, Another Thin Man, Shaw of the Thin Man ; Richard Thorpe, director for The Thin Man Goes Home ; Edward Buzzell, director for Song of the Thin Man ; Richard Schickel, director for Alias Nick and Nora.
-!??terry Sanders		a film by Terry Sanders ; written, produced and directed by terry Sanders ; narrated by Robert MacNeil.
+terry Sanders		a film by Terry Sanders ; written, produced and directed by terry Sanders ; narrated by Robert MacNeil.
 Terry Sanders		a film by Terry Sanders ; written, produced and directed by Terry Sanders ; narrated by Robert MacNeil.
 Pietro d'Agostino		Stage direction, Peter Konwitschny ; sets and costumes, Helmut Brade; lighting, Manfred Voss ; directed for television by Pietro d'Agostino.
 S. Surendra Nath|K.M. Chaitanya		Music, Laxmikant Pyarelal ; script, Shama Zaidi, Padmavati Rao ; research, Priya Chandrashekhar ; art direction, Jayoo Nachiket ; editor, K.S. Sridhar ; photography, S. Ramchandra ; sound, Kotappa ; associate directors, S. Surendra Nath, K.M. Chaitanya  ; production management, B.V. Ramchandra.
@@ -79,6 +79,7 @@ Christoffer Boe		Nordisk Film production ; produced by Tine Grew Pfeiffer ; writ
 --		Director of photography, Michael Ballhaus (Maria Braun), Xaver Schwarzenberger (Lola, Veronika Voss) ; editor, Juliane Lorenz ; music, Peer Raben.
 !Allen Hughes|Albert Hughes		Directors, the Hughes brothers ; executive producers, Amy Robinson, Thomas M. Hammel, Allen Hughes, Albert Hughes ; producers, Don Murphy, Jane Hamsher ; screenplay, Terry Hayes, Rafael Yglesias ; director of phtography, Peter Deming ; editors, George Bowers, Dan Lebental ; music, Trevor Jones.
 Allen Hughes|Albert Hughes		Directors, the Hughes brothers ; executive producers, Amy Robinson, Thomas M. Hammel, Allen Hughes, Albert Hughes ; producers, Don Murphy, Jane Hamsher ; screenplay, Terry Hayes, Rafael Yglesias ; director of photography, Peter Deming ; editors, George Bowers, Dan Lebental ; music, Trevor Jones.
+#Everything below here are ones for which the algorithm should work perfectly
 Christopher Guest		Castle Rock Entertainment ; produced by Karen Murphy ; written by Christopher Guest & Eugene Levy ; directed by Christopher Guest.
 --		Director of photography, Roberto Schaffer ; edited by Robert Leighton.
 Barbet Schroeder		Barbet Schroeder (director); Pierre Andrieux (producer); Barbet Schroeder, Paul Voujargol (screenplay); Nestor Almendros (cinematographer); Roberto Plate (art director); Denise de Casabianca (editor).
