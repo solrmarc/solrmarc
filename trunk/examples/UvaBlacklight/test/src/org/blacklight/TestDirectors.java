@@ -1,6 +1,7 @@
 package org.blacklight;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -34,12 +35,15 @@ public class TestDirectors
         int numLinesImperfect = 0;
         Set<String> extraNames = new LinkedHashSet<String>();
         Set<String> missedNames = new LinkedHashSet<String>();
-        
+        String testDataParentPath = System.getProperty("test.data.path");
+        if (testDataParentPath == null)
+            fail("property test.data.path must be defined for the tests to run");
+
         boolean verbose = Boolean.getBoolean(System.getProperty("solrmarc.test.verbose", "false"));
         BufferedReader in = null;
         try
         {
-            in = new BufferedReader(new InputStreamReader(new FileInputStream(new File("video_director_test.txt")),"UTF8"));
+            in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(testDataParentPath, "video_director_test.txt")),"UTF8"));
         }
         catch (FileNotFoundException e1)
         {
@@ -148,11 +152,12 @@ public class TestDirectors
                 }
                 if (expectPerfection && !linePerfect)
                 {
-                    System.err.println("Failure on expected perfection"+ line);
+                    if (verbose) System.err.println("Failure on expected perfection:  "+ line);
+                    fail("Failure on expected perfection: " + line);
                 }
                 else if (!expectPerfection && linePerfect)
                 {
-                    System.err.println("Success on expected failure"+ line);
+                    if (verbose) System.err.println("Success on expected failure:  "+ line);
                 }
             }
         }
@@ -161,16 +166,15 @@ public class TestDirectors
         }
 //        if (out1 != null) { out1.flush();  out1.close();}
 //        if (out2 != null) { out2.flush();  out2.close();}
-        System.out.println("Out of a total of "+numLines+ " Marc record fields, containing an expected "+ numberToFind+ " directors");
-        System.out.println("                  "+numLinesPerfect+ " had the correct answer ");
-        System.out.println(numberFoundCorrect+" directors, were correctly extracted");
-        System.out.println(numberNotFound +" directors, were not found");
-        showNameList(missedNames);
-        System.out.println(numberExtra +" extra additional directors, were found");
-        showNameList(extraNames);
-        System.out.println(numberIffy +" may have been due to data errors");
-        
-        
+        if (verbose) System.out.println("Out of a total of "+numLines+ " Marc record fields, containing an expected "+ numberToFind+ " directors");
+        if (verbose) System.out.println("                  "+numLinesPerfect+ " had the correct answer ");
+        if (verbose) System.out.println(numberFoundCorrect+" directors, were correctly extracted");
+        if (verbose) System.out.println(numberNotFound +" directors, were not found");
+        if (verbose) showNameList(missedNames);
+        if (verbose) System.out.println(numberExtra +" extra additional directors, were found");
+        if (verbose) showNameList(extraNames);
+        if (verbose) System.out.println(numberIffy +" may have been due to data errors");
+        System.out.println("Test testDirectorsFuzzyMatch is successful");        
     }
     
     static void showNameList(Set<String> list)

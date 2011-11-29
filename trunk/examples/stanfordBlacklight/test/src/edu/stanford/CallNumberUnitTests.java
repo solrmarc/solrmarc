@@ -93,14 +93,14 @@ public class CallNumberUnitTests {
 	/**
 	 * remove call number grade suffix, if it exists
 	 */
-@Test
-	public void testRemoveLCGradeSuffix()
-	{
-		String callnum = "TX 519 .L18 GRADE 1";
-		assertEquals("TX 519 .L18", removeLCVolSuffix(callnum));
-		callnum = "TX 519 .L18ST GRADE 8";
-		assertEquals("TX 519 .L18ST", removeLCVolSuffix(callnum));
-	}
+//@Test
+//	public void testRemoveLCGradeSuffix()
+//	{
+//		String callnum = "TX 519 .L18 GRADE 1";
+//		assertEquals("TX 519 .L18", removeLCVolSuffix(callnum));
+//		callnum = "TX 519 .L18ST GRADE 8";
+//		assertEquals("TX 519 .L18ST", removeLCVolSuffix(callnum));
+//	}
 
 	/**
 	 * remove map folder suffix, if it exists
