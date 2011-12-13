@@ -3,6 +3,7 @@ package org.solrmarc.tools;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -19,12 +20,20 @@ import org.solrmarc.marc.RawRecordReader;
 public class MarcDiff
 {
     static boolean verbose = false;
+    static String writeDifferentRecords = null;
     
     public static void main(String[] args)
     {
         if (args[0].equals("-v")) 
         {
             verbose = true;
+            String newArgs[] = new String[args.length-1];
+            System.arraycopy(args, 1, newArgs, 0, args.length-1);
+            args = newArgs;
+        }
+        if (args[0].startsWith("-mrc")) 
+        {
+            writeDifferentRecords = args[0].substring(1);
             String newArgs[] = new String[args.length-1];
             System.arraycopy(args, 1, newArgs, 0, args.length-1);
             args = newArgs;
@@ -56,32 +65,92 @@ public class MarcDiff
         RawRecord rec1 = null;
         RawRecord rec2 = null;
         Comparator<String> comp = new StringNaturalCompare();
-        while (reader1.hasNext() && reader2.hasNext())
-        {
-            if (rec1 == null) rec1 = reader1.next();
-            if (rec2 == null) rec2 = reader2.next();
-            int compVal = comp.compare(rec1.getRecordId(), rec2.getRecordId());
-            if (compVal == 0)
+        try {
+            while (reader1.hasNext() && reader2.hasNext())
             {
-                byte rec1bytes[] = rec1.getRecordBytes();
-                byte rec2bytes[] = rec2.getRecordBytes();
-                if (!java.util.Arrays.equals(rec1bytes, rec2bytes))
+                if (rec1 == null) rec1 = reader1.next();
+                if (rec2 == null) rec2 = reader2.next();
+                int compVal = comp.compare(rec1.getRecordId(), rec2.getRecordId());
+                if (compVal == 0)
                 {
-                    Record r1 = rec1.getAsRecord(true, true, "999", "MARC8");
-                    Record r2 = rec2.getAsRecord(true, true, "999", "MARC8");
-                    String str1 = r1.toString();
-                    String str2 = r2.toString();
-                    if (!verbose) System.out.println("record with id: " + rec1.getRecordId() + " different in file1 and file2");
-                    if (!str1.equals(str2))
+                    byte rec1bytes[] = rec1.getRecordBytes();
+                    byte rec2bytes[] = rec2.getRecordBytes();
+                    if (!java.util.Arrays.equals(rec1bytes, rec2bytes))
                     {
-                        showDiffs(System.out, str1, str2, verbose, null);
+                        writeRecord(writeDifferentRecords, verbose, rec1, rec2);
                     }
+                    
+                    rec1 = reader1.next();
+                    rec2 = reader2.next();
                 }
-                
+                else if (compVal < 0)
+                {
+                    writeRecord(writeDifferentRecords, verbose, rec1, null);
+                    rec1 = reader1.next();
+                }
+                else if (compVal > 0)
+                {
+                    writeRecord(writeDifferentRecords, verbose, null, rec2);
+                    rec2 = reader2.next();
+                }
+            }
+            while (reader1.hasNext())
+            {
+                writeRecord(writeDifferentRecords, verbose, rec1, null);
                 rec1 = reader1.next();
+            }
+            while (reader2.hasNext())
+            {
+                writeRecord(writeDifferentRecords, verbose, null, rec2);
                 rec2 = reader2.next();
             }
-            else if (compVal < 0)
+        }
+        catch (IOException ioe)
+        {
+            System.err.println("Error: Trouble writing to stdout, can this even happen?");
+        }
+    }
+    
+    private static void writeRecord(String writeDifferentRecords, boolean verbose, RawRecord rec1, RawRecord rec2) throws IOException
+    {
+        if (writeDifferentRecords != null)
+        {
+            if (rec1 != null && rec2 != null)
+            {
+                if (writeDifferentRecords.equals("mrc") || writeDifferentRecords.startsWith("mrc2"))
+                {
+                    System.out.write(rec2.getRecordBytes());
+                }
+                else if (writeDifferentRecords.startsWith("mrc1"))
+                {
+                    System.out.write(rec1.getRecordBytes());
+                }
+            }
+            else if (writeDifferentRecords.contains("1") && rec1 != null)
+            {
+                System.out.write(rec1.getRecordBytes());
+            }
+            else if (writeDifferentRecords.contains("2") && rec2 != null)
+            {
+                System.out.write(rec2.getRecordBytes());
+            }
+            System.out.flush();
+        }
+        else
+        {
+            if (rec1 != null && rec2 != null)
+            {
+                Record r1 = rec1.getAsRecord(true, true, "999", "MARC8");
+                Record r2 = rec2.getAsRecord(true, true, "999", "MARC8");
+                String str1 = r1.toString();
+                String str2 = r2.toString();
+                if (!verbose) System.out.println("record with id: " + rec1.getRecordId() + " different in file1 and file2");
+                if (!str1.equals(str2))
+                {
+                    showDiffs(System.out, str1, str2, verbose, null);
+                }
+            }
+            else if (rec1 != null)
             {
                 System.out.println("record with id: " + rec1.getRecordId() + " found in file1 but not in file2");
                 if (verbose) 
@@ -89,9 +158,8 @@ public class MarcDiff
                     Record rec = rec1.getAsRecord(true, true, "999", "MARC8");
                     System.out.println(rec.toString());
                 }
-                rec1 = reader1.next();
             }
-            else if (compVal > 0)
+            else
             {
                 System.out.println("record with id: " + rec2.getRecordId() + " found in file2 but not in file1");
                 if (verbose) 
@@ -99,31 +167,10 @@ public class MarcDiff
                     Record rec = rec2.getAsRecord(true, true, "999", "MARC8");
                     System.out.println(rec.toString());
                 }
-                rec2 = reader2.next();
             }
-        }
-        while (reader1.hasNext())
-        {
-            System.out.println("record with id: " + rec1.getRecordId() + " found in file1 but not in file2");
-            if (verbose) 
-            {
-                Record rec = rec1.getAsRecord(true, true, "999", "MARC8");
-                System.out.println(rec.toString());
-            }
-            rec1 = reader1.next();
-        }
-        while (reader2.hasNext())
-        {
-            System.out.println("record with id: " + rec2.getRecordId() + " found in file2 but not in file1");
-            if (verbose) 
-            {
-                Record rec = rec2.getAsRecord(true, true, "999", "MARC8");
-                System.out.println(rec.toString());
-            }
-            rec2 = reader2.next();
         }
     }
-    
+
     public static void showDiffs(PrintStream out, String strNorm, String strPerm, boolean verbose, Map<Character,String> map)
     {
         if (strNorm != null)
