@@ -191,8 +191,7 @@ public class SolrIndexer
                 {
                     // split it into two pieces at first comma or space
                     String values[] = propValue.split("[, ]+", 2);
-                    if (values[0].startsWith("custom") || values[0].equals("customDeleteRecordIfFieldEmpty") ||
-                        values[0].startsWith("script"))
+                    if (values[0].startsWith("custom") ||  values[0].startsWith("script"))
                     {
                         fieldDef[1] = values[0];
 
@@ -388,9 +387,9 @@ public class SolrIndexer
 //            {
 //                className = null;
 //            }
-            if (indexType.matches("custom[(][a-zA-Z0-9.]+[)]"))
+            if (indexType.matches("custom(DeleteRecordIfFieldEmpty)?[(][a-zA-Z0-9.]+[)]"))
             {
-                className = indexType.substring(7, indexType.length()-1).trim();
+                className = indexType.replaceFirst("custom(DeleteRecordIfFieldEmpty)?[(]([a-zA-Z0-9.]+)[)]", "$2");
                 if (customMixinMap.containsKey(className))
                 {
                     classToLookIn = customMixinMap.get(className).getClass();
@@ -906,7 +905,7 @@ public class SolrIndexer
             logger.error("Error while indexing " + indexField + " for record " + (recCntlNum != null ? recCntlNum : "") + " -- " + e.getCause());
         }
         boolean deleteIfEmpty = false;
-        if (indexType.equals("customDeleteRecordIfFieldEmpty")) 
+        if (indexType.startsWith("customDeleteRecordIfFieldEmpty")) 
             deleteIfEmpty = true;
         boolean result = finishCustomOrScript(indexMap, indexField, mapName, returnType, retval, deleteIfEmpty);
         if (result == true) throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
