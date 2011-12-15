@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.SequenceInputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -37,6 +38,7 @@ public class HathiPlunderer extends InputStream
     private int fetchCount = 0;
     private static int numInBuf = 0;
     private static String urlBase = "http://catalog.hathitrust.org/api/volumes/full/json/";
+    private static String fetchOne = null;
 
     private int chunkSize = 20;
     private int maxToFetch = -1;
@@ -458,6 +460,10 @@ public class HathiPlunderer extends InputStream
             {
                 debug = true;
             }
+            else if (args[0].equals("-g"))
+            {
+                fetchOne = args[1];
+            }
             else if (args[0].equals("-v"))
             {
                 print = true;
@@ -490,7 +496,14 @@ public class HathiPlunderer extends InputStream
             args = newArgs;
         }
 
-        in = initReader(args);
+        if (fetchOne != null)
+        {
+            in = new BufferedReader(new StringReader(fetchOne+"\n"));
+        }
+        else
+        {
+            in = initReader(args);
+        }
 
         HathiPlunderer reader = new HathiPlunderer(in, maxToFetch, numToSkip, chunkSize);
         if (debug)
