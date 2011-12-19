@@ -256,6 +256,31 @@ public class GetFormatMixin extends SolrIndexerMixin
      * @param Record   -  MARC Record
      * @return Set of Strings of content types and media types
      */
+    public Set<String> getContentTypesAndMediaTypesMapped(final Record record, String mapFileName)
+    {
+        Set<String> formats = getContentTypes(record);
+        formats.addAll( getMediaTypes(record));
+        formats = addOnlineTypes(record, formats);
+        String mapName = null;
+        try
+        {
+            mapName = indexer.loadTranslationMap(null, mapFileName);
+        }
+        catch (IllegalArgumentException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        Set<String>formatsMapped = Utils.remap(formats, indexer.findMap(mapName), false);
+        return(formatsMapped);
+    }
+    
+    /**
+     * Return the content type and media types, plus electronic, for this record
+     * 
+     * @param Record   -  MARC Record
+     * @return Set of Strings of content types and media types
+     */
     public Set<String> getContentTypesAndMediaTypes(final Record record)
     {
         Set<String> formats = getContentTypes(record);

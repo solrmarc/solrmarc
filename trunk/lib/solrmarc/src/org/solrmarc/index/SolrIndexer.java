@@ -365,11 +365,32 @@ public class SolrIndexer
         }
     }
 
-    public SolrIndexerMixin findMixin(String className)
+    public SolrIndexerMixin findMixin(String className) 
     {
+        SolrIndexerMixin instance = null;
         if (customMixinMap.containsKey(className))
+        {
             return( customMixinMap.get(className));
-        return(null);
+        }
+        else 
+        { 
+            try
+            {
+                Class<?> classToLookIn = Class.forName(className);
+                if (SolrIndexerMixin.class.isAssignableFrom(classToLookIn))
+                {
+                   Constructor<?> classConstructor = classToLookIn.getConstructor();
+                   instance = (SolrIndexerMixin)classConstructor.newInstance((Object[])null);
+                   instance.setMainIndexer(this);
+                   customMixinMap.put(className, instance);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("Unable to find and load indexer mixin class "  + className);
+            }
+        }
+        return(instance);
     }
 
     /**
@@ -390,59 +411,15 @@ public class SolrIndexer
             if (indexType.matches("custom(DeleteRecordIfFieldEmpty)?[(][a-zA-Z0-9.]+[)]"))
             {
                 className = indexType.replaceFirst("custom(DeleteRecordIfFieldEmpty)?[(]([a-zA-Z0-9.]+)[)]", "$2");
-                if (customMixinMap.containsKey(className))
-                {
-                    classToLookIn = customMixinMap.get(className).getClass();
-                }
-                else
-                {
-                    classToLookIn = Class.forName(className);
-                    if (SolrIndexerMixin.class.isAssignableFrom(classToLookIn))
-                    {
-                       Constructor<?> classConstructor = classToLookIn.getConstructor();
-                       SolrIndexerMixin instance = (SolrIndexerMixin)classConstructor.newInstance((Object[])null);
-                       instance.setMainIndexer(this);
-                       customMixinMap.put(className, instance);
-                    }
-                }
+                SolrIndexerMixin instance = findMixin(className);
+                classToLookIn = instance.getClass();
             }
-        }
-        catch (ClassNotFoundException e)
-        {
-            logger.error("Unable to find indexer mixin class "  + className + " which should defing the custom indexing function " + indexParm);
-            logger.debug(e.getCause());
-            throw new IllegalArgumentException("Unable to find indexer mixin class "  + className + " which should defing the custom indexing function " + indexParm);
-        }
-        catch (SecurityException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
         catch (IllegalArgumentException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IllegalAccessException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (InvocationTargetException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (InstantiationException e)
-        {
-            logger.error("Unable to find no argument constructor in indexer mixin class "  + className);
+            logger.error("Unable to find indexer mixin class "  + className + " which should defing the custom indexing function " + indexParm);
             logger.debug(e.getCause());
-            throw new IllegalArgumentException("Unable to find no argument constructor in indexer mixin class "  + className);
-        }
-        catch (NoSuchMethodException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new IllegalArgumentException("Unable to find and load indexer mixin class "  + className + " which should define the custom indexing function " + indexParm);
         }
 
         try
@@ -1542,6 +1519,39 @@ public class SolrIndexer
             return null;
     }
 
+    /**
+     * Default version of format retrieval, invoke the getContentTypesAndMediaTypesMapped method
+     * of the GetFormatMixin and then map the returned result through the map passed in, or the 
+     * map defined in the file getformat_mixin_map.properties 
+     * @param record - the marc record object
+     * @param formatMapName - the the properties file (and optional map name) of the translation map 
+     *                        to use to remap the return value.
+     * @return set of format strings after being mapped via the passed in map. 
+     */
+
+    public Set<String> getFormatMapped(final Record record, String formatMapName)
+    {    
+        SolrIndexerMixin formatmixin = findMixin("org.solrmarc.index.GetFormatMixin");
+        Set<String>formats = formatmixin.invokeByName("getContentTypesAndMediaTypesMapped", record, formatMapName);                
+        formats.add("Online"); // Online
+        formats.remove("Computer Resource"); // Online
+        return(formats);
+    }
+    
+    /**
+     * Default version of format retrieval, invoke the getContentTypesAndMediaTypesMapped method
+     * of the GetFormatMixin and then map the returned result through the map passed in, or the 
+     * map defined in the file getformat_mixin_map.properties 
+     * @param record - the marc record object
+     * @return set of format strings after being mapped via the passed in map. 
+     */
+
+    public Set<String> getFormat(final Record record)
+    {    
+        return(getFormatMapped(record, "getformat_mixin_map.properties"));
+    }
+    
+    
     /**
      * Get the 245a (and 245b, if it exists, concatenated with a space between
      *  the two subfield values), with trailing punctuation removed.
