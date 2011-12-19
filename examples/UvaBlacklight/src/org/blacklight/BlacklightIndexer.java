@@ -1593,6 +1593,12 @@ public class BlacklightIndexer extends SolrIndexer
         return(result);
     }
     
+    @Override
+    public Set<String> getFormatMapped(Record record, String propertyFileName)
+    {
+        return(getCombinedFormatNew2(record));
+    }
+    
     public Set<String> getCombinedFormatNew2(final Record record)
     {    
         if (combinedFormat != null) return(combinedFormat);
