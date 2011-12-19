@@ -396,7 +396,11 @@ public final class Utils {
             // trailing period removed in certain circumstances
             if (currResult.endsWith("."))
             {
-                if (currResult.matches(".*\\w\\w\\.$"))
+                if (currResult.matches(".*[JS]r\\.$"))
+                {
+                    // dont strip period off of Jr. or Sr.
+                }
+                else if (currResult.matches(".*\\w\\w\\.$"))
                 {
                     currResult = currResult.substring(0, currResult.length()-1);
                 }
