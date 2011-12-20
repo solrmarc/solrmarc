@@ -213,23 +213,23 @@ public class VideoInfoMixin extends SolrIndexerMixin
             String responsibility = indexer.getFirstFieldVal(record, null, "245c");
             if (responsibility != null)
             {
-                Set<String> directors = getVideoDirectorsFromTextField(responsibility);
+                Set<String> directors = getVideoDirectorsFromTextField(responsibility, true);
                 result.addAll(directors);
             }
             Set<String> credits = indexer.getFieldList(record, "508a");
             for (String credit : credits)
             {
-                Set<String> directors = getVideoDirectorsFromTextField(credit);
+                Set<String> directors = getVideoDirectorsFromTextField(credit, true);
                 result.addAll(directors);
             }
             if (result.size() == 0)
             {
-                Set<String> notes = indexer.getFieldList(record, "500a");
+                Set<String> notes = indexer.getFieldList(record, "500a:505a:505t");
                 for (String note : notes)
                 {
                     if (note.contains("direct") || note.contains("Direct"))
                     {
-                        Set<String> directors = getVideoDirectorsFromTextField(note);
+                        Set<String> directors = getVideoDirectorsFromTextField(note, false);
                         result.addAll(directors);
                     }
                 }
@@ -267,7 +267,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
      * @param ratingString   the value of 245c subfield or a 508a subfield extracted from the record being processed
      * @return  Set<String>  a set of Strings representing the name(s) of the director(s) of the video  (or an empty set, if none can be found)
      */
-    public static Set<String> getVideoDirectorsFromTextField(String responsibility)
+    public static Set<String> getVideoDirectorsFromTextField(String responsibility, boolean greedy)
     {
         // First do some initital processing on the passed in string
         boolean reverseName = false;
@@ -276,12 +276,15 @@ public class VideoInfoMixin extends SolrIndexerMixin
         String responsibility1 = responsibility.replaceAll("\\[sic[.]?[]]", "");
         responsibility1 = responsibility1.replaceAll("([a-z][a-z][a-z])[.]", "$1;");
         responsibility1 = responsibility1.replaceAll("([a-z][a-z])[.]  ", "$1;  ");
-        responsibility1 = responsibility1.replaceAll("[Rr]egi[ea]?([^a-z])", "director$1");//german/italian/swedish
+        responsibility1 = responsibility1.replaceAll("[Rr]egi[ea]?\\b", "director");//german/italian/swedish
+        responsibility1 = responsibility1.replaceAll("[Rr]eggia\\b", "director");//spanish
         responsibility1 = responsibility1.replaceAll("[Dd]irecci(ó|o)n", "director");//spanish
         responsibility1 = responsibility1.replaceAll("[Rr](é|e)alisation", "direction");//french
         responsibility1 = responsibility1.replaceAll("direção de produção", "producer");//porteguese
         responsibility1 = responsibility1.replaceAll("direction de (la )?production", "producer");//french
         responsibility1 = responsibility1.replaceAll("[Rr]éalisé par", "directed by");//porteguese
+        responsibility1 = responsibility1.replaceAll("Directed por", "directed by");//spanish
+        responsibility1 = responsibility1.replaceAll("[Dd]irreción", "direction");//spanish
         responsibility1 = responsibility1.replaceAll("[Dd]ireção", "director");//porteguese
         responsibility1 = responsibility1.replaceAll("[Dd]iretto da", "director");//italian
         responsibility1 = responsibility1.replaceAll("[Dd]irigid[oa]", "director");//porteguese
@@ -289,11 +292,13 @@ public class VideoInfoMixin extends SolrIndexerMixin
         responsibility1 = responsibility1.replaceAll("[Ii]khr(ā|a)j", "director");//arabic
         responsibility1 = responsibility1.replaceAll("[Rr]ezhisser[a]?", "director");//russian
         responsibility1 = responsibility1.replaceAll("[Yy]öneten", "director");//turkish
+        responsibility1 = responsibility1.replaceAll("[Nn]irdeśaka", "director");//hindi
         responsibility1 = responsibility1.replaceAll("un film d[ei]", "a film by");
         responsibility1 = responsibility1.replaceAll("produit par\\b", "produced by");
         responsibility1 = responsibility1.replaceAll("\\bpar\\b", "a film by");
         responsibility1 = responsibility1.replaceAll("en film av", "a film by"); //swedish
         responsibility1 = responsibility1.replaceAll("ein [Ff]ilm von", "a film by"); //german
+        responsibility1 = responsibility1.replaceAll("una pel(í|i)cula de", "a film by");//spanish
         if (!responsibility1.equals(responsibility))
         {
             responsibility = responsibility1;
@@ -321,6 +326,15 @@ public class VideoInfoMixin extends SolrIndexerMixin
                 {
                     String trimmed;
                 //    part = part.replaceAll("\\[sic[.][]]", "");
+                    if (!greedy && part.matches(".*[Dd]irector[']?s.*"))
+                    {
+                        continue;
+                    }
+                    if (!greedy && part.matches(".*\"[^,\"]*[Dd]irect(ed by|or[s]?|ion)[^,\"]*\".*"))
+                    {
+                        part = part.replaceAll("\"[^\",]*?\"", "XXX");
+                    }
+                    
                     // Try to split apart "brothers" ie.  the Hughes Brothers  becomes  Albert Hughes and Allen Hughes
                     if (part.matches(".*(the )?[A-Z][^ ]* [Bb]rothers.*"))
                     {
@@ -375,7 +389,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                         part = part.replaceAll(".*([Dd]irector .*)director.*", "$1");
                     }
                     //  Pattern matching when the subpart is of the form:   Some Name Director
-                    if (part.matches(".*[Dd]irector[^A-Z]*") )//fotografía
+                    if (part.matches(".*[Dd]irector[^A-Z]*") && !part.matches(".*of the [Dd]irector.*"))
                     {
                         if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotography|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Dd]ance|[Ee]diting) [Dd]irector.*" ) ||
                                 part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotograf(i|í)a)|(de arte)).*"))
@@ -388,9 +402,13 @@ public class VideoInfoMixin extends SolrIndexerMixin
                         part = part.replaceAll(" [a-z/]+/director", " director");
                         part = part.replaceAll(" co-director", " director");
                         part = part.replaceAll(" [a-z ,]+ director", " director");
-                        part = part.replaceAll(".*: (([A-Z][A-Za-z.]* )*[A-Z][A-Za-z.]*)(, )?director", "$1, director");
+                        if (greedy)
+                            part = part.replaceAll(".*: (([A-Z][A-Za-z.]* )*[A-Z][A-Za-z.]*)(, )?director", "$1, director");
+                        else
+                            part = part.replaceAll(".*? (([A-Z][A-Za-z.]* )*[A-Z][A-Za-z.]*)(, )?director", "$1, director");
+
                         part = part.replaceFirst(".* (of|by)", "by");
-                        part = part.replaceAll(" (and) ", " & ");
+                        part = part.replaceAll(" (and|und|/) ", " & ");
                         part = part.replaceFirst("by ", "");
                         part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "# $1");
                         part = part.replaceFirst("[,]?[ ]?director", "");
@@ -400,8 +418,12 @@ public class VideoInfoMixin extends SolrIndexerMixin
                         String commaparts[] = part.split("[|]+");
                         for (String subpart : commaparts)
                         {
-                            addCleanedName(result, squeezedresult, subpart, reverseName);
+                            addCleanedName(result, squeezedresult, subpart, reverseName, greedy);
                         }
+                    }
+                    else if (!greedy && part.matches(".*, [Dd]irector (of|for|on).*"))
+                    {
+                        continue;
                     }
                     //  Pattern matching when the subpart is of the form:   Directed by Some Name 
                     else if (part.matches(".*[Dd]irect(ed|ion).*?by.*")|| part.matches(".*a film by.*"))
@@ -414,7 +436,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                         part = part.replaceAll("/", " & ");
                         part = part.replaceAll("\\[|\\]", "");
                         part = part.replaceFirst("et al", "");
-                        part = part.replaceAll(" (and|with|et) ", " & ");
+                        part = part.replaceAll(" (and|with|et|und) ", " & ");
                         part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "# $1");
                         part = part.replaceAll("[.][.][.]", "");
                         part = part.replaceAll("([A-Z][^ .][^ .][^ .]+)[.].*", "$1");
@@ -428,7 +450,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                         String commaparts[] = part.split("[|]+");
                         for (String subpart : commaparts)
                         {
-                            addCleanedName(result, squeezedresult, subpart, reverseName);
+                            addCleanedName(result, squeezedresult, subpart, reverseName, greedy);
                         }
                     }
                     else if (part.matches(".*[Dd]irected.*"))
@@ -437,7 +459,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                         part = part.replaceAll("/", " & ");
                         part = part.replaceAll("\\[|\\]", "");
                         part = part.replaceFirst("et al", "");
-                        part = part.replaceAll(" (and|with|et) ", " & ");
+                        part = part.replaceAll(" (and|with|et|und) ", " & ");
                         part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "# $1");
                         part = part.replaceAll("[.][.][.]", "");
                         part = part.replaceAll("([A-Z][^ .][^ .][^ .]+)[.].*", "$1");
@@ -451,7 +473,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                         String commaparts[] = part.split("[|]+");
                         for (String subpart : commaparts)
                         {
-                            addCleanedName(result, squeezedresult, subpart, reverseName);
+                            addCleanedName(result, squeezedresult, subpart, reverseName, greedy);
                         }
                     }
                     //  Pattern matching when the subpart is of the form:   Director Some Name 
@@ -467,19 +489,26 @@ public class VideoInfoMixin extends SolrIndexerMixin
                         part = part.replaceFirst("Produced", "produced");
                         part = part.replaceFirst(", English", ", english");
                         part = part.replaceFirst("Researcher", "researcher");
-                        part = part.replaceFirst(".*[Dd]irector", "director");
+                        part = part.replaceFirst(".*?[Dd]irector", "director");
                         part = part.replaceAll("[ ]?([.][.][.])?[ ]?[\\[][^\\]]*[\\]]", "");
                         part = part.replaceAll("[]]", "");
                         part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "# $1");
                         part = part.replaceAll("director[-A-Za-z/]*", "director");
                         part = part.replaceAll("director (for|and|of)( [A-Z][A-Za-z]*)+", "director");
+                        if (!greedy)
+                            part = part.replaceFirst("director( and [a-z]*)?, [a-z].*", "");
                         part = part.replaceFirst("director[^A-Z]* ([ʻ*]?[A-Z])", "director= $1");
                         part = part.replaceFirst("with the [a-z][A-Za-z ]*", "");
                         part = part.replaceFirst("et al", "");
+                        if (!greedy)
+                            part = part.replaceAll("[,]? and [a-z].*", "");
                         part = part.replaceAll(" (and|with|et) ", " & ");
                         part = part.replaceAll(",[ ]?[a-z].*", "");
                         part = part.replaceAll("= [^(]*[)], ", ": ");
-                        part = part.replaceAll("director=[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*ʻ]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|von |zur |van |de[rl]?[ ]?|the |in |d[']|al-|da-)+)[^|&]*", "$1");
+                        if (greedy)
+                            part = part.replaceAll("director=[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*ʻ]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|von |zur |van |de[rl]?[ ]?|the |in |d[']|al-|da-)+)[^|&]*", "$1");
+                        else // strict
+                            part = part.replaceAll("director=[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*ʻ]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|von |zur |van |de[rl]?[ ]?|the |in |d[']|al-|da-)+)( [a-z].*|$)", "$1");
                         part = part.replaceAll("^([A-Z][^ .]+) & ([A-Z][^ .]+) ([A-Z][^ .]+)", "$1 $3 & $2 $3");
                         part = part.replaceAll("([,][ ]?|[ ]?[|&][ ]?)", "|");
                         part = part.replaceAll("[#]", ",");
@@ -487,7 +516,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                         String commaparts[] = part.split("[|]+");
                         for (String subpart : commaparts)
                         {
-                            addCleanedName(result, squeezedresult, subpart, reverseName);
+                            addCleanedName(result, squeezedresult, subpart, reverseName, greedy);
                         }
                     }
                     //  Pattern matching when the subpart is of the form:   Direction Some Name 
@@ -508,7 +537,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                         String commaparts[] = part.split("[|]+");
                         for (String subpart : commaparts)
                         {
-                            addCleanedName(result, squeezedresult, subpart, reverseName);
+                            addCleanedName(result, squeezedresult, subpart, reverseName, greedy);
                         }
                     }
                 }
@@ -542,9 +571,9 @@ public class VideoInfoMixin extends SolrIndexerMixin
 
     }
 
-    private static void addCleanedName(Set<String> result, Set<String> squeezedresult, String subpart, boolean reverseName)
+    private static void addCleanedName(Set<String> result, Set<String> squeezedresult, String subpart, boolean reverseName, boolean greedy)
     {
-        subpart = nameClean(subpart);
+        subpart = nameClean(subpart, greedy);
         if (subpart == null) return;
         if (reverseName) 
             subpart = subpart.replaceFirst("([^ ]+)[ ]+(.*)", "$2 $1");
@@ -556,32 +585,48 @@ public class VideoInfoMixin extends SolrIndexerMixin
         }
     }
 
-    private static String nameClean(String subpart)
+    private static String nameClean(String subpart, boolean greedy)
     {
         if (subpart.matches(".*[(].*[)]"));
             subpart = subpart.replaceAll("(.*)[(].*[)]", "$1");
+        if (subpart.matches("\".*") || subpart.matches(".*\""))
+            subpart = subpart.replaceAll("\"?(.*?)\"?", "$1");
         if (subpart.matches(".* for .*"))
             subpart = subpart.replaceAll("(.*) for .*", "$1");
         if (subpart.matches(".*, Inc[.]"))
             return(null);
         if (subpart.matches(".*( of | a | in ).*"))
             return(null);
+        if (subpart.matches(".*'s"))
+            subpart = subpart.replaceFirst("'s$", "");
         if (subpart.matches(".*? [a-z][a-z ]*"))
             subpart = subpart.replaceAll("(.*?) [a-z][a-z ]*", "$1");
         if (subpart.matches("[a-z]*"))
             return(null);
         if (subpart.matches(".*[ .]+$"))
             subpart = subpart.replaceAll("(.*?)[ .][ .]+$", "$1");
+        if (!greedy && subpart.matches(".*[0-9]+.*"))
+            return(null);
+        if (!greedy && subpart.matches("[Tt]he( .*|$)"))
+            return(null);
+        if (!greedy && subpart.matches("[A-Z][a-z]*"))
+            return(null);
+        if (!greedy && subpart.matches("^[\"]?[a-z].*"))
+            return(null);
         if (subpart.matches("[Tt]he( .*|$)"))
             subpart = subpart.replaceFirst("[Tt]he[ ]?", "");
         if (subpart.contains("Group")) return(null);
         if (subpart.contains("Studio[s]?")) return(null);
         if (subpart.contains("Entertainment")) return(null);
         if (subpart.contains("Department")) return(null);
+        if (subpart.contains("National")) return(null);
+        if (subpart.contains("Museum")) return(null);
+        if (subpart.contains("Response")) return(null);
         if (subpart.contains("Cities")) return(null);
         if (subpart.contains("High")) return(null);
         if (subpart.endsWith("Productions")) return(null);
-        if (subpart.equalsIgnoreCase("Writer")) return(null);
+        if (subpart.startsWith("Written")) return(null);
+        if (subpart.startsWith("Writer")) return(null);
         if (subpart.equalsIgnoreCase("Various")) return(null);
         if (subpart.equalsIgnoreCase("Editor")) return(null);
         if (subpart.equalsIgnoreCase("Executive")) return(null);
