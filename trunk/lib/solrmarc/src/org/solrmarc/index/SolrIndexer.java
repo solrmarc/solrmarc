@@ -805,9 +805,9 @@ public class SolrIndexer
         Object objectThatContainsMethod = this;
         try
         {
-            if (indexType.matches("custom[(][a-zA-Z0-9.]+[)]"))
+            if (indexType.matches("custom(DeleteRecordIfFieldEmpty)?[(][a-zA-Z0-9.]+[)]"))
             {
-                className = indexType.substring(7, indexType.length()-1).trim();
+                className = indexType.replaceFirst("custom(DeleteRecordIfFieldEmpty)?[(]([a-zA-Z0-9.]+)[)]", "$2");
                 if (customMixinMap.containsKey(className))
                 {
                     objectThatContainsMethod = customMixinMap.get(className);
