@@ -375,7 +375,8 @@ public class MarcMerger
             e.printStackTrace();
         }
     }
-    
+
+
     static void processMergeDeletes(DataInputStream mainFile, RawRecordReader newOrModified, DataInputStream deleted, PrintStream out) 
     {
         Comparator<String> compare = new StringNaturalCompare();
@@ -392,14 +393,14 @@ public class MarcMerger
         }
         while (compare.compare(mainDelete, maxRecordID)< 0)
         {
-            if (compare.compare(mainDelete, newOrModrec.getRecordId())< 0  && compare.compare(mainDelete, deletedId) < 0)
+            if ((newOrModrec == null || compare.compare(mainDelete, newOrModrec.getRecordId())< 0)  && compare.compare(mainDelete, deletedId) < 0)
             {
                 // mainDeleted rec ID unchanged, just write it out to delete file.
                 //if (verbose) System.err.println("Writing original record "+ mainrec.id + " from input file");
                 out.println(mainDelete);
                 mainDelete = getNextDelId(mainReader);
             }
-            else if (compare.compare(mainDelete, newOrModrec.getRecordId())== 0  && compare.compare(mainDelete, deletedId)== 0)
+            else if ((newOrModrec != null && compare.compare(mainDelete, newOrModrec.getRecordId())== 0 ) && compare.compare(mainDelete, deletedId)== 0)
             {   
                 // mainrec equals deleteID  AND it equals modifiedRecId,  Delete record.  Although this should not happen.
                 if (verbose) System.err.println("Deleting record "+ deletedId);
@@ -408,7 +409,7 @@ public class MarcMerger
                 out.println(mainDelete);
                 mainDelete = getNextDelId(mainReader);
             }
-            else if (compare.compare(mainDelete, newOrModrec.getRecordId())< 0  && compare.compare(mainDelete, deletedId)== 0)
+            else if ((newOrModrec == null || compare.compare(mainDelete, newOrModrec.getRecordId())< 0) && compare.compare(mainDelete, deletedId)== 0)
             {    
                 // mainrec equals deleteID,   Delete record.  
                 if (verbose) System.err.println("Deleting record "+ deletedId);
@@ -416,7 +417,7 @@ public class MarcMerger
                 out.println(mainDelete);
                 mainDelete = getNextDelId(mainReader);
             }
-            else if (compare.compare(mainDelete, newOrModrec.getRecordId())== 0  && compare.compare(mainDelete, deletedId)< 0)
+            else if ((newOrModrec != null && compare.compare(mainDelete, newOrModrec.getRecordId())== 0 )  && compare.compare(mainDelete, deletedId)< 0)
             {    
                 // mainrec equals modifiedRecId,  Write out modified record.
                 if (verbose) System.err.println("Record added, removing id from  "+ newOrModrec.getRecordId() + " from Mod file");
@@ -425,14 +426,14 @@ public class MarcMerger
             }
             else // mainrec.id is greater than either newOrModrec.id or deletedId
             {
-                if (compare.compare(mainDelete, newOrModrec.getRecordId())> 0 && compare.compare(newOrModrec.getRecordId(), deletedId)== 0)
+                if (newOrModrec != null && compare.compare(mainDelete, newOrModrec.getRecordId())> 0 && compare.compare(newOrModrec.getRecordId(), deletedId)== 0)
                 {    
                     //  Update contains a new 
                     out.println(mainDelete);
                 }
                 else
                 {
-                    if (compare.compare(mainDelete, newOrModrec.getRecordId())> 0)
+                    if (newOrModrec != null && compare.compare(mainDelete, newOrModrec.getRecordId())> 0)
                     {    
                         // newOrModrec is a new record,  Write out new record.
                         if (verbose) System.err.println("New record in mod file "+ newOrModrec.getRecordId() + " skipping it.");
@@ -455,7 +456,7 @@ public class MarcMerger
             deletedId = getNextDelId(delReader);
         }
     }
-
+  
 
     private static String getNextDelId(BufferedReader delReader)
     {
@@ -465,7 +466,7 @@ public class MarcMerger
             String line = delReader.readLine();
             if (line != null) 
             {
-                id = line.replaceFirst("u?([0-9]*).*", "u$1");
+                id = line.replaceFirst("([-A-Za-z:._0-9]*).*", "$1");
             }
         }
         catch (IOException e)
