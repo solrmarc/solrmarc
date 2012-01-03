@@ -84,7 +84,7 @@ public class TestDirectors
                 numLines++;
                 String lineparts[] = line.split("\t\t");
                 boolean expectPerfection = true;
-                boolean expectToFix = false;
+                boolean greedy = true;
                 String answerStr = lineparts[0];
                 if (lineparts[0].startsWith("!"))
                 {
@@ -93,11 +93,11 @@ public class TestDirectors
                 }
                 if (answerStr.startsWith("~"))
                 {
-                    expectToFix = false;
+                    greedy = false;
                     answerStr = answerStr.substring(1);
                 }
                 String answers[] = answerStr.split("[|]");
-                Set<String> directors = VideoInfoMixin.getVideoDirectorsFromTextField(lineparts[1]);
+                Set<String> directors = VideoInfoMixin.getVideoDirectorsFromTextField(lineparts[1], greedy);
                 Set<String> answerSet = new LinkedHashSet<String>();
                 Set<String> iffyAnswerSet = new LinkedHashSet<String>();
                 boolean linePerfect = true;
