@@ -1,5 +1,39 @@
 #expected answer[tab][tab]line extracted from Marc record
-
+Jiří Menzel		Režie: Jiří Menzel; hudba: Jiří Šust... .
+Andrzej Wajda		Wytwórnia filmów Fabularnych ; scenariusz, Bohdan Czesko ; reayseria, Andrzej Wajda =
+Andrzej Wajda		Triumph Films ; ein Film von Andrzej Wajda ; Drehbuch von Boleslaw Michalek, Agnieszka Holland und Andrzej Wajda ; eine deutsch-französisch Coproduktion der CCC Filmkunst, Berlin, und Gaumont/TF1 Films Production/Stand'art, Paris, in Zusammenheit mit dem ZDF ; produziert von Artur Brauner ; Regie, Andrzej Wajda.
+Andrzej Wajda		Wytwórnia filmów Fabularnych ; scenariusz, Bohdan Czesko ; reayseria, Andrzej Wajda =
+Andrzej Wajda		Janus Films ; une coproduction Franco Polonaise, Gaumont-TF1 Films production, S.F.P.C.-T.M ; avec la participation du Ministere de la Culture, Paris, et Films Polski presentent ; un film d'Andrzej Wajda ; scénario, Jean-Claude Carriere ; avec la collaboration de Andrzej Wajda Agnieszka Holland, Bolesław Michałek, Jacek Gasiorowski ; une production Margaret Menegoz, Les Films du Losange ; avec la collaboration de Groupe de Production X-Varsovie, Barbara Pec-S̀lesicka.
+Alain Cavalier		Maurice Bernart presente une coproduction A.F.C. et Films A2 avec la participation du C.N.C. ; film de Alain Cavalier avec la collaboration de Camille de Casabianca ; produit par Maurice Bernat ; directeur, Alain Cavalier.
+Danièle Huillet|Jean-Marie Straub		von Danièle Huillet und Jean-Marie Straub ; Franz Seitz Produktion ... [et al.] ; Produktionsleitung, Danièle Huillet.
+Mweze Ngangura		un film écrit, réalisé et produit par Mweze Ngangura.
+Leontine Sagan		a Janus Films presentation ; a John Krimsky and Gifford Cochran presentation ; adaptation & screenplay, Christa A. Winsloe ; regie [i.e. director], Leontine Sagan.
+Gerhard Menzel		Ein Ufafilm ; Ein Film von Gerhard Menzel ; Spielleitung, Detlef Sierck.
+~Ruth Twiggs|Bruce Berryhill		a portrait of the artist ; directed by Ruth Twiggs, Bruce Berryhill ; produced by Ruth Twiggs, Eileen Mott.
+~Chuck Jones		Dr. Seuss' Horton hears a Who!  / Metro-Goldwyn-Mayer ; produced by Chuck Jones and Ted Geisel ; directed by Chuck Jones.
+~Trey Parker		world police / Paramount Pictures presents a Scott Rudin, Matt Stone production, a Trey Parker film ; produced by Scott Rudin, Trey Parker, Matt Stone ; written by Trey Parker & Matt Stone & Pam Brady ; directed by Trey Parker.
+~--		director of ludicrous movies.
+~--		recent developments, future directions /
+~Kathryn Lipke Vigesaa|John McKay		Maya thread of change /cproduced and directed by Kathryn Lipke Vigesaa and John McKay.
+José María Quero		realización, José María Quero.
+Vincent Gallo		Director/producer/writer/editor/director of photography, Vincent Gallo
+Larisy Shepitʹko		Mosfilʹm ; Tvorcheskoe obʺedinenie Tovarishch ; st͡senariĭ Valentina Ezhova, Natalʹi Ri͡azant͡sevoĭ ; postanovka, Larisy Shepitʹko ; direktor kartiny, V. Maslov.
+Vladimira Menʹshova		Mosfilʹm ; Vtoroe tvorcheskoe obʺedinenie ; st͡senariĭ Vladimira Gurkina ; postanovka Vladimira Menʹshova.
+Jerzy Hoffman		Przedsie̜biorstwo Realizacji Filmów "Zéspoły Filmowe" przedstawiaja film ; scenariusz w/g powiesci Henryka Sienkiewicza, Jerzy Hoffman, Adam Kersten, Wojciech Żukrowski ; reżyseria Jerzy Hoffman.
+Jean-Pierre Melville		Carlo Ponti, Georges de Beauregard présentent ; film de Jean-Pierre Melville ; Studio Canal.
+Yun Sŏng-ho		chejak, Ŭnha Haebang Chŏnsŏn Chejak Wiwŏnhoe ; kongdong chejak, Chʻŏngnyŏn Pʻillŭm ; pʻŭrodyusŏ, Kim Il-gwŏn ; kakpŏn, yŏnchʻul, Yun Sŏng-ho.
+Kim Tong-wŏn		Indie Story ; yŏnchʻul, Kim Tong-wŏn ; kihŏek, chejak, Pʻŭrŭn Yŏngsang.
+Pedro Almodóvar		una producción El Deseo S.A./Renn Productions/France 2 Cinema ; guión y direccíon, Pedro Almodóvar ; productor, Agustín Almodóvar.
+Deb Ellis|Denis Mueller		by Deb Ellis and Denis Mueller.
+Glauber Rocha		Mapa Difilm ; un filme de Glauber Rocha ; produto, Zelito Viana.
+Jacques Rivette		Pierre Grise productions ; Image Entertainment, Inc. ; Sceneries Entertainment ; un scenario et mise en scène de Jacques Rivette; scénario et dialogues Pascal Bonitzer et Christine Laurent; images Caroline Champetier; décors Mann de Chauvigny.
+Federico Fellini		un film P.D.C.-O.F.I. ; prodotto da Luigi Rovere ; regía di Federico Fellini ; sceneggiatura di Federico Fellini e Tullio Pinelli con la collaborazione di Ennio Flaiano da un soggetto di M. Antonioni-F. Fellini, T. Pinelli.
+Miloš Forman		Janus Films ; Československý Filmový Ústav Filmotéka ; Filmové Studio Barrandov uvádí ; námě a scénář Miloš Forman, Jaroslav Papoušek, Ivan Passer ; dramturg, Václav Šašek ; režie, Miloš Forman.
+Ingmar Bergman		an film av Ingmar Bergman ; Cinematograph ; Svenska filminstitutet ; a Janus Films presentation.
+Agnès Varda		Cine Tamaris présente ; un film d'Agnès Varda.
+Alfred Hitchcock		Universal Pictures ; Alfred Hitchcock's film
+François Truffaut		Films du carrosse, Valoria films, FIDA Cinematografica ; scénario et dialogue, François Truffaut, Claude de Givray, Bernard Revon ; producteur délégué, Marcel Berbert ; mise en scène, François Truffaut.
+Jean-Jacques Beineix		Film by Jean-Jacques Beineix ; screenplay, Jean-Jacques Beineix, Jean Van Hamme ; director of photography, Philippe Rouselot ; music, Vladimir Cosma ; production manager, Ully Pickard.
 S. Surendra Nath|K.M. Chaitanya		Music, Laxmikant Pyarelal ; script, Shama Zaidi, Padmavati Rao ; research, Priya Chandrashekhar ; art direction, Jayoo Nachiket ; editor, K.S. Sridhar ; photography, S. Ramchandra ; sound, Kotappa ; associate directors, S. Surendra Nath, K.M. Chaitanya  ; production management, B.V. Ramchandra.
 ~--		Includes HBO "first look", special effects, a virtual tour of the solar system, 3D models of the ships, mission objectives, Kennedy's speech, time-line of the space mission, the history of the moon, TV spots, "Destination moon", Generic series sell", "Cosmic wonder", "Patriotic", "Emotional", "Take the kids", "Rocket science", "The pitch", "Cowboys", "Directed by Sally Field", "Critics", "Hope I see you again".
 ~--		Special features (not subtitled) include two commentary tracks of director and director and producer, deleted scenes, making the Hyoja-dong set, TV documentary, historical incidents in film, about Song Kang-ho, interview with director, music video, poster shooting, trailer, press screening, PIFF info, and netizens' reviews.
@@ -11,7 +45,7 @@ S. Surendra Nath|K.M. Chaitanya		Music, Laxmikant Pyarelal ; script, Shama Zaidi
 Bernd Jacobs|Michael Kloft		ein film von Bernd Jacobs und Michael Kloft.
 Katrin Klocke|Britta Sandberg		ein film von Katrin Klocke und Britta Sandberg.
 Julio Bracho		Directed por Julio Bracho.
-Girīśh Kāranāḍa|Girish Karnad		Dūradarśana prastuti ; nirdeśaka, Girīśh Kāranāḍa = Swarajnama / Doordarshan presents ; directed by Girish Karnad.
+Girish Karnad		Dūradarśana prastuti ; nirdeśaka, Girīśh Kāranāḍa = Swarajnama / Doordarshan presents ; directed by Girish Karnad.
 ~--		"Produced by: Office of the Associate Director for Communication in collaboration with: CDC's Global Health Odyssey Museum.
 ~Veit Harlan		"The Restored 1945 Epic, directed by Veit Harlan" -- Container.
 ~--		"Josephine P. Briggs, M.D., director of the National Center for Complementary and Alternative Medicine, talks about how she has made biking a part of her everyday life."
@@ -31,6 +65,7 @@ Ermanno Olmi		Luigi Musini e Roberto Cicutto presentano ; una coproduzione ... C
 ~--		"Co-presented with the Virginia Funeral Directors Association, The Creative Writing Program of the Department of English, the Department of Chaplaincy Services and Pastoral Education, and the Forum for Contemporary Thought." -- from program flyer
 ~--		"Director-approved special edition five-disc set"--Container.
 Ricardo Franco		una película de Ricardo Franco.
+Fernando Colomo		une película de Fernando Colomo.
 ~--		Special features include bio-filmography of the director, out-takes and commentary.
 ~Martin Scorsese		Italianamerican / produced by the National Communications Foundation ; producers, Saul Rubin, Elaine Attias ; Director Martin Scorsese. 1974. Cast: Catherine and Charles Scorsese. A profile of Scorsese's parents.
 ~Martin Scorsese		The big shave : Viet '67 / Martin Scorsese, director, screenplay, editor. 1967. Cast: Peter Bernuth. "'Underground' cinema"--Program notes.
@@ -151,7 +186,7 @@ Natalia Toth		Contrakultura presenta ; Iruña Films ; una producción de Eduar
 !Dani Levy		A First Run Features presentation ; Y Filme Directors Pool ; X Filme Creative Pool ; in co-produktion mit WDR, BR, ARTE ; ein film von Dani Levy ; produzent, Stefan Arndt ; buch und regie, Dani Levy. 
 Rainer Werner Fassbinder		Produktion, Ulli Lommel/Atlantis Film, Antitheater X-film ; Buch und Regie, Rainer Werner Fassbinder. 
 Andreas Dresen		Peter Rommel Productions ; Dramaturgie, Cooky Ziesche ; Produzent, Peter Rommel ; Regie, Andreas Dresen. 
-??Ornah Ben-Dor Niv|??Orna Ben-Dor Niv		sherut ha-seraṭim ha-Yiśraʼeli magish ; tasriṭ u-vimui, Ornah Ben-Dor Niv ; mefiḳim : Shemuʼel Alṭman, Daṿid Shits ; ḥevrat hafaḳah, Manor Hafaḳot b-ʻe. m. = Because of that war / Israel film service presents ; director, Orna Ben-Dor Niv ; producers, Samuel Altman, David Shuetz ; production, Manor Ltd.
+Orna Ben-Dor Niv		sherut ha-seraṭim ha-Yiśraʼeli magish ; tasriṭ u-vimui, Ornah Ben-Dor Niv ; mefiḳim : Shemuʼel Alṭman, Daṿid Shits ; ḥevrat hafaḳah, Manor Hafaḳot b-ʻe. m. = Because of that war / Israel film service presents ; director, Orna Ben-Dor Niv ; producers, Samuel Altman, David Shuetz ; production, Manor Ltd.
 Ornah Ben-Dor Niv		sherut ha-seraṭim ha-Yiśraʼeli magish ; tasriṭ u-vimui, Ornah Ben-Dor Niv ; mefiḳim : Shemuʼel Alṭman, Daṿid Shits ; ḥevrat hafaḳah, Manor Hafaḳot b-ʻe. m. = Because of that war / Israel film service presents ; director, Ornah Ben-Dor Niv ; producers, Samuel Altman, David Shuetz ; production, Manor Ltd.
 Emilio Aragón		dirigida por Emilio Aragón ; guión, Fernando Castets, Emilio Aragón ; productores, Emilio Aragón y Mercedes Gamero ; música, Emilio Aragón ; director de fotografía, David Omedes ; montador, José Salcedo ; dirección de arte, Fernando González. 
 André Klotzel		Programa de Integracã̜o Cinema e TV ; Apoio Cultural Banespa ; BNDES Socicam Telerio e Eletrobás ; produtores associados Quanta, Consorcio Europa, Monica Schmiedt ; co-producã̜o, Portuguesa Lusa Filmes, Cinemate ; dirigido e produzido por André Klotzel.
@@ -160,7 +195,7 @@ Eryk Rocha		Petrobras, Grupo Novo de Cinema, TV Tarcisio Vidigal, Labo Cine do B
 Mosheh Tsimerman		"Tasriṭ u-vimui Mosheh Tsimerman (scriptwriter/director); bimui ṿa-ʻarikhah Ṭali Goldenberg (editing director)" ; editing, Inbar Tavor ; music, Ellyot ; writing and narration, Miri Chanoch ; camera, Avi Kener, Moshe Zimerman ; producers, Osnat Trebelsi, Moshe Zimerman.
 --		Cindy Tolan, casting, Jennifer von Mayrhauser, costume designer, Michael Shaw, production designer, Michael Rohatyn, music, Sabine Hoffman, editor, Declan Quinn, director of photography.
 Denis Caïozzi		Bel Air Media ... [et al.] présentent ; musique, Igor Stravinsky ; Orchestre et Ballet du Théâtre Mariinsky direction artistique et musicale, Valery Gergiev ; producteur délégué François Duplat ; réalisation, Denis Caïozzi.
-??Josef von Sternberg|??Joseph von Sternberg		UFA ; an Erich Pommer Production ; regie, Josef von Sternberg ; screenplay, Robert Liebmann, Carl Zuckmayer, Karl Vollmöller ; directed by Joseph von Sternberg.
+Joseph von Sternberg		UFA ; an Erich Pommer Production ; regie, Josef von Sternberg ; screenplay, Robert Liebmann, Carl Zuckmayer, Karl Vollmöller ; directed by Joseph von Sternberg.
 Josef von Sternberg		UFA ; an Erich Pommer Production ; regie, Josef von Sternberg ; screenplay, Robert Liebmann, Carl Zuckmayer, Karl Vollmöller ; directed by Josef von Sternberg.
 Jiang Wen|Mira Nair|Shunji Iwai|Yvan Attal|Brett Ratner|Allen Hughes|Shekhar Kapur|Natalie Portman|Faith Akin|Joshua Marston|Randy Balsmeyer		Vivendi Entertainment presents an Ever So Close & Visitor Pictures production in association with Sherezade Films in association with Also Known As Pictures ; Emmanuel Benbihy & Marina Grasic production ; producers, Emmanuel Benbihy & Marina Grasic ; written by Hu Hong & Meng Yao, Suketu Mehta, Shunji Iwai, Olivier Lecot and Yvan Attal, Jeff Nathanson, Xan Cassavetes and Stephen Winter, Anthony Minghella, Natalie Portman, Fatih Akin, Joshua Marston, Hall Powell and Israel Horovitz & James Strouse ; directed by Jiang Wen, Mira Nair, Shunji Iwai, Yvan Attal, Brett Ratner, Allen Hughes, Shekhar Kapur, Natalie Portman, Faith Akin, Joshua Marston, Randy Balsmeyer.
 David Udris|James Der Derian|Michael Udris		UDRIS Film and OXYOPIA Productions present a film by Udris/Der Derian/Udris ; Global Media Project ; produced, written, and directed by David Udris/James Der Derian/Michael Udris.
@@ -171,7 +206,7 @@ W.S. Van Dyke|Richard Thorpe|Edward Buzzell|Richard Schickel		W.S. Van Dyke, dir
 Terry Sanders		a film by Terry Sanders ; written, produced and directed by Terry Sanders ; narrated by Robert MacNeil.
 Pietro d'Agostino		Stage direction, Peter Konwitschny ; sets and costumes, Helmut Brade; lighting, Manfred Voss ; directed for television by Pietro d'Agostino.
 S. Surendra Nath|K.M. Chaitanya		Music, Laxmikant Pyarelal ; script, Shama Zaidi, Padmavati Rao ; research, Priya Chandrashekhar ; art direction, Jayoo Nachiket ; editor, K.S. Sridhar ; photography, S. Ramchandra ; sound, Kotappa ; associate directors, S. Surendra Nath, K.M. Chaitanya  ; production management, B.V. Ramchandra.
-Girīśh Kāranāḍa|Girish Karnad		Dūradarśana prastuti ; nirdeśaka, Girīśh Kāranāḍa = Swarajnama / Doordarshan presents ; directed by Girish Karnad.
+Girish Karnad		Dūradarśana prastuti ; nirdeśaka, Girīśh Kāranāḍa = Swarajnama / Doordarshan presents ; directed by Girish Karnad.
 Martin Mhando|Ron Mulvihill		a film by Martin Mhando, Ron Mulvihill and the ancestors ; written and produced by Queenae Taylor Mulvihill.
 --		Photography, Raúl Martínez Solares ; art direction, Edward Fitzgerald ; music, Luis Hernández Breton ; editor, Jorge Bustos.
 Jos ̌Padilha|Felipe Lacerda		THINKFilm in association with HBO/Cinemax Documentary Films presents a Zazen Production ; produced by Jos ̌Padilha and Marcos Prado ; directed by Jos ̌Padilha [and] Felipe Lacerda.
@@ -206,8 +241,8 @@ Elaine Prater Hodges|Ellen Wooters		Directors, Elaine Prater Hodges, Ellen Woote
 !??george Lucas		Producer, Francis Ford Coppola ; co-producer, Gary Kurtz ; director, george Lucas ; writers, George Lucas, Gloria Katz, Willard Huyck.
 George Lucas		Producer, Francis Ford Coppola ; co-producer, Gary Kurtz ; director, George Lucas ; writers, George Lucas, Gloria Katz, Willard Huyck.
 Bob Spiers		In Absolutely fabulous: Bob Spiers, co-director ; Jon Plowman, Elizabeth Flowers, producers.
-??N. Mikhalkov|Nikita Mikhalkov|S. Mirochnitchenko		Studii͡a "TRITĖ", Caméra One ... et al.] ; Nikita Mikhalkov i Mishelʹ Seĭdu predstavli͡ai͡ut ; filʹm Nikity Mikhalkova ; avtor st͡senarii͡a i rezhisser, N. Mikhalkov pri uchastii S. Miroshnichenko = Studio Trite, Camera One ; Nikita Mikalkov and Michel Seydoux present ; a film by Nikita Mikhalkov ; screenplay and direction, Nikita Mikhalkov with the participation of S. Mirochnitchenko.
-??Nikity Mikhalkov|Nikita Mikhalkov|S. Mirochnitchenko		Studii͡a "TRITĖ", Caméra One ... et al.] ; Nikita Mikhalkov i Mishelʹ Seĭdu predstavli͡ai͡ut ; filʹm Nikity Mikhalkova ; avtor st͡senarii͡a i rezhisser, Nikity Mikhalkov pri uchastii S. Miroshnichenko = Studio Trite, Camera One ; Nikita Mikalkov and Michel Seydoux present ; a film by Nikita Mikhalkov ; screenplay and direction, Nikita Mikhalkov with the participation of S. Mirochnitchenko.
+Nikita Mikhalkov|S. Mirochnitchenko		Studii͡a "TRITĖ", Caméra One ... et al.] ; Nikita Mikhalkov i Mishelʹ Seĭdu predstavli͡ai͡ut ; filʹm Nikity Mikhalkova ; avtor st͡senarii͡a i rezhisser, N. Mikhalkov pri uchastii S. Miroshnichenko = Studio Trite, Camera One ; Nikita Mikalkov and Michel Seydoux present ; a film by Nikita Mikhalkov ; screenplay and direction, Nikita Mikhalkov with the participation of S. Mirochnitchenko.
+Nikita Mikhalkov|S. Mirochnitchenko		Studii͡a "TRITĖ", Caméra One ... et al.] ; Nikita Mikhalkov i Mishelʹ Seĭdu predstavli͡ai͡ut ; filʹm Nikity Mikhalkova ; avtor st͡senarii͡a i rezhisser, Nikity Mikhalkov pri uchastii S. Miroshnichenko = Studio Trite, Camera One ; Nikita Mikalkov and Michel Seydoux present ; a film by Nikita Mikhalkov ; screenplay and direction, Nikita Mikhalkov with the participation of S. Mirochnitchenko.
 Nikita Mikhalkov|S. Mirochnitchenko		Studii͡a "TRITĖ", Caméra One ... et al.] ; Nikita Mikhalkov i Mishelʹ Seĭdu predstavli͡ai͡ut ; filʹm Nikita Mikhalkova ; avtor st͡senarii͡a i rezhisser, Nikita Mikhalkov pri uchastii S. Miroshnichenko = Studio Trite, Camera One ; Nikita Mikalkov and Michel Seydoux present ; a film by Nikita Mikhalkov ; screenplay and direction, Nikita Mikhalkov with the participation of S. Mirochnitchenko.
 !??rossana Horsley		Director, rossana Horsley; series producer, Richard Keefe.
 Rossana Horsley		Director, Rossana Horsley; series producer, Richard Keefe.
