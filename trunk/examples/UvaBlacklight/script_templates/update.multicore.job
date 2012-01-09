@@ -25,5 +25,5 @@ solrnewcore2=blacklight_all_`date +%Y%m%d`
 #copy the file solr.xml.template to solr.xml  replacing 
 #the strings @@blacklight_index@@ and @@blacklight_dev_index@@ 
 #with the names of the new solr cores. 
-cat /lib_content27/solr/solr.xml.template  | sed -e "s/@@blacklight_index@@/$solrnewcore1/" -e "s/@@blacklight_dev_index@@/$solrnewcore2/" > /lib_content27/solr/solr.xml
+cat /lib_content27/solr/solr.xml.template  | sed -e "s/@@blacklight_index@@/$solrnewcore2/" -e "s/@@blacklight_dev_index@@/$solrnewcore1/" > /lib_content27/solr/solr.xml
 
