@@ -38,7 +38,7 @@ if [ -e /usr/local/projects/marc/incoming/$update.mrc ] ; then
     java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar $SOLRMARCDISTDIR/SolrMarc.jar $INPUTDIRTMP/$update.sort.mrc $INPUTDIR/location.txt changesOnly handleAllLocs > $INPUTDIRTMP/$update.patch.mrc
     marcupdate $INPUTDIRTMP/$update.sort.mrc $INPUTDIRTMP/$update.patch.mrc > $INPUTDIR/$update.mrc
 
-    sort -n $INPUTDIRTMP/$update.del > $INPUTDIR/$update.del
+    sort -n $INPUTDIRTMP/$update.del | sed -e 's/\([0-9]*\).*/u\1/' > $INPUTDIR/$update.del
 else
     echo "No nightly update found for date: $update" | mail -s "Message from update cron job" rh9ec@virginia.edu
 fi

@@ -18,11 +18,11 @@ if [ "$arg2" == "" ]
 then
     solrcore=`cat $solrmarcdir/$config | egrep solr.core.name | sed -e's/.* = //'`
     solrnewcore=`echo $solrcore | sed -e's/_index//'`_`date +%Y%m%d`
-    solroldcore=`echo $solrcore | sed -e's/_index//'`_`date --date="-3 days" +%Y%m%d`
+    solroldcore=`echo $solrcore | sed -e's/_index//'`_`date --date="-2 days" +%Y%m%d`
 else
     solrcore=$arg2
     solrnewcore=blacklight_${arg2}_`date +%Y%m%d`
-    solroldcore=blacklight_${arg2}_`date --date="-3 days" +%Y%m%d`
+    solroldcore=blacklight_${arg2}_`date --date="-2 days" +%Y%m%d`
 fi
 
 solrhome=`cat $solrmarcdir/$config | egrep solr.path | sed -e's/.* = //'`
