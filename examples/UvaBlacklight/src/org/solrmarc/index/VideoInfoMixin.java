@@ -234,7 +234,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                     }
                 }
                 String subtitle = indexer.getFirstFieldVal(record, null, "245b");
-                if (subtitle != null && subtitle.contains("direct") || subtitle.contains("Direct"))
+                if (subtitle != null && (subtitle.contains("direct") || subtitle.contains("Direct")))
                 {
                     Set<String> directors = getVideoDirectorsFromTextField(subtitle, false);
                     result.addAll(directors);
@@ -284,7 +284,8 @@ public class VideoInfoMixin extends SolrIndexerMixin
         responsibility = responsibility.replaceAll("([a-z][a-z][a-z])[.]", "$1;");
         responsibility = responsibility.replaceAll("([a-z][a-z])[.]  ", "$1;  ");
         responsibility = responsibility.replaceAll("direção de produção", "producer");//porteguese
-        responsibility = responsibility.replaceAll("direction de (la )?production", "producer");//french
+        responsibility = responsibility.replaceAll("direct(or|ion|eur) de (la )?[ ]?produc[ct]i(ó|o)n", "producer");//french/spanish
+        responsibility = responsibility.replaceAll("direcci(ó|o)n art\\B*", "artguy");//spanish
         responsibility = responsibility.replaceAll("produit par\\b", "produced by");
 
         String responsibility1 = responsibility.replaceAll("[Rr]eg(i|í)[ea]?\\b", "didrector");//german/italian/swedish
@@ -295,7 +296,8 @@ public class VideoInfoMixin extends SolrIndexerMixin
         responsibility1 = responsibility1.replaceAll("[Rr](é|e)alisation", "didrection");//french
         responsibility1 = responsibility1.replaceAll("[Rr]ealizaci(ó|o)n", "didrection");//spanish
         responsibility1 = responsibility1.replaceAll("[Rr]éalisé( et [a-z]*)? (par|by)", "didrected$1 by");//french
-        responsibility1 = responsibility1.replaceAll("Directed por", "didrected by");//spanish
+        responsibility1 = responsibility1.replaceAll("[Dd]irected por", "didrected by");//spanish
+        responsibility1 = responsibility1.replaceAll("[Dd]irigé par", "didrected by");//french
         responsibility1 = responsibility1.replaceAll("[Dd]irreción", "didrection");//spanish
         responsibility1 = responsibility1.replaceAll("[Dd]ireccíon", "didrection");//spanish
         responsibility1 = responsibility1.replaceAll("[Dd]ireção", "didrector");//porteguese
@@ -308,16 +310,16 @@ public class VideoInfoMixin extends SolrIndexerMixin
         responsibility1 = responsibility1.replaceAll("[Yy]öneten", "didrector");//turkish
         responsibility1 = responsibility1.replaceAll("[Nn]irdeśaka", "didrector");//hindi
         responsibility1 = responsibility1.replaceAll("[Pp]ostanovka", "didrector");//russian
-        responsibility1 = responsibility1.replaceAll("(un )?film[e]? d[ei]", "a flim by");//french
+        responsibility1 = responsibility1.replaceAll("(un )?film[e]? d[ei]\\b", "a flim by");//french
         responsibility1 = responsibility1.replaceAll("un film d'", "a flim by ");//french
         responsibility1 = responsibility1.replaceAll("(an|en) film av", "a flim by"); //swedish
         responsibility1 = responsibility1.replaceAll("[Ee]in [Ff]ilm von", "a flim by"); //german
         responsibility1 = responsibility1.replaceAll("un(e|a) pel(í|i)cula de", "a flim by");//spanish
-        responsibility1 = responsibility1.replaceAll("mise en sc(e|è)ne( de)?", "a flim by");//french
+        responsibility1 = responsibility1.replaceAll("[Mm]is[e]? en sc(e|è)ne( de)?", "a flim by");//french
         responsibility1 = responsibility1.replaceAll("Film by", "a flim by");
-        responsibility1 = responsibility1.replaceAll("\\bpar\\b", "maybe by");
-        responsibility1 = responsibility1.replaceAll("^by", "maybe by");
-        responsibility1 = responsibility1.replaceAll("^von", "maybe by");
+        //responsibility1 = responsibility1.replaceAll("\\bpar\\b", "maybe by");
+        //responsibility1 = responsibility1.replaceAll("^by", "maybe by");
+        //responsibility1 = responsibility1.replaceAll("^von", "maybe by");
 //        if (!responsibility1.equals(responsibility))
 //        {
 //            responsibility = responsibility1;
@@ -335,7 +337,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
 
         // Now split the string into subparts separated by ;  (or -- or  : )
         
-        for (int loop = 0; loop < 6; loop++)
+        for (int loop = 0; loop < 5; loop++)
         {
             if (loop == 3)
             {
@@ -348,8 +350,8 @@ public class VideoInfoMixin extends SolrIndexerMixin
                 String part = part0;
                 part = part.trim();
                 if (((loop == 0 || loop == 3) && part.matches(".*[Dd]irect(ed|or[s]?|ion)\\b.*")) ||
-                    ((loop == 1 || loop == 4) && part.matches(".*a film by.*")) ||
-                    (loop == 5 && part.matches(".*maybe by.*")) )
+                    ((loop == 1 || loop == 4) && part.matches(".*a film by.*"))) // ||
+         //           (loop == 5 && part.matches(".*maybe by.*")) )
                 {
                     String trimmed;
                 //    part = part.replaceAll("\\[sic[.][]]", "");
@@ -395,9 +397,9 @@ public class VideoInfoMixin extends SolrIndexerMixin
                     {
                         part = part1;
                     }
-                    if (part.matches(".*[Dd]irector[s]? of [Pp]hotography.*"))
+                    if (part.matches(".*[Dd]irector[s]? (of|de|de la) ([Pp]h|[Ff])otogra(ph|f)(y|(i|í)[ea]).*"))
                     {
-                        part = part.replaceFirst("[Dd]irector[s]? of [Pp]hotography", "cinematographer");
+                        part = part.replaceFirst("[Dd]irector[s]? (of|de|de la) ([Pp]h|[Ff])otogra(ph|f)(y|(i|í)[ea])", "cinematographer");
                     }
                     else if (part.matches(".*, [Dd]irector[s]? (of|for) .*"))
                     {
@@ -550,10 +552,9 @@ public class VideoInfoMixin extends SolrIndexerMixin
                     //  Pattern matching when the subpart is of the form:   Direction Some Name 
                     else if (part.matches(".*[Dd]irection.*"))
                     {
-                        if (part.matches(".*([Aa]rt|[Mm]usic(al)?|[Ss]tage|[Pp]roject|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Ee]diting) [Dd]irection.*" )||
-                                part.matches(".*[Dd]irection (de )?((la )?(f|ph)otogra(f|ph)ie|production|artistique|arte|musicale).*"))
+                        if (part.matches(".*([Aa]rt|[Mm]usic(al)?|[Ss]tage|[Pp]roject|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Oo]rchestra|[Ee]diting) [Dd]irection.*" )||
+                                part.matches(".*[Dd]irection (of )?(de )?(la )?((f|ph)otogra(f|ph)ie|production|[Cc]in(é|e)matographie|artistique|art[e]?|musicale).*"))
                             continue;
-    
                         part = part.replaceFirst(".*[Dd]irection[^A-Z]*", "direction: ");
                         part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "# $1");
                         part = part.replaceAll(" (and|with|et) ", " & ");

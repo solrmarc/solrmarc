@@ -174,8 +174,8 @@ public class MarcFilteredReader implements MarcReader
             if (rec != null && includeRecordIfFieldMissing != null)
             {
                 Set<String> fields = SolrIndexer.getFieldList(rec, includeRecordIfFieldMissing);
-                if ((fields.size() == 0 && includeRecordIfFieldDoesntContain == null) ||
-                    (fields.size() != 0 && includeRecordIfFieldDoesntContain != null && !Utils.setItemContains(fields, includeRecordIfFieldDoesntContain)))
+                if ((includeRecordIfFieldDoesntContain == null && fields.size() == 0) ||
+                    (includeRecordIfFieldDoesntContain != null && !Utils.setItemContains(fields, includeRecordIfFieldDoesntContain)))
                 {
                     currentRecord = rec;
                 }

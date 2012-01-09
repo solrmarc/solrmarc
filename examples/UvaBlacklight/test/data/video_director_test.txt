@@ -1,11 +1,26 @@
 #expected answer[tab][tab]line extracted from Marc record
+Rafael Alcázar		Vestuario, Paco Delgado; sonido, Daniel Heras, Fernando Pocostales; dirección artistica, Miguel A. Moraleda; música original, Álvaro Peire; montaje, Javier Laffaille; director de fotografía, Gerardo Gormezano; director de producción, Manuel Manchón; guión, Felipe Hernández Cava, Rafael Alcázar; producción y dirección, Rafael Alcázar.
+Sembene Ousmane		Filmi Domireew Sénégal présente ; co-production Direction de la Cinématographie Nationale, Centre Cinématographique Marocain, Cinetelefilms, Les Films de la Terre Africaine ; scénario et réalisation, Sembene Ousmane.
+--		Direction of art, Tulé Peake ; costumes, Cláudia Kopke ; sound, Leandro Lima ; photo and camera, Lula Carvalho ; music, Pedro Bromfman.
+--		Cinematographers, Jules Kruger, René Ribault, Charlotte Guilbert ; art director, Lucien Carré ; music, Arthur Honegger ; orchestra direction, Maurice Jaubert ; production designer, Jean Perrier ; produced by Raymond Borderie.
+--		Scénario, adaptation, et dialogue, Luis Bunuel at Jean-Claude Carrière ; directeur de la photographie, Christian Matras ; music by, Luis Buñuel ; directeur de la  production, U. Pickard.
+Max Ophuls		a Janus Film presentation ; une co-production Gamma Films, Florida Films, Union Films ; Gamma-Film présente ; un film de Max Ophuls ; d'après un roman de Cecil Saint Laurent ; scènario de Max Ophuls ; adaptation de Annette Wademant et Max Ophuls ; dialogue de Jacques Natanson ; directeur de la production, Ralph Baum ; producteur délégué, Albert Caraco.
+--		Directeur de photographie, Christian Matras ; musique de Georges Auric ; [edited by] Madeleine Gug.
+Carlos Galettini		Negocios Cinematográficos presenta un film de Carlos Galettini ; director de producción, Luis A. Sartor ; dirección, Carlos Galettini.
+Claude Sautet		[présenté par] Raymond Danon, Roland Girard, et Jean Bolvary ; [dirigé par] Claude Sautet ; scénario de Paul Guimard, Jean-Loup Dabadie et Claude Sautet.
+Imanol Uribe		Dirigida, Imanol Uribe ; director de produccion, Antonio Guillen Rey ; musica, Jose Nieto ; fotografia, Javier Aguirresarobe ; productor ejecutivo, Antonio Cardenal ; guion, Imanol Uribe, Juan Potau, Paco Pino.
+Daniel Vigne		[présent par] La société française de production cinématographique, La société de production des films Marcel Dassault, France région 3 ; un film écrit par Jean-Claude Carriere, Daniel Vigne ; décors, Alain Negre ; directeur de la production, Paul Maigret ; un film de Daniel Vigne.
+Cheick Oumar Sissoko		Idrissa Ouedraogo présente ; une production Kora-Films ; directeur de production, Ibrahima Toure ; un film de Cheick Oumar Sissoko.
+Pierre Cheval		Mis en scene, Pierre Cheval ; adaptation cinematographique, Pierre Cheval, Christian Stengel, Wladimir Strijevsky ; directeur de production, Christian Stengel, prises de vues, Mundviller ; musique, Arthur Honegger.
+--		Producer, George Stevens, Jr., ; film designer, James R. Silke ; writer, Theodore Strauss.
+Jaime de Armiñan		Escrita y dirigida, Jaime de Armiñan; director de productions, Manuel Perez; director de fotografia, Teo Escamilla.
+Jean Renoir		Paris Film production ; un film de Jean Renoir ; directeur de production, Robert Thal.
 Jiří Menzel		Režie: Jiří Menzel; hudba: Jiří Šust... .
 Andrzej Wajda		Wytwórnia filmów Fabularnych ; scenariusz, Bohdan Czesko ; reayseria, Andrzej Wajda =
 Andrzej Wajda		Triumph Films ; ein Film von Andrzej Wajda ; Drehbuch von Boleslaw Michalek, Agnieszka Holland und Andrzej Wajda ; eine deutsch-französisch Coproduktion der CCC Filmkunst, Berlin, und Gaumont/TF1 Films Production/Stand'art, Paris, in Zusammenheit mit dem ZDF ; produziert von Artur Brauner ; Regie, Andrzej Wajda.
 Andrzej Wajda		Wytwórnia filmów Fabularnych ; scenariusz, Bohdan Czesko ; reayseria, Andrzej Wajda =
 Andrzej Wajda		Janus Films ; une coproduction Franco Polonaise, Gaumont-TF1 Films production, S.F.P.C.-T.M ; avec la participation du Ministere de la Culture, Paris, et Films Polski presentent ; un film d'Andrzej Wajda ; scénario, Jean-Claude Carriere ; avec la collaboration de Andrzej Wajda Agnieszka Holland, Bolesław Michałek, Jacek Gasiorowski ; une production Margaret Menegoz, Les Films du Losange ; avec la collaboration de Groupe de Production X-Varsovie, Barbara Pec-S̀lesicka.
 Alain Cavalier		Maurice Bernart presente une coproduction A.F.C. et Films A2 avec la participation du C.N.C. ; film de Alain Cavalier avec la collaboration de Camille de Casabianca ; produit par Maurice Bernat ; directeur, Alain Cavalier.
-Danièle Huillet|Jean-Marie Straub		von Danièle Huillet und Jean-Marie Straub ; Franz Seitz Produktion ... [et al.] ; Produktionsleitung, Danièle Huillet.
 Mweze Ngangura		un film écrit, réalisé et produit par Mweze Ngangura.
 Leontine Sagan		a Janus Films presentation ; a John Krimsky and Gifford Cochran presentation ; adaptation & screenplay, Christa A. Winsloe ; regie [i.e. director], Leontine Sagan.
 Gerhard Menzel		Ein Ufafilm ; Ein Film von Gerhard Menzel ; Spielleitung, Detlef Sierck.
@@ -24,7 +39,6 @@ Jean-Pierre Melville		Carlo Ponti, Georges de Beauregard présentent ; film de 
 Yun Sŏng-ho		chejak, Ŭnha Haebang Chŏnsŏn Chejak Wiwŏnhoe ; kongdong chejak, Chʻŏngnyŏn Pʻillŭm ; pʻŭrodyusŏ, Kim Il-gwŏn ; kakpŏn, yŏnchʻul, Yun Sŏng-ho.
 Kim Tong-wŏn		Indie Story ; yŏnchʻul, Kim Tong-wŏn ; kihŏek, chejak, Pʻŭrŭn Yŏngsang.
 Pedro Almodóvar		una producción El Deseo S.A./Renn Productions/France 2 Cinema ; guión y direccíon, Pedro Almodóvar ; productor, Agustín Almodóvar.
-Deb Ellis|Denis Mueller		by Deb Ellis and Denis Mueller.
 Glauber Rocha		Mapa Difilm ; un filme de Glauber Rocha ; produto, Zelito Viana.
 Jacques Rivette		Pierre Grise productions ; Image Entertainment, Inc. ; Sceneries Entertainment ; un scenario et mise en scène de Jacques Rivette; scénario et dialogues Pascal Bonitzer et Christine Laurent; images Caroline Champetier; décors Mann de Chauvigny.
 Federico Fellini		un film P.D.C.-O.F.I. ; prodotto da Luigi Rovere ; regía di Federico Fellini ; sceneggiatura di Federico Fellini e Tullio Pinelli con la collaborazione di Ennio Flaiano da un soggetto di M. Antonioni-F. Fellini, T. Pinelli.
@@ -148,7 +162,7 @@ Sergio Leone		a Sergio Leone film.
 Martha Coolidge		HBO Pictures presents an Esparza/Katz production in association with Berry/Cirrincione ; a Martha Coolidge film ; produced by Larry Y. Albucher ; screenplay by Shonda Rimes and Scott Abbott.
 Jean-Luc Godard		Sara Films ... [et al.] ; un film de Jean-Luc Godard ; direction de production, Martine Marignac, Catherine Lapoujade, Armand Barbault. Prénom Carmen / Alain Sarde présente ; la co-production Sara Films, JLG Films, Films A2 ; scénario adaptation, Anne-Marie Miéville ; un film de Jean-Luc Godard.
 Pierre Thoretton		Les Films du Lendemain, Les Films de Pierre présentent, en coproduction avec France 3 Cinema, avel la participation de Canal +, avec la participation de France Televisions ; une film produit par Kristina Larsen, Hugues Charbonneau, Pierre Thoretton ; scenario, Eve Guillou, Pierre Thoretton ; un film de Pierre Thoretton. 
-Jean Grémillon		par Jean Grémillon ; scénario et dialogues de Jacques Prévert et Pierre Laroche ; une production André Paulvé. Alain Renais		realisation, Alain Renais ; co-production, Cocinor, Como-Films, Argos Films. 
+Alain Renais		realisation, Alain Renais ; co-production, Cocinor, Como-Films, Argos Films. 
 Alain Resnais		une co-production, Como-Films, S. Halfon, Argos-Films, A. Dauman, Ph. Lifchitz, Cocinor ; réalisation, Alain Resnais ; texte, Jean Cayrol ; direction de la production en extérieurs, Edouard Muszka. 
 Yavuz Turgul		Kurgu, Bülent Taşar ; sanat yönetmeni, Sirma Bradley ; yardimci yönetmen, Leyla Özalp ; müzik, Tamer Çiray ; görüntü yönetmeni, Soykut Turan ; yapimcilar, Mine Vargi, Ömer Vargi, Mustafa Oğ̈uz ; yazan / yöneten, Yavuz Turgul. 
 Nuri Bilge Ceylan		CO Production, NBC Film, Pyramide Productions ; yazan ve yöneten, Nuri Bilge Ceylan ; producer, Zeynep Özbatur. 
