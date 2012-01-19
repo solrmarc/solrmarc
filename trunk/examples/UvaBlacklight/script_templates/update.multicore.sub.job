@@ -59,7 +59,7 @@ if [ ! -e $solrnewdir ] ; then
     mv $solrnewdir.tmp $solrnewdir
 fi
 
-# now delete the solr data directory from three days ago
+# now delete the solr data directory from two days ago
 if [[ ! -e $solrolddir  && `echo $solrolddir | grep 'all'` != "" ]] 
 then
    solrolddir=`echo $solrolddir | sed -e 's/all/dev/'`
