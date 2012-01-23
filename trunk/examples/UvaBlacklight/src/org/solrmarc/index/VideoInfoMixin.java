@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.marc4j.ErrorHandler;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
@@ -236,7 +237,25 @@ public class VideoInfoMixin extends SolrIndexerMixin
                 String subtitle = indexer.getFirstFieldVal(record, null, "245b");
                 if (subtitle != null && (subtitle.contains("direct") || subtitle.contains("Direct")))
                 {
+                    
+                    if (indexer.getErrorHandler() != null)
+                    {
+                        indexer.getErrorHandler().addError(record.getControlNumber(), "245", "b", ErrorHandler.MINOR_ERROR, 
+                                                           "Director information erroneously included in the 245b subtitle field");
+                    }
                     Set<String> directors = getVideoDirectorsFromTextField(subtitle, false);
+                    result.addAll(directors);
+                }
+                String medium = indexer.getFirstFieldVal(record, null, "245h");
+                if (medium != null && (medium.contains("direct") || medium.contains("Direct")))
+                {
+                    
+                    if (indexer.getErrorHandler() != null)
+                    {
+                        indexer.getErrorHandler().addError(record.getControlNumber(), "245", "h", ErrorHandler.MINOR_ERROR, 
+                                                           "Director information erroneously included in the 245h medium field");
+                    }
+                    Set<String> directors = getVideoDirectorsFromTextField(medium, false);
                     result.addAll(directors);
                 }
 
@@ -300,9 +319,11 @@ public class VideoInfoMixin extends SolrIndexerMixin
         responsibility1 = responsibility1.replaceAll("[Dd]irigé par", "didrected by");//french
         responsibility1 = responsibility1.replaceAll("[Dd]irreción", "didrection");//spanish
         responsibility1 = responsibility1.replaceAll("[Dd]ireccíon", "didrection");//spanish
+        responsibility1 = responsibility1.replaceAll("[Dd]irector(a|es)", "didrector");//spanish
         responsibility1 = responsibility1.replaceAll("[Dd]ireção", "didrector");//porteguese
         responsibility1 = responsibility1.replaceAll("[Dd]iretto da", "didrector");//italian
         responsibility1 = responsibility1.replaceAll("[Dd]irecteur", "didrector");//french
+        responsibility1 = responsibility1.replaceAll("[Dd]irect(e|io)r", "didrector");//typo
         responsibility1 = responsibility1.replaceAll("[Dd]irigid[oa]", "didrector");//porteguese
         responsibility1 = responsibility1.replaceAll("[Tt]asriṭ u-vimui", "didrector");//hebrew
         responsibility1 = responsibility1.replaceAll("[Ii]khr(ā|a)j", "didrector");//arabic
@@ -483,8 +504,9 @@ public class VideoInfoMixin extends SolrIndexerMixin
                             addCleanedName(result, squeezedresult, subpart, reverseName, greedy);
                         }
                     }
-                    else if (part.matches(".*[Dd]irected.*"))
+                    else if (part.matches(".*[Dd]irected.*") || part.matches(".*[Dd]irected( (and|&) [-a-z]*)?,.*"))
                     {
+                        part = part.replaceFirst(".*[Dd]irected( (and|&) [-a-z]*),","directified by");  
                         part = part.replaceFirst(".*[Dd]irected[]:,)]?[ ]?", "directified by ");
                         part = part.replaceAll("/", " & ");
                         part = part.replaceAll("\\[|\\]", "");
