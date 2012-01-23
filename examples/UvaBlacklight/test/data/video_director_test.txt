@@ -1,4 +1,14 @@
 #expected answer[tab][tab]line extracted from Marc record
+Tami Gold		Tamerik Productions ; a videotape by Tami Gold with Jennifer Miller ; produced, directed & camera, Tami Gold.
+Alan Lomax|Forrestine Paulay		Directors, writers, by Alan Lomax and Forrestine Paulay; project director, Alan Lomax.
+George B. Seitz		Directer George B. Seitz ; piano score by Stuart Oderman.
+Alan Hartwick		Alan Hartwick, producer and directer  ; produced by Wild Canary Sights and Sounds.
+M.S. Darr		story dialogues, Alam Siahposh ; producer, G.A. Gul ; directior, M.S. Darr.
+Howard Worth		Ravi Shankar ; directer, Howard Worth ; writer, Nancy Bacal ; producer, Gary Haber.
+Miguel Kahan		una produccion de Amalia Hernández, directora y coreografa, y Miguel Kahan.
+Ginny Martin		una producción de KERA ; Procineas S.C.L., para Once TV ; productora de la serie/productora ejecutiva, Sylvia Komatsu ; productores, Andrea Boardman, Ginny Martin, Rob Tranchin ; productor principal, Paul Espinosa ; directora, Ginny Martin.
+Mafer Surez|Gerardo Tort		Televisa presenta ; directores, Mafer Surez, Gerardo Tort ; guionistas, Catalina Aguilar ... [et al.].
+Harry From		written, produced and narrated by Stanley Milgram ; directed and co-produced, Harry From.
 Rafael Alcázar		Vestuario, Paco Delgado; sonido, Daniel Heras, Fernando Pocostales; dirección artistica, Miguel A. Moraleda; música original, Álvaro Peire; montaje, Javier Laffaille; director de fotografía, Gerardo Gormezano; director de producción, Manuel Manchón; guión, Felipe Hernández Cava, Rafael Alcázar; producción y dirección, Rafael Alcázar.
 Sembene Ousmane		Filmi Domireew Sénégal présente ; co-production Direction de la Cinématographie Nationale, Centre Cinématographique Marocain, Cinetelefilms, Les Films de la Terre Africaine ; scénario et réalisation, Sembene Ousmane.
 --		Direction of art, Tulé Peake ; costumes, Cláudia Kopke ; sound, Leandro Lima ; photo and camera, Lula Carvalho ; music, Pedro Bromfman.
