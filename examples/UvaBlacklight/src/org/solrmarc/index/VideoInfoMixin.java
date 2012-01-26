@@ -320,7 +320,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
         responsibility1 = responsibility1.replaceAll("[Dd]irreción", "didrection");//spanish
         responsibility1 = responsibility1.replaceAll("[Dd]ireccíon", "didrection");//spanish
         responsibility1 = responsibility1.replaceAll("[Dd]irector(a|es)", "didrector");//spanish
-        responsibility1 = responsibility1.replaceAll("[Dd]ireção", "didrector");//porteguese
+        responsibility1 = responsibility1.replaceAll("[Dd]ire(ç|c)ão", "didrector");//porteguese
         responsibility1 = responsibility1.replaceAll("[Dd]iretto da", "didrector");//italian
         responsibility1 = responsibility1.replaceAll("[Dd]irecteur", "didrector");//french
         responsibility1 = responsibility1.replaceAll("[Dd]irect(e|io)r", "didrector");//typo
