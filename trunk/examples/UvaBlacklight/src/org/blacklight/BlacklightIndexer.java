@@ -1299,10 +1299,26 @@ public class BlacklightIndexer extends SolrIndexer
         return(result);
     }
 
+    private String getURLLabelFrom3andZ(DataField df, String defaultLabel)
+    {
+        String label = "";
+        
+        List<Subfield> subs = (List<Subfield>)df.getSubfields();
+        for (Subfield sf : subs)
+        {
+            if (sf.getCode() == 'z' || sf.getCode() == '3')
+            {
+                label = label + sf.getData() + " ";
+            }
+        }
+        label = label.replaceAll("[ ]+$", "");
+        if (label.length()== 0) label = defaultLabel;
+        return(label);
+    }
+    
     private String buildParsableURLString(DataField df, String defaultLabel)
     {
-        String label = (df.getSubfield('z') != null) ? df.getSubfield('z').getData() : defaultLabel;
-        if (label.startsWith("(")) label = defaultLabel;
+        String label = getURLLabelFrom3andZ(df, defaultLabel);
         String url = df.getSubfield('u').getData(); 
         String result = url + "||" + label;
         return(result);
