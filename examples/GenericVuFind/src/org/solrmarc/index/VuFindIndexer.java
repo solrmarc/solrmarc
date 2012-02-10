@@ -849,13 +849,20 @@ public class VuFindIndexer extends SolrIndexer
                 if (subfields_d != null) {
                     while (subfieldsIter_d.hasNext()) {
                         val = subfieldsIter_d.next().getData();
+                        if (!val.matches("-?\\d+(.\\d+)?")) {
+                            return null;
+                        }
                     }
                 }
                 List<Subfield> subfields_f = physical.getSubfields('f');
                 Iterator<Subfield> subfieldsIter_f = subfields_f.iterator();
                 if (subfields_f != null) {
                     while (subfieldsIter_f.hasNext()) {
-                        val = val + ',' + subfieldsIter_f.next().getData();
+                        String val2 = subfieldsIter_f.next().getData();
+                        if (!val2.matches("-?\\d+(.\\d+)?")) {
+                            return null;
+                        }
+                        val = val + ',' + val2;
                     }
                 }
             return val;
