@@ -27,6 +27,7 @@ fi
 cp /usr/local/projects/marc/incoming/location.txt $INPUTDIR
 cp /usr/local/projects/marc/incoming/allmhlds $INPUTDIR
 cp /usr/local/projects/marc/incoming/AllShadowedIdsRaw.txt $INPUTDIR
+cp /usr/local/projects/marc/incoming/BoundWithIds.txt $INPUTDIR
 
 update=`date --date="-1 days" +%Y%m%d`
 if [ -e /usr/local/projects/marc/incoming/$update.mrc ] ; then
@@ -45,13 +46,13 @@ fi
 
 
 # first move auth files to another directory
-for file in `find $INPUTDIR -name '*.auth*' -print`
-do
-    mv $file $DATADIR/not_processed
-done
+#for file in `find $INPUTDIR -name '*.auth*' -print`
+#do
+#    mv $file $DATADIR/not_processed
+#done
 
 #make sure directories exist
-for dir in prod merge merge_patch bibcore
+for dir in prod merge_patch bibcore
 do
     mkdir $DATADIR/incoming_$dir 2> /dev/null
     mkdir $DATADIR/processed_$dir 2> /dev/null
@@ -61,7 +62,7 @@ done
 for file in `find $INPUTDIR -regex '.*[.]\(del\|mrc\)' -links 1 -print | sort`
 do
      fname=`basename $file`
-     for dir in prod merge merge_patch bibcore
+     for dir in prod merge_patch bibcore
      do
         ln $file $DATADIR/incoming_$dir/$fname
      done
@@ -77,6 +78,7 @@ patch_dir=$DATADIR/patched_debug
 patch_out=$patch_dir/location_patch_`date +%Y%m%d`.mrc 
 summary_hold_out=$patch_dir/summary_holdings_`date +%Y%m%d`.mrc 
 shadowed_changed_recs=$patch_dir/changed_shadow_recs_`date +%Y%m%d`.mrc
+boundWithChangedRecs=$patch_dir/changed_boundwith_recs_`date +%Y%m%d`.mrc
 
 if [ -f "$patch_out" ] ; then
     cp $patch_out $DATADIR/incoming_prod
@@ -85,6 +87,8 @@ if [ -f "$patch_out" ] ; then
     cp $summary_hold_out $DATADIR/incoming_bibcore
     cp $shadowed_changed_recs $DATADIR/incoming_prod  2> /dev/null
     cp $shadowed_changed_recs $DATADIR/incoming_bibcore  2> /dev/null
+    cp $boundWithChangedRecs $DATADIR/incoming_prod  2> /dev/null
+    cp $boundWithChangedRecs $DATADIR/incoming_bibcore  2> /dev/null
 fi
 
 #if [ "$verbose" == "-v" ] ; then
