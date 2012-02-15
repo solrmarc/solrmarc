@@ -217,9 +217,9 @@ then
 
     bound_with_changed_ids=$boundWithDir/BoundWithChanges_`date +%Y%m%d`.txt
 
-    cat $boundWithLocs $boundWithPrev | dos2unix | sort -n -t'|' --key=1 | uniq -u | cut -d'|' -f1 | uniq > $bound_with_changed_ids
+    cat $boundWithLocs $boundWithPrev | dos2unix | sort -n -t'|' --key=1 | uniq -u | cut -d'|' -f1 | uniq | sed -e 's/\([0-9]*\).*/u\1/' > $bound_with_changed_ids
 
-    cat $DATADIR/full_dump_patched/*.mrc | getrecord $shadowed_changed_ids > $boundWithChangedRecs
+    cat $DATADIR/full_dump_patched/*.mrc | getrecord $bound_with_changed_ids > $boundWithChangedRecs
 fi
 
 if [ "$verbose" == "-v" ] ; then
