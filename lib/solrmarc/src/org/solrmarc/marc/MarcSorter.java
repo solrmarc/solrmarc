@@ -1,17 +1,10 @@
 package org.solrmarc.marc;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.TreeMap;
 
 import org.solrmarc.tools.RawRecord;
@@ -27,6 +20,8 @@ public class MarcSorter
 {
     static TreeMap<String, byte[]> recordMap = null;
     static boolean verbose = false;
+    static boolean check = false;
+    static StringNaturalCompare compare = null;
 	 // Initialize logging category
 	/**
 	 * 
@@ -36,9 +31,11 @@ public class MarcSorter
     {
     //    try {
         InputStream input;
-        recordMap = new TreeMap<String, byte[]>(new StringNaturalCompare());
+        compare = new StringNaturalCompare();
+        recordMap = new TreeMap<String, byte[]>(compare);
         int offset = 0;
-        if (args[0].equals("-v")) { verbose = true; offset = 1; }
+        if (args[0].equals("-v")) { verbose = true; offset++; }
+        if (args[offset].equals("-c")) { check = true; offset++; }
         try
         {
             if (args[offset].equals("-"))
@@ -70,27 +67,53 @@ public class MarcSorter
     {
         RawRecordReader rawReader = new RawRecordReader(input);
         RawRecord rec = rawReader.hasNext() ? rawReader.next() : null;
+        String prevField001 = "";
+        int rec_count = 0;
         while (rec != null)
         {
             String field001 = "Undefined";
             field001 = rec.getRecordId();
             byte newRec[] = rec.getRecordBytes();
-            if (recordMap.containsKey(field001))
+            if (check)
             {
-                byte existingRec[] = recordMap.get(field001);
-                byte combinedRec[] = new byte[existingRec.length + newRec.length];
-                System.arraycopy(existingRec, 0, combinedRec, 0, existingRec.length);
-                System.arraycopy(newRec, 0, combinedRec, existingRec.length, newRec.length);
-                recordMap.put(field001, combinedRec);
+                if (prevField001 != "" && compare.compare(prevField001, field001) > 0)
+                {
+                    if (verbose)
+                    {
+                        System.err.println("ERROR: File not sorted: record "+rec_count + " has id="+ prevField001+ " the following record has id="+field001);
+                    }
+                    System.exit(-1);
+                }
+                rec_count++;
+                prevField001 = field001;
+                rec = rawReader.hasNext() ? rawReader.next() : null;
             }
-            else
+            else 
             {
-                recordMap.put(field001, newRec);
+                if (recordMap.containsKey(field001))
+                {
+                    byte existingRec[] = recordMap.get(field001);
+                    byte combinedRec[] = new byte[existingRec.length + newRec.length];
+                    System.arraycopy(existingRec, 0, combinedRec, 0, existingRec.length);
+                    System.arraycopy(newRec, 0, combinedRec, existingRec.length, newRec.length);
+                    recordMap.put(field001, combinedRec);
+                }
+                else
+                {
+                    recordMap.put(field001, newRec);
+                }
+                if (verbose) System.err.println("Record read : "+ field001);
+                rec = rawReader.hasNext() ? rawReader.next() : null;
             }
-            if (verbose) System.err.println("Record read : "+ field001);
-            rec = rawReader.hasNext() ? rawReader.next() : null;
         }
-
+        if (check)
+        {
+            if (verbose)
+            {
+                System.err.println("File correctly sorted");
+            }
+            System.exit(0);
+        }
         try {
             while (recordMap.size() > 0)
             {
