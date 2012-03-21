@@ -19,6 +19,7 @@ package org.solrmarc.tools;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -124,6 +125,37 @@ public final class Utils {
     }
     /**
      * load a properties file into a Properties object
+     * @param fullFilenameURLStr String representation of url to properties file whether it is in a local file or a resource
+     * @return Properties object 
+     */
+    public static Properties loadProperties(String fullFilenameURLStr)
+    {
+        InputStream in = getPropertyFileInputStream(fullFilenameURLStr); 
+        String errmsg = "Fatal error: Unable to find specified properties file: " + fullFilenameURLStr;
+
+        // load the properties
+        Properties props = new Properties();
+        try
+        {
+            if (fullFilenameURLStr.endsWith(".xml") || fullFilenameURLStr.endsWith(".XML"))
+            {
+                props.loadFromXML(in);
+            }
+            else
+            {
+                props.load(in);
+            }
+            in.close();
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException(errmsg);
+        }
+        return props;
+    }
+
+    /**
+     * load a properties file into a Properties object
      * @param propertyPaths the directories to search for the properties file
      * @param propertyFileName name of the sought properties file
      * @param showName whether the name of the file/resource being read should be shown.
@@ -172,13 +204,116 @@ public final class Utils {
         return(getPropertyFileInputStream(propertyPaths, propertyFileName, false, null));
     }
     
-    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName, boolean showName, String inputSource[]) 
+    public static InputStream getPropertyFileInputStream(String propertyFileURLStr) 
+    {
+        InputStream in = null;
+        String errmsg = "Fatal error: Unable to open specified properties file: " + propertyFileURLStr;
+        try
         {
+            URL url = new URL(propertyFileURLStr);
+            in = url.openStream();
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException(errmsg);
+        }
+
+        return(in);
+    }
+    
+    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName, boolean showName, String inputSource[]) 
+    {
+        InputStream in = null;
+        String fullPropertyFileURLStr = getPropertyFileAbsoluteURL(propertyPaths, propertyFileName, showName, inputSource);
+        return(getPropertyFileInputStream(fullPropertyFileURLStr));
+    }
+    
+//        String verboseStr = System.getProperty("marc.test.verbose");
+//        boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
+//        String lookedIn = "";
+//        if (propertyPaths != null)
+//        {
+//            File propertyFile = new File(propertyFileName);
+//            int pathCnt = 0;
+//            do 
+//            {
+//                if (propertyFile.exists() && propertyFile.isFile() && propertyFile.canRead())
+//                {
+//                    try
+//                    {
+//                        in = new FileInputStream(propertyFile);
+//                        if (inputSource != null && inputSource.length >= 1)
+//                        {
+//                            inputSource[0] = propertyFile.getAbsolutePath();
+//                        }
+//                        if (showName)
+//                            logger.info("Opening file: "+ propertyFile.getAbsolutePath());
+//                        else
+//                            logger.debug("Opening file: "+ propertyFile.getAbsolutePath());
+//                    }
+//                    catch (FileNotFoundException e)
+//                    {
+//                        // simply eat this exception since we should only try to open the file if we previously
+//                        // determined that the file exists and is readable. 
+//                    }
+//                    break;   // we found it!
+//                }
+//                if (verbose)  lookedIn = lookedIn + propertyFile.getAbsolutePath() + "\n";
+//                if (propertyPaths != null && pathCnt < propertyPaths.length)
+//                {
+//                    propertyFile = new File(propertyPaths[pathCnt], propertyFileName);
+//                }
+//                pathCnt++;
+//            } while (propertyPaths != null && pathCnt <= propertyPaths.length);
+//        }
+//        // if we didn't find it as a file, look for it as a URL
+//        String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
+//        if (verbose) errmsg = errmsg + "\n Looked in: "+ lookedIn;
+//        if (in == null)
+//        {
+//            Utils utilObj = new Utils();
+//            URL url = utilObj.getClass().getClassLoader().getResource(propertyFileName);
+//            if (url == null)  
+//                url = utilObj.getClass().getResource("/" + propertyFileName);
+//            if (url == null)
+//            {
+//                logger.error(errmsg);
+//                throw new IllegalArgumentException(errmsg);
+//            }
+//            if (showName)
+//                logger.info("Opening resource via URL: "+ url.toString());
+//            else
+//                logger.debug("Opening resource via URL: "+ url.toString());
+//
+///*
+//            if (url == null) 
+//                url = utilObj.getClass().getClassLoader().getResource(propertyPath + "/" + propertyFileName);
+//            if (url == null) 
+//                url = utilObj.getClass().getResource("/" + propertyPath + "/" + propertyFileName);
+//*/
+//            if (url != null)
+//            {
+//                try
+//                {
+//                    in = url.openStream();
+//                }
+//                catch (IOException e)
+//                {
+//                    throw new IllegalArgumentException(errmsg);
+//                }
+//            }
+//        }
+//        return(in);
+//    }
+    
+    public static String getPropertyFileAbsoluteURL(String[] propertyPaths, String propertyFileName, boolean showName, String inputSource[]) 
+    {
         InputStream in = null;
         // look for properties file in paths
         String verboseStr = System.getProperty("marc.test.verbose");
         boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
         String lookedIn = "";
+        String fullPathName = null;
         if (propertyPaths != null)
         {
             File propertyFile = new File(propertyFileName);
@@ -189,21 +324,21 @@ public final class Utils {
                 {
                     try
                     {
-                        in = new FileInputStream(propertyFile);
+                        fullPathName = propertyFile.toURI().toURL().toExternalForm();
                         if (inputSource != null && inputSource.length >= 1)
                         {
                             inputSource[0] = propertyFile.getAbsolutePath();
                         }
-                        if (showName)
-                            logger.info("Opening file: "+ propertyFile.getAbsolutePath());
-                        else
-                            logger.debug("Opening file: "+ propertyFile.getAbsolutePath());
                     }
-                    catch (FileNotFoundException e)
+                    catch (MalformedURLException e)
                     {
-                        // simply eat this exception since we should only try to open the file if we previously
-                        // determined that the file exists and is readable. 
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                     }
+                    if (showName)
+                        logger.info("Opening file: "+ propertyFile.getAbsolutePath());
+                    else
+                        logger.debug("Opening file: "+ propertyFile.getAbsolutePath());
                     break;   // we found it!
                 }
                 if (verbose)  lookedIn = lookedIn + propertyFile.getAbsolutePath() + "\n";
@@ -217,7 +352,7 @@ public final class Utils {
         // if we didn't find it as a file, look for it as a URL
         String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
         if (verbose) errmsg = errmsg + "\n Looked in: "+ lookedIn;
-        if (in == null)
+        if (fullPathName == null)
         {
             Utils utilObj = new Utils();
             URL url = utilObj.getClass().getClassLoader().getResource(propertyFileName);
@@ -239,23 +374,9 @@ public final class Utils {
             if (url == null) 
                 url = utilObj.getClass().getResource("/" + propertyPath + "/" + propertyFileName);
 */
-            if (url != null)
-            {
-                try
-                {
-                    in = url.openStream();
-                }
-                catch (IOException e)
-                {
-                    throw new IllegalArgumentException(errmsg);
-                }
-            }
-            else
-            {
-                throw new IllegalArgumentException(errmsg);
-            }
+            fullPathName = url.toExternalForm();
         }
-        return(in);
+        return(fullPathName);
     }
     
     
