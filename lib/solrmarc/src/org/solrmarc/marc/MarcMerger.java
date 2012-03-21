@@ -267,8 +267,8 @@ public class MarcMerger
         try
         {
             RawRecord mainrec = mainFile.hasNext() ? mainFile.next() : null; //new SimpleRecord(mainFile);
-            String segmentMinRecordID = mainrec.getRecordId();
-            if (segmentMinRecordID == maxRecordID)  segmentMinRecordID = "u0";
+            String segmentMinRecordID = (mainrec != null) ? mainrec.getRecordId() : "0";
+            if (segmentMinRecordID == maxRecordID)  segmentMinRecordID = "0";
             RawRecord newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null; //new SimpleRecord(newOrModified);
             String deletedId = maxRecordID;
             BufferedReader delReader = null;
