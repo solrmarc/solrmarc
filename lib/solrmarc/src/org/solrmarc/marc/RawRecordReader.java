@@ -110,19 +110,6 @@ public class RawRecordReader
             int numToSkip = 0;
             int numToOutput = -1;
             int offset = 0;
-            while (args[offset].equals("-skip")|| args[offset].equals("-num"))
-            {
-                if (args[offset].equals("-skip"))
-                {
-                    numToSkip = Integer.parseInt(args[offset+1]);
-                    offset += 2;
-                }
-                if (args[offset].equals("-num"))
-                {
-                    numToOutput = Integer.parseInt(args[offset+1]);
-                    offset += 2;
-                }  
-            }
             if (args[offset].equals("-"))
             {
                 reader = new RawRecordReader(System.in);
@@ -130,28 +117,42 @@ public class RawRecordReader
             else
             {    
                 reader = new RawRecordReader(new FileInputStream(new File(args[offset])));
-            }   
+            }
+            offset++;
+            while (offset < args.length && ( args[offset].equals("-skip")|| args[offset].equals("-num")))
+            {
+                if (args[offset].equals("-skip"))
+                {
+                    numToSkip = Integer.parseInt(args[offset+1]);
+                    offset += 2;
+                }
+                else if (args[offset].equals("-num"))
+                {
+                    numToOutput = Integer.parseInt(args[offset+1]);
+                    offset += 2;
+                }  
+            }
             if (numToSkip != 0 || numToOutput != -1)
             {
                 processInput(reader, numToSkip, numToOutput);
             }
-            else if (args[offset+1].equals("-id"))
+            else if (args[offset].equals("-id"))
             {
                 printIds(reader);
             }
-            else if (args[offset+1].equals("-h") && args.length >= 3)
-            {
-                String idRegex = args[offset+2].trim();
-                processInput(reader, null, idRegex, null);
-            }
-            else if (!args[offset+1].endsWith(".txt"))
+            else if (args[offset].equals("-h") && args.length >= 3)
             {
                 String idRegex = args[offset+1].trim();
+                processInput(reader, null, idRegex, null);
+            }
+            else if (!args[offset].endsWith(".txt"))
+            {
+                String idRegex = args[offset].trim();
                 processInput(reader, idRegex, null, null);
             }
             else 
             {
-                File idList = new File(args[offset+1]);
+                File idList = new File(args[offset]);
                 BufferedReader idStream = new BufferedReader(new InputStreamReader(new BufferedInputStream(new FileInputStream(idList))));
                 String line;
                 String findReplace[] = null;
