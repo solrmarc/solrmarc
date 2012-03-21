@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.*;
+import javax.xml.xpath.*;
 
 import org.apache.log4j.Logger;
 import org.marc4j.*;
@@ -31,6 +32,9 @@ import org.marc4j.marc.*;
 import org.solrmarc.marc.MarcImporter;
 import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.Utils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import bsh.BshMethod;
 import bsh.EvalError;
@@ -250,6 +254,25 @@ public class SolrIndexer
                         fieldDef[3] = values.length > 1 ? values[1].trim() : null;
                         // NOTE: assuming no translation map here
                         if (fieldDef[2].equals("era") && fieldDef[3] != null)
+                        {
+                            try
+                            {
+                                fieldDef[3] = loadTranslationMap(props, fieldDef[3]);
+                            }
+                            catch (IllegalArgumentException e)
+                            {
+                                logger.error("Unable to find file containing specified translation map (" + fieldDef[3] + ")");
+                                throw new IllegalArgumentException("Error: Problems reading specified translation map (" + fieldDef[3] + ")");
+                            }
+                        }
+                    }
+                    else if (values[0].startsWith("xpath") )
+                    {
+                        fieldDef[1] = values[0];
+                        String values2[] = values[1].trim().split("[ ]*,[ ]*", 2);
+                        fieldDef[2] = values2[0];
+                        fieldDef[3] = values2.length > 1 ? values2[1] : null;
+                        if (fieldDef[3] != null)
                         {
                             try
                             {
@@ -613,6 +636,158 @@ public class SolrIndexer
                 valueMap.put(mapKey, value);
             }
         }
+    }
+
+    /**
+     * Given a record, return a Map of solr fields (keys are field names, values
+     * are an Object containing the values (a Set or a String)
+     */
+    public Map<String, Object> map(Node doc)
+    {
+        return (map(doc, null));
+    }
+
+    /**
+     * Given a record, return a Map of solr fields (keys are field names, values
+     * are an Object containing the values (a Set or a String)
+     */
+    public Map<String, Object> map(Node doc, ErrorHandler errors)
+    {
+        this.errors = errors;
+        Map<String, Object> indexMap = new HashMap<String, Object>();
+        for (String key : fieldMap.keySet())
+        {
+            String fieldVal[] = fieldMap.get(key);
+            String indexField = fieldVal[0];
+            String indexType = fieldVal[1];
+            String indexParm = fieldVal[2];
+            String mapName = fieldVal[3];
+
+            if (indexType.equals("constant"))
+            {
+                if (indexParm.contains("|"))
+                {
+                    String parts[] = indexParm.split("[|]");
+                    Set<String> result = new LinkedHashSet<String>();
+                    result.addAll(Arrays.asList(parts));
+                    // if a zero length string appears, remove it
+                    result.remove("");
+                    addFields(indexMap, indexField, null, result);
+                }
+                else
+                    addField(indexMap, indexField, indexParm);
+            }
+            else if (indexType.startsWith("xpath"))
+            {
+                Set<String> fields = getXPathFieldList(doc, indexParm);
+                if (indexType.startsWith("xpath-join"))
+                {
+                    String sep = ", ";
+                    String field = "";
+                    for (String sf : fields)
+                    {
+                        if (mapName != null && findMap(mapName) != null)
+                            sf = Utils.remap(sf, findMap(mapName), true);
+                        if (field.length() > 0) field = field + ", ";
+                        field = field + sf;
+                    }
+                    addField(indexMap, indexField, null, field);
+                }
+                else 
+                {
+                    if (mapName != null && findMap(mapName) != null)
+                        fields = Utils.remap(fields, findMap(mapName), true);
+
+                    if (fields.size() != 0)
+                        addFields(indexMap, indexField, null, fields);
+                }
+//                else  // no entries produced for field => generate no record in Solr
+//                    throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE, 
+//                                                    "Index specification: "+ indexField +" says this record should be deleted.");
+                
+            }
+/*            else if (indexType.startsWith("custom"))
+            {
+                try {
+                    handleCustom(indexMap, indexType, indexField, mapName, record, indexParm);
+                }
+                catch(SolrMarcIndexerException e)
+                {
+                    String recCntlNum = null;
+                    try {
+                        recCntlNum = record.getControlNumber();
+                    }
+                    catch (NullPointerException npe) { }// ignore 
+
+                    if (e.getLevel() == SolrMarcIndexerException.DELETE)
+                    {
+                        throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE, 
+                                "Record " + (recCntlNum != null ? recCntlNum : "") + " purposely not indexed because " + key + " field is empty");
+//                      logger.error("Record " + (recCntlNum != null ? recCntlNum : "") + " not indexed because " + key + " field is empty -- " + e.getMessage(), e);
+                    }
+                    else
+                    {
+                        logger.error("Unable to index record " + (recCntlNum != null ? recCntlNum : "") + " due to field " + key + " -- " + e.getMessage(), e);
+                        throw(e);
+                    }
+                }
+            }
+            else if (indexType.startsWith("script"))
+            {
+                try {
+                    handleScript(indexMap, indexType, indexField, mapName, record, indexParm);
+                }
+                catch(SolrMarcIndexerException e)
+                {
+                    String recCntlNum = null;
+                    try {
+                        recCntlNum = record.getControlNumber();
+                    }
+                    catch (NullPointerException npe) {} // ignore  
+
+                    if (e.getLevel() == SolrMarcIndexerException.DELETE)
+                    {
+                        logger.error("Record " + (recCntlNum != null ? recCntlNum : "") + " purposely not indexed because " + key + " field is empty -- " + e.getMessage(), e);
+                    }
+                    else
+                    {
+                        logger.error("Unable to index record " + (recCntlNum != null ? recCntlNum : "") + " due to field " + key + " -- " + e.getMessage(), e);
+                        throw(e);
+                    }
+                }
+            }*/
+        }
+        this.errors = null;
+        return indexMap;
+
+    }
+    
+    private Set<String> getXPathFieldList(Node doc, String indexParm) 
+    {
+        String pathParts[] = indexParm.split("[|][|]");
+        Set<String> result = new LinkedHashSet<String>();
+        for (String pathPart : pathParts)
+        {
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            NodeList resultNodeList;
+            try {
+                resultNodeList = (NodeList) xpath.evaluate(pathPart, doc, XPathConstants.NODESET);
+                for (int i = 0; i < resultNodeList.getLength(); i++)
+                {
+                    Node node = resultNodeList.item(i);
+                    String str = node.getTextContent();
+                    str = Utils.cleanData(str);
+                    if (str != null && str.length() != 0) 
+                        result.add(str);
+                }
+            } 
+            catch (XPathExpressionException e) 
+            {
+                // TODO Auto-generated catch block
+                //e.printStackTrace();
+            }
+        }
+        return(result);
     }
 
     /**
@@ -2478,6 +2653,51 @@ public class SolrIndexer
         }
         return (value);
     }
+    
+    /**
+     * Loops through all datafields and creates a field for "all fields"
+     * searching. Shameless stolen from Vufind Indexer Custom Code
+     * 
+     * @param record
+     *            marc record object
+     * @param lowerBoundStr -
+     *            the "lowest" marc field to include (e.g. 100). defaults to 100
+     *            if value passed doesn't parse as an integer
+     * @param upperBoundStr -
+     *            one more than the "highest" marc field to include (e.g. 900
+     *            will include up to 899). Defaults to 900 if value passed
+     *            doesn't parse as an integer
+     * @return a Set of strings containing ALL subfields of ALL marc fields within the
+     *         range indicated by the bound string arguments, with one string for each field encountered.
+     */
+    public Set<String> getAllSearchableFields(final Record record, String lowerBoundStr, String upperBoundStr)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        int lowerBound = localParseInt(lowerBoundStr, 100);
+        int upperBound = localParseInt(upperBoundStr, 900);
+
+        List<DataField> fields = record.getDataFields();
+        for (DataField field : fields)
+        {
+            // Get all fields starting with the 100 and ending with the 839
+            // This will ignore any "code" fields and only use textual fields
+            int tag = localParseInt(field.getTag(), -1);
+            if ((tag >= lowerBound) && (tag < upperBound))
+            {
+                // Loop through subfields
+                StringBuffer buffer = new StringBuffer("");
+                List<Subfield> subfields = field.getSubfields();
+                for (Subfield subfield : subfields)
+                {
+                    if (buffer.length() > 0)
+                        buffer.append(" ");
+                    buffer.append(subfield.getData());
+                }
+                result.add(buffer.toString());
+            }
+        }
+        return result;
+    }
 
     /**
      * Loops through all datafields and creates a field for "all fields"
@@ -2495,7 +2715,7 @@ public class SolrIndexer
      * @return a string containing ALL subfields of ALL marc fields within the
      *         range indicated by the bound string arguments.
      */
-    public String getAllSearchableFields(final Record record, String lowerBoundStr, String upperBoundStr)
+    public String getAllSearchableFieldsAsString(final Record record, String lowerBoundStr, String upperBoundStr)
     {
         StringBuffer buffer = new StringBuffer("");
         int lowerBound = localParseInt(lowerBoundStr, 100);
