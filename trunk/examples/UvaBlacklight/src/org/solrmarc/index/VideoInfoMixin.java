@@ -364,6 +364,10 @@ public class VideoInfoMixin extends SolrIndexerMixin
             {
                 responsibility = responsibility.replaceAll("didrect", "direct"); 
                 responsibility = responsibility.replaceAll("a flim by", "a film by"); 
+                if (responsibility.matches(".*filmed[,a-z ]*by\\b.*"))
+                {
+                    responsibility = responsibility.replaceAll("filmed", "directed");
+                }            
             }
             String semiparts[] = responsibility.split(";|--| : ");
             for (String part0 : semiparts)
@@ -675,6 +679,8 @@ public class VideoInfoMixin extends SolrIndexerMixin
         if (subpart.contains("Department")) return(null);
         if (subpart.contains("National")) return(null);
         if (subpart.contains("Museum")) return(null);
+        if (subpart.contains("Films")) return(null);
+        if (subpart.contains("TV")) return(null);
         if (subpart.contains("Response")) return(null);
         if (subpart.contains("Cities")) return(null);
         if (subpart.contains("High")) return(null);
