@@ -209,6 +209,14 @@ public abstract class MarcHandler {
         if (Utils.getProperty(configProps, "marc.override")!= null)
         {
             System.setProperty("org.marc4j.marc.MarcFactory", Utils.getProperty(configProps, "marc.override").trim());
+//            if (Utils.getProperty(configProps, "marc.override.reader.remap")!= null)
+//            {
+//                String remapFilename =  Utils.getProperty(configProps, "marc.override.reader.remap").trim();
+//                String configFilePath = Utils.getProperty(configProps, "config.file.dir");
+//                String propertySearchPath[] = makePropertySearchPath(solrmarcPath, siteSpecificPath, configFilePath, homeDir);
+//                String remapURL = Utils.getPropertyFileAbsoluteURL(propertySearchPath, remapFilename, false, null);
+//                System.setProperty("marc.override.reader.remapURL", remapURL);
+//            }
         }
         else  // no override, tell solrmarc to use the NoSortMarcFactory by default.
         {
@@ -431,10 +439,26 @@ public abstract class MarcHandler {
         String marcIncludeIfPresent = Utils.getProperty(configProps, "marc.include_if_present");
         String marcIncludeIfMissing = Utils.getProperty(configProps, "marc.include_if_missing");
         String marcDeleteSubfields = Utils.getProperty(configProps, "marc.delete_subfields");
+        String marcRemapRecord = Utils.getProperty(configProps, "marc.reader.remap");
         if (marcDeleteSubfields != null)  marcDeleteSubfields = marcDeleteSubfields.trim();
-        if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null || marcDeleteSubfields != null))
+        if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null || marcDeleteSubfields != null || marcRemapRecord != null))
         {
-            reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing, marcDeleteSubfields);
+//            if (marcDeleteSubfields != null && marcRemapRecord != null)
+//            {
+//                logger.error("Cannot specify both a remap property file and a delete_subfields specification");
+//            }
+            if (marcRemapRecord != null)
+            {
+                String remapFilename =  marcRemapRecord.trim();
+                String configFilePath = Utils.getProperty(configProps, "config.file.dir");
+                String propertySearchPath[] = makePropertySearchPath(solrmarcPath, siteSpecificPath, configFilePath, homeDir);
+                String remapURL = Utils.getPropertyFileAbsoluteURL(propertySearchPath, remapFilename, false, null);
+                reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing, marcDeleteSubfields, remapURL);
+            }
+            else
+            {
+                reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing, marcDeleteSubfields);
+            }
         }
         // Do translating last so that if we are Filtering as well as translating, we don't expend the 
         // effort to translate records, which may then be filtered out and discarded.
