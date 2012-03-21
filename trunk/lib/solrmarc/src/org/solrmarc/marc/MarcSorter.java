@@ -21,6 +21,7 @@ public class MarcSorter
     static TreeMap<String, byte[]> recordMap = null;
     static boolean verbose = false;
     static boolean check = false;
+    static boolean quiet = false;
     static StringNaturalCompare compare = null;
 	 // Initialize logging category
 	/**
@@ -34,8 +35,12 @@ public class MarcSorter
         compare = new StringNaturalCompare();
         recordMap = new TreeMap<String, byte[]>(compare);
         int offset = 0;
-        if (args[0].equals("-v")) { verbose = true; offset++; }
-        if (args[offset].equals("-c")) { check = true; offset++; }
+        while (args[offset].equals("-v") || args[offset].equals("-c")|| args[offset].equals("-q"))
+        {
+            if (args[offset].equals("-v")) { quiet = false; verbose = true; offset++; }
+            if (args[offset].equals("-c")) { check = true; offset++; }
+            if (args[offset].equals("-q")) { verbose = false; quiet = true; offset++; }
+        }
         try
         {
             if (args[offset].equals("-"))
@@ -78,7 +83,7 @@ public class MarcSorter
             {
                 if (prevField001 != "" && compare.compare(prevField001, field001) > 0)
                 {
-                    if (verbose)
+                    if (!quiet)
                     {
                         System.err.println("ERROR: File not sorted: record "+rec_count + " has id="+ prevField001+ " the following record has id="+field001);
                     }
@@ -121,7 +126,7 @@ public class MarcSorter
                 byte recValue[] = recordMap.remove(firstKey);
                 System.out.write(recValue);
                 System.out.flush();
-                if (verbose) System.err.println("Record written : "+ firstKey);
+                if (!quiet) System.err.println("Record written : "+ firstKey);
             }
         }
         catch (IOException e)
