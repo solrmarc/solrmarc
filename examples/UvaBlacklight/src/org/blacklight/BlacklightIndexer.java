@@ -1318,17 +1318,32 @@ public class BlacklightIndexer extends SolrIndexer
     
     private String buildParsableURLString(DataField df, String defaultLabel)
     {
+        return(buildParsableURLString(df, defaultLabel, null));
+    }
+    
+    private String buildParsableURLString(DataField df, String defaultLabel, Map<String, String> patternMap)
+    {
         String label = getURLLabelFrom3andZ(df, defaultLabel);
         String url = df.getSubfield('u').getData(); 
+        if (patternMap != null)
+        {
+            url = Utils.remap(url, patternMap, true);
+        }
+//        if (url.startsWith("http://www.jstor.org"))
+//        {
+//            url = "http://proxy.its.virginia.edu/login?url=" + url;
+//        }
         String result = url + "||" + label;
         return(result);
     }
     
-    public Set<String> getLabelledURL(final Record record, String defaultLabel)
+    public Set<String> getLabelledURLmapped(final Record record, String defaultLabel, String patternMapFileName)
     {
         Set<String> resultSet = new LinkedHashSet<String>();
         Set<String> backupResultSet = new LinkedHashSet<String>();
         List<?> urlFields = record.getVariableFields("856");
+        String mapName = loadTranslationMap(null, patternMapFileName);
+        Map<String,String> patternMap = findMap(mapName);
         for (Object field : urlFields)
         {
             if (field instanceof DataField)
@@ -1338,58 +1353,46 @@ public class BlacklightIndexer extends SolrIndexer
                 {
                     if (dField.getSubfield('u') != null) 
                     {
-                        resultSet.add(buildParsableURLString(dField, defaultLabel));
+                        resultSet.add(buildParsableURLString(dField, defaultLabel, patternMap));
                     }
                 }
                 else if (dField.getIndicator1() == '4' && dField.getIndicator2() == '1')
                 {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related resources";
                     if (dField.getSubfield('u') != null) 
                     {
-                        resultSet.add(buildParsableURLString(dField, defaultLabel));
+                        resultSet.add(buildParsableURLString(dField, label, patternMap));
                     }
                 }
-//                if (dField.getIndicator1() == '4' && dField.getIndicator2() == '2')
-//                {
-//                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related Info";
-//                    if (dField.getSubfield('u') != null) 
-//                    {
-//                        resultSet.add(buildParsableURLString(dField, label));
-//                    }
-//                }
                 else if (dField.getIndicator1() == '4' && dField.getIndicator2() == ' ')
                 {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : defaultLabel;
                     if (dField.getSubfield('u') != null) 
                     {
-                        resultSet.add(buildParsableURLString(dField, defaultLabel));
+                        resultSet.add(buildParsableURLString(dField, label, patternMap));
                     }
                 }
                 else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '0')
                 {
                     if (dField.getSubfield('u') != null) 
                     {
-                        backupResultSet.add(buildParsableURLString(dField, defaultLabel));
+                        backupResultSet.add(buildParsableURLString(dField, defaultLabel, patternMap));
                     }
                 }
                 else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '1')
                 {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related resources";
                     if (dField.getSubfield('u') != null) 
                     {
-                        backupResultSet.add(buildParsableURLString(dField, defaultLabel));
+                        backupResultSet.add(buildParsableURLString(dField, label, patternMap));
                     }
                 }
-//                if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '2')
-//                {
-//                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related Info";
-//                    if (dField.getSubfield('u') != null) 
-//                    {
-//                        backupResultSet.add(buildParsableURLString(dField, label));
-//                    }
-//                }
                 else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == ' ')
                 {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : defaultLabel;
                     if (dField.getSubfield('u') != null) 
                     {
-                        backupResultSet.add(buildParsableURLString(dField, defaultLabel));
+                        backupResultSet.add(buildParsableURLString(dField, label, patternMap));
                     }
                 }
             }
@@ -2334,29 +2337,30 @@ public class BlacklightIndexer extends SolrIndexer
             VariableField vf = fields.get(i);
             if (!(vf instanceof DataField))  continue;
             DataField df = (DataField)vf;
+            if (!df.getTag().startsWith("8")) continue; 
             if (df.getTag().equals("852"))  
             {
                 libraryField = df;
-                if (getSubfieldVal(libraryField, 'z', null) != null)
+                if (getSubfieldVal(libraryField, "hiz", null) != null)
                 {
-                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, "", getSubfieldVal(libraryField, 'z', ""), "");
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, "", getSubfieldVal(libraryField, 'z', ""), "", getSubfieldVal(libraryField, "hi", ""));
                     addHoldingsField(result, ivyresult, holdingsField);
                 }
             }
             else if (df.getTag().equals("853"))  continue; // ignore 853's here.
             else if (df.getTag().equals("866"))  
             {
-                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""), "Library has");
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""), "Library has", null);
                 addHoldingsField(result, ivyresult, holdingsField);
             }
             else if (df.getTag().equals("867"))
             {
-                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, "z+a", ""), getSubfieldVal(df, "-z", ""), "Suppl text holdings");
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, "z+a", ""), getSubfieldVal(df, "-z", ""), "Suppl text holdings", null);
                 addHoldingsField(result, ivyresult, holdingsField);
             }
             else if (df.getTag().equals("868"))
             {
-                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""), "Index text holdings");
+                holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, getSubfieldVal(df, 'a', ""), getSubfieldVal(df, 'z', ""), "Index text holdings", null);
                 addHoldingsField(result, ivyresult, holdingsField);
             }
             else if (df.getTag().equals("863"))
@@ -2377,14 +2381,14 @@ public class BlacklightIndexer extends SolrIndexer
                 if (linktag != null) labelField = getLabelField(record, getLinkPrefix(linktag));
                 if (labelField != null && j == i + 1) 
                 {
-                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField), getSubfieldVal(df, 'z', ""), "Library has");
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedField(df, labelField), getSubfieldVal(df, 'z', ""), "Library has", null);
                     addHoldingsField(result, ivyresult, holdingsField);
                 }
                 else if (labelField != null && j > i + 1) 
                 {
                     VariableField nvf = fields.get(j-1);
                     DataField ndf = (DataField)nvf;
-                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedFieldRange(df, ndf, labelField), getSubfieldVal(df, 'z', ""), "Library has");
+                    holdingsField = buildHoldingsField(libraryField, libMapName, locMapName, processEncodedFieldRange(df, ndf, labelField), getSubfieldVal(df, 'z', ""), "Library has", null);
                     addHoldingsField(result, ivyresult, holdingsField);
                     i = j - 1;
                 }
@@ -2418,9 +2422,17 @@ public class BlacklightIndexer extends SolrIndexer
         String result = "";
         boolean found_a = false;
         boolean getBefore_a = subfieldTags.contains("+");
+        boolean getAfter_a = subfieldTags.contains("-");
+//        boolean addlineBreak = subfieldTags.contains("/");
         for (Subfield sf : subfields)
         {
-            if (sf.getCode() == 'a')
+            if (!subfieldTags.contains("a") && ! getBefore_a  && ! getAfter_a && subfieldTags.contains(""+sf.getCode()))
+            {
+                String spacer = ((result.length() > 0) ? " " : "");
+//                if (addlineBreak && sf.getCode() == 'z') spacer = "<br>";
+                result = result + ((result.length() > 0) ? spacer : "") + sf.getData();
+            }
+            else if (sf.getCode() == 'a')
             {
                 if (subfieldTags.contains(""+sf.getCode()))
                 {
@@ -2452,14 +2464,15 @@ public class BlacklightIndexer extends SolrIndexer
         return result;
     }
 
-    private String buildHoldingsField(DataField libraryField, String libMapName, String locMapName, String holdingsValue, String publicNote, String holdingsType)
+    private String buildHoldingsField(DataField libraryField, String libMapName, String locMapName, String holdingsValue, String publicNote, String holdingsType, String callNumber)
     {
-        if (libraryField == null || ((holdingsValue == null || holdingsValue.length() == 0) && (publicNote.length() == 0 ))) return(null);
+        if (libraryField == null || ((holdingsValue == null || holdingsValue.length() == 0) && (publicNote.length() == 0 && (callNumber == null || callNumber.length() == 0)))) return(null);
         String libraryName = libraryField.getSubfield('b') != null ? Utils.remap(libraryField.getSubfield('b').getData(), findMap(libMapName), false) : null;
         String locName = libraryField.getSubfield('c') != null ? Utils.remap(libraryField.getSubfield('c').getData(), findMap(locMapName), false) : null;
         if (libraryName == null) libraryName = "";
         if (locName == null) locName = "";
-        return(libraryName +"|"+ locName +"|"+ holdingsValue+"|"+publicNote+"|"+holdingsType);
+        if (callNumber == null) callNumber = "";
+        return(libraryName +"|"+ locName +"|"+ holdingsValue+"|"+publicNote+"|"+holdingsType+"|"+callNumber);
     }
 
     private String processEncodedField(DataField df, DataField labelField)
