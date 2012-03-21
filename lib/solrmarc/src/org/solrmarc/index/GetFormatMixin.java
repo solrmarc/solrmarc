@@ -202,6 +202,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         VideoLaserdisc,
         VideoMII,
         VideoOther,
+        VideoOnline,
         VideoQuadruplex,
         VideoReel,
         VideoSuperVHS,
@@ -938,7 +939,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
             char field007_02 = '?';
             if (field007.getData().length() <= 2 || 
-                (field007_02 = field007.getData().toLowerCase().charAt(2)) != ' ' && field007_02 != '|' && field007_02 != '-')
+                (field007_02 = field007.getData().toLowerCase().charAt(2)) != ' ' && field007_02 != '|' && field007_02 != '-' && field007_02 != '*')
             { 
                 {
                     if (indexer != null && indexer.errors != null)
@@ -1651,8 +1652,14 @@ public class GetFormatMixin extends SolrIndexerMixin
                             // z - Other
 
                             default:
-
-                                formToAdd = MediaType.VideoOther.toString();
+                                if (hasFullText(record))
+                                {
+                                    formToAdd = MediaType.VideoOnline.toString();
+                                }
+                                else
+                                {
+                                    formToAdd = MediaType.VideoOther.toString();
+                                }
                                 break;
                         }
                         form.add(formToAdd);
