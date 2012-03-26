@@ -95,6 +95,123 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
+     * Given the base name of a configuration file, locate the full path.
+     * @param filename
+     */
+    private File findConfigFile(String filename)
+    {
+        // Find VuFind's home directory in the environment; if it's not available,
+        // try using a relative path on the assumption that we are currently in
+        // VuFind's import subdirectory:
+        String vufindHome = System.getenv("VUFIND_HOME");
+        if (vufindHome == null) {
+            vufindHome = "..";
+        }
+
+        // Check for VuFind 2.0's local directory environment variable:
+        String vufindLocal = System.getenv("VUFIND_LOCAL_DIR");
+
+        // Try several different locations for the file -- VuFind 2 local dir,
+        // VuFind 2 base dir, VuFind 1 base dir.
+        File file;
+        if (vufindLocal != null) {
+            file = new File(vufindLocal + "/application/configs/" + filename);
+            if (file.exists()) {
+                return file;
+            }
+        }
+        file = new File(vufindHome + "/application/configs/" + filename);
+        if (file.exists()) {
+            return file;
+        }
+        file = new File(vufindHome + "/web/conf/" + filename);
+        return file;
+    }
+
+    /**
+     * Sanitize a VuFind configuration setting.
+     * @param str
+     */
+    private String sanitizeConfigSetting(String str)
+    {
+        // Drop comments if necessary:
+        int pos = str.indexOf(';');
+        if (pos >= 0) {
+            str = str.substring(0, pos).trim();
+        }
+
+        // Strip wrapping quotes if necessary (the ini reader won't do this for us):
+        if (str.startsWith("\"")) {
+            str = str.substring(1, str.length());
+        }
+        if (str.endsWith("\"")) {
+            str = str.substring(0, str.length() - 1);
+        }
+        return str;
+    }
+
+    /**
+     * Load an ini file.
+     * @param filename
+     */
+    private Ini loadConfigFile(String filename)
+    {
+        // Obtain the DSN from the config.ini file:
+        Ini ini = new Ini();
+        try {
+            ini.load(new FileReader(findConfigFile(filename)));
+        } catch (Throwable e) {
+            dieWithError("Unable to access " + filename);
+        }
+        return ini;
+    }
+
+    /**
+     * Get a setting from a VuFind configuration file.
+     * @param filename
+     * @param section
+     * @param setting
+     */
+    private String getConfigSetting(String filename, String section, String setting)
+    {
+        String retVal = null;
+
+        // Grab the ini file.
+        Ini ini = loadConfigFile(filename);
+
+        // Check to see if we need to worry about an override file:
+        String override = ini.get("Extra_Config", "local_overrides");
+        if (override != null) {
+            Ini overrideIni = loadConfigFile(override);
+            retVal = overrideIni.get(section, setting);
+            if (retVal != null) {
+                return sanitizeConfigSetting(retVal);
+            }
+        }
+
+        // Try to find the requested setting:
+        retVal = ini.get(section, setting);
+
+        //  No setting?  Check for a parent configuration:
+        while (retVal == null) {
+            String parent = ini.get("Parent_Config", "path");
+            if (parent !=  null) {
+                try {
+                    ini.load(new FileReader(new File(parent)));
+                } catch (Throwable e) {
+                    dieWithError("Unable to access " + parent);
+                }
+                retVal = ini.get(section, setting);
+            } else {
+                break;
+            }
+        }
+
+        // Return the processed setting:
+        return sanitizeConfigSetting(retVal);
+    }
+
+    /**
      * Connect to the VuFind database if we do not already have a connection.
      */
     private void connectToDatabase()
@@ -104,33 +221,7 @@ public class VuFindIndexer extends SolrIndexer
             return;
         }
 
-        // Obtain the DSN from the config.ini file:
-        Ini ini = new Ini();
-
-        // Find VuFind's home directory in the environment; if it's not available,
-        // try using a relative path on the assumption that we are currently in
-        // VuFind's import subdirectory:
-        String vufindHome = System.getenv("VUFIND_HOME");
-        if (vufindHome == null) {
-            vufindHome = "..";
-        }
-
-        String configFile = vufindHome + "/web/conf/config.ini";
-        File file = new File(configFile);
-        try {
-            ini.load(new FileReader(file));
-        } catch (Throwable e) {
-            dieWithError("Unable to access " + configFile);
-        }
-        String dsn = ini.get("Database", "database");
-
-        // Strip wrapping quotes if necessary (the ini reader won't do this for us):
-        if (dsn.startsWith("\"")) {
-            dsn = dsn.substring(1, dsn.length());
-        }
-        if (dsn.endsWith("\"")) {
-            dsn = dsn.substring(0, dsn.length() - 1);
-        }
+        String dsn = getConfigSetting("config.ini", "Database", "database");
 
         try {
             // Parse key settings from the PHP-style DSN:
@@ -243,6 +334,8 @@ public class VuFindIndexer extends SolrIndexer
         java.util.Date retVal;
         try {
             retVal = marc008date.parse(input.substring(0, 6));
+        } catch(java.lang.StringIndexOutOfBoundsException e) {
+            retVal = new java.util.Date(0);
         } catch(java.text.ParseException e) {
             retVal = new java.util.Date(0);
         }
@@ -986,7 +1079,7 @@ public class VuFindIndexer extends SolrIndexer
         String result = "";
 
         // Get the path to Aperture web crawler (and return no text if it is unavailable)
-        String aperturePath = getAperturePath();
+        String aperturePath = getConfigSetting("fulltext.ini", "Aperture", "webcrawler");
         if (aperturePath == null) {
             return null;
         }
@@ -1028,52 +1121,6 @@ public class VuFindIndexer extends SolrIndexer
      */
     public String getFulltext(Record record) {
         return getFulltext(record, "856u", null);
-    }
-
-    /**
-     * Extract the Aperture path from fulltext.ini
-     *
-     * @return String          Path to Aperture executables
-     */
-    public String getAperturePath() {
-        // Obtain path to Aperture from the fulltext.ini file:
-        Ini ini = new Ini();
-
-        // Find VuFind's home directory in the environment; if it's not available,
-        // try using a relative path on the assumption that we are currently in
-        // VuFind's root directory:
-        String vufindHome = System.getenv("VUFIND_HOME");
-        if (vufindHome == null) {
-            vufindHome = "";
-        }
-
-        String fulltextIniFile = vufindHome + "/web/conf/fulltext.ini";
-        File file = new File(fulltextIniFile);
-        try {
-            ini.load(new FileReader(fulltextIniFile));
-        } catch (Throwable e) {
-            dieWithError("Unable to access " + fulltextIniFile);
-        }
-        String aperturePath = ini.get("Aperture", "webcrawler");
-        if (aperturePath == null) {
-            return null;
-        }
-
-        // Drop comments if necessary:
-        int pos = aperturePath.indexOf(';');
-        if (pos >= 0) {
-            aperturePath = aperturePath.substring(0, pos).trim();
-        }
-
-        // Strip wrapping quotes if necessary (the ini reader won't do this for us):
-        if (aperturePath.startsWith("\"")) {
-            aperturePath = aperturePath.substring(1, aperturePath.length());
-        }
-        if (aperturePath.endsWith("\"")) {
-            aperturePath = aperturePath.substring(0, aperturePath.length() - 1);
-        }
-
-        return aperturePath;
     }
 
     /**
