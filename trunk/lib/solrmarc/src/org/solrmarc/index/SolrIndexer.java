@@ -2670,7 +2670,7 @@ public class SolrIndexer
      * @return a Set of strings containing ALL subfields of ALL marc fields within the
      *         range indicated by the bound string arguments, with one string for each field encountered.
      */
-    public Set<String> getAllSearchableFields(final Record record, String lowerBoundStr, String upperBoundStr)
+    public Set<String> getAllSearchableFieldsAsSet(final Record record, String lowerBoundStr, String upperBoundStr)
     {
         Set<String> result = new LinkedHashSet<String>();
         int lowerBound = localParseInt(lowerBoundStr, 100);
@@ -2715,7 +2715,7 @@ public class SolrIndexer
      * @return a string containing ALL subfields of ALL marc fields within the
      *         range indicated by the bound string arguments.
      */
-    public String getAllSearchableFieldsAsString(final Record record, String lowerBoundStr, String upperBoundStr)
+    public String getAllSearchableFields(final Record record, String lowerBoundStr, String upperBoundStr)
     {
         StringBuffer buffer = new StringBuffer("");
         int lowerBound = localParseInt(lowerBoundStr, 100);
