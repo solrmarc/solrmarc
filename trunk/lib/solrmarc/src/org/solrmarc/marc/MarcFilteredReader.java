@@ -345,6 +345,38 @@ public class MarcFilteredReader implements MarcReader
                 }
             }
         }
+        else if (command.startsWith("append("))
+        {
+            String args[] = getTwoArgs(command);
+            if (args.length == 2 && args[0].length() == 1)
+            {
+                subfields = field.getSubfields(args[0].charAt(0));
+                for (Subfield sf : subfields)
+                {
+                    String newData = sf.getData() + args[1];
+                    if (!newData.equals(sf.getData()))
+                    {
+                        sf.setData(newData);
+                    }
+                }
+            }
+        }
+        else if (command.startsWith("prepend("))
+        {
+            String args[] = getTwoArgs(command);
+            if (args.length == 2 && args[0].length() == 1)
+            {
+                subfields = field.getSubfields(args[0].charAt(0));
+                for (Subfield sf : subfields)
+                {
+                    String newData = args[1] + sf.getData();
+                    if (!newData.equals(sf.getData()))
+                    {
+                        sf.setData(newData);
+                    }
+                }
+            }
+        }
         else if (command.startsWith("deletesubfield("))
         {
             String arg = getOneArg(command);
