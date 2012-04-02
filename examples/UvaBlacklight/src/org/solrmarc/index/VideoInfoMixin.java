@@ -794,7 +794,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
     public static Pattern genreActionAdventure = Pattern.compile("(^|[^a-z])(action|adventure|espionage|martial arts|samurai|spies|spy thriller|bond, james)([^a-z]|$)");
     public static Pattern genreAnimation = Pattern.compile("(^|[^a-z])(animated|animation)([^a-z]|$)");
     public static Pattern genreBiography = Pattern.compile("(^|[^a-z])(biograph(ical|y))([^a-z]|$)");
-    public static Pattern genreChildren = Pattern.compile("(^|[^a-z])(children('s)?)([^a-z]|$)");
+    public static Pattern genreChildren = Pattern.compile("(^|[^a-z])((children's) (stories|films|literature|poetry|songs|television programs))|(television programs|video recordings|dance) for children([^a-z]|$)");
     public static Pattern genreComedy = Pattern.compile("(^|[^a-z])(comed(y|ies)|humor)([^a-z]|$)");
     public static Pattern genreCrimeMystery = Pattern.compile("(^|[^a-z])(assassins|cop|crime|criminal[s]?|detective[s]?|fugitives|gangster[s]?|investigation|kidnapping|legal|murder(ers)?|mystery|police|prison[s]?|robbery|suspense|swindlers|thrillers|thieves)([^a-z]|$)");
     public static Pattern genreDocumentary = Pattern.compile("(^|[^a-z])(documentary|newsreels)([^a-z]|$)");
