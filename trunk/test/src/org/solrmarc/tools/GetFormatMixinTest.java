@@ -46,11 +46,16 @@ public class GetFormatMixinTest
         String testDataParentPath = System.getProperty("test.data.path");
         if (testDataParentPath == null)
             fail("property test.data.path must be defined for the tests to run");
+        String testDataFile = System.getProperty("test.data.file");
+        if (testDataFile == null || testDataFile.equals("${test.data.file}"))
+            testDataFile = "formatRecs.mrc";
+        System.err.println("test DataFile = "+ testDataFile);
         MarcReader reader = null;
         Properties indexingProps = new Properties();
         indexingProps.setProperty("getformatmixin", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes");
         indexingProps.setProperty("getformatmixinmapped", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_map.properties");
         indexingProps.setProperty("getformatmixinunmapped", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_unmap_map.properties");
+        indexingProps.setProperty("getformatmixinprimary", "custom(org.solrmarc.index.GetFormatMixin), getPrimaryContentType, getformat_mixin_map.properties");
         String verboseStr = System.getProperty("marc.verbose");
         boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
         ErrorHandler errors = new ErrorHandler();
@@ -68,7 +73,7 @@ public class GetFormatMixinTest
         SolrIndexer testIndexer = SolrIndexer.indexerFromProperties(indexingProps, new String[]{"translation_maps"});
         try
         {
-            reader = new MarcPermissiveStreamReader(new FileInputStream(new File(testDataParentPath, "formatRecs.mrc")), true, true, "MARC8");
+            reader = new MarcPermissiveStreamReader(new FileInputStream(new File(testDataParentPath, testDataFile)), true, true, "MARC8");
             while (reader.hasNext())
             {
                 Record record = reader.next();
@@ -101,9 +106,9 @@ public class GetFormatMixinTest
         }
         catch (FileNotFoundException e)
         {
-            fail("unable to read test recordfile  formatTests.mrc");
+            fail("unable to read test recordfile "+testDataFile);
         }
-        System.out.println("Test testRemoteIndexRecord is successful");
+        System.out.println("Test testGetFormatMixin is successful");
     }
 
     private Object mergeresults(Object resultraw, Object resultmapped)
