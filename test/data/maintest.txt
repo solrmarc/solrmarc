@@ -56,7 +56,7 @@
 
 # Test 18
 #now verify that the default is being set to sorted
-+, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
++, double_007.mrc, getAllSearchableFieldsAsSet(rec, 949, 960), 496826|aapl|bmain|emain
 
 # Test 19-20
 #check permissive reader vs non-permissive reader

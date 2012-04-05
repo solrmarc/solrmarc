@@ -84,6 +84,11 @@ public class MarcPrinter extends MarcHandler
             {
                 unique = true;
             }
+            else if (arg.equals("-nomap")) 
+            {
+                System.setProperty("marc.delete_subfields", "nomap");
+                System.setProperty("marc.reader.remap", "nomap");
+            }
             else if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate") || arg.equals("untranslate") || arg.equals("to_json") )
             {
                 mode = arg;
@@ -97,13 +102,6 @@ public class MarcPrinter extends MarcHandler
                 indexkeyprefix = arg.replaceAll("\\*", ".*").replaceAll("\\?", ".?");
             }
         }
-        String marcIncludeIfPresent2 = Utils.getProperty(configProps, "marc.include_if_present2");
-        String marcIncludeIfMissing2 = Utils.getProperty(configProps, "marc.include_if_missing2");
-
-        if (reader != null && (marcIncludeIfPresent2 != null || marcIncludeIfMissing2 != null)) 
-        {
-            reader = new MarcFilteredReader(reader, marcIncludeIfPresent2, marcIncludeIfMissing2, null);
-        }
     }
 
     @Override
@@ -112,12 +110,24 @@ public class MarcPrinter extends MarcHandler
     }
 
     @Override
+    public void loadReader(String source, String fName)
+    {
+        super.loadReader(source, fName);
+        String marcIncludeIfPresent2 = Utils.getProperty(configProps, "marc.include_if_present2");
+        String marcIncludeIfMissing2 = Utils.getProperty(configProps, "marc.include_if_missing2");
+
+        if (reader != null && (marcIncludeIfPresent2 != null || marcIncludeIfMissing2 != null)) 
+        {
+            reader = new MarcFilteredReader(reader, marcIncludeIfPresent2, marcIncludeIfMissing2, null);
+        }
+
+    }
+    @Override
     public int handleAll() 
     {
         // keep track of record count
         int recordCounter = 0;
         java.util.Set<String> contentMap = new java.util.LinkedHashSet<String>();
-
         while(reader != null && reader.hasNext())
         {
             recordCounter++;

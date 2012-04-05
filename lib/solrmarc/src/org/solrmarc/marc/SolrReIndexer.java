@@ -72,8 +72,6 @@ public class SolrReIndexer extends MarcImporter
   //      configProps.setProperty("solrmarc.use_binary_request_handler", "false");
 //        configProps.setProperty("solrmarc.use_streaming_proxy", "false");
         super.loadLocalProperties();
-        solrFieldContainingEncodedMarcRecord = Utils.getProperty(configProps, "solr.fieldname");
-        queryForRecordsToUpdate = Utils.getProperty(configProps, "solr.query");
         String up = Utils.getProperty(configProps, "solr.do_update");
         doUpdate = (up == null) ? true : Boolean.parseBoolean(up);
     }
@@ -82,6 +80,8 @@ public class SolrReIndexer extends MarcImporter
     protected void processAdditionalArgs() 
     {
         int argOffset = 0;
+        solrFieldContainingEncodedMarcRecord = Utils.getProperty(configProps, "solr.fieldname");
+        queryForRecordsToUpdate = Utils.getProperty(configProps, "solr.query");
         if (addnlArgs.length > 0 && addnlArgs[0].equals("-id"))
         {
             getIdsOnly = true;
@@ -95,24 +95,29 @@ public class SolrReIndexer extends MarcImporter
         {
             solrFieldContainingEncodedMarcRecord = addnlArgs[argOffset+1];
         }
+    }
+
+    @Override
+    public void loadIndexer(String indexerName, String indexerProps) 
+    {
+        super.loadIndexer(indexerName, indexerProps);
         solrServer = ((SolrServerProxy)solrProxy).getSolrServer();
     }
 
-    
     /**
      * Read matching records from the index
      * @param queryForRecordsToUpdate
      */
     public void readAllMatchingIds(String queryForRecordsToUpdate)
     {
-        String queryparts[] = queryForRecordsToUpdate.split(":");
-        if (queryparts.length != 2) 
-        {
-            //System.err.println("Error query must be of the form    field:term");
-            logger.error("Error query must be of the form    field:term");
-            System.out.println("Error: query must be of the form    field:term  " + queryForRecordsToUpdate);
-            return;
-        }
+//        String queryparts[] = queryForRecordsToUpdate.split(":");
+//        if (queryparts.length != 2) 
+//        {
+//            //System.err.println("Error query must be of the form    field:term");
+//            logger.error("Error query must be of the form    field:term");
+//            System.out.println("Error: query must be of the form    field:term  " + queryForRecordsToUpdate);
+//            return;
+//        }
         
         SolrQuery query = new SolrQuery();
         query.setQuery(queryForRecordsToUpdate);

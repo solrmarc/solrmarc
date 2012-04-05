@@ -110,6 +110,7 @@ public abstract class MarcHandler {
         configToUse = configProperties;
         
         initLocal();
+        processAdditionalArgs();
         if (configToUse != null) 
         {
             // System.out.println("Loading properties from " + properties);
@@ -125,8 +126,6 @@ public abstract class MarcHandler {
         {
             loadIndexer(indexerName, indexerProps); 
         }
-        
-        processAdditionalArgs();
 	}
 		
     /** 
@@ -209,14 +208,6 @@ public abstract class MarcHandler {
         if (Utils.getProperty(configProps, "marc.override")!= null)
         {
             System.setProperty("org.marc4j.marc.MarcFactory", Utils.getProperty(configProps, "marc.override").trim());
-//            if (Utils.getProperty(configProps, "marc.override.reader.remap")!= null)
-//            {
-//                String remapFilename =  Utils.getProperty(configProps, "marc.override.reader.remap").trim();
-//                String configFilePath = Utils.getProperty(configProps, "config.file.dir");
-//                String propertySearchPath[] = makePropertySearchPath(solrmarcPath, siteSpecificPath, configFilePath, homeDir);
-//                String remapURL = Utils.getPropertyFileAbsoluteURL(propertySearchPath, remapFilename, false, null);
-//                System.setProperty("marc.override.reader.remapURL", remapURL);
-//            }
         }
         else  // no override, tell solrmarc to use the NoSortMarcFactory by default.
         {
@@ -439,14 +430,12 @@ public abstract class MarcHandler {
         String marcIncludeIfPresent = Utils.getProperty(configProps, "marc.include_if_present");
         String marcIncludeIfMissing = Utils.getProperty(configProps, "marc.include_if_missing");
         String marcDeleteSubfields = Utils.getProperty(configProps, "marc.delete_subfields");
+        if (marcDeleteSubfields != null && marcDeleteSubfields.equals("nomap")) marcDeleteSubfields = null;
         String marcRemapRecord = Utils.getProperty(configProps, "marc.reader.remap");
+        if (marcRemapRecord != null && marcRemapRecord.equals("nomap")) marcRemapRecord = null;
         if (marcDeleteSubfields != null)  marcDeleteSubfields = marcDeleteSubfields.trim();
         if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null || marcDeleteSubfields != null || marcRemapRecord != null))
         {
-//            if (marcDeleteSubfields != null && marcRemapRecord != null)
-//            {
-//                logger.error("Cannot specify both a remap property file and a delete_subfields specification");
-//            }
             if (marcRemapRecord != null)
             {
                 String remapFilename =  marcRemapRecord.trim();
