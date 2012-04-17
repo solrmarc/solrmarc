@@ -196,6 +196,8 @@ public class BlacklightIndexer extends SolrIndexer
         addBoundWithHoldings(record, result);
         removeShadowed999sFromList(record, result);
         removeLostHoldings(result);
+        //  this line (and the called method) added in response to JIRA ISSUE LIBSRVSRCHDISCOV-377
+        removeOrderRecords(result);
         return result;
     }
     
@@ -342,6 +344,22 @@ public class BlacklightIndexer extends SolrIndexer
                 }
             }
 
+        }
+    }
+    
+    //  this method added in response to JIRA ISSUE LIBSRVSRCHDISCOV-377
+    private void removeOrderRecords(List<?> fields999)
+    {
+        Iterator<?> iter = fields999.iterator();
+        while (iter.hasNext())
+        {
+            Object field = iter.next();
+            DataField df = (DataField)field;
+            Subfield callNumber = df.getSubfield('a');
+            if (callNumber != null && callNumber.getData().contains("order-0"))
+            {
+                iter.remove();
+            }
         }
     }
     
@@ -2083,7 +2101,7 @@ public class BlacklightIndexer extends SolrIndexer
         boolean returnHiddenRecs = returnHidden.startsWith("return");
         String mapName = loadTranslationMap(null, propertiesMap);
         
-        Set<String> fields = getFieldList(record, "999ikl';'");
+        Set<String> fields = getFieldList(record, "999aikl';'");
         boolean visible = false;
         String extraString = null;
         if (processExtraShadowedIds && boundWithIds != null && boundWithIds.containsKey(record.getControlNumber().substring(1)))
@@ -2109,22 +2127,27 @@ public class BlacklightIndexer extends SolrIndexer
                 for (String field : fields)
                 {
                     String fparts[] = field.split(";");
-                    if (extraString != null && extraString.contains("|" + fparts[0] + "|"))
+                    //  this test (and the change above to return aikl instead of ikl) added in response to JIRA ISSUE LIBSRVSRCHDISCOV-377
+                    if (fparts[0].contains("order-0"))
+                    {
+                        continue;
+                    }
+                    else if (extraString != null && extraString.contains("|" + fparts[1] + "|"))
                     {
                         // this holding is marked as Hidden via the addnlShadowedIds data file
                         // so simply continue, and unless another non-Hidden holding is found the 
                         // record will be not visible.
                         continue;
                     }
-                    else if (fparts.length == 2)
-                    {
-                        String mappedFpart = Utils.remap(fparts[1], findMap(mapName), true);
-                        if (mappedFpart.equals("VISIBLE"))  visible = true;
-                    }
                     else if (fparts.length == 3)
                     {
-                        String mappedFpart1 = Utils.remap(fparts[1], findMap(mapName), true);
-                        String mappedFpart2 = Utils.remap(fparts[2], findMap(mapName), true);
+                        String mappedFpart = Utils.remap(fparts[2], findMap(mapName), true);
+                        if (mappedFpart.equals("VISIBLE"))  visible = true;
+                    }
+                    else if (fparts.length == 4)
+                    {
+                        String mappedFpart1 = Utils.remap(fparts[2], findMap(mapName), true);
+                        String mappedFpart2 = Utils.remap(fparts[3], findMap(mapName), true);
                         if (mappedFpart1.equals("VISIBLE") && mappedFpart2.equals("VISIBLE"))
                         {
                             visible = true;
