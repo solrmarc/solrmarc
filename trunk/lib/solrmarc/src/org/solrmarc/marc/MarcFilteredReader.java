@@ -593,7 +593,7 @@ public class MarcFilteredReader implements MarcReader
         {
             char ind1 = mdf.group(2).charAt(0);
             if (ind1 < '0' || ind1 > '9') ind1 = ' ';
-            char ind2 = mdf.group(2).charAt(0);
+            char ind2 = mdf.group(3).charAt(0);
             if (ind2 < '0' || ind2 > '9') ind2 = ' ';
             DataField df = factory.newDataField(mdf.group(1), ind1, ind2);
             String sfData = mdf.group(4);
