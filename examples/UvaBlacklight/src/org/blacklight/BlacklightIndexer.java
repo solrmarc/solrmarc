@@ -356,7 +356,7 @@ public class BlacklightIndexer extends SolrIndexer
             Object field = iter.next();
             DataField df = (DataField)field;
             Subfield callNumber = df.getSubfield('a');
-            if (callNumber != null && callNumber.getData().contains("order-0"))
+            if (callNumber != null && callNumber.getData().matches(".*[Oo][Rr][Dd][Ee][Rr][- ]*0.*"))
             {
                 iter.remove();
             }
@@ -2128,7 +2128,7 @@ public class BlacklightIndexer extends SolrIndexer
                 {
                     String fparts[] = field.split(";");
                     //  this test (and the change above to return aikl instead of ikl) added in response to JIRA ISSUE LIBSRVSRCHDISCOV-377
-                    if (fparts[0].contains("order-0"))
+                    if (fparts[0].matches(".*[Oo][Rr][Dd][Ee][Rr][- ]*0.*"))
                     {
                         continue;
                     }
