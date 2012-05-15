@@ -1182,8 +1182,8 @@ public class VuFindIndexer extends SolrIndexer
             }
         }
 
-        String badChars = "[^\\x0009\\x000A\\x000D\\x0020-\\xD7FF\\xE000-\\xFFFD]";
-        plainText =  Pattern.compile(badChars).matcher(plainText).replaceAll(" ");
+        String badChars = "[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]+";
+        plainText = plainText.replaceAll(badChars, " ");
 
         return plainText;
     }
