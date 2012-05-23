@@ -1,4 +1,4 @@
-package org.solrmarc.tools;
+package org.blacklight;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -37,11 +37,9 @@ import org.solrmarc.marcoverride.MarcSplitStreamWriter;
 
 public class GetFormatMixinTest
 {
-    /**
-     * unit test for org.solrmarc.marc.RawRecordReader and org.solrmarc.tools.RawRecord
-     */
+    
     @Test
-    public void testGetFormatMixin()
+    public void testGetFormatVsMixin()
     {
         String testDataParentPath = System.getProperty("test.data.path");
         if (testDataParentPath == null)
@@ -55,76 +53,8 @@ public class GetFormatMixinTest
         indexingProps.setProperty("getformatmixin", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes");
         indexingProps.setProperty("getformatmixinmapped", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_map.properties");
         indexingProps.setProperty("getformatmixinunmapped", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_unmap_map.properties");
-        String verboseStr = System.getProperty("marc.verbose");
-        boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
-        ErrorHandler errors = new ErrorHandler();
-        PrintStream out = null;
-        if (verbose)
-        {
-            try
-            {
-                out = new PrintStream(System.out, true, "UTF-8");
-            }
-            catch (UnsupportedEncodingException e)
-            {
-            } 
-        }
-        SolrIndexer testIndexer = SolrIndexer.indexerFromProperties(indexingProps, new String[]{"translation_maps"});
-        try
-        {
-            reader = new MarcPermissiveStreamReader(new FileInputStream(new File(testDataParentPath, testDataFile)), true, true, "MARC8");
-            while (reader.hasNext())
-            {
-                Record record = reader.next();
-                Map<String,Object> indexedRecord = testIndexer.map(record, errors);
-                String id = record.getControlNumber();
-                Object resultraw = indexedRecord.get("getformatmixin");
-                Object resultmapped = indexedRecord.get("getformatmixinunmapped");
-                Object resultmerged = mergeresults(resultraw, resultmapped);
-                showResults(resultmerged, "raw   ", verbose, out, id);
-
-                resultmapped = indexedRecord.get("getformatmixinmapped");
-                showResults(resultmapped, "mapped", verbose, out, id);
-                if (verbose) 
-                {
-                    if (errors.hasErrors())
-                    {
-                        Object prevError = "";
-                        for (Object error : errors.getErrors())
-                        {
-                            if (!error.toString().equals(prevError.toString()))
-                                out.println(error.toString());
-                            prevError = error;
-                        }
-                    }
-                    out.println(record.toString());
-                }
-                indexedRecord = testIndexer.map(record);
-                errors.reset();
-            }
-        }
-        catch (FileNotFoundException e)
-        {
-            fail("unable to read test recordfile "+testDataFile);
-        }
-        System.out.println("Test testGetFormatMixin is successful");
-    }
-    
-/*    @Test
-    public void testGetFormatVsMixin()
-    {
-        String testDataParentPath = System.getProperty("test.data.path");
-        if (testDataParentPath == null)
-            fail("property test.data.path must be defined for the tests to run");
-        String testDataFile = System.getProperty("test.data.file");
-        if (testDataFile == null || testDataFile.equals("${test.data.file}"))
-            testDataFile = "formatRecs.mrc";
-        System.err.println("test DataFile = "+ testDataFile);
-        MarcReader reader = null;
-        Properties indexingProps = new Properties();
-        indexingProps.setProperty("getformatmixinmapped", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_map.properties");
-        indexingProps.setProperty("getformatmixinunmapped", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_unmap_map.properties");
-        indexingProps.setProperty("format_orig_facet", "getCombinedFormatNew2");
+        indexingProps.setProperty("format_orig_facet", "custom, getCombinedFormatNew2");
+        indexingProps.setProperty("format_diff", "custom,  getFormatDiff");
         String verboseStr = System.getProperty("marc.verbose");
         boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
         ErrorHandler errors = new ErrorHandler();
@@ -151,24 +81,52 @@ public class GetFormatMixinTest
                 String id = record.getControlNumber();
                 Object resultraw = indexedRecord.get("getformatmixin");
                 Object resultmapped = indexedRecord.get("getformatmixinunmapped");
+                Object format_orig_facet = indexedRecord.get("format_orig_facet");
                 Object resultmerged = mergeresults(resultraw, resultmapped);
-                showResults(resultmerged, "raw   ", verbose, out, id);
-
+                Object resultdiff = indexedRecord.get("format_diff");
                 resultmapped = indexedRecord.get("getformatmixinmapped");
-                showResults(resultmapped, "mapped", verbose, out, id);
-                if (verbose) 
+                if (resultdiff != null)
                 {
-                    if (errors.hasErrors())
+                    if (!setsEqual(resultmapped, format_orig_facet) )// || errors.hasErrors())
                     {
-                        Object prevError = "";
-                        for (Object error : errors.getErrors())
+                        boolean breakOut = false;
+                        if (errors.hasErrors())
                         {
-                            if (!error.toString().equals(prevError.toString()))
-                                out.println(error.toString());
-                            prevError = error;
+                            List<?> errorMsgs = errors.getErrors();
+                            for (Object errorMsg : errorMsgs)
+                            {
+                                String msgStr = errorMsg.toString();
+                                if (msgStr.contains("Record contains minimal metadata"))
+                                {
+                                    breakOut = true;
+                                }
+                            }
+                        }
+                        if (breakOut) continue;
+                        showResults(resultmerged, "raw   ", verbose, out, id);
+                        showResults(resultmapped, "new   ", verbose, out, id);                    
+                        showResults(format_orig_facet, "old   ", verbose, out, id);                    
+                        if (verbose) 
+                        {
+                            if (errors.hasErrors())
+                            {
+                                Object prevError = "";
+                                for (Object error : errors.getErrors())
+                                {
+                                    if (!error.toString().equals(prevError.toString()))
+                                        out.println(error.toString());
+                                    prevError = error;
+                                }
+                            }
+                            out.println(record.toString());
+                            errors.reset();
                         }
                     }
-                    out.println(record.toString());
+                    else
+                    {
+                        showResults(resultmapped, "a-ok  ", verbose, out, id); 
+                        out.println();
+                    }
                 }
                 indexedRecord = testIndexer.map(record);
                 errors.reset();
@@ -180,7 +138,39 @@ public class GetFormatMixinTest
         }
         System.out.println("Test testGetFormatMixin is successful");
     }
-*/
+
+    private boolean setsEqual(Object resultmapped, Object format_orig_facet)
+    {
+        if (format_orig_facet instanceof Set && resultmapped instanceof Set)
+        {
+            Set<String> resold = (Set<String>)format_orig_facet;
+            Set<String> resmapped = (Set<String>)resultmapped;
+            if (!resold.containsAll(resmapped)) 
+            {
+                return(false);
+            }
+            if (!resmapped.containsAll(resold)) 
+            {
+                return(false);
+            }
+            return(true);
+        }
+        else if (format_orig_facet instanceof String && resultmapped instanceof String)
+        {
+            String resold = (String)format_orig_facet;
+            String resmapped = (String)resultmapped;
+            if (resold.equals(resmapped))
+            {
+                return(true);
+            }
+        }
+        else
+        {
+            return(false);           
+        }
+        return false;
+    }
+
     private Object mergeresults(Object resultraw, Object resultmapped)
     {
         if (resultraw instanceof Set && resultmapped instanceof Set)
@@ -203,6 +193,10 @@ public class GetFormatMixinTest
         {
             String resmerged = resultraw + "\t--\t" + resultmapped;
             return(resmerged);
+        }
+        else if (resultraw == null && resultmapped == null)
+        {
+            return(null);
         }
         else
         {
