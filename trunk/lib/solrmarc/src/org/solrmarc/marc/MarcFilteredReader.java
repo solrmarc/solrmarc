@@ -411,7 +411,8 @@ public class MarcFilteredReader implements MarcReader
                     {
                         for (Subfield sf : (List<Subfield>)((DataField)vf).getSubfields(args[1].charAt(0)))
                         {
-                            if (sf.getData().matches(args[2]))  return(true);
+                            if (sf.getData().equals(args[2]) || sf.getData().matches(args[2]))  
+                                return(true);
                         }
                     }
                 }

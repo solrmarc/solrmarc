@@ -1636,6 +1636,21 @@ public class BlacklightIndexer extends SolrIndexer
         return(getCombinedFormatNew2(record));
     }
     
+    public Set<String> getFormatDiff(Record record)
+    {
+        Set<String> orig_format = getCombinedFormatNew2(record);
+        Set<String> new_format = super.getFormatMapped(record, "getformat_mixin_map.properties");
+        Set<String> format_Union = new LinkedHashSet<String>(orig_format);
+        format_Union.addAll(new_format);
+        Set<String> format_intersection = new LinkedHashSet<String>();
+        for (String x : orig_format)
+            if (new_format.contains(x))
+                format_intersection.add(x);
+        Set<String> format_difference = new LinkedHashSet<String>(format_Union);
+        format_difference.removeAll(format_intersection);
+        return(format_difference);
+    }
+    
     public Set<String> getCombinedFormatNew2(final Record record)
     {    
         if (combinedFormat != null) return(combinedFormat);
@@ -1811,7 +1826,7 @@ public class BlacklightIndexer extends SolrIndexer
                 }
                 combinedFormat.add("Video");
                 boolean ff = false;  //  ff means found format;
-                if (combinedFormat.contains("VHS") || combinedFormat.contains("DVD") || combinedFormat.contains("Laser Disc")) ff = true;
+                if (combinedFormat.contains("VHS") || combinedFormat.contains("DVD") || combinedFormat.contains("Laserdisc")) ff = true;
                 if (!ff)
                 {
                     Set<String> field538a = getFieldList(record, "538a");
@@ -1822,10 +1837,10 @@ public class BlacklightIndexer extends SolrIndexer
                 {
                     if (field300a == null) field300a = getFieldList(record, "300a");
                     // omit the v to catch both upper and lower case 
-                    if (Utils.setItemContains(field300a, "ideocassette")) 
+                    if (Utils.setItemContains(field300a, "[Vv]ideo[ ]?cassette")) 
                     { 
                         Set<String> field300c = getFieldList(record, "300c");
-                        if (Utils.setItemContains(field300c, "3/4"))  combinedFormat.add("U-matic"); 
+                        if (Utils.setItemContains(field300c, "3/4"))  combinedFormat.add("Video U-Matic"); 
                         else combinedFormat.add("VHS");
                         ff = true;
                     }
@@ -1833,7 +1848,7 @@ public class BlacklightIndexer extends SolrIndexer
                     if (Utils.setItemContains(field300a, "ideodisc"))  
                     { 
                         Set<String> field300c = getFieldList(record, "300c");
-                        if (Utils.setItemContains(field300c, "12"))  combinedFormat.add("Laser Disc"); 
+                        if (Utils.setItemContains(field300c, "12"))  combinedFormat.add("Laserdisc"); 
                         else combinedFormat.add("DVD");
                         ff = true;
                     }

@@ -1,5 +1,6 @@
 package org.solrmarc.index;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,14 +9,31 @@ import org.marc4j.ErrorHandler;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
+import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.tools.Utils;
 
 public class GetFormatMixin extends SolrIndexerMixin
 {
+    private enum ProfileType
+    {
+        NoneDefined,
+        Books,
+        Computers,
+        Maps,
+        Music,
+        Serial,
+        Visual,
+        Mixed;
+        @Override public String toString()
+        {
+            return "ProfileType." + name();
+        }
+    };
     
     private enum ContentType
     {
+        NoneDefined,
         Art,
         ArtReproduction,
         Book,
@@ -41,6 +59,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         Filmstrip,
         FlashCard,
         Game,
+        GovernmentDocument,
         Graphic,
         Image,
         Kit,
@@ -88,6 +107,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
     }
 
+    
     private enum MediaType
     {
         ActivityCard,
@@ -114,6 +134,12 @@ public class GetFormatMixin extends SolrIndexerMixin
         FilmCartridge, 
         FilmCassette,
         FilmOther,
+        Film8mm,
+        FilmSuper8mm,
+        Film9_5mm,
+        Film16mm,
+        Film28mm,
+        Film35mm,
         FilmRoll, 
         FilmReel, 
         Filmslip,
@@ -186,35 +212,90 @@ public class GetFormatMixin extends SolrIndexerMixin
         TechnicalDrawing,
         TextOther,
         Transparency,
-        Video8mm,
-        VideoBeta,
-        VideoBetacam,
-        VideoBetacamSP,
-        VideoBluRay,
-        VideoCartridge,
-        VideoCassette,
-        VideoCapacitance,
-        VideoD2,
-        VideoDisc,
-        VideoDVD,
-        VideoEIAJ,
-        VideoHi8,
-        VideoLaserdisc,
-        VideoMII,
-        VideoOther,
-        VideoOnline,
-        VideoQuadruplex,
-        VideoReel,
-        VideoSuperVHS,
-        VideoTypeC,
-        VideoUMatic,
-        VideoVHS;
+        TypeObsolete,
+        Video8mm(0.6),
+        VideoBeta(0.6),
+        VideoBetacam(0.6),
+        VideoBetacamSP(0.6),
+        VideoBluRay(0.75),
+        VideoCartridge(0.7),
+        VideoCassette(0.7),
+        VideoCapacitance(0.8),
+        VideoD2(0.6),
+        VideoDisc(0.7),
+        VideoDVD(0.75),
+        VideoEIAJ(0.6),
+        VideoHi8(0.6),
+        VideoLaserdisc(0.8),
+        VideoMII(0.6),
+        VideoOther(0.6),
+        VideoOnline(0.8),
+        VideoQuadruplex(0.6),
+        VideoReel(0.7),
+        VideoSuperVHS(0.6),
+        VideoTypeC(0.6),
+        VideoUMatic(0.6),
+        VideoVHS(0.75), 
+        VideoVHS_Heuristic(0.9, VideoVHS), 
+        VideoDVD_Heuristic(0.9, VideoDVD), 
+        VideoLaserdisc_Heuristic(0.85, VideoLaserdisc),
+        VideoBeta_Heuristic(0.65, VideoBeta);
+        private double priority;
+        private MediaType mapsTo;
+        private boolean isHeuristic;
+        private String fromFields;
+        MediaType() { priority = 0.6; isHeuristic = false; mapsTo = null; fromFields = null;}
+        MediaType(double priority) { this.priority = priority; isHeuristic = false; mapsTo = null; fromFields = null;}
+        MediaType(double priority, MediaType mapsTo) { this.priority = priority; this.mapsTo = mapsTo; isHeuristic = true; fromFields = null;}
+        MediaType(double priority, MediaType mapsTo, String fromField) { this.priority = priority; this.mapsTo = mapsTo; isHeuristic = true; fromFields = fromField;}
+        public MediaType mapsTo()
+        {
+            if (this.mapsTo != null) return(this.mapsTo);
+            else return(this);
+        }
+        public static MediaType selectBest(MediaType t1, MediaType t2)
+        {
+            if (t1.priority >= t2.priority) return(t1);
+            else return(t2);
+        }
+        public double sigmoidProb()
+        {
+            double sigmoid = 1 / ( 1 + Math.exp(-1 * (2.0 * (priority -0.5))));
+            return(sigmoid);
+            
+        }
         @Override public String toString()
         {
             return "MediaType." + name();
         }
-    }
+    };
 
+    private class MediaTypeHeuristic 
+    {
+        private double priority;
+        private MediaType mapsTo;
+        private boolean isHeuristic;
+        private String fromFields;
+        MediaTypeHeuristic(MediaType mapsTo, double priority, String fromField) { this.priority = priority; isHeuristic = false; this.mapsTo = mapsTo; fromFields = fromField;}
+
+        MediaTypeHeuristic(MediaType mapsTo) { priority = 0.5; isHeuristic = false; this.mapsTo = mapsTo; fromFields = null;}
+        void combine(MediaTypeHeuristic mth2)
+        {
+            double newPriority = ((this.priority - 0.5) +  (mth2.priority - 0.5) + 0.5);
+            String newFields = (this.fromFields.contains(mth2.fromFields)) ? this.fromFields : (this.fromFields + ":" + mth2.fromFields);
+            this.priority = newPriority;
+            this.fromFields = newFields;
+        }
+        public double sigmoidProb()
+        {
+            double sigmoid = 1 / ( 1 + Math.exp(-1 * (2.0 * (priority -0.5))));
+            return(sigmoid);
+            
+        }
+
+
+    };
+    
     private enum FormOfItem
     {
         Microfilm, 
@@ -250,6 +331,392 @@ public class GetFormatMixin extends SolrIndexerMixin
             return "ControlType." + name();
         }
     }
+    private static LinkedHashMap<Character, ProfileType> mainProfileMap = new LinkedHashMap<Character, ProfileType>() {
+        {
+            put( 'a', ProfileType.Books);                   //  a - Book
+            put( 'b', ProfileType.NoneDefined);             //  b - Archival and manuscripts control OBSOLETE, 1995
+            put( 'c', ProfileType.Music);                   //  c - Notated music
+            put( 'd', ProfileType.Music);                   //  d - Manuscript notated music
+            put( 'e', ProfileType.Maps);                    //  e - Cartographic material
+            put( 'f', ProfileType.Maps);                    //  f - Manuscript cartographic material
+            put( 'g', ProfileType.Visual);                  //  g - Projected medium
+            put( 'h', ProfileType.NoneDefined);             //  h - Microform publications [OBSOLETE, 1972] [USMARC only]
+            put( 'i', ProfileType.Music);                   //  i - Nonmusical sound recording
+            put( 'j', ProfileType.Music);                   //  j - Musical sound recording
+            put( 'k', ProfileType.Visual);                  //  k - Two-dimensional nonprojectable graphic
+            put( 'm', ProfileType.Computers);               //  m - Computer file
+            put( 'n', ProfileType.NoneDefined);             //  n - Special instructional material [OBSOLETE, 1983]
+            put( 'o', ProfileType.Visual);                  //  o - Kit
+            put( 'p', ProfileType.Mixed);                   //  p - Mixed materials
+            put( 'r', ProfileType.Visual);                  //  r - Three-dimensional artifact or naturally occurring object
+            put( 's', ProfileType.Serial);                  //  s - Serial/Integrating resource - Continuing Resources
+            put( 't', ProfileType.Books);                   //  t - Manuscript language material
+        }
+    };
+    
+    private static LinkedHashMap<Character, ProfileType> mainSubProfileMap = new LinkedHashMap<Character, ProfileType>() {
+        {           
+            put( 'a', ProfileType.Books);                   //  a - Monographic component part
+            put( 'b', ProfileType.Serial);                  //  b - Serial component part
+            put( 'c', ProfileType.Books);                   //  c - Collection
+            put( 'd', ProfileType.Books);                   //  d - Subunit
+            put( 'i', ProfileType.Serial);                  //  i - Integrating resource
+            put( 'p', ProfileType.NoneDefined);             // p - Pamphlet [OBSOLETE, 1988] [CAN/MARC only]
+            put( 'm', ProfileType.Books);                   // m - Monograph/Item
+            put( 's', ProfileType.Serial);                  //  s - Serial
+        }
+    };
+    
+    private static LinkedHashMap<String, ContentType[]> field245hTypeMap = new LinkedHashMap<String, ContentType[]>() {
+        {
+            put ( "art original", new ContentType[]{ContentType.Art});
+            put ( "art reproduction", new ContentType[]{ContentType.ArtReproduction});
+   //         put ( "computer file");
+            put ( "cartographic material", new ContentType[]{ ContentType.Map, ContentType.MapManuscript, ContentType.MapSingle, ContentType.MapSeries, 
+                                                              ContentType.MapSerial, ContentType.MapGlobe, ContentType.MapAtlas, ContentType.MapSeparate, ContentType.MapBound });
+//          3133  electronic book
+//        740178  electronic resource
+    //        put ( "graphic"
+//         30580  manuscript
+  //          put( "microform", new ContentType[]{ MediaType.Microform});
+//          1341  picture
+//           145  series record
+            put ( "slide", new ContentType[]{ ContentType.Slide});
+            put ( "sound recording", new ContentType[]{ ContentType.MusicRecording, ContentType.SoundRecording});
+            put ( "videorecording", new ContentType[]{ ContentType.Video });
+            put ( "videocassette", new ContentType[]{ ContentType.Video });
+        }
+    };
+    
+    private static LinkedHashMap<Character, ContentType> mainTypeMap = new LinkedHashMap<Character, ContentType>() {
+        {
+            put( 'a', ContentType.Book);                    //  a - Book
+            put( 'b', ContentType.Manuscript);              //  b - Archival and manuscripts control OBSOLETE, 1995
+            put( 'c', ContentType.MusicalScore);            //  c - Notated music
+            put( 'd', ContentType.MusicalScoreManuscript);  //  d - Manuscript notated music
+            put( 'e', ContentType.Map);                     //  e - Cartographic material
+            put( 'f', ContentType.MapManuscript);           //  f - Manuscript cartographic material
+            put( 'g', ContentType.ProjectedMedium);         //  g - Projected medium
+            put( 'h', ContentType.NoneDefined);             //  h - Microform publications [OBSOLETE, 1972] [USMARC only]
+            put( 'i', ContentType.SoundRecording);          //  i - Nonmusical sound recording
+            put( 'j', ContentType.MusicRecording);          //  j - Musical sound recording
+            put( 'k', ContentType.Image);                   //  k - Two-dimensional nonprojectable graphic
+            put( 'm', ContentType.ComputerFile);            //  m - Computer file
+            put( 'n', ContentType.NoneDefined);             //  n - Special instructional material [OBSOLETE, 1983]
+            put( 'o', ContentType.Kit);                     //  o - Kit
+            put( 'p', ContentType.MixedMaterial);           //  p - Mixed materials
+            put( 'r', ContentType.PhysicalObject);          //  r - Three-dimensional artifact or naturally occurring object
+            put( 's', ContentType.Serial);                  //  s - Serial/Integrating resource - Continuing Resources
+            put( 't', ContentType.Manuscript);              //  t - Manuscript language material
+        }
+    };
+    
+    private static LinkedHashMap<Character, ContentType> mainSubTypeMap = new LinkedHashMap<Character, ContentType>() {
+        {           
+            put( 'a', ContentType.BookComponentPart);       //  a - Monographic component part
+            put( 'b', ContentType.SerialComponentPart);     //  b - Serial component part
+            put( 'c', ContentType.BookCollection);          //  c - Collection
+            put( 'd', ContentType.BookSubunit);             //  d - Subunit
+            put( 'i', ContentType.SerialIntegratingResource);     //  i - Integrating resource
+            put( 'p', ContentType.Pamphlet);                // p - Pamphlet [OBSOLETE, 1988] [CAN/MARC only]
+            put( 'm', ContentType.Book);                    // m - Monograph/Item
+            put( 's', ContentType.Serial);                  //  s - Serial
+        }
+    };
+
+    private static LinkedHashMap<Character, ContentType> computersSubTypes = new LinkedHashMap<Character, ContentType>() {
+        { 
+            put( 'a', ContentType.ComputerNumericData );            // a - Numeric data
+            put( 'b', ContentType.ComputerProgram );                // b - Computer program
+            put( 'c', ContentType.ComputerRepresentational);        // c - Representational
+            put( 'd', ContentType.ComputerDocument);                // d - Document
+            put( 'e', ContentType.ComputerBibliographicData);       // e - Bibliographic data
+            put( 'f', ContentType.ComputerFont);                    // f - Font
+            put( 'g', ContentType.ComputerGame);                    // g - Game
+            put( 'h', ContentType.ComputerSound);                   // h - Sound
+            put( 'i', ContentType.ComputerInteractiveMultimedia);   // i - Interactive multimedia
+            put( 'j', ContentType.ComputerOnlineSystem);            // j - Online system or service
+            put( 'm', ContentType.ComputerCombination);             // m - Combination
+            put( 'j', ContentType.ComputerOnlineSystem);            // j - Online system or service
+            put( 'u', ContentType.ComputerFile);                    // u - Unknown
+            put( 'z', ContentType.ComputerFile);                    // z - Other
+            put( ' ', ContentType.ComputerFile);                    //   - Anything else
+        }
+    };
+    
+    private static LinkedHashMap<Character, ContentType> visualSubTypes = new LinkedHashMap<Character, ContentType>() {
+        {
+            put( 'a', ContentType.Art);                             // a - Art original   
+            put( 'b', ContentType.VisualKit);                       // b - Kit
+            put( 'c', ContentType.ArtReproduction);                 // c - Art reproduction
+            put( 'd', ContentType.Diorama);                         // d - Diorama
+            put( 'f', ContentType.Filmstrip);                       // f - Filmstrip
+            put( 'g', ContentType.Game);                            // g - Game
+            put( 'i', ContentType.Picture);                         // i - Picture
+            put( 'k', ContentType.Graphic);                         // k - Graphic
+            put( 'l', ContentType.TechnicalDrawing);                // l - Technical drawing
+            put( 'm', ContentType.MotionPicture);                   // m - Motion picture
+            put( 'n', ContentType.Chart);                           // n - Chart
+            put( 'o', ContentType.FlashCard);                       // o - Flash card
+            put( 'p', ContentType.MicroscopeSlide);                 // p - Microscope slide
+            put( 'q', ContentType.Model);                           // q - Model
+            put( 'r', ContentType.Realia);                          // r - Realia
+            put( 's', ContentType.Slide);                           // s - Slide
+            put( 't', ContentType.Transparency);                    // t - Transparency
+            put( 'v', ContentType.Video);                           // v - Videorecording
+            put( 'w', ContentType.Toy);                             // w - Toy
+        }
+    };
+    
+    private static LinkedHashMap<Character, String> visualValidSubTypes = new LinkedHashMap<Character, String>() {
+        {
+            put( 'a', "kr");                                        // a - Art original   
+            put( 'b', "o");                                         // b - Kit
+            put( 'c', "kr");                                        // c - Art reproduction
+            put( 'd', "r");                                         // d - Diorama
+            put( 'f', "g");                                         // f - Filmstrip
+            put( 'g', "kr");                                        // g - Game
+            put( 'i', "kr");                                        // i - Picture
+            put( 'k', "k");                                         // k - Graphic
+            put( 'l', "k");                                         // l - Technical drawing
+            put( 'm', "g");                                         // m - Motion picture
+            put( 'n', "k");                                         // n - Chart
+            put( 'o', "k");                                         // o - Flash card
+            put( 'p', "r");                                         // p - Microscope slide
+            put( 'q', "r");                                         // q - Model
+            put( 'r', "r");                                         // r - Realia
+            put( 's', "gk");                                        // s - Slide
+            put( 't', "gk");                                        // t - Transparency
+            put( 'v', "g");                                         // v - Videorecording
+            put( 'w', "r");                                         // w - Toy
+        }
+    };
+
+    private static LinkedHashMap<Character, ContentType> mapsSubTypes = new LinkedHashMap<Character, ContentType>() {
+        { 
+            put( 'a', ContentType.MapSingle );                      // a - Single map
+            put( 'b', ContentType.MapSeries );                      // b - Map series
+            put( 'c', ContentType.MapSerial);                       // c - Map serial
+            put( 'd', ContentType.MapGlobe);                        // d - Globe
+            put( 'e', ContentType.MapAtlas);                        // e - Atlas
+            put( 'f', ContentType.MapSeparate);                     // f - Separate supplement to another work
+            put( 'g', ContentType.MapBound);                        // g - Bound as part of another work
+            put( 'u', ContentType.Map);                             // u - Unknown
+            put( 'z', ContentType.Map);                             // z - Other
+            put( ' ', ContentType.Map);                             //   - Anything else
+        }
+    };
+    
+    private static LinkedHashMap<Character, ContentType> serialsSubTypes = new LinkedHashMap<Character, ContentType>() {
+        { 
+            put( 'd', ContentType.MapSingle );                      // d - updating database
+            put( 'l', ContentType.LooseLeaf );                      // l - Updating loose-leaf
+            put( 'm', ContentType.BookSeries);                      // m - Monographic series
+            put( 'n', ContentType.Newspaper);                       // n - Newspaper
+            put( 'p', ContentType.Periodical);                      // p - Periodical
+            put( 'w', ContentType.Website);                         // w - Updating Web site
+            put( ' ', ContentType.Serial);                          //   - Anything else
+        }
+    };
+    
+    // used for mapping the 007 field(s)
+    private static LinkedHashMap<String, MediaType> mediaTypeMap = new LinkedHashMap<String, MediaType>() {
+        {
+            // maps
+            put( "ad", MediaType.Atlas);                        //  ad - Atlas
+            put( "ag", MediaType.MapDiagram);                   //  ag - Diagram
+            put( "aj", MediaType.Map);                          //  aj - Map
+            put( "ak", MediaType.MapProfile);                   //  ak - Manuscript notated music
+            put( "aq", MediaType.MapModel);                     //  aq - Model
+            put( "ar", MediaType.SensorImage);                  //  ar - Remote-sensing image
+            put( "as", MediaType.MapSection);                   //  as - Section
+            put( "ay", MediaType.MapView);                      //  ay - View
+            put( "az", MediaType.MapOther);                     //  az - Other Map
+            
+            put( "aa", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "ab", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "ac", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "ah", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "ai", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "am", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "an", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "ao", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "ap", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "at", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "av", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "aw", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            put( "ax", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
+            
+            // electronic resource
+            put( "ca", MediaType.ComputerTapeCartridge);        // ca - Tape cartridge
+            put( "cb", MediaType.ComputerChipCartridge);        // cb - Chip cartridge
+            put( "cc", MediaType.ComputerOpticalDiscCartridge); // cc - Computer optical disc cartridge
+            put( "cd", MediaType.ComputerDisk);                 // cd - Computer disc, type unspecified
+            put( "ce", MediaType.ComputerDiscCartridge);        // ce - Computer disc cartridge, type unspecified
+            put( "cf", MediaType.ComputerTapeCassette);         // cf - Tape cassette
+            put( "ch", MediaType.ComputerTapeReel);             // ch - Tape reel
+            put( "cj", MediaType.ComputerFloppyDisk);           // cj - Magnetic disk
+            put( "ck", MediaType.ComputerCard);                 // ck - Computer card
+            put( "cm", MediaType.ComputerMagnetoOpticalDisc);   // cm - Magneto-optical disc
+            put( "co", MediaType.ComputerOpticalDisc);          // co - Optical disc
+            put( "cr", MediaType.Online);                       // cr - Remote
+            put( "cu", MediaType.ComputerOther);                // cu - Unspecified
+            put( "cz", MediaType.ComputerOther);                // cz - Other
+            
+            // globe
+            put( "da", MediaType.GlobeCelestial);				// da - Celestial globe
+            put( "db", MediaType.GlobePlanetary);				// db - Planetary or lunar globe
+            put( "dc", MediaType.GlobeTerrestrial);             // dc - Terrestrial globe
+            put( "dd", MediaType.TypeObsolete);                 // dd - Satellite globe (of our solar system), excluding the earth moon [OBSOLETE, 1997] [CAN/MARC only]
+            put( "de", MediaType.GlobeEarthMoon);				// de - Earth moon globe
+            put( "du", MediaType.GlobeOther);                   // du - Unspecified
+            put( "dz", MediaType.GlobeOther);                   // dz - Other
+            
+            // tactile material
+            put( "fa", MediaType.TactileMoon);				    // fa - Moon
+            put( "fb", MediaType.Braille);                      // fb - Braille
+            put( "fc", MediaType.TactileCombination);           // fc - Combination
+            put( "fd", MediaType.TactileNoWritingSystem);       // fd - Tactile, with no writing system
+            put( "fu", MediaType.TactileOther);                 // fu - Unspecified
+            put( "fz", MediaType.TactileOther);                 // fz - Other
+
+            // projected graphic
+            put( "gc", MediaType.FilmstripCartridge);           // gc - Filmstrip cartridge
+            put( "gd", MediaType.Filmslip);                     // gd - Filmslip
+            put( "gf", MediaType.Filmstrip);                    // gf - Filmstrip, type unspecified
+            put( "gn", MediaType.TypeObsolete);                 // gn - Not applicable [OBSOLETE, 1981] [USMARC only]
+            put( "go", MediaType.FilmstripRoll);				// go - Filmstrip roll
+            put( "gs", MediaType.Slide);                        // gs - Slide
+            put( "gt", MediaType.Transparency);                 // gt - Transparency
+            put( "gu", MediaType.ProjectedMediumOther);         // gu - Unspecified
+            put( "gz", MediaType.ProjectedMediumOther);         // gz - Other
+
+            // microform
+            put( "ha", MediaType.MicroformApetureCard);         // ha - Aperture card
+            put( "hb", MediaType.MicrofilmCartridge);           // hb - Microfilm cartridge
+            put( "hc", MediaType.MicrofilmCassette);            // hc - Microfilm cassette
+            put( "hd", MediaType.MicrofilmReel);                // hd - Microfilm reel
+            put( "he", MediaType.Microfiche);                   // he - Microfiche
+            put( "hf", MediaType.MicroficheCassette);           // hf - Microfiche cassette
+            put( "hg", MediaType.Microopaque);                  // hg - Microopaque
+            put( "hh", MediaType.MicrofilmSlip);                // hh - Microfilm slip
+            put( "hj", MediaType.MicrofilmRoll);                // hj - Microfilm roll
+            put( "hu", MediaType.Microform);                    // hu - Unspecified
+            put( "hz", MediaType.Microform);                    // hz - Other
+
+            // non-projected graphic
+            put( "ka", MediaType.ActivityCard);                 // ka - Activity card
+            put( "kc", MediaType.Collage);                      // kc - Collage
+            put( "kd", MediaType.Drawing);                      // kd - Drawing
+            put( "ke", MediaType.Painting);                     // ke - Painting
+            put( "kf", MediaType.PhotomechanicalPrint);         // kf - Photomechanical print
+            put( "kg", MediaType.Photonegative);                // kg - Photonegative
+            put( "kh", MediaType.PhotoPrint);                   // kh - Photoprint
+            put( "ki", MediaType.Picture);                      // ki - Picture
+            put( "kj", MediaType.ImagePrint);                   // kj - Print
+            put( "kk", MediaType.Poster);                       // kk - Poster
+            put( "kl", MediaType.TechnicalDrawing);             // kl - Technical drawing
+            put( "kn", MediaType.Chart);                        // kn - Chart
+            put( "ko", MediaType.FlashCard);                    // ko - Flash card
+            put( "kp", MediaType.Postcard);                     // kp - Postcard
+            put( "kq", MediaType.Icon);                         // kq - Icon
+            put( "kr", MediaType.Radiograph);                   // kr - Radiograph
+            put( "ks", MediaType.StudyPrint);                   // ks - Study print
+            put( "kv", MediaType.Photo);                        // kv - Photograph, type unspecified
+            put( "ku", MediaType.ImageOther);                   // ku - Unspecified
+            put( "kz", MediaType.ImageOther);                   // kz - Other
+
+            // motion picture
+            put( "mc", MediaType.FilmCartridge);                // mc - Film cartridge
+            put( "mf", MediaType.FilmCassette);                 // mf - Film cassette
+            put( "mo", MediaType.FilmRoll);                     // mo - Film roll
+            put( "mr", MediaType.FilmReel);                     // mr - Film reel
+            put( "mu", MediaType.FilmOther);                    // mu - Unspecified
+            put( "mz", MediaType.FilmOther);                    // mz - Other
+
+            put( "o?", MediaType.Kit);                          // o - kit
+            put( "q?", MediaType.MusicalScore);                 // q - notated music
+            put( "r?", MediaType.SensorImage);                  // r - remote-sensing image
+
+            // sound recording
+            put( "sd.a", MediaType.SoundDiscLP);                    // sd - Sound disc
+            put( "sd.b", MediaType.SoundDiscLP);                    // sd - Sound disc
+            put( "sd.c", MediaType.SoundDiscLP);                    // sd - Sound disc
+            put( "sd.d", MediaType.SoundDiscLP);                    // sd - Sound disc
+            put( "sd.f", MediaType.SoundDiscCD);                    // sd - Sound disc
+            put( "sd", MediaType.SoundDisc);                    // sd - Sound disc
+            put( "sc", MediaType.TypeObsolete);                 // sc - Cylinder [OBSOLETE]
+            put( "se", MediaType.SoundCylinder);                // se - Cylinder
+            put( "sf", MediaType.TypeObsolete);                 // sf - Sound-track film [OBSOLETE]
+            put( "sg", MediaType.SoundCartridge);               // sg - Sound cartridge
+            put( "si", MediaType.SoundTrackFilm);               // si - Sound-track film
+            put( "sr", MediaType.TypeObsolete);                 // sr - Roll [OBSOLETE]
+            put( "sq", MediaType.SoundRoll);                    // sq - Roll
+            put( "ss", MediaType.SoundCassette);                // ss - Sound cassette
+            put( "st", MediaType.SoundTapeReel);                // st - Sound-tape reel
+            put( "sw", MediaType.SoundWireRecording);           // sw - Wire recording
+            put( "su", MediaType.SoundRecordingOther);          // su - Unspecified
+            put( "sz", MediaType.SoundRecordingOther);          // sz - Other
+
+            // text
+            put( "ta", MediaType.Print);                        // ta - Regular print
+            put( "tb", MediaType.PrintLarge);                   // tb - Large print
+            put( "tc", MediaType.Braille);                      // tc - Braille
+            put( "td", MediaType.LooseLeaf);                    // td - Loose-leaf
+            put( "tu", MediaType.TextOther);                    // tu - Unspecified
+            put( "tz", MediaType.TextOther);                    // tz - Other
+            
+            // video recording
+             put( "v...a", MediaType.VideoBeta);                // vf--a - Beta (1/2 in., videocassette)
+             put( "v...b", MediaType.VideoVHS);                 // vf--b - VHS (1/2 in., videocassette)
+             put( "v...c", MediaType.VideoUMatic);              // vf--c - U-matic (3/4 in., videocasstte)
+             put( "v...d", MediaType.VideoEIAJ);                // vr--d - EIAJ (1/2 in., reel)
+             put( "v...e", MediaType.VideoTypeC);               // vr--e - Type C (1 in., reel)
+             put( "v...f", MediaType.VideoQuadruplex);          // vr--f - Quadruplex (1 in. or 2 in., reel)
+             put( "v...g", MediaType.VideoLaserdisc);           // vd--g - Laserdisc
+             put( "v...h", MediaType.VideoCapacitance);         // vd--h - CED (Capacitance Electronic Disc) videodisc
+             put( "v...i", MediaType.VideoBetacam);             // vf--i - Betacam (1/2 in., videocassette)
+             put( "v...j", MediaType.VideoBetacamSP);           // vf--j - Betacam SP (1/2 in., videocassette)
+             put( "v...k", MediaType.VideoSuperVHS);            // vf--k - Super-VHS (1/2 in., videocassette)
+             put( "v...m", MediaType.VideoMII);                 // vf--m - M-II (1/2 in., videocassette)
+             put( "v...o", MediaType.VideoD2);                  // vf--o - D-2 (3/4 in., videocassette)
+             put( "v...p", MediaType.Video8mm);                 // vf--p - 8 mm.   videocassette
+             put( "v...q", MediaType.VideoHi8);                 // vf--q - Hi-8 mm.  videocassette
+             put( "v...m", MediaType.VideoMII);                 // vf--m - M-II (1/2 in., videocassette)
+             put( "v...s", MediaType.VideoBluRay);              // vd--s - Blu-ray disc
+             put( "v...v", MediaType.VideoDVD);                 // vd--v - DVD
+             put( "v...n", MediaType.TypeObsolete);             // v---n - Obsolete type specification
+             put( "v...?", null);                               // v---? - Obsolete type specification
+             put( "v...u", MediaType.VideoOther);               // v---u - Unspecified         
+    //       put( "v...z", MediaType.VideoOther);               // v---z - Other video type         // needs special handling
+                                         
+        }
+    };
+    
+    // used for validating the form of a specific video item
+    private static LinkedHashMap<String, Character> videoFormMap = new LinkedHashMap<String, Character>() {
+        {
+            // video recording
+            put( "v...a", 'f');                                 // vf--a - Beta (1/2 in., videocassette)
+            put( "v...b", 'f');                                 // vf--b - VHS (1/2 in., videocassette)
+            put( "v...c", 'f');                                 // vf--c - U-matic (3/4 in., videocasstte)
+            put( "v...d", 'r');                                 // vr--d - EIAJ (1/2 in., reel)
+            put( "v...e", 'r');                                 // vr--e - Type C (1 in., reel)
+            put( "v...f", 'r');                                 // vr--f - Quadruplex (1 in. or 2 in., reel)
+            put( "v...g", 'd');                                 // vd--g - Laserdisc
+            put( "v...h", 'd');                                 // vd--h - CED (Capacitance Electronic Disc) videodisc
+            put( "v...i", 'f');                                 // vf--i - Betacam (1/2 in., videocassette)
+            put( "v...j", 'f');                                 // vf--j - Betacam SP (1/2 in., videocassette)
+            put( "v...k", 'f');                                 // vf--k - Super-VHS (1/2 in., videocassette)
+            put( "v...m", 'f');                                 // vf--m - M-II (1/2 in., videocassette)
+            put( "v...o", 'f');                                 // vf--o - D-2 (3/4 in., videocassette)
+            put( "v...p", 'f');                                 // vf--p - 8 mm.   videocassette
+            put( "v...q", 'f');                                 // vf--q - Hi-8 mm.  videocassette
+            put( "v...m", 'f');                                 // vf--m - M-II (1/2 in., videocassette)
+            put( "v...s", 'd');                                 // vd--s - Blu-ray disc
+            put( "v...v", 'd');                                 // vd--v - DVD
+        }
+    };
     
     /**
      * Return the content type and media types, plus electronic, for this record
@@ -261,7 +728,13 @@ public class GetFormatMixin extends SolrIndexerMixin
     {
         Set<String> formats = getContentTypes(record);
         formats.addAll( getMediaTypes(record));
-        formats = addOnlineTypes(record, formats);
+        if (recordIsMinimal(record) && indexer != null && indexer.errors != null && (record.getId() == null || (record.getId() & (long)1) == 0))
+        {
+            record.setId(record.getId() == null ? (long)1 : record.getId() | (long)1);
+            indexer.errors.addError(record.getControlNumber(), "n/a", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Record contains minimal metadata, format is likely wrong");                
+        }
+        formats = addOnlineTypes(record, formats, false);
+        if (isArchive(record)) formats.add(ControlType.Archive.toString());
         String mapName = null;
         try
         {
@@ -286,44 +759,106 @@ public class GetFormatMixin extends SolrIndexerMixin
     {
         Set<String> formats = getContentTypes(record);
         formats.addAll( getMediaTypes(record));
-        formats = addOnlineTypes(record, formats); 
+        if (recordIsMinimal(record) && indexer != null && indexer.errors != null && (record.getId() == null || (record.getId() & (long)1) == 0))
+        {
+            record.setId(record.getId() == null ? (long)1 : record.getId() | (long)1);
+            indexer.errors.addError(record.getControlNumber(), "n/a", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Record contains minimal metadata, format is likely wrong");                
+        }
+        formats = addOnlineTypes(record, formats, false); 
+        if (isArchive(record)) formats.add(ControlType.Archive.toString());
         return(formats);
     }
     
-    /**
-     * Return the primary content type, plus electronic, for this record
-     * 
-     * @param Record  -  MARC Record
-     * @return String of primary material types
-     */
-
-    public Set<String> getPrimaryContentTypePlusOnline(final Record record)
+    private boolean recordIsMinimal(Record record)
     {
-        Set<String> format = new LinkedHashSet<String>();
+        ControlField field008 = ((ControlField)record.getVariableField("008"));
+        if (field008 == null) return(true);
+        String field008Str = field008.getData();
+        List<?> vfs = record.getVariableFields(new String[]{"300", "538", "500"});
+        if ((field008Str.startsWith("000000n")||field008Str.contains("????????????")) && vfs.size() == 0)  
+            return(true);
+        return (false);
+    }
 
-        // get primary material type
+    /*
+     * Online materials
+     *   Leader/06 a, i, j, t    AND     006/06 (008/23) o OR 007/00 c AND007/01 r  
+     *   Leader/06 m         AND     006/06 (008/23) o
+     *   Leader/06 p, c, d   AND 006/06 (008/23) o
+     *   Leader/06 g         AND     006/06 (008/23) o OR 007/00 v   AND 007/04 z 
+     *   Leader/06 e, f, k, o, r     AND     006/12 (008/29) o
 
-        String primaryType = getPrimaryContentType(record);
-        format.add(primaryType);
-        
-        format = addOnlineTypes(record, format);
-        
-        return format;
+     */
+    public boolean isOnlineFormatTypes(final Record record)
+    {
+        char typeOfRecord = record.getLeader().getTypeOfRecord();
+        ControlField field008 = ((ControlField)record.getVariableField("008"));
+        String field008Str = field008 != null ? field008.getData() : "";
+        List<ControlField> fields006 = (List<ControlField>)record.getVariableFields("006");
+        List<ControlField> fields007 = (List<ControlField>)record.getVariableFields("007");
+        String types1 = "aijtpcd";
+        String types2 = "efgkorm";
+        if (types1.indexOf(typeOfRecord) != -1)
+        {
+            if (field008Str.length() > 23 && field008Str.charAt(23) == 'o') return(true);
+            if (setContainsAt(fields006, 6, "o", true))   return(true);
+            if (typeOfRecord == 'a' || typeOfRecord == 'i' || typeOfRecord == 'j' || typeOfRecord == 't')
+            {
+                if (setContainsAt(fields007, 0, "cr", true))   return(true);
+            }
+        }
+        if (types2.indexOf(typeOfRecord) != -1)
+        {
+            if (field008Str.length() > 29 && field008Str.charAt(29) == 'o') return(true);
+            if (setContainsAt(fields006, 12, "o", true))   return(true);
+            if (typeOfRecord == 'g')
+            {
+                if (setContainsAt(fields007, 0, "v...z", true))   
+                {
+                    if (this.hasFullText(record))  return(true);
+                }
+            }
+        }
+        return(false);
+    }
+    
+    private boolean setContainsAt(List<ControlField> fields, int offset, String match, boolean ignoreCase)
+    {
+        for (ControlField cf : fields)
+        {
+            String data = cf.getData();
+            if (!match.contains("."))
+            {
+                if (data.regionMatches(ignoreCase, offset, match, 0, match.length())) 
+                {
+                    return(true);
+                }
+            }
+            else
+            {
+                if (data.length() > offset+match.length() && data.substring(offset, offset + match.length()).matches(match))
+                {
+                    return(true);
+                }
+            }
+        }
+        return false;
     }
 
     /**
      * Add types EBook and Online for electronic items for this record
+     * @param checkURLs 
      * 
      * @param Record  -  MARC Record
      * @param Set<String>  - the Set of formats to add the types EBook and Online to 
      * @return String of primary material types
      */
 
-    public Set<String> addOnlineTypes(final Record record, Set<String> formats)
+    public Set<String> addOnlineTypes(final Record record, Set<String> formats, boolean checkURLs)
     {
         // see if we have full-text link
 
-        Boolean online = hasFullText(record);
+        boolean online = isOnlineFormatTypes(record) || hasFullText(record);
 
         // if so, and this is a book, add e-book as well
 
@@ -394,7 +929,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
     public Set<String> getContentTypes(final Record record)
     {
-        Set<String> materialType = new LinkedHashSet<String>(); // the list of material types
+        Set<String> contentTypes = new LinkedHashSet<String>(); // the list of material types
 
         // // Leader ////
 
@@ -402,8 +937,8 @@ public class GetFormatMixin extends SolrIndexerMixin
 
         // get main type and profile from leader/06
 
-        String leaderType = extractType(leader, "leader"); // main material type, based on leader
-        String leaderProfile = extractProfile(leader, "leader"); // 008 profile to use
+        ContentType leaderType = extractType(leader, "leader"); // main material type, based on leader
+        ProfileType leaderProfile = extractProfile(leader, "leader"); // 008 profile to use
 
         // // 008 & 006 ////
 
@@ -412,495 +947,245 @@ public class GetFormatMixin extends SolrIndexerMixin
         // so we can iterate over them both
 
         String[] formatTags = { "008", "006" };
-        List<ControlField> fieldsFormat = (List<ControlField>)record.getVariableFields(formatTags);
+        ControlField field008 = (ControlField)record.getVariableField("008");
+        List<ControlField> fields006 = (List<ControlField>)record.getVariableFields("006");
 
-        for (ControlField fieldFormat : fieldsFormat)
+        if (field008 != null)
         {
-            String tag = fieldFormat.getTag();
-
-            String profile = ""; // we'll use this to determine which
-                                    // positions to use
-            String type = ""; // we'll use this to set a default type
-
-            if (tag.equals("008"))
-            {
-                // 008 uses profile and type set in leader
-
-                profile = leaderProfile;
-                type = leaderType;
-            }
-            else if (tag.equals("006"))
-            {
-                // 006 uses position 0 to indicate profile and type
-
-                profile = extractProfile(fieldFormat.getData(), "006");
-                type = extractType(fieldFormat.getData(), "006");
-            }
-
-            // BOOKS
-
-            // is used when Leader/06 (Type of record) contains code a (Language
-            // material)
-            // or t (Manuscript language material) and Leader/07 (Bibliographic
-            // level)
-            // contains code a (Monographic component part), c (Collection), d
-            // (Subunit),
-            // or m (Monograph)
-
-            if (profile.equals("books"))
-            {
-                materialType.add(type);
-            }
-
-            // COMPUTER FILES
-
-            // is used when Leader/06 (Type of record) contains code m.
-
-            else if (profile.equals("computers"))
-            {
-                // type of computer file
-
-                int position = 26;
-
-                if (tag.equals("006"))
-                {
-                    position = position - 7;
-                }
-
-                String field = fieldFormat.getData();
-
-                // wasn't long enough, yo!
-
-                if (field.length() - 1 < position)
-                {
-                    materialType.add(type);
-                    if (indexer != null && indexer.errors != null)
-                    {
-                        indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
-                    }
-                    continue;
-                }
-
-                switch (field.toLowerCase().charAt(position)) {
-                    case 'a': // a - Numeric data
-
-                        materialType.add(ContentType.ComputerNumericData.toString());
-                        break;
-
-                    case 'b': // b - Computer program
-
-                        materialType.add(ContentType.ComputerProgram.toString());
-                        break;
-
-                    case 'c': // c - Representational
-
-                        materialType.add(ContentType.ComputerRepresentational.toString());
-                        break;
-
-                    case 'd': // d - Document
-
-                        materialType.add(ContentType.ComputerDocument.toString());
-                        break;
-
-                    case 'e': // e - Bibliographic data
-
-                        materialType.add(ContentType.ComputerBibliographicData.toString());
-                        break;
-
-                    case 'f': // f - Font
-
-                        materialType.add(ContentType.ComputerFont.toString());
-                        break;
-
-                    case 'g': // g - Game
-
-                        materialType.add(ContentType.ComputerGame.toString());
-                        break;
-
-                    case 'h': // h - Sound
-
-                        materialType.add(ContentType.ComputerSound.toString());
-                        break;
-
-                    case 'i': // i - Interactive multimedia
-
-                        materialType.add(ContentType.ComputerInteractiveMultimedia.toString());
-                        break;
-
-                    case 'j': // j - Online system or service
-
-                        materialType.add(ContentType.ComputerOnlineSystem.toString());
-                        break;
-
-                    case 'm': // m - Combination
-
-                        materialType.add(ContentType.ComputerCombination.toString());
-                        break;
-
-                    // u - Unknown
-                    // z - Other
-
-                    default:
-
-                        materialType.add(type);
-                        break;
-                }
-            }
-
-            // MAPS
-
-            // is used when Leader/06 (Type of record) contains code e
-            // (Cartographic material)
-            // or f (Manuscript cartographic material).
-
-            else if (profile.equals("maps"))
-            {
-                // type of cartographic material
-
-                int position = 25;
-
-                if (tag.equals("006"))
-                {
-                    position = position - 7;
-                }
-
-                String field = fieldFormat.getData();
-
-                // wasn't long enough, yo!
-
-                if (field.length() - 1 < position)
-                {
-                    materialType.add(type);
-                    if (indexer != null && indexer.errors != null)
-                    {
-                        indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
-                    }
-                    continue;
-                }
-
-                switch (field.toLowerCase().charAt(position)) {
-                    case 'a': // a - Single map
-
-                        materialType.add(ContentType.MapSingle.toString());
-                        break;
-
-                    case 'b': // b - Map series
-
-                        materialType.add(ContentType.MapSeries.toString());
-                        break;
-
-                    case 'c': // c - Map serial
-
-                        materialType.add(ContentType.MapSerial.toString());
-                        break;
-
-                    case 'd': // d - Globe
-
-                        materialType.add(ContentType.MapGlobe.toString());
-                        break;
-
-                    case 'e': // e - Atlas
-
-                        materialType.add(ContentType.MapAtlas.toString());
-                        break;
-
-                    case 'f': // f - Separate supplement to another work
-
-                        materialType.add(ContentType.MapSeparate.toString());
-                        break;
-
-                    case 'g': // g - Bound as part of another work
-
-                        materialType.add(ContentType.MapBound.toString());
-                        break;
-
-                    // u - Unknown
-                    // z - Other
-
-                    default:
-                        materialType.add(type);
-                        break;
-                }
-            }
-
-            // MUSIC
-
-            // is used when Leader/06 (Type of record) contains code c (Notated
-            // music),
-            // d (Manuscript notated music), i (Nonmusical sound recording), or
-            // j (Musical sound recording)
-
-            else if (profile.equals("music"))
-            {
-                materialType.add(type);
-            }
-
-            // CONTINUING RESOURCES
-
-            // is used when Leader/06 (Type of record) contains code a (Language
-            // material) and Leader/07
-            // contains code b (Serial component part), i (Integrating
-            // resource), or code s (Serial).
-
-            else if (profile.equals("serial"))
-            {
-                // type of continuing resource
-
-                int position = 21;
-
-                if (tag.equals("006"))
-                {
-                    position = position - 7;
-                }
-
-                String field = fieldFormat.getData();
-
-                // wasn't long enough, yo!
-
-                if (field.length() - 1 < position)
-                {
-                    materialType.add(type);
-                    if (indexer != null && indexer.errors != null)
-                    {
-                        indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
-                    }
-                    continue;
-                }
-
-                switch (field.toLowerCase().charAt(position)) {
-                    case 'd': // updating database
-
-                        materialType.add(ContentType.Database.toString());
-                        break;
-
-                    case 'l': // l - Updating loose-leaf
-
-                        materialType.add(ContentType.LooseLeaf.toString());
-                        break;
-                        
-                    case 'm': // Monographic series
-
-                        materialType.add(ContentType.BookSeries.toString());
-                        break;
-
-                    case 'n': // Newspaper
-
-                        materialType.add(ContentType.Newspaper.toString());
-                        break;
-
-                    case 'p': // Periodical
-
-                        materialType.add(ContentType.Periodical.toString());
-                        break;
-
-                    case 'w': // Updating Web site
-
-                        materialType.add(ContentType.Website.toString());
-                        break;
-
-                    default:
-                        materialType.add(type);
-                        break;
-                }
-            }
-
-            // VISUAL MATERIALS
-
-            // is used when Leader/06 (Type of record) contains code g
-            // (Projected medium),
-            // code k (Two-dimensional nonprojectable graphic), code o (Kit), or
-            // code r (Three-dimensional artifact or naturally occurring
-            // object).
-
-            else if (profile.equals("visual"))
-            {
-                // type of visual material
-
-                int position = 33;
-
-                if (tag.equals("006"))
-                {
-                    position = position - 7;
-                }
-
-                String field = fieldFormat.getData();
-
-                // wasn't long enough, yo!
-
-                if (field.length() - 1 < position)
-                {
-                    materialType.add(type);
-                    if (indexer != null && indexer.errors != null)
-                    {
-                        indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
-                    }
-                    continue;
-                }
-
-                switch (field.toLowerCase().charAt(position)) {
-                    case 'a': // a - Art original
-
-                        materialType.add(ContentType.Art.toString());
-                        break;
-                        
-                    case 'b': // b - Kit
-
-                        materialType.add(ContentType.VisualKit.toString());
-                        break;
-
-                    case 'c': // c - Art reproduction
-
-                        materialType.add(ContentType.ArtReproduction.toString());
-                        break;
-
-                    case 'd': // d - Diorama
-
-                        materialType.add(ContentType.Diorama.toString());
-                        break;
-                        
-                    case 'f': // f - Filmstrip
-
-                        materialType.add(ContentType.Filmstrip.toString());
-                        break;
-
-                    case 'g': // g - Game
-
-                        materialType.add(ContentType.Game.toString());
-                        break;
-                        
-                    case 'i': // i - Picture
-
-                        materialType.add(ContentType.Picture.toString());
-                        break;
-
-                    case 'k': // k - Graphic
-
-                        materialType.add(ContentType.Graphic.toString());
-                        break;
-
-                    case 'l': // l - Technical drawing
-
-                        materialType.add(ContentType.TechnicalDrawing.toString());
-                        break;
-
-                    case 'm': // m - Motion picture
-
-                        materialType.add(ContentType.MotionPicture.toString());
-                        break;
-
-                    case 'n': // n - Chart
-
-                        materialType.add(ContentType.Chart.toString());
-                        break;
-
-                    case 'o': // o - Flash card
-
-                        materialType.add(ContentType.FlashCard.toString());
-                        break;
-
-                    case 'p': // p - Microscope slide
-
-                        materialType.add(ContentType.MicroscopeSlide.toString());
-                        break;
-
-                    case 'q': // q - Model
-
-                        materialType.add(ContentType.Model.toString());
-                        break;
-
-                    case 'r': // r - Realia
-
-                        materialType.add(ContentType.Realia.toString());
-                        break;
-
-                    case 's': // s - Slide
-
-                        materialType.add(ContentType.Slide.toString());
-                        break;
-
-                    case 't': // t - Transparency
-
-                        materialType.add(ContentType.Transparency.toString());
-                        break;
-
-                    case 'v': // v - Videorecording
-
-                        materialType.add(ContentType.Video.toString());
-                        break;
-
-                    case 'w': // w - Toy
-
-                        materialType.add(ContentType.Toy.toString());
-                        break;
-
-                    // z - Other
-
-                    default:
-                        materialType.add(type);
-                        break;
-                }
-            }
-
-            // MIXED MATERIALS
-
-            // is used when Leader/06 (Type of record) contains code p (Mixed
-            // material).
-
-            else if (profile.equals("mixed"))
-            {
-                materialType.add(type);
-            }
-            else
-            {
-                if (indexer != null && indexer.errors != null)
-                {
-                    String field = tag.equals("006") ? "006/00" : "LEADER/06";
-                    indexer.errors.addError(record.getControlNumber(), field, "n/a", ErrorHandler.MINOR_ERROR, "Unknown item profile specified in "+ field);
-                }
-                //throw new SolrMarcIndexerException(1, "bad profile: " + profile);
-            }
+            getContentTypeFromFixedField(contentTypes, record, field008, leaderProfile, leaderType, offsetForProfile008(leaderProfile));
+        }
+        for (ControlField field006 : fields006)
+        {
+            ProfileType profile = extractProfile(field006.getData(), "006");
+            ContentType type = extractType(field006.getData(), "006");
+            getContentTypeFromFixedField(contentTypes, record, field006, profile, type, offsetForProfile008(profile) - 17);
         }
 
         // / DATA FIELDS ///
-
+        
         // thesis
-
         if (!record.getVariableFields("502").isEmpty())
         {
-            // set the first (primary) type as thesis
-
-            materialType = addToTop(materialType, ContentType.Thesis.toString());
-
-            // nix manuscript so we can distinguish actual manuscripts
-
-            materialType.remove(ContentType.Manuscript.toString());
+            String value502 =  ((DataField)record.getVariableField("502")).getSubfield('a') != null ? 
+                 ((DataField)record.getVariableField("502")).getSubfield('a').getData() : "";
+            if (value502.matches(".*[Tt]hesis.*") || value502.matches(".*[Dd]issertation.*") || value502.matches(".*[Hh]abilitation.*"))
+            {
+                // set the first (primary) type as thesis
+                contentTypes = addToTop(contentTypes, ContentType.Thesis.toString());
+    
+                // nix manuscript so we can distinguish actual manuscripts
+                contentTypes.remove(ContentType.Manuscript.toString());
+            }
+            else
+            {
+                contentTypes = addToTop(contentTypes, ContentType.Thesis.toString());
+            }
         }
 
         // nothing worked?
-
-        if (materialType.isEmpty())
+        if (contentTypes.isEmpty())
         {
             // record must have very little data, so we'll take whatever we can
-            // get
-
-            // isbn
-
+            // get isbn
             if (!record.getVariableFields("020").isEmpty())
             {
-                materialType.add(ContentType.Book.toString());
+                contentTypes.add(ContentType.Book.toString());
             }
 
             // only type from leader was available
-
-            else if (leaderType != "")
+            else if (leaderType != ContentType.NoneDefined)
             {
-                materialType.add(leaderType);
+                contentTypes.add(leaderType.toString());
             }
         }
-
-        return materialType;
+        return contentTypes;
+    }
+    
+    private void getContentTypeFromFixedField(Set<String> contentTypesStr, Record record, ControlField field, ProfileType profile, ContentType defaultType, int offsetInField)
+    {
+        ContentType typeToAdd = null;
+        if (field.getData().length()-1 < offsetInField)
+        {
+            typeToAdd = defaultType;
+            if (indexer != null && indexer.errors != null && (field.getId() == null || (field.getId() & (long)1) == 0))
+            {
+                field.setId(field.getId() == null ? (long)1 : field.getId() | (long)1);
+                indexer.errors.addError(record.getControlNumber(), field.getTag(), "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Fixed field "+field.getTag()+" is shorter than it ought to be");                
+            }
+        }
+        else 
+        {
+            char subContentType = field.getData().charAt(offsetInField);
+            switch (profile)
+            {
+                case Books:
+                {
+                    typeToAdd = defaultType;
+                    break;
+                }
+                case Computers: 
+                {
+                    typeToAdd = lookupType(computersSubTypes, subContentType, defaultType); 
+                    break;
+                }
+                case Maps:
+                {
+                    typeToAdd = lookupType(mapsSubTypes, subContentType, defaultType); 
+                    break;
+                }
+                case Music:
+                {
+                    typeToAdd = defaultType;
+                    break;
+                }
+                case Serial:
+                {
+                    typeToAdd = lookupType(serialsSubTypes, subContentType, defaultType); 
+                    break;
+                }
+                case Visual:
+                {
+                    ContentType type = lookupType(visualSubTypes, subContentType, defaultType);
+                    typeToAdd = type; 
+                    if (visualValidSubTypes.containsKey(subContentType))
+                    {
+                        String validValues = visualValidSubTypes.get(subContentType);
+                        boolean isValid = false;
+                        for (char c : validValues.toCharArray())
+                        {
+                            if (mainTypeMap.get(c).equals(defaultType)) isValid = true;
+                        }
+                        if (!isValid && indexer != null && indexer.errors != null && (field.getId() == null || (field.getId() & (long)2) == 0))
+                        {
+                            field.setId(field.getId() == null ? (long)2 : field.getId() | (long)2);
+                            indexer.errors.addError(record.getControlNumber(), field.getTag(), "n/a", ErrorHandler.ERROR_TYPO, "GetFormatMixin - Visual subtype is "+type+" which is probably not valid for type "+defaultType);
+                        } 
+                    }
+                    break;
+                }
+                case Mixed:
+                {
+                    typeToAdd = defaultType;
+                    break;
+                }
+            }
+        }
+        String field245h = indexer.getFirstFieldVal(record, null, "245h");
+        if (field245h != null ) 
+        {
+            field245h = field245h.replaceFirst(".*?\\[([a-zA-Z ]*).*\\].*", "$1").trim();
+            if (field245hTypeMap.containsKey(field245h))
+            {
+                boolean isValid = false;
+                ContentType valid[] = field245hTypeMap.get(field245h);
+                for (ContentType validType : valid)
+                {
+                    if (validType == typeToAdd) isValid = true;
+                }
+                if (isValid)
+                {
+                    contentTypesStr.add(typeToAdd.toString());
+                }
+                else
+                {
+                    if (!isSuperTypeOf(typeToAdd, valid[0]) || ( (field.getId() != null && (field.getId() & (long)2) == (long)2)))
+                    {
+                        contentTypesStr.add(typeToAdd.toString());
+                    }
+                    contentTypesStr.add(valid[0].toString());
+                    if (indexer != null && indexer.errors != null && (field.getId() == null || (field.getId() & (long)4) == 0))
+                    {
+                        field.setId(field.getId() == null ? (long)4 : field.getId() | (long)4);
+                        indexer.errors.addError(record.getControlNumber(), field.getTag(), "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - ContentType as specified in the leader/008 field conflicts with that specified in the 245h subfield");                
+                    }
+                }
+            }
+            else
+            {
+                contentTypesStr.add(typeToAdd.toString());
+            }
+        }
+        else
+        {
+            contentTypesStr.add(typeToAdd.toString());
+        }
+        if ((profile == ProfileType.Books || profile == ProfileType.Serial ) && isGovDoc(field, record))
+        {
+            contentTypesStr.add(ContentType.GovernmentDocument.toString());
+        }
     }
 
+    static String govDocLetters = "acfilmoz";
+    private boolean isGovDoc(ControlField field, Record record)
+    {
+        int offsetForGovDoc = (field.getTag().equals("008")) ? 28 : 11;
+        if (field != null && field.getData().length() > offsetForGovDoc)
+        {
+            char govdoc = field.getData().toLowerCase().charAt(offsetForGovDoc);
+            if (govDocLetters.indexOf(govdoc) != -1)
+            {
+                return(true);
+            }
+            else if (govdoc == 's')
+            {
+                DataField pubInfo260 = ((DataField)(record.getVariableField("260")));
+                if (pubInfo260 != null)
+                {
+                    Subfield sfb = pubInfo260.getSubfield('b');
+                    if (sfb != null && !sfb.getData().contains("University"))
+                    {
+                        return(true);
+                    }
+                    else
+                    {
+                        return(false);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isSuperTypeOf(ContentType typeToAdd, ContentType contentTypeFrom245h)
+    {
+        if (typeToAdd == ContentType.ProjectedMedium && contentTypeFrom245h == ContentType.Video) 
+            return(true);
+        return false;
+    }
+
+    private ContentType lookupType(LinkedHashMap<Character, ContentType> subTypeMap, char subContentType, ContentType defaultType)
+    {
+        if (subTypeMap.containsKey(subContentType))
+        {
+            return(subTypeMap.get(subContentType));
+        }
+        else if (subTypeMap.containsKey(' ')) //  key not found use default value, if defined
+        {
+            return(subTypeMap.get(' '));
+        }
+        else
+        {
+            return(defaultType);
+        }
+    }
+
+    private int offsetForProfile008(ProfileType profile)
+    {
+        switch (profile)
+        {
+            case Computers:  return(26);
+            case Visual:     return(33);
+            case Maps:       return(25);
+            case Serial:     return(21);
+            case Mixed:
+            case Books:
+            case Music:      return(23);
+        }
+        return 00;
+    }
+
+    
+    
     /**
      * Parse out media / carrier types from record
      * 
@@ -911,9 +1196,10 @@ public class GetFormatMixin extends SolrIndexerMixin
 
     public Set<String> getMediaTypes(final Record record)
     {
-        Set<String> form = new LinkedHashSet<String>(); // the list of form
+        Set<MediaType> form = new LinkedHashSet<MediaType>(); // the list of form
                                                         // types
-
+        ContentType leaderType = extractType(record.getLeader().toString(), "leader"); // main material type, based on leader
+        ProfileType profileType = extractProfile(record.getLeader().toString(), "leader");
         // // Data Fields ////
         // electronic resource from title
 
@@ -924,770 +1210,145 @@ public class GetFormatMixin extends SolrIndexerMixin
             // general material designator in title 245|h
             if (title.getSubfield('h').getData().toLowerCase().contains("[electronic resource]"))
             {
-                form.add(MediaType.Electronic245.toString());
+                form.add(MediaType.Electronic245);
             }
         }
 
         // // 007 ////
 
-        List<ControlField> fields007 = record.getVariableFields("007");
+        List<ControlField> fields007 = (List<ControlField>)record.getVariableFields("007");
 
         for (ControlField field007 : fields007)
         {
             // first, check to make sure this is a post-1981 007 by looking at
             // position 2, which should be undefined
-
-            char field007_02 = '?';
-            if (field007.getData().length() <= 2 || 
-                (field007_02 = field007.getData().toLowerCase().charAt(2)) != ' ' && field007_02 != '|' && field007_02 != '-' && field007_02 != '*')
-            { 
+            String field007Str = validate007Field(record, profileType, field007);
+            
+            if (field007Str == null) continue;
+            char materialGeneral =  field007Str.charAt(0);
+            String materialFirst =  "" + field007Str.charAt(0) + "?";
+            String materialFirstTwo = field007Str.substring(0, 2);
+            String key = materialFirstTwo;
+            if (materialGeneral == 'v')
+            {
+                key = "" + field007Str.charAt(0) + "..." + field007Str.charAt(4);
+            }
+            else if (materialGeneral == 's' && key.equals("sd") && mediaTypeMap.containsKey(key + "." + field007Str.charAt(3)))
+            {
+                key = key + "." + field007Str.charAt(3);
+            }
+            if (key.equals("v...z"))  // Special handling for Video Other
+            {
+                if (this.hasFullText(record))
+                    form.add(MediaType.VideoOnline);
+                else
+                    form.add(MediaType.VideoOther);
+            }
+            else if (!mediaTypeMap.containsKey(key)) 
+            {
+                key = materialFirst;
+            }
+            // look up value in the media type map which maps the initial characters of an 007 field to a media type
+            if (mediaTypeMap.containsKey(key))
+            {
+                MediaType result = mediaTypeMap.get(key);
+                if (result == MediaType.TypeObsolete)
                 {
-                    if (indexer != null && indexer.errors != null)
+                    if (indexer != null && indexer.errors != null && (field007.getId() == null || (field007.getId() & (long)2) == (long)0))
                     {
-                        indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "Malformed 007 fixed field");
+                        field007.setId(field007.getId() == null ? (long)2 : field007.getId() | (long)2);
+                        indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - 007 field specifies "+field007Str+ " which uses an obsolete encoding");
                     }
-                //    continue;
+                }
+                else if (result != null)
+                {
+                    form.add(result);
+                }
+                else
+                {
+                    result = null;
                 }
             }
-
-            char materialGeneral = field007.getData().toLowerCase().charAt(0);
-            char materialSpecific = field007.getData().toLowerCase().charAt(1);
-
-            switch (materialGeneral) {
-                case 'a': // maps
-
-                    switch (materialSpecific) {
-                        // a (Aerial chart) [OBSOLETE, 1997] [CAN/MARC only]
-                        // b (Aerial remote-sensing image) [OBSOLETE, 1997]
-                        // [CAN/MARC only]
-                        // c (Anamorphic map) [OBSOLETE, 1997] [CAN/MARC only]
-
-                        case 'd': // d - Atlas
-
-                            form.add(MediaType.Atlas.toString());
-                            break;
-
-                        // e (Celestial chart) [OBSOLETE, 1997] [CAN/MARC only]
-                        // f (Chart) [OBSOLETE, 1997] [CAN/MARC only]
-
-                        case 'g': // g - Diagram
-
-                            form.add(MediaType.MapDiagram.toString());
-                            break;
-
-                        // h (Hydrographic chart) [OBSOLETE, 1997] [CAN/MARC
-                        // only]
-                        // i (Imaginative map) [OBSOLETE, 1997] [CAN/MARC only]
-                        // j (Orthophoto) [OBSOLETE, 1997] [CAN/MARC only]
-
-                        case 'j': // j - Map
-
-                            form.add(MediaType.Map.toString());
-                            break;
-
-                        case 'k': // k - Profile
-
-                            form.add(MediaType.MapProfile.toString());
-                            break;
-
-                        // m (Photo mosaic (controlled)) [OBSOLETE, 1997]
-                        // [CAN/MARC only]
-                        // n (Photo mosaic (uncontrolled)) [OBSOLETE, 1997]
-                        // [CAN/MARC only]
-                        // o (Photomap) [OBSOLETE, 1997] [CAN/MARC only]
-                        // p (Plan) [OBSOLETE, 1997] [CAN/MARC only]
-
-                        case 'q': // q - Model
-
-                            form.add(MediaType.MapModel.toString());
-                            break;
-
-                        case 'r': // r - Remote-sensing image
-
-                            form.add(MediaType.SensorImage.toString());
-                            break;
-
-                        case 's': // s - Section
-
-                            form.add(MediaType.MapSection.toString());
-                            break;
-
-                        // t (Space remote-sensing image) [OBSOLETE, 1997]
-                        // [CAN/MARC only]
-                        // u - Unspecified
-                        // v (Terrestrial remote-sensing image) [OBSOLETE, 1997]
-                        // [CAN/MARC only]
-                        // w (Topographical drawing) [OBSOLETE, 1997] [CAN/MARC
-                        // only]
-                        // x (Topographical print) [OBSOLETE, 1997] [CAN/MARC
-                        // only]
-
-                        case 'y': // y - View
-
-                            form.add(MediaType.MapView.toString());
-                            break;
-
-                        // z - Other
-
-                        default:
-                            form.add(MediaType.MapOther.toString());
-                            break;
-                    }
-                    break;
-
-                case 'c': // electronic resource
-
-                    switch (materialSpecific) {
-                        case 'a': // a - Tape cartridge
-
-                            form.add(MediaType.ComputerTapeCartridge.toString());
-                            break;
-
-                        case 'b': // b - Chip cartridge
-
-                            form.add(MediaType.ComputerChipCartridge.toString());
-                            break;
-
-                        case 'c': // c - Computer optical disc cartridge
-
-                            form.add(MediaType.ComputerOpticalDiscCartridge.toString());
-                            break;
-
-                        case 'd': // d - Computer disc, type unspecified
-
-                            form.add(MediaType.ComputerDisk.toString());
-                            break;
-
-                        case 'e': // e - Computer disc cartridge, type
-                                    // unspecified
-
-                            form.add(MediaType.ComputerDiscCartridge.toString());
-                            break;
-
-                        case 'f': // f - Tape cassette
-
-                            form.add(MediaType.ComputerTapeCassette.toString());
-                            break;
-
-                        case 'h': // h - Tape reel
-
-                            form.add(MediaType.ComputerTapeReel.toString());
-                            break;
-
-                        case 'j': // j - Magnetic disk
-
-                            form.add(MediaType.ComputerFloppyDisk.toString());
-                            break;
-
-                        case 'k': // k - Computer card
-
-                            form.add(MediaType.ComputerCard.toString());
-                            break;
-
-                        case 'm': // m - Magneto-optical disc
-
-                            form.add(MediaType.ComputerMagnetoOpticalDisc.toString());
-                            break;
-
-                        case 'o': // o - Optical disc
-
-                            form.add(MediaType.ComputerOpticalDisc.toString());
-                            break;
-
-                        case 'r': // r - Remote
-
-                            form.add(MediaType.Online.toString());
-                            break;
-
-                        // u - Unspecified
-                        // z - Other
-
-                        default:
-
-                            form.add(MediaType.ComputerOther.toString());
-                            break;
-                    }
-                    break;
-
-                case 'd': // globe
-
-                    switch (materialSpecific) {
-                        case 'a': // a - Celestial globe
-
-                            form.add(MediaType.GlobeCelestial.toString());
-                            break;
-
-                        case 'b': // b - Planetary or lunar globe
-
-                            form.add(MediaType.GlobePlanetary.toString());
-                            break;
-
-                        case 'c': // c - Terrestrial globe
-
-                            form.add(MediaType.GlobeTerrestrial.toString());
-                            break;
-
-                        // d - Satellite globe (of our solar system), excluding
-                        // the earth moon [OBSOLETE, 1997] [CAN/MARC only]
-
-                        case 'e': // e - Earth moon globe
-
-                            form.add(MediaType.GlobeEarthMoon.toString());
-                            break;
-
-                        // u - Unspecified
-                        // z - Other
-
-                        default:
-
-                            form.add(MediaType.GlobeOther.toString());
-                            break;
-                    }
-                    break;
-
-                case 'f': // tactile material
-
-                    switch (materialSpecific) {
-                        case 'a': // a - Moon
-
-                            form.add(MediaType.TactileMoon.toString());
-                            break;
-
-                        // b - Braille
-
-                        case 'b': // d - Tactile, with no writing system
-
-                            form.add(MediaType.Braille.toString());
-                            break;
-
-                        case 'c': // c - Combination
-
-                            form.add(MediaType.TactileCombination.toString());
-                            break;
-
-                        case 'd': // d - Tactile, with no writing system
-
-                            form.add(MediaType.TactileNoWritingSystem.toString());
-                            break;
-
-                        // u - Unspecified
-                        // z - Other
-
-                        default:
-                            form.add(MediaType.TactileOther.toString());
-                            break;
-                    }
-                    break;
-
-                case 'g': // projected graphic
-
-                    switch (materialSpecific) {
-                        case 'c': // c - Filmstrip cartridge
-
-                            form.add(MediaType.FilmstripCartridge.toString());
-                            break;
-
-                        case 'd': // d - Filmslip
-
-                            form.add(MediaType.Filmslip.toString());
-                            break;
-
-                        case 'f': // f - Filmstrip, type unspecified
-
-                            form.add(MediaType.Filmstrip.toString());
-                            break;
-
-                        // n - Not applicable [OBSOLETE, 1981] [USMARC only]
-
-                        case 'o': // o - Filmstrip roll
-
-                            form.add(MediaType.FilmstripRoll.toString());
-                            break;
-
-                        case 's': // s - Slide
-
-                            form.add(MediaType.Slide.toString());
-                            break;
-
-                        case 't': // t - Transparency
-
-                            form.add(MediaType.Transparency.toString());
-                            break;
-
-                        // # - Not applicable or no attempt to code [OBSOLETE,
-                        // 1980]
-                        // u - Unspecified
-                        // z - Other
-
-                        default:
-
-                            form.add(MediaType.ProjectedMediumOther.toString());
-                            break;
-                    }
-                    break;
-
-                case 'h': // microform
-
-                    switch (materialSpecific) {
-                        case 'a': // a - Aperture card
-
-                            form.add(MediaType.MicroformApetureCard.toString());
-                            break;
-
-                        case 'b': // b - Microfilm cartridge
-
-                            form.add(MediaType.MicrofilmCartridge.toString());
-                            break;
-
-                        case 'c': // c - Microfilm cassette
-
-                            form.add(MediaType.MicrofilmCassette.toString());
-                            break;
-
-                        case 'd': // d - Microfilm reel
-
-                            form.add(MediaType.MicrofilmReel.toString());
-                            break;
-
-                        case 'e': // e - Microfiche
-
-                            form.add(MediaType.Microfiche.toString());
-                            break;
-
-                        case 'f': // f - Microfiche cassette
-
-                            form.add(MediaType.MicroficheCassette.toString());
-                            break;
-
-                        case 'g': // g - Microopaque
-
-                            form.add(MediaType.Microopaque.toString());
-                            break;
-
-                        case 'h': // h - Microfilm slip
-
-                            form.add(MediaType.MicrofilmSlip.toString());
-                            break;
-
-                        case 'j': // j - Microfilm roll
-
-                            form.add(MediaType.MicrofilmRoll.toString());
-                            break;
-
-                        // u - Unspecified
-                        // z - Other
-
-                        default:
-
-                            form.add(MediaType.Microform.toString());
-                            break;
-                    }
-                    break;
-
-                case 'k': // non-projected graphic
-
-                    switch (materialSpecific) {
-                        case 'a': // a - Activity card
-
-                            form.add(MediaType.ActivityCard.toString());
-                            break;
-
-                        case 'c': // c - Collage
-
-                            form.add(MediaType.Collage.toString());
-                            break;
-
-                        case 'd': // d - Drawing
-
-                            form.add(MediaType.Drawing.toString());
-                            break;
-
-                        case 'e': // e - Painting
-
-                            form.add(MediaType.Painting.toString());
-                            break;
-
-                        case 'f': // f - Photomechanical print
-
-                            form.add(MediaType.PhotomechanicalPrint.toString());
-                            break;
-
-                        case 'g': // g - Photonegative
-
-                            form.add(MediaType.Photonegative.toString());
-                            break;
-
-                        case 'h': // h - Photoprint
-
-                            form.add(MediaType.PhotoPrint.toString());
-                            break;
-
-                        case 'i': // i - Picture
-
-                            form.add(MediaType.Picture.toString());
-                            break;
-
-                        case 'j': // j - Print
-
-                            form.add(MediaType.ImagePrint.toString());
-                            break;
-
-                        case 'k': // k - Poster
-
-                            form.add(MediaType.Poster.toString());
-                            break;
-
-                        case 'l': // l - Technical drawing
-
-                            form.add(MediaType.TechnicalDrawing.toString());
-                            break;
-
-                        case 'n': // n - Chart
-
-                            form.add(MediaType.Chart.toString());
-                            break;
-
-                        case 'o': // o - Flash card
-
-                            form.add(MediaType.FlashCard.toString());
-                            break;
-
-                        case 'p': // p - Postcard
-
-                            form.add(MediaType.Postcard.toString());
-                            break;
-
-                        case 'q': // q - Icon
-
-                            form.add(MediaType.Icon.toString());
-                            break;
-
-                        case 'r': // r - Radiograph
-
-                            form.add(MediaType.Radiograph.toString());
-                            break;
-
-                        case 's': // s - Study print
-
-                            form.add(MediaType.StudyPrint.toString());
-                            break;
-
-                        // u - Unspecified
-
-                        case 'v': // v - Photograph, type unspecified
-
-                            form.add(MediaType.Photo.toString());
-                            break;
-
-                        // z - Other
-
-                        default:
-
-                            form.add(MediaType.ImageOther.toString());
-                            break;
-                    }
-                    break;
-
-                case 'm': // motion picture
-
-                    switch (materialSpecific) {
-                        case 'c': // c - Film cartridge
-
-                            form.add(MediaType.FilmCartridge.toString());
-                            break;
-
-                        case 'f': // f - Film cassette
-
-                            form.add(MediaType.FilmCassette.toString());
-                            break;
-
-                        case 'o': // o - Film roll
-
-                            form.add(MediaType.FilmRoll.toString());
-                            break;
-
-                        case 'r': // r - Film reel
-
-                            form.add(MediaType.FilmReel.toString());
-                            break;
-
-                        // u - Unspecified
-                        // z - Other
-
-                        default:
-                            form.add(MediaType.FilmOther.toString());
-                            break;
-                    }
-                    break;
-
-                case 'o': // kit
-
-                    form.add(MediaType.Kit.toString());
-                    break;
-
-                case 'q': // notated music
-
-                    form.add(MediaType.MusicalScore.toString());
-                    break;
-
-                case 'r': // remote-sensing image
-
-                    form.add(MediaType.SensorImage.toString());
-                    break;
-
-                case 's': // sound recording
-
-                    switch (materialSpecific) {
-                        case 'd': // d - Sound disc
-
-                            form.add(MediaType.SoundDisc.toString());
-                            
-                            //  check subtype of sound disc f in 007/03 means CD  one of abde means LP
-                            char subSpecific = (field007.getData().length() > 3) ? field007.getData().toLowerCase().charAt(3) : ' ';
-                            if (subSpecific == 'f')
-                                form.add(MediaType.SoundDiscCD.toString());
-                            else if ("abde".indexOf(subSpecific) != -1)
-                                form.add(MediaType.SoundDiscLP.toString());
-                            
-                            break;
-
-                        case 'c': // c - Cylinder [OBSOLETE]
-                        case 'e': // e - Cylinder
-
-                            form.add(MediaType.SoundCylinder.toString());
-                            break;
-
-                        case 'g': // g - Sound cartridge
-
-                            form.add(MediaType.SoundCartridge.toString());
-                            break;
-
-                        case 'f': // f - Sound-track film [OBSOLETE]
-                        case 'i': // i - Sound-track film
-
-                            form.add(MediaType.SoundTrackFilm.toString());
-                            break;
-
-                        case 'r': // r - Roll [OBSOLETE]
-                        case 'q': // q - Roll
-
-                            form.add(MediaType.SoundRoll.toString());
-                            break;
-
-                        case 's': // s - Sound cassette
-
-                            form.add(MediaType.SoundCassette.toString());
-                            break;
-
-                        case 't': // t - Sound-tape reel
-
-                            form.add(MediaType.SoundTapeReel.toString());
-                            break;
-
-                        // u - Unspecified
-
-                        case 'w': // w - Wire recording
-
-                            form.add(MediaType.SoundWireRecording.toString());
-                            break;
-
-                        // z - Other
-
-                        default:
-                            form.add(MediaType.SoundRecordingOther.toString());
-                            break;
-                    }
-                    break;
-
-                case 't': // text
-
-                    switch (materialSpecific) {
-                        case 'a': // a - Regular print
-
-                            form.add(MediaType.Print.toString());
-                            break;
-
-                        case 'b': // b - Large print
-
-                            form.add(MediaType.PrintLarge.toString());
-                            break;
-
-                        case 'c': // c - Braille
-
-                            form.add(MediaType.Braille.toString());
-                            break;
-
-                        case 'd': // d - Loose-leaf
-
-                            form.add(MediaType.LooseLeaf.toString());
-                            break;
-
-                        // u - Unspecified
-                        // z - Other
-
-                        default:
-                            form.add(MediaType.TextOther.toString());
-                            break;
-                    }
-
-                    break;
-
-                case 'v': // video recording
-
-                    if (field007.getData().length() >= 5)
+            else
+            {
+                if (indexer != null && indexer.errors != null)
+                {
+                    indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - 007 Format code '"+field007Str+"' is undefined, looking at other fields");
+                }
+            }
+            if (materialGeneral == 'v') // validate form of video (disc, reel, cassette with the format of the video.  ie. You probably don't have a VHS video disc
+            {
+                if (videoFormMap.containsKey(key) && videoFormMap.get(key) != field007Str.charAt(1))
+                {
+                    if (indexer != null && indexer.errors != null && (field007.getId() == null || (field007.getId() & (long)4) == (long)0))
                     {
-                        // 04 - Videorecording format
-
-                        char videoFormat = field007.getData().toLowerCase().charAt(4);
-                        String formToAdd = null;
-                        String id = record.getControlNumber();
-                        switch (videoFormat) {
-                            case 'a': // a - Beta (1/2 in., videocassette)
-
-                                formToAdd = MediaType.VideoBeta.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
-                                break;
-
-                            case 'b': // b - VHS (1/2 in., videocassette)
-
-                                formToAdd = MediaType.VideoVHS.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
-                                break;
-
-                            case 'c': // c - U-matic (3/4 in., videocasstte)
-
-                                formToAdd = MediaType.VideoUMatic.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
-                                break;
-
-                            case 'd': // d - EIAJ (1/2 in., reel)
-
-                                formToAdd = MediaType.VideoEIAJ.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'r', formToAdd);
-                                break;
-
-                            case 'e': // e - Type C (1 in., reel)
-
-                                formToAdd = MediaType.VideoTypeC.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'r', formToAdd);
-                                break;
-
-                            case 'f': // f - Quadruplex (1 in. or 2 in., reel)
-
-                                formToAdd = MediaType.VideoQuadruplex.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'r', formToAdd);
-                                break;
-
-                            case 'g': // g - Laserdisc
-
-                                formToAdd = MediaType.VideoLaserdisc.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'd', formToAdd);
-                                break;
-
-                            case 'h': // h - CED (Capacitance Electronic Disc)
-                                        // videodisc
-
-                                formToAdd = MediaType.VideoCapacitance.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'd', formToAdd);
-                                break;
-
-                            case 'i': // i - Betacam (1/2 in., videocassette)
-
-                                formToAdd = MediaType.VideoBetacam.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
-                                break;
-
-                            case 'j': // j - Betacam SP (1/2 in.,
-                                        // videocassette)
-
-                                formToAdd = MediaType.VideoBetacamSP.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
-                                break;
-
-                            case 'k': // k - Super-VHS (1/2 in.,
-                                        // videocassette)
-
-                                formToAdd = MediaType.VideoSuperVHS.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
-                                break;
-
-                            case 'm': // m - M-II (1/2 in., videocassette)
-
-                                formToAdd = MediaType.VideoMII.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
-                                break;
-
-                            case 'o': // o - D-2 (3/4 in., videocassette)
-
-                                formToAdd = MediaType.VideoD2.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
-                                break;
-
-                            case 'p': // p - 8 mm.
-
-                                formToAdd = MediaType.Video8mm.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
-                                break;
-
-                            case 'q': // q - Hi-8 mm.
-
-                                formToAdd = MediaType.VideoHi8.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'f', formToAdd);
-                                break;
-
-                            case 's': // s - Blu-ray disc
-
-                                formToAdd = MediaType.VideoBluRay.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'd', formToAdd);
-                                break;
-
-                            // u - Unknown
-
-                            case 'v': // v - DVD
-
-                                formToAdd = MediaType.VideoDVD.toString();
-                                checkTypeOfVideo(id, materialSpecific, 'd', formToAdd);
-                                break;
-
-                            // z - Other
-
-                            default:
-                                if (hasFullText(record))
-                                {
-                                    formToAdd = MediaType.VideoOnline.toString();
-                                }
-                                else
-                                {
-                                    formToAdd = MediaType.VideoOther.toString();
-                                }
-                                break;
-                        }
-                        form.add(formToAdd);
+                        field007.setId(field007.getId() == null ? (long)4 : field007.getId() | (long)4);
+                        String errMsg = "GetFormatMixin - Mismatch between form of video (007/01)" + field007Str.charAt(1) + " and type of video (007/04)" + key.charAt(4);
+                        indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.ERROR_TYPO, errMsg);
                     }
-                    else
-                    {
-                        if (indexer != null && indexer.errors != null)
-                        {
-                            indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "Malformed 007 fixed field (too short) "+ field007.getData());
-                        }
-                        String formToAdd = getVideoMediaForm(materialSpecific);
-                        form.add(formToAdd);
-                    }
-                    break;
+                }
+            }
+        } // done with 007 fields
+//        BinaryHeapPriorityQueue bestAnswers = new BinaryHeapPriorityQueue<MediaType>();
+//        for (MediaType mt : form)
+//        {
+//            bestAnswers.add(mt, mt.priority);
+//        }
+        MediaTypeHeuristic type = getMediaTypeHeuristically(record);
+        if (type != null)
+        {
+            if (form.isEmpty())
+            {
+                form.add(type.mapsTo);
+                if (indexer != null && indexer.errors != null && (record.getId() == null || (record.getId() & (long)2) == 0))
+                {
+                    record.setId(record.getId() == null ? (long)2 : record.getId() | (long)2);
+                    String errMsg = "GetFormatMixin - Media type not specified determining it heuristically " + type.mapsTo + "based on fields: " + type.fromFields;
+                    indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.INFO, errMsg);
+                }
 
             }
+            else if (form.size() == 1)
+            {
+                MediaType specifiedForm = form.toArray(new MediaType[0])[0];
+                MediaType heuristicFormMapsTo = type.mapsTo;
+                if (!heuristicFormMapsTo.toString().equals(specifiedForm.toString()))
+                {
+                    MediaType finalAnswer = (type.sigmoidProb() > specifiedForm.sigmoidProb()) ? type.mapsTo : specifiedForm;
+                    if (indexer != null && indexer.errors != null && (record.getId() == null || (record.getId() & (long)2) == 0))
+                    {
+                        record.setId(record.getId() == null ? (long)2 : record.getId() | (long)2);
+                        String errMsg = "GetFormatMixin - Mismatch between specified media type" + specifiedForm + " and heuristically determined one " + heuristicFormMapsTo + " based on fields: "+ type.fromFields;
+                        indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.INFO, errMsg);
+                        if (finalAnswer != specifiedForm)
+                        {
+                            errMsg = "GetFormatMixin - Overriding specified form " + specifiedForm + " with heuristically determined one " + heuristicFormMapsTo;
+                            indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, errMsg);
+                        }
+                    }
+                    if (finalAnswer != specifiedForm)
+                    {
+                        form.remove(specifiedForm);
+                        form.add(finalAnswer);
+                    }
+                }
+            }
         }
-
         // // 008 & 006 ////
 
         // parse the form of item indicator from 008 and 006
-
+        Set<String> formStr = new LinkedHashSet<String>();
+        for (MediaType mt : form)
+        {
+            formStr.add(mt.toString());
+        }
+        
         String[] formatTags = { "008", "006" };
         List<ControlField> fieldsFormat = record.getVariableFields(formatTags);
 
         for (ControlField fieldFormat : fieldsFormat)
         {
-            String profile = "";
+            ProfileType profile;
             int position = 0; // position we'll use
 
             // determine the profile
@@ -1703,13 +1364,13 @@ public class GetFormatMixin extends SolrIndexerMixin
 
             // from profile, find position
 
-            if (profile.equals("books") || profile.equals("computers") ||
-                profile.equals("mixed") || profile.equals("music") ||
-                profile.equals("serial"))
+            if (profile == ProfileType.Books || profile == ProfileType.Computers ||
+                profile == ProfileType.Mixed || profile == ProfileType.Music ||
+                profile == ProfileType.Serial)
             {
                 position = 23;
             }
-            else if (profile.equals("maps") || profile.equals("visual"))
+            else if (profile == ProfileType.Maps || profile == ProfileType.Visual)
             {
                 position = 29;
             }
@@ -1722,7 +1383,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
             if (tag.equals("006"))
             {
-                position = position - 7;
+                position = position - 17;
             }
 
             String field = fieldFormat.getData();
@@ -1733,7 +1394,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             {
                 if (indexer != null && indexer.errors != null)
                 {
-                    indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
+                    indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Fixed field "+tag+" is shorter than it ought to be");
                 }
                 continue;
             }
@@ -1744,123 +1405,184 @@ public class GetFormatMixin extends SolrIndexerMixin
             {
                 case 'a': // a - Microfilm
 
-                    form.add(FormOfItem.Microfilm.toString());
+                    formStr.add(FormOfItem.Microfilm.toString());
                     break;
 
                 case 'b': // b - Microfiche
 
-                    form.add(FormOfItem.Microfiche.toString());
+                    formStr.add(FormOfItem.Microfiche.toString());
                     break;
 
                 case 'c': // c - Microopaque
 
-                    form.add(FormOfItem.Microopaque.toString());
+                    formStr.add(FormOfItem.Microopaque.toString());
                     break;
 
                 case 'd': // d - Large print
 
-                    form.add(FormOfItem.PrintLarge.toString());
+                    formStr.add(FormOfItem.PrintLarge.toString());
                     break;
 
                 case 'f': // f - Braille
 
-                    form.add(FormOfItem.Braille.toString());
+                    formStr.add(FormOfItem.Braille.toString());
                     break;
 
                 case 'o': // o - Online
 
-                    form.add(FormOfItem.Online.toString());
+                    formStr.add(FormOfItem.Online.toString());
                     break;
 
                 case 'q': // q - Direct electronic
 
-                    form.add(FormOfItem.ElectronicDirect.toString());
+                    formStr.add(FormOfItem.ElectronicDirect.toString());
                     break;
 
                 case 's': // s - Electronic
 
-                    form.add(FormOfItem.Electronic.toString());
+                    formStr.add(FormOfItem.Electronic.toString());
                     break;
 
                 case 'r': // r - Regular print reproduction
 
-                    form.add(FormOfItem.Print.toString());
+                    formStr.add(FormOfItem.Print.toString());
                     break;
             }
         }
 
-        return form;
+        return formStr;
     }
 
-    /**
-     * Return the type of video item (cartridge, disc, reel, cassette) given the single letter from 007/01 that encodes this value.
-     * 
-     * @param materialSpecific 
-     *              letter for the form of the video (taken from 007/01)
-     * @returns string
-     */
-    private String getVideoMediaForm(char materialSpecific)
+    private void addPossibleForm(LinkedHashMap<MediaType, MediaTypeHeuristic> possibleForms, MediaType key, MediaTypeHeuristic value)
     {
-        String form = null;
-        switch (materialSpecific) 
+        if (possibleForms.containsKey(key))
         {
-            case 'c': // c - Videocartridge
-
-                form = MediaType.VideoCartridge.toString();
-                break;
-
-            case 'd': // d - Videodisc
-
-                form = MediaType.VideoDisc.toString();
-                break;
-
-            case 'f': // f - Videocassette
-
-                form = MediaType.VideoCassette.toString();
-                break;
-
-            case 'r': // r - Videoreel
-
-                form = MediaType.VideoReel.toString();
-                break;
-
-            // # - Not applicable or no attempt to code
-            // [OBSOLETE, 1980]
-            // n - Not applicable [OBSOLETE, 1981]
-            // u - Unspecified
-            // z - Other
-
-            default:
-                form = MediaType.VideoOther.toString();
-                break;
+            MediaTypeHeuristic oldVal = possibleForms.get(key);
+            oldVal.combine(value);
+            possibleForms.put(key, oldVal);
         }
-        return form;
+        else
+        {
+            possibleForms.put(key, value);
+        }
+    }
+    
+    private MediaTypeHeuristic getMediaTypeHeuristically(Record record)
+    {
+        LinkedHashMap<MediaType, MediaTypeHeuristic> possibleForms = new LinkedHashMap<MediaType, MediaTypeHeuristic>(); 
+        List<DataField> notes = (List<DataField>)record.getVariableFields(new String[] {"500", "538"});
+        for (DataField note : notes)
+        {
+            String noteData = note.getSubfield('a').getData();
+            if (noteData.contains("DVD"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoDVD, new MediaTypeHeuristic(MediaType.VideoDVD,  0.8, note.getTag()));
+            }
+            if (noteData.matches(".*Laser[ ]?[Dd]isc.*") ||
+                    noteData.contains("CLV"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoLaserdisc, new MediaTypeHeuristic(MediaType.VideoLaserdisc,  0.8, note.getTag()));
+            }
+            if (noteData.matches(".*[Cc]ompact [Dd]isc.*") )
+            {
+                addPossibleForm( possibleForms, MediaType.SoundDiscCD, new MediaTypeHeuristic(MediaType.SoundDiscCD,  0.8, note.getTag()));
+            }
+            if (noteData.matches(".*[Vv]ideodisc.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoLaserdisc, new MediaTypeHeuristic(MediaType.VideoLaserdisc,  0.6, note.getTag()));
+                addPossibleForm( possibleForms, MediaType.VideoDVD, new MediaTypeHeuristic(MediaType.VideoDVD,  0.6, note.getTag()));
+            }
+            if (noteData.contains("VHS") && !noteData.matches(".*[Aa]lso.*VHS.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoVHS, new MediaTypeHeuristic(MediaType.VideoVHS,  0.7, note.getTag()));
+            }
+            else if (noteData.matches(".*Beta\\b.*") && !noteData.matches(".*[Aa]lso.*Beta\\b.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoBeta, new MediaTypeHeuristic(MediaType.VideoBeta,  0.8, note.getTag()));
+            }
+        }
+        Set<String> forms = SolrIndexer.getAllSubfields(record, "300[ac]", "--");
+        for (String form : forms)
+        {
+            if (form.matches(".*[Vv]ideo[ ]?disc.*--.*12.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoLaserdisc, new MediaTypeHeuristic(MediaType.VideoLaserdisc,  0.8, "300"));
+                addPossibleForm( possibleForms, MediaType.VideoDVD, new MediaTypeHeuristic(MediaType.VideoDVD,  0.1, "300"));
+            }
+            else if (form.matches(".*[Vv]ideo[ ]?disc.*--.*4 3/4.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoLaserdisc, new MediaTypeHeuristic(MediaType.VideoLaserdisc,  0.1, "300"));
+                addPossibleForm( possibleForms, MediaType.VideoDVD, new MediaTypeHeuristic(MediaType.VideoDVD,  0.8, "300"));
+            }
+            else if (form.matches(".*[Vv]ideo[ ]?cassette.*--.*[1\u00B9]/[2\u2082].*"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoVHS, new MediaTypeHeuristic(MediaType.VideoVHS,  0.7, "300"));
+                addPossibleForm( possibleForms, MediaType.VideoVHS, new MediaTypeHeuristic(MediaType.VideoBeta,  0.55, "300"));
+            }
+            else if (form.matches(".*[Vv]ideo[ ]?cassette.*--.*3/4.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoUMatic, new MediaTypeHeuristic(MediaType.VideoUMatic,  0.7, "300"));
+                addPossibleForm( possibleForms, MediaType.VideoVHS, new MediaTypeHeuristic(MediaType.VideoBeta,  0.4, "300"));
+            }
+            else if (form.matches(".*[Ss]ound [Dd]is[ck].*--.*4 3/4.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.SoundDiscCD, new MediaTypeHeuristic(MediaType.SoundDiscCD,  0.75, "300"));
+            }
+            else if (form.matches(".*[Ss]ound [Cc]assette.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.SoundCassette, new MediaTypeHeuristic(MediaType.SoundCassette,  0.75, "300"));
+            }
+        }
+        double maxPriority = 0.0;
+        MediaTypeHeuristic maxMth = null;
+        for (MediaType mt : possibleForms.keySet())
+        {
+            MediaTypeHeuristic mth = possibleForms.get(mt);
+            if (mth.priority > maxPriority) 
+            {
+                maxMth = mth;
+                maxPriority = mth.priority;
+            }
+        }
+        return(maxMth);
     }
 
-    /**
-     * Compare the type of video item (cartridge, disc, reel, cassette) with the expected value for the type given the assigned form
-     * For instance is the assigned form is DVD and the type if video item is cassette, it's probably an error.
-     * 
-     * @param id
-     *              id of the record being processed
-     * @param materialSpecific 
-     *              letter for the form of the video (taken from 007/01)
-     * @param expectedVal 
-     *              letter for expected form of the video (based on the assignedForm)
-     * @param assignedForm 
-     *              String for the type of video (assigned based on 007/04)
-     */
-    private void checkTypeOfVideo(String id, char materialSpecific, char expectedVal, String assignedForm)
+    private String validate007Field(Record record, ProfileType profileType, ControlField field007)
     {
-        String videoMediaForm = getVideoMediaForm(materialSpecific);
-        if (materialSpecific != expectedVal)
-        {
-            if (indexer != null && indexer.errors != null)
+        char field007_02 = '?';
+        if (field007.getData().length() <= 2 || 
+            (field007_02 = field007.getData().toLowerCase().charAt(2)) != ' ' && field007_02 != '|' && field007_02 != '-' && field007_02 != '*')
+        { 
             {
-                String errMsg = "Mismatch between form of video (007/01)" + videoMediaForm + " and type of video (007/04)" + assignedForm;
-                indexer.errors.addError(id, "007", "n/a", ErrorHandler.ERROR_TYPO, errMsg);
+                boolean showError = false;
+                if (indexer != null && indexer.errors != null && (field007.getId() == null || (field007.getId() & (long)1) == (long)0))
+                {
+                    /// set id on field to prevent multiple error messages for the same error
+                    field007.setId(field007.getId() == null ? (long)1 : field007.getId() | (long)1);
+                    showError = true;
+                }
+                if (profileType.equals("visual") && (field007.getData().length() % 6) == 0 || field007.getData().replaceFirst("-*$", "").length() == 6)
+                {
+                    String newValue = field007.getData().replaceFirst("([a-z])([-a-z][-a-z][-a-z][-a-z][-a-z]).*", "v$1 $2");
+                    if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Old 007 visual material fixed field (pre-1981) mapping it from "+field007+ " to "+ newValue);
+                    return(newValue);
+                }
+                else if (profileType.equals("music") && (field007.getData().length() % 11) == 0 || field007.getData().replaceFirst("-*$", "").length() == 11)
+                {
+                    if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Old 007 music fixed field (pre 1981)");
+                    return(null);
+                }
+                else if ( field007_02 == 'r' || field007_02 == 'o')
+                {
+                    if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.ERROR_TYPO, "GetFormatMixin - Old 007 fixed field (post-1981), character 2 is '"+field007_02+"' it should be undefined.");
+                }
+                else
+                {
+                    if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Malformed 007 fixed field, character 02 should be blank");
+                }
             }
-        }      
+        }
+        return(field007.getData());
     }
 
     /**
@@ -1874,10 +1596,31 @@ public class GetFormatMixin extends SolrIndexerMixin
      * @return string
      */
 
-    protected String extractType(String field, String source)
+    protected ContentType extractType(String field, String source)
     {
-        String[] result = extractTypeProfile(field, source);
-        return result[0];
+        char recordType = ' ';
+
+        if (source.equals("leader"))
+        {
+            recordType = field.toLowerCase().charAt(6);
+        }
+        else if (source.equals("006"))
+        {
+            recordType = field.toLowerCase().charAt(0);
+        }
+        if (recordType == 'a' && !source.equals("006")) 
+        {
+            char subKey = field.toLowerCase().charAt(7);
+            if (mainSubTypeMap.containsKey(subKey))
+            {
+                return(mainSubTypeMap.get(subKey));
+            }
+        }
+        if (mainTypeMap.containsKey(recordType))  // not else if on purpose
+        {
+            return(mainTypeMap.get(recordType));
+        }
+        return ContentType.NoneDefined; 
     }
 
     /**
@@ -1891,29 +1634,8 @@ public class GetFormatMixin extends SolrIndexerMixin
      * @return string
      */
 
-    protected String extractProfile(String field, String source)
+    protected ProfileType extractProfile(String field, String source)
     {
-        String[] result = extractTypeProfile(field, source);
-        return result[1];
-    }
-
-    /**
-     * Return the profile and type based on record type character from either
-     * leader or 006/00
-     * 
-     * @param field
-     *            leader or 006 as string
-     * @param source
-     *            whether this is leader of 006
-     * @return array as [type,profile]
-     */
-
-    protected String[] extractTypeProfile(String field, String source)
-    {
-        String profile = ""; // we'll use this to determine which positions
-                                // of the 006/008 to use
-        String type = ""; // we'll use this to set a default type
-
         char recordType = ' ';
 
         if (source.equals("leader"))
@@ -1924,185 +1646,19 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             recordType = field.toLowerCase().charAt(0);
         }
-
-        switch (recordType) {
-            case 'a': // a - Language material
-            case 't': // t - Manuscript language material
-                if (source.equals("006"))
-                {
-                    type = recordType == 'a' ? ContentType.Book.toString() : ContentType.Manuscript.toString();
-                    profile = "books";
-                }
-                else if (source.equals("leader"))
-                {
-                    char leader7 = field.toLowerCase().charAt(7); // bibliographic
-                                                                    // level
-
-                    switch (leader7) {
-                        case 'a': // a - Monographic component part
-
-                            type = ContentType.BookComponentPart.toString();
-                            profile = "books";
-                            break;
-
-                        case 'b': // b - Serial component part
-
-                            type = ContentType.SerialComponentPart.toString();
-                            profile = "serial";
-                            break;
-
-                        case 'c': // c - Collection
-
-                            type = ContentType.BookCollection.toString();
-                            profile = "books";
-                            break;
-
-                        case 'd': // d - Subunit
-
-                            type = ContentType.BookSubunit.toString();
-                            profile = "books";
-                            break;
-
-                        case 'i': // i - Integrating resource
-
-                            type = ContentType.SerialIntegratingResource.toString();
-                            profile = "serial";
-                            break;
-
-                        case 'p': // p - Pamphlet [OBSOLETE, 1988] [CAN/MARC
-                                    // only]
-
-                            type = ContentType.Pamphlet.toString();
-                            // no profile
-                            break;
-
-                        case 'm': // m - Monograph/Item
-
-                            type = ContentType.Book.toString();
-                            profile = "books";
-                            break;
-
-                        case 's': // s - Serial
-
-                            type = ContentType.Serial.toString();
-                            profile = "serial";
-                            break;
-                    }
-                }
-
-                break;
-
-            case 'b': // b - Archival and manuscripts control [OBSOLETE, 1995]
-
-                type = ContentType.Manuscript.toString();
-                // no profile
-                break;
-
-            case 'c': // c - Notated music
-
-                type = ContentType.MusicalScore.toString();
-                profile = "music";
-                break;
-
-            case 'd': // d - Manuscript notated music
-
-                type = ContentType.MusicalScoreManuscript.toString();
-                profile = "music";
-                break;
-
-            case 'e': // e - Cartographic material
-
-                type = ContentType.Map.toString();
-                profile = "maps";
-                break;
-
-            case 'f': // f - Manuscript cartographic material
-
-                type = ContentType.MapManuscript.toString();
-                profile = "maps";
-                break;
-
-            case 'g': // g - Projected medium
-
-                type = ContentType.ProjectedMedium.toString();
-                profile = "visual";
-                break;
-
-            case 'h': // h - Microform publications [OBSOLETE, 1972] [USMARC
-                        // only]
-
-                // no type, since this is a physical form not a material type
-                // no profile
-                break;
-
-            case 'i': // i - Nonmusical sound recording
-
-                type = ContentType.SoundRecording.toString();
-                profile = "music";
-                break;
-
-            case 'j': // j - Musical sound recording
-
-                type = ContentType.MusicRecording.toString();
-                profile = "music";
-                break;
-
-            case 'k': // k - Two-dimensional nonprojectable graphic
-
-                type = ContentType.Image.toString();
-                profile = "visual";
-                break;
-
-            case 'm': // m - Computer file
-
-                type = ContentType.ComputerFile.toString();
-                profile = "computers";
-                break;
-
-            case 'n': // n - Special instructional material [OBSOLETE, 1983]
-
-                type = ContentType.SpecialInstructionalMaterial.toString();
-                // no profile
-                break;
-
-            case 'o': // o - Kit
-
-                type = ContentType.Kit.toString();
-                profile = "visual";
-                break;
-
-            case 'p': // p - Mixed materials
-
-                type = ContentType.MixedMaterial.toString();
-                profile = "mixed";
-                break;
-
-            case 'r': // r - Three-dimensional artifact or naturally occurring
-                        // object
-
-                type = ContentType.PhysicalObject.toString();
-                profile = "visual";
-                break;
-
-            case 's': // s - Serial/Integrating resource - Continuing
-                        // Resources
-
-                // only the 006 uses this value, so make sure
-
-                if (source.equals("006"))
-                {
-                    type = ContentType.Serial.toString();
-                    profile = "serial";
-                }
-
-            //case 't': // t - Manuscript language material
-
-                //combined above with case 'a'
+        if (recordType == 'a' && !source.equals("006")) 
+        {
+            char subKey = field.toLowerCase().charAt(7);
+            if (mainSubTypeMap.containsKey(subKey))
+            {
+                return(mainSubProfileMap.get(subKey));
+            }
         }
-
-        String[] result = { type, profile };
-
-        return result;
+        if (mainTypeMap.containsKey(recordType))  // not else if on purpose
+        {
+            return(mainProfileMap.get(recordType));
+        }
+        return ProfileType.NoneDefined; 
     }
 
     /**

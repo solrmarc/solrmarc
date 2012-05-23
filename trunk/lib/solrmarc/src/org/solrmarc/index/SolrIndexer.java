@@ -1708,8 +1708,8 @@ public class SolrIndexer
     {    
         SolrIndexerMixin formatmixin = findMixin("org.solrmarc.index.GetFormatMixin");
         Set<String>formats = formatmixin.invokeByName("getContentTypesAndMediaTypesMapped", record, formatMapName);                
-        formats.add("Online"); // Online
-        formats.remove("Computer Resource"); // Online
+ //       formats.add("Online"); // Online
+ //       formats.remove("Computer Resource"); // Online
         return(formats);
     }
     
