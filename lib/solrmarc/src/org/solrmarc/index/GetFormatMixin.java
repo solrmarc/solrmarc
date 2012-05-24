@@ -958,7 +958,10 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             ProfileType profile = extractProfile(field006.getData(), "006");
             ContentType type = extractType(field006.getData(), "006");
-            getContentTypeFromFixedField(contentTypes, record, field006, profile, type, offsetForProfile008(profile) - 17);
+            if (profile != ProfileType.NoneDefined)
+            {
+                getContentTypeFromFixedField(contentTypes, record, field006, profile, type, offsetForProfile008(profile) - 17);
+            }
         }
 
         // / DATA FIELDS ///
