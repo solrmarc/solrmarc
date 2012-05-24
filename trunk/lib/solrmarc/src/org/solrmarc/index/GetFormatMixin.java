@@ -1093,7 +1093,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                 {
                     if (!isSuperTypeOf(typeToAdd, valid[0]) || ( (field.getId() != null && (field.getId() & (long)2) == (long)2)))
                     {
-                        contentTypesStr.add(typeToAdd.toString());
+                        if (typeToAdd != null)  contentTypesStr.add(typeToAdd.toString());
                     }
                     contentTypesStr.add(valid[0].toString());
                     if (indexer != null && indexer.errors != null && (field.getId() == null || (field.getId() & (long)4) == 0))
@@ -1105,12 +1105,12 @@ public class GetFormatMixin extends SolrIndexerMixin
             }
             else
             {
-                contentTypesStr.add(typeToAdd.toString());
+                if (typeToAdd != null)  contentTypesStr.add(typeToAdd.toString());
             }
         }
         else
         {
-            contentTypesStr.add(typeToAdd.toString());
+            if (typeToAdd != null)  contentTypesStr.add(typeToAdd.toString());
         }
         if ((profile == ProfileType.Books || profile == ProfileType.Serial ) && isGovDoc(field, record))
         {
@@ -1579,6 +1579,11 @@ public class GetFormatMixin extends SolrIndexerMixin
                 else if ( field007_02 == 'r' || field007_02 == 'o')
                 {
                     if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.ERROR_TYPO, "GetFormatMixin - Old 007 fixed field (post-1981), character 2 is '"+field007_02+"' it should be undefined.");
+                }
+                else if (field007.getData().length() <= 2)
+                {
+                    if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Malformed 007 fixed field, field too short");
+                    return (field007.getData() + "        ");
                 }
                 else
                 {
