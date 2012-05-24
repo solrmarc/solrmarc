@@ -711,7 +711,25 @@ public final class CallNumUtils {
         // pad initial letters with trailing blanks to be 4 chars long
         StringBuilder initLetBuf = new StringBuilder("    ");
         String lets = getLCstartLetters(upcaseLCcallnum);
-        initLetBuf.replace(0, lets.length(), lets);
+        if (lets != null) 
+        {
+            initLetBuf.replace(0, lets.length(), lets);
+        }
+        else
+        {
+            if ( (recid != null) && (!rawLCcallnum.startsWith("XX")) ) // Stanford mod
+            {
+                if (errors == null)
+                {
+                    System.err.println("Problem creating shelfkey for record " + recid + "; call number: " + rawLCcallnum);
+                }
+                else
+                {
+                    errors.addError(ErrorHandler.ERROR_TYPO, "Problem creating shelfkey for record " + recid + "; call number: " + rawLCcallnum);
+                }
+            }
+            return(rawLCcallnum+" ");
+        }
         resultBuf.append(initLetBuf);
         
         try {
