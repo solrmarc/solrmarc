@@ -1473,6 +1473,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         List<DataField> notes = (List<DataField>)record.getVariableFields(new String[] {"500", "538"});
         for (DataField note : notes)
         {
+            if (note.getSubfield('a') == null) continue;
             String noteData = note.getSubfield('a').getData();
             if (noteData.contains("DVD"))
             {
