@@ -1483,7 +1483,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                 addPossibleForm( possibleForms, MediaType.VideoDVD, new MediaTypeHeuristic(MediaType.VideoDVD,  0.8, note.getTag()));
             }
             if (noteData.matches(".*Laser[ ]?[Dd]isc.*") ||
-                    noteData.contains("CLV"))
+                    noteData.matches(".*\bCLV\b.*"))
             {
                 addPossibleForm( possibleForms, MediaType.VideoLaserdisc, new MediaTypeHeuristic(MediaType.VideoLaserdisc,  0.8, note.getTag()));
             }
@@ -1505,32 +1505,36 @@ public class GetFormatMixin extends SolrIndexerMixin
                 addPossibleForm( possibleForms, MediaType.VideoBeta, new MediaTypeHeuristic(MediaType.VideoBeta,  0.8, note.getTag()));
             }
         }
-        Set<String> forms = SolrIndexer.getAllSubfields(record, "300[ac]", "--");
+        Set<String> forms = SolrIndexer.getAllSubfields(record, "300[abc]", "--");
         for (String form : forms)
         {
-            if (form.matches(".*[Vv]ideo[ ]?disc.*--.*12.*"))
+            if (form.matches(".*[Vv]ideo[ ]?disc.*--.*--.*12.*"))
             {
                 addPossibleForm( possibleForms, MediaType.VideoLaserdisc, new MediaTypeHeuristic(MediaType.VideoLaserdisc,  0.8, "300"));
                 addPossibleForm( possibleForms, MediaType.VideoDVD, new MediaTypeHeuristic(MediaType.VideoDVD,  0.1, "300"));
             }
-            else if (form.matches(".*[Vv]ideo[ ]?disc.*--.*4 3/4.*"))
+            else if (form.matches(".*[Vv]ideo[ ]?disc.*--.*--.*4 3/4.*"))
             {
                 addPossibleForm( possibleForms, MediaType.VideoLaserdisc, new MediaTypeHeuristic(MediaType.VideoLaserdisc,  0.1, "300"));
                 addPossibleForm( possibleForms, MediaType.VideoDVD, new MediaTypeHeuristic(MediaType.VideoDVD,  0.8, "300"));
             }
-            else if (form.matches(".*[Vv]ideo[ ]?cassette.*--.*[1\u00B9]/[2\u2082].*"))
+            else if (form.matches(".*[Vv]ideo[ ]?cassette.*--.*--.*[1\u00B9]/[2\u2082].*"))
             {
                 addPossibleForm( possibleForms, MediaType.VideoVHS, new MediaTypeHeuristic(MediaType.VideoVHS,  0.7, "300"));
                 addPossibleForm( possibleForms, MediaType.VideoVHS, new MediaTypeHeuristic(MediaType.VideoBeta,  0.55, "300"));
             }
-            else if (form.matches(".*[Vv]ideo[ ]?cassette.*--.*3/4.*"))
+            else if (form.matches(".*[Vv]ideo[ ]?cassette.*--.*--.*3/4.*"))
             {
                 addPossibleForm( possibleForms, MediaType.VideoUMatic, new MediaTypeHeuristic(MediaType.VideoUMatic,  0.7, "300"));
                 addPossibleForm( possibleForms, MediaType.VideoVHS, new MediaTypeHeuristic(MediaType.VideoBeta,  0.4, "300"));
             }
-            else if (form.matches(".*[Ss]ound [Dd]is[ck].*--.*4 3/4.*"))
+            else if (form.matches(".*[Ss]ound [Dd]is[ck].*--.*--.*4 3/4.*"))
             {
                 addPossibleForm( possibleForms, MediaType.SoundDiscCD, new MediaTypeHeuristic(MediaType.SoundDiscCD,  0.75, "300"));
+            }
+            else if (form.matches(".*[Ss]ound [Dd]is[ck].*--.*33 1/3.*--.*12.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.SoundDiscLP, new MediaTypeHeuristic(MediaType.SoundDiscLP,  0.75, "300"));
             }
             else if (form.matches(".*[Ss]ound [Cc]assette.*"))
             {
@@ -1565,16 +1569,17 @@ public class GetFormatMixin extends SolrIndexerMixin
                     field007.setId(field007.getId() == null ? (long)1 : field007.getId() | (long)1);
                     showError = true;
                 }
-                if (profileType.equals("visual") && (field007.getData().length() % 6) == 0 || field007.getData().replaceFirst("-*$", "").length() == 6)
+                if (profileType.equals("visual") && ((field007.getData().length() % 6) == 0 || field007.getData().replaceFirst("-*$", "").length() == 6))
                 {
                     String newValue = field007.getData().replaceFirst("([a-z])([-a-z][-a-z][-a-z][-a-z][-a-z]).*", "v$1 $2");
                     if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Old 007 visual material fixed field (pre-1981) mapping it from "+field007+ " to "+ newValue);
                     return(newValue);
                 }
-                else if (profileType.equals("music") && (field007.getData().length() % 11) == 0 || field007.getData().replaceFirst("-*$", "").length() == 11)
+                else if (profileType.equals("music") && (field007.getData().matches("^sl..j.*") || field007.getData().matches("^d[abcd].[ms][cde].*") || field007.getData().matches("^de.g.*")) )
                 {
+                    String newValue = field007.getData().replaceFirst("([a-z])([-a-z][-a-z][-a-z][-a-z].*)", "s$1 $2");
                     if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Old 007 music fixed field (pre 1981)");
-                    return(null);
+                    return(newValue);
                 }
                 else if ( field007_02 == 'r' || field007_02 == 'o')
                 {
