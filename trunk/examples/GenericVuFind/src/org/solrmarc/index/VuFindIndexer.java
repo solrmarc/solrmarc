@@ -243,18 +243,26 @@ public class VuFindIndexer extends SolrIndexer
             // Parse key settings from the PHP-style DSN:
             String username = "";
             String password = "";
+            String classname = "invalid";
+            String prefix = "invalid";
             if (dsn.substring(0, 8).equals("mysql://")) {
-                Class.forName( "com.mysql.jdbc.Driver" ).newInstance();
-                String[] parts = dsn.split("://");
+                classname = "com.mysql.jdbc.Driver";
+                prefix = "mysql";
+            } else if (dsn.substring(0, 8).equals("pgsql://")) {
+                classname = "org.postgresql.Driver";
+                prefix = "postgresql";
+            }
+
+            Class.forName(classname).newInstance();
+            String[] parts = dsn.split("://");
+            if (parts.length > 1) {
+                parts = parts[1].split("@");
                 if (parts.length > 1) {
-                    parts = parts[1].split("@");
+                    dsn = prefix + "://" + parts[1];
+                    parts = parts[0].split(":");
+                    username = parts[0];
                     if (parts.length > 1) {
-                        dsn = "mysql://" + parts[1];
-                        parts = parts[0].split(":");
-                        username = parts[0];
-                        if (parts.length > 1) {
-                            password = parts[1];
-                        }
+                        password = parts[1];
                     }
                 }
             }

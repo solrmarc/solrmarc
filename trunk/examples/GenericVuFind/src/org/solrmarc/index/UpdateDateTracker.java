@@ -61,7 +61,8 @@ public class UpdateDateTracker
     {
         PreparedStatement sql = db.prepareStatement(
             "SELECT first_indexed, last_indexed, last_record_change, deleted " +
-            "FROM change_tracker WHERE core = ? AND id = ?;");
+            "FROM change_tracker WHERE core = ? AND id = ?;",
+            ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         sql.setString(1, core);
         sql.setString(2, id);
         ResultSet result = sql.executeQuery();
