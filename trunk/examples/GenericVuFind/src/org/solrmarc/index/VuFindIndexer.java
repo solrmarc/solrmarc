@@ -26,6 +26,7 @@ import java.text.ParseException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.sql.*;
@@ -39,6 +40,7 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.solrmarc.tools.CallNumUtils;
 import org.solrmarc.tools.SolrMarcIndexerException;
+import org.solrmarc.tools.Utils;
 import org.ini4j.Ini;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -68,6 +70,9 @@ public class VuFindIndexer extends SolrIndexer
     // Shutdown flag:
     private boolean shuttingDown = false;
 
+    // VuFind-specific configs:
+    private Properties vuFindConfigs = null;
+
     /**
      * Default constructor
      * @param propertiesMapFile
@@ -82,6 +87,11 @@ public class VuFindIndexer extends SolrIndexer
     public VuFindIndexer(final String propertiesMapFile, final String[] propertyDirs)
             throws FileNotFoundException, IOException, ParseException {
         super(propertiesMapFile, propertyDirs);
+        try {
+            vuFindConfigs = Utils.loadProperties(propertyDirs, "vufind.properties");
+        } catch (IllegalArgumentException e) {
+            // If the properties load failed, don't worry about it -- we'll use defaults.
+        }
     }
 
     /**
@@ -111,16 +121,22 @@ public class VuFindIndexer extends SolrIndexer
         // Check for VuFind 2.0's local directory environment variable:
         String vufindLocal = System.getenv("VUFIND_LOCAL_DIR");
 
+        // Get the relative VuFind path from the properties file, defaulting to
+        // the 2.0alpha-style application/configs if necessary.
+        String relativeConfigPath = Utils.getProperty(
+            vuFindConfigs, "vufind.config.relative_path", "application/configs"
+        );
+
         // Try several different locations for the file -- VuFind 2 local dir,
         // VuFind 2 base dir, VuFind 1 base dir.
         File file;
         if (vufindLocal != null) {
-            file = new File(vufindLocal + "/application/configs/" + filename);
+            file = new File(vufindLocal + "/" + relativeConfigPath + "/" + filename);
             if (file.exists()) {
                 return file;
             }
         }
-        file = new File(vufindHome + "/application/configs/" + filename);
+        file = new File(vufindHome + "/" + relativeConfigPath + "/" + filename);
         if (file.exists()) {
             return file;
         }
