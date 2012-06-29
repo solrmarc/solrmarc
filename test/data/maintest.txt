@@ -147,7 +147,7 @@
 
 # Test 53 
 #test using mixin custom indexing method
-+, 009888737.mrc, 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes', CombinedType.EBook|ContentType.Book|ContentType.ComputerFile|MediaType.Online
++, 009888737.mrc, 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes', CombinedType.EBook|ContentType.Book|ContentType.ComputerDocument|MediaType.Online
 
 # Test 54 
 #test using mixin custom indexing method
@@ -155,11 +155,11 @@
 
 # Test 55 
 #test using mixin custom indexing method
-+, formatRecs.mrc(u3514547), 'custom(org.solrmarc.index.GetFormatMixin), getPrimaryContentTypePlusOnline', ContentType.Video
++, formatRecs.mrc(u3514547), 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypesMapped(getformat_mixin_map.properties)', Video|DVD
 
 # Test 56 
 #test using mixin custom indexing method with translation map
-+, formatRecs.mrc(u3591589), 'custom(org.solrmarc.index.GetFormatMixin), getPrimaryContentTypePlusOnline, getformat_mixin_map.properties', Map|Online
++, formatRecs.mrc(u3591589), 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_map.properties', Map|Online
 
 # Test 57 
 #test reading JSON encoded marc record method

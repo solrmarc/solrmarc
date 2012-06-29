@@ -808,114 +808,125 @@ public class SolrIndexer
         this.errors = errors;
         perRecordInitMaster(record);
         Map<String, Object> indexMap = new HashMap<String, Object>();
+        getSolrId(record, indexMap);
 
         for (String key : fieldMap.keySet())
         {
-            String fieldVal[] = fieldMap.get(key);
-            String indexField = fieldVal[0];
-            String indexType = fieldVal[1];
-            String indexParm = fieldVal[2];
-            String mapName = fieldVal[3];
-
-            if (indexType.equals("constant"))
+            if (key.equals("id")) 
             {
-                if (indexParm.contains("|"))
-                {
-                    String parts[] = indexParm.split("[|]");
-                    Set<String> result = new LinkedHashSet<String>();
-                    result.addAll(Arrays.asList(parts));
-                    // if a zero length string appears, remove it
-                    result.remove("");
-                    addFields(indexMap, indexField, null, result);
-                }
-                else
-                    addField(indexMap, indexField, indexParm);
+                // do nothing, already handled above
             }
-            else if (indexType.equals("first"))
-                addField(indexMap, indexField, getFirstFieldVal(record, mapName, indexParm));
-            else if (indexType.equals("all"))
-                addFields(indexMap, indexField, mapName, getFieldList(record, indexParm));
-            else if (indexType.equals("DeleteRecordIfFieldEmpty"))
+            else 
             {
-                Set<String> fields = getFieldList(record, indexParm);
-                if (mapName != null && findMap(mapName) != null)
-                    fields = Utils.remap(fields, findMap(mapName), true);
-
-                if (fields.size() != 0)
-                    addFields(indexMap, indexField, null, fields);
-                else  // no entries produced for field => generate no record in Solr
-                    throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE, 
-                                                    "Index specification: "+ indexField +" says this record should be deleted.");
-            }
-            else if (indexType.startsWith("join"))
-            {
-                String joinChar = " ";
-                if (indexType.contains("(") && indexType.endsWith(")"))
-                    joinChar = indexType.replace("join(", "").replace(")", "");
-                addField(indexMap, indexField, getFieldVals(record, indexParm, joinChar));
-            }
-            else if (indexType.equals("std"))
-            {
-                if (indexParm.equals("era"))
-                    addFields(indexMap, indexField, mapName, getEra(record));
-                else
-                    addField(indexMap, indexField, getStd(record, indexParm));
-            }
-            else if (indexType.startsWith("custom"))
-            {
-                try {
-                    handleCustom(indexMap, indexType, indexField, mapName, record, indexParm);
-                }
-                catch(SolrMarcIndexerException e)
-                {
-                    String recCntlNum = null;
-                    try {
-                        recCntlNum = record.getControlNumber();
-                    }
-                    catch (NullPointerException npe) { /* ignore */ }
-
-                    if (e.getLevel() == SolrMarcIndexerException.DELETE)
-                    {
-                        throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE, 
-                                "Record " + (recCntlNum != null ? recCntlNum : "") + " purposely not indexed because " + key + " field is empty");
-//                      logger.error("Record " + (recCntlNum != null ? recCntlNum : "") + " not indexed because " + key + " field is empty -- " + e.getMessage(), e);
-                    }
-                    else
-                    {
-                        logger.error("Unable to index record " + (recCntlNum != null ? recCntlNum : "") + " due to field " + key + " -- " + e.getMessage(), e);
-                        throw(e);
-                    }
-                }
-            }
-            else if (indexType.startsWith("script"))
-            {
-                try {
-                    handleScript(indexMap, indexType, indexField, mapName, record, indexParm);
-                }
-                catch(SolrMarcIndexerException e)
-                {
-                    String recCntlNum = null;
-                    try {
-                        recCntlNum = record.getControlNumber();
-                    }
-                    catch (NullPointerException npe) { /* ignore */ }
-
-                    if (e.getLevel() == SolrMarcIndexerException.DELETE)
-                    {
-                        logger.error("Record " + (recCntlNum != null ? recCntlNum : "") + " purposely not indexed because " + key + " field is empty -- " + e.getMessage(), e);
-                    }
-                    else
-                    {
-                        logger.error("Unable to index record " + (recCntlNum != null ? recCntlNum : "") + " due to field " + key + " -- " + e.getMessage(), e);
-                        throw(e);
-                    }
-                }
+                addFieldValueToMap(record, key, indexMap);
             }
         }
         this.errors = null;
         return indexMap;
     }
 
+    /**
+     * Given a record, a field name, and a Map of solr fields (where keys are field names, values
+     * are an Object containing the values (a Set or a String) 
+     * Compute the value for a field and 
+     */
+    public void addFieldValueToMap(Record record, String key, Map<String, Object> indexMap)
+    {
+        String fieldVal[] = fieldMap.get(key);
+        String indexField = fieldVal[0];
+        String indexType = fieldVal[1];
+        String indexParm = fieldVal[2];
+        String mapName = fieldVal[3];
+
+        if (indexType.equals("constant"))
+        {
+            if (indexParm.contains("|"))
+            {
+                String parts[] = indexParm.split("[|]");
+                Set<String> result = new LinkedHashSet<String>();
+                result.addAll(Arrays.asList(parts));
+                // if a zero length string appears, remove it
+                result.remove("");
+                addFields(indexMap, indexField, null, result);
+            }
+            else
+                addField(indexMap, indexField, indexParm);
+        }
+        else if (indexType.equals("first"))
+            addField(indexMap, indexField, getFirstFieldVal(record, mapName, indexParm));
+        else if (indexType.equals("all"))
+            addFields(indexMap, indexField, mapName, getFieldList(record, indexParm));
+        else if (indexType.equals("DeleteRecordIfFieldEmpty"))
+        {
+            Set<String> fields = getFieldList(record, indexParm);
+            if (mapName != null && findMap(mapName) != null)
+                fields = Utils.remap(fields, findMap(mapName), true);
+
+            if (fields.size() != 0)
+                addFields(indexMap, indexField, null, fields);
+            else  // no entries produced for field => generate no record in Solr
+                addIndexerExceptionAsField(record, indexMap, indexField, SolrMarcIndexerException.DELETE);
+        }
+        else if (indexType.startsWith("join"))
+        {
+            String joinChar = " ";
+            if (indexType.contains("(") && indexType.endsWith(")"))
+                joinChar = indexType.replace("join(", "").replace(")", "");
+            addField(indexMap, indexField, getFieldVals(record, indexParm, joinChar));
+        }
+        else if (indexType.equals("std"))
+        {
+            if (indexParm.equals("era"))
+                addFields(indexMap, indexField, mapName, getEra(record));
+            else
+                addField(indexMap, indexField, getStd(record, indexParm));
+        }
+        else if (indexType.startsWith("custom"))
+        {
+            try {
+                handleCustom(indexMap, indexType, indexField, mapName, record, indexParm);
+            }
+            catch(SolrMarcIndexerException e)
+            {
+                addIndexerExceptionAsField(record, indexMap, indexField, e.getLevel());
+            }
+        }
+        else if (indexType.startsWith("script"))
+        {
+            try {
+                handleScript(indexMap, indexType, indexField, mapName, record, indexParm);
+            }
+            catch(SolrMarcIndexerException e)
+            {
+                addIndexerExceptionAsField(record, indexMap, indexField, e.getLevel());
+            }
+        }
+    }
+    
+    /**
+     * When a custom indexing script throws an indexing exception, this routine converts it to a special-named index map key
+     * and includes a descriptive message as the index value for that key
+     */
+    private void addIndexerExceptionAsField(Record record, Map<String, Object> indexMap, String indexField, int exceptionLevel)
+    {
+        String fieldName = SolrMarcIndexerException.getLevelFieldName(exceptionLevel);
+        if (exceptionLevel == SolrMarcIndexerException.DELETE)
+        {
+            addField(indexMap, fieldName, null, 
+                     "Index specification: "+ indexField +" says this record should be deleted.");
+        }
+        else if (exceptionLevel == SolrMarcIndexerException.IGNORE)
+        {
+            addField(indexMap, fieldName, null, 
+                     "Index specification: "+ indexField +" says this record should be ignored.");
+        }
+        else if (exceptionLevel == SolrMarcIndexerException.EXIT)
+        {
+            addField(indexMap, fieldName, null, 
+                     "Index specification: "+ indexField +" says because of this record indexing should be terminated.");
+        }
+    }
+    
     /**
      * This routine CANNOT be overridden in a sub-class.  Its is called to perform some processing that needs 
      * to be done once for each record, and which may be needed by several indexing specifications.  Basically all 
@@ -1050,7 +1061,7 @@ public class SolrIndexer
         {
             if (e.getTargetException() instanceof SolrMarcIndexerException)
             {
-                throw((SolrMarcIndexerException)e.getTargetException());
+                addIndexerExceptionAsField(record, indexMap, indexField, ((SolrMarcIndexerException)e.getTargetException()).getLevel());
             }
             e.printStackTrace();   // DEBUG
 //            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
@@ -1060,7 +1071,8 @@ public class SolrIndexer
         if (indexType.startsWith("customDeleteRecordIfFieldEmpty")) 
             deleteIfEmpty = true;
         boolean result = finishCustomOrScript(indexMap, indexField, mapName, returnType, retval, deleteIfEmpty);
-        if (result == true) throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
+        if (result == true) addIndexerExceptionAsField(record, indexMap, indexField, SolrMarcIndexerException.DELETE);
+       // if (result == true) throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
     }
 
     /**
@@ -1150,7 +1162,8 @@ public class SolrIndexer
         if (retval == Primitive.NULL)  
             retval = null;
         boolean result = finishCustomOrScript(indexMap, indexField, mapName, returnType, retval, deleteIfEmpty);
-        if (result == true) throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
+        if (result == true) addIndexerExceptionAsField(record, indexMap, indexField, SolrMarcIndexerException.DELETE);
+        // throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
     }
 
     /**
@@ -1499,6 +1512,25 @@ public class SolrIndexer
         return result;
     }
 
+    public String getSolrId(Record record, Map<String, Object> indexMap)
+    {      
+        if (!indexMap.containsKey("id"))
+        {
+            if (fieldMap.containsKey("id"))
+                addFieldValueToMap(record, "id", indexMap);
+            else
+            {
+                addField(indexMap, "id", getFirstFieldVal(record, null, "001"));
+            }
+        }
+        Object keyObj = indexMap.get("id");
+        if (!(keyObj instanceof String))
+        {
+            throw new IllegalArgumentException("Value computed for Solr value \"id\" value must be a single String");
+        }
+        return ((String)keyObj);
+    }
+    
     /****
      * Intended to be called as a custom method from an indexing properties
      * file: some_field = custom, getWithOptions( marcFieldSpec, options)

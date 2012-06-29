@@ -1648,7 +1648,14 @@ public class BlacklightIndexer extends SolrIndexer
                 format_intersection.add(x);
         Set<String> format_difference = new LinkedHashSet<String>(format_Union);
         format_difference.removeAll(format_intersection);
-        return(format_difference);
+      //  return(format_difference);
+        Set<String> format_difference_plus = new LinkedHashSet<String>();
+        for (String x : format_difference)
+            if (orig_format.contains(x))
+                format_difference_plus.add("-"+x);
+            else 
+                format_difference_plus.add("+"+x);
+        return(format_difference_plus);
     }
     
     public Set<String> getCombinedFormatNew2(final Record record)

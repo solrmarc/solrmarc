@@ -52,6 +52,7 @@ public class GetFormatMixinTest
         System.err.println("test DataFile = "+ testDataFile);
         MarcReader reader = null;
         Properties indexingProps = new Properties();
+//        indexingProps.setProperty("id", "001, first");
         indexingProps.setProperty("getformatmixin", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes");
         indexingProps.setProperty("getformatmixinmapped", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_map.properties");
         indexingProps.setProperty("getformatmixinunmapped", "custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_unmap_map.properties");
