@@ -95,7 +95,7 @@ public class MarcFilteredReader implements MarcReader
     {
         this(r, ifFieldPresent, ifFieldMissing, deleteSubfields);
       //  remapPropertiesFilename = System.getProperty("marc.override.reader.remapURL", null);
-        remapProperties = Utils.loadProperties(remapURL);      
+        remapProperties = Utils.loadProperties(remapURL);
     }
 
     /**

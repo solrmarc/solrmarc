@@ -310,16 +310,17 @@ public class MarcImporter extends MarcHandler
             catch (NullPointerException npe) { /* ignore */ }
 
             try {
-                boolean added = addToIndex(record);
-                if (added)
+                Map <String, Object> fieldsMap = addToIndex(record);
+                if (fieldsMap != null)
                 {
+                    String recordId = fieldsMap.get("id").toString(); 
                     recsIndexedCounter++;
-                    logger.info("Added record " + recsReadCounter + " read from file: " + recCntlNum);
+                    logger.info("Added record " + recsReadCounter + " read from file: " + recordId);
                 }
-                else
-                {
-                    logger.info("Deleted record " + recsReadCounter + " read from file: " + recCntlNum);                        
-                }
+//                else
+//                {
+//                    logger.info("Deleted record " + recsReadCounter + " read from file: " + recCntlNum);                        
+//                }
             }
             catch (Exception e)
             {
@@ -353,17 +354,24 @@ public class MarcImporter extends MarcHandler
                 else if (e instanceof SolrMarcIndexerException)
                 {
                     SolrMarcIndexerException smie = (SolrMarcIndexerException)e;
+                    Map<String, Object> indexMapFromException = smie.getIndexMap();
+                    String recordIDFromException = indexMapFromException.get("id").toString();
+                    String idMessage = "";
+                    if (recCntlNum != null && !recCntlNum.equals(recordIDFromException))
+                    {
+                        idMessage = " with solr id ("+recordIDFromException+ ")";
+                    }
                     if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
                     {
-           	            logger.info("Ignored record " + (recCntlNum != null ? recCntlNum : "") + " (record count " + recsReadCounter + ")");
+           	            logger.info("Ignored record " + (recCntlNum != null ? recCntlNum : "") + idMessage + " (record count " + recsReadCounter + ")");
                     }
                     else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
                     {            
-           	            logger.info("Deleted record " + (recCntlNum != null ? recCntlNum : "") + " (record count " + recsReadCounter + ")");
+           	            logger.info("Deleted record " + (recCntlNum != null ? recCntlNum : "") + idMessage + " (record count " + recsReadCounter + ")");
                     }
                     else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
                     {
-           	            logger.info("Serious Error flagged in record " + (recCntlNum != null ? recCntlNum : "") + " (record count " + recsReadCounter + ")");
+           	            logger.info("Serious Error flagged in record " + (recCntlNum != null ? recCntlNum : "") + idMessage + " (record count " + recsReadCounter + ")");
                         throw(smie);
                     }
                 }
@@ -385,45 +393,44 @@ public class MarcImporter extends MarcHandler
      * Add a record to the index
      * @param record marc record to add
      */
-    private boolean addToIndex(Record record) throws IOException
+    private Map<String, Object> addToIndex(Record record) throws IOException
     {
-        try {
-            Map<String, Object> fieldsMap = indexer.map(record, errors); 
-            String docStr = addToIndex(fieldsMap);
-
-            if (verbose || justIndexDontAdd)
-            {
-                if (verbose) 
-                {
-                    System.out.println(record.toString());
-                    logger.info(record.toString());
-                }
-                System.out.println(docStr);
-                logger.info(docStr);
-            }
-            return(true);
-        }
-        catch (SolrMarcIndexerException e)
+        Map<String, Object> fieldsMap = indexer.map(record, errors); 
+        String id = fieldsMap.get("id").toString();
+        // Check the fieldsMap for a special case field name indicating that some kind of indexing error occurred.
+        if (fieldsMap.containsKey(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.EXIT)))
         {
-            if (e.getLevel() == SolrMarcIndexerException.IGNORE)
-            {
-                throw(e);
-            }
-            else if (e.getLevel() == SolrMarcIndexerException.DELETE)
-            {            
-                String id = record.getControlNumber();
-                if (id != null)
-                {
-                    solrProxy.delete(id, true, true);
-                }
-                throw(e);
-            }
-            else if (e.getLevel() == SolrMarcIndexerException.EXIT)
-            {
-                throw(e);
-            }
+            String message = fieldsMap.get(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.EXIT)).toString();
+            throw(new SolrMarcIndexerException(SolrMarcIndexerException.EXIT, fieldsMap, message));
         }
-        return(true);
+        else if (fieldsMap.containsKey(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.DELETE)))
+        {
+            String message = fieldsMap.get(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.DELETE)).toString();
+            if (id != null)
+            {
+                solrProxy.delete(id, true, true);
+            }
+            throw(new SolrMarcIndexerException(SolrMarcIndexerException.DELETE, fieldsMap, message));
+        }
+        else if (fieldsMap.containsKey(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.IGNORE)))
+        {
+            String message = fieldsMap.get(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.IGNORE)).toString();
+            throw(new SolrMarcIndexerException(SolrMarcIndexerException.IGNORE, fieldsMap, message));
+        }
+
+        String docStr = addToIndex(fieldsMap);
+
+        if (verbose || justIndexDontAdd)
+        {
+            if (verbose) 
+            {
+                System.out.println(record.toString());
+                logger.info(record.toString());
+            }
+            System.out.println(docStr);
+            logger.info(docStr);
+        }
+        return(fieldsMap);
     }
     
     /**
