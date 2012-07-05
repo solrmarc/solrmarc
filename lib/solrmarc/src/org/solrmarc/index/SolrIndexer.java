@@ -822,6 +822,23 @@ public class SolrIndexer
             }
         }
         this.errors = null;
+        // Check the fieldsMap for a special case field name indicating that some kind of indexing error occurred.
+        if (indexMap.containsKey(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.EXIT)))
+        {
+            String message = indexMap.get(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.EXIT)).toString();
+            throw(new SolrMarcIndexerException(SolrMarcIndexerException.EXIT, indexMap, message));
+        }
+        else if (indexMap.containsKey(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.DELETE)))
+        {
+            String message = indexMap.get(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.DELETE)).toString();
+            throw(new SolrMarcIndexerException(SolrMarcIndexerException.DELETE, indexMap, message));
+        }
+        else if (indexMap.containsKey(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.IGNORE)))
+        {
+            String message = indexMap.get(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.IGNORE)).toString();
+            throw(new SolrMarcIndexerException(SolrMarcIndexerException.IGNORE, indexMap, message));
+        }
+
         return indexMap;
     }
 

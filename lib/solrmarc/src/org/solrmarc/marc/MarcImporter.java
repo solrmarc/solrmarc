@@ -395,42 +395,61 @@ public class MarcImporter extends MarcHandler
      */
     private Map<String, Object> addToIndex(Record record) throws IOException
     {
-        Map<String, Object> fieldsMap = indexer.map(record, errors); 
-        String id = fieldsMap.get("id").toString();
-        // Check the fieldsMap for a special case field name indicating that some kind of indexing error occurred.
-        if (fieldsMap.containsKey(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.EXIT)))
-        {
-            String message = fieldsMap.get(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.EXIT)).toString();
-            throw(new SolrMarcIndexerException(SolrMarcIndexerException.EXIT, fieldsMap, message));
-        }
-        else if (fieldsMap.containsKey(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.DELETE)))
-        {
-            String message = fieldsMap.get(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.DELETE)).toString();
-            if (id != null)
-            {
-                solrProxy.delete(id, true, true);
-            }
-            throw(new SolrMarcIndexerException(SolrMarcIndexerException.DELETE, fieldsMap, message));
-        }
-        else if (fieldsMap.containsKey(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.IGNORE)))
-        {
-            String message = fieldsMap.get(SolrMarcIndexerException.getLevelFieldName(SolrMarcIndexerException.IGNORE)).toString();
-            throw(new SolrMarcIndexerException(SolrMarcIndexerException.IGNORE, fieldsMap, message));
-        }
+        try {
+            Map<String, Object> fieldsMap = indexer.map(record, errors); 
+            String docStr = addToIndex(fieldsMap);
 
-        String docStr = addToIndex(fieldsMap);
-
-        if (verbose || justIndexDontAdd)
-        {
-            if (verbose) 
+            if (verbose || justIndexDontAdd)
             {
-                System.out.println(record.toString());
-                logger.info(record.toString());
+                if (verbose) 
+                {
+                    System.out.println(record.toString());
+                    logger.info(record.toString());
+                }
+                System.out.println(docStr);
+                logger.info(docStr);
             }
-            System.out.println(docStr);
-            logger.info(docStr);
+            return(fieldsMap);
         }
-        return(fieldsMap);
+        catch (SolrMarcIndexerException smie)
+        {
+            Map<String, Object> fieldsMap = smie.getIndexMap();
+            String id = fieldsMap.get("id").toString();
+            int level = smie.getLevel();
+            // Check the fieldsMap for a special case field name indicating that some kind of indexing error occurred.
+            if (level == SolrMarcIndexerException.EXIT)
+            {
+                throw(smie);
+            }
+            else if (level == SolrMarcIndexerException.DELETE)
+            {
+                if (id != null && !justIndexDontAdd)
+                {
+                    solrProxy.delete(id, true, true);
+                }
+                else if (id != null && justIndexDontAdd)
+                {
+                    String recCntlNum = null;
+                    try {
+                        recCntlNum = record.getControlNumber();
+                    }
+                    catch (NullPointerException npe) { /* ignore */ }
+                    String idMessage = "";
+                    if (recCntlNum != null && !recCntlNum.equals(id))
+                    {
+                        idMessage = " with solr id ("+id+ ")";
+                    }
+                    System.out.println("Deleted record " + (recCntlNum != null ? recCntlNum : "") + idMessage + " (record count " + recsReadCounter + ")");
+                    logger.info("Deleted record " + (recCntlNum != null ? recCntlNum : "") + idMessage + " (record count " + recsReadCounter + ")");
+                }
+                throw(smie);
+            }
+            else if (level == SolrMarcIndexerException.IGNORE)
+            {
+                throw(smie);
+            }
+        }
+        return(null);
     }
     
     /**
