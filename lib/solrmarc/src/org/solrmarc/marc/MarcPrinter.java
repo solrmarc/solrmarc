@@ -240,17 +240,24 @@ public class MarcPrinter extends MarcHandler
                     }
                     catch (SolrMarcIndexerException e)
                     {
+                        Map<String, Object> indexMapFromRecord = e.getIndexMap();
+                        String idFromRecord = indexMapFromRecord.get("id").toString();
+                        String idMessage = record.getControlNumber();
+                        if (!idFromRecord.equals(idMessage))
+                        {
+                            idMessage = idMessage + " with id = "+ idFromRecord;
+                        }
                         if (e.getLevel() == SolrMarcIndexerException.IGNORE)
                         {
-                            System.err.println("Indexing routine says record "+ record.getControlNumber() + " should be ignored");                                   
+                            System.err.println("Indexing routine says record "+ idMessage + " should be ignored");                                   
                         }
                         else if (e.getLevel() == SolrMarcIndexerException.DELETE)
                         {
-                            System.err.println("Indexing routine says record "+ record.getControlNumber() + " should be deleted");                                   
+                            System.err.println("Indexing routine says record "+ idMessage + " should be deleted");                                   
                         }
                         if (e.getLevel() == SolrMarcIndexerException.EXIT)
                         {
-                            System.err.println("Indexing routine says processing should be terminated at record "+ record.getControlNumber()); 
+                            System.err.println("Indexing routine says processing should be terminated at record "+ idMessage); 
                             break;
                         }
                     }
