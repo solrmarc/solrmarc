@@ -355,7 +355,7 @@ public class MarcImporter extends MarcHandler
                 {
                     SolrMarcIndexerException smie = (SolrMarcIndexerException)e;
                     Map<String, Object> indexMapFromException = smie.getIndexMap();
-                    String recordIDFromException = indexMapFromException.get("id").toString();
+                    String recordIDFromException = (indexMapFromException != null) ? indexMapFromException.get("id").toString() : recCntlNum;
                     String idMessage = "";
                     if (recCntlNum != null && !recCntlNum.equals(recordIDFromException))
                     {
@@ -414,7 +414,7 @@ public class MarcImporter extends MarcHandler
         catch (SolrMarcIndexerException smie)
         {
             Map<String, Object> fieldsMap = smie.getIndexMap();
-            String id = fieldsMap.get("id").toString();
+            String id = (fieldsMap != null) ? fieldsMap.get("id").toString() : null;
             int level = smie.getLevel();
             // Check the fieldsMap for a special case field name indicating that some kind of indexing error occurred.
             if (level == SolrMarcIndexerException.EXIT)
