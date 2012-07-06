@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+  <!-- no 010 -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">aNo010</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">no 010, no lccn</subfield>
+    </datafield>
+  </record>
+  <!-- sub a -->
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010suba8digit</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">   85153773 </subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a, 8 digit, prefix of 3 blanks</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010suba10digit</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">  2001627090</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a, 10 digit, prefix of 2 blanks</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010suba8digitPfx</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">a  60123456</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a, 8 digit, prefix of one letter</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010suba8digit2LetPfx</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">bs 66654321</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a, 8 digit, prefix of 2 letters</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010suba8digit3LetPfx</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">cad77665544</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a, 8 digit, prefix of 3 letters</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010suba10digitPfx</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">r 2001336783</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a, 10 digit, prefix of 1 letter</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010suba10digit2LetPfx</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">ne2001045944</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a, 10 digit, prefix of 2 letters</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010suba8digitSfx</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">   79139101 /AC/MN</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a, 8 digit, suffix</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010suba10digitSfx</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">  2006002284 //r752</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a, 10 digit, suffix</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010suba8digitSfx2</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">   73002284 //r752</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a, 8 digit, 'nother suffix</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010subaAndZ</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">   76647633 </subfield>
+      <subfield code="z">sc 76000587</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub a and z</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010subz</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="z">  20072692384 </subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub z only</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010multSubZ</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="z">   76647633 </subfield>
+      <subfield code="z">  2000123456 </subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, mult sub z only</subfield>
+    </datafield>
+  </record>
+  <record>
+    <leader>01952cim  2200457Ia 45í0</leader>
+    <controlfield tag="001">a010bad</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="z">  123456789 </subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">lccn, sub z wrong format</subfield>
+    </datafield>
+  </record>
+</collection>

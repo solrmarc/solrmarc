@@ -1,0 +1,983 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marc:collection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.loc.gov/mods/v3" xmlns:marc="http://www.loc.gov/MARC21/slim"
+  xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam37.07</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008">070724s1853
+      ohu|||||s|||||||||||zxx||</marc:controlfield>
+    <marc:datafield tag="028" ind1="2" ind2="2">
+      <marc:subfield code="a">1819.4</marc:subfield>
+      <marc:subfield code="b">W.C. Peters &amp; Sons</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Kinkel, Charles</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="0">
+      <marc:subfield code="a">Mountain belle schottisch</marc:subfield>
+      <marc:subfield code="c">composed by C. Kinkel.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">Cincinnati, Ohio</marc:subfield>
+      <marc:subfield code="b">W.C. Peters &amp; Sons</marc:subfield>
+      <marc:subfield code="c">[c1853]</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">5 p. of music.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">For piano solo.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Piano music</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Schottisches</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Popular instrumental music</marc:subfield>
+      <marc:subfield code="y">To 1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000003487</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam105.17</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008">070724s1845
+      kyu|||||s|||||||||||eng||</marc:controlfield>
+    <marc:datafield tag="028" ind1="2" ind2="2">
+      <marc:subfield code="a">1721-2</marc:subfield>
+      <marc:subfield code="b">David P. Faulds</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Balfe, M. W. (Michael William),</marc:subfield>
+      <marc:subfield code="d">1808-1870</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="240" ind1="1" ind2="0">
+      <marc:subfield code="a">Bohemian girl. Vocal score</marc:subfield>
+      <marc:subfield code="p">I dreamt that I dwelt in marble
+        halls</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="0">
+      <marc:subfield code="a">I dreamt that I dwelt in marble
+        halls</marc:subfield>
+      <marc:subfield code="b">from The Bohemian girl</marc:subfield>
+      <marc:subfield code="c">arranged for the guitar by Saml.
+        Carusi.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="246" ind1="1" ind2=" ">
+      <marc:subfield code="a">I dreamt that I dwelt in marble
+        halls</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">Louisville, Ky</marc:subfield>
+      <marc:subfield code="b">David P. Faulds</marc:subfield>
+      <marc:subfield code="c">c1845</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">1 vocal score ([2] p.)</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Orchestral acc. arr. for guitar.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Caption title.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Libretto by Alfred Bunn.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">"Webb"--Colophon.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Operas</marc:subfield>
+      <marc:subfield code="v">Excerpts</marc:subfield>
+      <marc:subfield code="v">Vocal scores with guitar</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Songs with guitar</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Popular music</marc:subfield>
+      <marc:subfield code="z">United States</marc:subfield>
+      <marc:subfield code="y">To 1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Carusi, Samuel</marc:subfield>
+      <marc:subfield code="e">arranger</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Bunn, Alfred,</marc:subfield>
+      <marc:subfield code="d">1796?-1860</marc:subfield>
+      <marc:subfield code="e">librettist</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Webb, L. W.</marc:subfield>
+      <marc:subfield code="e">engraver</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000000018</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam105.03</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008"
+      >070724q18731894nyu|||||s|||||||||||zxx||</marc:controlfield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Liszt, Franz,</marc:subfield>
+      <marc:subfield code="d">1811-1886</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="0">
+      <marc:subfield code="a">Rigoletto de Verdi</marc:subfield>
+      <marc:subfield code="c">F. Liszt.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="246" ind1="1" ind2=" ">
+      <marc:subfield code="a">Paraphrases de concert</marc:subfield>
+      <marc:subfield code="p">Rigoletto</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">New York (13 E. 14th St., New
+        York)</marc:subfield>
+      <marc:subfield code="b">S.T. Gordon &amp; Son</marc:subfield>
+      <marc:subfield code="c">[1873-1894?]</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">13 p. of music.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="490" ind1="0" ind2=" ">
+      <marc:subfield code="a">Oeuvres choisis / de Franz Liszt ;
+        7</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">For piano.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Publisher was at this address between 1873 and
+        1894. Cf. Handbook of early American sheet music / Dichter and
+        Shapiro.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Piano music</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Operas</marc:subfield>
+      <marc:subfield code="v">Excerpts, Arranged</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Popular instrumental music</marc:subfield>
+      <marc:subfield code="y">To 1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="787" ind1="0" ind2=" ">
+      <marc:subfield code="t">Rigoletto</marc:subfield>
+      <marc:subfield code="g">Quartetto</marc:subfield>
+      <marc:subfield code="a">Verdi, Giuseppe, 1813-1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000000004</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam105.19</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008"
+      >070724q18431851mdu|||||s|||||||||||zxx||</marc:controlfield>
+    <marc:datafield tag="028" ind1="2" ind2="2">
+      <marc:subfield code="a">688</marc:subfield>
+      <marc:subfield code="b">F.D. Benteen</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="047" ind1=" " ind2=" ">
+      <marc:subfield code="a">wz</marc:subfield>
+      <marc:subfield code="a">op</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Balfe, M. W. (Michael William),</marc:subfield>
+      <marc:subfield code="d">1808-1870</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="240" ind1="1" ind2="0">
+      <marc:subfield code="a">Bohemian girl</marc:subfield>
+      <marc:subfield code="p">I dreamt that I dwelt in marble
+        halls</marc:subfield>
+      <marc:subfield code="o">arr.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="0">
+      <marc:subfield code="a">I dreamt that I dwelt in marble
+        halls</marc:subfield>
+      <marc:subfield code="c">arranged as a waltz.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">Baltimore</marc:subfield>
+      <marc:subfield code="b">F.D. Benteen</marc:subfield>
+      <marc:subfield code="c">[1843-1851?]</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">[1] leaf of music.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Arranged for piano.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Caption title.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">From the opera Bohemian girl, after J.-H. Vernoy
+        de Saint-Georges's La gypsy, from M. de Cervantes's La
+        gitanilla.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Piano music, Arranged</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Waltzes</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Operas</marc:subfield>
+      <marc:subfield code="v">Excerpts, Arranged</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Popular instrumental music</marc:subfield>
+      <marc:subfield code="y">To 1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000000020</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam105.26</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008"
+      >070724q18301838mdu|||||s|||||||||||eng||</marc:controlfield>
+    <marc:datafield tag="028" ind1="2" ind2="2">
+      <marc:subfield code="a">Dark eyed one Geo. Willig, Jr.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="047" ind1=" " ind2=" ">
+      <marc:subfield code="a">sg</marc:subfield>
+      <marc:subfield code="a">op</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Auber, D. F. E. (Daniel François
+        Esprit),</marc:subfield>
+      <marc:subfield code="d">1782-1871</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="240" ind1="1" ind2="0">
+      <marc:subfield code="a">Dieu et la Bayadère</marc:subfield>
+      <marc:subfield code="n">Acte 1. No. 5</marc:subfield>
+      <marc:subfield code="p">Air de danse</marc:subfield>
+      <marc:subfield code="o">arr.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="0">
+      <marc:subfield code="a">Dark eyed one</marc:subfield>
+      <marc:subfield code="b">Persian love song : sung by Mr.
+        Horn</marc:subfield>
+      <marc:subfield code="c">written by J.R. Planché ; music by
+        Auber.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="246" ind1="1" ind2=" ">
+      <marc:subfield code="a">Persian love long</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="246" ind1="1" ind2=" ">
+      <marc:subfield code="a">Dark eyed one! dark eyed one come hither to
+        me</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">Baltimore</marc:subfield>
+      <marc:subfield code="b">Published and sold by Geo. Willig,
+        Jr.</marc:subfield>
+      <marc:subfield code="c">[1830-1838?]</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">1 score (2 leaves)</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">For voice and piano.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Caption title.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">English words, set to a melody from Auber's opera
+        Dieu et la Bayadère.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Songs with piano</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Operas</marc:subfield>
+      <marc:subfield code="v">Excerpts, Arranged</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Popular music</marc:subfield>
+      <marc:subfield code="y">To 1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Planché, J. R. (James Robinson),</marc:subfield>
+      <marc:subfield code="d">1796-1880</marc:subfield>
+      <marc:subfield code="e">lyricist</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Horn, Charles Edward,</marc:subfield>
+      <marc:subfield code="d">1786-1849</marc:subfield>
+      <marc:subfield code="e">performer</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000000028</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam105.11</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008">070724s1842
+      pau|||||s|||||||||||zxx||</marc:controlfield>
+    <marc:datafield tag="028" ind1="2" ind2="2">
+      <marc:subfield code="a">El zagal valse</marc:subfield>
+      <marc:subfield code="b">George Willig</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Bassani, Charles</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="3">
+      <marc:subfield code="a">El zagal</marc:subfield>
+      <marc:subfield code="b">waltz al española : pour le piano forte : tiré
+        d'un motif favori d'Elisa e Claudio</marc:subfield>
+      <marc:subfield code="c">composé par Charles Bassini.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">Philadelphia (171 Chestnut St., Philadelphia) </marc:subfield>
+      <marc:subfield code="a">Richmond, Va</marc:subfield>
+      <marc:subfield code="b">George Willig</marc:subfield>
+      <marc:subfield code="b">Smith, Drinker &amp; Morris</marc:subfield>
+      <marc:subfield code="c">c1842</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">2 leaves of music.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">For piano.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Caption title.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">"Dédié à Miss Catherine L. Bridges of Richmond,
+        Va."</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Piano music</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Waltzes</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Popular instrumental music</marc:subfield>
+      <marc:subfield code="y">To 1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Bridges, Catherine L.</marc:subfield>
+      <marc:subfield code="e">dedicatee</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="787" ind1="0" ind2=" ">
+      <marc:subfield code="t">Elisa e Claudio</marc:subfield>
+      <marc:subfield code="a">Mercadante, Saverio, 1795-1870</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000000012</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam105.23</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008"
+      >070724q18521869dcu|||||s|||||||||||eng||</marc:controlfield>
+    <marc:datafield tag="028" ind1="2" ind2="2">
+      <marc:subfield code="a">78</marc:subfield>
+      <marc:subfield code="b">John F. Ellis</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Richards, Brinley,</marc:subfield>
+      <marc:subfield code="d">1819-1885</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="240" ind1="1" ind2="0">
+      <marc:subfield code="a">Oh! whisper what thou feelest</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="0">
+      <marc:subfield code="a">Oh whisper what thou feelest</marc:subfield>
+      <marc:subfield code="c">Richards.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="246" ind1="1" ind2=" ">
+      <marc:subfield code="a">Crown diamonds</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="246" ind1="1" ind2=" ">
+      <marc:subfield code="a">Oh! whisper what thou feelest</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">Washington, D.C. (306 Pennsylvania Ave.,
+        Washington, D.C.)</marc:subfield>
+      <marc:subfield code="b">John F. Ellis</marc:subfield>
+      <marc:subfield code="c">[1852-1869?]</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">1 score (5 p.)</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="490" ind1="0" ind2=" ">
+      <marc:subfield code="a">Wreath : a collection of popular songs by various
+        authors</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">For voice and piano.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Written as an additional number for the production
+        at Drury Lane in 1846 of Auber's Les diamants de la
+        couronne.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Composer's name given in caption as
+        Auber.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">"Clayton, engraver."</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Advertisement on p. [6]: John F. Ellis Music
+        Store.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Songs with piano</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Popular music</marc:subfield>
+      <marc:subfield code="z">United States</marc:subfield>
+      <marc:subfield code="y">To 1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Clayton, Charles O.</marc:subfield>
+      <marc:subfield code="e">engraver</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="787" ind1="0" ind2=" ">
+      <marc:subfield code="t">Diamants de la couronne</marc:subfield>
+      <marc:subfield code="a">Auber, D. F. E. (Daniel François Esprit),
+        1782-1871</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000000025</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam105.24</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008"
+      >070724s18851885nyu|||||s|||||||||||zxx||</marc:controlfield>
+    <marc:datafield tag="028" ind1="2" ind2="2">
+      <marc:subfield code="a">1036-16</marc:subfield>
+      <marc:subfield code="b">Richard A. Saalfield</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="047" ind1=" " ind2=" ">
+      <marc:subfield code="a">ov</marc:subfield>
+      <marc:subfield code="a">op</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Flotow, Friedrich von,</marc:subfield>
+      <marc:subfield code="d">1812-1883</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="240" ind1="1" ind2="0">
+      <marc:subfield code="a">Martha</marc:subfield>
+      <marc:subfield code="p">Ouverture</marc:subfield>
+      <marc:subfield code="o">arr.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="0">
+      <marc:subfield code="a">Overture, Martha</marc:subfield>
+      <marc:subfield code="b">Oper in vier Aufzügen</marc:subfield>
+      <marc:subfield code="c">von Friedrich ; music by Friedrich von Flotow ;
+        arr. for the pianoforte for four hands by Carl Czerny.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="246" ind1="1" ind2=" ">
+      <marc:subfield code="a">Martha overture</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">New York (41 Union Square, New
+        York)</marc:subfield>
+      <marc:subfield code="b">Richard A. Saalfield</marc:subfield>
+      <marc:subfield code="c">1885?</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">17 p. of music.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="490" ind1="0" ind2=" ">
+      <marc:subfield code="a">Four hand folio : a collection of gems arranged
+        for two performers ; 1036</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Opera excerpt, arranged for piano, 4
+        hands.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Caption title.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Advertisement: "The Saalfield series : standard,
+        popular and classic music books."</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Overtures (Piano, 4 hands),
+        Arranged</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Operas</marc:subfield>
+      <marc:subfield code="v">Excerpts, Arranged</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Popular instrumental music</marc:subfield>
+      <marc:subfield code="y">To 1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Friedrich, W.,</marc:subfield>
+      <marc:subfield code="d">ca. 1820-1879</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Czerny, Carl,</marc:subfield>
+      <marc:subfield code="d">1791-1857</marc:subfield>
+      <marc:subfield code="e">arranger</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000000026</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam112.16</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008">070724s1884
+      pau|||||s|||||||||||eng||</marc:controlfield>
+    <marc:datafield tag="028" ind1="2" ind2="2">
+      <marc:subfield code="a">800</marc:subfield>
+      <marc:subfield code="b">W. F. Shaw</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Tosti, F. Paolo, (Francesco Paolo)</marc:subfield>
+      <marc:subfield code="d">1846-1916</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="0">
+      <marc:subfield code="a">Bid me good-bye</marc:subfield>
+      <marc:subfield code="c">words by F.E. Weatherly ; music by F. Paolo
+        Tosti.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="246" ind1="1" ind2=" ">
+      <marc:subfield code="a">If in your heart a corner lies</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">[Philadelphia, Pa.]</marc:subfield>
+      <marc:subfield code="b">W. F. Shaw</marc:subfield>
+      <marc:subfield code="c">c1884</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">1 score (5 p.) : ill.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="490" ind1="0" ind2=" ">
+      <marc:subfield code="a">F. Paolo Tosti's favorites</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">For voice and piano.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Caption title.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">"X. L. C. R. edition"--Series title
+        page.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Illustration: Portrait of Tosti framed by a rustic
+        trellis.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Place of publication derived from publisher. Cf.
+        Handbook of early American sheet music / Dichter and
+        Shapiro.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="600" ind1="1" ind2="7">
+      <marc:subfield code="a">Tosti, F. Paolo (Francesco Paolo),</marc:subfield>
+      <marc:subfield code="d">1846-1916</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Songs with piano</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Popular music</marc:subfield>
+      <marc:subfield code="y">To 1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Weatherly, Frederic Edward,</marc:subfield>
+      <marc:subfield code="d">1848-1929</marc:subfield>
+      <marc:subfield code="e">lyricist</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000000426</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam105.21</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008"
+      >070724q18651874kyu|||||s|||||||||||eng||</marc:controlfield>
+    <marc:datafield tag="028" ind1="2" ind2="2">
+      <marc:subfield code="a">760.8</marc:subfield>
+      <marc:subfield code="b">David P. Faulds</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Balfe, M. W. (Michael William),</marc:subfield>
+      <marc:subfield code="d">1808-1870,</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="0">
+      <marc:subfield code="a">I'm a merry Zingara :</marc:subfield>
+      <marc:subfield code="b">sung by Mad. Anna Thillon in the opera of The
+        crown jewels /</marc:subfield>
+      <marc:subfield code="c">composed by Balfe.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="246" ind1="1" ind2=" ">
+      <marc:subfield code="a">I'm a merry, merry, merry Zingara</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">Louisville, Ky. (70 Main St.,
+        Louisville)</marc:subfield>
+      <marc:subfield code="b">David P. Faulds</marc:subfield>
+      <marc:subfield code="c">[1865-1874?]</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">1 score (9 p.)</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">For voice and piano.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Introduced as an additional song in the English
+        version of Auber's Les diamants de la couronne.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">Includes advertisement on verso of p. 9:
+        "Catalogue of the latest publications of D.P. Faulds."</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">English words by Edward Fitzball. Cf. Grove Music
+        Online.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Songs with piano</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Popular music</marc:subfield>
+      <marc:subfield code="z">United States</marc:subfield>
+      <marc:subfield code="y">To 1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Fitzball, Edward,</marc:subfield>
+      <marc:subfield code="d">1792-1873</marc:subfield>
+      <marc:subfield code="e">lyricist</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Thillon, Anna,</marc:subfield>
+      <marc:subfield code="d">d. 1903</marc:subfield>
+      <marc:subfield code="e">performer</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="787" ind1="0" ind2=" ">
+      <marc:subfield code="t">Diamants de la couronne</marc:subfield>
+      <marc:subfield code="a">Auber, D. F. E. (Daniel François Esprit),
+        1782-1871</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000000023</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record>
+    <marc:leader>     ncm  22     uu 4500</marc:leader>
+    <marc:controlfield tag="001">eam112.45</marc:controlfield>
+    <marc:controlfield tag="003">McRaeCatalog</marc:controlfield>
+    <marc:controlfield tag="008">070724q18001899pau|||||s|||||||||||ita fre eng
+      fre||</marc:controlfield>
+    <marc:datafield tag="028" ind1="2" ind2="2">
+      <marc:subfield code="a">G.A. 245</marc:subfield>
+      <marc:subfield code="b">G. André &amp; Co.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="040" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@</marc:subfield>
+      <marc:subfield code="b">eng</marc:subfield>
+      <marc:subfield code="c">VA@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="049" ind1=" " ind2=" ">
+      <marc:subfield code="a">VA@@</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="100" ind1="1" ind2=" ">
+      <marc:subfield code="a">Verdi, Giuseppe,</marc:subfield>
+      <marc:subfield code="d">1813-1901</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="240" ind1="1" ind2="0">
+      <marc:subfield code="a">Vêpres siciliennes. Vocal score</marc:subfield>
+      <marc:subfield code="p">Jour d'ivresse. Polygot</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="1" ind2="0">
+      <marc:subfield code="a">O'er the calm and sparkling waters</marc:subfield>
+      <marc:subfield code="b">barcarolle in Les vêpres
+        siciliennes</marc:subfield>
+      <marc:subfield code="c">[English translation by] G. Linley ; [music by]
+        Verdi.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="246" ind1="1" ind2=" ">
+      <marc:subfield code="a">O'er the calm and sparkling waters</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="a">[Philadelphia, Pa]</marc:subfield>
+      <marc:subfield code="b">G. André &amp; Co.</marc:subfield>
+      <marc:subfield code="c">[1800-1899?]</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="300" ind1=" " ind2=" ">
+      <marc:subfield code="a">1 vocal score (7 p.)</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="490" ind1="0" ind2=" ">
+      <marc:subfield code="a">G. André's collection of modern italian songs and
+        duets ; no. 1</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">For voice and piano.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="500" ind1=" " ind2=" ">
+      <marc:subfield code="a">French words with English and Italian
+        translations.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">The Library is providing access to this material
+        for educational and research purposes and is not aware of any U.S.
+        copyright protection (see Title 17 of the United States
+        code).</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="650" ind1="1" ind2=" ">
+      <marc:subfield code="a">Operas</marc:subfield>
+      <marc:subfield code="v">Excerpts</marc:subfield>
+      <marc:subfield code="v">Vocal scores with piano</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="700" ind1="1" ind2=" ">
+      <marc:subfield code="a">Linley, George,</marc:subfield>
+      <marc:subfield code="d">1798-1865</marc:subfield>
+      <marc:subfield code="e">translator</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="852" ind1=" " ind2=" ">
+      <marc:subfield code="a">Special Collections, University of Virginia
+        Library, Charlottesville, Va.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="856" ind1=" " ind2=" ">
+      <marc:subfield code="u">m000000459</marc:subfield>
+      <marc:subfield code="q">image/tiff</marc:subfield>
+      <marc:subfield code="3">electronic resource</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+</marc:collection>

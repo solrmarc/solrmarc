@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+    <!-- blacklisted subjects (from Lane) -->
+    <!-- all 655a from Lane;  650a no mesh -->
+    <!-- nomesh -->
+    <record>
+        <leader>01854nea a2200421Ka 45 0</leader>
+        <controlfield tag="001">a650nomesh</controlfield>
+        <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">650a nomesh</subfield>
+        </datafield>
+        <datafield tag="650" ind1="1" ind2="1">
+            <subfield code="a">nomesh</subfield>
+        </datafield>
+    </record>
+    <!-- 650a other (yes, lane) -->
+    <record>
+        <leader>01854nea a2200421Ka 45 0</leader>
+        <controlfield tag="001">a650a</controlfield>
+        <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">650 a other</subfield>
+        </datafield>
+        <datafield tag="650" ind1=" " ind2="4">
+            <subfield code="a">I am a rock</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">I451 .R45 1938</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">LL100057</subfield>
+            <subfield code="l">ASK@LANE</subfield>
+            <subfield code="m">LANE-MED</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">MEDICAL</subfield>
+            <subfield code="u">3/30/2008</subfield>
+        </datafield>    
+    </record>
+    <!-- 655a Internet Resource -->
+    <record>
+        <leader>01854nea a2200421Ka 45 0</leader>
+        <controlfield tag="001">a655internetresource</controlfield>
+        <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">655a internet resource</subfield>
+        </datafield>
+        <datafield tag="655" ind1=" " ind2="4">
+            <subfield code="a">Internet Resource</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">I451 .R45 1938</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">LL100057</subfield>
+            <subfield code="l">ASK@LANE</subfield>
+            <subfield code="m">LANE-MED</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">MEDICAL</subfield>
+            <subfield code="u">3/30/2008</subfield>
+        </datafield>    
+    </record>
+    <!-- 655a Fulltext -->
+    <record>
+        <leader>01854nea a2200421Ka 45 0</leader>
+        <controlfield tag="001">a655fulltext</controlfield>
+        <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">655a full text</subfield>
+        </datafield>
+        <datafield tag="655" ind1=" " ind2="4">
+            <subfield code="a">Fulltext</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">I451 .R45 1938</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">LL100057</subfield>
+            <subfield code="l">ASK@LANE</subfield>
+            <subfield code="m">LANE-MED</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">MEDICAL</subfield>
+            <subfield code="u">3/30/2008</subfield>
+        </datafield>    
+    </record>
+    <!-- 655a no export -->
+    <record>
+        <leader>01854nea a2200421Ka 45 0</leader>
+        <controlfield tag="001">a655noexport</controlfield>
+        <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">655a no export</subfield>
+        </datafield>
+        <datafield tag="655" ind1=" " ind2="4">
+            <subfield code="a">NoExport</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">I451 .R45 1938</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">LL100057</subfield>
+            <subfield code="l">ASK@LANE</subfield>
+            <subfield code="m">LANE-MED</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">MEDICAL</subfield>
+            <subfield code="u">3/30/2008</subfield>
+        </datafield>    
+    </record>
+    <!-- 655b -->
+    <record>
+        <leader>01854nea a2200421Ka 45 0</leader>
+        <controlfield tag="001">a655b</controlfield>
+        <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">655 b, not a</subfield>
+        </datafield>
+        <datafield tag="655" ind1=" " ind2="4">
+            <subfield code="b">be bee be</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">I451 .R45 1938</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">LL100057</subfield>
+            <subfield code="l">ASK@LANE</subfield>
+            <subfield code="m">LANE-MED</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">MEDICAL</subfield>
+            <subfield code="u">3/30/2008</subfield>
+        </datafield>    
+    </record>
+    <!-- 655a not lane -->
+    <record>
+        <leader>01854nea a2200421Ka 45 0</leader>
+        <controlfield tag="001">a655keepme</controlfield>
+        <controlfield tag="008">050825m18911895dcud      a  fs 0   eng d</controlfield>
+        <datafield tag="245" ind1="1" ind2="0">
+            <subfield code="a">655a not lane</subfield>
+        </datafield>
+        <datafield tag="655" ind1=" " ind2="4">
+            <subfield code="a">keep me</subfield>
+        </datafield>
+        <datafield tag="999" ind1=" " ind2=" ">
+            <subfield code="a">I445 .N27 1949</subfield>
+            <subfield code="w">LC</subfield>
+            <subfield code="c">1</subfield>
+            <subfield code="i">LL100006</subfield>
+            <subfield code="l">ASK@LANE</subfield>
+            <subfield code="m">GREEN</subfield>
+            <subfield code="r">N</subfield>
+            <subfield code="s">Y</subfield>
+            <subfield code="t">MEDICAL</subfield>
+            <subfield code="u">3/30/2008</subfield>
+        </datafield>    
+    </record>
+</collection>
