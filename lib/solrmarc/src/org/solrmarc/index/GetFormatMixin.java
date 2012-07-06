@@ -737,7 +737,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( "v...v", 'd');                                 // vd--v - DVD
         }
     };
-    
+        
     /**
      * Return the content type and media types, plus electronic, for this record
      * 
@@ -915,6 +915,27 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
 
         return primaryFormat;
+    }
+    
+    /**
+     * Return the primary content type, plus electronic, for this record
+     * 
+     * @param Record  -  MARC Record
+     * @return String of primary material types
+     */
+
+    public Set<String> getPrimaryContentTypePlusOnline(final Record record)
+    {
+        Set<String> format = new LinkedHashSet<String>();
+
+        // get primary material type
+
+        String primaryType = getPrimaryContentType(record);
+        format.add(primaryType);
+        
+        format = addOnlineTypes(record, format, false);
+        
+        return format;
     }
 
     /**
