@@ -43,15 +43,25 @@ public class SolrMarcIndexerException extends RuntimeException {
 		this.setLevel(level);
 	}
 
-	/**
-	 * Constructs with message.
-	 * @param message Message to pass
-	 */
-	public SolrMarcIndexerException(int level, Map<String, Object> indexMap, final String message) {
-		super(message);
+    /**
+     * Constructs with message.
+     * @param message Message to pass
+     */
+    public SolrMarcIndexerException(int level, Map<String, Object> indexMap, final String message) {
+        super(message);
         this.indexMap = indexMap;
-		this.setLevel(level);
-	}
+        this.setLevel(level);
+    }
+    
+    /**
+     * Constructs with message.
+     * @param message Message to pass
+     */
+    public SolrMarcIndexerException(int level, final String message) {
+        super(message);
+        this.indexMap = null;
+        this.setLevel(level);
+    }
 
 	/**
 	 * Constructs with chained exception
