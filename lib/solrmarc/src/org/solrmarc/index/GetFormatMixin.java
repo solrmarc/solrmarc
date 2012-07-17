@@ -118,6 +118,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         ActivityCard,
         Atlas,
         Braille,
+        Broadside,
         Chart,
         Collage,
         ComputerCard,
@@ -1608,6 +1609,10 @@ public class GetFormatMixin extends SolrIndexerMixin
             else if (form.matches(".*[Ss]ound [Cc]assette.*"))
             {
                 addPossibleForm( possibleForms, MediaType.SoundCassette, new MediaTypeHeuristic(MediaType.SoundCassette,  0.75, "300"));
+            }
+            else if (leaderType == ContentType.Book && (form.matches(".*broadside.*--.*") || form.matches(".*sheet\\b.*--.*")))
+            {
+                addPossibleForm( possibleForms, MediaType.Broadside, new MediaTypeHeuristic(MediaType.Broadside,  0.75, "300"));
             }
         }
         double maxPriority = 0.0;
