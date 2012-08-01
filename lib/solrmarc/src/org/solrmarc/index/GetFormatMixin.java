@@ -58,6 +58,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         Diorama,
         Filmstrip,
         FlashCard,
+        Equipment,
         Game,
         GovernmentDocumentFederal,
         GovernmentDocumentState,
@@ -206,6 +207,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         SoundDiscCD,
         SoundDiscLP,
         SoundRecordingOther,
+        SoundRecordingOnline,
         SoundRoll,
         SoundTapeReel,
         SoundTrackFilm,
@@ -677,7 +679,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( "st", MediaType.SoundTapeReel);                // st - Sound-tape reel
             put( "sw", MediaType.SoundWireRecording);           // sw - Wire recording
             put( "su", MediaType.SoundRecordingOther);          // su - Unspecified
-            put( "sz", MediaType.SoundRecordingOther);          // sz - Other
+         //   put( "sz", MediaType.SoundRecordingOther);          // sz - Other  // needs special handling
 
             // text
             put( "ta", MediaType.Print);                        // ta - Regular print
@@ -1159,6 +1161,20 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             contentTypesStr.add(govDocType.toString());
         }
+        Set<String> holdings = SolrIndexer.getAllSubfields(record, "999t", "");
+        for (String holding : holdings)
+        {
+            if (holding.equals("EQUIPMENT") || holding.equals("HS-DVDPLYR") || holding.equals("EQUIP-3DAY") || holding.equals("CELLPHONE") ||  
+                    holding.equals("CALCULATOR") ||  holding.equals("LCDPANEL") ||  holding.equals("HSLAPTOP") ||  holding.equals("PROJSYSTEM") ||  
+                    holding.equals("HSWIRELESS") ||  holding.equals("EQUIP-2HR") ||  holding.equals("DIGITALCAM") ||  holding.equals("AUDIO-VIS") ||  
+                    holding.equals("LAPTOP") ||  holding.equals("EQUIP-3HR") ||  holding.equals("CAMCORDER"))
+            {
+                contentTypesStr.clear();
+                contentTypesStr.add(ContentType.Equipment.toString());
+            }
+
+        }
+
     }
 
     static String govDocLetters = "acfilmoz";
@@ -1291,6 +1307,13 @@ public class GetFormatMixin extends SolrIndexerMixin
                     form.add(MediaType.VideoOnline);
                 else
                     form.add(MediaType.VideoOther);
+            }
+            else if (key.equals("sz"))  // Special handling for Sound Other Media
+            {
+                if (this.hasFullText(record))
+                    form.add(MediaType.SoundRecordingOnline);
+                else
+                    form.add(MediaType.SoundRecordingOther);
             }
             else if (!mediaTypeMap.containsKey(key)) 
             {
@@ -1615,6 +1638,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                 addPossibleForm( possibleForms, MediaType.Broadside, new MediaTypeHeuristic(MediaType.Broadside,  0.75, "300"));
             }
         }
+
         double maxPriority = 0.0;
         MediaTypeHeuristic maxMth = null;
         for (MediaType mt : possibleForms.keySet())
