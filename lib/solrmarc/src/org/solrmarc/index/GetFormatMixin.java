@@ -1,9 +1,11 @@
 package org.solrmarc.index;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 import org.marc4j.ErrorHandler;
 import org.marc4j.marc.ControlField;
@@ -1077,7 +1079,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                 }
                 case Maps:
                 {
-                    typeToAdd = lookupType(mapsSubTypes, subContentType, defaultType); 
+                    typeToAdd = lookupType(mapsSubTypes, subContentType, defaultType);                         
                     break;
                 }
                 case Music:
@@ -1156,8 +1158,12 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             if (typeToAdd != null)  contentTypesStr.add(typeToAdd.toString());
         }
+        if (defaultType == ContentType.MapManuscript && Utils.setItemContains(contentTypesStr, "ContentType\\.Map.*"))
+        {
+            contentTypesStr.add(defaultType.toString());
+        }
         ContentType govDocType = null;
-        if ((profile == ProfileType.Books || profile == ProfileType.Serial ) && (govDocType = isGovDoc(field, record)) != null)
+        if (/*(profile == ProfileType.Books || profile == ProfileType.Serial ) && */(govDocType = isGovDoc(field, record)) != null)
         {
             contentTypesStr.add(govDocType.toString());
         }
@@ -1176,7 +1182,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
 
     }
-
+    
     static String govDocLetters = "acfilmoz";
     private ContentType isGovDoc(ControlField field, Record record)
     {
@@ -1286,7 +1292,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             // first, check to make sure this is a post-1981 007 by looking at
             // position 2, which should be undefined
-            String field007Str = validate007Field(record, profileType, field007);
+            String field007Str = validate007Field(record, profileType, leaderType, field007);
             
             if (field007Str == null) continue;
             char materialGeneral =  field007Str.charAt(0);
@@ -1541,7 +1547,7 @@ public class GetFormatMixin extends SolrIndexerMixin
     private MediaTypeHeuristic getMediaTypeHeuristically(Record record, ContentType leaderType)
     {
         LinkedHashMap<MediaType, MediaTypeHeuristic> possibleForms = new LinkedHashMap<MediaType, MediaTypeHeuristic>(); 
-        List<DataField> notes = (List<DataField>)record.getVariableFields(new String[] {"500", "538"});
+        List<DataField> notes = (List<DataField>)record.getVariableFields(new String[] {"538"});
         for (DataField note : notes)
         {
             if (note.getSubfield('a') == null) continue;
@@ -1550,7 +1556,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             {
                 addPossibleForm( possibleForms, MediaType.VideoBluRay, new MediaTypeHeuristic(MediaType.VideoBluRay,  0.8, note.getTag()));
             }
-            else if (noteData.contains("DVD"))
+            else if (noteData.contains("DVD") && !noteData.matches(".*[Aa]lso.*DVD.*") && !noteData.matches(".*DVD-ROM.*") && !noteData.matches(".*DVD [Dd]rive.*"))
             {
                 addPossibleForm( possibleForms, MediaType.VideoDVD, new MediaTypeHeuristic(MediaType.VideoDVD,  0.8, note.getTag()));
             }
@@ -1599,6 +1605,12 @@ public class GetFormatMixin extends SolrIndexerMixin
             {
                 addPossibleForm( possibleForms, MediaType.VideoVHS, new MediaTypeHeuristic(MediaType.VideoVHS,  0.7, "300"));
                 addPossibleForm( possibleForms, MediaType.VideoBeta, new MediaTypeHeuristic(MediaType.VideoBeta,  0.55, "300"));
+            }
+            else if (leaderType == ContentType.ProjectedMedium && form.matches(".*cassette.*--.*--.*[Uu][-]?[Mm]atic.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoUMatic, new MediaTypeHeuristic(MediaType.VideoUMatic,  0.75, "300"));
+                addPossibleForm( possibleForms, MediaType.VideoBeta, new MediaTypeHeuristic(MediaType.VideoBeta,  0.3, "300"));
+                addPossibleForm( possibleForms, MediaType.VideoVHS, new MediaTypeHeuristic(MediaType.VideoVHS,  0.4, "300"));
             }
             else if (form.matches(".*[Vv]ideo[ ]?cassette.*--.*--.*3/4.*"))
             {
@@ -1653,10 +1665,47 @@ public class GetFormatMixin extends SolrIndexerMixin
         return(maxMth);
     }
 
-    private String validate007Field(Record record, ProfileType profileType, ControlField field007)
+    private String validate007Field(Record record, ProfileType profileType, ContentType leaderType, ControlField field007)
     {
         char field007_02 = '?';
-        if (field007.getData().length() <= 2 || 
+        if (field007.getData().matches(".*[bde][a-z][^a-z]{1,2}[cdef][a-z][^a-z]{1,2}[defgh][a-z].*"))
+        {
+            // catch the really wackadoodle 007 fields like this:   v|bd|dc|ev|fa|gi|hz|iu
+            // and fix them (in this case the answer should be: vd cvaizu
+            boolean showError = false;
+            if (indexer != null && indexer.errors != null && (field007.getId() == null || (field007.getId() & (long)1) == (long)0))
+            {
+                /// set id on field to prevent multiple error messages for the same error
+                field007.setId(field007.getId() == null ? (long)1 : field007.getId() | (long)1);
+                showError = true;
+            }
+            String subfields[] = field007.getData().split("[^a-z]{1,2}");
+            char[] new007Val = "                                        ".toCharArray();
+            if (subfields[0].length() == 0) 
+            {
+                String newsf[] = Arrays.copyOfRange(subfields, 1, subfields.length);
+                subfields = newsf;
+            }
+            for (int i = 0; i < subfields.length; i++)
+            {
+                if (i == 0 && (subfields[i].length() == 1 || subfields[i].charAt(0) != 'a')) 
+                {
+                    new007Val[i] = subfields[i].charAt(0);
+                }
+                else if (subfields[i].length() > 1 )
+                {
+                    int offset = (int)(subfields[i].charAt(0) - 'a');
+                    if (new007Val[0] == 'h' && offset > 5) offset += 3;
+                    new007Val[offset] = subfields[i].charAt(1);
+                }
+            }
+            new007Val[2] = ' ';  // make sure character 2 of new field is blank
+            String newValue = new String(new007Val);
+            newValue = newValue.trim();
+            if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - totally whackadoodle 007 field found \"Its got subfields\" changing it to \'"+ newValue+ "\'");
+            return(newValue);
+        }
+        else if (field007.getData().length() <= 2 || 
             (field007_02 = field007.getData().toLowerCase().charAt(2)) != ' ' && field007_02 != '|' && field007_02 != '-' && field007_02 != '*')
         { 
             {
@@ -1667,7 +1716,8 @@ public class GetFormatMixin extends SolrIndexerMixin
                     field007.setId(field007.getId() == null ? (long)1 : field007.getId() | (long)1);
                     showError = true;
                 }
-                if (profileType == profileType.Visual && ((field007.getData().length() % 6) == 0 || field007.getData().replaceFirst("-*$", "").length() == 6))
+                if (profileType == profileType.Visual && leaderType == ContentType.ProjectedMedium && 
+                    ((field007.getData().length() % 6) == 0 || field007.getData().replaceFirst("-*$", "").length() == 6))
                 {
                     String newValue = field007.getData().replaceFirst("([a-z])([-a-z][-a-z][-a-z][-a-z][-a-z]).*", "v$1 $2");
                     if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Old 007 visual material fixed field (pre-1981) mapping it from "+field007+ " to "+ newValue);
@@ -1694,6 +1744,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                 }
             }
         }
+
         return(field007.getData());
     }
 
