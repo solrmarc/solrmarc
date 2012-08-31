@@ -2166,6 +2166,15 @@ public class BlacklightIndexer extends SolrIndexer
                         String mappedFpart = Utils.remap(fparts[2], findMap(mapName), true);
                         if (mappedFpart.equals("VISIBLE"))  visible = true;
                     }
+                    else if (fparts.length == 4 || fparts[3].equals("RSRVSHADOW"))
+                    {
+                        String mappedFpart1 = Utils.remap(fparts[2], findMap(mapName), true);
+                        //String mappedFpart2 = Utils.remap(fparts[3], findMap(mapName), true);
+                        if (mappedFpart1.equals("VISIBLE"))
+                        {
+                            visible = true;
+                        }
+                    }
                     else if (fparts.length == 4)
                     {
                         String mappedFpart1 = Utils.remap(fparts[2], findMap(mapName), true);
