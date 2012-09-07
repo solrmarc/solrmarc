@@ -797,6 +797,24 @@ public class BlacklightIndexer extends SolrIndexer
        return(result);
 
    }
+   public String getShelfKey(final Record record)
+   {
+       String callnum = bestSingleCallNumber;
+       String result = null;
+       if (callnum == null) return(null);
+       String resultParts[] = callnum.split(":", 2);
+       if ( resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1])))
+           result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber(), super.getErrorHandler());
+       return(result);
+   }
+   
+   public String getReverseShelfKey(final Record record)
+   {
+       String shelfKey = getShelfKey(record);
+       if (shelfKey == null) return(shelfKey);
+       String revShelfKey = CallNumUtils.getReverseShelfKey(shelfKey);
+       return(revShelfKey);
+   }
  
    public Set<String> getCallNumbersCleanedNewNo050(final Record record, String conflatePrefixes)
    {
