@@ -2058,7 +2058,7 @@ public class SolrIndexer
         return null;
     }
 
-    protected static boolean isControlField(String fieldTag)
+    public static boolean isControlField(String fieldTag)
     {
         if (fieldTag.matches("00[0-9]"))
         {
@@ -2080,7 +2080,7 @@ public class SolrIndexer
      *          fldTag
      */
     @SuppressWarnings("unchecked")
-    protected static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldsStr, String separator)
+    public static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldsStr, String separator)
     {
         Set<String> resultSet = new LinkedHashSet<String>();
 
@@ -2148,7 +2148,7 @@ public class SolrIndexer
      * @return the result set of strings
      */
     @SuppressWarnings("unchecked")
-    protected static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfield, int beginIx, int endIx)
+    public static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfield, int beginIx, int endIx)
     {
         Set<String> resultSet = new LinkedHashSet<String>();
 
