@@ -100,12 +100,12 @@ public String harvestWithAperture(url, aperturePath) {
     String cmd = aperturePath + " -o " + f.getAbsolutePath().toString()  + " -x " + url;
 
     // Call Aperture
-    System.out.println("Loading fulltext from " + url + ". Please wait ...");
+    //System.out.println("Loading fulltext from " + url + ". Please wait ...");
     Process p = Runtime.getRuntime().exec(cmd);
     BufferedReader stdInput = new BufferedReader(new
         InputStreamReader(p.getInputStream()));
     while ((s = stdInput.readLine()) != null) {
-        System.out.println(s);
+        //System.out.println(s);
     }
     // Wait for Aperture to finish
     p.waitFor();
