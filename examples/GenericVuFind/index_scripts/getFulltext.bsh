@@ -9,13 +9,16 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.DataField;
 import java.util.regex.Pattern;
 import java.io.*;
-import org.ini4j.Ini;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+// define the base level indexer so that its methods can be called from the script.
+// note that the SolrIndexer code will set this value before the script methods are called.
+org.solrmarc.index.SolrIndexer indexer = null;
 
 /**
  * Extract full-text from the documents referenced in the tags
@@ -29,7 +32,9 @@ public String getFulltext(Record record, String fieldSpec, String extension) {
     String result = "";
 
     // Get the path to Aperture web crawler (and return no text if it is unavailable)
-    String aperturePath = getAperturePath();
+    String aperturePath = indexer.getConfigSetting(
+        "fulltext.ini", "Aperture", "webcrawler"
+    );
     if (aperturePath == null) {
         return null;
     }
@@ -71,49 +76,6 @@ public String getFulltext(Record record, String fieldSpec) {
  */
 public String getFulltext(Record record) {
     return getFulltext(record, "856u", null);
-}
-
-/**
- * Extract the Aperture path from fulltext.ini
- *
- * @return String          Path to Aperture executables
- */
-public String getAperturePath() {
-    // Obtain path to Aperture from the fulltext.ini file:
-    Ini ini = new Ini();
-
-    // Find VuFind's home directory in the environment; if it's not available,
-    // try using a relative path on the assumption that we are currently in
-    // VuFind's root directory:
-    String vufindHome = System.getenv("VUFIND_HOME");
-    if (vufindHome == null) {
-        vufindHome = "";
-    }
-
-    // TODO: update this to work with 2.0 config paths
-    String fulltextIniFile = vufindHome + "/web/conf/fulltext.ini";
-    File file = new File(fulltextIniFile);
-    ini.load(new FileReader(fulltextIniFile));
-    String aperturePath = ini.get("Aperture", "webcrawler");
-    if (aperturePath == null) {
-        return null;
-    }
-
-    // Drop comments if necessary:
-    int pos = aperturePath.indexOf(';');
-    if (pos >= 0) {
-        aperturePath = aperturePath.substring(0, pos).trim();
-    }
-
-    // Strip wrapping quotes if necessary (the ini reader won't do this for us):
-    if (aperturePath.startsWith("\"")) {
-        aperturePath = aperturePath.substring(1, aperturePath.length());
-    }
-    if (aperturePath.endsWith("\"")) {
-        aperturePath = aperturePath.substring(0, aperturePath.length() - 1);
-    }
-
-    return aperturePath;
 }
 
 /**
