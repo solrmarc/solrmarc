@@ -1,3 +1,10 @@
+/**
+ * Custom full text retrieval script.
+ *
+ * This can be used to override built-in SolrMarc custom functions.  If you change
+ * this script, you will need to activate it in import/marc_local.properties before
+ * it will be applied during indexing.
+ */
 import org.marc4j.marc.Record;
 import org.marc4j.marc.DataField;
 import java.util.regex.Pattern;
@@ -83,6 +90,7 @@ public String getAperturePath() {
         vufindHome = "";
     }
 
+    // TODO: update this to work with 2.0 config paths
     String fulltextIniFile = vufindHome + "/web/conf/fulltext.ini";
     File file = new File(fulltextIniFile);
     try {
@@ -156,8 +164,8 @@ public String harvestWithAperture(url, aperturePath) {
         }
     }
 
-    String badChars = "[^\\x0009\\x000A\\x000D\\x0020-\\xD7FF\\xE000-\\xFFFD]";
-    plainText =  Pattern.compile(badChars).matcher(plainText).replaceAll(" ");
+    String badChars = "[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]+";
+    plainText = plainText.replaceAll(badChars, " ");
 
     return plainText;
 }
