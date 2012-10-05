@@ -1,3 +1,10 @@
+/**
+ * Custom call number script.
+ *
+ * This can be used to override built-in SolrMarc custom functions.  If you change
+ * this script, you will need to activate it in import/marc_local.properties before
+ * it will be applied during indexing.
+ */
 import org.marc4j.marc.Record;
 
 // define the base level indexer so that its methods can be called from the script.
