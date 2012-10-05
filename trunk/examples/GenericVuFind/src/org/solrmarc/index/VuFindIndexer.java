@@ -170,7 +170,7 @@ public class VuFindIndexer extends SolrIndexer
      * Load an ini file.
      * @param filename
      */
-    private Ini loadConfigFile(String filename)
+    public Ini loadConfigFile(String filename)
     {
         // Obtain the DSN from the config.ini file:
         Ini ini = new Ini();
@@ -188,7 +188,7 @@ public class VuFindIndexer extends SolrIndexer
      * @param section
      * @param setting
      */
-    private String getConfigSetting(String filename, String section, String setting)
+    public String getConfigSetting(String filename, String section, String setting)
     {
         String retVal = null;
 
@@ -224,7 +224,7 @@ public class VuFindIndexer extends SolrIndexer
         }
 
         // Return the processed setting:
-        return sanitizeConfigSetting(retVal);
+        return retVal == null ? null : sanitizeConfigSetting(retVal);
     }
 
     /**
