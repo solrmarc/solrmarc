@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.StringBuilder;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -1094,6 +1095,49 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
+     * Load configurations for the full text parser.  Return an array containing the
+     * parser type in the first element and the parser configuration in the second
+     * element.
+     *
+     * @return String[]
+     */
+    public String[] getFulltextParserSettings()
+    {
+        String parserType = getConfigSetting(
+            "fulltext.ini", "General", "parser"
+        );
+        if (null != parserType) {
+            parserType = parserType.toLowerCase();
+        }
+
+        // Is Aperture active?
+        String aperturePath = getConfigSetting(
+            "fulltext.ini", "Aperture", "webcrawler"
+        );
+        if ((null == parserType && null != aperturePath)
+            || (null != parserType && parserType.equals("aperture"))
+        ) {
+            String[] array = { "aperture", aperturePath };
+            return array;
+        }
+
+        // Is Tika active?
+        String tikaPath = getConfigSetting(
+            "fulltext.ini", "Tika", "path"
+        );
+        if ((null == parserType && null != tikaPath)
+            || (null != parserType && parserType.equals("tika"))
+        ) {
+            String[] array = { "tika", tikaPath };
+            return array;
+        }
+
+        // No recognized parser found:
+        String[] array = { "none", null };
+        return array;
+    }
+
+    /**
      * Extract full-text from the documents referenced in the tags
      *
      * @param Record record
@@ -1104,9 +1148,9 @@ public class VuFindIndexer extends SolrIndexer
     public String getFulltext(Record record, String fieldSpec, String extension) {
         String result = "";
 
-        // Get the path to Aperture web crawler (and return no text if it is unavailable)
-        String aperturePath = getConfigSetting("fulltext.ini", "Aperture", "webcrawler");
-        if (aperturePath == null) {
+        // Get the web crawler settings (and return no text if it is unavailable)
+        String[] parserSettings = getFulltextParserSettings();
+        if (parserSettings[0].equals("none")) {
             return null;
         }
 
@@ -1119,8 +1163,8 @@ public class VuFindIndexer extends SolrIndexer
                 String current = fieldsIter.next();
                 // Filter by file extension
                 if (extension == null || current.endsWith(extension)) {
-                    // Load the aperture output for each tag into a string
-                    result = result + harvestWithAperture(current, aperturePath);
+                    // Load the parser output for each tag into a string
+                    result = result + harvestWithParser(current, parserSettings);
                 }
             }
         }
@@ -1161,7 +1205,7 @@ public class VuFindIndexer extends SolrIndexer
         File tempFile = File.createTempFile("buffer", ".tmp");
         FileOutputStream fw = new FileOutputStream(tempFile);
         OutputStreamWriter writer = new OutputStreamWriter(fw, "UTF8");
-        
+
         //delete this control character from the File and save
         FileReader fr = new FileReader(f);
         BufferedReader br = new BufferedReader(fr);
@@ -1171,15 +1215,27 @@ public class VuFindIndexer extends SolrIndexer
         writer.close();
         br.close();
         fr.close();
-    
+
         return tempFile;
+    }
+
+    /**
+     * Clean up bad characters in the full text.
+     *
+     * @param String Text to clean
+     * @return String Cleaned text
+     */
+    public String sanitizeFullText(String text)
+    {
+        String badChars = "[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]+";
+        return text.replaceAll(badChars, " ");
     }
 
     /**
      * Harvest the contents of a document file (PDF, Word, etc.) using Aperture.
      * This method will only work if Aperture is properly configured in the
-     * web/conf/fulltext.ini file.  Without proper configuration, this will
-     * simply return an empty string.
+     * fulltext.ini file.  Without proper configuration, this will simply return an
+     * empty string.
      *
      * @param String The url extracted from the MARC tag.
      * @param String The path to Aperture
@@ -1232,17 +1288,68 @@ public class VuFindIndexer extends SolrIndexer
                 }
             }
 
-            String badChars = "[^\\u0009\\u000A\\u000D\\u0020-\\uD7FF\\uE000-\\uFFFD\\u10000-\\u10FFFF]+";
-            plainText = plainText.replaceAll(badChars, " ");
+            plainText = sanitizeFullText(plainText);
 
             // we'll hold onto the temp file if it failed to parse for debugging;
             // only set it up to be deleted if we've made it this far successfully.
-            tempFile.deleteOnExit(); 
+            tempFile.deleteOnExit();
         } catch (Throwable e) {
             logger.error("Problem parsing Aperture XML -- " + e.getMessage());
         }
 
         return plainText;
+    }
+
+    /**
+     * Harvest the contents of a document file (PDF, Word, etc.) using Tika.
+     * This method will only work if Tika is properly configured in the fulltext.ini
+     * file.  Without proper configuration, this will simply return an empty string.
+     *
+     * @param String The url extracted from the MARC tag.
+     * @param String The path to Tika
+     * @return String The full-text
+     */
+    public String harvestWithTika(String url, String scraperPath) {
+        String plainText = "";
+
+        // Construct the command
+        String cmd = "java -jar " + scraperPath + " -t -eUTF8 " + url;
+
+        StringBuilder stringBuilder= new StringBuilder();
+
+        // Call our scraper
+        //System.out.println("Loading fulltext from " + url + ". Please wait ...");
+        try {
+            Process p = Runtime.getRuntime().exec(cmd);
+            BufferedReader stdInput = new BufferedReader(new
+                InputStreamReader(p.getInputStream(), "UTF8"));
+    
+            // We'll build the string from the command output
+            String s;
+            while ((s = stdInput.readLine()) != null) {
+                stringBuilder.append(s);
+            }
+        } catch (Throwable e) {
+            logger.error("Problem with Tika -- " + e.getMessage());
+        }
+
+        return sanitizeFullText(stringBuilder.toString());
+    }
+
+    /**
+     * Harvest the contents of a document file (PDF, Word, etc.) using the active parser.
+     *
+     * @param String The url extracted from the MARC tag.
+     * @param String[] Configuration settings from getFulltextParserSettings.
+     * @return String The full-text
+     */
+    public String harvestWithParser(String url, String[] settings) {
+        if (settings[0].equals("aperture")) {
+            return harvestWithAperture(url, settings[1]);
+        } else if (settings[0].equals("tika")) {
+            return harvestWithTika(url, settings[1]);
+        }
+        return null;
     }
 
     /**
