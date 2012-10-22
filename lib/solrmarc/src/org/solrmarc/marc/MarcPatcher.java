@@ -477,6 +477,13 @@ public class MarcPatcher extends MarcHandler
                     }
                     changed = true;
                 }
+                Subfield libraryName = df999.getSubfield('m');
+                if (libraryName != null && !locationFileLine2[4].equals(libraryName.getData()))
+                {
+                    String newLibraryName = locationFileLine2[4];                    
+                    libraryName.setData(newLibraryName);
+                    changed = true;
+                }
             }
             else if (handleAllLocs && locationFileLine2.length >= 8)
             {
