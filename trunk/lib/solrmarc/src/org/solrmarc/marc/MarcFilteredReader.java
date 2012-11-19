@@ -337,6 +337,21 @@ public class MarcFilteredReader implements MarcReader
                 return(!eval(arg, field, record));
             }
         }
+        else if (conditional.startsWith("indicatormatches("))
+        {
+            String args[] = getTwoArgs(conditional);
+            if (field != null && field instanceof DataField && args.length == 2 && args[0].length() == 1 && args[1].length() == 1)
+            {
+                char indicator1 = ((DataField)field).getIndicator1();
+                char indicator2 = ((DataField)field).getIndicator2();
+                if ((args[0].charAt(0) == '*' || args[0].charAt(0) == indicator1) && 
+                    (args[1].charAt(0) == '*' || args[1].charAt(0) == indicator2))
+                {
+                    return(true);
+                }
+                return(false);
+            }
+        }
         else if (conditional.startsWith("subfieldmatches("))
         {
             String args[] = getTwoArgs(conditional);
