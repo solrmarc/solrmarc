@@ -232,8 +232,47 @@ public class MarcDiff
                     else
                     {
                         out.println(" < " + normLines[i]);
-                        out.println(" > " + permLines[i]);                    
+                        out.println(" > " + permLines[i]);
                     }
+                }
+            }
+            else
+            {
+                int index1 = 0; 
+                int index2 = 0;
+                while (index1 < normLines.length && index2 < permLines.length)
+                {
+                    if (normLines[index1].equals(permLines[index2]))
+                    {
+                        if (verbose) out.println("   " + normLines[index1]);
+                        index1++; index2++;
+                    }
+                    else if (hasMatch(permLines, index2+1, normLines[index1]))
+                    {
+                        out.println(" > " + permLines[index2]);
+                        index2++;
+                    }
+                    else if (hasMatch(normLines, index1+1, permLines[index2]))
+                    {
+                        out.println(" < " + normLines[index1]);
+                        index1++;
+                    }
+                    else
+                    {
+                        out.println(" < " + normLines[index1]);
+                        out.println(" > " + permLines[index2]);
+                        index1++; index2++;
+                    }
+                }
+                while (index1 < normLines.length)
+                {
+                    out.println(" < " + normLines[index1]);
+                    index1++;
+                }
+                while (index2 < permLines.length)
+                {
+                    out.println(" > " + permLines[index2]);
+                    index2++;
                 }
             }
         }
@@ -246,6 +285,16 @@ public class MarcDiff
             }
         }
 
+    }
+
+    private static boolean hasMatch(String[] lines, int index, String string)
+    {
+        for (int i = index; i < lines.length; i++)
+        {
+            if (lines[i].equals(string))
+                return(true);
+        }
+        return false;
     }
 
 
