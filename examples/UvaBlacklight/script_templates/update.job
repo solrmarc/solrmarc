@@ -12,6 +12,8 @@ INPUTDIRTMP=$DATADIR/incoming_tmp
 PROCESSEDDIR=$DATADIR/processed
 RESULTSDIR=$DATADIR/results
 verbose=
+DROPLOCATION=/lib_content23/record_source_for_solr_cores/bib/marc/incoming_raw
+OLDDROPLOCATION=/usr/local/projects/marc/incoming
 
 mkdir $INPUTDIRTMP 2> /dev/null
 
@@ -23,16 +25,21 @@ if [ "$verbose" == "-v" ] ; then
     echo copying files from incoming directory
 fi
 
+DROPLOC=$DROPLOCATION
+if [ ! -e $DROPLOC/location.txt ] ; then
+    DROPLOC=$OLDDROPLOCATION
+fi
+
 #copy files from old nightly update drop location to new location
-cp /usr/local/projects/marc/incoming/location.txt $INPUTDIR
-cp /usr/local/projects/marc/incoming/allmhlds $INPUTDIR
-cp /usr/local/projects/marc/incoming/AllShadowedIdsRaw.txt $INPUTDIR
-cp /usr/local/projects/marc/incoming/BoundWithIds.txt $INPUTDIR
+cp $DROPLOC/location.txt $INPUTDIR
+cp $DROPLOC/allmhlds $INPUTDIR
+cp $DROPLOC/AllShadowedIdsRaw.txt $INPUTDIR
+cp $DROPLOC/BoundWithIds.txt $INPUTDIR
 
 update=`date --date="-1 days" +%Y%m%d`
-if [ -e /usr/local/projects/marc/incoming/$update.mrc ] ; then
-    cp /usr/local/projects/marc/incoming/$update.mrc $INPUTDIRTMP
-    cp /usr/local/projects/marc/incoming/$update.del $INPUTDIRTMP
+if [ -e $DROPLOC/$update.mrc ] ; then
+    cp $DROPLOC/$update.mrc $INPUTDIRTMP
+    cp $DROPLOC/$update.del $INPUTDIRTMP
 
     marcsort $INPUTDIRTMP/$update.mrc > $INPUTDIRTMP/$update.sort.mrc
     #use location.txt file to tweak locations found in the nightly update
@@ -123,7 +130,8 @@ if [ "$verbose" == "-v" ] ; then
     echo updating multicore development index at solrpowr.lib:8984/solr/bib
 fi
 update.index.job $verbose bibcore bib_core_config.properties
-/usr/local/projects/multicoremerge/bin/mergecores > $DATADIR/results_bibcore/results_mergecores
+/lib_content23/solr/multicoremerge/bin/mergecores > $DATADIR/results_bibcore/results_mergecores
+/lib_content23/solr/multicoremerge/bin/installtestindex http://libsvr26.lib.virginia.edu:8082/solr  http://libsvr27.lib.virginia.edu:8082/solr  http://libsvr28.lib.virginia.edu:8082/solr >> $DATADIR/results_bibcore/results_mergecores
 
 if [ "$verbose" == "-v" ] ; then
     echo cleaning up incoming directories
