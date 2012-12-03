@@ -39,6 +39,7 @@ import org.marc4j.MarcException;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.marc.DataField;
+import org.marc4j.marc.MarcFactory;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
@@ -74,6 +75,7 @@ public class MarcPatcher extends MarcHandler
     private String locationFileName = null;
     private MarcWriter writerAll = null;
     private MarcWriter writerChanged = null;
+    private PrintStream writerDeleted = null;
     private RawRecordReader rawReader = null;
     private PrintStream out;
     private String locationRecordIDMapper = null;
@@ -85,6 +87,7 @@ public class MarcPatcher extends MarcHandler
 //    private Properties libraries = null;
     private StringNaturalCompare compare = null;
     private boolean handleAllLocs = false;
+    private Record placeHolderRecordToDelete = MarcFactory.newInstance().newRecord();
 
 //    public MarcPatcher(String locationFile, String changedOutputFile, PrintStream out)
 //    {
@@ -263,6 +266,10 @@ public class MarcPatcher extends MarcHandler
                 File changedRecordFile = new File(changedRecordFileName);
                 changedRecordStream = new FileOutputStream(changedRecordFile);
                 writerChanged = new MarcSplitStreamWriter(changedRecordStream, "ISO-8859-1", 70000, "999");
+                File deletedRecordFile = new File(changedRecordFileName.replaceAll("[.][Mm][Rr][Cc]", ".del"));
+                changedRecordStream = new FileOutputStream(changedRecordFile);
+
+                writerDeleted = new PrintStream(new FileOutputStream(deletedRecordFile));
             }
             catch (FileNotFoundException e)
             {
@@ -286,12 +293,14 @@ public class MarcPatcher extends MarcHandler
                 
                 if (writerAll != null)
                 {
-                    if (patchedRecord != null) writerAll.write(patchedRecord);
+                    if (patchedRecord == this.placeHolderRecordToDelete) { /* do nothing */ }
+                    else if (patchedRecord != null) writerAll.write(patchedRecord);
                     else out.write(record.getRecordBytes());
                 }
                 if (patchedRecord != null && writerChanged != null) 
                 {
-                    writerChanged.write(patchedRecord);
+                    if (patchedRecord == this.placeHolderRecordToDelete)  writerDeleted.println(record.getRecordId());
+                    else writerChanged.write(patchedRecord);
                 }
                 if (out != null) out.flush();
             }
@@ -310,6 +319,7 @@ public class MarcPatcher extends MarcHandler
         }
         if (writerAll != null) { writerAll.close(); }
         if (writerChanged != null) { writerChanged.close(); }
+        if (writerDeleted != null) { writerDeleted.close(); }
         return 0;
     }
 
@@ -347,6 +357,14 @@ public class MarcPatcher extends MarcHandler
                         patched = true;
                     }
                 }
+            }
+        }
+        else if ((locationFileLine != null && compare.compare(locationFileLine[0], recId) > 0))
+        {
+            // no location entry for the record, ie.  it was deleted
+            if (changedlocationReader == null)
+            {
+                return(this.placeHolderRecordToDelete);
             }
         }
         return(patched ? record : null);
