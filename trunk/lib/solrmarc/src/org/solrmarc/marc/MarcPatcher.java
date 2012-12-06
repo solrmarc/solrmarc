@@ -171,7 +171,7 @@ public class MarcPatcher extends MarcHandler
                 while ((line = addnlIdsReader.readLine()) != null)
                 {
                     String linepts[] = line.split("\\|", 2);
-                    linepts[0] = linepts[0].replaceAll(mapPattern, mapReplace);
+                    linepts[0] = linepts[0].replaceFirst(mapPattern, mapReplace);
                     String existing = boundWithIds.get(linepts[0]);
                     if (existing == null) boundWithIds.put(linepts[0], linepts[1]); 
                 }
