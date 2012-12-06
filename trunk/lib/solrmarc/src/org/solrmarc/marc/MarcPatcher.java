@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.PatternSyntaxException;
@@ -73,6 +74,7 @@ public class MarcPatcher extends MarcHandler
     private String changedRecordFileName = null;
     private String changedLocationFileName = null;
     private String locationFileName = null;
+    private String boundWithFileName = null;
     private MarcWriter writerAll = null;
     private MarcWriter writerChanged = null;
     private PrintStream writerDeleted = null;
@@ -83,6 +85,7 @@ public class MarcPatcher extends MarcHandler
     private String mapReplace = null;
     private String locationFileLine[] = null;
     private String currentLocationID = null;
+    private LinkedHashMap<String, String> boundWithIds = null;
 //    private String libraryLocationMap = null;
 //    private Properties libraries = null;
     private StringNaturalCompare compare = null;
@@ -97,12 +100,13 @@ public class MarcPatcher extends MarcHandler
 //        changedRecordFileName = changedOutputFile;
 //    }
    
-    public MarcPatcher(String locationFile, String changedLocationFile, String changedOutputFile, PrintStream out, boolean handleAllLocs)
+    public MarcPatcher(String locationFile, String changedLocationFile, String boundWithFile, String changedOutputFile, PrintStream out, boolean handleAllLocs)
     {
         super();
         this.out = out;
         locationFileName = locationFile;
         changedRecordFileName = changedOutputFile;
+        boundWithFileName = boundWithFile;
         changedLocationFileName = changedLocationFile;
         this.handleAllLocs = handleAllLocs;
     }
@@ -156,6 +160,34 @@ public class MarcPatcher extends MarcHandler
         loadReader(source, fName);
         mapPattern = "u?([0-9]*).*";
         mapReplace = "u$1";
+        boundWithIds = null;
+        if (boundWithIds == null && boundWithFileName != null)
+        {
+            boundWithIds = new LinkedHashMap<String, String>();
+            InputStream addnlIdsStream = null;
+            try {
+                BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(new FileInputStream(boundWithFileName)));
+                String line;
+                while ((line = addnlIdsReader.readLine()) != null)
+                {
+                    String linepts[] = line.split("\\|", 2);
+                    linepts[0] = linepts[0].replaceAll(mapPattern, mapReplace);
+                    String existing = boundWithIds.get(linepts[0]);
+                    if (existing == null) boundWithIds.put(linepts[0], linepts[1]); 
+                }
+
+            }
+            catch (IllegalArgumentException iae)
+            {
+                // couldn't find BoundWith.txt file, but don't have a cow man
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
 //        libraries = new Properties();
 //        try
 //        {
@@ -362,6 +394,10 @@ public class MarcPatcher extends MarcHandler
         else if ((locationFileLine != null && compare.compare(locationFileLine[0], recId) > 0))
         {
             // no location entry for the record, ie.  it was deleted
+            if (boundWithIds != null && boundWithIds.containsKey(recId))
+            {
+                return(null);
+            }
             if (changedlocationReader == null)
             {
                 return(this.placeHolderRecordToDelete);
@@ -629,6 +665,7 @@ public class MarcPatcher extends MarcHandler
         String tmpArgs[] = new String[1];
         tmpArgs[0] = args[0];
         String locationFile = null;
+        String boundWithFile = null;
         String changedLocationFile = null;
         String changedFile = null;
         boolean changesOnly = false;
@@ -637,6 +674,7 @@ public class MarcPatcher extends MarcHandler
         for (int i = 1; i < args.length; i++)
         {
             if (args[i].endsWith(".txt") && locationFile == null) locationFile = args[i];
+            else if (args[i].endsWith("BoundWithIds.txt") && locationFile != null) boundWithFile = args[i];
             else if (args[i].endsWith(".txt") && locationFile != null) changedLocationFile = args[i];
             else if (args[i].equals("handleAllLocs")) handleAllLocs = true;
             else if (args[i].equals("changesOnly")) changesOnly = true;
@@ -659,7 +697,7 @@ public class MarcPatcher extends MarcHandler
                 pOut = new PrintStream(new FileOutputStream(new File(outputFile)));
             else
                 pOut = System.out;
-            marcPatcher = new MarcPatcher(locationFile, changedLocationFile, changedFile, pOut, handleAllLocs);
+            marcPatcher = new MarcPatcher(locationFile, changedLocationFile, boundWithFile, changedFile, pOut, handleAllLocs);
             marcPatcher.init(tmpArgs);
         }
         catch (IllegalArgumentException e)

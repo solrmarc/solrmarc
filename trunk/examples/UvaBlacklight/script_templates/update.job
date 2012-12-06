@@ -43,7 +43,7 @@ if [ -e $DROPLOC/$update.mrc ] ; then
 
     marcsort $INPUTDIRTMP/$update.mrc > $INPUTDIRTMP/$update.sort.mrc
     #use location.txt file to tweak locations found in the nightly update
-    java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar $SOLRMARCDISTDIR/SolrMarc.jar $INPUTDIRTMP/$update.sort.mrc $INPUTDIR/location.txt changesOnly handleAllLocs > $INPUTDIRTMP/$update.patch.mrc
+    java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar $SOLRMARCDISTDIR/SolrMarc.jar $INPUTDIRTMP/$update.sort.mrc $INPUTDIR/location.txt $INPUTDIR/BoundWithIds.txt changesOnly handleAllLocs > $INPUTDIRTMP/$update.patch.mrc
     marcupdate $INPUTDIRTMP/$update.sort.mrc $INPUTDIRTMP/$update.patch.mrc > $INPUTDIR/$update.mrc
 
     sort -n $INPUTDIRTMP/$update.del | sed -e 's/\([0-9]*\).*/u\1/' > $INPUTDIR/$update.del

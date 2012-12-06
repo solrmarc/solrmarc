@@ -7,6 +7,7 @@ then
 fi
 
 location_file=/lib_content27/marc/incoming/location.txt
+boundwith_file=/lib_content27/marc/incoming/BoundWithIds.txt
 
 out_dir=/lib_content27/marc/full_dump_patched
 tmp_out_dir=/lib_content27/marc/full_dump_patched_tmp
@@ -20,5 +21,5 @@ do
     fname=`basename $file`
     froot=`basename $file .mrc`
     dir=`dirname $file`
-    java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar $scriptdir/SolrMarc.jar $file  $location_file handleAllLocs $patch_dir/${froot}_patched.mrc $tmp_out_dir/$fname 
+    java -Dsolrmarc.main.class="org.solrmarc.marc.MarcPatcher" -jar $scriptdir/SolrMarc.jar $file  $location_file $boundwith_file handleAllLocs $patch_dir/${froot}_patched.mrc $tmp_out_dir/$fname 
 done
