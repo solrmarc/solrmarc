@@ -39,7 +39,7 @@ public class HathiIndexerMixin extends SolrIndexerMixin
                 String sortlabel = (labelField != null) ? labelField.getData() : identField.getData();
                 if (defaultLabel.contains("%"))
                 {
-                    label = defaultLabel.replaceFirst("%", label);
+                    label = defaultLabel.replace("%", label);
                     label = label.replaceAll(" [ ]+", " ");
                 }
                 else 
