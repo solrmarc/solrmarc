@@ -1,4 +1,7 @@
 #expected answer[tab][tab]line extracted from Marc record
+--		Producer, Joe Boyd ; associate producer Leo Branton ; film editor Peter Colbert ; research, John Head ; visuals, Gary Weis ; assistant editor, Rancy Roberts ; interviews filmed by Sea Films.
+--		by Richard Feynman ; [filmed by] BBC TV ; producer, Alan Sleath.
+Peter Davis|Daniel Riesenfeld		written, filmed, edited and produced by Peter Davis and Daniel Riesenfeld.
 Joaquim Pedro de Andrade		Lei de Incentivo a Cultura, Ministério da Cultura, BR Petrobras apresenta ; realização Filmes do Serro ; restauração TeleImage, Cinemateca Brasileira, TRAMA ; DIFILM apresenta ; na produção Filmes do Sêrro, Grupo Filmes, Condor Filmes ; Adaptacão e roteiro Joaquim Pedro de Andrade do livro "Macunaíma" de Mario de Andrade ; produtor executivo, K.M. Eckstein ; direcão, Joaquim Pedro de Andrade. 
 Tami Gold		Tamerik Productions ; a videotape by Tami Gold with Jennifer Miller ; produced, directed & camera, Tami Gold.
 Alan Lomax|Forrestine Paulay		Directors, writers, by Alan Lomax and Forrestine Paulay; project director, Alan Lomax.
