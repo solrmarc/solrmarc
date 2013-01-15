@@ -331,7 +331,7 @@ public class MarcPatcher extends MarcHandler
                 }
                 if (patchedRecord != null && writerChanged != null) 
                 {
-                    if (patchedRecord == this.placeHolderRecordToDelete)  writerDeleted.println(record.getRecordId());
+                    if (patchedRecord == this.placeHolderRecordToDelete && writerDeleted != null)  writerDeleted.println(record.getRecordId());
                     else writerChanged.write(patchedRecord);
                 }
                 if (out != null) out.flush();
@@ -674,7 +674,7 @@ public class MarcPatcher extends MarcHandler
         for (int i = 1; i < args.length; i++)
         {
             if (args[i].endsWith(".txt") && locationFile == null) locationFile = args[i];
-            else if (args[i].endsWith("BoundWithIds.txt") && locationFile != null) boundWithFile = args[i];
+            else if (args[i].contains("BoundWithIds") && locationFile != null) boundWithFile = args[i];
             else if (args[i].endsWith(".txt") && locationFile != null) changedLocationFile = args[i];
             else if (args[i].equals("handleAllLocs")) handleAllLocs = true;
             else if (args[i].equals("changesOnly")) changesOnly = true;
