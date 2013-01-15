@@ -96,13 +96,14 @@ public class GetFormatMixinTest
                             for (Object errorMsg : errorMsgs)
                             {
                                 String msgStr = errorMsg.toString();
-                                if (msgStr.contains("Record contains minimal metadata"))
-                                {
-                                    breakOut = true;
-                                }
+//                                if (msgStr.contains("Record contains minimal metadata"))
+//                                {
+//                                    breakOut = true;
+//                                }
                             }
                         }
                         if (breakOut) continue;
+                        showResults(resultdiff,   "diff  ", verbose, out, id);
                         showResults(resultmerged, "raw   ", verbose, out, id);
                         showResults(resultmapped, "new   ", verbose, out, id);                    
                         showResults(format_orig_facet, "old   ", verbose, out, id);                    
