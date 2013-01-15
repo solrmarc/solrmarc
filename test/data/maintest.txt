@@ -159,7 +159,7 @@
 
 # Test 56 
 #test using mixin custom indexing method with translation map
-+, formatRecs.mrc(u3591589), 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_map.properties', Map|Online
++, formatRecs.mrc(u3591589), 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_map.properties', Map|Online|Government Document
 
 # Test 57 
 #test reading JSON encoded marc record method
