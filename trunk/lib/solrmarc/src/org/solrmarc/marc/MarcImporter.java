@@ -197,7 +197,7 @@ public class MarcImporter extends MarcHandler
         // Set up Solr core
         boolean useSolrServerProxy = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_solr_server_proxy", "true"));
         useBinaryRequestHandler = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_binary_request_handler", "true"));
-        useStreamingServer = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_streaming_proxy", "true"));
+        useStreamingServer = Boolean.parseBoolean(Utils.getProperty(configProps, "solrmarc.use_streaming_proxy", "false"));
         if (useSolrServerProxy || useStreamingServer) 
             solrProxy = getSolrServerProxy();
         else
