@@ -27,8 +27,8 @@ import org.solrmarc.tools.StringNaturalCompare;
  */
 public class MarcMerger
 {
-    public final static String minRecordID = "u0";
-    public final static String maxRecordID = "u99999999999";
+    public final static String minRecordID = "0";
+    public final static String maxRecordID = "zzzzzzzzzzzzzzzz";
     public static boolean verbose = false;
     public static boolean veryverbose = false;
 
@@ -231,7 +231,7 @@ public class MarcMerger
             }
             if (mergeRecords) 
             {
-                processMergeRecords(input0, segmentMaxRecordID, input2, input3, System.out, newRecordsOutStream);
+                processMergeRecords(input0, segmentMinRecordID, segmentMaxRecordID, input2, input3, System.out, newRecordsOutStream);
             }
             else
             {
@@ -261,14 +261,13 @@ public class MarcMerger
 //        return(newName);
 //    }
 
-    static void processMergeRecords(RawRecordReader mainFile, String maxID, RawRecordReader newOrModified, DataInputStream deleted, OutputStream out, OutputStream newRecsOut) 
+    static void processMergeRecords(RawRecordReader mainFile, String minID, String maxID, RawRecordReader newOrModified, DataInputStream deleted, OutputStream out, OutputStream newRecsOut) 
     {
         Comparator<String> compare = new StringNaturalCompare();
         try
         {
             RawRecord mainrec = mainFile.hasNext() ? mainFile.next() : null; //new SimpleRecord(mainFile);
-            String segmentMinRecordID = (mainrec != null) ? mainrec.getRecordId() : "0";
-            if (segmentMinRecordID == maxRecordID)  segmentMinRecordID = "0";
+            String segmentMinRecordID = minID;
             RawRecord newOrModrec = newOrModified.hasNext() ? newOrModified.next() : null; //new SimpleRecord(newOrModified);
             String deletedId = maxRecordID;
             BufferedReader delReader = null;
