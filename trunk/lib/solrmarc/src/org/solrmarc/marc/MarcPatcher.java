@@ -331,7 +331,10 @@ public class MarcPatcher extends MarcHandler
                 }
                 if (patchedRecord != null && writerChanged != null) 
                 {
-                    if (patchedRecord == this.placeHolderRecordToDelete && writerDeleted != null)  writerDeleted.println(record.getRecordId());
+                    if (patchedRecord == this.placeHolderRecordToDelete)
+                    {
+                        if (writerDeleted != null)  writerDeleted.println(record.getRecordId());
+                    }
                     else writerChanged.write(patchedRecord);
                 }
                 if (out != null) out.flush();
