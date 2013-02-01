@@ -426,6 +426,10 @@ public class VideoInfoMixin extends SolrIndexerMixin
                     {
                         part = part.replaceFirst("[Dd]irector[s]? (of|de|de la) ([Pp]h|[Ff])otogra(ph|f)(y|(i|í)[ea])", "cinematographer");
                     }
+                    if (part.matches(".*[Dd]irector[s]? (of|de|de la) ([Aa]nimation).*"))
+                    {
+                        part = part.replaceFirst("[Dd]irector[s]? (of|de|de la) ([Aa]nimation)", "supervising animator");
+                    }
                     else if (part.matches(".*, [Dd]irector[s]? (of|for) .*"))
                     {
                         part = part.replaceFirst("[Dd]irector[s]? (of|for)((( ([A-Z][a-z]*|the|of|and|a))+)[,]?)+", "director");
