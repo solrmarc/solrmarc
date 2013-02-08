@@ -1210,7 +1210,7 @@ public class VuFindIndexer extends SolrIndexer
         FileReader fr = new FileReader(f);
         BufferedReader br = new BufferedReader(fr);
         while (br.ready()) {
-            writer.write(br.readLine().replaceAll("\u000C",""));
+            writer.write(sanitizeFullText(br.readLine()));
         }
         writer.close();
         br.close();
@@ -1287,8 +1287,6 @@ public class VuFindIndexer extends SolrIndexer
                     plainText = plainText + node.getTextContent();
                 }
             }
-
-            plainText = sanitizeFullText(plainText);
 
             // we'll hold onto the temp file if it failed to parse for debugging;
             // only set it up to be deleted if we've made it this far successfully.
