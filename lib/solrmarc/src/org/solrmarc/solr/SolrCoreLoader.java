@@ -234,7 +234,7 @@ public class SolrCoreLoader
                 Method getCoreMethod = coreContainerClass.getMethod("getCore", String.class);
                 solrCoreObj = getCoreMethod.invoke(coreContainerObj, solrCoreName);
                 
-                }
+            }
             else  // non-multicore Solr 1.3 installation 
             {
                 if (solrDataDir == null) 
@@ -303,6 +303,11 @@ public class SolrCoreLoader
                         Class<?> embeddedSolrServerClass = Class.forName("org.apache.solr.client.solrj.embedded.EmbeddedSolrServer");
                         Constructor<?> embeddedSolrServerConstructor = embeddedSolrServerClass.getConstructor(coreContainerClass, String.class);
                         solrServerObj = embeddedSolrServerConstructor.newInstance(coreContainerObj, solrCoreName);
+                        int refcnt = (Integer)(solrCoreObj.getClass().getMethod("getOpenCount").invoke(solrCoreObj));
+                        if (refcnt == 2)
+                        {
+                            solrCoreObj.getClass().getMethod("close").invoke(solrCoreObj);
+                        }
                     }
                     catch (Exception e)
                     {
