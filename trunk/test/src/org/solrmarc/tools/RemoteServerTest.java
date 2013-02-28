@@ -293,8 +293,8 @@ public class RemoteServerTest
         CommandLineUtils.runCommandLineUtil("org.solrmarc.marc.MarcImporter", "main", null, out1, err1, new String[]{testConfigFile, testDataParentPath+"/mergeInput.mrc"  }, addnlProps1);
         
         results = getRawFieldByID(urlStr, "u3", "marc_display");
-        assertTrueMsg("Record added using remote binary request handler doesn't contain \\u001e", results.contains("\\u001e"));
-        assertTrueMsg("Record added using remote binary request handler does contain #30;", !results.contains("#30;"));
+        assertTrueMsg("Record added using streaming remote binary request handler doesn't contain \\u001e", results.contains("\\u001e"));
+        assertTrueMsg("Record added using streaming remote binary request handler does contain #30;", !results.contains("#30;"));
 
         out1.reset();
         err1.reset();
@@ -304,8 +304,8 @@ public class RemoteServerTest
         
         // Check whether record was not written as binary 
         results = getRawFieldByID(urlStr, "u3", "marc_display");
-        assertTrueMsg("Record added using remote non-binary request handler does contain \\u001e", !results.contains("\\u001e"));
-        assertTrueMsg("Record added using remote non-binary request handler doesn't contain #30;", results.contains("#30;"));
+        assertTrueMsg("Record added using streaming remote non-binary request handler does contain \\u001e", !results.contains("\\u001e"));
+        assertTrueMsg("Record added using streaming remote non-binary request handler doesn't contain #30;", results.contains("#30;"));
 
         out1.reset();
         err1.reset();
