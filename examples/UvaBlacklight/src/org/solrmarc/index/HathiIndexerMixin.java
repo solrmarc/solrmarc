@@ -131,7 +131,7 @@ public class HathiIndexerMixin extends SolrIndexerMixin
     {    
         Set<String>formats = indexer.getFormatMapped(record, formatMapName);               
         formats.add("Online"); // Online
-        if (formats.contains("Book")) formats.add("eBook");
+        if (formats.contains("Book")) formats.add("EBook");
         return(formats);
     }
     
