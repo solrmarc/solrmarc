@@ -290,7 +290,18 @@ public class SolrCoreLoader
                 
             // create solrServerObj from solrCore and coreContainerObj 
             Object solrServerObj = null;
-                if (useBinaryRequestHandler)
+            if (useBinaryRequestHandler)
+            {
+                try {
+                    Class<?> AddUpdateCommandClass = Class.forName("org.apache.solr.update.AddUpdateCommand");
+                    Constructor<?> arglessConstructor = AddUpdateCommandClass.getConstructor((Class<?>[])null);
+                }
+                catch (NoSuchMethodException nsme)
+                {
+                    useBinaryRequestHandler = false;
+                }
+            }
+            if (useBinaryRequestHandler)
                 { 
                     Class<?> embeddedSolrServerClass = Class.forName("org.solrmarc.solr.embedded.SolrServerEmbeddedImpl");
                     Constructor<?> embeddedSolrServerConstructor = embeddedSolrServerClass.getConstructor(Object.class, Object.class);
