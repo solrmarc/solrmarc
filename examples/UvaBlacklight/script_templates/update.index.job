@@ -17,7 +17,7 @@ fi
 dirname=$1
 configname=$2
 
-DATADIR=/lib_content27/marc
+DATADIR=/lib_content23/record_source_for_solr_cores/bib/marc
 INPUTDIR=$DATADIR/incoming_${dirname}
 PROCESSEDDIR=$DATADIR/processed_${dirname}
 RESULTSDIR=$DATADIR/results_${dirname}

@@ -6,7 +6,7 @@ num=0
 JAVA_HOME=/usr/java/latest/bin/java
 export JAVA_HOME
 
-DATADIR=/lib_content27/marc
+DATADIR=/lib_content23/record_source_for_solr_cores/bib/marc
 INPUTDIR=$DATADIR/incoming_merge
 RESULTSDIR=$DATADIR/results_merge
 
