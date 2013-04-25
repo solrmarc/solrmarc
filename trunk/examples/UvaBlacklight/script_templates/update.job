@@ -6,7 +6,7 @@ num=0
 JAVA_HOME=/usr/java/latest/bin/java
 export JAVA_HOME
 
-DATADIR=/lib_content27/marc
+DATADIR=/lib_content23/record_source_for_solr_cores/bib/marc
 INPUTDIR=$DATADIR/incoming
 INPUTDIRTMP=$DATADIR/incoming_tmp
 PROCESSEDDIR=$DATADIR/processed
@@ -107,12 +107,30 @@ if [ "$verbose" == "-v" ] ; then
     echo updating multicore prod index at solrpowr:18983/solr/bib
 fi
 update.index.job $verbose prod bib_core_prod_config.properties
-/lib_content27/solr/multicoremerge/bin/mergecores > $DATADIR/results_prod/results_mergecores
+let loopcnt=0
+done=
+echo "" > $DATADIR/results_prod/results_mergecores
+while [[ $loopcnt -lt 3 && "$done" == "" ]]
+do 
+    #echo "$done  $loopcnt"; 
+    /lib_content27/solr/multicoremerge/bin/mergecores >> $DATADIR/results_prod/results_mergecores
+    let cnt=`/lib_content27/solr/multicoremerge/bin/getnumrecords`
+    if [[ $cnt -gt 6000000 ]] 
+    then
+        done=true
+    fi
+    let loopcnt=$loopcnt+1
+done
 
 if [ "$verbose" == "-v" ] ; then
     echo copying blacklight_indexes to datastamped indexes to use for searching
 fi
-update.multicore.job
+
+let cnt=`/lib_content27/solr/multicoremerge/bin/getnumrecords`
+if [[ $cnt -gt 6000000 ]] 
+then
+    update.multicore.job
+fi
 
 
 #if [ "$verbose" == "-v" ] ; then
@@ -126,12 +144,12 @@ update.multicore.job
 #fi
 #update.index.job $verbose debug blacklight_test_config.properties
 
-if [ "$verbose" == "-v" ] ; then
-    echo updating multicore development index at solrpowr.lib:8984/solr/bib
-fi
-update.index.job $verbose bibcore bib_core_config.properties
-/lib_content23/solr/multicoremerge/bin/mergecores > $DATADIR/results_bibcore/results_mergecores
-/lib_content23/solr/multicoremerge/bin/installtestindex http://libsvr26.lib.virginia.edu:8082/solr  http://libsvr27.lib.virginia.edu:8082/solr  http://libsvr28.lib.virginia.edu:8082/solr >> $DATADIR/results_bibcore/results_mergecores
+#if [ "$verbose" == "-v" ] ; then
+    #echo updating multicore development index at solrpowr.lib:8984/solr/bib
+#fi
+#update.index.job $verbose bibcore bib_core_config.properties
+#/lib_content23/solr/multicoremerge/bin/mergecores > $DATADIR/results_bibcore/results_mergecores
+#/lib_content23/solr/multicoremerge/bin/installalltestindex  >> $DATADIR/results_bibcore/results_mergecores
 
 if [ "$verbose" == "-v" ] ; then
     echo cleaning up incoming directories
