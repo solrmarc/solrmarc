@@ -41,6 +41,7 @@ import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
+import org.marc4j.marc.VariableField;
 import org.solrmarc.tools.CallNumUtils;
 import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.Utils;
@@ -399,6 +400,73 @@ public class VuFindIndexer extends SolrIndexer
 
         // If we got this far, we couldn't find a valid value; return an arbitrary date:
         return new java.util.Date(0);
+    }
+
+    /**
+     * Get all available dates from the record.
+     *
+     * @param  Record          record
+     * @return Set<String>     dates
+     */
+    public Set<String> getDates(final Record record) {
+        Set<String> dates = new LinkedHashSet<String>();
+
+        // First check old-style 260c date:
+        String oldStyle = getDate(record);
+        if (oldStyle != null && oldStyle.length() > 0) {
+            dates.add(oldStyle);
+        }
+
+        // Now track down relevant RDA-style 264c dates; we only care about
+        // copyright and publication dates (and ignore copyright dates if
+        // publication dates are present).
+        Set<String> pubDates = new LinkedHashSet<String>();
+        Set<String> copyDates = new LinkedHashSet<String>();
+        List<VariableField> list264 = record.getVariableFields("264");
+        for (VariableField vf : list264)
+        {
+            DataField df = (DataField) vf;
+            Subfield currentDate = df.getSubfield('c');
+            if (currentDate != null) {
+                String currentDateStr = Utils.cleanDate(currentDate.getData());
+                char ind2 = df.getIndicator2();
+                switch (ind2)
+                {
+                    case '1':
+                        pubDates.add(currentDateStr);
+                        break;
+                    case '4':
+                        copyDates.add(currentDateStr);
+                        break;
+                }
+            }
+        }
+        if (pubDates.size() > 0) {
+            dates.addAll(pubDates);
+        } else if (copyDates.size() > 0) {
+            dates.addAll(copyDates);
+        }
+
+        return dates;
+    }
+
+    /**
+     * Get the earliest publication date from the record.
+     *
+     * @param  Record          record
+     * @return String          earliest date
+     */
+    public String getFirstDate(final Record record) {
+        String result = null;
+        Set<String> dates = getDates(record);
+        Iterator<String> datesIter = dates.iterator();
+        while (datesIter.hasNext()) {
+            String current = datesIter.next();
+            if (result == null || Integer.parseInt(current) < Integer.parseInt(result)) {
+                result = current;
+            }
+        }
+        return result;
     }
 
     /**
