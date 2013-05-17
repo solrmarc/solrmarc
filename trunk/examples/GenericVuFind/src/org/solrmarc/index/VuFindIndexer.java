@@ -403,6 +403,58 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
+     * Get all available publishers from the record.
+     *
+     * @param  Record          record
+     * @return Set<String>     publishers
+     */
+    public Set<String> getPublishers(final Record record) {
+        Set<String> publishers = new LinkedHashSet<String>();
+
+        // First check old-style 260b name:
+        List<VariableField> list260 = record.getVariableFields("260");
+        for (VariableField vf : list260)
+        {
+            DataField df = (DataField) vf;
+            Subfield current = df.getSubfield('b');
+            if (current != null) {
+                publishers.add(current.getData());
+            }
+        }
+
+        // Now track down relevant RDA-style 264b names; we only care about
+        // copyright and publication names (and ignore copyright names if
+        // publication names are present).
+        Set<String> pubNames = new LinkedHashSet<String>();
+        Set<String> copyNames = new LinkedHashSet<String>();
+        List<VariableField> list264 = record.getVariableFields("264");
+        for (VariableField vf : list264)
+        {
+            DataField df = (DataField) vf;
+            Subfield currentName = df.getSubfield('b');
+            if (currentName != null) {
+                char ind2 = df.getIndicator2();
+                switch (ind2)
+                {
+                    case '1':
+                        pubNames.add(currentName.getData());
+                        break;
+                    case '4':
+                        copyNames.add(currentName.getData());
+                        break;
+                }
+            }
+        }
+        if (pubNames.size() > 0) {
+            publishers.addAll(pubNames);
+        } else if (copyNames.size() > 0) {
+            publishers.addAll(copyNames);
+        }
+
+        return publishers;
+    }
+
+    /**
      * Get all available dates from the record.
      *
      * @param  Record          record
