@@ -28,6 +28,7 @@ import java.lang.StringBuilder;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -1069,6 +1070,38 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
+     * Normalize Dewey numbers for AlphaBrowse sorting purposes (use all numbers!)
+     *
+     * Can return null
+     *
+     * @param record
+     * @param fieldSpec - which MARC fields / subfields need to be analyzed
+     * @return List containing normalized Dewey numbers extracted from specified fields.
+     */
+    public List<String> getDeweySortables(Record record, String fieldSpec) {
+        // Initialize our return value:
+        List<String> result = new LinkedList<String>();
+
+        // Loop through the specified MARC fields:
+        Set<String> input = getFieldList(record, fieldSpec);
+        Iterator<String> iter = input.iterator();
+        while (iter.hasNext()) {
+            // Get the current string to work on:
+            String current = iter.next();
+
+            // If this is a valid Dewey number, return the sortable shelf key:
+            if (CallNumUtils.isValidDewey(current)) {
+                result.add(CallNumUtils.getDeweyShelfKey(current));
+            }
+        }
+
+        // If we found no call numbers, return null; otherwise, return our results:
+        if (result.isEmpty())
+            return null;
+        return result;
+    }
+
+    /**
      * Determine the longitude and latitude of the items location.
      *
      * @param  Record    record
@@ -1441,7 +1474,7 @@ public class VuFindIndexer extends SolrIndexer
             Process p = Runtime.getRuntime().exec(cmd);
             BufferedReader stdInput = new BufferedReader(new
                 InputStreamReader(p.getInputStream(), "UTF8"));
-    
+
             // We'll build the string from the command output
             String s;
             while ((s = stdInput.readLine()) != null) {
