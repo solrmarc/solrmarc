@@ -492,11 +492,11 @@ public class SolrIndexer
             // valid = false;
             // }
             if (!(Set.class.isAssignableFrom(retval) || String.class.isAssignableFrom(retval) ||
-                    Map.class.isAssignableFrom(retval)) )
+                    Map.class.isAssignableFrom(retval) ||  List.class.isAssignableFrom(retval)) )
             {
 //                System.err.println("Error: Return type of custom indexing function " + indexParm + " must be either String or Set<String>");
-                logger.error("Error: Return type of custom indexing function " + indexParm + " must be String or Set<String> or Map<String, String>");
-                throw new IllegalArgumentException("Error: Return type of custom indexing function " + indexParm + " must be String or Set<String> or Map<String, String>");
+                logger.error("Error: Return type of custom indexing function " + indexParm + " must be String or Set<String> or List<String> or Map<String, String>");
+                throw new IllegalArgumentException("Error: Return type of custom indexing function " + indexParm + " must be String or Set<String> or List<String> or Map<String, String>");
             }
         }
         catch (SecurityException e)
@@ -1209,7 +1209,30 @@ public class SolrIndexer
         else if (returnType.isAssignableFrom(Map.class))
         {
             if (deleteIfEmpty && ((Map<String, String>) retval).size() == 0) return (true);
-            if (retval != null)  indexMap.putAll((Map<String, String>) retval);
+            if (retval != null)  
+            {
+                Map<String, String> retmap =  (Map<String, String>) retval;
+                for (String retkey : retmap.keySet())
+                {
+                    indexMap.putAll((Map<String, String>) retval);
+                }
+            }
+        }
+        else if (returnType.isAssignableFrom(List.class))
+        {
+            List<String> fields = (List<String>) retval;
+            if (mapName != null && findMap(mapName) != null)
+            {
+                List<String> newFields = new ArrayList<String>();
+                for (String field: fields) 
+                {
+                    String newfield = Utils.remap(field, findMap(mapName), true);
+                    newFields.add(newfield);
+                }
+                fields = newFields;
+            }
+            if (deleteIfEmpty && fields.size()== 0)  return (true);
+            addFields(indexMap, indexField, fields);
         }
         else if (returnType.isAssignableFrom(Set.class))
         {
@@ -1428,6 +1451,29 @@ public class SolrIndexer
         if (mapName != null && findMap(mapName) != null)
             fieldVals = Utils.remap(fieldVals, findMap(mapName), true);
 
+        if (!fieldVals.isEmpty())
+        {
+            if (fieldVals.size() == 1)
+            {
+                String value = fieldVals.iterator().next();
+                indexMap.put(ixFldName, value);
+            }
+            else
+                indexMap.put(ixFldName, fieldVals);
+        }
+    }
+    
+    /**
+     * Add a field-value pair to the indexMap representation of a solr doc for
+     *  each value present in the "fieldVals" parameter.
+     *  The values will be "translated" per the translation map indicated.
+     * @param indexMap - the mapping of solr doc field names to values
+     * @param ixFldName - the name of the field to add to the solr doc
+     * @param mapName - the name of a translation map for the field value, or null
+     * @param fieldVals - a set of (untranslated) field values to be assigned to the solr doc field
+     */
+    protected void addFields(Map<String, Object> indexMap, String ixFldName, List<String> fieldVals)
+    {
         if (!fieldVals.isEmpty())
         {
             if (fieldVals.size() == 1)
