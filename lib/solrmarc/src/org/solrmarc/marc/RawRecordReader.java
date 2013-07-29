@@ -108,6 +108,7 @@ public class RawRecordReader
         try
         {
             int numToSkip = 0;
+            boolean hasSkip = false;
             int numToOutput = -1;
             int offset = 0;
             if (args[offset].equals("-"))
@@ -123,6 +124,7 @@ public class RawRecordReader
             {
                 if (args[offset].equals("-skip"))
                 {
+                    hasSkip = true;
                     numToSkip = Integer.parseInt(args[offset+1]);
                     offset += 2;
                 }
@@ -132,7 +134,7 @@ public class RawRecordReader
                     offset += 2;
                 }  
             }
-            if (numToSkip != 0 || numToOutput != -1)
+            if (hasSkip || numToOutput != -1)
             {
                 processInput(reader, numToSkip, numToOutput);
             }
@@ -197,6 +199,10 @@ public class RawRecordReader
                 System.out.write(recordBytes);
                 System.out.flush();
                 numOutput++;
+            }
+            else if (numOutput >= numToOutput)
+            {
+                break;
             }
         }
     }
