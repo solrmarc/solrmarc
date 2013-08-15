@@ -1,0 +1,167 @@
+# Test 0
+# marc record with no 245$a, but a 245$k. Does getTitleSorted still find the $k?
++, title_k.mrc, getSortableTitle(rec), morton hoffman papers
+
+# Test 1
+# marc record with no 245$a, but a $b. (Bad data). Does getTitleSorted
+# not raise, and still come up with something, even if it's weird?
++, title_b.mrc, getSortableTitle(rec), family physician; or, domestic medical friend
+
+# Test 2
+# checking the use of the indicators to remove characters to create the sortable title
++, med_bibs-20sample.mrc(5680749), getSortableTitle(rec), outline of bacteriology and immunity
+
+# Test 3-6
+#test of combining reader
++, u55_split.mrc, 999m , ALDERMAN
++marc.combine_records=999, u55_split.mrc, 999m , ALDERMAN|CLEMONS
++marc.combine_records=999+marc.combine_records.left_field=001+marc.combine_records.right_field=001, u55_split.mrc, 999m , ALDERMAN|CLEMONS
++marc.combine_records=999, u55_split.mrc, 999m , ALDERMAN|CLEMONS
+
+# Test 7
+#Test of Unicode normalization: this line contains the code point 'à' rather than an 'a' followed by the grave accent '̀'
++marc.permissive=true+marc.to_utf_8=true+marc.unicode_normalize=C, u4.mrc(u4), 245a, The princes of Hà-tiên (1682-1867) /
+
+# Test 8
+#Test of not using Unicode normalization: this line contains the code points 'a' followed by the grave accent '̀'
++marc.permissive=true+marc.to_utf_8=true, u4.mrc(u4), 245a, The princes of Hà-tiên (1682-1867) /
+
+# Test 9
+#test of getEra function with translation map
++, u399.mrc, getEra(rec){composition_era_map.properties}, 1970's|20th Century
+
+# Test 10
+#test of getting language with translation map
++, selectedRecs.mrc(u8), 008[35-37]:041a:041d{language_map.properties}, English|Tamil
+
+# Test 11-12
+#test of Jonathan's getWithOptions function
+#many more of these should be written
++marc.permissive=true+marc.to_utf_8=true, u2103_raw.mrc, getWithOptions(rec, 245ab, includedLinkedFields:removeTrailingPunct), Zi jin cheng gong dian|紫禁城宮殿
++, selectedRecs.mrc(u377), getWithOptions(rec, 610[a-z]:651[a-z], combineSubfields=" -- "), Catholic Church -- India|India -- Religion
+
+# Test 13-14
+#testing MarcFilteredReader deleting a particular subfield
++marc.delete_subfields=999d, selectedRecs.mrc(u2), 999d, 
++, selectedRecs.mrc(u2), 999d, 6/28/1996
+
+# Test 15-16
+#testing marc.override to install a sorting/non-sorting MarcReader
++marc.override=org.solrmarc.marcoverride.NoSortMarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
++marc.override=org.marc4j.marc.impl.SortedMarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), 496826 aapl bmain emain
+
+# Test 17
+#testing marc.override to install a UVAMarcFactory (should also be non-sorted)
++marc.override=org.solrmarc.marcoverride.UVAMarcFactoryImpl, double_007.mrc, getAllSearchableFields(rec, 949, 960), aapl bmain emain 496826
+
+# Test 18
+#now verify that the default is being set to sorted
++, double_007.mrc, getAllSearchableFieldsAsSet(rec, 949, 960), 496826|aapl|bmain|emain
+
+# Test 19-20
+#check permissive reader vs non-permissive reader
++marc.permissive=true+marc.to_utf_8=true, u2103_raw.mrc, getWithOptions(rec, 245ab, includedLinkedFields:removeTrailingPunct), Zi jin cheng gong dian|紫禁城宮殿
++marc.to_utf_8=true, u2103_raw.mrc, getWithOptions(rec, 245ab, includedLinkedFields:removeTrailingPunct), Zi jin cheng gong dian|紫禁城
+
+# Test 21
+#test LNK type syntax for specifying linked fields
++marc.permissive=true+marc.to_utf_8=true, u2103_raw.mrc, LNK245ab, 紫禁城宮殿
+
+# Test 22
+#test getAllAlphaSubfields
++, selectedRecs.mrc(u8), getAllAlphaSubfields(rec, 260), Madras : Tamil Patippakam, 1982. 
+
+# Test 23
+#test getAllAlphaExcept
++marc.to_utf_8=true+marc.permissive=true, selectedRecs.mrc(u3), getAllAlphaExcept(rec, 100c), Gontaut-Biron, Élie, 1818?-l890.
+
+# Test 24
+#test getLinkedFieldCombined
++marc.to_utf_8=true, u2103_raw.mrc, getLinkedFieldCombined(rec, 245ab), Zi jin cheng gong dian /|紫禁城
+
+# Test 25-26
+#test getSingleIndexEntry
++, double_007.mrc, getSingleIndexEntry(rec, 260a, false), Prince Frederick, MD :
++, double_007.mrc, getSingleIndexEntry(rec, 260a, true), Prince Frederick, MD :
+
+# Test 27-31
+#test getURLs
++, url_test_recs.mrc(u740162), getFullTextUrls(rec), http://www.bartleby.com/139
++, url_test_recs.mrc(u18488), getSupplUrls(rec), http://us.imdb.com/title/tt0040897/
++, url_test_recs.mrc(u1563789), getSupplUrls(rec), http://purl.access.gpo.gov/GPO/LPS6762
++, url_test_recs.mrc(u2020731), getFullTextUrls(rec), http://www.unctad.org/en/docs/wir92_en.pdf
++, url_test_recs.mrc(u2020731), getSupplUrls(rec), http://www.unctad.org/en/docs/wir92ove.en.pdf
+
+# Test 32
++marc.permissive=true+marc.to_utf_8=true+marc.default_encoding=MARC8, non_latin.mrc, 245a, Kepone R effects on development of C̲a̲l̲l̲i̲n̲e̲c̲t̲e̲s̲ s̲a̲p̲i̲d̲u̲s̲ and R̲h̲i̲t̲h̲r̲o̲p̲a̲n̲o̲p̲e̲u̲s̲ h̲a̲r̲[̲r̲]̲i̲s̲i̲i̲ /
+
+# Test 33-36
+# test getPublicationDate
++, selectedRecs.mrc(u8), getPublicationDate(rec), 1982
++, u3412403.mrc, getPublicationDate(rec), 1986
++marc.permissive=true, WPUbadrecords.mrc(101950), getPublicationDate(rec), 1977
++marc.permissive=true, WPUbadrecords.mrc(101573), getPublicationDate(rec), 1980
+
+# Test 37-38
+#test reading .xml file (including entity translation (&amp; to & ) and unprettification
++, mods2MarcTest-pretty.xml(eam37.07), 260b, W.C. Peters & Sons
++, mods2MarcTest-pretty.xml(eam37.07), 852a, Special Collections, University of Virginia Library, Charlottesville, Va.
+
+# Test 39-43
+#test MarcFilteredReader class for selecting out specific records or removing certain subfields
++marc.delete_subfields=650z, selectedRecs.mrc(u2), 650axz, Russian literature Translations from foreign languages History and criticism.|Translating and interpreting History.
++marc.include_if_present=082a, selectedRecs.mrc, 245a, Studies in Tamilology /
++marc.include_if_present=999m/DARDEN, selectedRecs.mrc, 245a, Natural resources and the environment :
++marc.include_if_missing=100a, selectedRecs.mrc, 245a, Socialist way of life :
++marc.include_if_missing=999m/ALDERMAN, selectedRecs.mrc, 245a, Busoni /
+
+# Test 44
+#test reading way too big record
++marc.permissive=true, bad_too_long_plus_2.mrc(360944), 000[5], n
+
+# Test 45-46
+#test constant specification
++, u4.mrc, "test string", test string
++, u4.mrc, "test string 1|test string 2", test string 1|test string 2
+
+# Test 47
+#test single quoted test specification 
++, selectedRecs.mrc(u21), 'custom, getSortableAuthor', Carrington Frank Crime and justice a conservative strategy
+
+# Test 48 
+#test using beanshell scripting custom indexing method
++, selectedRecs.mrc(u21), 'script(deweyfacet.bsh), getDeweyFacet(dewey_callnumber_map.properties)', 300s - Social Sciences|340s - Law
+
+# Test 49
+#test using "first" directive
++, selectedRecs.mrc(u89), '650a, first', Environmental policy
+
+# Test 50-51
+#test using "join" directive
++, selectedRecs.mrc(u233), '650a, join', Cave paintings Paleolithic period Art, Prehistoric
++, selectedRecs.mrc(u233), '650a, join( -- )', Cave paintings -- Paleolithic period -- Art, Prehistoric
+
+# Test 52
+#test using "std" directive
++, u399.mrc, 'era, composition_era_map.properties', 1970's|20th Century
+
+# Test 53 
+#test using mixin custom indexing method
++, 009888737.mrc, 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes', CombinedType.EBook|ContentType.Book|ContentType.ComputerDocument|MediaType.Online
+
+# Test 54 
+#test using mixin custom indexing method
++, formatRecs.mrc(u3514547), 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes', ContentType.Video|MediaType.VideoDVD
+
+# Test 55 
+#test using mixin custom indexing method
++, formatRecs.mrc(u3514547), 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypesMapped(getformat_mixin_map.properties)', Video|DVD
+
+# Test 56 
+#test using mixin custom indexing method with translation map
++, formatRecs.mrc(u3591589), 'custom(org.solrmarc.index.GetFormatMixin), getContentTypesAndMediaTypes, getformat_mixin_map.properties', Map|Online|Government Document
+
+# Test 57 
+#test reading JSON encoded marc record method
++, u1669079.json, getSortableTitle(rec), tender is the night:the confessions of f. scott fitzgerald
+

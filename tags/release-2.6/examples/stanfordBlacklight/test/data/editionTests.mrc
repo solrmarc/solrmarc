@@ -1,0 +1,1 @@
+00241cim  2200085Ia 45í0001001100000008004100011245004700052250003000099250002600129aeditionMV041202s2000    mdunnn  s      f    eng d14adata to populate multivalued edition field  aSpecial education version  aMedium-high voice ed.

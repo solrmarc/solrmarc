@@ -1,0 +1,134 @@
+#!/bin/bash
+SOLRMARCDISTDIR=/lib_content27/solrmarc/dist
+PATH=$SOLRMARCDISTDIR/bin:$PATH
+export PATH
+num=0
+JAVA_HOME=/usr/java/latest/bin/java
+export JAVA_HOME
+verbose=
+
+mkdir $INPUTDIRTMP 2> /dev/null
+
+if [ "$1" == "-v" ]  ; then 
+    shift
+    verbose=-v
+fi
+
+dirname=$1
+configname=$2
+
+DATADIR=/lib_content23/record_source_for_solr_cores/bib/marc
+INPUTDIR=$DATADIR/incoming_${dirname}
+PROCESSEDDIR=$DATADIR/processed_${dirname}
+RESULTSDIR=$DATADIR/results_${dirname}
+
+for file in `find $INPUTDIR -name '*.mrc' -print | sort`
+    do
+    fname=`basename $file`
+    froot=`basename $file .mrc`
+    dir=`dirname $file`
+    delfname=$froot.del
+    delfile=$dir/$delfname
+    output=$RESULTSDIR/results_$froot
+
+    #check whether the mrc file has already been processed
+    if [ -e "$PROCESSEDDIR/$fname" ] ; then
+            cmp -s $file $PROCESSEDDIR/$fname
+        if [ "$?" -eq 1 ] ; then
+            # file already exists in processed directory but its different
+                # than the new incoming one, make backup and index new file
+            mv $PROCESSEDDIR/$fname $PROCESSEDDIR/$fname-`date +%Y%m%e`
+            cp $file $PROCESSEDDIR
+            if [ "$verbose" == "-v" ]
+            then
+                echo "indexing file $file (again) using config $configname"
+            fi
+            indexfile ${configname} $file > $output 2>&1
+            let "num += 1"
+        else
+            # incoming file already processed, just delete it
+            if [ "$verbose" == "-v" ]
+            then
+                echo "skipping file $file (already processed)"
+            fi
+            rm $file
+        fi
+    else
+        # file doesnt exist in processed dir, index it normally
+        cp $file $PROCESSEDDIR
+        if [ "$verbose" == "-v" ]
+        then
+            echo "indexing file $file using config $configname"
+        fi
+        indexfile ${configname} $file  > $output 2>&1
+        let "num += 1"
+    fi
+
+    #check whether the del file has already been processed
+    if [ -e "$delfile" ] ; then
+        if [ -e "$PROCESSEDDIR/$delfname" ] ; then
+                cmp -s $delfile $PROCESSEDDIR/$delfname
+            if [ "$?" -eq 1 ] ; then
+                # file already exists in processed directory but its different
+                    # than the new incoming one, make backup and index new file
+                mv $PROCESSEDDIR/$delfname $PROCESSEDDIR/$delfname-`date +%Y%m%e`
+                cp $delfile $PROCESSEDDIR
+                if [ "$verbose" == "-v" ]
+                then
+                    echo "indexing file $delfile (again) using config $configname"
+                fi
+                indexfile ${configname} NONE $delfile >> $output 2>&1
+                let "num += 1"
+            else
+                # incoming file already processed, just delete it
+                if [ "$verbose" == "-v" ]
+                then
+                    echo "skipping file $file (already processed)"
+                fi
+                rm $delfile
+            fi
+        else
+            # file doesnt exist in processed dir, index it normally
+            cp $delfile $PROCESSEDDIR
+            if [ "$verbose" == "-v" ]
+            then
+                echo "indexing file $delfile using config $configname"
+            fi
+            indexfile ${configname} NONE $delfile >> $output 2>&1
+            let "num += 1"
+        fi
+    else
+        # no .del file exists corresponding to the .mrc file found in the incoming directory
+        # do nothing, be happy
+        nodelfile=true
+    fi
+
+    done
+
+
+# run booklist daily update
+if [ "$num" -ne 0 ] 
+    then
+    if [ "$verbose" == "-v" ]
+    then
+        echo "running booklist monthly and daily"
+    fi
+    runbooklist monthly ${configname} > $RESULTSDIR/results_booklists_$froot 2>&1
+    runbooklist daily ${configname} >> $RESULTSDIR/results_booklists_$froot 2>&1
+fi
+
+# if any files were indexed, optimize solr index
+if [ "$num" -ne 0 ] 
+    then
+    if [ "$verbose" == "-v" ]
+    then
+        echo "running optimize"
+    fi
+    optimizesolr ${configname} > $RESULTSDIR/results_optimize 2>&1
+fi
+
+if [ "$verbose" == "-v" ]
+then
+    echo "Done!!"
+fi
+
