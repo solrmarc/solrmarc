@@ -819,8 +819,8 @@ public class GetFormatMixin extends SolrIndexerMixin
         char typeOfRecord = record.getLeader().getTypeOfRecord();
         ControlField field008 = ((ControlField)record.getVariableField("008"));
         String field008Str = field008 != null ? field008.getData() : "";
-        List<ControlField> fields006 = (List<ControlField>)record.getVariableFields("006");
-        List<ControlField> fields007 = (List<ControlField>)record.getVariableFields("007");
+        List<VariableField> fields006 = record.getVariableFields("006");
+        List<VariableField> fields007 = record.getVariableFields("007");
         String types1 = "aijtpcd";
         String types2 = "efgkorm";
         if (types1.indexOf(typeOfRecord) != -1)
@@ -847,10 +847,11 @@ public class GetFormatMixin extends SolrIndexerMixin
         return(false);
     }
     
-    private boolean setContainsAt(List<ControlField> fields, int offset, String match, boolean ignoreCase)
+    private boolean setContainsAt(List<VariableField> fields, int offset, String match, boolean ignoreCase)
     {
-        for (ControlField cf : fields)
+        for (VariableField vf : fields)
         {
+            ControlField cf = (ControlField)vf;
             String data = cf.getData();
             if (!match.contains("."))
             {
@@ -994,14 +995,15 @@ public class GetFormatMixin extends SolrIndexerMixin
 
         String[] formatTags = { "008", "006" };
         ControlField field008 = (ControlField)record.getVariableField("008");
-        List<ControlField> fields006 = (List<ControlField>)record.getVariableFields("006");
+        List<VariableField> fields006 = (List<VariableField>)record.getVariableFields("006");
 
         if (field008 != null)
         {
             getContentTypeFromFixedField(contentTypes, record, field008, leaderProfile, leaderType, offsetForProfile008(leaderProfile));
         }
-        for (ControlField field006 : fields006)
+        for (VariableField field006v : fields006)
         {
+            ControlField field006 = (ControlField)field006v;
             ProfileType profile = extractProfile(field006.getData(), "006");
             ContentType type = extractType(field006.getData(), "006");
             if (profile != ProfileType.NoneDefined)
@@ -1286,10 +1288,11 @@ public class GetFormatMixin extends SolrIndexerMixin
 
         // // 007 ////
 
-        List<ControlField> fields007 = (List<ControlField>)record.getVariableFields("007");
+        List<VariableField> fields007 = (List<VariableField>)record.getVariableFields("007");
 
-        for (ControlField field007 : fields007)
+        for (VariableField field007v : fields007)
         {
+            ControlField field007 = (ControlField)field007v;
             // first, check to make sure this is a post-1981 007 by looking at
             // position 2, which should be undefined
             String field007Str = validate007Field(record, profileType, leaderType, field007);
@@ -1421,10 +1424,11 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
         
         String[] formatTags = { "008", "006" };
-        List<ControlField> fieldsFormat = record.getVariableFields(formatTags);
+        List<VariableField> fieldsFormat = record.getVariableFields(formatTags);
 
-        for (ControlField fieldFormat : fieldsFormat)
+        for (VariableField fieldFormatv : fieldsFormat)
         {
+            ControlField fieldFormat = (ControlField)fieldFormatv;
             ProfileType profile;
             int position = 0; // position we'll use
 
@@ -1547,9 +1551,10 @@ public class GetFormatMixin extends SolrIndexerMixin
     private MediaTypeHeuristic getMediaTypeHeuristically(Record record, ContentType leaderType)
     {
         LinkedHashMap<MediaType, MediaTypeHeuristic> possibleForms = new LinkedHashMap<MediaType, MediaTypeHeuristic>(); 
-        List<DataField> notes = (List<DataField>)record.getVariableFields(new String[] {"538"});
-        for (DataField note : notes)
+        List<VariableField> notes = (List<VariableField>)record.getVariableFields(new String[] {"538"});
+        for (VariableField notev : notes)
         {
+            DataField note = (DataField)notev;
             if (note.getSubfield('a') == null) continue;
             String noteData = note.getSubfield('a').getData();
             if (noteData.matches(".*Blu[e]?-[Rr]ay.*"))

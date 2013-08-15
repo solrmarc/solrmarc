@@ -170,6 +170,8 @@ public abstract class MarcHandler {
         }
         loadLocalProperties();
         
+        setMarc4JProperties(configProps);
+        
         solrmarcPath = Utils.getProperty(configProps, "solrmarc.path");
         solrmarcPath = normalizePathsProperty(homeDir, solrmarcPath);
 
@@ -221,7 +223,20 @@ public abstract class MarcHandler {
         loadReader(source, fName);
 	}
 	
-	// We only get here if the parm (unicodeNormalize2) is not null compare it against 
+	private void setMarc4JProperties(Properties configProps2)
+    {
+        for (String prop : configProps2.stringPropertyNames())
+        {
+            if (prop.startsWith("org.marc4j."))
+            {
+                String value = configProps2.getProperty(prop);
+                System.setProperty(prop, value);
+            }
+        }
+        
+    }
+
+    // We only get here if the parm (unicodeNormalize2) is not null compare it against 
 	// the valid values and return the correct value to use as the parm
 	private String handleUnicodeNormalizeParm(String parm)
     {

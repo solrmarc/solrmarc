@@ -3,8 +3,11 @@ package org.solrmarc.tools;
 import java.io.*;
 import java.util.*;
 
-import org.marc4j.*;
-import org.marc4j.marc.*;
+import org.marc4j.marc.Record;
+import org.marc4j.marc.ControlField;
+import org.marc4j.marc.VariableField;
+import org.marc4j.MarcReader;
+import org.marc4j.MarcWriter;
 import org.solrmarc.marc.*;
 import org.solrmarc.marcoverride.MarcSplitStreamWriter;
 
