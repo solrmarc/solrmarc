@@ -549,8 +549,8 @@ public class VuFindIndexer extends SolrIndexer
         }
 
         // check the 007 - this is a repeating field
-        List<ControlField> fields = record.getVariableFields("007");
-        Iterator<ControlField> fieldsIter = fields.iterator();
+        List<VariableField> fields = record.getVariableFields("007");
+        Iterator<VariableField> fieldsIter = fields.iterator();
         if (fields != null) {
             ControlField formatField;
             while(fieldsIter.hasNext()) {
@@ -920,8 +920,8 @@ public class VuFindIndexer extends SolrIndexer
             }
 
             // Now check if any 006 fields apply:
-            List<ControlField> fields = record.getVariableFields("006");
-            Iterator<ControlField> fieldsIter = fields.iterator();
+            List<VariableField> fields = record.getVariableFields("006");
+            Iterator<VariableField> fieldsIter = fields.iterator();
             if (fields != null) {
                 ControlField formatField;
                 while(fieldsIter.hasNext()) {
@@ -940,8 +940,8 @@ public class VuFindIndexer extends SolrIndexer
         }
 
         // Now check for interesting strings in 300 subfield b:
-        List<ControlField> fields = record.getVariableFields("300");
-        Iterator<ControlField> fieldsIter = fields.iterator();
+        List<VariableField> fields = record.getVariableFields("300");
+        Iterator<VariableField> fieldsIter = fields.iterator();
         if (fields != null) {
             DataField physical;
             while(fieldsIter.hasNext()) {
@@ -1109,8 +1109,8 @@ public class VuFindIndexer extends SolrIndexer
      */
     public String getLongLat(Record record) {
         // Check 034 subfield d and f
-        List<ControlField> fields = record.getVariableFields("034");
-        Iterator<ControlField> fieldsIter = fields.iterator();
+        List<VariableField> fields = record.getVariableFields("034");
+        Iterator<VariableField> fieldsIter = fields.iterator();
         if (fields != null) {
             DataField physical;
             while(fieldsIter.hasNext()) {

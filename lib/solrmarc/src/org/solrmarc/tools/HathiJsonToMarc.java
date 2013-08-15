@@ -25,6 +25,7 @@ import org.marc4j.MarcReader;
 import org.marc4j.MarcWriter;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcXmlReader;
+import org.marc4j.marc.VariableField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.MarcFactory;
 import org.marc4j.marc.Record;
@@ -305,10 +306,11 @@ public class HathiJsonToMarc implements MarcReader
 
     private static void make856fields(Record curRecord)
     {
-        List<DataField> dfs = (List<DataField>)curRecord.getVariableFields("974"); 
+        List<VariableField> dfs = (List<VariableField>)curRecord.getVariableFields("974"); 
         Map<String, String> sortedMap = new TreeMap<String, String>(compare);
-        for (DataField df : dfs)
+        for (VariableField dfv : dfs)
         {
+            DataField df = (DataField)dfv;
             Subfield rights = null;
             if ((rights = df.getSubfield('r')) != null && (rights.getData().startsWith("pd") || rights.getData().equals("world")))
             {

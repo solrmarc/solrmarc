@@ -16,7 +16,6 @@ package org.solrmarc.marc;
  * limitations under the License.
  */
 
-import org.marc4j.DataFieldTest;
 import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.ControlField;
@@ -300,7 +299,7 @@ public class MarcFilteredReader implements MarcReader
                             break;
                         index++;
                     }
-                    rec.getDataFields().add(index, field);
+                    rec.getDataFields().add(index, (DataField)field);
                 }
                 else if (field.getTag().equals("001"))
                 {
@@ -315,7 +314,7 @@ public class MarcFilteredReader implements MarcReader
                             break;
                         index++;
                     }
-                    rec.getControlFields().add(index, field);
+                    rec.getControlFields().add(index, (ControlField)field);
                 }
             }
         }
