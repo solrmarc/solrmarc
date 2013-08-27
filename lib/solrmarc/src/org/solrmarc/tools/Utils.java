@@ -883,6 +883,10 @@ public final class Utils {
                 }
             }
         }
+        if (result.isEmpty() && allowDefault && map.containsKey("__DEFAULT"))
+        {
+            result.add(map.get("__DEFAULT"));
+        }                      
         return result;
     }
 

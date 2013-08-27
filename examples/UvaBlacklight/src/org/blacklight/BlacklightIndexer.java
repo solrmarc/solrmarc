@@ -1651,7 +1651,7 @@ public class BlacklightIndexer extends SolrIndexer
     @Override
     public Set<String> getFormatMapped(Record record, String propertyFileName)
     {
-        return(getCombinedFormatNew2(record));
+        return super.getFormatMapped(record, propertyFileName);
     }
     
     public Set<String> getFormatDiff(Record record)

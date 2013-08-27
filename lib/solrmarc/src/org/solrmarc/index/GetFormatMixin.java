@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -770,7 +771,8 @@ public class GetFormatMixin extends SolrIndexerMixin
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        Set<String>formatsMapped = Utils.remap(formats, indexer.findMap(mapName), false);
+        Map<String, String> translationMap = indexer.findMap(mapName);
+        Set<String>formatsMapped = Utils.remap(formats, translationMap, true);
         return(formatsMapped);
     }
     
