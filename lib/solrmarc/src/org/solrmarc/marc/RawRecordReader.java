@@ -1,12 +1,15 @@
 package org.solrmarc.marc;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -110,6 +113,7 @@ public class RawRecordReader
             int numToSkip = 0;
             boolean hasSkip = false;
             int numToOutput = -1;
+            String outputDirectory = null;
             int offset = 0;
             if (args[offset].equals("-"))
             {
@@ -120,7 +124,7 @@ public class RawRecordReader
                 reader = new RawRecordReader(new FileInputStream(new File(args[offset])));
             }
             offset++;
-            while (offset < args.length && ( args[offset].equals("-skip")|| args[offset].equals("-num")))
+            while (offset < args.length && ( args[offset].equals("-skip")|| args[offset].equals("-num") || args[offset].equals("-dir")))
             {
                 if (args[offset].equals("-skip"))
                 {
@@ -133,8 +137,17 @@ public class RawRecordReader
                     numToOutput = Integer.parseInt(args[offset+1]);
                     offset += 2;
                 }  
+                else if (args[offset].equals("-dir"))
+                {
+                    outputDirectory = args[offset+1];
+                    offset += 2;
+                }  
             }
-            if (hasSkip || numToOutput != -1)
+            if (outputDirectory != null)
+            {
+                processInput(reader, outputDirectory);
+            }
+            else if (hasSkip || numToOutput != -1)
             {
                 processInput(reader, numToSkip, numToOutput);
             }
@@ -184,6 +197,34 @@ public class RawRecordReader
 
     }
     
+    private static void processInput(RawRecordReader reader, String outputDirectory)
+    {
+        while (reader.hasNext())
+        {
+            RawRecord rec = reader.next();
+            String id = rec.getRecordId();
+            File outfile = new File(outputDirectory, id+".mrc");
+            try
+            {
+                BufferedOutputStream bof = new BufferedOutputStream(new FileOutputStream(outfile));
+                byte recordBytes[] = rec.getRecordBytes();
+                bof.write(recordBytes);
+                bof.flush();
+                bof.close();
+            }
+            catch (FileNotFoundException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
     private static void processInput(RawRecordReader reader, int numToSkip, int numToOutput) throws IOException
     {
         int num = 0;
