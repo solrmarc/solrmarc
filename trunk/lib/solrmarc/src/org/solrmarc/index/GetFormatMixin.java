@@ -1597,7 +1597,12 @@ public class GetFormatMixin extends SolrIndexerMixin
         Set<String> forms = SolrIndexer.getAllSubfields(record, "300[abc]", "--");
         for (String form : forms)
         {
-            if (form.matches(".*[Vv]ideo[ ]?disc.*--.*--.*12.*"))
+            if (form.matches(".*[Vv]ideo[ ]?disc.*--.*--.*12 cm.*"))
+            {
+                addPossibleForm( possibleForms, MediaType.VideoLaserdisc, new MediaTypeHeuristic(MediaType.VideoLaserdisc,  0.1, "300"));
+                addPossibleForm( possibleForms, MediaType.VideoDVD, new MediaTypeHeuristic(MediaType.VideoDVD,  0.8, "300"));
+            }
+            else if (form.matches(".*[Vv]ideo[ ]?disc.*--.*--.*12.*"))
             {
                 addPossibleForm( possibleForms, MediaType.VideoLaserdisc, new MediaTypeHeuristic(MediaType.VideoLaserdisc,  0.8, "300"));
                 addPossibleForm( possibleForms, MediaType.VideoDVD, new MediaTypeHeuristic(MediaType.VideoDVD,  0.1, "300"));

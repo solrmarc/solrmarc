@@ -228,7 +228,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                 Set<String> notes = indexer.getFieldList(record, "500a:505a:505t");
                 for (String note : notes)
                 {
-                    if (note.contains("direct") || note.contains("Direct"))
+                    if (note.contains("direct") || note.contains("Direct") || note.contains("A film by") || note.contains("a film by"))
                     {
                         Set<String> directors = getVideoDirectorsFromTextField(note, false);
                         result.addAll(directors);
@@ -649,6 +649,8 @@ public class VideoInfoMixin extends SolrIndexerMixin
     {
         if (subpart.matches(".*[(].*[)]"));
             subpart = subpart.replaceAll("(.*)[(].*[)]", "$1");
+        if (subpart.matches("[^()]*[)]"));
+            subpart = subpart.replaceAll("([^()]*)[)]", "$1");
         if (subpart.matches("\".*") || subpart.matches(".*\""))
             subpart = subpart.replaceAll("\"?(.*?)\"?", "$1");
         if (subpart.matches(".* for .*"))
