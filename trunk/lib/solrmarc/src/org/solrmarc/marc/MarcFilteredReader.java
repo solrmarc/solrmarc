@@ -237,7 +237,7 @@ public class MarcFilteredReader implements MarcReader
                         String mapParts[] = remapString.split("=>");
                         if (eval(mapParts[0], (ControlField)field, rec))
                         {
-                            keepRecord &= process(mapParts[1], field, null, fToDelete, fToInsert);
+                            keepRecord &= process(mapParts[1], field, null, fToDelete, fToInsert, rec);
                         }
                     }                    
                 }
@@ -251,7 +251,7 @@ public class MarcFilteredReader implements MarcReader
                         String mapParts[] = remapString.split("=>");
                         if (eval(mapParts[0], (DataField)field, rec))
                         {
-                            keepRecord &= process(mapParts[1], field, sfToDelete, fToDelete, fToInsert);
+                            keepRecord &= process(mapParts[1], field, sfToDelete, fToDelete, fToInsert, rec);
                         }
                     }
 
@@ -275,7 +275,7 @@ public class MarcFilteredReader implements MarcReader
                 String mapParts[] = remapString.split("=>");
                 if (eval(mapParts[0], null, rec))
                 {
-                    keepRecord &= process(mapParts[1], null, null, fToDelete, fToInsert);
+                    keepRecord &= process(mapParts[1], null, null, fToDelete, fToInsert, rec);
                 }
             }
         }
@@ -436,7 +436,7 @@ public class MarcFilteredReader implements MarcReader
         return false;
     }
     
-    private boolean process(String command, VariableField field, List<Subfield> sfToDelete, List<VariableField> fToDelete, List<VariableField> fToInsert)
+    private boolean process(String command, VariableField field, List<Subfield> sfToDelete, List<VariableField> fToDelete, List<VariableField> fToInsert, Record record)
     {
         List<Subfield> subfields;
         if (command.startsWith("replace("))
@@ -524,15 +524,34 @@ public class MarcFilteredReader implements MarcReader
         else if (command.startsWith("both("))
         {
             String args[] = getTwoConditionals(command);
+            boolean returncode = true;
             if (args.length == 2)
             {
-                process(args[0], field, sfToDelete, fToDelete, fToInsert);
-                process(args[1], field, sfToDelete, fToDelete, fToInsert);
+                returncode = process(args[0], field, sfToDelete, fToDelete, fToInsert, record);
+                returncode &= process(args[1], field, sfToDelete, fToDelete, fToInsert, record);
             }
         }
         else if (command.startsWith("deletefield("))
         {
             fToDelete.add(field);
+        }
+        else if (command.startsWith("deleteotherfield("))
+        {
+            String args[] = getThreeArgs(command);
+            if (args.length == 3 && args[0].matches("[0-9][0-9][0-9]") && args[1].length() == 1)
+            {
+                for (VariableField vf : (List<VariableField>)record.getVariableFields(args[0]))
+                {
+                    subfields = ((DataField)vf).getSubfields(args[1].charAt(0));
+                    for (Subfield sf : subfields)
+                    {
+                        if (sf.getData().equals(args[2]) || sf.getData().matches(args[2]))
+                        {
+                            fToDelete.add(vf);
+                        }
+                    }
+                }
+            }
         }
         else if (command.startsWith("insertfield("))
         {
