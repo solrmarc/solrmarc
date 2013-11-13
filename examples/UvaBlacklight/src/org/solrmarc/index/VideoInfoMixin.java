@@ -265,7 +265,8 @@ public class VideoInfoMixin extends SolrIndexerMixin
             {
                 DataField df = (DataField)vf;
                 // this could be overly broad, and could also grab music directors or other roles containing the word "director"
-                if (ChkSubfield(df, '4', "drt") || ChkSubfield(df, 'c', ".*director.*") || ChkSubfield(df, 'e', ".*direct.*"))
+                if (ChkSubfield(df, '4', "drt") || ChkSubfield(df, 'c', "[(]?([Ff]ilm )?[Dd]irector[)]?[^a-z]*") || 
+                        (ChkSubfield(df, 'e', "(co-|film )?[Dd]irect(or|er|ion|eur|ed by)[^a-z]*") ))
                 {
                     String name = df.getSubfield('a').getData();
                     name = Utils.cleanData(name);
