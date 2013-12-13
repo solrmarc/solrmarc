@@ -889,6 +889,38 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
+     * Normalize a single LCCN
+     * @param record
+     * @param fieldSpec
+     * @return String Normalized LCCN
+     */
+    public String getFullCallNumberNormalized(final Record record) {
+
+        return(getFullCallNumberNormalized(record, "099ab:090ab:050ab"));
+    }
+
+    /**
+     * Normalize a single LCCN
+     * @param record
+     * @param fieldSpec
+     * @return String Normalized LCCN
+     */
+    public String getFullCallNumberNormalized(final Record record, String fieldSpec) {
+
+        if (fieldSpec != null) {
+            String cn = getFirstFieldVal(record, fieldSpec);
+            try {
+                return CallNumUtils.getLCShelfkey(cn, null);
+            } catch(Exception e) {
+                // Don't bail out of indexing just because of a weird call number!
+                //System.out.println("getFullCallNumberNormalized error: " + e);
+            }
+        }
+        // If we got this far, we couldn't find a valid value:
+        return null;
+    }
+
+    /**
      * Determine if a record is illustrated.
      *
      * @param  Record          record
