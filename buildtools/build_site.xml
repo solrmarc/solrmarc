@@ -703,6 +703,9 @@
                  <fileset dir="${site.test.dir}/tmp_solrmarc_jars" includes="*.jar" />
                  <fileset dir="${site.test.build.dir}" includes="**/*.jar" />
                  <fileset dir="${solr.jar.file.dir}" includes="*.jar" />
+            	 <!-- VuFindIndexer depends on ini4j -->
+            	 <!-- TODO: fix the hard-coded file name -->
+             	 <fileset dir="${site.lib.dir}" includes="**/ini4j-0.5.2-SNAPSHOT.jar" />
              </path>
          </sequential>
     </macrodef>

@@ -81,22 +81,12 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Default constructor
      * @param propertiesMapFile
+     * @param propertyDirs array of directories holding properties files
      * @throws Exception
      */
-    /*
-    public VuFindIndexer(final String propertiesMapFile) throws FileNotFoundException, IOException, ParseException
-    {
-        super(propertiesMapFile);
-    }
-    */
     public VuFindIndexer(final String propertiesMapFile, final String[] propertyDirs)
             throws FileNotFoundException, IOException, ParseException {
         super(propertiesMapFile, propertyDirs);
-        try {
-            vuFindConfigs = Utils.loadProperties(propertyDirs, "vufind.properties");
-        } catch (IllegalArgumentException e) {
-            // If the properties load failed, don't worry about it -- we'll use defaults.
-        }
     }
 
     /**
