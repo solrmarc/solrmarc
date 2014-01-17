@@ -1446,6 +1446,7 @@ public class SolrIndexer
      * @param mapName - the name of a translation map for the field value, or null
      * @param fieldVals - a set of (untranslated) field values to be assigned to the solr doc field
      */
+    // TODO: refactor so fieldVals is Collection<String>, must change Utils.remap first
     protected void addFields(Map<String, Object> indexMap, String ixFldName, String mapName, Set<String> fieldVals)
     {
         if (mapName != null && findMap(mapName) != null)
@@ -1470,9 +1471,11 @@ public class SolrIndexer
      * @param indexMap - the mapping of solr doc field names to values
      * @param ixFldName - the name of the field to add to the solr doc
      * @param mapName - the name of a translation map for the field value, or null
-     * @param fieldVals - a set of (untranslated) field values to be assigned to the solr doc field
+     * @param fieldVals - a <code>Collection</code> of (untranslated) field values
+     *                    to be assigned to the solr doc field, usuall a <code>Set</code>
+     *                    or <code>List</code>. 
      */
-    protected void addFields(Map<String, Object> indexMap, String ixFldName, List<String> fieldVals)
+    protected void addFields(Map<String, Object> indexMap, String ixFldName, Collection<String> fieldVals)
     {
         if (!fieldVals.isEmpty())
         {
@@ -1487,9 +1490,9 @@ public class SolrIndexer
     }
 
     /**
-     * Get Set of Strings as indicated by tagStr. For each field spec in the
-     * tagStr that is NOT about bytes (i.e. not a 008[7-12] type fieldspec), the
-     * result string is the concatenation of all the specific subfields.
+     * Get <code>Collection</code> of Strings as indicated by tagStr. For each field 
+     * spec in the tagStr that is NOT about bytes (i.e. not a 008[7-12] type fieldspec),  
+     * the result string is the concatenation of all the specific subfields.
      * 
      * @param record -
      *            the marc record object
@@ -1505,13 +1508,17 @@ public class SolrIndexer
      *            brackets are digits, it will be interpreted as particular
      *            bytes, NOT a pattern. 100abcd denotes subfields a, b, c, d are
      *            desired.
-     * @return the contents of the indicated marc field(s)/subfield(s), as a set
-     *         of Strings.
+     * @param collector
+     *            object in which to collect the data from the fields described by
+     *            <code>tagStr</code>. A <code>Set</code> will automatically de-dupe
+     *            values, a <code>List</code> will allow values to repeat. 
      */
-    public static Set<String> getFieldList(Record record, String tagStr)
+    public static void getFieldListCollector(Record record, 
+    		          				         String tagStr, 
+                                             Collection<String> collector)
     {
         String[] tags = tagStr.split(":");
-        Set<String> result = new LinkedHashSet<String>();
+        //Set<String> collector = new LinkedHashSet<String>();
         for (int i = 0; i < tags.length; i++)
         {
             // Check to ensure tag length is at least 3 characters
@@ -1544,7 +1551,7 @@ public class SolrIndexer
                     int substart = Integer.parseInt(sub[0]);
                     subend = (sub.length > 1) ? Integer.parseInt(sub[1]) + 1 : substart + 1;
                     String subfieldWObracket = subfield.substring(0, bracket-3);
-                    result.addAll(getSubfieldDataAsSet(record, tag, subfieldWObracket, substart, subend));
+                    getSubfieldDataCollector(record, tag, subfieldWObracket, substart, subend, collector);
                 }
                 catch (NumberFormatException e)
                 {
@@ -1563,18 +1570,84 @@ public class SolrIndexer
 
                 if (havePattern)
                     if (linkedField)
-                        result.addAll(getLinkedFieldValue(record, tag, subfield, separator));
+                    	getLinkedFieldValueCollector(record, tag, subfield, separator, collector);
                     else
-                        result.addAll(getAllSubfields(record, tag + subfield, separator));
+                        getAllSubfieldsCollector(record, tag + subfield, separator, collector);
                 else if (linkedField)
-                    result.addAll(getLinkedFieldValue(record, tag, subfield, separator));
+                	getLinkedFieldValueCollector(record, tag, subfield, separator, collector);
                 else
-                    result.addAll(getSubfieldDataAsSet(record, tag, subfield, separator));
+                	getSubfieldDataCollector(record, tag, subfield, separator, collector);
             }
         }
+        return;
+    }
+
+    /**
+     * Get Set of Strings as indicated by tagStr. For each field spec in the
+     * tagStr that is NOT about bytes (i.e. not a 008[7-12] type fieldspec), the
+     * result string is the concatenation of all the specific subfields.
+     * 
+     * @param record -
+     *            the marc record object
+     * @param tagStr
+     *            string containing which field(s)/subfield(s) to use. This is a
+     *            series of: marc "tag" string (3 chars identifying a marc
+     *            field, e.g. 245) optionally followed by characters identifying
+     *            which subfields to use. Separator of colon indicates a
+     *            separate value, rather than concatenation. 008[5-7] denotes
+     *            bytes 5-7 of the 008 field (0 based counting) 100[a-cf-z]
+     *            denotes the bracket pattern is a regular expression indicating
+     *            which subfields to include. Note: if the characters in the
+     *            brackets are digits, it will be interpreted as particular
+     *            bytes, NOT a pattern. 100abcd denotes subfields a, b, c, d are
+     *            desired.
+     * @return the contents of the indicated marc field(s)/subfield(s), as a set
+     *         of Strings.
+     */
+    public static Set<String> getFieldList(Record record, String tagStr)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        getFieldListCollector(record, tagStr, result);
         return result;
     }
 
+    /**
+     * Get <code>List</code> of Strings as indicated by tagStr. For each field spec in the
+     * tagStr that is NOT about bytes (i.e. not a 008[7-12] type fieldspec), the
+     * result string is the concatenation of all the specific subfields.
+     * 
+     * @param record -
+     *            the marc record object
+     * @param tagStr
+     *            string containing which field(s)/subfield(s) to use. This is a
+     *            series of: marc "tag" string (3 chars identifying a marc
+     *            field, e.g. 245) optionally followed by characters identifying
+     *            which subfields to use. Separator of colon indicates a
+     *            separate value, rather than concatenation. 008[5-7] denotes
+     *            bytes 5-7 of the 008 field (0 based counting) 100[a-cf-z]
+     *            denotes the bracket pattern is a regular expression indicating
+     *            which subfields to include. Note: if the characters in the
+     *            brackets are digits, it will be interpreted as particular
+     *            bytes, NOT a pattern. 100abcd denotes subfields a, b, c, d are
+     *            desired.
+     * @return the contents of the indicated marc field(s)/subfield(s).
+     */
+    public static List<String> getFieldListAsList(Record record, String tagStr)
+    {
+        List<String> result = new ArrayList<String>();
+        getFieldListCollector(record, tagStr, result);
+        return result;
+    }
+
+    /**
+     * Get the value that Solr should use as the <code>id</code> for this record.
+     * If <code>indexMap</code> has an entry for <code>id</code>, use that definition;
+     * if not, use the contents of the first <code>001</code>.
+     * 
+     * @param record
+     * @param indexMap
+     * @return
+     */
     public String getSolrId(Record record, Map<String, Object> indexMap)
     {      
         if (!indexMap.containsKey("id"))
@@ -1594,7 +1667,7 @@ public class SolrIndexer
         return ((String)keyObj);
     }
     
-    /****
+    /**
      * Intended to be called as a custom method from an indexing properties
      * file: some_field = custom, getWithOptions( marcFieldSpec, options)
      *
@@ -2117,24 +2190,22 @@ public class SolrIndexer
      * Get the specified subfields from the specified MARC field, returned as a
      * set of strings to become lucene document field values
      * 
-     * @param record - the marc record object
-     * @param fldTag - the field name, e.g. 245
-     * @param subfldsStr - the string containing the desired subfields
-     * @param separator - the separator string to insert between subfield items (if null, a " " will be used)
-     * @returns a Set of String, where each string is the concatenated contents
-     *          of all the desired subfield values from a single instance of the
-     *          fldTag
+     * @param record     the MARC record object
+     * @param fldTag     the field name, e.g. 245
+     * @param subfldsStr the string containing the desired subfields
+     * @param separator  the separator string to insert between subfield items (if null, a " " will be 
+     *                   used)
+     * @param collector  an object to accumulate the data indicated by <code>fldTag</code> and 
+     *                   <code>subfldsStr</code>.
      */
-    @SuppressWarnings("unchecked")
-    public static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldsStr, String separator)
+    public static void getSubfieldDataCollector(Record record, String fldTag, String subfldsStr, 
+    											String separator, Collection<String> collector)
     {
-        Set<String> resultSet = new LinkedHashSet<String>();
-
         // Process Leader
         if (fldTag.equals("000"))
         {
-            resultSet.add(record.getLeader().toString());
-            return resultSet;
+            collector.add(record.getLeader().toString());
+            return;
         }
 
         // Loop through Data and Control Fields
@@ -2162,7 +2233,7 @@ public class SolrIndexer
                         }
                     }
                     if (buffer.length() > 0)
-                        resultSet.add(buffer.toString());
+                        collector.add(buffer.toString());
                 }
                 else
                 {
@@ -2170,17 +2241,17 @@ public class SolrIndexer
                     List<Subfield> subFlds = dfield.getSubfields(subfldsStr.charAt(0));
                     for (Subfield sf : subFlds)
                     {
-                        resultSet.add(sf.getData().trim());
+                        collector.add(sf.getData().trim());
                     }
                 }
             }
             else
             {
                 // Control Field
-                resultSet.add(((ControlField) vf).getData().trim());
+                collector.add(((ControlField) vf).getData().trim());
             }
         }
-        return resultSet;
+        return;
     }
 
     /**
@@ -2191,36 +2262,35 @@ public class SolrIndexer
      * @param subfldsStr - the string containing the desired subfields
      * @param beginIx - the beginning index of the substring of the subfield value
      * @param endIx - the ending index of the substring of the subfield value
-     * @return the result set of strings
+     * @param collector  an object to accumulate the data indicated by <code>fldTag</code> and 
+     *                   <code>subfldsStr</code>.
      */
-    @SuppressWarnings("unchecked")
-    public static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfield, int beginIx, int endIx)
+    public static void getSubfieldDataCollector(Record record, String fldTag, String subfldStr, 
+    		           int beginIx, int endIx, Collection<String> collector)
     {
-        Set<String> resultSet = new LinkedHashSet<String>();
-
         // Process Leader
         if (fldTag.equals("000"))
         {
-            resultSet.add(record.getLeader().toString().substring(beginIx, endIx));
-            return resultSet;
+            collector.add(record.getLeader().toString().substring(beginIx, endIx));
+            return;
         }
 
         // Loop through Data and Control Fields
         List<VariableField> varFlds = record.getVariableFields(fldTag);
         for (VariableField vf : varFlds)
         {
-            if (!isControlField(fldTag) && subfield != null)
+            if (!isControlField(fldTag) && subfldStr != null)
             {
                 // Data Field
                 DataField dfield = (DataField) vf;
-                if (subfield.length() > 1)
+                if (subfldStr.length() > 1)
                 {
                     // automatic concatenation of grouped subfields
                     StringBuffer buffer = new StringBuffer("");
                     List<Subfield> subFlds = dfield.getSubfields();
                     for (Subfield sf : subFlds)
                     {
-                        if (subfield.indexOf(sf.getCode()) != -1 && 
+                        if (subfldStr.indexOf(sf.getCode()) != -1 && 
                                 sf.getData().length() >= endIx)
                         {
                             if (buffer.length() > 0)
@@ -2228,16 +2298,16 @@ public class SolrIndexer
                             buffer.append(sf.getData().substring(beginIx, endIx));
                         }
                     }
-                    resultSet.add(buffer.toString());
+                    collector.add(buffer.toString());
                 }
                 else
                 {
                     // get all instances of the single subfield
-                    List<Subfield> subFlds = dfield.getSubfields(subfield.charAt(0));
+                    List<Subfield> subFlds = dfield.getSubfields(subfldStr.charAt(0));
                     for (Subfield sf : subFlds)
                     {
                         if (sf.getData().length() >= endIx)
-                            resultSet.add(sf.getData().substring(beginIx, endIx));
+                            collector.add(sf.getData().substring(beginIx, endIx));
                     }
                 }
             }
@@ -2245,12 +2315,84 @@ public class SolrIndexer
             {
                 String cfldData = ((ControlField) vf).getData();
                 if (cfldData.length() >= endIx)
-                    resultSet.add(cfldData.substring(beginIx, endIx));
+                    collector.add(cfldData.substring(beginIx, endIx));
             }
         }
-        return resultSet;
+        return;
     }
-
+    
+    /**
+     * Get the specified subfields from the specified MARC field, returned as a
+     * set of strings to become lucene document field values
+     * 
+     * @param record - the marc record object
+     * @param fldTag - the field name, e.g. 245
+     * @param subfldsStr - the string containing the desired subfields
+     * @param separator - the separator string to insert between subfield items (if null, a " " will be used)
+     * @returns a Set of String, where each string is the concatenated contents
+     *          of all the desired subfield values from a single instance of the
+     *          fldTag
+     */
+    public static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldsStr, String separator)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        SolrIndexer.getSubfieldDataCollector(record, fldTag, subfldsStr, separator, result);
+        return result;
+    }
+    
+    /**
+     * Get the specified substring of subfield values from the specified MARC 
+     * field, returned as  a set of strings to become lucene document field values
+     * @param record - the marc record object
+     * @param fldTag - the field name, e.g. 008
+     * @param subfldsStr - the string containing the desired subfields
+     * @param beginIx - the beginning index of the substring of the subfield value
+     * @param endIx - the ending index of the substring of the subfield value
+     * @return the result set of strings
+     */
+    public static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldStr, int beginIx, int endIx)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        SolrIndexer.getSubfieldDataCollector(record, fldTag, subfldStr, beginIx, endIx, result);
+        return result;
+    }
+    
+    /**
+     * Get the specified subfields from the specified MARC field, returned as a
+     * set of strings to become lucene document field values
+     * 
+     * @param record - the marc record object
+     * @param fldTag - the field name, e.g. 245
+     * @param subfldsStr - the string containing the desired subfields
+     * @param separator - the separator string to insert between subfield items (if null, a " " will be used)
+     * @returns a List of String, where each string is the concatenated contents
+     *          of all the desired subfield values from a single instance of the
+     *          fldTag
+     */
+    public static List<String> getSubfieldDataAsList(Record record, String fldTag, String subfldsStr, String separator)
+    {
+    	List<String> result = new ArrayList<String>();
+        SolrIndexer.getSubfieldDataCollector(record, fldTag, subfldsStr, separator, result);
+        return result;
+    }
+    
+    /**
+     * Get the specified substring of subfield values from the specified MARC 
+     * field, returned as  a set of strings to become lucene document field values
+     * @param record - the marc record object
+     * @param fldTag - the field name, e.g. 008
+     * @param subfldsStr - the string containing the desired subfields
+     * @param beginIx - the beginning index of the substring of the subfield value
+     * @param endIx - the ending index of the substring of the subfield value
+     * @return the result list of strings
+     */
+    public static List<String> getSubfieldDataAsList(Record record, String fldTag, String subfldStr, int beginIx, int endIx)
+    {
+    	List<String> result = new ArrayList<String>();
+        SolrIndexer.getSubfieldDataCollector(record, fldTag, subfldStr, beginIx, endIx, result);
+        return result;
+    }
+    
     /**
      * Write a marc record as a binary string to the
      * @param record marc record object to be written
@@ -2363,12 +2505,15 @@ public class SolrIndexer
      * @param separator -
      *            the character to use between subfield values in the solr field
      *            contents
-     * @return Set of values (as strings) for solr field
+     * @param collector
+     *            object in which to collect the data from the fields described by
+     *            <code>tagStr</code>. A <code>Set</code> will automatically de-dupe
+     *            values, a <code>List</code> will allow values to repeat. 
      */
-    public static Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
+    public static void getAllSubfieldsCollector(final Record record, 
+    											String fieldSpec, String separator, 
+    											Collection<String> collector)
     {
-        Set<String> result = new LinkedHashSet<String>();
-
         String[] fldTags = fieldSpec.split(":");
         for (int i = 0; i < fldTags.length; i++)
         {
@@ -2403,14 +2548,58 @@ public class SolrIndexer
                         }
                     }
                     if (buffer.length() > 0)
-                        result.add(Utils.cleanData(buffer.toString()));
+                        collector.add(Utils.cleanData(buffer.toString()));
                 }
             }
         }
 
+        return;
+    }
+
+    /**
+     * extract all the subfields requested in requested marc fields. Each
+     * instance of each marc field will be put in a separate result (but the
+     * subfields will be concatenated into a single value for each marc field)
+     * 
+     * @param record
+     *            marc record object
+     * @param fieldSpec -
+     *            the desired marc fields and subfields as given in the
+     *            xxx_index.properties file
+     * @param separator -
+     *            the character to use between subfield values in the solr field
+     *            contents
+     * @return Set of values (as strings) for solr field
+     */
+    public static Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        getAllSubfieldsCollector(record, fieldSpec, separator, result);
         return result;
     }
 
+    /**
+     * extract all the subfields requested in requested marc fields. Each
+     * instance of each marc field will be put in a separate result (but the
+     * subfields will be concatenated into a single value for each marc field)
+     * 
+     * @param record
+     *            marc record object
+     * @param fieldSpec -
+     *            the desired marc fields and subfields as given in the
+     *            xxx_index.properties file
+     * @param separator -
+     *            the character to use between subfield values in the solr field
+     *            contents
+     * @return Set of values (as strings) for solr field
+     */
+    public static List<String> getAllSubfieldsAsList(final Record record, String fieldSpec, String separator)
+    {
+        List<String> result = new ArrayList<String>();
+        getAllSubfieldsCollector(record, fieldSpec, separator, result);
+        return result;
+    }
+    
     /**
      * For each occurrence of a marc field in the fieldSpec list, extract the
      * contents of all alphabetical subfields, concatenate them with a space
@@ -2428,7 +2617,6 @@ public class SolrIndexer
      * @return a set of strings, where each string is the concatenated values of
      *         all the alphabetic subfields.
      */
-    @SuppressWarnings("unchecked")
     public Set<String> getAllAlphaSubfields(final Record record, String fieldSpec) 
     {
         Set<String> resultSet = new LinkedHashSet<String>();
@@ -2490,7 +2678,6 @@ public class SolrIndexer
      * @return a set of strings, where each string is the concatenated values of
      *         all the alphabetic subfields.
      */
-    @SuppressWarnings("unchecked")
     public final Set<String> getAllAlphaSubfields(final Record record, String fieldSpec, String multOccurs) 
     {
         Set<String> result = getAllAlphaSubfields(record, fieldSpec);
@@ -2537,7 +2724,6 @@ public class SolrIndexer
      * @return a set of strings, where each string is the concatenated values of
      *         all the alphabetic subfields.
      */
-    @SuppressWarnings("unchecked")
     public Set<String> getAllAlphaExcept(final Record record, String fieldSpec)
     {
         Set<String> resultSet = new LinkedHashSet<String>();
@@ -2656,13 +2842,13 @@ public class SolrIndexer
      *            bytes, NOT a pattern 100abcd denotes subfields a, b, c, d are
      *            desired from the linked 880.
      * @param separator - the separator string to insert between subfield items (if null, a " " will be used)
-     * 
-     * @return set of Strings containing the values of the designated 880 field(s)/subfield(s)
+     * @param collector - object to accumulate the values of the designated 880 field(s)/subfield(s)
      */
-    public static Set<String> getLinkedFieldValue(final Record record, String tag, String subfield, String separator)
+    public static void getLinkedFieldValueCollector(final Record record, 
+    												String tag, String subfield, String separator,
+    												Collection<String> collector)
     {
         // assume brackets expression is a pattern such as [a-z]
-        Set<String> result = new LinkedHashSet<String>();
         boolean havePattern = false;
         Pattern subfieldPattern = null;
         if (subfield.indexOf('[') != -1)
@@ -2704,12 +2890,63 @@ public class SolrIndexer
                     }
                 }
                 if (buf.length() > 0) 
-                    result.add(Utils.cleanData(buf.toString()));
+                    collector.add(Utils.cleanData(buf.toString()));
             }
         }
-        return(result);
+        return;
     }
-    
+
+    /**
+     * Given a tag for a field, and a list (or regex) of one or more subfields
+     * get any linked 880 fields and include the appropriate subfields as a String value 
+     * in the result set.
+     * 
+     * @param record - marc record object
+     * @param tag -  the marc field for which 880s are sought.
+     * @param subfield -
+     *           The subfield(s) within the 880 linked field that should be returned
+     *            [a-cf-z] denotes the bracket pattern is a regular expression indicating 
+     *            which subfields to include from the linked 880. Note: if the characters 
+     *            in the brackets are digits, it will be interpreted as particular
+     *            bytes, NOT a pattern 100abcd denotes subfields a, b, c, d are
+     *            desired from the linked 880.
+     * @param separator - the separator string to insert between subfield items (if null, a " " will be used)
+     * 
+     * @return set of Strings containing the values of the designated 880 field(s)/subfield(s)
+     */
+    public static Set<String> getLinkedFieldValue(final Record record, String tag, String subfield, String separator)
+    {
+        // assume brackets expression is a pattern such as [a-z]
+        Set<String> result = new LinkedHashSet<String>();
+        SolrIndexer.getLinkedFieldValueCollector(record, tag, subfield, separator, result);
+		return result;
+    }
+
+    /**
+     * Given a tag for a field, and a list (or regex) of one or more subfields
+     * get any linked 880 fields and include the appropriate subfields as a String value 
+     * in the result set.
+     * 
+     * @param record - marc record object
+     * @param tag -  the marc field for which 880s are sought.
+     * @param subfield -
+     *           The subfield(s) within the 880 linked field that should be returned
+     *            [a-cf-z] denotes the bracket pattern is a regular expression indicating 
+     *            which subfields to include from the linked 880. Note: if the characters 
+     *            in the brackets are digits, it will be interpreted as particular
+     *            bytes, NOT a pattern 100abcd denotes subfields a, b, c, d are
+     *            desired from the linked 880.
+     * @param separator - the separator string to insert between subfield items (if null, a " " will be used)
+     * 
+     * @return list of Strings containing the values of the designated 880 field(s)/subfield(s)
+     */
+    public static List<String> getLinkedFieldValueAsList(final Record record, String tag, String subfield, String separator)
+    {
+        // assume brackets expression is a pattern such as [a-z]
+    	List<String> result = new ArrayList<String>();
+        SolrIndexer.getLinkedFieldValueCollector(record, tag, subfield, separator, result);
+		return result;
+    }
     
     /**
      * Given a fieldSpec, get the field(s)/subfield(s) values, PLUS any linked
