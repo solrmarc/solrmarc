@@ -2,14 +2,11 @@ package org.solrmarc.index;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.Properties;
+import java.util.List;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.MarcFactory;
@@ -17,48 +14,45 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.impl.MarcFactoryImpl;
 
 /** 
- * Tests some of the <code>getField*</code> methods of <code>SolrIndexer</code>.
+ * Tests the <code>getField*</code> and <code>getLinkedField*</code> methods 
+ * of <code>SolrIndexer</code>.
  * 
  *  @author Tod Olson <tod@uchicago.edu>
  */
 
-public class GetFieldUnitTests {
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
+public class GetFieldListUnitTests {
 
 	private MarcFactory marcFactory;
-	private SolrIndexer indexer;
-	private Record testRecCommonLaw;
 
-	public GetFieldUnitTests() {
+	public GetFieldListUnitTests() {
 		this.marcFactory = new MarcFactoryImpl();
-		// Don't really need any properties set for these methods.
-		this.indexer = SolrIndexer.indexerFromProperties(new Properties(), new String[] {"."});
-		
-		this.testRecCommonLaw = this.marcFactory.newRecord();
-		this.testRecCommonLaw.addVariableField(marcFactory.newDataField("240", '0', '4', "a", "The Common Law"));
-		this.testRecCommonLaw.addVariableField(marcFactory.newDataField("245", '0', '4', "a", "The Common Law",  "c", "by O. W. Holmes."));
-		this.testRecCommonLaw.addVariableField(marcFactory.newDataField("246", '0', '4', "a", "Common Law"));
-		this.testRecCommonLaw.addVariableField(marcFactory.newDataField("300", ' ', ' ', "a", "xvi, 422 p. ;", "c", "22 cm."));
-		this.testRecCommonLaw.addVariableField(marcFactory.newDataField("990", ' ', ' ', "a", "repeat field"));
-		this.testRecCommonLaw.addVariableField(marcFactory.newDataField("990", ' ', ' ', "a", "repeat field"));
-		this.testRecCommonLaw.addVariableField(marcFactory.newDataField("991", ' ', ' ', "a", "repeat subfield", "a", "repeat subfield"));
-		
 	}
 
-	@Before
-	public void setUp() throws Exception {
-	}
+	/*
+	 * Tests for getFieldListCollector
+	 * 
+	 * Most code paths will be tested through the tests for getFieldList and getFieldListAsList.
+	 * 
+	 * Focus on tests that do not vary by type of collector.
+	 */
 
-	@After
-	public void tearDown() throws Exception {
+	/*
+	 * getFieldListCollector: subfield not specified
+	 */
+	@Test(expected=StringIndexOutOfBoundsException.class)
+	public void testGetFieldListCollectorNoSubfield() { 
+		Record testRec = this.marcFactory.newRecord();
+		testRec.addVariableField(marcFactory.newDataField("245", '0', '4', "a", "The Common Law",  "c", "by O. W. Holmes."));
+		testRec.addVariableField(marcFactory.newDataField("990", ' ', ' ', "a", "single field"));
+		
+		SolrIndexer.getFieldListCollector(testRec, "990", new LinkedHashSet<String>());
 	}
+	
+	/*
+	 * Tests for getFieldList
+	 * 
+	 * Will test most of the code paths for getFieldListCollector
+	 */
 
 	/*
 	 * getFieldList: Test for fixed field ranges
@@ -368,122 +362,46 @@ public class GetFieldUnitTests {
 		assertEquals(expected, result);
 	}
 
-	@Test
-	public void testGetLinkedFieldValueSubFieldList() {
- 		Record testRec = this.marcFactory.newRecord();
-		DataField df245 = marcFactory.newDataField("245", ' ', ' ');
-		df245.addSubfield(marcFactory.newSubfield('6', "880-01"));
-		df245.addSubfield(marcFactory.newSubfield('a', "The Common Law"));
-		df245.addSubfield(marcFactory.newSubfield('c', "by O. W. Holmes."));
-		testRec.addVariableField(df245);
-		DataField df880 = marcFactory.newDataField("880", ' ', ' ');
-		df880.addSubfield(marcFactory.newSubfield('6', "245-01"));
-		df880.addSubfield(marcFactory.newSubfield('a', "The Vernacular Common Law"));
-		df880.addSubfield(marcFactory.newSubfield('c', "vernacularAuthor"));
-		testRec.addVariableField(df880);
-		
-		Set<String> expected = new LinkedHashSet<String>();
-		expected.add("The Vernacular Common Law");
-		
-		Set<String> result = SolrIndexer.getLinkedFieldValue(testRec, "245", "a", null);
-		
-		assertEquals(expected, result);
-	}
-	
-	@Test
-	public void testGetLinkedFieldValueSubFieldList2() {
- 		Record testRec = this.marcFactory.newRecord();
-		DataField df245 = marcFactory.newDataField("245", ' ', ' ');
-		df245.addSubfield(marcFactory.newSubfield('6', "880-01"));
-		df245.addSubfield(marcFactory.newSubfield('a', "The Common Law"));
-		df245.addSubfield(marcFactory.newSubfield('b', "or how to stop worrying..."));
-		df245.addSubfield(marcFactory.newSubfield('c', "by O. W. Holmes."));
-		testRec.addVariableField(df245);
-		DataField df880_245 = marcFactory.newDataField("880", ' ', ' ');
-		df880_245.addSubfield(marcFactory.newSubfield('6', "245-01"));
-		df880_245.addSubfield(marcFactory.newSubfield('a', "The Vernacular Common Law"));
-		df880_245.addSubfield(marcFactory.newSubfield('b', "vernacular sub-title"));
-		df880_245.addSubfield(marcFactory.newSubfield('c', "vernacularAuthor"));
-		testRec.addVariableField(df880_245);
-		DataField df900 = marcFactory.newDataField("900", ' ', ' ');
-		df900.addSubfield(marcFactory.newSubfield('6', "880-02"));
-		df900.addSubfield(marcFactory.newSubfield('a', "subA"));
-		df900.addSubfield(marcFactory.newSubfield('b', "subB"));
-		df900.addSubfield(marcFactory.newSubfield('c', "subC"));
-		df900.addSubfield(marcFactory.newSubfield('e', "subE"));
-		df900.addSubfield(marcFactory.newSubfield('f', "subF"));
-		df900.addSubfield(marcFactory.newSubfield('g', "subG"));
-		df900.addSubfield(marcFactory.newSubfield('h', "subH"));
-		df900.addSubfield(marcFactory.newSubfield('s', "subS"));
-		df900.addSubfield(marcFactory.newSubfield('t', "subT"));
-		df900.addSubfield(marcFactory.newSubfield('w', "subW"));
-		df900.addSubfield(marcFactory.newSubfield('y', "subHY"));
-		testRec.addVariableField(df900);
-		DataField df880_900 = marcFactory.newDataField("880", ' ', ' ');
-		df880_900.addSubfield(marcFactory.newSubfield('6', "900-02"));
-		df880_900.addSubfield(marcFactory.newSubfield('a', "VsubA"));
-		df880_900.addSubfield(marcFactory.newSubfield('b', "VsubB"));
-		df880_900.addSubfield(marcFactory.newSubfield('c', "VsubC"));
-		df880_900.addSubfield(marcFactory.newSubfield('e', "VsubE"));
-		df880_900.addSubfield(marcFactory.newSubfield('f', "VsubF"));
-		df880_900.addSubfield(marcFactory.newSubfield('g', "VsubG"));
-		df880_900.addSubfield(marcFactory.newSubfield('h', "VsubH"));
-		df880_900.addSubfield(marcFactory.newSubfield('s', "VsubS"));
-		df880_900.addSubfield(marcFactory.newSubfield('t', "VsubT"));
-		df880_900.addSubfield(marcFactory.newSubfield('w', "VsubW"));
-		df880_900.addSubfield(marcFactory.newSubfield('y', "VsubHY"));
-		testRec.addVariableField(df880_900);
+	/*
+	 * Tests for getFieldListAsList
+	 * 
+	 * Focus on areas where results will be different from getFieldList 
+	 */
 
+
+	@Test
+	public void testGetFieldListAsListRepeatedFieldDupValues() {
+ 		Record testRec = this.marcFactory.newRecord();
+		testRec.addVariableField(marcFactory.newDataField("245", '0', '4', "a", "The Common Law",  "c", "by O. W. Holmes."));
+		testRec.addVariableField(marcFactory.newDataField("990", ' ', ' ', "a", "first"));
+		testRec.addVariableField(marcFactory.newDataField("990", ' ', ' ', "a", "first"));
+		testRec.addVariableField(marcFactory.newDataField("990", ' ', ' ', "a", "second"));
+
+		List<String> expected = new ArrayList<String>();
+		expected.add("first");
+		expected.add("first");
+		expected.add("second");
 		
-		Set<String> expected = new LinkedHashSet<String>();
-		expected.add("VsubC VsubE VsubF VsubS VsubT");
+		List<String> result = SolrIndexer.getFieldListAsList(testRec, "990a");
 		
-		Set<String> result = SolrIndexer.getLinkedFieldValue(testRec, "900", "[c-fr-t]", null);
-		
+		assertEquals(4, testRec.getDataFields().size());
 		assertEquals(expected, result);
 	}
 
 	@Test
-	public void testGetLinkedFieldValueBracketExpressionTrivial() {
+	public void testGetFieldListAsListDupValues() {
  		Record testRec = this.marcFactory.newRecord();
-		DataField df245 = marcFactory.newDataField("245", ' ', ' ');
-		df245.addSubfield(marcFactory.newSubfield('6', "880-01"));
-		df245.addSubfield(marcFactory.newSubfield('a', "The Common Law"));
-		df245.addSubfield(marcFactory.newSubfield('c', "by O. W. Holmes."));
-		testRec.addVariableField(df245);
-		DataField df880 = marcFactory.newDataField("880", ' ', ' ');
-		df880.addSubfield(marcFactory.newSubfield('6', "245-01"));
-		df880.addSubfield(marcFactory.newSubfield('a', "The Vernacular Common Law"));
-		df880.addSubfield(marcFactory.newSubfield('c', "vernacularAuthor"));
-		testRec.addVariableField(df880);		
-		Set<String> expected = new LinkedHashSet<String>();
-		expected.add("The Vernacular Common Law");
-		
-		Set<String> result = SolrIndexer.getLinkedFieldValue(testRec, "245", "[a]", null);
-		
-		assertEquals(expected, result);
-	}
+		testRec.addVariableField(marcFactory.newDataField("245", '0', '4', "a", "The Common Law",  "c", "by O. W. Holmes."));
+		testRec.addVariableField(marcFactory.newDataField("990", ' ', ' ', "a", "first"));
+		testRec.addVariableField(marcFactory.newDataField("991", ' ', ' ', "a", "first"));
+		testRec.addVariableField(marcFactory.newDataField("991", ' ', ' ', "a", "second"));
 
-	@Test
-	public void testGetLinkedFieldValueBracketExpressionRange() {
- 		Record testRec = this.marcFactory.newRecord();
-		DataField df245 = marcFactory.newDataField("245", ' ', ' ');
-		df245.addSubfield(marcFactory.newSubfield('6', "880-01"));
-		df245.addSubfield(marcFactory.newSubfield('a', "The Common Law"));
-		df245.addSubfield(marcFactory.newSubfield('b', "or how to stop worrying..."));
-		df245.addSubfield(marcFactory.newSubfield('c', "by O. W. Holmes."));
-		testRec.addVariableField(df245);
-		DataField df880 = marcFactory.newDataField("880", ' ', ' ');
-		df880.addSubfield(marcFactory.newSubfield('6', "245-01"));
-		df880.addSubfield(marcFactory.newSubfield('a', "The Vernacular Common Law"));
-		df880.addSubfield(marcFactory.newSubfield('b', "vernacular sub-title"));
-		df880.addSubfield(marcFactory.newSubfield('c', "vernacularAuthor"));
-		testRec.addVariableField(df880);
+		List<String> expected = new ArrayList<String>();
+		expected.add("first");
+		expected.add("first");
+		expected.add("second");
 		
-		Set<String> expected = new LinkedHashSet<String>();
-		expected.add("The Vernacular Common Law");
-		
-		Set<String> result = SolrIndexer.getLinkedFieldValue(testRec, "245", "[a]", null);
+		List<String> result = SolrIndexer.getFieldListAsList(testRec, "990a:991a");
 		
 		assertEquals(expected, result);
 	}

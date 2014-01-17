@@ -6,7 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.junit.Test;
-import org.marc4j.marc.ControlField;
 import org.marc4j.marc.MarcFactory;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.impl.MarcFactoryImpl;
@@ -116,6 +115,45 @@ public class GetAllSubfieldsUnitTests {
 		expected.add("Hope");
 		expected.add("Crosby 1942");
 		Set<String> result = SolrIndexer.getAllSubfields(testRec, "900[b-c]", null);
+		assertEquals(expected, result);
+	}
+
+	/*
+	 * Tests for getAllSubfieldsCollector
+	 * 
+	 * Above tests exercise code with the collector as a Set.
+	 * Focus on behaviors that are different if collector is not a Set
+	 */
+	
+	@Test
+	public void testGetAllSubfieldsCollectorListRepeatedFields() {
+		Record testRec = this.marcFactory.newRecord();
+		testRec.addVariableField(marcFactory.newDataField("900", '0', '4', "a", "Bob", "c", "Hope"));
+		testRec.addVariableField(marcFactory.newDataField("900", '0', '4', "a", "Bob", "c", "Hope"));
+		testRec.addVariableField(marcFactory.newDataField("901", '0', ' ', "a", "Bing", "b", "Crosby", "c", "1942"));
+		testRec.addVariableField(marcFactory.newDataField("902", ' ', ' ', "a", "Jack", "e", "Benny"));
+		
+		Set<String> expected = new LinkedHashSet<String>();
+		expected.add("Bob Hope");
+		expected.add("Bob Hope");
+		expected.add("Bing 1942");
+		Set<String> result = SolrIndexer.getAllSubfields(testRec, "900[ac]:901[ac]", null);
+		assertEquals(expected, result);
+	}
+
+	@Test
+	public void testGetAllSubfieldsCollectorListRepeatedValues() {
+		Record testRec = this.marcFactory.newRecord();
+		testRec.addVariableField(marcFactory.newDataField("900", '0', '4', "a", "Bob", "c", "Hope"));
+		testRec.addVariableField(marcFactory.newDataField("901", '0', ' ', "a", "Bing", "b", "Crosby", "c", "1942"));
+		testRec.addVariableField(marcFactory.newDataField("902", ' ', ' ', "a", "Jack", "e", "Benny"));
+		testRec.addVariableField(marcFactory.newDataField("903", '0', '4', "a", "Bob", "c", "Hope"));
+		
+		Set<String> expected = new LinkedHashSet<String>();
+		expected.add("Bob Hope");
+		expected.add("Jack");
+		expected.add("Bob Hope");
+		Set<String> result = SolrIndexer.getAllSubfields(testRec, "900[ac]:902[a]:903[ac]", null);
 		assertEquals(expected, result);
 	}
 
