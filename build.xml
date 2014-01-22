@@ -154,8 +154,7 @@
         <echo message="Use 'ant test' to run unit tests" />
         <echo message="To build and test an example configuration in its own sub directory do the following:" />
         <echo message="      ant -Dsite.dir=test-GenericBlacklight -Ddist.path=dist dist test" />
-
-
+        <echo message="Use 'ant javadoc' to build SolrMarc API documentation" />
     </target>
 
     <!-- Site Testing Targets -->
@@ -218,5 +217,23 @@
              <property name="dist.path" location="core-only/${dist.dir}" />
          </ant>
     </target>
+	
+	<!-- Build Javadoc -->
+	<target name="javadoc"
+		description="Build java api documentation">
+		<javadoc packagenames="org.solrmarc.*" 
+			sourcepath="lib/solrmarc/src" 
+			destdir="docs/api"
+			windowtitle="SolrMarc API">
+			<classpath>
+				<fileset dir="${lib.dir}">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+			<doctitle>SolrMarc API</doctitle>
+			<header>SolrMarc API</header>
+			<footer>SolrMarc API</footer>
+		</javadoc>
+	</target>
 
 </project>
