@@ -1411,10 +1411,10 @@ public class SolrIndexer
     /**
      * Add a field-value pair to the indexMap representation of a solr doc.
      *  The value will be "translated" per the translation map indicated.
-     * @param indexMap - the mapping of solr doc field names to values
-     * @param ixFldName - the name of the field to add to the solr doc
-     * @param mapName - the name of a translation map for the field value, or null
-     * @param fieldVal - the (untranslated) field value to add to the solr doc field
+     * @param indexMap  the mapping of solr doc field names to values
+     * @param ixFldName the name of the field to add to the solr doc
+     * @param mapName   the name of a translation map for the field value, or null
+     * @param fieldVal  the (untranslated) field value to add to the solr doc field
      */
     protected void addField(Map<String, Object> indexMap, String ixFldName, String mapName, String fieldVal)
     {
@@ -1427,10 +1427,10 @@ public class SolrIndexer
 
     /**
      * Add a field-value pair to the indexMap representation of a solr doc.
-     * @param indexMap - the mapping of solr doc field names to values
-     * @param ixFldName - the name of the field to add to the solr doc
-     * @param mapName - the name of a translation map for the field value, or null
-     * @param fieldVal - the (untranslated) field value to add to the solr doc field
+     * 
+     * @param indexMap  the mapping of solr doc field names to values
+     * @param ixFldName the name of the field to add to the solr doc
+     * @param fieldVal  the (untranslated) field value to add to the solr doc field
      */
     protected void addField(Map<String, Object> indexMap, String ixFldName, String fieldVal)
     {
@@ -1441,10 +1441,10 @@ public class SolrIndexer
      * Add a field-value pair to the indexMap representation of a solr doc for
      *  each value present in the "fieldVals" parameter.
      *  The values will be "translated" per the translation map indicated.
-     * @param indexMap - the mapping of solr doc field names to values
-     * @param ixFldName - the name of the field to add to the solr doc
-     * @param mapName - the name of a translation map for the field value, or null
-     * @param fieldVals - a set of (untranslated) field values to be assigned to the solr doc field
+     * @param indexMap  the mapping of solr doc field names to values
+     * @param ixFldName the name of the field to add to the solr doc
+     * @param mapName   the name of a translation map for the field value, or null
+     * @param fieldVals a set of (untranslated) field values to be assigned to the solr doc field
      */
     // TODO: refactor so fieldVals is Collection<String>, must change Utils.remap first
     protected void addFields(Map<String, Object> indexMap, String ixFldName, String mapName, Set<String> fieldVals)
@@ -1468,12 +1468,12 @@ public class SolrIndexer
      * Add a field-value pair to the indexMap representation of a solr doc for
      *  each value present in the "fieldVals" parameter.
      *  The values will be "translated" per the translation map indicated.
-     * @param indexMap - the mapping of solr doc field names to values
-     * @param ixFldName - the name of the field to add to the solr doc
-     * @param mapName - the name of a translation map for the field value, or null
-     * @param fieldVals - a <code>Collection</code> of (untranslated) field values
-     *                    to be assigned to the solr doc field, usuall a <code>Set</code>
-     *                    or <code>List</code>. 
+     *  
+     * @param indexMap  the mapping of solr doc field names to values
+     * @param ixFldName the name of the field to add to the solr doc
+     * @param fieldVals a <code>Collection</code> of (untranslated) field values
+     *                  to be assigned to the solr doc field, usuall a <code>Set</code>
+     *                  or <code>List</code>. 
      */
     protected void addFields(Map<String, Object> indexMap, String ixFldName, Collection<String> fieldVals)
     {
@@ -1644,9 +1644,9 @@ public class SolrIndexer
      * If <code>indexMap</code> has an entry for <code>id</code>, use that definition;
      * if not, use the contents of the first <code>001</code>.
      * 
-     * @param record
-     * @param indexMap
-     * @return
+     * @param  record
+     * @param  indexMap
+     * @return Solr <code>id</code> for the record
      */
     public String getSolrId(Record record, Map<String, Object> indexMap)
     {      
@@ -1932,7 +1932,7 @@ public class SolrIndexer
      *         and with non-filing characters omitted. Null returned if no
      *         title can be found. 
      * 
-     * @see org.solrmarc.index.SolrIndexer.getTitle()
+     * @see SolrIndexer#getTitle
      */
     public String getSortableTitle(Record record)
     {
@@ -2259,7 +2259,7 @@ public class SolrIndexer
      * field, returned as  a set of strings to become lucene document field values
      * @param record - the marc record object
      * @param fldTag - the field name, e.g. 008
-     * @param subfldsStr - the string containing the desired subfields
+     * @param subfldStr - the string containing the desired subfields
      * @param beginIx - the beginning index of the substring of the subfield value
      * @param endIx - the ending index of the substring of the subfield value
      * @param collector  an object to accumulate the data indicated by <code>fldTag</code> and 
@@ -2325,13 +2325,13 @@ public class SolrIndexer
      * Get the specified subfields from the specified MARC field, returned as a
      * set of strings to become lucene document field values
      * 
-     * @param record - the marc record object
-     * @param fldTag - the field name, e.g. 245
-     * @param subfldsStr - the string containing the desired subfields
-     * @param separator - the separator string to insert between subfield items (if null, a " " will be used)
-     * @returns a Set of String, where each string is the concatenated contents
-     *          of all the desired subfield values from a single instance of the
-     *          fldTag
+     * @param record     the marc record object
+     * @param fldTag     the field name, e.g. 245
+     * @param subfldsStr the string containing the desired subfields
+     * @param separator  the separator string to insert between subfield items 
+     *                   (if <code>null</code>, a " " will be used)
+     * @return           a Set of String, where each string is the concatenated contents of all the
+     *                   desired subfield values from a single instance of the <code>fldTag</code>
      */
     public static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldsStr, String separator)
     {
@@ -2343,12 +2343,12 @@ public class SolrIndexer
     /**
      * Get the specified substring of subfield values from the specified MARC 
      * field, returned as  a set of strings to become lucene document field values
-     * @param record - the marc record object
-     * @param fldTag - the field name, e.g. 008
-     * @param subfldsStr - the string containing the desired subfields
-     * @param beginIx - the beginning index of the substring of the subfield value
-     * @param endIx - the ending index of the substring of the subfield value
-     * @return the result set of strings
+     * @param record    the marc record object
+     * @param fldTag    the field name, e.g. 008
+     * @param subfldStr the string containing the desired subfields
+     * @param beginIx   the beginning index of the substring of the subfield value
+     * @param endIx     the ending index of the substring of the subfield value
+     * @return          the result set of strings
      */
     public static Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldStr, int beginIx, int endIx)
     {
@@ -2361,30 +2361,30 @@ public class SolrIndexer
      * Get the specified subfields from the specified MARC field, returned as a
      * set of strings to become lucene document field values
      * 
-     * @param record - the marc record object
-     * @param fldTag - the field name, e.g. 245
-     * @param subfldsStr - the string containing the desired subfields
-     * @param separator - the separator string to insert between subfield items (if null, a " " will be used)
-     * @returns a List of String, where each string is the concatenated contents
-     *          of all the desired subfield values from a single instance of the
-     *          fldTag
+     * @param record    the marc record object
+     * @param fldTag    the field name, e.g. 245
+     * @param subfldStr the string containing the desired subfields
+     * @param separator  the separator string to insert between subfield items 
+     *                   (if <code>null</code>, a " " will be used)
+     * @return           a List of String, where each string is the concatenated contents of all the
+     *                   desired subfield values from a single instance of the <code>fldTag</code>
      */
-    public static List<String> getSubfieldDataAsList(Record record, String fldTag, String subfldsStr, String separator)
+    public static List<String> getSubfieldDataAsList(Record record, String fldTag, String subfldStr, String separator)
     {
     	List<String> result = new ArrayList<String>();
-        SolrIndexer.getSubfieldDataCollector(record, fldTag, subfldsStr, separator, result);
+        SolrIndexer.getSubfieldDataCollector(record, fldTag, subfldStr, separator, result);
         return result;
     }
     
     /**
      * Get the specified substring of subfield values from the specified MARC 
      * field, returned as  a set of strings to become lucene document field values
-     * @param record - the marc record object
-     * @param fldTag - the field name, e.g. 008
-     * @param subfldsStr - the string containing the desired subfields
-     * @param beginIx - the beginning index of the substring of the subfield value
-     * @param endIx - the ending index of the substring of the subfield value
-     * @return the result list of strings
+     * @param record    the marc record object
+     * @param fldTag    the field name, e.g. 008
+     * @param subfldStr the string containing the desired subfields
+     * @param beginIx   the beginning index of the substring of the subfield value
+     * @param endIx     the ending index of the substring of the subfield value
+     * @return          the result list of strings
      */
     public static List<String> getSubfieldDataAsList(Record record, String fldTag, String subfldStr, int beginIx, int endIx)
     {
@@ -2606,16 +2606,12 @@ public class SolrIndexer
      * separator and add the string to the result set. Each instance of each
      * marc field will be put in a separate result.
      * 
-     * @param record - the marc record
-     * @param fieldSpec -
-     *            the marc fields (e.g. 600:655) in which we will grab the
-     *            alphabetic subfield contents for the result set. The field may
-     *            not be a control field (must be 010 or greater)
-     * @param multOccurs -
-     *            "first", "join" or "all" indicating how to handle multiple
-     *            occurrences of field values
-     * @return a set of strings, where each string is the concatenated values of
-     *         all the alphabetic subfields.
+     * @param record    the marc record
+     * @param fieldSpec the marc fields (e.g. 600:655) in which we will grab the
+     *                  alphabetic subfield contents for the result set. The field may
+     *                  not be a control field (must be 010 or greater)
+     * @return          a set of strings, where each string is the concatenated values of
+     *                  all the alphabetic subfields.
      */
     public Set<String> getAllAlphaSubfields(final Record record, String fieldSpec) 
     {
@@ -3159,10 +3155,10 @@ public class SolrIndexer
     /**
      * treats indicator 2 as the number of non-filing indicators to exclude,
      * removes ascii punctuation
-     * @param DataField with ind2 containing # non-filing chars, or has value ' '
-     * @param skipSubFldc true if subfield c contents should be skipped
-     * @return StringBuffer of the contents of the subfields - with a trailing
-     *         space
+     * @param df          <code>DataField</code> with <code>ind2</code> containing # non-filing chars, or has value ' '
+     * @param skipSubFldc <code>true</code> if subfield c contents should be skipped
+     * @return            <code>StringBuffer</code> of the contents of the subfields - with a trailing
+     *                    space
      */
     @SuppressWarnings("unchecked")
     protected StringBuffer getAlphaSubfldsAsSortStr(DataField df, boolean skipSubFldc)

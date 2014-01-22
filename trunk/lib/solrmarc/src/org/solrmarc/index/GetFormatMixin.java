@@ -747,8 +747,8 @@ public class GetFormatMixin extends SolrIndexerMixin
     /**
      * Return the content type and media types, plus electronic, for this record
      * 
-     * @param Record   -  MARC Record
-     * @return Set of Strings of content types and media types
+     * @param record  MARC Record
+     * @return        Set of Strings of content types and media types
      */
     public Set<String> getContentTypesAndMediaTypesMapped(final Record record, String mapFileName)
     {
@@ -779,8 +779,8 @@ public class GetFormatMixin extends SolrIndexerMixin
     /**
      * Return the content type and media types, plus electronic, for this record
      * 
-     * @param Record   -  MARC Record
-     * @return Set of Strings of content types and media types
+     * @param record MARC Record
+     * @return       Set of Strings of content types and media types
      */
     public Set<String> getContentTypesAndMediaTypes(final Record record)
     {
@@ -877,9 +877,9 @@ public class GetFormatMixin extends SolrIndexerMixin
      * Add types EBook and Online for electronic items for this record
      * @param checkURLs 
      * 
-     * @param Record  -  MARC Record
-     * @param Set<String>  - the Set of formats to add the types EBook and Online to 
-     * @return String of primary material types
+     * @param record  MARC Record
+     * @param formats the <code>Set</code> of formats to add the types EBook and Online to 
+     * @return        <code>String</code> of primary material types
      */
 
     public Set<String> addOnlineTypes(final Record record, Set<String> formats, boolean checkURLs)
@@ -905,9 +905,8 @@ public class GetFormatMixin extends SolrIndexerMixin
     /**
      * Return the primary content type for this record
      * 
-     * @param Record
-     *            MARC Record
-     * @return String of primary material types
+     * @param record MARC Record
+     * @return       <code>String</code> of primary material types
      */
 
     public String getPrimaryContentType(final Record record)
@@ -928,8 +927,8 @@ public class GetFormatMixin extends SolrIndexerMixin
     /**
      * Return the primary content type, plus electronic, for this record
      * 
-     * @param Record  -  MARC Record
-     * @return String of primary material types
+     * @param record MARC Record
+     * @return       String of primary material types
      */
 
     public Set<String> getPrimaryContentTypePlusOnline(final Record record)
@@ -949,9 +948,8 @@ public class GetFormatMixin extends SolrIndexerMixin
     /**
      * Parse out content types from record
      * 
-     * @param Record
-     *            MARC Record
-     * @return List of material types
+     * @param record MARC Record
+     * @return       <code>List</code> of material types
      */
 
     public boolean isArchive(final Record record)
@@ -971,9 +969,8 @@ public class GetFormatMixin extends SolrIndexerMixin
     /**
      * Parse out content types from record
      * 
-     * @param Record
-     *            MARC Record
-     * @return List of material types
+     * @param record MARC Record
+     * @return       <code>List</code> of material types
      */
 
     public Set<String> getContentTypes(final Record record)
@@ -1263,9 +1260,8 @@ public class GetFormatMixin extends SolrIndexerMixin
     /**
      * Parse out media / carrier types from record
      * 
-     * @param Record
-     *            MARC Record
-     * @return List of material types
+     * @param record MARC Record
+     * @return       <code>List</code> of material types
      */
 
     public Set<String> getMediaTypes(final Record record)
@@ -1839,9 +1835,8 @@ public class GetFormatMixin extends SolrIndexerMixin
     /**
      * Whether the record contains a full-text link
      * 
-     * @param Record
-     *            record
-     * @return Boolean
+     * @param record MARC Record
+     * @return       <code>true</code> if record contains a full-text link
      */
 
     public Boolean hasFullText(final Record record)
@@ -1881,11 +1876,11 @@ public class GetFormatMixin extends SolrIndexerMixin
     }
     
     /**
-     * Shift an element to the front of our list
+     * Shift (or add) element to the front of our list
      *
      * @param formats list
-     * @param add item to add
-     * @return
+     * @param add     item to add
+     * @return        new <code>Set</code> with item <code>add</code> at the front
      */
 
     protected Set<String> addToTop(Set<String> formats, String add )

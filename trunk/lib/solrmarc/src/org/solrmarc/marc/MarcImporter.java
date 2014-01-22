@@ -90,7 +90,6 @@ public class MarcImporter extends MarcHandler
         
     /**
      * Load the properties file
-     * @param properties
      */
     @Override
     protected void loadLocalProperties() 
@@ -454,8 +453,8 @@ public class MarcImporter extends MarcHandler
     
     /**
      * Add a document to the index according to the fields map
-     * @param record marc record to add
-     * @return the document added, as a String
+     * @param fieldsMap fields to index (from MARC record)
+     * @return          the document added, as a String
      */
     protected String addToIndex(Map<String, Object> fieldsMap)
         throws IOException
@@ -591,7 +590,6 @@ public class MarcImporter extends MarcHandler
     /**
      * Main loop in the MarcImporter class the handles all of 
      * importing and deleting of records.
-     * @param args
      */
     @Override
     public int handleAll()

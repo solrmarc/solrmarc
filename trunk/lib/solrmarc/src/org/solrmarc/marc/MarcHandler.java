@@ -519,7 +519,8 @@ public abstract class MarcHandler {
                     
 	/**
 	 * Load the Custom Indexer routine
-	 * @param properties
+	 * @param indexerName  class name of the indexer
+	 * @param indexerProps name of properties file for the indexer
 	 * @throws IOException
 	 */
 	public void loadIndexer(String indexerName, String indexerProps) 

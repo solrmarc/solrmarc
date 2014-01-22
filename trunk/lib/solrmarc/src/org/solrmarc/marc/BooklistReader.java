@@ -39,8 +39,6 @@ public class BooklistReader extends SolrReIndexer
     String booklistFilename = null;
     /**
      * Constructor
-     * @param properties Path to properties files
-     * @throws IOException
      */
     public BooklistReader() 
     {

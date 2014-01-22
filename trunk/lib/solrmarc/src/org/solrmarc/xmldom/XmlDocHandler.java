@@ -456,7 +456,8 @@ public abstract class XmlDocHandler {
                     
 	/**
 	 * Load the Custom Indexer routine
-	 * @param properties
+	 * @param indexerName  name of indexer class
+	 * @param indexerProps name of property file for indexer
 	 * @throws IOException
 	 */
 	public void loadIndexer(String indexerName, String indexerProps) 
