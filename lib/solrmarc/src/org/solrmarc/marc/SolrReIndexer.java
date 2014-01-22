@@ -40,9 +40,6 @@ public class SolrReIndexer extends MarcImporter
     
     /**
      * Constructor
-     * @param properties path to properties files
-     * @param args additional arguments
-     * @throws IOException
      */
     public SolrReIndexer()
     {
@@ -249,8 +246,8 @@ public class SolrReIndexer extends MarcImporter
     
     /**
      * Add information from a document to a map.
-     * @param doc
-     * @param map
+     * @param doc    Solr Document to pull information from
+     * @param docMap <code>Map</code> to add information to
      */
     protected void addExtraInfoFromDocToMap(SolrDocument doc, Map<String, Object> docMap)
     {

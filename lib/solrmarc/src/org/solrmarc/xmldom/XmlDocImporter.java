@@ -95,7 +95,6 @@ public class XmlDocImporter extends XmlDocHandler
         
     /**
      * Load the properties file
-     * @param properties
      */
     @Override
     protected void loadLocalProperties() 
@@ -435,8 +434,8 @@ public class XmlDocImporter extends XmlDocHandler
     
     /**
      * Add a document to the index according to the fields map
-     * @param record marc record to add
-     * @return the document added, as a String
+     * @param fieldsMap marc record to add, as map of Solr fields
+     * @return          the document added, as a String
      */
     protected String addToIndex(Map<String, Object> fieldsMap)
         throws IOException
@@ -572,7 +571,6 @@ public class XmlDocImporter extends XmlDocHandler
     /**
      * Main loop in the MarcImporter class the handles all of 
      * importing and deleting of records.
-     * @param args
      */
     @Override
     public int handleAll()

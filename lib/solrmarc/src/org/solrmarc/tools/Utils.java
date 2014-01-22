@@ -71,9 +71,9 @@ public final class Utils {
      * Check first for a particular property in the System Properties, so that the -Dprop="value" command line arg 
      * mechanism can be used to override values defined in the passed in property file.  This is especially useful
      * for defining the marc.source property to define which file to operate on, in a shell script loop.
-     * @param props - property set in which to look.
-     * @param propname - name of the property to lookup.
-     * @returns String - value stored for that property (or null if it doesn't exist) 
+     * @param props    property set in which to look.
+     * @param propname name of the property to lookup.
+     * @return         value stored for that property (or null if it doesn't exist) 
      */
     public static String getProperty(Properties props, String propname)
     {
@@ -84,10 +84,10 @@ public final class Utils {
      * Check first for a particular property in the System Properties, so that the -Dprop="value" command line arg 
      * mechanism can be used to override values defined in the passed in property file.  This is especially useful
      * for defining the marc.source property to define which file to operate on, in a shell script loop.
-     * @param props - property set in which to look.
-     * @param propname - name of the property to lookup.
-     * @param defVal - the default value to use if property is not defined
-     * @returns String - value stored for that property (or the  if it doesn't exist) 
+     * @param props    property set in which to look.
+     * @param propname name of the property to lookup.
+     * @param defVal   the default value to use if property is not defined
+     * @return         value stored for that property (or the  if it doesn't exist) 
      */
     public static String getProperty(Properties props, String propname, String defVal)
     {
@@ -661,7 +661,7 @@ public final class Utils {
      * If there is a period at the end of the string, remove the period if it is
      *  immediately preceded by the regular expression
      * @param origStr the string to be cleaned
-     * @param charsB4periodRegEx a regular expression that must immediately 
+     * @param precedingCharsRegEx a regular expression that must immediately 
      *  precede a trailing period IN ORDER FOR THE PERIOD TO BE REMOVED. 
      *  Note that the regular expression will NOT have the period or '$' at 
      *  the end. 
@@ -825,11 +825,11 @@ public final class Utils {
      *      values, then the default lookup needs to be done here.  If the spec
      *      for a field is only supposed to return the first matching mappable 
      *      value, then the default mapping should be done in the calling method 
-     * @param fieldVal - the raw value to be mapped
-     * @param map - the map to be used
-     * @param allowDefault - if "displayRawIfMissing" is not a key in the map, 
-     *   and this is to true, then if the map contains "__DEFAULT" as a key, 
-     *   the value of "__DEFAULT" in the map is used.  
+     * @param set          the raw values to be mapped
+     * @param map          the map to be used
+     * @param allowDefault if "displayRawIfMissing" is not a key in the map, 
+     *                     and this is to true, then if the map contains "__DEFAULT" as a key, 
+     *                     the value of "__DEFAULT" in the map is used.  
      * @return the new value, as determined by the mapping.
      */
     public static Set<String> remap(Set<String> set, Map<String, String> map, boolean allowDefault)
@@ -973,10 +973,10 @@ public final class Utils {
 
     
     /**
-     * returns true if the 3 letter language code is for a right to left 
-     *  language (one written in arabic or hebrew characters)
-     * @param langcode
-     * @return
+     * returns <code>true</code> if the 3 letter language code is for a right to left 
+     * language (one written in arabic or hebrew characters)
+     * @param  langcode
+     * @return <code>true</code> if code is for a right-to-left language
      */
     public final static boolean isRightToLeftLanguage(String langcode) 
     {

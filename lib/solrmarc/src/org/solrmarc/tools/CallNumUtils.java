@@ -990,14 +990,14 @@ public final class CallNumUtils {
      *  the decimal (adding leading zeroes as necessary) and (digitsAfter 
      *  after the decimal.  In the case of a whole number, there will be no
      *  decimal point.
-     * @param floatStr, the number, as a String
-     * @param digitsB4 - the number of characters the result should have before the
-     *   decimal point (leading zeroes will be added as necessary). A negative 
-     *   number means leave whatever digits encountered as is; don't pad with leading zeroes.
-     * @param digitsAfter - the number of characters the result should have after
-     *   the decimal point.  A negative number means leave whatever fraction
-     *   encountered as is; don't pad with trailing zeroes (trailing zeroes in
-     *   this case will be removed)
+     * @param floatStr    the number, as a String
+     * @param digitsB4    the number of characters the result should have before the
+     *                    decimal point (leading zeroes will be added as necessary). A negative 
+     *                    number means leave whatever digits encountered as is; don't pad with leading zeroes.
+     * @param digitsAfter the number of characters the result should have after
+     *                    the decimal point.  A negative number means leave whatever fraction
+     *                    encountered as is; don't pad with trailing zeroes (trailing zeroes in
+     *                    this case will be removed)
      * @throws NumberFormatException if string can't be parsed as a number
      */
     public static String normalizeFloat(String floatStr, int digitsB4, int digitsAfter)
