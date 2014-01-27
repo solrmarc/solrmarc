@@ -89,7 +89,7 @@ public class MarcPrinter extends MarcHandler
                 System.setProperty("marc.delete_subfields", "nomap");
                 System.setProperty("marc.reader.remap", "nomap");
             }
-            else if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate") || arg.equals("untranslate") || arg.equals("to_json") )
+            else if (arg.equals("print") || arg.equals("index") || arg.equals("to_xml") || arg.equals("translate") || arg.startsWith("untranslate") || arg.equals("to_json") )
             {
                 mode = arg;
             }
@@ -184,6 +184,16 @@ public class MarcPrinter extends MarcHandler
                     {
                         writer = new MarcStreamWriter(System.out, "ISO8859_1", true);
                         writer.setConverter(new UnicodeToAnsel());
+                    }
+                    record.getLeader().setCharCodingScheme(' ');
+                    writer.write(record);
+                }
+                else if (mode.equals("untranslateNCR"))
+                {
+                    if (writer == null)
+                    {
+                        writer = new MarcStreamWriter(System.out, "ISO8859_1", true);
+                        writer.setConverter(new UnicodeToAnsel(true));
                     }
                     record.getLeader().setCharCodingScheme(' ');
                     writer.write(record);
