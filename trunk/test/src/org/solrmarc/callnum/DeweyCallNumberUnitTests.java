@@ -1,14 +1,7 @@
 package org.solrmarc.callnum;
 
 import static org.junit.Assert.*;
-import static org.solrmarc.tools.CallNumUtils.getDeweyCutter;
-import static org.solrmarc.tools.CallNumUtils.getDeweyCutterSuffix;
-import static org.solrmarc.tools.CallNumUtils.getDeweyShelfKey;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -21,6 +14,28 @@ import org.junit.Test;
  *
  */
 public class DeweyCallNumberUnitTests {
+
+    /**
+     * light sanity test for parse, check different fields
+     */
+    @Test
+    public void testParse()
+    {
+        String callnum;
+        DeweyCallNumber dewey = new DeweyCallNumber();
+
+        callnum = "1 .I39";
+        dewey.parse(callnum);
+        assertEquals("1", dewey.classification);
+        assertEquals("I39", dewey.cutter);
+        assertEquals(null, dewey.suffix);
+
+        callnum = "324.6 .A75CUA"; // letters without space
+        dewey.parse(callnum);
+        assertEquals("324.6", dewey.classification);
+        assertEquals("A75CUA", dewey.cutter);
+        assertEquals(null, dewey.suffix);
+    }
 
     /**
      * unit test for getting classification from Dewey call number
@@ -113,22 +128,20 @@ public class DeweyCallNumberUnitTests {
     {
         // cutter has following letters
         String callnum = "324.54 .I39 F"; // letter with space
-        assertEquals("I39", getDeweyCutter(callnum));
-        // assertNull(getDeweyCutterSuffix(callnum));
-        assertEquals("F", getDeweyCutterSuffix(callnum));
-        // assertEquals("I39 F", new DeweyCallNumber(callnum).getCutter());
-        assertEquals("I39", new DeweyCallNumber(callnum).cutter);
-        assertEquals("I39", new DeweyCallNumber(callnum).getCutter());
-        // assertNull(new DeweyCallNumber(callnum).getSuffix());
-        assertEquals("F", new DeweyCallNumber(callnum).getSuffix());
+        DeweyCallNumber dewey = new DeweyCallNumber(callnum);
+        assertEquals("I39", dewey.cutter);
+        assertEquals("I39", dewey.getCutter());
+        assertEquals("F", dewey.getSuffix());
+
         callnum = "324.548 .C425R"; // letter without space
-        assertEquals("C425R", new DeweyCallNumber(callnum).getCutter());
-        assertNull(new DeweyCallNumber(callnum).getSuffix());
+        dewey = new DeweyCallNumber(callnum);
+        assertEquals("C425R", dewey.getCutter());
+        assertNull(dewey.getSuffix());
+
         callnum = "324.6 .A75CUA"; // letters without space
-        // It seems the below is expected to fail (broken comment), so commenting it out - TAO
-        //assertEquals("A75CUA", new DeweyCallNumber(callnum).getSuffix());
-// TODO: this is broken.  Presumably not too many call numbers with multiple letters at end of cutter
-        // assertNull(new DeweyCallNumber(callnum).getSuffix());
+        dewey = new DeweyCallNumber(callnum);
+        assertEquals("A75CUA", dewey.getCutter());
+        assertNull(dewey.getSuffix());
 
         // suffixes
         callnum = "323.09 .K43 V.1"; // suffix volume
@@ -194,7 +207,23 @@ public class DeweyCallNumberUnitTests {
         assertEquals("323.00000000 A512RE NO.000023-000028", new DeweyCallNumber(callnum).getShelfKey());
         callnum = "323 .A778 ED.2"; // suffix ed
         assertEquals("323.00000000 A778 ED.000002", new DeweyCallNumber(callnum).getShelfKey());
+    }
 
+    /**
+     * unit test for getting non-Dewey shelf key
+     */
+    @Test
+    public void testNonDeweyShelfKey()
+    {
+        // Non-Dewey call number
+        String callnum = "MC1 259";
+        assertEquals(callnum, new DeweyCallNumber(callnum).getShelfKey());
+
+        // real edge cases
+        callnum = "";
+        assertEquals(callnum, new DeweyCallNumber(callnum).getShelfKey());
+        callnum = null;
+        assertEquals(callnum, new DeweyCallNumber(callnum).getShelfKey());
     }
 
 }

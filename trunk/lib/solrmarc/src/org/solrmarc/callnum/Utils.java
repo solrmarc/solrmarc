@@ -31,9 +31,9 @@ public class Utils {
 
     /**
      * normalizes numbers (can have decimal portion) to (<code>digitsB4</code>) before
-     *  the decimal (adding leading zeroes as necessary) and (<code>digitsAfter</code>)
-     *  after the decimal.  In the case of a whole number, there will be no
-     *  decimal point.
+     * the decimal (adding leading zeroes as necessary) and (<code>digitsAfter</code>)
+     * after the decimal.  In the case of a whole number, there will be no
+     * decimal point.
      * @param floatStr    the number, as a String
      * @param digitsB4    the number of characters the result should have before the
      *                    decimal point (leading zeroes will be added as necessary). A negative
@@ -74,6 +74,41 @@ public class Utils {
             }
         }
         return b4.toString();
+    }
+    /**
+     * normalize a suffix for shelf list sorting by changing all digit
+     *  substrings to a constant length (left padding with zeros).
+     */
+    public static String normalizeSuffix(String suffix) {
+        if (suffix != null && suffix.length() > 0) {
+            StringBuilder resultBuf = new StringBuilder(suffix.length());
+            // get digit substrings
+            String[] digitStrs = suffix.split("[\\D]+");
+            int len = digitStrs.length;
+            if (digitStrs != null && len != 0) {
+                int s = 0;
+                for (int d = 0; d < len; d++) {
+                    String digitStr = digitStrs[d];
+                    int ix = suffix.indexOf(digitStr, s);
+                    // add the non-digit chars before, if they exist
+                    if (s < ix) {
+                        String text = suffix.substring(s, ix);
+                        resultBuf.append(text);
+                    }
+                    if (digitStr != null && digitStr.length() != 0) {
+                        // add the normalized digit chars, if they exist
+                        resultBuf.append(normalizeFloat(digitStr, 6, 0));
+                        s = ix + digitStr.length();
+                    }
+
+                }
+                // add any chars after the last digStr
+                resultBuf.append(suffix.substring(s));
+                return resultBuf.toString();
+            }
+        }
+
+        return suffix;
     }
 
 }
