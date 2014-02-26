@@ -18,13 +18,18 @@ package org.solrmarc.callnum;
 
 /**
  * Provides a generic interface for building call number objects.
- * <h4>Constructor</h4>
+ * <h4>Constructors</h4>
  * Implementing classes are encourages to provide two constructors:
  * <ol>
  * <li>a constructor with no parameters which will just initialize the object, and</li>
  * <li>a constructor with a <code>String</code> parameter, which will <code>init</code>
  * the object and <code>parse</code> the parameter.</li>
  * </ol>
+ * <h4>Parsing and fields</h4>
+ * <code>parse</code> will set internal fields to represent logical parts of the call number.
+ * Use <code>null</code> when some part of the call number is absent.
+ * For example, if there is an internal field to represent a cutter but the parser finds no
+ * cutter, set the field to <code>null</code>.
  *
  * @author Tod Olson, University of Chicago
  *
@@ -45,8 +50,6 @@ public interface CallNumber {
      * Reports whether the string given to <code>parse</code> matched the pattern for a call number.
      * Behavior is unspecified if call number was built from setters or if object has been initialized
      * since the last <code>parse</code>.
-     *
-     * @return <code>true</code> if object holds a valid call number.
      */
     public boolean isValid();
 
