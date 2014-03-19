@@ -2,14 +2,22 @@ package org.blacklight;
 
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.DateFormat;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -30,6 +38,7 @@ import org.marc4j.marc.impl.DataFieldImpl;
 import org.marc4j.marc.impl.SubfieldImpl;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.tools.CallNumUtils;
+import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
 
@@ -59,6 +68,7 @@ public class BlacklightIndexer extends SolrIndexer
     Map<String, String> addnlShadowedIds = null;
     Map<String, String> boundWithIds = null;
     Map<String, String> dateFirstAddedMap = null;
+    Map<String, String[]> booklistData = null;
     String extraIdsFilename = "AllShadowedIds.txt";
     String boundWithsFilename = "BoundWith.txt";
     Set<String> combinedFormat = null;
@@ -949,6 +959,127 @@ public class BlacklightIndexer extends SolrIndexer
         }
     }
     
+    public String getDateReceived(Record rec, String urlList)
+    {
+        if (booklistData == null)
+        {
+            readBooklistData(urlList);
+        }
+        String docID = rec.getControlNumber();
+        if (!booklistData.containsKey(docID))
+        {
+            return(null);
+        }
+        else
+        {
+            String result = null;
+            String data[] = booklistData.get(docID);
+            for (int i = 0; i < data.length; i += 2)
+            {
+                if (result == null) 
+                    result = data[i];
+                else if (result.compareTo(data[i]) < 0)
+                    result = data[i];
+            }
+            return(result);
+        }
+    }
+    
+    public Set<String> getFundCode(Record rec, String urlList)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        if (booklistData == null)
+        {
+            readBooklistData(urlList);
+        }
+        String docID = rec.getControlNumber();
+        if (!booklistData.containsKey(docID))
+        {
+            return(result);
+        }
+        else
+        {
+            String data[] = booklistData.get(docID);
+            for (int i = 0; i < data.length; i += 2)
+            {
+                if (data[i+1].length() != 0)
+                    result.add(data[i+1]);
+            }
+        }
+        return(result);
+    }
+    
+    private void readBooklistData(String urlList)
+    {
+        String urls[] = urlList.split("[|]");
+        booklistData = new LinkedHashMap<String, String[]>();
+        InputStreamReader input;
+        for (String urlstr : urls)
+        {
+            try{
+                if (urlstr.startsWith("http:"))
+                {
+                    URL url = new URL(urlstr);
+                    URLConnection conn = url.openConnection();
+                    input = new InputStreamReader(conn.getInputStream());
+                }
+                else
+                {
+                    continue;
+                }
+                BufferedReader reader = new BufferedReader(input);
+                String line;
+                Date today = new Date();
+                while ((line = reader.readLine()) != null)
+                {
+                    String fields[] = line.split("\\|");
+                    // discard bad data, ie.  somthing that was received at some date in the future
+                    DateFormat format = new SimpleDateFormat("yyyyMMdd");
+                    Date dateReceived = format.parse(fields[0], new ParsePosition(0));
+                    if (dateReceived.after(today)) continue;
+                    
+                    String docID = "u"+fields[9];
+                    String dateAndFundcode[] = new String[]{fields[0], fields[11]};
+                    if (booklistData.containsKey(docID))
+                    {
+                        String[] data = booklistData.get(docID);
+                        boolean dataexists = false;
+                        for (int i = 0; i < data.length; i += 2)
+                        {
+                            if (data[i].equals(dateAndFundcode[0]) && data[i+1].equals(dateAndFundcode[1]))
+                            {
+                                dataexists = true;
+                                break;
+                            }
+                        }       
+                        if (!dataexists)
+                        {
+                            String combinedData[] = new String[data.length + 2];
+                            System.arraycopy(data, 0, combinedData, 0, data.length);
+                            System.arraycopy(dateAndFundcode, 0, combinedData, data.length, 2);
+                            booklistData.put(docID, combinedData);
+                        }
+                    }
+                    else
+                    {
+                        booklistData.put(docID, dateAndFundcode);
+                    }
+                }
+            }
+            catch (FileNotFoundException e)
+            {
+                // e.printStackTrace();
+                logger.info(e.getMessage());
+                logger.error(e.getCause());
+            }
+            catch (IOException e)
+            {
+                logger.info(e.getMessage());
+                logger.error(e.getCause());
+            }
+        }
+    }
+    
     private String getCallNum(final String callNum)
     {
         String callNumParts[] = callNum.split(":", 2);
@@ -1519,6 +1650,27 @@ public class BlacklightIndexer extends SolrIndexer
             return(backupResultSet);
         }
         return(resultSet);
+    }
+
+    public Set<String> getLabelledURLPlusBookPlateLink(Record rec, String urlList, String translationMapProps)
+    {
+        String mapName = loadTranslationMap(null, translationMapProps);
+        Map<String, String> translationMap = findMap(mapName);
+        Set<String> fundcodes = this.getFundCode(rec, urlList);
+        if (fundcodes.size() == 0)
+        {
+            return( getLabelledURLnew(rec, ""));
+        }
+        Set<String> urlStrings = getLabelledURLnew(rec, "");
+        for (String fundcode : fundcodes)
+        {
+            String fundcodeURL = Utils.remap(fundcode, translationMap, false);
+            if (fundcodeURL != null)
+            {
+                urlStrings.add(fundcodeURL+"|View Book Plate");
+            }
+        }
+        return(urlStrings);
     }
     
     private String getCommonPrefix(String string1, String string2, Comparator comp)
