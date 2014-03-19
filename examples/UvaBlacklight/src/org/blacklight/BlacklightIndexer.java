@@ -1667,7 +1667,7 @@ public class BlacklightIndexer extends SolrIndexer
             String fundcodeURL = Utils.remap(fundcode, translationMap, false);
             if (fundcodeURL != null)
             {
-                urlStrings.add(fundcodeURL+"|View Book Plate");
+                urlStrings.add(fundcodeURL+"||View Book Plate");
             }
         }
         return(urlStrings);
