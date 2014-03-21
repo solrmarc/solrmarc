@@ -1652,7 +1652,7 @@ public class BlacklightIndexer extends SolrIndexer
         return(resultSet);
     }
 
-    public Set<String> getLabelledURLPlusBookPlateLink(Record rec, String urlList, String translationMapProps)
+    public Set<String> getBookPlateURL(Record rec, String urlList, String translationMapProps)
     {
         String mapName = loadTranslationMap(null, translationMapProps);
         Map<String, String> translationMap = findMap(mapName);
@@ -1661,16 +1661,16 @@ public class BlacklightIndexer extends SolrIndexer
         {
             return( getLabelledURLnew(rec, ""));
         }
-        Set<String> urlStrings = getLabelledURLnew(rec, "");
+        Set<String> result = new LinkedHashSet<String>();
         for (String fundcode : fundcodes)
         {
             String fundcodeURL = Utils.remap(fundcode, translationMap, false);
             if (fundcodeURL != null)
             {
-                urlStrings.add(fundcodeURL+"||View Book Plate");
+                result.add(fundcodeURL);
             }
         }
-        return(urlStrings);
+        return(result);
     }
     
     private String getCommonPrefix(String string1, String string2, Comparator comp)
