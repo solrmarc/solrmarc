@@ -1657,11 +1657,11 @@ public class BlacklightIndexer extends SolrIndexer
         String mapName = loadTranslationMap(null, translationMapProps);
         Map<String, String> translationMap = findMap(mapName);
         Set<String> fundcodes = this.getFundCode(rec, urlList);
+        Set<String> result = new LinkedHashSet<String>();
         if (fundcodes.size() == 0)
         {
-            return( getLabelledURLnew(rec, ""));
+            return(result);
         }
-        Set<String> result = new LinkedHashSet<String>();
         for (String fundcode : fundcodes)
         {
             String fundcodeURL = Utils.remap(fundcode, translationMap, false);
