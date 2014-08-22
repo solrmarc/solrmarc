@@ -1114,6 +1114,11 @@ public class VuFindIndexer extends SolrIndexer
             // If this is a valid Dewey number, return the sortable shelf key:
             if (CallNumUtils.isValidDewey(current)) {
                 result.add(CallNumUtils.getDeweyShelfKey(current));
+            } else {
+                // If the number is invalid, we can't normalize it, but we still want
+                // to put an entry in the sort list so that things don't get out of sync
+                // for the AlphaBrowse indexer -- we'll just use the raw string
+                result.add(current);
             }
         }
 
