@@ -34,14 +34,10 @@ public class UVARecordImpl extends NoSortRecordImpl
         if (Verifier.isControlNumberField(tag)) 
         {
             ControlField cfield = getControlNumberField();
-            if (cfield != null)
+            if (cfield != null && cfield.getData().startsWith("u") )
             {
-                if (!((ControlField)field).getData().startsWith("u") && 
-                       cfield.getData().startsWith("u") )
-                {
-                    // ditch it!
-                    return;
-                }
+                // ditch it!
+                return;
             }
         }
         super.addVariableField(field);
