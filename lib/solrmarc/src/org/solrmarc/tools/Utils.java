@@ -890,7 +890,7 @@ public final class Utils {
         return result;
     }
 
-    private static boolean containsMatch(String val, String pattern)
+    public static boolean containsMatch(String val, String pattern)
     {
         String rep = val.replaceFirst(pattern, "###match###");
         
