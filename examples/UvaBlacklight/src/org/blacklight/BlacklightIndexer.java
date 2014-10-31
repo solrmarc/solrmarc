@@ -1613,7 +1613,7 @@ public class BlacklightIndexer extends SolrIndexer
 //                        resultSet.add(buildParsableURLString(dField, label));
 //                    }
 //                }
-                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == ' ')
+                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == ' ' && !isSupplementalUrl(dField))
                 {
                     String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : defaultLabel;
                     if (dField.getSubfield('u') != null) 
@@ -1644,7 +1644,88 @@ public class BlacklightIndexer extends SolrIndexer
 //                        backupResultSet.add(buildParsableURLString(dField, label));
 //                    }
 //                }
-                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == ' ')
+                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == ' ' && !isSupplementalUrl(dField))
+                {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : defaultLabel;
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        backupResultSet.add(buildParsableURLString(dField, label));
+                    }
+                }
+            }
+        }
+        if (resultSet.size() == 0 && backupResultSet.size() != 0)
+        {
+            return(backupResultSet);
+        }
+        return(resultSet);
+    }
+
+    public Set<String> getLabelledSupplURLnew(final Record record, String defaultLabel)
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+        Set<String> backupResultSet = new LinkedHashSet<String>();
+        List<?> urlFields = record.getVariableFields("856");
+        for (Object field : urlFields)
+        {
+            if (field instanceof DataField)
+            {
+                DataField dField = (DataField)field;
+//                if (dField.getIndicator1() == '4' && dField.getIndicator2() == '0')
+//                {
+//                    if (dField.getSubfield('u') != null) 
+//                    {
+//                        resultSet.add(buildParsableURLString(dField, defaultLabel));
+//                    }
+//                }
+                if (dField.getIndicator1() == '4' && dField.getIndicator2() == '1' && isSupplementalUrl(dField))
+                {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related resources";
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        resultSet.add(buildParsableURLString(dField, label));
+                    }
+                }
+                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == '2')
+                {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related Info";
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        resultSet.add(buildParsableURLString(dField, label));
+                    }
+                }
+                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == ' ' && isSupplementalUrl(dField))
+                {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : defaultLabel;
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        resultSet.add(buildParsableURLString(dField, label));
+                    }
+                }
+//                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '0')
+//                {
+//                    if (dField.getSubfield('u') != null) 
+//                    {
+//                        backupResultSet.add(buildParsableURLString(dField, defaultLabel));
+//                    }
+//                }
+                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '1' && isSupplementalUrl(dField))
+                {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related resources";
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        backupResultSet.add(buildParsableURLString(dField, label));
+                    }
+                }
+                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '2')
+                {
+                    String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related Info";
+                    if (dField.getSubfield('u') != null) 
+                    {
+                        backupResultSet.add(buildParsableURLString(dField, label));
+                    }
+                }
+                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == ' ' && isSupplementalUrl(dField))
                 {
                     String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : defaultLabel;
                     if (dField.getSubfield('u') != null) 
