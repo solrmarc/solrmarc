@@ -1694,6 +1694,7 @@ public class SolrIndexer
       String strDefault = null;
       String mapName = null;
       String combineSubfieldsJoin = null;
+      String condition = null;
       //specified options
       String[] options = optionStr.split(":");
       for (int i = 0; i < options.length; i++)
@@ -1727,6 +1728,14 @@ public class SolrIndexer
                   combineSubfieldsJoin = combineSubfieldsJoin.substring(1, combineSubfieldsJoin.length() - 1);
               }
           }
+//          else if (option.startsWith("condition="))
+//          {
+//              condition = option.substring("condition=".length());
+//              if (combineSubfieldsJoin.length() > 2 && combineSubfieldsJoin.startsWith("\"") && combineSubfieldsJoin.endsWith("\""))
+//              {
+//                  combineSubfieldsJoin = combineSubfieldsJoin.substring(1, combineSubfieldsJoin.length() - 1);
+//              }
+//          }
       }
       
       
@@ -1760,7 +1769,7 @@ public class SolrIndexer
        //first only?       
        if ( results.size() > 0 && first) {
          Iterator<String> iter = results.iterator();
-         Set newResults = new LinkedHashSet<String>();
+         Set<String> newResults = new LinkedHashSet<String>();
          newResults.add(iter.next());
          results = newResults;
        }
@@ -1778,7 +1787,7 @@ public class SolrIndexer
        
        //removeTrailingPunct?
        if ( removeTrailingPunct ) {
-         Set newResults = new LinkedHashSet<String>();
+         Set<String> newResults = new LinkedHashSet<String>();
          for (String s : results)
          {
             newResults.add(Utils.cleanData(s));
@@ -2149,10 +2158,13 @@ public class SolrIndexer
         list3z.addAll(Utils.getSubfieldStrings(f856, 'z'));
         for (String s : list3z)
         {
-            if (s.toLowerCase().contains("table of contents")
-                    || s.toLowerCase().contains("abstract")
-                    || s.toLowerCase().contains("description")
-                    || s.toLowerCase().contains("sample text"))
+            String lc = s.toLowerCase();
+            if (lc.contains("table") || lc.contains("some") || lc.contains("suppl") || lc.contains("errata")
+               || lc.matches("^no[t]? ") || lc.contains("front") || lc.contains("search") || lc.contains("summary")
+               || lc.contains("cover") || lc.contains("additional") || lc.contains("glosser") || lc.contains("appendix")
+               || lc.contains("guide") || lc.contains("inhalts") || lc.contains("version") || lc.contains("addendum")
+               || lc.contains("abstract") || lc.contains("index") || lc.contains("digest") || lc.contains("contents"))
+                
                 supplmntl = true;
         }
         return supplmntl;
@@ -3187,6 +3199,145 @@ public class SolrIndexer
         return result;
     }
 
+    public List<VariableField> getFieldSetMatchingTagList(final Record record, String fieldspecs[])
+    {
+        String tags[] = new String[fieldspecs.length];
+        for (int i = 0; i < fieldspecs.length; i++)
+        {
+            String tag = fieldspecs[i].substring(0, 3);
+            if (tag == "LNK") tag = fieldspecs[i].substring(0, 6);
+            tags[i] = tag;
+        }
+        List<VariableField> fieldSet = record.getVariableFields(tags);
+        return(fieldSet);
+    }
+    
+    public List<VariableField> getFieldSetMatchingTagList(final Record record, String fieldSpec)
+    {
+        String fieldspecs[] = fieldSpec.split(":");
+        return(getFieldSetMatchingTagList(record, fieldspecs));
+    }
+
+    public String getDataFromVariableField(VariableField vf, String subfldTags, String separator, boolean cleanIt)
+    {
+        Pattern subfieldPattern = Pattern.compile(subfldTags.length() == 0 ? "." : subfldTags);
+        DataField marcField = (DataField) vf;
+        StringBuffer buffer = new StringBuffer("");
+        List<Subfield> subfields = marcField.getSubfields();
+        for (Subfield subfield : subfields)
+        {
+            Matcher matcher = subfieldPattern.matcher("" + subfield.getCode());
+            if (matcher.matches())
+            {
+                if (buffer.length() > 0)
+                    buffer.append(separator != null ? separator : " ");
+                buffer.append(subfield.getData().trim());
+            }
+        }
+        if (buffer.length() > 0)
+            return(cleanIt ? Utils.cleanData(buffer.toString()) : buffer.toString());
+        else
+            return(null);
+    }
+/*   
+ 
+   
+  *     public Map<String, List<VariableField>> getFieldSetMatchingTagList(final Record record, String fieldspecs[])
+    {
+//        String tags[] = new String[fieldspecs.length];
+        Map<String, List<VariableField>> result = new LinkedHashMap<String, List<VariableField>>();
+        for (int i = 0; i < fieldspecs.length; i++)
+        {
+            String tag = fieldspecs[i].substring(0, 3);
+            if (tag == "LNK") tag = fieldspecs[i].substring(0, 6);
+            List<VariableField> fieldSet = record.getVariableFields(tag); // !!!
+            result.put(fieldspecs[i], fieldSet);
+        }
+        return(result);
+    }
+    
+    public Map<String, List<VariableField>> getFieldSetMatchingTagList(final Record record, String fieldSpec)
+    {
+        String fieldspecs[] = fieldSpec.split(":");
+        return(getFieldSetMatchingTagList(record, fieldspecs));
+    }
+      
+    List<VariableField> getFieldSetMatchingTagList(final Record record, String fieldSpec, String conditional)
+    {
+        String fieldspecs[] = fieldSpec.split(":");
+        String tags[] = new String[fieldspecs.length];
+        for (int i = 0; i < fieldspecs.length; i++)
+        {
+            String tag = fieldspecs[i].substring(0, 3);
+            if (tag == "LNK") tag = fieldspecs[i].substring(0, 6);
+            tags[i] = tag;
+        }
+        List<VariableField> fieldSet = record.getVariableFields(tags);
+        if (conditional != null)
+        {
+            pruneFieldSet(fieldSet, conditional);
+            return(fieldSet);
+        }
+        return(fieldSet);
+    }
+    
+    private void pruneFieldSet(List<VariableField> fieldSet, String conditional)
+    {
+        for (VariableField vf : fieldSet)
+        {
+            if (testConditional(vf, conditional) == false)
+            {
+                fieldSet.remove(vf);
+            }
+        }
+    }
+
+    private boolean testConditional(VariableField vf, String conditional)
+    {
+        conditional = conditional.trim();
+        if (conditional == null) return(true);
+        String operand1 = getOperand(conditional);
+        
+        for (String clause : conditionalClauses)
+        {
+            if (testConditionalAnd(vf, clause))
+                return(true);
+        }
+        return(false);
+    }
+
+    private String getOperand(String conditional)
+    {
+        if (conditional.charAt(0) == '(')
+        {
+            for (int paren = 1, offset = 1; paren == 1 && conditional.charAt(offset) == ')'; offset ++)
+            {
+                char curChar = conditional.charAt(offset);
+                if (curChar == '(') paren++;
+                if (curChar == ')') paren--;
+            }
+        }
+        return
+    }
+    
+    private boolean testConditionalAnd(VariableField vf, String conditional)
+    {
+        if (conditional == null) return(true);
+        String conditionalClauses[] = conditional.split("&");
+        for (String clause : conditionalClauses)
+        {
+            if (!testConditionalBase(vf, clause))
+                return(false);
+        }
+        return(true);
+    }
+
+    private boolean testConditionalBase(VariableField vf, String clause)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+*/
     /**
      * @param df
      *            a DataField

@@ -14,6 +14,7 @@ import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -29,6 +30,11 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//import java_cup.runtime.ComplexSymbolFactory;
+//import java_cup.runtime.Scanner;
+//import java_cup.runtime.Symbol;
+//import java_cup.runtime.SymbolFactory;
+
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
@@ -37,6 +43,9 @@ import org.marc4j.marc.VariableField;
 import org.marc4j.marc.impl.DataFieldImpl;
 import org.marc4j.marc.impl.SubfieldImpl;
 import org.solrmarc.index.SolrIndexer;
+//import org.solrmarc.index.conditional.ConditionalParser;
+//import org.solrmarc.index.conditional.ConditionalScanner;
+//import org.solrmarc.index.conditional.ConditionalSpecification;
 import org.solrmarc.tools.CallNumUtils;
 import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.StringNaturalCompare;
@@ -1588,7 +1597,7 @@ public class BlacklightIndexer extends SolrIndexer
                         resultSet.add(buildParsableURLString(dField, defaultLabel));
                     }
                 }
-                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == '1')
+                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == '1' && !isSupplementalUrl(dField))
                 {
                     String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related resources";
                     if (dField.getSubfield('u') != null) 
@@ -1619,7 +1628,7 @@ public class BlacklightIndexer extends SolrIndexer
                         backupResultSet.add(buildParsableURLString(dField, defaultLabel));
                     }
                 }
-                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '1')
+                else if (dField.getIndicator1() == ' ' && dField.getIndicator2() == '1' && !isSupplementalUrl(dField))
                 {
                     String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related resources";
                     if (dField.getSubfield('u') != null) 
@@ -3118,6 +3127,205 @@ public class BlacklightIndexer extends SolrIndexer
         String result = resultBuf.toString().trim().toLowerCase().replaceAll("[^0-9a-z ]", "");
         return(result);
     }
+    
+    private String getSubfieldSpec(String tag, VariableField f, String[] subjectFieldSpecs)
+    {
+        for (String spec : subjectFieldSpecs)
+        {
+            String stag = spec.substring(0, 3);
+            if (stag == "LNK") stag = spec.substring(0, 6);
+            if (tag.equals(stag))
+            {
+                return(spec.substring(3));
+            }
+            if (tag.equals("880") && ((DataField)f).getSubfield('2') != null && 
+                ((DataField)f).getSubfield('2').getData().equals(stag.substring(3)))
+            {
+                return(spec.substring(6));
+            }
+        }
+        return null;
+    }  
 
+//    static ConditionalSpecification cond = null;
+//    static SymbolFactory sf = null; 
+//    
+//    public static ConditionalSpecification buildCondSpec(String conditional)
+//    {
+//        if (sf == null)  sf = new ComplexSymbolFactory();
+//        Scanner scan = new ConditionalScanner(conditional, sf);
+//        ConditionalParser parser = new ConditionalParser(scan, sf);
+//        ConditionalParser.setParserDebug(true);
+//        ConditionalSpecification result = null;
+//        Symbol parse_tree = null;
+//        try {
+//            if (ConditionalParser.shouldParserDebug())
+//              parse_tree = parser.debug_parse();
+//            else
+//              parse_tree = parser.parse();
+//            result = (ConditionalSpecification) parse_tree.value;
+//        } 
+//        catch (Exception e) {
+//            System.out.println("Exception "+e.toString());
+//        } 
+//        finally {
+//        }
+//        return(result);
+//    }
+
+
+    public List<VariableField> getSubjectFieldsAsList(final Record record, String subjectFieldSpecs[])
+    {
+        List<VariableField> fields = getFieldSetMatchingTagList(record, subjectFieldSpecs);
+//        if (cond == null) cond = buildCondSpec("(ind2 != 7 | (ind2 = 7 & $2 ~ \"fast|lcsh|tgn|aat\"))");
+        List<VariableField> fieldsTrimmed = new ArrayList<VariableField>();
+        for (VariableField field : fields)
+        {
+//        {
+//            if (cond.matches(field))
+//            {
+//                fieldsTrimmed.add(field);
+//            }
+//        }
+//        return fieldsTrimmed;
+//    }
+            if (field instanceof DataField)
+            {
+                DataField df = (DataField)field;
+                Subfield sf2;
+                if (df.getIndicator2() == '7')
+                { 
+                    sf2 = df.getSubfield('2');
+                    if (sf2 == null || !sf2.getData().matches("fast|lcsh|tgn|aat"))
+                    {
+                        continue;
+                    }
+                }
+            }
+
+        }
+        return fieldsTrimmed;
+    }
+
+    public Set<String> getSubjectFieldsAsText(final Record record, String subjectFieldSpec)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        String subjectFieldSpecs[] = subjectFieldSpec.split(":");
+        List<VariableField> fields = getSubjectFieldsAsList(record, subjectFieldSpecs);
+        for (VariableField f : fields)
+        {
+            String sfSpec = getSubfieldSpec(f.getTag(), f, subjectFieldSpecs);
+            String resStr = null;
+            if (sfSpec != null)
+                resStr = getDataFromVariableField(f, sfSpec, null, true);
+            if (resStr != null)
+                result.add(resStr);
+        }
+        return(result);
+    }
+    
+    public Set<String> getSubjectFieldsAsFacet(final Record record, String subjectFieldSpec, String separator)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        String subjectFieldSpecs[] = subjectFieldSpec.split(":");
+        List<VariableField> fields = getSubjectFieldsAsList(record, subjectFieldSpecs);
+        for (VariableField f : fields)
+        {
+            String sfSpec = getSubfieldSpec(f.getTag(), f, subjectFieldSpecs);
+            String resStr = null;
+            if (sfSpec != null)
+                resStr = getDataFromVariableField(f, sfSpec, separator, true);
+            if (resStr != null)
+                result.add(resStr);
+        }
+        return(result);
+    }
+/*
+ *     public Set<String> getSubjectFieldsAsText(final Record record, String subjectFieldSpec)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        String subjectFieldSpecs[] = subjectFieldSpec.split(":");
+        Map<String, List<VariableField>> subfieldMap = getSubjectFieldsAsMap(record, subjectFieldSpecs);
+        for (String keySpec : subfieldMap.keySet())
+        {
+            for (VariableField f : subfieldMap.get(keySpec))
+            {
+                String resStr = getDataFromVariableField(f, keySpec, null, true);
+                if (resStr != null) result.add(resStr);
+            }
+        }
+        return(result);
+    }
+    
+    private String getSubfieldSpec(String tag, VariableField f, String[] subjectFieldSpecs)
+    {
+        for (String spec : subjectFieldSpecs)
+        {
+            String stag = spec.substring(0, 3);
+            if (stag == "LNK") stag = spec.substring(0, 6);
+            if (tag.equals(stag))
+            {
+                return(spec.substring(3));
+            }
+            if (tag.equals("880") && ((DataField)f).getSubfield('2').getData().equals(stag.substring(3)))
+            {
+                return(spec.substring(6));
+            }
+        }
+        return null;
+    }
+    
+    public Set<String> getSubjectFieldsAsFacet(final Record record, String subjectFieldSpec, String separator)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        String subjectFieldSpecs[] = subjectFieldSpec.split(":");
+        Map<String, List<VariableField>> subfieldMap = getSubjectFieldsAsMap(record, subjectFieldSpecs);
+        for (String keySpec : subfieldMap.keySet())
+        {
+            for (VariableField f : subfieldMap.get(keySpec))
+            {
+                String resStr = getDataFromVariableField(f, keySpec, separator, true);
+                if (resStr != null) result.add(resStr);
+            }
+        }
+        return(result);
+    }
+
+    public Map<String, List<VariableField>> getSubjectFieldsAsMap(final Record record, String subjectFieldSpecs[])
+    {
+        Map<String, List<VariableField>> result = getFieldSetMatchingTagList(record, subjectFieldSpecs);
+        for (String key : result.keySet())
+        {
+            boolean trimmed = false;
+            List<VariableField> trimmedFieldSet = new ArrayList<VariableField>();
+            for (VariableField field : result.get(key))
+            {
+                if (field instanceof DataField)
+                {
+                    DataField df = (DataField)field;
+                    Subfield sf2;
+                    if (df.getIndicator2() == '7')
+                    { 
+                        sf2 = df.getSubfield('2');
+                        if (sf2 == null || !sf2.getData().matches("fast|lcsh|tgn|aat"))
+                        {
+                            trimmed = true;
+                            continue;
+                        }
+                    }
+                }
+                trimmedFieldSet.add(field);
+            }
+            if (trimmed) 
+            {
+                result.put(key, trimmedFieldSet);
+            }
+        }
+        return result;
+    }
+
+*/
+ 
+    
     
 }
