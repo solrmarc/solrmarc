@@ -1590,14 +1590,14 @@ public class BlacklightIndexer extends SolrIndexer
             if (field instanceof DataField)
             {
                 DataField dField = (DataField)field;
-                if (dField.getIndicator1() == '4' && dField.getIndicator2() == '0')
+                if (firstIndicatorValid(dField) && dField.getIndicator2() == '0')
                 {
                     if (dField.getSubfield('u') != null) 
                     {
                         resultSet.add(buildParsableURLString(dField, defaultLabel));
                     }
                 }
-                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == '1' && !isSupplementalUrl(dField))
+                else if (firstIndicatorValid(dField) && dField.getIndicator2() == '1' && !isSupplementalUrl(dField))
                 {
                     String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related resources";
                     if (dField.getSubfield('u') != null) 
@@ -1613,7 +1613,7 @@ public class BlacklightIndexer extends SolrIndexer
 //                        resultSet.add(buildParsableURLString(dField, label));
 //                    }
 //                }
-                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == ' ' && !isSupplementalUrl(dField))
+                else if (firstIndicatorValid(dField) && dField.getIndicator2() == ' ' && !isSupplementalUrl(dField))
                 {
                     String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : defaultLabel;
                     if (dField.getSubfield('u') != null) 
@@ -1661,6 +1661,20 @@ public class BlacklightIndexer extends SolrIndexer
         return(resultSet);
     }
 
+    private boolean firstIndicatorValid(DataField dField)
+    {
+        if (dField.getIndicator1() == '4' || dField.getIndicator1() == '1') return(true);
+        if (dField.getIndicator1() == '7')
+        {
+            Subfield sf = dField.getSubfield('2');
+            if (sf != null && (sf.getData().equals("http") || sf.getData().equals("ftp")))
+            {
+                return(true);
+            }
+        }
+        return(false);
+    }
+
     public Set<String> getLabelledSupplURLnew(final Record record, String defaultLabel)
     {
         Set<String> resultSet = new LinkedHashSet<String>();
@@ -1678,7 +1692,7 @@ public class BlacklightIndexer extends SolrIndexer
 //                        resultSet.add(buildParsableURLString(dField, defaultLabel));
 //                    }
 //                }
-                if (dField.getIndicator1() == '4' && dField.getIndicator2() == '1' && isSupplementalUrl(dField))
+                if (firstIndicatorValid(dField) && dField.getIndicator2() == '1' && isSupplementalUrl(dField))
                 {
                     String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related resources";
                     if (dField.getSubfield('u') != null) 
@@ -1686,7 +1700,7 @@ public class BlacklightIndexer extends SolrIndexer
                         resultSet.add(buildParsableURLString(dField, label));
                     }
                 }
-                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == '2')
+                else if (firstIndicatorValid(dField) && dField.getIndicator2() == '2')
                 {
                     String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : "Related Info";
                     if (dField.getSubfield('u') != null) 
@@ -1694,7 +1708,7 @@ public class BlacklightIndexer extends SolrIndexer
                         resultSet.add(buildParsableURLString(dField, label));
                     }
                 }
-                else if (dField.getIndicator1() == '4' && dField.getIndicator2() == ' ' && isSupplementalUrl(dField))
+                else if (firstIndicatorValid(dField) && dField.getIndicator2() == ' ' && isSupplementalUrl(dField))
                 {
                     String label = (dField.getSubfield('3') != null) ? dField.getSubfield('3').getData() : defaultLabel;
                     if (dField.getSubfield('u') != null) 
