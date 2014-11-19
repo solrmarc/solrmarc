@@ -762,6 +762,13 @@ public class VuFindIndexer extends SolrIndexer
                     result.add("Book");
                 }
                 break;
+            // Component parts
+            case 'A':
+                result.add("BookComponentPart");
+                break;
+            case 'B':
+                result.add("SerialComponentPart");
+                break;
             // Serial
             case 'S':
                 // Look in 008 to determine what type of Continuing Resource
