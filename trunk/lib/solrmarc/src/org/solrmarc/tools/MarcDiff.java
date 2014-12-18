@@ -66,10 +66,10 @@ public class MarcDiff
         RawRecord rec2 = null;
         Comparator<String> comp = new StringNaturalCompare();
         try {
-            while (reader1.hasNext() && reader2.hasNext())
+            if (reader1.hasNext()) rec1 = reader1.next();
+            if (reader2.hasNext()) rec2 = reader2.next();
+            while (rec1 != null && rec2 != null)
             {
-                if (rec1 == null) rec1 = reader1.next();
-                if (rec2 == null) rec2 = reader2.next();
                 int compVal = comp.compare(rec1.getRecordId(), rec2.getRecordId());
                 if (compVal == 0)
                 {
@@ -80,29 +80,29 @@ public class MarcDiff
                         writeRecord(writeDifferentRecords, verbose, rec1, rec2);
                     }
                     
-                    rec1 = reader1.next();
-                    rec2 = reader2.next();
+                    rec1 = (reader1.hasNext()) ? reader1.next() : null;
+                    rec2 = (reader2.hasNext()) ? reader2.next() : null;
                 }
                 else if (compVal < 0)
                 {
                     writeRecord(writeDifferentRecords, verbose, rec1, null);
-                    rec1 = reader1.next();
+                    rec1 = (reader1.hasNext()) ? reader1.next() : null;
                 }
                 else if (compVal > 0)
                 {
                     writeRecord(writeDifferentRecords, verbose, null, rec2);
-                    rec2 = reader2.next();
+                    rec2 = (reader2.hasNext()) ? reader2.next() : null;
                 }
             }
-            while (reader1.hasNext())
+            while (rec1 != null)
             {
                 writeRecord(writeDifferentRecords, verbose, rec1, null);
-                rec1 = reader1.next();
+                rec1 = (reader1.hasNext()) ? reader1.next() : null;
             }
-            while (reader2.hasNext())
+            while (rec2 != null)
             {
                 writeRecord(writeDifferentRecords, verbose, null, rec2);
-                rec2 = reader2.next();
+                rec2 = (reader2.hasNext()) ? reader2.next() : null;
             }
         }
         catch (IOException ioe)
