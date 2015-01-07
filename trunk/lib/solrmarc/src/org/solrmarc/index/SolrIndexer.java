@@ -2164,8 +2164,8 @@ public class SolrIndexer
                || lc.contains("cover") || lc.contains("additional") || lc.contains("glosser") || lc.contains("appendix")
                || lc.contains("guide") || lc.contains("inhalts") || lc.contains("version") || lc.contains("addendum")
                || lc.contains("abstract") || lc.contains("index") || lc.contains("digest") || lc.contains("contents")
-               || lc.contains("klappentext") || lc.contains("verlagsinformation") || lc.contains("lizenzfrei") || lc.contains("Rezension") 
-               || lc.contains("sample"))
+               || lc.contains("klappentext") || lc.contains("verlagsinformation") || lc.contains("lizenzfrei") || lc.contains("rezension") 
+               || lc.contains("sample") || lc.contains("related"))
                 
                 supplmntl = true;
         }
