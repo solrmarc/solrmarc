@@ -520,7 +520,7 @@ public class GetFormatMixin extends SolrIndexerMixin
     
     private static LinkedHashMap<Character, ContentType> serialsSubTypes = new LinkedHashMap<Character, ContentType>() {
         { 
-            put( 'd', ContentType.MapSingle );                      // d - updating database
+            put( 'd', ContentType.Database );                       // d - updating database
             put( 'l', ContentType.LooseLeaf );                      // l - Updating loose-leaf
             put( 'm', ContentType.BookSeries);                      // m - Monographic series
             put( 'n', ContentType.Newspaper);                       // n - Newspaper
