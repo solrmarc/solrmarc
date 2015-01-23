@@ -217,6 +217,11 @@
              <property name="dist.path" location="core-only/${dist.dir}" />
          </ant>
     </target>
+
+    <target name="junitreport" 
+            description="Format junit test reports site in site directory">
+        <ant antfile="${site.dir}/build.xml" target="junitreport" inheritAll="false" /> 
+    </target>
 	
 	<!-- Build Javadoc -->
 	<target name="javadoc"

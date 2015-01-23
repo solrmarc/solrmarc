@@ -414,6 +414,22 @@
         <delete dir="${solr.jar.file.dir}" deleteonexit="true" quiet="true" />
         <delete dir="${site.test.dir}/tmp_solrmarc_jars" deleteonexit="true" quiet="true" />
     </target>
+    
+    <target name="junitreport" description="formats jUnit test output as HTML">
+        <init_site_properties/>
+        <property name="report.dir" location="${site.test.dir}/report"/>
+        <property name="output.dir" location="${site.test.dir}/output"/>
+        <property name="html.dir" location="${site.test.dir}/junitreport"/>
+        <mkdir dir="${report.dir}"/>
+        <junitreport todir="${report.dir}">
+            <fileset dir="${site.test.dir}/output">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${html.dir}"/>
+        </junitreport>
+        <echo message="JUnit reports available in ${html.dir}"></echo>
+    </target>
+
 
     <!-- macros to handle the bulk of the work for the targets defined above   --> 
 
@@ -720,7 +736,7 @@
             <property name="indextest.class" value="org.solrmarc.testUtils.ParameterizedIndexTest" />
             <echo message="indextest class = ${indextest.class} " />
             <echo message="solr.data.dir = ${site.test.solr.dir}/data " />
-            <mkdir dir="${site.test.dir}/output" />          
+            <mkdir dir="${site.test.dir}/output" />
             <if >
                 <and> 
                     <isset property="indextest.class" />

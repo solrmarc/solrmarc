@@ -21,168 +21,240 @@ import java.util.regex.Pattern;
 
 /**
  * Implements a call number class for Dewey call numbers.
- *
- * Borrows heavily from Naomi Dushay's <code>CallNumUtils</code>.
+ * 
+ * <p>Example call number: {@code 322.44 .F816 V.1 1974}
+ * 
+ * <p>As unpacked into internal fields:
+ * 
+ * <table summary="call number parsed into fields">
+ * <tr><th>{@code classification}</th><td>322.44</td></tr>
+ * <tr><th>{@code classDigits}</th><td>322</td></tr>
+ * <tr><th>{@code classDecimal}</th><td>.44</td></tr>
+ * <tr><th>{@code cutter}</th><td>F816</td></tr>
+ * <tr><th>{@code suffix}</th><td>V.1 1974</td></tr>
+ * </table>
+ * 
+ * <p>If the call number doesn't look like Dewey (no starting digit) the entire call number
+ * goes into {@code suffix}. 
+ * 
+ * <p>Shelf keys:
+ * 
+ * <p>With computing shelf keys, we want a string which represents the number but can easily be sorted. 
+ * The main issues is sequences of digits: which ones sort numerically, and how to arrange that.
+ * 
+ * <p>The shelf key algorithm is basically:
+ * <ol>
+ * <li>trim leading zeros from {@code classDigits} and prepend with the number of remaining digits</li>
+ * <li>append {@code classDigits} with the leading period</li>
+ * <li>append a space and {@code cutter}</li>
+ * <li>
+ *   normalize {@code suffix} and append with a space, 
+ *   for details see {@link Utils#appendNumericallySortable Utils#appendNumericallySortable}
+ * </li>
+ * </ol>
+ * 
+ * <p>Using the above example call number:
+ * <table summary="constructing the shelf key">
+ * <thead>
+ * <tr><th>Field</th><th>Sample</th><th>Shelf Key</th><th>Notes</th></tr>
+ * </thead>
+ * <tbody>
+ * <tr><th>{@code classification}</th><td>{@code 322.44}</td><td></td><td>not used</td></tr>
+ * <tr><th>{@code classDigits}</th><td>{@code 322}</td><td>{@code 3322}</td><td></td></tr>
+ * <tr><th>{@code classDecimal}</th><td>{@code .44}</td><td>{@code .44}</td><td></td></tr>
+ * <tr><th>{@code cutter}</th><td>{@code F816}</td><td>{@code F816}</td><td></td></tr>
+ * <tr><th>{@code suffix}</th><td>{@code V.1 1974}</td><td>{@code V 11 41974}</td><td></td></tr>
+ * </tbody>
+ * </table>
+ * 
+ * <p>The resulting shelf key is {@code 3322.44 .F816 V.1 1974}.
+ * 
+ * <p>Run the {@code ExerciseDeweyCallNumber} class from the command line to print out a 
+ * number of examples of both parsed call numbers and shelf keys.
+ * 
+ * <p>Based in part on Naomi Dushay's {@code CallNumUtils}.
  *
  * @author Tod Olson, University of Chicago
  *
  */
 public class DeweyCallNumber extends AbstractCallNumber {
-    protected String classification;
-    protected String cutter;
-    protected String suffix;
+    protected String rawCallNum = null;
+    protected String classification = null;
+    protected String classDigits = null;
+    protected String classDecimal = null;
+    protected String cutter = null;
+    protected String cutterSuffix = null;
+
+    protected String shelfKey = null;
 
     /**
-     * regular expression for Dewey classification.
+     * Regular expression for Dewey call number.
      *  Dewey classification is a three digit number (possibly missing leading
      *   zeros) with an optional fraction portion.
-     *   Must use non-capturing group internally, as <code>parse</code> needs
-     *   reliable group numbers for the matches.
      */
-    public static final String DEWEY_CLASS_REGEX = "\\d{1,3}(?:\\.\\d+)?";
+    //public static final String CLASS_REGEX = "(\\d{1,3})(\\.\\d+)?";
+    public static final String CLASS_REGEX = "(\\d+)(\\.\\d+)?";
+    
+    /**
+     * Separates the class from the rest of a call number.
+     * 
+     * Match group 1 contains the classification.
+     * Match group 2 contains the class digits (before the decimal).
+     * Match group 3 contains the decimal portion of the class number, including the decimal point.
+     * Match group 4 contains everything after the classification.
+     */
+    protected static Pattern classPattern = Pattern.compile("(" + CLASS_REGEX + ")" + "(.*)?");
 
     /**
+     * Regular expression for Dewey cutter.
+     * 
      * Dewey cutters start with a letter, followed by a one to three digit
      * number. The number may be followed immediately (i.e. without space) by
      * letters, or followed first by a space and then letters.
+     * 
+     * NB: {@code CallNumUtils} did not implement the "space letters" part of the cutter,
+     * similarly, this class defers that detail. 
+     * Challenging to do while leaving volumes and similar suffixes in tact.
      */
-    public static final String DEWEY_MIN_CUTTER_REGEX = "[A-Z]\\d{1,3}";
-    public static final String DEWEY_CUTTER_TRAILING_LETTERS_REGEX = DEWEY_MIN_CUTTER_REGEX + "[A-Z]+";
-    public static final String DEWEY_CUTTER_SPACE_TRAILING_LETTERS_REGEX = DEWEY_MIN_CUTTER_REGEX + " +[A-Z]+";
-    public static final String DEWEY_FULL_CUTTER_REGEX = DEWEY_MIN_CUTTER_REGEX + " *[A-Z]*+";
+    //TODO: support cutter with space-then-letter
+    //public static final String CUTTER_REGEX = "[A-Z]\\d{1,3} *(?:[A-Z]+)?";
+    public static final String CUTTER_REGEX = "[A-Z]\\d{1,3}(?:[A-Z]+)?";
+
+    public static Pattern cutterPattern = Pattern.compile(" *\\.?(" + CUTTER_REGEX + ") *(.+)?");
 
     /**
-     * the full Dewey classification string, followed by the first cutter
+     * Constructs a call number object from the given string.
+     * 
+     * The constructor parses the <code>callNumber</code> argument as part of instantiating the object.
+     * 
+     * @param callNumber        call number to parse
      */
-    public static final String DEWEY_CLASS_N_CUTTER_REGEX = DEWEY_CLASS_REGEX + " *\\.?" + DEWEY_FULL_CUTTER_REGEX;
-    public static final Pattern DEWEY_CLASS_N_CUTTER_PATTERN = Pattern.compile(DEWEY_CLASS_N_CUTTER_REGEX + ".*");
+    public DeweyCallNumber(String callNumber) {
+        parse(callNumber);
+    }
 
     /**
-     * non-cutter text that can appear before or after cutters
+     * Constructs call number object with no call number.
+     * Mainly a convenience for inheritance.
      */
-    public static final String NOT_CUTTER = "(:?[\\da-z]\\w*)|(:?[A-Z]\\D+[\\w]*)";
-
     public DeweyCallNumber() {
-        this.init();
+        return;
     }
 
-    public DeweyCallNumber(String call) {
-        parse(call);
-    }
+    protected void init() {
+        rawCallNum = null;
+        classification = null;
+        classDigits = null;
+        classDecimal = null;
+        cutter = null;
+        cutterSuffix = null;
 
-    public void init() {
-        this.raw = null;
-        this.classification = null;
-        this.cutter = null;
-        this.suffix = null;
+        shelfKey = null;
     }
 
     public void parse(String call) {
-        this.init();
-        this.raw = call;
-        // Assume call number is valid Dewey, until we show otherwise
-        this.valid = true;
+        init();
+        this.rawCallNum = call;
+        parse();
+    }
 
-        if (call == null || call.length() == 0) {
-            this.valid = false;
-            return;
-        }
-        String cutterAndSuffix = this.parseClassificationHelper(call);
-        if (!this.valid)
-            return;
-        this.parseCutterAndSuffixHelper(cutterAndSuffix);
+    protected void parse() {
+        parseCallNumber();
+        buildShelfKey();
     }
 
     /**
-     * Parses the call number, sets <code>this.classification</code>, and returns any remaining
-     * cutter and suffix. Sets <code>valid</code> to <code>false</code> if the beginning of the
-     * call number does not match a Dewey classification pattern
-     *
-     * @param call call number to parse
-     * @return     <code>null</code> if the beginning of the call number does not look like a
-     *             Dewey class, empty string if parse is successful but there is no cutter or suffix.
-     *
+     * Parses the call number, splitting the classification portions from any
+     * cutter(s) and other following characters. Sets these internal fields:
+     * <ul>
+     * <li><code>classification</code></li>
+     * <li><code>classDigits</code></li>
+     * <li><code>classDecimal</code></li>
+     * <li><code>classSuffix</code></li>
+     * <li><code>cutter</code></li>
+     * <li><code>cutterSuffix</code></li>
+     * </ul>
+     * 
+     * <p>Supplies any missing leading zeroes for {@code classification} and {@code classDigits}.
      */
-    protected String parseClassificationHelper(String call) {
-        // group 1 is Dewey class, group 2 is cutter plus suffix; consume spaces and period in between.
-        Pattern deweyClassPat = Pattern.compile("(" + DEWEY_CLASS_REGEX + ")\\s*\\.?(.*)");
-        Matcher deweyClassMatch = deweyClassPat.matcher(call);
-        if (!deweyClassMatch.matches()) {
-            this.valid = false;
-            return null;
-        }
-        this.classification = deweyClassMatch.group(1).trim();
-        return deweyClassMatch.group(2);
-    }
 
-    /**
-     * helper method that parses the what remains after the classification has been identified.
-     * Note: group count for all patterns must be 2.
-     *
-     * @param cutterAndSuffix the part of the call number left over after classification has been trimmed.
-     */
-    protected void parseCutterAndSuffixHelper(String cutterAndSuffix) {
-        // dewey cutters can have trailing letters, preceded by a space or not
-        String regex1 = "(" + DEWEY_CUTTER_TRAILING_LETTERS_REGEX + ") +(" + NOT_CUTTER + ".*)";
-        String regex2 = "(" + DEWEY_MIN_CUTTER_REGEX + ") +(" + NOT_CUTTER + ".*)";
-        String regex3 = "(" + DEWEY_CUTTER_SPACE_TRAILING_LETTERS_REGEX + ") +(" + NOT_CUTTER + ".*)";
-        String regex4 = "(" + DEWEY_CUTTER_TRAILING_LETTERS_REGEX + ")(.*)";
-        String regex5 = "(" + DEWEY_MIN_CUTTER_REGEX + ")(.*)";
-        String regex6 = "(" + DEWEY_CUTTER_SPACE_TRAILING_LETTERS_REGEX + ")(.*)";
-        Pattern[] patterns = {
-                Pattern.compile(regex1),
-                Pattern.compile(regex2),
-                Pattern.compile(regex3),
-                Pattern.compile(regex4),
-                Pattern.compile(regex5),
-                Pattern.compile(regex6),
-        };
-        // try each pattern, take the first match
-        for (Pattern pat : patterns) {
-            Matcher matcher = pat.matcher(cutterAndSuffix);
-            if (matcher.matches()) {
-                String cutter = matcher.group(1);
-                String suffix = matcher.group(2);
-                suffix = suffix.trim();
-                // Not certain why we check for non-empty suffix--inherited algorithm
-                if (suffix.length() > 0) {
-                    // check if there are letters in the cutter that should be assigned
-                    //  to the suffix
-                    int ix = cutter.lastIndexOf(' ');
-                    // may be obsolete, no test cases exercise this code! - TAO 2014-02-21
-                    if (ix != -1) {
-                        // add to suffix...
-                        suffix = cutter.substring(ix) + suffix;
-                        // ..._then_ trim from cutter
-                        cutter = cutter.substring(0, ix);
-                    }
-                }
-                // enforce policy of null if cutter or suffix are empty
-                if (cutter.length()==0)
-                    this.cutter = null;
-                else
-                    this.cutter = cutter;
-                if (suffix.length()==0)
-                    this.suffix = null;
-                else
-                    this.suffix = suffix;
-                return;
+    protected void parseCallNumber() {
+        if (rawCallNum == null || rawCallNum.length() == 0) {
+            return;
+        }
+
+        String everythingElse;
+        
+        Matcher m = classPattern.matcher(rawCallNum);
+        if (!m.matches()) {
+            cutterSuffix = rawCallNum;
+        } else {
+            classification = m.group(1);
+            classDigits = m.group(2);
+            classDecimal = m.group(3);
+            everythingElse = m.group(4);
+            
+            Matcher mCut = cutterPattern.matcher(everythingElse);
+            if (!mCut.matches()) {
+                cutterSuffix = everythingElse;
+            } else {
+                cutter = mCut.group(1);
+                cutterSuffix = mCut.group(2);
             }
         }
-        // If we reach here no patterns have matched, assume it is all suffix
-        this.suffix = cutterAndSuffix;
+        
     }
 
     /**
      * returns the classification of the call number.
-     * @return call number classification, or <code>null</code> if not set or found by <code>parse<code>.
+     * @return call number classification, or null if not set or found by {@code parse}.
      */
     public String getClassification() {
         return classification;
     }
-    public void setClassification(String classification) {
-        this.classification = classification;
+
+    /**
+     * Returns a normal form of the classification string.
+     * 
+     * <p>Supplies any missing leading zeroes.
+     */
+    public String getClassificationNormalized() {
+        if (classDigits == null || classDigits.length() >= 3) {
+            return classification;
+        } 
+
+        StringBuilder norm = new StringBuilder();
+        switch (classDigits.length()) {
+        case 1:
+            norm.append("00");
+            break;
+        case 2:
+            norm.append("0");
+            break;
+        default:
+            // DRYROT: classDigits must be non-empty
+        }
+        norm.append(classDigits);
+        if (classDecimal != null) norm.append(classDecimal);
+        return norm.toString();
     }
+
+    /**
+     * returns the classification of the call number.
+     * @return call number classification, or null if not set or found by {@code parse}.
+     */
+    public String getClassDigits() {
+        return classDigits;
+    }
+
+    /**
+     * returns the classification of the call number.
+     * @return call number classification, or null if not set or found by {@code parse}.
+     */
+    public String getClassDecimal() {
+        return classDecimal;
+    }
+
     /**
      * returns the cutter of the call number.
      * @return call number cutter, or <code>null</code> if no cutter was set or found.
@@ -190,54 +262,58 @@ public class DeweyCallNumber extends AbstractCallNumber {
     public String getCutter() {
         return cutter;
     }
-    public void setCutter(String cutter) {
-        this.cutter = cutter;
-    }
     /**
-     * returns the suffix of the call number.
-     * @return call number suffix, or <code>null</code> if no suffix was set or found.
+     * returns the cutterSuffix of the call number.
+     * @return call number cutterSuffix, or <code>null</code> if no cutterSuffix was set or found.
      */
     public String getSuffix() {
-        return suffix;
+        return cutterSuffix;
     }
-    public void setSuffix(String suffix) {
-        this.suffix = suffix;
-    }
+
     @Override
     public String getShelfKey() {
-        if (!this.valid) {
-            return this.raw;
-        }
-        //return CallNumUtils.getDeweyShelfKey(this.raw);
-
-        StringBuilder resultBuf = new StringBuilder();
-
-        // class
-        // float number, normalized to have 3 leading zeros
-        //   and trailing zeros if blank doesn't sort before digits
-        String classNum = Utils.normalizeFloat(this.classification, 3, 8);
-        resultBuf.append(classNum);
-
-        // cutter   1-3 digits
-        // optional cutter letters suffix
-        //   letters preceded by space or not.
-
-        // normalize cutter  - treat number as a fraction.
-        if (this.cutter != null)
-            resultBuf.append(" " + this.cutter);
-
-        // optional suffix (year, part, volume, edition)
-        if (this.suffix != null)
-            resultBuf.append(" " + Utils.normalizeSuffix(this.suffix));
-
-
-        if (resultBuf.length() == 0)
-            resultBuf.append(this.raw);
-
-        return resultBuf.toString().trim();
-
+        return shelfKey;
     }
 
+    protected void buildShelfKey() {
+        StringBuilder keyBuf = new StringBuilder();
+        
+        if (rawCallNum == null) {            
+            shelfKey = null;
+        } else {
+            if (classDigits != null) {
+                Utils.appendSortableNumber(keyBuf, classDigits);
+            }
+            if (classDecimal != null) {
+                keyBuf.append(classDecimal);
+            }
+            if (cutter !=null) {
+                if (keyBuf.length() > 0) {
+                    keyBuf.append(' ');
+                }
+                keyBuf.append(cutter);
+            }
+            if (cutterSuffix != null) {
+                if (keyBuf.length() > 0) {
+                    keyBuf.append(' ');
+                }
+                Utils.appendNumericallySortable(keyBuf, cutterSuffix);
+            }
+            shelfKey = keyBuf.toString();
+        }
+    }
+    
+    public boolean isValid() {
+        if (classDigits == null) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
+    public String toString() {
+        return rawCallNum;
+    }
     /*
     public String debugInfo() {
         String info = "this.raw = " + this.raw

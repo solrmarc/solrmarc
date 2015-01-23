@@ -16,99 +16,182 @@ package org.solrmarc.callnum;
  * limitations under the License.
  */
 
-import java.text.DecimalFormat;
-
 /**
  * Provides utility functions to support call number manipulation.
- * Mostly reused from Naomis Dushay's <code>CallNumUtils</code>.
  *
- * @author Naomi Dushay, Stanford University
  * @author Tod Olson, University of Chicago
  *
  */
 
 public class Utils {
+    
+    public enum State { START, WORD, GAP, NUM }
+    public enum InType { LETTER, SPACE, PERIOD, PUNCT, DIGIT, OTHER, END }
 
     /**
-     * normalizes numbers (can have decimal portion) to (<code>digitsB4</code>) before
-     * the decimal (adding leading zeroes as necessary) and (<code>digitsAfter</code>)
-     * after the decimal.  In the case of a whole number, there will be no
-     * decimal point.
-     * @param floatStr    the number, as a String
-     * @param digitsB4    the number of characters the result should have before the
-     *                    decimal point (leading zeroes will be added as necessary). A negative
-     *                    number means leave whatever digits encountered as is; don't pad with leading zeroes.
-     * @param digitsAfter the number of characters the result should have after
-     *                    the decimal point.  A negative number means leave whatever fraction
-     *                    encountered as is; don't pad with trailing zeroes (trailing zeroes in
-     *                    this case will be removed)
-     * @throws NumberFormatException if string can't be parsed as a number
+     * Writes a numerically-sortable version of the input to the buffer.
+     * 
+     * The rules for production the numerically sortable sequence are:
+     * <ul>
+     * <li>Letters are translated to upper case</li>
+     * <li>numeric sequences are prepended with the length of the sequence</li> 
+     * <li>any other character is a word separator</li> 
+     * <li>sequences of word separators are reduced to a single space</li> 
+     * </ul>
+     * 
+     * <p>Prepending a sequence of digits with the number of digits ensures that they will easily sort numerically:
+     * sort keys for 2-digits nubmers start with 2, sort keys for 3-digit numbers start with 3, etc. 
+     * Suggested by John Craig at Code4Lib in Ashville, NC.
+     * 
+     * <p>Implemented as a finite state machine, modeled by <code>switch</code> statements.
+     * 
+     * @param buf       buffer for appending sortable version of the input
+     * @param input     source character sequence
      */
-    public static String normalizeFloat(String floatStr, int digitsB4, int digitsAfter)
-    {
-        double value = Double.valueOf(floatStr).doubleValue();
-
-        // TODO: what if digitsB4 or digitsAfter are too small for the value?
-        String formatStr = getFormatString(digitsB4) + '.' + getFormatString(digitsAfter);
-
-        DecimalFormat normFormat = new DecimalFormat(formatStr);
-        String norm = normFormat.format(value);
-        if (norm.endsWith("."))
-            norm = norm.substring(0, norm.length() - 1);
-        return norm;
-    }
-
-    /**
-     * returns a format string corresponding to the number of digits specified
-     * @param numDigits the number of characters the result should have (to be padded
-     *                  with zeroes as necessary). A negative number means leave whatever digits
-     *                  encountered as is; don't pad with zeroes -- up to 12 characters.
-     */
-    private static String getFormatString(int numDigits) {
-        StringBuilder b4 = new StringBuilder();
-        if (numDigits < 0)
-            b4.append("############");
-        else if (numDigits > 0) {
-            for (int i = 0; i < numDigits; i++) {
-                b4.append('0');
+    public static void appendNumericallySortable(StringBuilder buf, CharSequence input) {
+        StringBuilder numBuf = new StringBuilder();
+        State state = State.START;
+        char c;
+        InType inType = InType.END;
+        
+        for (int i = 0; i < input.length(); i++) {
+            c = input.charAt(i);
+            // Ugly C-style comparisons to avoid Unicode table lookups, 
+            // should be fine for call numbers
+            // TODO: remove unneeded input types
+            if (c >= 'A' && c <= 'Z') {
+                inType = InType.LETTER;
+            } else if (c >= 'a' && c <= 'z') {
+                inType = InType.LETTER;
+                c = Character.toUpperCase(c);
+            } else if (c >= '0' && c <= '9') {
+                inType = InType.DIGIT;
+            } else if (c == '.') {
+                inType = InType.PERIOD;
+            } else if (Character.isWhitespace(c)) {
+                inType = InType.SPACE;
+            } else if (c >= '!' && c <= '~') { 
+                // Only consider ASCII-style punctuation,
+                // have already eliminated digits and letters
+                inType = InType.PUNCT;
+            } else {
+                inType = InType.OTHER;
+            }
+            
+            switch (state) {
+                case START:
+                    switch (inType) {
+                        case LETTER:
+                            state = State.WORD;
+                            buf.append(c);
+                            break;
+                        case DIGIT:
+                            state = State.NUM;
+                            numBuf.append(c);
+                            break;
+                        default:
+                            // Consume anything else, remain in START state
+                            break;
+                    }
+                    break;
+                case WORD:      // Write word characters directly to buffer
+                    switch (inType) {
+                    case LETTER:
+                        state = State.WORD;
+                        buf.append(c);
+                        break;
+                    case DIGIT:
+                        state = State.NUM;
+                        buf.append(' ');
+                        numBuf.append(c);
+                        break;
+                    default:
+                        state = State.GAP;
+                        buf.append(' ');
+                        break;
+                    }
+                    break;
+                case GAP:       // If we are in a gap, only letters or digits will take us out
+                    switch (inType) {
+                    case LETTER:
+                        state = State.WORD;
+                        buf.append(c);
+                        break;
+                    case DIGIT:
+                        state = State.NUM;
+                        numBuf.append(c);
+                        break;
+                    default:
+                        // Consume anything else, remain in GAP state
+                        break;
+                    }
+                    break;
+                case NUM:       // accumulate number in special buffer, write sort version on state change
+                    switch (inType) {
+                    case DIGIT: // Stay in NUM state and accumulate another digit
+                    case PERIOD:
+                        numBuf.append(c);
+                        break;
+                    case LETTER:
+                        state = State.WORD;
+                        appendSortableNumber(buf, numBuf);
+                        numBuf.setLength(0);
+                        buf.append(c);
+                        break;
+                    default:
+                        state = State.GAP;
+                        appendSortableNumber(buf, numBuf);
+                        numBuf.setLength(0);
+                        buf.append(' ');
+                        break;
+                    }
+                    break;
+                default:
+                    //TODO: Dryrot error?
+                    break;
             }
         }
-        return b4.toString();
-    }
-    /**
-     * normalize a suffix for shelf list sorting by changing all digit
-     *  substrings to a constant length (left padding with zeros).
-     */
-    public static String normalizeSuffix(String suffix) {
-        if (suffix != null && suffix.length() > 0) {
-            StringBuilder resultBuf = new StringBuilder(suffix.length());
-            // get digit substrings
-            String[] digitStrs = suffix.split("[\\D]+");
-            int len = digitStrs.length;
-            if (digitStrs != null && len != 0) {
-                int s = 0;
-                for (int d = 0; d < len; d++) {
-                    String digitStr = digitStrs[d];
-                    int ix = suffix.indexOf(digitStr, s);
-                    // add the non-digit chars before, if they exist
-                    if (s < ix) {
-                        String text = suffix.substring(s, ix);
-                        resultBuf.append(text);
-                    }
-                    if (digitStr != null && digitStr.length() != 0) {
-                        // add the normalized digit chars, if they exist
-                        resultBuf.append(normalizeFloat(digitStr, 6, 0));
-                        s = ix + digitStr.length();
-                    }
-
-                }
-                // add any chars after the last digStr
-                resultBuf.append(suffix.substring(s));
-                return resultBuf.toString();
-            }
+        // Remember any lingering number data
+        if (state == State.NUM) {
+            appendSortableNumber(buf, numBuf);
+            numBuf.setLength(0);
         }
-
-        return suffix;
+    }
+    
+    /**
+     * Appends to a buffer a lexicographically sortable version of the number. 
+     * The number may be an integer or may include a decimal.
+     * 
+     * @param buf       buffer to insert the sortable token
+     * @param num       sequence of digits, possibly with decimal
+     */
+    public static void appendSortableNumber(StringBuilder buf, CharSequence num) {
+        /*
+        if (num.charAt(0) == '0') {
+            int i = 0;
+            while (i < num.length() && num.charAt(i) == '0') {
+                i++;
+            }
+            buf.append(num.length() - i);
+            buf.append(num.subSequence(i, num.length()));
+        } else {
+            buf.append(num.length());
+            buf.append(num);
+        }
+        */
+        // identify integer part
+        int intStart = 0;
+        int intEnd = 0;
+        while (intStart < num.length() && num.charAt(intStart) == '0') {
+            intStart++;
+        }
+        while (intEnd < num.length() && num.charAt(intEnd) >= '0' && num.charAt(intEnd) <= '9') {
+            intEnd++;
+        }
+        // append length of integer part
+        buf.append(intEnd - intStart);
+        // append number without leading 0s
+        buf.append(num.subSequence(intStart, num.length()));
     }
 
 }
