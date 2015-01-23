@@ -11,37 +11,43 @@ import org.junit.Test;
  */
 public class UtilsUnitTests {
 
+    // column 1 = number, column 2 = sort key
+    String[][] sortableNumberArray = {
+            {"1", "11"},
+            {"89", "289"},
+            {"0", "0"},
+            {"0002", "12"},
+            {"00", "0"},
+            {"4725.2", "44725.2"},
+    };
+    
     @Test
-    public void testNormalizeFloat() {
-        // regular floats
-        assertEquals("123.456", Utils.normalizeFloat("123.456", 3, 3));
-        assertEquals("0123.456000", Utils.normalizeFloat("123.456", 4, 6));
-        // decimal only
-        assertEquals("123.000", Utils.normalizeFloat("123", 3, 3));
-        assertEquals("0123.000000", Utils.normalizeFloat("123", 4, 6));
-        // no padding
-        assertEquals("123.456", Utils.normalizeFloat("123.456", -1, -1));
-        // trim needless zeroes
-        assertEquals("123.456", Utils.normalizeFloat("0123.45600", -1, -1));
+    public void testAppendSortableNumber() {
+        for (int i = 0; i < sortableNumberArray.length; i++) {
+            String in = sortableNumberArray[i][0];
+            String out = sortableNumberArray[i][1];
+            StringBuilder outBuf = new StringBuilder();
+            Utils.appendSortableNumber(outBuf, in);
+            assertEquals(out, outBuf.toString());
+        }
     }
-
-    // TODO: what should happen if the string is too long for the units or decimals?
+    
+    String[][] numSortArray = {
+            {"1960", "41960"},
+            {"100TH", "3100TH"},
+            {"100TH AND 17", "3100TH AND 217"},
+            {"reel 6038, no. 08", "REEL 46038 NO 18"},
+    };
+    
     @Test
-    public void testNormalizeFloatStringTooLong() {
-        //assertEquals("???", Utils.normalizeFloat("123.456", 3, 2));
-        //assertEquals("???", Utils.normalizeFloat("123.456", 2, 3));
+    public void testNumSortHelper() {
+        for (String[] subArray:numSortArray) {
+            String in = subArray[0];
+            String out = subArray[1];
+            StringBuilder outBuf = new StringBuilder();
+            Utils.appendNumericallySortable(outBuf, in);
+            assertEquals(out, outBuf.toString());
+        }
     }
-
-    @Test (expected = NumberFormatException.class)
-    public void testNormalizeFloatNonFloatString() {
-        Utils.normalizeFloat("Not a float", 3, 2);
-        fail("should have thrown a java.lang.NumberFormatException when formating a non-float");
-    }
-/*
-    @Test
-    public void test() {
-        fail("Not yet implemented");
-    }
-*/
 
 }

@@ -32,9 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.sql.*;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import org.apache.log4j.Logger;
@@ -43,14 +41,17 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.callnum.DeweyCallNumber;
+import org.solrmarc.callnum.LCCallNumber;
 import org.solrmarc.tools.CallNumUtils;
 import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.Utils;
 import org.ini4j.Ini;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -868,7 +869,7 @@ public class VuFindIndexer extends SolrIndexer
      *
      * Can return null
      *
-     * @param record
+     * @param record current MARC record
      * @return Call number label
      */
     public String getCallNumberSubject(final Record record, String fieldSpec) {
@@ -898,20 +899,16 @@ public class VuFindIndexer extends SolrIndexer
 
     /**
      * Normalize a single LCCN
-     * @param record
-     * @param fieldSpec
+     * @param record current MARC record
+     * @param fieldSpec - which MARC fields / subfields need to be analyzed
      * @return String Normalized LCCN
      */
     public String getFullCallNumberNormalized(final Record record, String fieldSpec) {
 
+        // TODO: is the null fieldSpec still an issue?
         if (fieldSpec != null) {
             String cn = getFirstFieldVal(record, fieldSpec);
-            try {
-                return CallNumUtils.getLCShelfkey(cn, null);
-            } catch(Exception e) {
-                // Don't bail out of indexing just because of a weird call number!
-                //System.out.println("getFullCallNumberNormalized error: " + e);
-            }
+            return (new LCCallNumber(cn)).getShelfKey();
         }
         // If we got this far, we couldn't find a valid value:
         return null;
@@ -998,7 +995,7 @@ public class VuFindIndexer extends SolrIndexer
      *
      * Can return null
      *
-     * @param record
+     * @param record current MARC record
      * @param fieldSpec - which MARC fields / subfields need to be analyzed
      * @param precisionStr - a decimal number (represented in string format) showing the
      *  desired precision of the returned number; i.e. 100 to round to nearest hundred,
@@ -1018,15 +1015,17 @@ public class VuFindIndexer extends SolrIndexer
         while (iter.hasNext()) {
             // Get the current string to work on:
             String current = iter.next();
-
-            if (CallNumUtils.isValidDewey(current)) {
+            
+            DeweyCallNumber callNum = new DeweyCallNumber(current);
+            if (callNum.isValid()) {
                 // Convert the numeric portion of the call number into a float:
-                float currentVal = Float.parseFloat(CallNumUtils.getDeweyB4Cutter(current));
-
+                float currentVal = Float.parseFloat(callNum.getClassification());
+                
                 // Round the call number value to the specified precision:
                 Float finalVal = new Float(Math.floor(currentVal / precision) * precision);
-
+                
                 // Convert the rounded value back to a string (with leading zeros) and save it:
+                // TODO: Provide different conversion to remove CallNumUtils dependency
                 result.add(CallNumUtils.normalizeFloat(finalVal.toString(), 3, -1));
             }
         }
@@ -1042,7 +1041,7 @@ public class VuFindIndexer extends SolrIndexer
      *
      * Can return null
      *
-     * @param record
+     * @param record current MARC record
      * @param fieldSpec - which MARC fields / subfields need to be analyzed
      * @return Set containing normalized Dewey numbers extracted from specified fields.
      */
@@ -1059,8 +1058,9 @@ public class VuFindIndexer extends SolrIndexer
 
             // Add valid strings to the set, normalizing them to be all uppercase
             // and free from whitespace.
-            if (CallNumUtils.isValidDewey(current)) {
-                result.add(current.toUpperCase().replaceAll(" ", ""));
+            DeweyCallNumber callNum = new DeweyCallNumber(current);
+            if (callNum.isValid()) {
+                result.add(callNum.toString().toUpperCase().replaceAll(" ", ""));
             }
         }
 
@@ -1075,7 +1075,7 @@ public class VuFindIndexer extends SolrIndexer
      *
      * Can return null
      *
-     * @param record
+     * @param record current MARC record
      * @param fieldSpec - which MARC fields / subfields need to be analyzed
      * @return String containing the first valid Dewey number encountered, normalized
      *         for sorting purposes.
@@ -1089,8 +1089,9 @@ public class VuFindIndexer extends SolrIndexer
             String current = iter.next();
 
             // If this is a valid Dewey number, return the sortable shelf key:
-            if (CallNumUtils.isValidDewey(current)) {
-                return CallNumUtils.getDeweyShelfKey(current);
+            DeweyCallNumber callNum = new DeweyCallNumber(current);
+            if (callNum.isValid()) {
+                return callNum.getShelfKey();
             }
         }
 
@@ -1118,15 +1119,9 @@ public class VuFindIndexer extends SolrIndexer
             // Get the current string to work on:
             String current = iter.next();
 
-            // If this is a valid Dewey number, return the sortable shelf key:
-            if (CallNumUtils.isValidDewey(current)) {
-                result.add(CallNumUtils.getDeweyShelfKey(current));
-            } else {
-                // If the number is invalid, we can't normalize it, but we still want
-                // to put an entry in the sort list so that things don't get out of sync
-                // for the AlphaBrowse indexer -- we'll just use the raw string
-                result.add(current);
-            }
+            // gather all sort keys, even if number is not valid
+            DeweyCallNumber callNum = new DeweyCallNumber(current);
+            result.add(callNum.getShelfKey());
         }
 
         // If we found no call numbers, return null; otherwise, return our results:

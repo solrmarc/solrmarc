@@ -18,14 +18,17 @@ package org.solrmarc.callnum;
 
 /**
  * Provides a generic interface for building call number objects.
- * <h4>Constructors</h4>
- * Implementing classes are encourages to provide two constructors:
+ * 
+ * Constructors:
+ * 
+ * Implementing classes are encourage to provide two constructors:
  * <ol>
- * <li>a constructor with no parameters which will just initialize the object, and</li>
- * <li>a constructor with a <code>String</code> parameter, which will <code>init</code>
- * the object and <code>parse</code> the parameter.</li>
+ * <li>a constructor with no parameters which will just instantiate the object, and</li>
+ * <li>a constructor with a call number parameter, which will parse the parameter.</li>
  * </ol>
- * <h4>Parsing and fields</h4>
+ * 
+ * Parsing and fields:
+ * 
  * <code>parse</code> will set internal fields to represent logical parts of the call number.
  * Use <code>null</code> when some part of the call number is absent.
  * For example, if there is an internal field to represent a cutter but the parser finds no
@@ -36,13 +39,9 @@ package org.solrmarc.callnum;
  */
 public interface CallNumber {
     /**
-     * Reset any internal fields so the object is ready to <code>parse</code> a new
-     * call number string, or to construct a new call number via the setter methods.
-     */
-    public void init();
-
-    /**
      * Parse call number and populate any fields.
+     * 
+     * @param callNumber        call number
      */
     public void parse(String callNumber);
 
@@ -50,11 +49,14 @@ public interface CallNumber {
      * Reports whether the string given to <code>parse</code> matched the pattern for a call number.
      * Behavior is unspecified if call number was built from setters or if object has been initialized
      * since the last <code>parse</code>.
+     * 
+     * @return true if this parsed call number looks valid
      */
     public boolean isValid();
 
     /**
-     * Compute and return a sort key for the call number.
+     * Returns a shelf key for the call number.
+     * The shelf key can be sorted lexicographically, in Unicode order.
      *
      * @return sort key
      */
