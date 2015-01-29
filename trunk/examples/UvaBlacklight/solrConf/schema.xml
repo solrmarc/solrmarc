@@ -112,6 +112,15 @@
         <filter class="solr.RemoveDuplicatesTokenFilterFactory"/>
       </analyzer>
     </fieldType>
+
+    <!-- single token analyzed text, for sorting. Punctuation is significant. -->
+    <fieldtype name="alphaSort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+      <analyzer>
+        <tokenizer class="solr.KeywordTokenizerFactory" />
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.TrimFilterFactory" />
+      </analyzer>
+    </fieldtype>
 	
     <!-- This is an example of using the KeywordTokenizer along
          With various TokenFilterFactories to produce a sortable field
@@ -162,6 +171,23 @@
       </analyzer>
     </fieldType>
 
+    <!-- Analyzed Text, no Stemming or Stopwords or Synonyms -->
+    <fieldtype name="callNumberText" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory" />
+        <filter class="schema.UnicodeNormalizationFilterFactory" version="icu4j" composed="false" remove_diacritics="true" remove_modifiers="true" fold="true" />
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="1" catenateNumbers="1" catenateAll="0" splitOnCaseChange="1" />
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory" />
+        <filter class="schema.UnicodeNormalizationFilterFactory" version="icu4j" composed="false" remove_diacritics="true" remove_modifiers="true" fold="true" />
+        <filter class="solr.WordDelimiterFilterFactory" generateWordParts="1" generateNumberParts="1" catenateWords="0" catenateNumbers="0" catenateAll="0" splitOnCaseChange="1" />
+        <filter class="solr.LowerCaseFilterFactory" />
+        <filter class="solr.RemoveDuplicatesTokenFilterFactory" />
+      </analyzer>
+    </fieldtype>
 
 
     <!-- Analyzed Text, no Stemming or Synonyms -->
@@ -211,6 +237,10 @@
     <field name="title_facet" type="lcaseString" indexed="true" stored="true" multiValued="true" />
     <field name="title_sort_facet" type="alphaNumOnlySort" indexed="true" stored="true" multiValued="false" />
     <field name="author_sort_facet" type="alphaNumOnlySort" indexed="true" stored="true" multiValued="false" />
+    <field name="shelfkey" type="alphaSort" indexed="true" stored="true" multiValued="false" />
+    <field name="reverse_shelfkey" type="alphaSort" indexed="true" stored="true" multiValued="false" />
+    <field name="call_number_text" type="callNumberText" indexed="true" stored="false" multiValued="true" />
+    <field name="anchor_script_text" type="text" indexed="true" stored="true" multiValued="false" />
   </fields>
 	
   <uniqueKey>id</uniqueKey>
