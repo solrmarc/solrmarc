@@ -2,8 +2,8 @@
 <project>
     <macrodef name="get-random" description="find an unused port to used for the test server" >
         <sequential>
-            <math result="result" datatype="int" >
-                <op op="rint">
+            <math result="result" >
+                <op op="rint" datatype="int" >
                     <op op="+">
                         <num value="2000"/>
                         <op op="*">
