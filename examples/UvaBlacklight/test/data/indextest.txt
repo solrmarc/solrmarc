@@ -1,7 +1,7 @@
 +, u3412403.mrc, 'script(PubDateGroups.bsh), getPubDateGroups()', Last 50 years
 +, u3412403.mrc, 'script(PubDateGroups.bsh), getPublicationDate()', 1986
-blacklight_config.properties, u642.mrc, format_facet, Journal/Magazine
-blacklight_config.properties, u10273.mrc, format_facet, Book|Musical Score|Manuscript
+blacklight_config.properties, u642.mrc, format_facet, Journal/Magazine|Periodical
+blacklight_config.properties, u10273.mrc, format_facet, Musical Score|Manuscript
 blacklight_config.properties, u17922.mrc, oclc_text, 10072685
 blacklight_config.properties, u470059.mrc, ports_of_call_facet, Penang|Malaysia
 blacklight_config.properties, u4802090.mrc, linked_responsibility_statement_display, 編著黃仁, 王唯 ; 撰述委員王清華 ... [et al.]
@@ -41,12 +41,12 @@ blacklight_config.properties, u2956.mrc, library_facet, Fine Arts|Semester at Se
 blacklight_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
 blacklight_config.properties, u2362477.mrc, location2_facet, Robertson Media Center Vault--Ask at circulation desk
 
-blacklight_config.properties, u4495584.mrc, format_facet, Online|Journal/Magazine
+blacklight_config.properties, u4495584.mrc, format_facet, Online|Journal/Magazine|Periodical
 blacklight_config.properties, u20563.mrc, year_multisort_i, 1982
 blacklight_config.properties, u3412403.mrc, year_multisort_i, 1986
 blacklight_config.properties, u8692.mrc, year_multisort_i, 1974
 blacklight_config.properties, u20563.mrc, published_date_facet, Last 50 years
-blacklight_config.properties, u4802090.mrc, published_date_facet, Last 10 years|Last 50 years
+blacklight_config.properties, u4802090.mrc, published_date_facet, Last 50 years
 blacklight_config.properties, u11.mrc, published_date_facet, More than 50 years ago
 
 blacklight_dev_config.properties, u8738.mrc, language_facet, English|French (translated from)
