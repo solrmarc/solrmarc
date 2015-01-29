@@ -61,7 +61,7 @@
 # Test 19-20
 #check permissive reader vs non-permissive reader
 +marc.permissive=true+marc.to_utf_8=true, u2103_raw.mrc, getWithOptions(rec, 245ab, includedLinkedFields:removeTrailingPunct), Zi jin cheng gong dian|紫禁城宮殿
-+marc.to_utf_8=true, u2103_raw.mrc, getWithOptions(rec, 245ab, includedLinkedFields:removeTrailingPunct), Zi jin cheng gong dian|紫禁城
++marc.to_utf_8=true, u2103_raw.mrc, getWithOptions(rec, 245ab, includedLinkedFields:removeTrailingPunct), Zi jin cheng gong dian|紫禁城!
 
 # Test 21
 #test LNK type syntax for specifying linked fields
@@ -77,7 +77,7 @@
 
 # Test 24
 #test getLinkedFieldCombined
-+marc.to_utf_8=true, u2103_raw.mrc, getLinkedFieldCombined(rec, 245ab), Zi jin cheng gong dian /|紫禁城
++marc.to_utf_8=true, u2103_raw.mrc, getLinkedFieldCombined(rec, 245ab), Zi jin cheng gong dian /|紫禁城!
 
 # Test 25-26
 #test getSingleIndexEntry
