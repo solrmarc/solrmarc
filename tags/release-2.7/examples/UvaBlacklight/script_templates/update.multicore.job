@@ -1,0 +1,27 @@
+#!/bin/bash
+SOLRMARCDISTDIR=/lib_content27/solrmarc/dist
+PATH=$SOLRMARCDISTDIR/bin:$PATH
+export PATH
+num=0
+JAVA_HOME=/usr/java/latest/bin/java
+export JAVA_HOME
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+solrmarcdir=$scriptdir
+if ! [ -e $solrmarcdir/SolrMarc.jar ] 
+then
+  solrmarcdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
+
+#update.multicore.sub.job blacklight_config.properties
+update.multicore.sub.job bib_core_prod_config.properties all
+
+solrcore=all
+
+solrnewcore=blacklight_all_`date +%Y%m%d`
+
+#copy the file solr.xml.template to solr.xml  replacing 
+#the string @@blacklight_index@@ 
+#with the names of the new solr core. 
+cat /lib_content27/solr/solr.xml.template  | sed -e "s/@@blacklight_index@@/$solrnewcore/" > /lib_content27/solr/solr.xml
+

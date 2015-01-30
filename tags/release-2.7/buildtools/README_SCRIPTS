@@ -1,0 +1,2 @@
+This is the directory in which you should place java-like beanshell 
+scripts for handling custom indexing functions via dynamic scripts.

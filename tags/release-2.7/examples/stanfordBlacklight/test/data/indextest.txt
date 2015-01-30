@@ -1,0 +1,7 @@
+# config file name, marc file to index, solr field to examine, value to expect
+
+sw_config.properties, u399.mrc, id, 399
+
+# config file name, marc file to index(id of record to index), solr field to examine, value to expect
+
+sw_config.properties, selectedRecs.mrc(2), id, 2

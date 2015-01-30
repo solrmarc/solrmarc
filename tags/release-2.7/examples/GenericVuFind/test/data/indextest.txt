@@ -1,0 +1,38 @@
+# Test isIllustrated method
+import.properties, notillus1.mrc, illustrated, Not Illustrated
+import.properties, notillus2.mrc, illustrated, Not Illustrated
+import.properties, notillus3.mrc, illustrated, Not Illustrated
+import.properties, illus1.mrc, illustrated, Illustrated
+import.properties, illus2.mrc, illustrated, Illustrated
+import.properties, illus3.mrc, illustrated, Illustrated
+import.properties, illus4.mrc, illustrated, Illustrated
+import.properties, illus5.mrc, illustrated, Illustrated
+import.properties, illus6.mrc, illustrated, Illustrated
+
+# Test Dewey Decimal functionality
+import.properties, dewey01.mrc, dewey-hundreds, 000 - Computer science, information & general works
+import.properties, dewey01.mrc, dewey-tens, 000 - Computer science, knowledge & systems
+import.properties, dewey01.mrc, dewey-ones, 001 - Knowledge
+import.properties, dewey01.mrc, dewey-full, 1.I39
+import.properties, dewey01.mrc, dewey-sort, 11 I39
+import.properties, dewey02.mrc, dewey-hundreds, 300 - Social sciences
+import.properties, dewey02.mrc, dewey-tens, 320 - Political science
+import.properties, dewey02.mrc, dewey-ones, 323 - Civil & political rights
+import.properties, dewey02.mrc, dewey-full, 323.A512RENO.23-28
+import.properties, dewey02.mrc, dewey-sort, 3323 A512RE NO 223 228
+
+# Test format determination
+import.properties, dewey01.mrc, format, Book
+import.properties, dewey02.mrc, format, Book
+import.properties, notillus1.mrc, format, VHS
+import.properties, illus1.mrc, format, Electronic
+import.properties, short007.mrc, format, Audio
+
+# Test latitude/longitude
+# the following test would fail by default because the definition of long_lat is commented out in marc_local.properties by default
+# the subsequent three tests directly invoke and test the getLongLat method in different ways without it being included in the marc_local.properties
+#import.properties, latlong01.mrc, long_lat, -7.1469,53.505
+import.properties, latlong01.mrc, 'custom, getLongLat', -7.1469,53.505
+import.properties, latlong01.mrc, getLongLat(rec), -7.1469,53.505
++solr.indexer=org.solrmarc.index.VuFindIndexer, latlong01.mrc, getLongLat(rec), -7.1469,53.505
+
