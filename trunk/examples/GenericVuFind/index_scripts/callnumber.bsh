@@ -121,11 +121,10 @@ return(getFullCallNumberNormalized(record, "099ab:090ab:050ab"));
 */
 public String getFullCallNumberNormalized(Record record, String fieldSpec) {
 
-if (fieldSpec != null) {
-String cn = indexer.getFirstFieldVal(record, fieldSpec);
-String cn = getFirstFieldVal(record, fieldSpec);
-return (new LCCallNumber(cn)).getShelfKey();
-}
+    if (fieldSpec != null) {
+        String cn = indexer.getFirstFieldVal(record, fieldSpec);
+        return (new LCCallNumber(cn)).getShelfKey();
+    }
     // If we got this far, we couldn't find a valid value:
     return null;
 }
