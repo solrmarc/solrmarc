@@ -81,9 +81,10 @@ public class VuFindIndexer extends SolrIndexer
 
     /**
      * Default constructor
-     * @param propertiesMapFile
+     * @param propertiesMapFile the {@code x_index.properties} file mapping solr
+     *  field names to values in the marc records
      * @param propertyDirs array of directories holding properties files
-     * @throws Exception
+     * @throws Exception if {@code SolrIndexer} constructor threw an exception.
      */
     public VuFindIndexer(final String propertiesMapFile, final String[] propertyDirs)
             throws FileNotFoundException, IOException, ParseException {
@@ -92,7 +93,7 @@ public class VuFindIndexer extends SolrIndexer
 
     /**
      * Log an error message and throw a fatal exception.
-     * @param msg
+     * @param msg message to log
      */
     private void dieWithError(String msg)
     {
@@ -102,7 +103,7 @@ public class VuFindIndexer extends SolrIndexer
 
     /**
      * Given the base name of a configuration file, locate the full path.
-     * @param filename
+     * @param filename base name of a configuration file
      */
     private File findConfigFile(String filename)
     {
@@ -142,7 +143,7 @@ public class VuFindIndexer extends SolrIndexer
 
     /**
      * Sanitize a VuFind configuration setting.
-     * @param str
+     * @param str configuration setting
      */
     private String sanitizeConfigSetting(String str)
     {
@@ -164,7 +165,7 @@ public class VuFindIndexer extends SolrIndexer
 
     /**
      * Load an ini file.
-     * @param filename
+     * @param filename name of {@code .ini} file
      */
     public Ini loadConfigFile(String filename)
     {
@@ -180,9 +181,9 @@ public class VuFindIndexer extends SolrIndexer
 
     /**
      * Get a setting from a VuFind configuration file.
-     * @param filename
-     * @param section
-     * @param setting
+     * @param filename configuration file name
+     * @param section section name within the file
+     * @param setting setting name within the section
      */
     public String getConfigSetting(String filename, String section, String setting)
     {
@@ -366,14 +367,13 @@ public class VuFindIndexer extends SolrIndexer
      * Extract the latest transaction date from the MARC record.  This is useful
      * for detecting when a record has changed since the last time it was indexed.
      *
-     * @param record
+     * @param record MARC record
      * @return Latest transaction date.
      */
     public java.util.Date getLatestTransaction(Record record) {
         // First try the 005 -- this is most likely to have a precise transaction date:
         Set<String> dates = getFieldList(record, "005");
         if (dates != null) {
-            String current;
             Iterator<String> dateIter = dates.iterator();
             if (dateIter.hasNext()) {
                 return normalize005Date(dateIter.next());
@@ -383,7 +383,6 @@ public class VuFindIndexer extends SolrIndexer
         // No luck with 005?  Try 008 next -- less precise, but better than nothing:
         dates = getFieldList(record, "008");
         if (dates != null) {
-            String current;
             Iterator<String> dateIter = dates.iterator();
             if (dateIter.hasNext()) {
                 return normalize008Date(dateIter.next());
@@ -397,8 +396,8 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Get all available publishers from the record.
      *
-     * @param  Record          record
-     * @return Set<String>     publishers
+     * @param  record MARC record
+     * @return set of publishers
      */
     public Set<String> getPublishers(final Record record) {
         Set<String> publishers = new LinkedHashSet<String>();
@@ -449,8 +448,8 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Get all available dates from the record.
      *
-     * @param  Record          record
-     * @return Set<String>     dates
+     * @param  record MARC record
+     * @return set of dates
      */
     public Set<String> getDates(final Record record) {
         Set<String> dates = new LinkedHashSet<String>();
@@ -497,15 +496,13 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Get the earliest publication date from the record.
      *
-     * @param  Record          record
-     * @return String          earliest date
+     * @param  record MARC record
+     * @return earliest date
      */
     public String getFirstDate(final Record record) {
         String result = null;
         Set<String> dates = getDates(record);
-        Iterator<String> datesIter = dates.iterator();
-        while (datesIter.hasNext()) {
-            String current = datesIter.next();
+        for(String current: dates) {
             if (result == null || Integer.parseInt(current) < Integer.parseInt(result)) {
                 result = current;
             }
@@ -516,8 +513,8 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Determine Record Format(s)
      *
-     * @param  Record          record
-     * @return Set<String>     format of record
+     * @param  record MARC record
+     * @return set of record formats
      */
     public Set<String> getFormat(final Record record){
         Set<String> result = new LinkedHashSet<String>();
@@ -543,6 +540,7 @@ public class VuFindIndexer extends SolrIndexer
         List<VariableField> fields = record.getVariableFields("007");
         Iterator<VariableField> fieldsIter = fields.iterator();
         if (fields != null) {
+            // TODO: update loop to for(:) syntax, but problem with type casting.
             ControlField formatField;
             while(fieldsIter.hasNext()) {
                 formatField = (ControlField) fieldsIter.next();
@@ -796,8 +794,8 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Extract the call number label from a record
-     * @param record
+     * Extract the full call number from a record, stripped of spaces
+     * @param record MARC record
      * @return Call number label
      */
     public String getFullCallNumber(final Record record) {
@@ -806,8 +804,9 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Extract the call number label from a record
-     * @param record
+     * Extract the full call number from a record, stripped of spaces
+     * @param record MARC record
+     * @param fieldSpec taglist for call number fields
      * @return Call number label
      */
     public String getFullCallNumber(final Record record, String fieldSpec) {
@@ -823,7 +822,7 @@ public class VuFindIndexer extends SolrIndexer
 
     /**
      * Extract the call number label from a record
-     * @param record
+     * @param record MARC record
      * @return Call number label
      */
     public String getCallNumberLabel(final Record record) {
@@ -833,7 +832,8 @@ public class VuFindIndexer extends SolrIndexer
 
     /**
      * Extract the call number label from a record
-     * @param record
+     * @param record MARC record
+     * @param fieldSpec taglist for call number fields
      * @return Call number label
      */
     public String getCallNumberLabel(final Record record, String fieldSpec) {
@@ -856,8 +856,8 @@ public class VuFindIndexer extends SolrIndexer
      *
      * Can return null
      *
-     * @param record
-     * @return Call number label
+     * @param record MARC record
+     * @return Call number subject letters
      */
     public String getCallNumberSubject(final Record record) {
 
@@ -870,7 +870,7 @@ public class VuFindIndexer extends SolrIndexer
      * Can return null
      *
      * @param record current MARC record
-     * @return Call number label
+     * @return Call number subject letters
      */
     public String getCallNumberSubject(final Record record, String fieldSpec) {
 
@@ -887,9 +887,8 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Normalize a single LCCN
-     * @param record
-     * @param fieldSpec
+     * Normalize a single LC call number
+     * @param record current MARC record
      * @return String Normalized LCCN
      */
     public String getFullCallNumberNormalized(final Record record) {
@@ -898,10 +897,10 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
-     * Normalize a single LCCN
+     * Normalize a single LC call number
      * @param record current MARC record
-     * @param fieldSpec - which MARC fields / subfields need to be analyzed
-     * @return String Normalized LCCN
+     * @param fieldSpec which MARC fields / subfields need to be analyzed
+     * @return String Normalized LC call number
      */
     public String getFullCallNumberNormalized(final Record record, String fieldSpec) {
 
@@ -917,8 +916,8 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Determine if a record is illustrated.
      *
-     * @param  Record          record
-     * @return String   "Illustrated" or "Not Illustrated"
+     * @param  LC call number
+     * @return "Illustrated" or "Not Illustrated"
      */
     public String isIllustrated(Record record) {
         String leader = record.getLeader().toString();
@@ -949,7 +948,6 @@ public class VuFindIndexer extends SolrIndexer
             List<VariableField> fields = record.getVariableFields("006");
             Iterator<VariableField> fieldsIter = fields.iterator();
             if (fields != null) {
-                ControlField formatField;
                 while(fieldsIter.hasNext()) {
                     fixedField = (ControlField) fieldsIter.next();
                     String fixedFieldText = fixedField.getData().toLowerCase();
@@ -973,14 +971,10 @@ public class VuFindIndexer extends SolrIndexer
             while(fieldsIter.hasNext()) {
                 physical = (DataField) fieldsIter.next();
                 List<Subfield> subfields = physical.getSubfields('b');
-                Iterator<Subfield> subfieldsIter = subfields.iterator();
-                if (subfields != null) {
-                    String desc;
-                    while (subfieldsIter.hasNext()) {
-                        desc = subfieldsIter.next().getData().toLowerCase();
-                        if (desc.contains("ill.") || desc.contains("illus.")) {
-                            return "Illustrated";
-                        }
+                for (Subfield sf: subfields) {
+                    String desc = sf.getData().toLowerCase();
+                    if (desc.contains("ill.") || desc.contains("illus.")) {
+                        return "Illustrated";
                     }
                 }
             }
@@ -996,8 +990,8 @@ public class VuFindIndexer extends SolrIndexer
      * Can return null
      *
      * @param record current MARC record
-     * @param fieldSpec - which MARC fields / subfields need to be analyzed
-     * @param precisionStr - a decimal number (represented in string format) showing the
+     * @param fieldSpec which MARC fields / subfields need to be analyzed
+     * @param precisionStr a decimal number (represented in string format) showing the
      *  desired precision of the returned number; i.e. 100 to round to nearest hundred,
      *  10 to round to nearest ten, 0.1 to round to nearest tenth, etc.
      * @return Set containing requested numeric portions of Dewey decimal call numbers
@@ -1011,11 +1005,7 @@ public class VuFindIndexer extends SolrIndexer
 
         // Loop through the specified MARC fields:
         Set<String> input = getFieldList(record, fieldSpec);
-        Iterator<String> iter = input.iterator();
-        while (iter.hasNext()) {
-            // Get the current string to work on:
-            String current = iter.next();
-            
+        for (String current: input) {
             DeweyCallNumber callNum = new DeweyCallNumber(current);
             if (callNum.isValid()) {
                 // Convert the numeric portion of the call number into a float:
@@ -1042,7 +1032,7 @@ public class VuFindIndexer extends SolrIndexer
      * Can return null
      *
      * @param record current MARC record
-     * @param fieldSpec - which MARC fields / subfields need to be analyzed
+     * @param fieldSpec which MARC fields / subfields need to be analyzed
      * @return Set containing normalized Dewey numbers extracted from specified fields.
      */
     public Set<String> getDeweySearchable(Record record, String fieldSpec) {
@@ -1076,7 +1066,7 @@ public class VuFindIndexer extends SolrIndexer
      * Can return null
      *
      * @param record current MARC record
-     * @param fieldSpec - which MARC fields / subfields need to be analyzed
+     * @param fieldSpec which MARC fields / subfields need to be analyzed
      * @return String containing the first valid Dewey number encountered, normalized
      *         for sorting purposes.
      */
@@ -1104,8 +1094,8 @@ public class VuFindIndexer extends SolrIndexer
      *
      * Can return null
      *
-     * @param record
-     * @param fieldSpec - which MARC fields / subfields need to be analyzed
+     * @param record current MARC record
+     * @param fieldSpec which MARC fields / subfields need to be analyzed
      * @return List containing normalized Dewey numbers extracted from specified fields.
      */
     public List<String> getDeweySortables(Record record, String fieldSpec) {
@@ -1133,8 +1123,8 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Determine the longitude and latitude of the items location.
      *
-     * @param  Record    record
-     * @return String    "longitude, latitude"
+     * @param  record current MARC record
+     * @return string of form "longitude, latitude"
      */
     public String getLongLat(Record record) {
         // Check 034 subfield d and f
@@ -1204,9 +1194,9 @@ public class VuFindIndexer extends SolrIndexer
      * Get the "first indexed" date for the current record.  (This is the first
      * time that SolrMarc ever encountered this particular record).
      *
-     * @param record
-     * @param fieldSpec
-     * @param core
+     * @param record current MARC record
+     * @param fieldSpec fields / subfields to be analyzed
+     * @param core core name
      * @return ID string
      */
     public String getFirstIndexed(Record record, String fieldSpec, String core) {
@@ -1219,8 +1209,8 @@ public class VuFindIndexer extends SolrIndexer
      * Get the "first indexed" date for the current record.  (This is the first
      * time that SolrMarc ever encountered this particular record).
      *
-     * @param record
-     * @param fieldSpec
+     * @param record current MARC record
+     * @param fieldSpec fields / subfields to be analyzed
      * @return ID string
      */
     public String getFirstIndexed(Record record, String fieldSpec) {
@@ -1231,7 +1221,7 @@ public class VuFindIndexer extends SolrIndexer
      * Get the "first indexed" date for the current record.  (This is the first
      * time that SolrMarc ever encountered this particular record).
      *
-     * @param record
+     * @param record current MARC record
      * @return ID string
      */
     public String getFirstIndexed(Record record) {
@@ -1242,9 +1232,9 @@ public class VuFindIndexer extends SolrIndexer
      * Get the "last indexed" date for the current record.  (This is the last time
      * the record changed from SolrMarc's perspective).
      *
-     * @param record
-     * @param fieldSpec
-     * @param core
+     * @param record current MARC record
+     * @param fieldSpec fields / subfields to be analyzed
+     * @param core core name
      * @return ID string
      */
     public String getLastIndexed(Record record, String fieldSpec, String core) {
@@ -1257,8 +1247,8 @@ public class VuFindIndexer extends SolrIndexer
      * Get the "last indexed" date for the current record.  (This is the last time
      * the record changed from SolrMarc's perspective).
      *
-     * @param record
-     * @param fieldSpec
+     * @param record current MARC record
+     * @param fieldSpec fields / subfields to analyze
      * @return ID string
      */
     public String getLastIndexed(Record record, String fieldSpec) {
@@ -1269,7 +1259,7 @@ public class VuFindIndexer extends SolrIndexer
      * Get the "last indexed" date for the current record.  (This is the last time
      * the record changed from SolrMarc's perspective).
      *
-     * @param record
+     * @param record current MARC record
      * @return ID string
      */
     public String getLastIndexed(Record record) {
@@ -1322,7 +1312,7 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Extract full-text from the documents referenced in the tags
      *
-     * @param Record record
+     * @param Record record current MARC record
      * @param String field spec to search for URLs
      * @param String only harvest files matching this extension (null for all)
      * @return String The full-text
@@ -1357,7 +1347,7 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Extract full-text from the documents referenced in the tags
      *
-     * @param Record record
+     * @param Record record current MARC record
      * @param String field spec to search for URLs
      * @return String The full-text
      */
@@ -1368,7 +1358,7 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Extract full-text from the documents referenced in the tags
      *
-     * @param Record record
+     * @param Record record current MARC record
      * @return String The full-text
      */
     public String getFulltext(Record record) {
@@ -1378,8 +1368,8 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Clean up XML data generated by Aperture
      *
-     * @param File The file to clean
-     * @return File A fixed version of the file
+     * @param f file to clean
+     * @return a fixed version of the file
      */
     public File sanitizeApertureOutput(File f) throws IOException
     {
@@ -1404,8 +1394,8 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Clean up bad characters in the full text.
      *
-     * @param String Text to clean
-     * @return String Cleaned text
+     * @param text text to clean
+     * @return cleaned text
      */
     public String sanitizeFullText(String text)
     {
@@ -1419,9 +1409,9 @@ public class VuFindIndexer extends SolrIndexer
      * fulltext.ini file.  Without proper configuration, this will simply return an
      * empty string.
      *
-     * @param String The url extracted from the MARC tag.
-     * @param String The path to Aperture
-     * @return String The full-text
+     * @param url the url extracted from the MARC tag.
+     * @param aperturePath The path to Aperture
+     * @return full-text extracted from url
      */
     public String harvestWithAperture(String url, String aperturePath) {
         String plainText = "";
@@ -1443,12 +1433,17 @@ public class VuFindIndexer extends SolrIndexer
         //System.out.println("Loading fulltext from " + url + ". Please wait ...");
         try {
             Process p = Runtime.getRuntime().exec(cmd);
+            
+            // Debugging output
+            /*
             BufferedReader stdInput = new BufferedReader(new
                 InputStreamReader(p.getInputStream()));
             String s;
             while ((s = stdInput.readLine()) != null) {
-                //System.out.println(s);
+                System.out.println(s);
             }
+            */
+            
             // Wait for Aperture to finish
             p.waitFor();
         } catch (Throwable e) {
@@ -1485,12 +1480,11 @@ public class VuFindIndexer extends SolrIndexer
      * This method will only work if Tika is properly configured in the fulltext.ini
      * file.  Without proper configuration, this will simply return an empty string.
      *
-     * @param String The url extracted from the MARC tag.
-     * @param String The path to Tika
-     * @return String The full-text
+     * @param url the url extracted from the MARC tag.
+     * @param scraperPath path to Tika
+     * @return the full-text
      */
     public String harvestWithTika(String url, String scraperPath) {
-        String plainText = "";
 
         // Construct the command
         String cmd = "java -jar " + scraperPath + " -t -eUTF8 " + url;
@@ -1519,9 +1513,9 @@ public class VuFindIndexer extends SolrIndexer
     /**
      * Harvest the contents of a document file (PDF, Word, etc.) using the active parser.
      *
-     * @param String The url extracted from the MARC tag.
-     * @param String[] Configuration settings from getFulltextParserSettings.
-     * @return String The full-text
+     * @param url the URL extracted from the MARC tag.
+     * @param settings configuration settings from {@code getFulltextParserSettings}.
+     * @return the full-text
      */
     public String harvestWithParser(String url, String[] settings) {
         if (settings[0].equals("aperture")) {
