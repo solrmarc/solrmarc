@@ -16,9 +16,7 @@ package org.solrmarc.index;
  * limitations under the License.
  */
 
-import java.io.IOException;
 import java.sql.*;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public class UpdateDateTracker
