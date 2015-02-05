@@ -89,6 +89,11 @@ public class VuFindIndexer extends SolrIndexer
     public VuFindIndexer(final String propertiesMapFile, final String[] propertyDirs)
             throws FileNotFoundException, IOException, ParseException {
         super(propertiesMapFile, propertyDirs);
+        try {
+            vuFindConfigs = Utils.loadProperties(propertyDirs, "vufind.properties");
+        } catch (IllegalArgumentException e) {
+            // If the properties load failed, don't worry about it -- we'll use defaults.
+        }
     }
 
     /**
@@ -119,9 +124,9 @@ public class VuFindIndexer extends SolrIndexer
         String vufindLocal = System.getenv("VUFIND_LOCAL_DIR");
 
         // Get the relative VuFind path from the properties file, defaulting to
-        // the 2.0alpha-style application/configs if necessary.
+        // the 2.0-style config/vufind if necessary.
         String relativeConfigPath = Utils.getProperty(
-            vuFindConfigs, "vufind.config.relative_path", "application/configs"
+            vuFindConfigs, "vufind.config.relative_path", "config/vufind"
         );
 
         // Try several different locations for the file -- VuFind 2 local dir,
