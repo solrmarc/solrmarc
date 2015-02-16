@@ -246,12 +246,16 @@ public class LCCallNumber extends AbstractCallNumber {
     }
 
     /**
-     * This parse can be used in conjunction with the empty constructor
+     * This parse can be used in conjunction with the empty constructor.
+     * 
+     * Leading and training whitespace will automatically be trimmed before call number is stored and parsed.
+     * 
+     * @param call call number to parse
      */
     @Override
     public void parse(String call) {
         init();
-        this.rawCallNum = call;
+        this.rawCallNum = call.trim();
         parse();
     }
 
