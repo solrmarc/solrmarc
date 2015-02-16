@@ -142,8 +142,10 @@ public class LCCallNumber extends AbstractCallNumber {
      * regular expression string for the cutter, without preceding characters
      * (such as the "required" period, which is sometimes missing, or spaces).
      * A Cutter is a single letter followed by digits.
+     * 
+     * Must match uppper and lower case, catalog patrons expect to type in either case.
      */
-    public static final String CUTTER_REGEX = "[A-Z]\\d+";
+    public static final String CUTTER_REGEX = "[A-Za-z]\\d+";
 
     /**
      * Separates the class from the rest of a call number.
@@ -173,7 +175,7 @@ public class LCCallNumber extends AbstractCallNumber {
      * and we just need to separate the cutter from any suffix.
      * Matching group 1 contains the cutter.
      */
-    protected static Pattern cutterAfterSuffixPat = Pattern.compile("(\\.?[A-Z]\\d+|^\\.[A-Z]| \\.[A-Z])");
+    protected static Pattern cutterAfterSuffixPat = Pattern.compile("(\\.?[A-Za-z]\\d+|^\\.[A-Za-z]| \\.[A-Za-z])");
 
     /* Constructors */
     /**
@@ -354,7 +356,7 @@ public class LCCallNumber extends AbstractCallNumber {
             Utils.appendNumericallySortable(key, classSuffix.toUpperCase());
         }
         if (cutter != null) {
-            appendCutterShelfKey(key, cutter);
+            appendCutterShelfKey(key, cutter.toUpperCase());
         }
         // TODO: better way to deal with trailing . or space in call num, as in "BF199.", 
         //       causes meaningless class suffix resulting in trailing space on shelf key
