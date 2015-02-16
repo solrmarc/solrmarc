@@ -1080,6 +1080,23 @@ public class LCCallNumberUnitTests {
     }
 
     /**
+     * unit test for getShelfKey: check that leading whitespace 
+     * produce the same shelfkey
+     */
+    @Test
+    public void testGetShelfKey_leadingSpaces()
+    {
+        String callnum = "  BQ1270";
+        assertEquals("BQ 41270", new LCCallNumber(callnum).getShelfKey());
+        callnum = "BQ 1270";
+        assertEquals("BQ 41270", new LCCallNumber(callnum).getShelfKey());
+        callnum = "\tBQ1270";
+        assertEquals("BQ 41270", new LCCallNumber(callnum).getShelfKey());
+        callnum = " \t BQ 1270";
+        assertEquals("BQ 41270", new LCCallNumber(callnum).getShelfKey());
+    }
+
+    /**
      * unit test for getShelfKey: check that trailing spaces 
      * produce the same shelfkey
      */
