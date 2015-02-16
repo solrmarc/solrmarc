@@ -1071,7 +1071,7 @@ public class LCCallNumberUnitTests {
      * unit test for getShelfKey: classification but no cutter
      */
     @Test
-    public void testGetShelfKey2()
+    public void testGetShelfKey_classNoCutter()
     {
         String callnum = "BF199";
         assertEquals("BF 3199", new LCCallNumber(callnum).getShelfKey());
@@ -1097,7 +1097,7 @@ public class LCCallNumberUnitTests {
     }
 
     /**
-     * unit test for getShelfKey: check that lower case input is 
+     * unit test for getShelfKey: check that lower case user input is handled sensibly
      */
     @Test
     public void testGetShelfKey_lowerCase()
@@ -1106,6 +1106,13 @@ public class LCCallNumberUnitTests {
         assertEquals("BQ 41270", new LCCallNumber(callnum).getShelfKey());
         callnum = "l666 15th A8"; // suffix with letters
         assertEquals("L 3666 215TH A8", new LCCallNumber(callnum).getShelfKey());
+        
+        // Check that upper case and lower case input normalizer the same
+        String callnumUpper = "M857 .K93 H2 OP.79";
+        String callnumLower = "m857 .k93 h2 op.79";
+        String callnumKey = "M 3857 K93 H2 OP 279";
+        assertEquals(callnumKey, new LCCallNumber(callnumUpper).getShelfKey());
+        assertEquals(callnumKey, new LCCallNumber(callnumLower).getShelfKey());
     }
 
     /**
