@@ -252,6 +252,46 @@ public class DeweyCallNumberUnitTests {
         assertEquals("", new DeweyCallNumber("").getShelfKey());
         assertNull(new DeweyCallNumber(null).getShelfKey());
     }
+    
+    /**
+     * unit test for getShelfKey: check empty string call number
+     */
+    @Test
+    public void testGetShelfKey_emptyCallNumber()
+    {
+        String callnum = "";
+        assertEquals("", new DeweyCallNumber(callnum).getShelfKey());
+    }
+
+    /**
+     * unit test for getShelfKey: check whitespace call number
+     */
+    @Test
+    public void testGetShelfKey_whitespaceCallNumber()
+    {
+        String callnum = " ";
+        assertEquals("", new DeweyCallNumber(callnum).getShelfKey());
+        callnum = "    "; // suffix with letters
+        assertEquals("", new DeweyCallNumber(callnum).getShelfKey());
+    }
+    
+    /**
+     * unit test for getShelfKey: check null call number
+     */
+    @Test
+    public void testGetShelfKey_nullCallNumber()
+    {
+        assertNull(new DeweyCallNumber(null).getShelfKey());
+    }
+
+    /**
+     * unit test for getShelfKey: parse has not been called
+     */
+    @Test
+    public void testGetShelfKey_notParsed()
+    {
+        assertNull(new LCCallNumber().getShelfKey());
+    }
 
     @Test
     public void testDeweyIsValid()

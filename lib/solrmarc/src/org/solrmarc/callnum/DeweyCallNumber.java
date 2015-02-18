@@ -78,7 +78,6 @@ import java.util.regex.Pattern;
  *
  */
 public class DeweyCallNumber extends AbstractCallNumber {
-    protected String rawCallNum = null;
     protected String classification = null;
     protected String classDigits = null;
     protected String classDecimal = null;

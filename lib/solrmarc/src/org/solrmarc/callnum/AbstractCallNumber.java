@@ -28,7 +28,7 @@ public abstract class AbstractCallNumber implements CallNumber {
      * Unparsed form of call number. If call number is built from components,
      * not initialized from a <code>String</code>, value may be <code>null</code>.
      */
-    protected String raw;
+    protected String rawCallNum;
 
     /**
      * Indicates whether call number parsed was a valid. Generally assume true unless proven otherwise.

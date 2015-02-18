@@ -102,7 +102,6 @@ import java.util.regex.Pattern;
 public class LCCallNumber extends AbstractCallNumber {
 
     /* Class variables */
-    protected String rawCallNum;
     protected String classification;
     protected String classLetters;
     protected String classDigits;
@@ -255,13 +254,19 @@ public class LCCallNumber extends AbstractCallNumber {
     @Override
     public void parse(String call) {
         init();
-        this.rawCallNum = call.trim();
+        if (call == null) {
+            this.rawCallNum = null;
+        } else {
+            this.rawCallNum = call.trim();
+        }
         parse();
     }
 
     protected void parse() {
-        parseCallNumber();
-        buildShelfKey();
+        if (this.rawCallNum != null) {
+            parseCallNumber();
+            buildShelfKey();
+        }
     }
 
     /**
@@ -364,10 +369,12 @@ public class LCCallNumber extends AbstractCallNumber {
         }
         // TODO: better way to deal with trailing . or space in call num, as in "BF199.", 
         //       causes meaningless class suffix resulting in trailing space on shelf key
-        int i = key.length() - 1;
-        char last = key.charAt(i);
-        if (last == ' ') {
-            key.deleteCharAt(i);
+        if (key.length() > 0) {
+            int i = key.length() - 1;
+            char last = key.charAt(i);
+            if (last == ' ') {
+                key.deleteCharAt(i);
+            }
         }
         shelfKey = key.toString();
     }
