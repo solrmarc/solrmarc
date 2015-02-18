@@ -58,7 +58,7 @@ public interface CallNumber {
      * Returns a shelf key for the call number.
      * The shelf key can be sorted lexicographically, in Unicode order.
      *
-     * @return sort key
+     * @return sort key, may return null if {@code parse} was not called.
      */
     public String getShelfKey();
 }

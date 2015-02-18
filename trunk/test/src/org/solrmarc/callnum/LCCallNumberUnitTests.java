@@ -1131,6 +1131,46 @@ public class LCCallNumberUnitTests {
         assertEquals(callnumKey, new LCCallNumber(callnumUpper).getShelfKey());
         assertEquals(callnumKey, new LCCallNumber(callnumLower).getShelfKey());
     }
+    
+    /**
+     * unit test for getShelfKey: check empty string call number
+     */
+    @Test
+    public void testGetShelfKey_emptyCallNumber()
+    {
+        String callnum = "";
+        assertEquals("", new LCCallNumber(callnum).getShelfKey());
+    }
+
+    /**
+     * unit test for getShelfKey: check whitespace call number
+     */
+    @Test
+    public void testGetShelfKey_whitespaceCallNumber()
+    {
+        String callnum = " ";
+        assertEquals("", new LCCallNumber(callnum).getShelfKey());
+        callnum = "    "; // suffix with letters
+        assertEquals("", new LCCallNumber(callnum).getShelfKey());
+    }
+    
+    /**
+     * unit test for getShelfKey: check null call number
+     */
+    @Test
+    public void testGetShelfKey_nullCallNumber()
+    {
+        assertNull(new LCCallNumber(null).getShelfKey());
+    }
+
+    /**
+     * unit test for getShelfKey: parse has not been called
+     */
+    @Test
+    public void testGetShelfKey_notParsed()
+    {
+        assertNull(new LCCallNumber().getShelfKey());
+    }
 
     /**
      * unit test for isValid
