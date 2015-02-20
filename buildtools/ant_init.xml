@@ -175,7 +175,7 @@
                 </fileset>
             </copy>
             <copy todir="${site.dir}" filtering="false" preservelastmodified="true">
-                 <fileset dir="examples/${example.configuration}" includes="*config*.properties,*index*.properties,import.properties,marc*.properties" >
+                 <fileset dir="examples/${example.configuration}" includes="*config*.properties,*index*.properties,import.properties,marc*.properties, vufind.properties" >
                      <depend targetdir="${site.dir}" >
                      </depend>
                  </fileset>

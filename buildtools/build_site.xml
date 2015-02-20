@@ -106,7 +106,7 @@
         <copy todir="${dist.path}" >
             <flattenmapper/>
             <fileset dir="${site.build.dir}" includes="*.jar" />
-            <fileset dir="${site.base.dir}" includes="*index*.properties,marc*.properties" />
+            <fileset dir="${site.base.dir}" includes="*index*.properties,marc*.properties,vufind.properties" />
         </copy>
         <if >
             <available file="${site.build.dir}/${custom.jar.name}.jar" />
