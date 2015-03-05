@@ -26,6 +26,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.StringBuilder;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -799,10 +801,96 @@ public class VuFindIndexer extends SolrIndexer
     }
 
     /**
+     * Get call numbers of a specific type.
+     * 
+     * <p>{@code fieldSpec} is of form {@literal 098abc:099ab}, does not accept subfield ranges.
+     *
+     *
+     * @param record  current MARC record
+     * @param fieldSpec  which MARC fields / subfields need to be analyzed
+     * @param callTypeSf  subfield containing call number type, single character only
+     * @param callType  literal call number code
+     * @param result  a collection to gather the call numbers
+     * @return collection of call numbers, same object as {@code result}
+     */
+    public static Collection<String> getCallNumberByTypeCollector(
+            Record record, String fieldSpec, String callTypeSf, String callType, Collection<String> result) {
+        for (String tag : fieldSpec.split(":")) {
+            // Check to ensure tag length is at least 3 characters
+            if (tag.length() < 3) {
+                //TODO: Should this go to a log? Better message for a bad tag in a field spec?
+                System.err.println("Invalid tag specified: " + tag);
+                continue;
+            }
+            String dfTag = tag.substring(0, 3);
+            String sfSpec = null;
+            if (tag.length() > 3) {
+                    sfSpec = tag.substring(3);
+            }
+
+            // do all fields for this tag
+            for (VariableField vf : record.getVariableFields(dfTag)) {
+                // Assume tag represents a DataField
+                DataField df = (DataField) vf;
+                boolean callTypeMatch = false;
+                
+                // Assume call type subfield could repeat
+                for (Subfield typeSf : df.getSubfields(callTypeSf)) {
+                    if (callTypeSf.indexOf(typeSf.getCode()) != -1 && typeSf.getData().equals(callType)) {
+                        callTypeMatch = true;
+                    }
+                }
+                System.err.println("callTypeMatch after loop: " + callTypeMatch);
+                if (callTypeMatch) {
+                    result.add(df.getSubfieldsAsString(sfSpec));
+                }
+            } // end loop over variable fields
+        } // end loop over fieldSpec
+        return result;
+    }
+    
+
+    /**
+     * Get call numbers of a specific type.
+     * 
+     * <p>{@code fieldSpec} is of form {@literal 098abc:099ab}, does not accept subfield ranges.
+     *
+     * @param record  current MARC record
+     * @param fieldSpec  which MARC fields / subfields need to be analyzed
+     * @param callTypeSf  subfield containing call number type, single character only
+     * @param callType  literal call number code
+     * @return set of call numbers
+     */
+    public static Set<String> getCallNumberByType(Record record, String fieldSpec, String callTypeSf, String callType) {
+        return (Set<String>) getCallNumberByTypeCollector(record, fieldSpec, callTypeSf, callType,
+                new LinkedHashSet<String>());
+    }
+
+    /**
+     * Get call numbers of a specific type.
+     * 
+     * <p>{@code fieldSpec} is of form {@literal 098abc:099ab}, does not accept subfield ranges.
+     *
+     * @param record  current MARC record
+     * @param fieldSpec  which MARC fields / subfields need to be analyzed
+     * @param callTypeSf  subfield containing call number type, single character only
+     * @param callType  literal call number code
+     * @return list of call numbers
+     */
+    public static List<String> getCallNumberByTypeAsList(Record record, String fieldSpec, String callTypeSf, String callType) {
+        return (List<String>) getCallNumberByTypeCollector(record, fieldSpec, callTypeSf, callType,
+                new ArrayList<String>());
+    }
+    
+    /**
      * Extract the full call number from a record, stripped of spaces
      * @param record MARC record
      * @return Call number label
+     * @deprecated Obsolete as of VuFind 2.4.
+     *          This method exists only to support the VuFind call number search, version <= 2.3.
+     *          As of VuFind 2.4, the munging for call number search in handled entirely in Solr.
      */
+    @Deprecated
     public String getFullCallNumber(final Record record) {
 
         return(getFullCallNumber(record, "099ab:090ab:050ab"));
@@ -813,7 +901,11 @@ public class VuFindIndexer extends SolrIndexer
      * @param record MARC record
      * @param fieldSpec taglist for call number fields
      * @return Call number label
+     * @deprecated Obsolete as of VuFind 2.4.
+     *          This method exists only to support the VuFind call number search, version <= 2.3.
+     *          As of VuFind 2.4, the munging for call number search in handled entirely in Solr.
      */
+    @Deprecated
     public String getFullCallNumber(final Record record, String fieldSpec) {
 
         String val = getFirstFieldVal(record, fieldSpec);
@@ -989,6 +1081,86 @@ public class VuFindIndexer extends SolrIndexer
         return "Not Illustrated";
     }
 
+
+    /**
+     * Normalize LC numbers for sorting purposes (use only the first valid number!)
+     *
+     * Can return null
+     *
+     * @param record current MARC record
+     * @param fieldSpec which MARC fields / subfields need to be analyzed
+     * @return String containing the first valid Dewey number encountered, normalized
+     *         for sorting purposes.
+     */
+    public String getLCSortable(Record record, String fieldSpec) {
+        // Loop through the specified MARC fields:
+        Set<String> input = getFieldList(record, fieldSpec);
+        Iterator<String> iter = input.iterator();
+        while (iter.hasNext()) {
+            // Get the current string to work on:
+            String current = iter.next();
+
+            // If this is a valid LC number, return the sortable shelf key:
+            LCCallNumber callNum = new LCCallNumber(current);
+            if (callNum.isValid()) {
+                return callNum.getShelfKey();
+            }
+        }
+
+        // If we made it this far, we didn't find a valid sortable Dewey number:
+        return null;
+    }
+
+    /**
+     * Get sort key for first LC call number, identified by call type.
+     * 
+     * <p>{@code fieldSpec} is of form {@literal 098abc:099ab}, does not accept subfield ranges.
+     *
+     *
+     * @param record  current MARC record
+     * @param fieldSpec  which MARC fields / subfields need to be analyzed
+     * @param callTypeSf  subfield containing call number type, single character only
+     * @param callType  literal call number code
+     * @return sort key for first identified Dewey call number
+     */
+    public static String getLCSortableByType(
+            Record record, String fieldSpec, String callTypeSf, String callType) {
+        String sortKey = null;
+        for (String tag : fieldSpec.split(":")) {
+            // Check to ensure tag length is at least 3 characters
+            if (tag.length() < 3) {
+                //TODO: Should this go to a log? Better message for a bad tag in a field spec?
+                System.err.println("Invalid tag specified: " + tag);
+                continue;
+            }
+            String dfTag = tag.substring(0, 3);
+            String sfSpec = null;
+            if (tag.length() > 3) {
+                    sfSpec = tag.substring(3);
+            }
+
+            // do all fields for this tag
+            for (VariableField vf : record.getVariableFields(dfTag)) {
+                // Assume tag represents a DataField
+                DataField df = (DataField) vf;
+                boolean callTypeMatch = false;
+                
+                // Assume call type subfield could repeat
+                for (Subfield typeSf : df.getSubfields(callTypeSf)) {
+                    if (callTypeSf.indexOf(typeSf.getCode()) != -1 && typeSf.getData().equals(callType)) {
+                        callTypeMatch = true;
+                    }
+                }
+                // take the first call number coded as Dewey
+                if (callTypeMatch) {
+                    sortKey = new LCCallNumber(df.getSubfieldsAsString(sfSpec)).getShelfKey();
+                    break;
+                }
+            } // end loop over variable fields
+        } // end loop over fieldSpec
+        return sortKey;
+    }
+
     /**
      * Extract a numeric portion of the Dewey decimal call number
      *
@@ -1094,6 +1266,57 @@ public class VuFindIndexer extends SolrIndexer
         return null;
     }
 
+    /**
+     * Get sort key for first Dewey call number, identified by call type.
+     * 
+     * <p>{@code fieldSpec} is of form {@literal 098abc:099ab}, does not accept subfield ranges.
+     *
+     *
+     * @param record  current MARC record
+     * @param fieldSpec  which MARC fields / subfields need to be analyzed
+     * @param callTypeSf  subfield containing call number type, single character only
+     * @param callType  literal call number code
+     * @return sort key for first identified Dewey call number
+     */
+    public static String getDeweySortableByType(
+            Record record, String fieldSpec, String callTypeSf, String callType) {
+        String sortKey = null;
+        for (String tag : fieldSpec.split(":")) {
+            // Check to ensure tag length is at least 3 characters
+            if (tag.length() < 3) {
+                //TODO: Should this go to a log? Better message for a bad tag in a field spec?
+                System.err.println("Invalid tag specified: " + tag);
+                continue;
+            }
+            String dfTag = tag.substring(0, 3);
+            String sfSpec = null;
+            if (tag.length() > 3) {
+                    sfSpec = tag.substring(3);
+            }
+
+            // do all fields for this tag
+            for (VariableField vf : record.getVariableFields(dfTag)) {
+                // Assume tag represents a DataField
+                DataField df = (DataField) vf;
+                boolean callTypeMatch = false;
+                
+                // Assume call type subfield could repeat
+                for (Subfield typeSf : df.getSubfields(callTypeSf)) {
+                    if (callTypeSf.indexOf(typeSf.getCode()) != -1 && typeSf.getData().equals(callType)) {
+                        callTypeMatch = true;
+                    }
+                }
+                // take the first call number coded as Dewey
+                if (callTypeMatch) {
+                    sortKey = new DeweyCallNumber(df.getSubfieldsAsString(sfSpec)).getShelfKey();
+                    break;
+                }
+            } // end loop over variable fields
+        } // end loop over fieldSpec
+        return sortKey;
+    }
+
+    
     /**
      * Normalize Dewey numbers for AlphaBrowse sorting purposes (use all numbers!)
      *
