@@ -1514,7 +1514,7 @@ public class SolrIndexer
      *            values, a <code>List</code> will allow values to repeat. 
      */
     public static void getFieldListCollector(Record record, 
-    		          				         String tagStr, 
+                                             String tagStr, 
                                              Collection<String> collector)
     {
         String[] tags = tagStr.split(":");
@@ -2525,8 +2525,8 @@ public class SolrIndexer
      *            values, a <code>List</code> will allow values to repeat. 
      */
     public static void getAllSubfieldsCollector(final Record record, 
-    											String fieldSpec, String separator, 
-    											Collection<String> collector)
+                                                String fieldSpec, String separator, 
+                                                Collection<String> collector)
     {
         String[] fldTags = fieldSpec.split(":");
         for (int i = 0; i < fldTags.length; i++)
