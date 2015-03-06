@@ -1084,7 +1084,8 @@ public class VuFindIndexer extends SolrIndexer
 
     /**
      * Normalize LC numbers for sorting purposes (use only the first valid number!).
-     * Will return first call number found if none pass validation.
+     * Will return first call number found if none pass validation,
+     * or empty string if no call numbers.
      *
      * @param  record current MARC record
      * @param  fieldSpec which MARC fields / subfields need to be analyzed
@@ -1094,14 +1095,14 @@ public class VuFindIndexer extends SolrIndexer
     public static String getLCSortable(Record record, String fieldSpec) {
         // Loop through the specified MARC fields:
         Set<String> input = getFieldList(record, fieldSpec);
-        String firstCall = null;
+        String firstCall = "";
         for (String current : input) {
             // If this is a valid LC number, return the sortable shelf key:
             LCCallNumber callNum = new LCCallNumber(current);
             if (callNum.isValid()) {
                 return callNum.getShelfKey();   // RETURN first valid
             }
-            if (firstCall == null) {
+            if (firstCall.length() == 0) {
                 firstCall = current;
             }
         }
