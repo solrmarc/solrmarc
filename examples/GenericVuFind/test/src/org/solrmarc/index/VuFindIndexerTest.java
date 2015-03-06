@@ -182,4 +182,26 @@ public class VuFindIndexerTest {
                 VuFindIndexer.getLCSortable(myCallNumRec, "090a"));
     }
 
+
+    /**
+     * Unit test for VuFindIndexer.getLCSortable
+     * case where no call number is in the record.
+     */
+    @Test
+    public void testGetLCSortableNoCallNums() {
+        
+        // Init records
+        Record myCallNumRec = new RecordImpl();
+        myCallNumRec.setLeader(genericLeader);;
+        
+        String callNumDDC = "324.987 B34";
+        DataField df245 = new DataFieldImpl("245", ' ', ' ');
+        df245.addSubfield(new SubfieldImpl('a', "The Hobbit : "));
+        df245.addSubfield(new SubfieldImpl('b', "or There and Back Again / "));
+        df245.addSubfield(new SubfieldImpl('c', "by J.R.R. Tolien"));
+        myCallNumRec.addVariableField(df245);
+        
+        assertEquals("", VuFindIndexer.getLCSortable(myCallNumRec, "090a"));
+    }
+
 }
