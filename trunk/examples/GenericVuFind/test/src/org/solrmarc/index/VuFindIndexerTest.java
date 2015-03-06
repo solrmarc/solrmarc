@@ -128,4 +128,58 @@ public class VuFindIndexerTest {
         assertEquals(new LCCallNumber(callNumLC).getShelfKey(), 
                 VuFindIndexer.getLCSortableByType(myCallNumRec, "090a", "t", "LC"));
     }
+
+    /**
+     * Unit test for VuFindIndexer.getLCSortable
+     */
+    @Test
+    public void testGetLCSortable() {
+        
+        // Init records
+        Record myCallNumRec = new RecordImpl();
+        myCallNumRec.setLeader(genericLeader);;
+        
+        String callNumDDC = "324.987 B34";
+        DataField df090DDC = new DataFieldImpl("090", ' ', ' ');
+        df090DDC.addSubfield(new SubfieldImpl('a', callNumDDC));
+        df090DDC.addSubfield(new SubfieldImpl('t', "DDC"));
+        myCallNumRec.addVariableField(df090DDC);
+        
+        String callNumLC = "PS 1234.5 .G78";
+        DataField df090LC = new DataFieldImpl("090", ' ', ' ');
+        df090LC.addSubfield(new SubfieldImpl('a', callNumLC));
+        df090LC.addSubfield(new SubfieldImpl('t', "LC"));
+        myCallNumRec.addVariableField(df090LC);
+        
+        assertEquals(new LCCallNumber(callNumLC).getShelfKey(), 
+                VuFindIndexer.getLCSortable(myCallNumRec, "090a"));
+    }
+
+    /**
+     * Unit test for VuFindIndexer.getLCSortable
+     * case where no call number is valid LC.
+     */
+    @Test
+    public void testGetLCSortableNoneValid() {
+        
+        // Init records
+        Record myCallNumRec = new RecordImpl();
+        myCallNumRec.setLeader(genericLeader);;
+        
+        String callNumDDC = "324.987 B34";
+        DataField df090DDC = new DataFieldImpl("090", ' ', ' ');
+        df090DDC.addSubfield(new SubfieldImpl('a', callNumDDC));
+        df090DDC.addSubfield(new SubfieldImpl('t', "DDC"));
+        myCallNumRec.addVariableField(df090DDC);
+        
+        String callNumInvalid = "1234XXXXX";
+        DataField df090LC = new DataFieldImpl("090", ' ', ' ');
+        df090LC.addSubfield(new SubfieldImpl('a', callNumInvalid));
+        df090LC.addSubfield(new SubfieldImpl('t', "LC"));
+        myCallNumRec.addVariableField(df090LC);
+        
+        assertEquals(new LCCallNumber(callNumDDC).getShelfKey(), 
+                VuFindIndexer.getLCSortable(myCallNumRec, "090a"));
+    }
+
 }
