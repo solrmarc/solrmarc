@@ -1,0 +1,86 @@
++, u3412403.mrc, 'script(PubDateGroups.bsh), getPubDateGroups()', Last 50 years
++, u3412403.mrc, 'script(PubDateGroups.bsh), getPublicationDate()', 1986
+blacklight_config.properties, u642.mrc, format_facet, Journal/Magazine|Periodical
+blacklight_config.properties, u10273.mrc, format_facet, Musical Score|Manuscript
+blacklight_config.properties, u17922.mrc, oclc_text, 10072685
+blacklight_config.properties, u470059.mrc, ports_of_call_facet, Penang|Malaysia
+blacklight_config.properties, u4802090.mrc, linked_responsibility_statement_display, 編著黃仁, 王唯 ; 撰述委員王清華 ... [et al.]
+blacklight_config.properties, u235.mrc, location2_facet, Biology & Psychology Journals|Brown SEL Journals
+blacklight_config.properties, mss-11848.mrc, location_facet, Special Collections
+blacklight_config.properties, mss-11848.mrc, call_number_display, MSS 11848
+blacklight_config.properties, u1824938.mrc, author_display, Great Britain. Ordnance Survey
+blacklight_config.properties, u157151.mrc, author_facet, Harley, J. B. (John Brian)
+blacklight_test_config.properties, u10273.mrc, author_facet, Paisiello, Giovanni, 1740-1816|Palomba, Giuseppe, fl. 1769-1825
+blacklight_test_config.properties, u399.mrc, author_sort_facet, lopez p dickson
+
+blacklight_config.properties, u151.mrc, call_number_text, DT73.D47 Z5 1979
+blacklight_config.properties, u210.mrc, call_number_text, HB2615.V8O23 1983|PD VIRG.O1536O|UVATM 2/OC 2
+
+blacklight_config.properties, u60.mrc, call_number_display, DP269.27.S67 H47 1982  V.1, V.2
+blacklight_config.properties, u55.mrc, call_number_display, PR4231.A43 1984 (13 volumes)
+blacklight_config.properties, u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
+#blacklight_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (22 volumes)
+blacklight_config.properties, u642.mrc, call_number_display, ML5.G654 (43 volumes)
+blacklight_config.properties, u696140.mrc, call_number_display, ND1489.G4713 1986
+
+blacklight_config.properties, u200.mrc, shadowed_location_facet, HIDDEN
+blacklight_config.properties, u210.mrc, shadowed_location_facet, VISIBLE
+blacklight_config.properties, u63.mrc, shadowed_location_facet, HIDDEN
+blacklight_config.properties, u2312095.mrc, shadowed_location_facet, HIDDEN
+
+blacklight_config.properties, u3344744.mrc, location2_facet, Semester at Sea Stacks
+blacklight_config.properties, u3344744.mrc, library_facet, Semester at Sea
+blacklight_config.properties, u3344744.mrc, shadowed_location_facet, VISIBLE
+
+blacklight_config.properties, u150-u153.mrc(u150), marc_error, 
+blacklight_config.properties, u150-u153.mrc(u151), marc_error, Minor Error  : Subfield contains odd pattern of subscript or superscript escapes.  --- [ 245 : a ]
+blacklight_config.properties, u150-u153.mrc(u152), marc_error, 
+
+blacklight_config.properties, u2956.mrc, location2_facet, Fine Arts Stacks|Semester at Sea Stacks|Ivy Annex
+blacklight_config.properties, u2956.mrc, library_facet, Fine Arts|Semester at Sea|Ivy
+blacklight_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
+blacklight_config.properties, u2362477.mrc, location2_facet, Robertson Media Center Vault--Ask at circulation desk
+
+blacklight_config.properties, u4495584.mrc, format_facet, Online|Journal/Magazine|Periodical
+blacklight_config.properties, u20563.mrc, year_multisort_i, 1982
+blacklight_config.properties, u3412403.mrc, year_multisort_i, 1986
+blacklight_config.properties, u8692.mrc, year_multisort_i, 1974
+blacklight_config.properties, u20563.mrc, published_date_facet, Last 50 years
+blacklight_config.properties, u4802090.mrc, published_date_facet, Last 50 years
+blacklight_config.properties, u11.mrc, published_date_facet, More than 50 years ago
+
+blacklight_dev_config.properties, u8738.mrc, language_facet, English|French (translated from)
+blacklight_dev_config.properties, u4403509.mrc, language_facet, French|English (subtitles in)
+blacklight_dev_config.properties, u392.mrc, language_facet, Russian|English (also in)
+
+blacklight_dev_config.properties, u151.mrc, call_number_text, DT73.D47 Z5 1979
+blacklight_dev_config.properties, u210.mrc, call_number_text, HB2615.V8O23 1983|PD VIRG.O1536O|UVATM 2/OC 2
+
+blacklight_dev_config.properties, u60.mrc, call_number_display, DP269.27.S67 H47 1982  V.1, V.2
+blacklight_dev_config.properties, u55.mrc, call_number_display, PR4231.A43 1984 (13 volumes)
+blacklight_dev_config.properties, u115.mrc, call_number_display, PT2619.A6 A24  1984, 1984b
+#blacklight_dev_config.properties, u2112.mrc, call_number_display, Computer File|HB1.N39 (22 volumes)
+blacklight_dev_config.properties, u642.mrc, call_number_display, ML5.G654 (43 volumes)
+
+blacklight_dev_config.properties, u399.mrc, instrument_facet, Chamber orchestra|Tenor voice
+blacklight_dev_config.properties, u1023.mrc, instrument_facet, Soprano voice|Alto voice|Tenor voice|Bass voice|Choruses, Unspecified|Chamber orchestra
+
+blacklight_config.properties, u11.mrc, barcode_facet, 11-1001
+blacklight_config.properties, u60.mrc, barcode_facet, X000872036|X000872037
+
+#blacklight_sas_config.properties, u3344744.mrc, location_facet, Semester at Sea Collection
+#blacklight_sas_config.properties, u3344744.mrc, library_facet, Semester at Sea
+#blacklight_sas_config.properties, u3344744.mrc, shadowed_location_facet, VISIBLE
+
+#blacklight_sas_config.properties, u2956.mrc, location_facet, Semester at Sea Collection
+#blacklight_sas_config.properties, u2956.mrc, library_facet, Semester at Sea
+#blacklight_sas_config.properties, u2956.mrc, shadowed_location_facet, VISIBLE
+
+blacklight_test_config.properties, u2362477.mrc, release_date_facet, 1992
+blacklight_test_config.properties, u4403509.mrc, release_date_facet, 1998
+
+blacklight_test_config.properties, u4403509.mrc, language_facet, French|English (subtitles in)
+blacklight_test_config.properties, u696140.mrc, language_facet, English|German (translated from)
+
+
+

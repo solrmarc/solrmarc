@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+  <!-- leader/06 t /07 b - other -->
+  <record>
+    <leader>01952ctb  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06t07b</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">other (not book): leader/06 t /07 b</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 a /07 s 008/21 blank - serial publication -->
+  <record>
+    <leader>01952cas  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06a07s</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">Serial Publication: leader/06 a /07 s 008/21 blank</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 a /07 m - book -->
+  <record>
+    <leader>01952cam  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06a07m</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">book: leader/06 a /07 m</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 t /07 a - book -->
+  <record>
+    <leader>01952cta  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06t07a</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">book: leader/06 t /07 a</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 e - globe -->
+  <record>
+    <leader>01952ced  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06e</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">globe: leader/06 e</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 f - map -->
+  <record>
+    <leader>01952cfd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06f</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 0 eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">map: leader/06 f</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 k 008/33 w - other -->
+  <record>
+    <leader>01952ckd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06k00833w</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 w eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">other (not image): leader/06 k 008/33 w</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 k 008/33 i - image -->
+  <record>
+    <leader>01952ckd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06k00833i</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 i eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">image: leader/06 k 008/33 i</subfield>
+    </datafield>
+  </record>  
+  <!-- leader/06 k 008/33 k - image -->
+  <record>
+    <leader>01952ckd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06k00833k</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 k eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">image: leader/06 k 008/33 k</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 k 008/33 p - image -->
+  <record>
+    <leader>01952ckd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06k00833p</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 p eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">image: leader/06 k 008/33 p</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 k 008/33 s - image -->
+  <record>
+    <leader>01952ckd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06k00833s</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 s eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">image: leader/06 k 008/33 s</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 k 008/33 t - image -->
+  <record>
+    <leader>01952ckd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06k00833t</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 t eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">image: leader/06 k 008/33 t</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 g 008/33 w - other -->
+  <record>
+    <leader>01952cgd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06g00833w</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 w eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">other (not video): leader/06 g 008/33 w</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 g 008/33 m - video -->
+  <record>
+    <leader>01952cgd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06g00833m</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 m eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">video: leader/06 g 008/33 m</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 g 008/33 v - video -->
+  <record>
+    <leader>01952cgd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06g00833v</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">video: leader/06 g 008/33 v</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 i - audio non-music -->
+  <record>
+    <leader>01952cid  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06i</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">audio non-music: leader/06 i</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 j - music-audio -->
+  <record>
+    <leader>01952cjd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06j</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">music-audio: leader/06 j</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 c - music-score -->
+  <record>
+    <leader>01952ccd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06c</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">music-score: leader/06 c</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 d - music-score -->
+  <record>
+    <leader>01952cdd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06d</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">music-score: leader/06 d</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 b - manuscript/archive -->
+  <record>
+    <leader>01952cbd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06b</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">manuscript: leader/06 b (obsolete)</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 p - manuscript/archive -->
+  <record>
+    <leader>01952cpd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06p</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">manuscript: leader/06 p (mixed materials)</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 r - other (object) -->
+  <record>
+    <leader>01952crd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06r</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">other (object): leader/06 r</subfield>
+    </datafield>
+  </record>
+  <!-- 502 - thesis -->
+  <record>
+    <leader>01952cad  2200457Ia 45í0</leader>
+    <controlfield tag="001">a502</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">thesis: has 502</subfield>
+    </datafield>
+    <datafield tag="502" ind1=" " ind2=" ">
+      <subfield code="a">dissertation note field; we don't care about the contents</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 o - other (kit) -->
+  <record>
+    <leader>01952cod  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06o</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">other (instructional kit): leader/06 o</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 a /07 s 008/21 n - newspaper -->
+  <record>
+    <leader>01952cas  2200457Ia 45í0</leader>
+    <controlfield tag="001">anewspaper</controlfield>
+    <controlfield tag="008">780930m19391944nyu   n       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">newspaper: leader/06 a /07 s 008/21 n</subfield>
+    </datafield>
+  </record> 
+  <!-- leader/06 m 008/26 u - other -->
+  <record>
+    <leader>01952cmd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06m00826u</controlfield>
+    <controlfield tag="008">780930m19391944nyu        u  000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">other (not data): leader/06 m 008/26 u</subfield>
+    </datafield>
+  </record>
+  <!-- leader/06 m 008/26 a - data -->
+  <record>
+    <leader>01952cmd  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader06m00826a</controlfield>
+    <controlfield tag="008">780930m19391944nyu        a  000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">data: leader/06 m 008/26 a</subfield>
+    </datafield>
+  </record>
+  <!-- 245 h has "microform" - microfilm AND music-score -->
+  <record>
+    <leader>01952adm  2200457Ia 45í0</leader>
+    <controlfield tag="001">a245hmicroform</controlfield>
+    <controlfield tag="008">780930m19391944nyu           000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">microform: 245h</subfield>
+      <subfield code="c">××¨××§ ×.; ×¢×××¡ ×××××××; ×¢×¨× ×××§××× ××××: ×××¨××× ×××§×.</subfield>
+      <subfield code="h">[microform]</subfield>
+    </datafield>
+  </record>
+  <!-- leader/07 s, no 006, 008/21 m - book (monographic series) -->
+  <record>
+    <leader>01952cas  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader07s00821m</controlfield>
+    <controlfield tag="008">780930m19391944nyu   m       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">book (monographic series): leader/07 s, no 006 and 008/21 m</subfield>
+    </datafield>
+  </record>
+  <!-- leader/07 b, 006/00 s, 008/21 m - serial publication -->
+  <record>
+    <leader>01952cab  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader07b00600s00821m</controlfield>
+    <controlfield tag="006">s        h        </controlfield>
+    <controlfield tag="008">780930m19391944nyu   m       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">serial publication: leader/07 b, 006/00 s, 006/04 blank, 008/21 d</subfield>
+    </datafield>
+  </record>
+
+  <!-- leader/07 b, 006/00 s, 006/04 m, 008/21 d - book (monographic series) -->
+  <record>
+    <leader>01952cab  2200457Ia 45í0</leader>
+    <controlfield tag="001">a223344</controlfield>
+    <controlfield tag="006">s   m    h        </controlfield>
+    <controlfield tag="008">780930m19391944nyu   d       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">book (monographic series): leader/07 b, 006/00 s, 006/04 m, 008/21 d</subfield>
+    </datafield>
+  </record>
+
+  <!-- leader/07 s, 006/00 j, 008/21 d - other (updating database) -->
+  <record>
+    <leader>01952cas  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader07s00600j00821d</controlfield>
+    <controlfield tag="006">j        h        </controlfield>
+    <controlfield tag="008">780930m19391944nyu   d       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">other (updating database): leader/07s, 006/00 j and 008/21 d</subfield>
+    </datafield>
+  </record>
+  <!-- leader/07 s, no 006, 008/21 p - journal -->
+  <record>
+    <leader>01952cas  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader07sNo00600821p</controlfield>
+    <controlfield tag="008">780930m19391944nyu   p       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">journal: leader/07s, no 006, and 008/21 p</subfield>
+    </datafield>
+  </record>
+  <!-- leader/07 b, 006/00 s, 008/21 p - Serial Publication -->
+  <record>
+    <leader>01952cab  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader07b00600s00821p</controlfield>
+    <controlfield tag="006">s        h        </controlfield>
+    <controlfield tag="008">780930m19391944nyu   p       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">Serial Publication: leader/07 b, 006/00 s 006/04 blank and 008/21 p</subfield>
+    </datafield>
+  </record>  
+  <!-- leader/07 s, no 006, 008/21 n - newspaper -->
+  <record>
+    <leader>01952cas  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader07sNo00600821n</controlfield>
+    <controlfield tag="008">780930m19391944nyu   n       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">newspaper: leader/07s, no 006, and 008/21 n</subfield>
+    </datafield>
+  </record>
+  <!-- leader/07 b, 006/00 s, 006/04 w, 008/21 n - Other -->
+  <record>
+    <leader>01952cab  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader07b00600s00821n</controlfield>
+    <controlfield tag="006">s   w    h        </controlfield>
+    <controlfield tag="008">780930m19391944nyu   n       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">Other: leader/07 b, 006/00 s 006/04 w and 008/21 n</subfield>
+    </datafield>
+  </record>
+  <!-- leader/07 s, no 006, 008/21 w - other (web site) -->
+  <record>
+    <leader>01952cas  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader07sNo00600821w</controlfield>
+    <controlfield tag="008">780930m19391944nyu   w       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">other (web site): leader/07s, no 006, and 008/21 w</subfield>
+    </datafield>
+  </record>
+  <!-- leader/07 b, 006/00 s, 008/21 w - other (web site) -->
+  <record>
+    <leader>01952cab  2200457Ia 45í0</leader>
+    <controlfield tag="001">aleader07b00600s00821w</controlfield>
+    <controlfield tag="006">s   w    h        </controlfield>
+    <controlfield tag="008">780930m19391944nyu   w       000 v eng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">other (web site): leader/07 b, 006/00 s and 008/21 w</subfield>
+    </datafield>
+  </record>
+  <!-- format serial publication:  leader/07 s and 008/21 blank (ignore LCPER in 999w) -->
+  <record>
+    <leader>01247cas a2200337 a 4500</leader>
+    <controlfield tag="001">a460947</controlfield>
+    <controlfield tag="008">830415c19809999vauuu    a    0    0eng  </controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">format serial publication:  from LCPER 999w</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">v. ;</subfield>
+      <subfield code="c">22 cm.</subfield>
+    </datafield>
+    <datafield tag="362" ind1="0" ind2=" ">
+      <subfield code="a">Vol. 1 (1980)-</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Title from cover.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Hispanic Americans</subfield>
+      <subfield code="x">Periodicals.</subfield>
+    </datafield>
+    <datafield tag="999" ind1=" " ind2=" ">
+      <subfield code="a">E184.S75 R47A V.1 1980</subfield>
+      <subfield code="w">LCPER</subfield>
+      <subfield code="c">1</subfield>
+      <subfield code="i">36105007402873</subfield>
+      <subfield code="d">2/5/2004</subfield>
+      <subfield code="e">9/3/1998</subfield>
+      <subfield code="l">STACKS</subfield>
+      <subfield code="m">GREEN</subfield>
+      <subfield code="n">1</subfield>
+      <subfield code="p">$40.00</subfield>
+      <subfield code="q">4</subfield>
+      <subfield code="r">Y</subfield>
+      <subfield code="s">Y</subfield>
+      <subfield code="t">STKS-MONO</subfield>
+      <subfield code="u">4/15/1983</subfield>
+      <subfield code="o">.TECHSTAFF. #16/i:jrt</subfield>
+    </datafield>
+  </record>
+  
+  <!-- format Serial Publication:  leader/07 s and 008/21 blank (ignore DEWEYPER in 999w) -->
+  <record>
+    <leader>01247cas a2200337 a 4500</leader>
+    <controlfield tag="001">a446688</controlfield>
+    <controlfield tag="008">830415c19809999vauuu    a    0    0eng  </controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">format serial publication:  ignore from DEWEYPER in 999w</subfield>
+    </datafield>
+    <datafield tag="999" ind1=" " ind2=" ">
+      <subfield code="a">666.27 .F22</subfield>
+      <subfield code="w">DEWEYPER</subfield>
+      <subfield code="c">1</subfield>
+      <subfield code="i">36105007402873</subfield>
+      <subfield code="d">2/5/2004</subfield>
+      <subfield code="e">9/3/1998</subfield>
+      <subfield code="l">STACKS</subfield>
+      <subfield code="m">GREEN</subfield>
+      <subfield code="n">1</subfield>
+      <subfield code="p">$40.00</subfield>
+      <subfield code="q">4</subfield>
+      <subfield code="r">Y</subfield>
+      <subfield code="s">Y</subfield>
+      <subfield code="t">STKS-MONO</subfield>
+      <subfield code="u">4/15/1983</subfield>
+      <subfield code="o">.TECHSTAFF. #16/i:jrt</subfield>
+    </datafield>
+  </record>
+  
+  <!-- format Serial Publication; leader/07 s 008/21 blank, 65x sub v  -->
+  <record>
+    <leader>01823cas a22004457a 4500</leader>
+    <controlfield tag="001">a4114632</controlfield>
+    <controlfield tag="008">961105d19961996dcuuuu       f0    0eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">format Serial Publication; leader/07 s 008/21 blank, 65x sub v "Periodicals"</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">1 v. :</subfield>
+      <subfield code="b">ill. ;</subfield>
+      <subfield code="c">28 cm</subfield>
+    </datafield>
+    <datafield tag="310" ind1=" " ind2=" ">
+      <subfield code="a">Annual</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">"Investigation No. 332-345"--Cover p. 1.</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Distributed to depository libraries in microfiche.</subfield>
+    </datafield>
+    <datafield tag="515" ind1=" " ind2=" ">
+      <subfield code="a">June 1996 issue covers 1995.</subfield>
+    </datafield>
+    <datafield tag="550" ind1=" " ind2=" ">
+      <subfield code="a">Prepared by: Office of Industries.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Industrial statistics</subfield>
+      <subfield code="v">Periodicals.</subfield>
+    </datafield>
+    <datafield tag="651" ind1=" " ind2="0">
+      <subfield code="a">United States</subfield>
+      <subfield code="v">Periodicals.</subfield>
+    </datafield>
+    <datafield tag="999" ind1=" " ind2=" ">
+      <subfield code="a">ITC 1.15/3:</subfield>
+      <subfield code="w">SUDOC</subfield>
+      <subfield code="c">1</subfield>
+      <subfield code="i">4114632-1001</subfield>
+      <subfield code="d">7/12/1999</subfield>
+      <subfield code="l">FED-DOCS</subfield>
+      <subfield code="m">GREEN</subfield>
+      <subfield code="r">Y</subfield>
+      <subfield code="s">Y</subfield>
+      <subfield code="t">GOVSTKS</subfield>
+      <subfield code="u">7/12/1999</subfield>
+      <subfield code="x">MARCIVE</subfield>
+    </datafield>
+  </record>
+  
+  <!-- format Other should be access online leader/07 s, 006/00 m, 008/21 | -->
+  <record>
+    <leader>00988nas a2200193z  4500</leader>
+    <controlfield tag="001">a7117119</controlfield>
+    <controlfield tag="006">m        d        </controlfield>
+    <controlfield tag="007">cr mnu        </controlfield>
+    <controlfield tag="008">071214uuuuuuuuuxx uu |ss    u|    |||| d</controlfield>
+    <datafield tag="245" ind1="1" ind2=" ">
+      <subfield code="a">format Other; should be access online</subfield>
+    </datafield>
+    <datafield tag="956" ind1="4" ind2="0">
+      <subfield code="u">http://caslon.stanford.edu:3210/sfxlcl3?url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;ctx_enc=info:ofi/enc:UTF-8&amp;rfr_id=info:sid/sfxit.com:opac_856&amp;url_ctx_fmt=info:ofi/fmt:kev:mtx:ctx&amp;sfx.ignore_date_threshold=1&amp;rft.object_id=110978984448763&amp;svc_val_fmt=info:ofi/fmt:kev:mtx:sch_svc&amp;</subfield>
+      <subfield code="x">eLoaderURL</subfield>
+      <subfield code="x">mb4</subfield>
+      <subfield code="x">mb110978984448763</subfield>
+    </datafield>
+    <datafield tag="999" ind1=" " ind2=" ">
+      <subfield code="a">INTERNET RESOURCE</subfield>
+      <subfield code="w">ASIS</subfield>
+      <subfield code="c">1</subfield>
+      <subfield code="i">7117119-1001</subfield>
+      <subfield code="l">INTERNET</subfield>
+      <subfield code="m">SUL</subfield>
+      <subfield code="r">N</subfield>
+      <subfield code="s">Y</subfield>
+      <subfield code="t">SUL</subfield>
+      <subfield code="u">12/15/2007</subfield>
+      <subfield code="z">TAX=8.25</subfield>
+    </datafield>
+  </record>
+  
+  <!-- format Serial Publication; leader/07 b, 006/00 s, 006/04 blank, 008/21 blank  -->
+  <record>
+    <leader>01823cab a22004457a 4500</leader>
+    <controlfield tag="001">a123</controlfield>
+    <controlfield tag="006">s        h        </controlfield>
+    <controlfield tag="008">961105d19961996dcuuuu       f0    0eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">format Serial Publication; leader/07 b, 006/00 s, 006/04 blank, 008/21 blank</subfield>
+    </datafield>
+  </record>
+  <!-- Other; leader/07 b, 006/00 s, 006/04 d, 008/21 |  -->
+  <record>
+    <leader>01823cab a22004457a 4500</leader>
+    <controlfield tag="001">a321</controlfield>
+    <controlfield tag="006">s   d    h        </controlfield>
+    <controlfield tag="008">961105d19961996dcuuuu|      f0    0eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">Other; leader/07 b, 006/00 s, 006/04 |, 008/21 |</subfield>
+    </datafield>
+  </record>
+  
+  <!-- Book: monographic series -->
+  <record>
+    <leader>00868cas a22002294a 4500</leader>
+    <controlfield tag="001">a5987319</controlfield>
+    <controlfield tag="008">050823c20029999ohuuu m       0    0eng d</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">Book: leader/07 s  and 008/21 m</subfield>
+    </datafield>
+  </record>
+  <!-- Book: monographic series -->
+  <record>
+    <leader>01068cas a2200277 a 4500</leader>
+    <controlfield tag="001">a5598989</controlfield>
+    <controlfield tag="008">030807c20029999nyufx m       0    0eng c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">Book: leader/07 s  and 008/21 m</subfield>
+    </datafield>
+  </record>
+  
+  <!-- Other: leader/07 s 008/21 d, 006/00 s 006/04 d -->
+  <record>
+    <leader>01068cas a2200277 a 4500</leader>
+    <controlfield tag="001">a112233</controlfield>
+    <controlfield tag="006">s   d    h        </controlfield>
+    <controlfield tag="008">030807c20029999nyufx d       0    0eng c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">Other: leader/07 s 008/21 d, 006/00 s 006/04 d</subfield>
+    </datafield>
+  </record>
+  
+  <!-- Journal: leader/07 s 008/21 d, 006/00 s 006/04 p -->
+  <record>
+    <leader>01068cas a2200277 a 4500</leader>
+    <controlfield tag="001">a335577</controlfield>
+    <controlfield tag="006">s   p    h        </controlfield>
+    <controlfield tag="008">030807c20029999nyufx         0    0eng c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">Journal: leader/07 s 008/21 d, 006/00 s 006/04 p</subfield>
+    </datafield>
+  </record>
+  
+  <!-- Other: leader/07 s 008/21 d, 006/00 j 006/04 p -->
+  <record>
+    <leader>01068cas a2200277 a 4500</leader>
+    <controlfield tag="001">a778899</controlfield>
+    <controlfield tag="006">j   p    h        </controlfield>
+    <controlfield tag="008">030807c20029999nyufx d       0    0eng c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">Other: leader/07 s 008/21 d, 006/00 s 006/04 d</subfield>
+    </datafield>
+  </record>
+  
+  <!-- Newspaper: leader/07 s 008/21 d, 006/00 s 006/04 n -->
+  <record>
+    <leader>01068cas a2200277 a 4500</leader>
+    <controlfield tag="001">a334455</controlfield>
+    <controlfield tag="006">s   n    h        </controlfield>
+    <controlfield tag="008">030807c20029999nyufx d       0    0eng c</controlfield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">Newspaper: leader/07 s 008/21 d, 006/00 s 006/04 n</subfield>
+    </datafield>
+  </record>
+  
+  <!-- Conference Proceedings  -->
+  <record>
+    <leader>04473cam a2200313Ia 4500</leader>
+    <controlfield tag="001">a5666387</controlfield>
+    <controlfield tag="008">040202s2003    fi g     b    100 0deng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">conference proceedings</subfield>
+    </datafield>
+    <datafield tag="600" ind1="1" ind2="0">
+      <subfield code="a">Sibelius, Jean,</subfield>
+      <subfield code="d">1865-1957</subfield>
+      <subfield code="v">Congresses.</subfield>
+    </datafield>
+  </record>
+  
+  <!-- Conference Proceedings  -->
+  <record>
+    <leader>04473cam a2200313Ia 4500</leader>
+    <controlfield tag="001">a666</controlfield>
+    <controlfield tag="008">040202s2003    fi g     b    100 0deng d</controlfield>
+    <datafield tag="245" ind1="1" ind2="4">
+      <subfield code="a">more conference proceedings</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Music</subfield>
+      <subfield code="v">Congresses.</subfield>
+    </datafield>
+  </record>
+
+</collection>

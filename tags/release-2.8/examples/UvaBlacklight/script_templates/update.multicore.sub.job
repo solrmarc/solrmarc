@@ -1,0 +1,69 @@
+#!/bin/bash
+SOLRMARCDISTDIR=/lib_content27/solrmarc/dist
+PATH=$SOLRMARCDISTDIR/bin:$PATH
+export PATH
+num=0
+JAVA_HOME=/usr/java/latest/bin/java
+export JAVA_HOME
+
+scriptdir=$( (cd -P $(dirname $0) && pwd) )
+solrmarcdir=$scriptdir
+if ! [ -e $solrmarcdir/SolrMarc.jar ] 
+then
+  solrmarcdir=$( (cd -P $(dirname $0)/.. && pwd) )
+fi
+config=$1
+arg2=$2
+if [ "$arg2" == "" ] 
+then
+    solrcore=`cat $solrmarcdir/$config | egrep solr.core.name | sed -e's/.* = //'`
+    solrnewcore=`echo $solrcore | sed -e's/_index//'`_`date +%Y%m%d`
+    solroldcore=`echo $solrcore | sed -e's/_index//'`_`date --date="-2 days" +%Y%m%d`
+else
+    solrcore=$arg2
+    solrnewcore=blacklight_${arg2}_`date +%Y%m%d`
+    solroldcore=blacklight_${arg2}_`date --date="-2 days" +%Y%m%d`
+fi
+
+solrhome=`cat $solrmarcdir/$config | egrep solr.path | sed -e's/.* = //'`
+solrhomeparent=/lib_content27/solr
+#solrurlstart=`cat $solrmarcdir/$config | egrep solr.hosturl | sed -e's/.* = //' -e's:/[A-Za-z0-9_]*$::'`
+
+solrdir=$solrhome/$solrcore
+solrnewdir=$solrhomeparent/$solrnewcore
+solrolddir=$solrhomeparent/$solroldcore
+
+java -cp /lib_content27/solr/verification/lucene-core-2.9.1.jar org.apache.lucene.index.CheckIndex $solrdir/index  > /dev/null 2>1
+if ! [ "$?" == "0" ] 
+then
+    return=$?
+    echo "Warning index verification process failed.  Index seems to be corrupted."
+    exit $return
+fi
+
+if [ ! -e $solrnewdir ] ; then
+    # copy entire index via creating hard links, then turn segment files from hardlinks to copies
+    cp -lR $solrdir $solrnewdir.tmp
+    rm $solrnewdir.tmp/conf/solrcore.properties
+    cp $solrhomeparent/solrcore.properties $solrnewdir.tmp/conf
+
+    for file in $solrnewdir.tmp/*/seg*
+    do
+    #   echo $file
+        mv $file $file.tmp
+        cp $file.tmp $file
+        rm $file.tmp
+    done
+    rm $solrnewdir.tmp/*/.nfs* 2> /dev/null
+
+    mv $solrnewdir.tmp $solrnewdir
+fi
+
+# now delete the solr data directory from two days ago
+if [[ ! -e $solrolddir  && `echo $solrolddir | grep 'all'` != "" ]] 
+then
+   solrolddir=`echo $solrolddir | sed -e 's/all/dev/'`
+fi
+
+rm -rf $solrolddir
+
