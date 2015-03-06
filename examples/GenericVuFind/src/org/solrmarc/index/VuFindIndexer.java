@@ -1083,32 +1083,31 @@ public class VuFindIndexer extends SolrIndexer
 
 
     /**
-     * Normalize LC numbers for sorting purposes (use only the first valid number!)
+     * Normalize LC numbers for sorting purposes (use only the first valid number!).
+     * Will return first call number found if none pass validation.
      *
-     * Can return null
-     *
-     * @param record current MARC record
-     * @param fieldSpec which MARC fields / subfields need to be analyzed
-     * @return String containing the first valid LC number encountered, normalized
-     *         for sorting purposes.
+     * @param  record current MARC record
+     * @param  fieldSpec which MARC fields / subfields need to be analyzed
+     * @return sortable shelf key of the first valid LC number encountered, 
+     *         otherwise shelf key of the first call number found.
      */
-    public String getLCSortable(Record record, String fieldSpec) {
+    public static String getLCSortable(Record record, String fieldSpec) {
         // Loop through the specified MARC fields:
         Set<String> input = getFieldList(record, fieldSpec);
-        Iterator<String> iter = input.iterator();
-        while (iter.hasNext()) {
-            // Get the current string to work on:
-            String current = iter.next();
-
+        String firstCall = null;
+        for (String current : input) {
             // If this is a valid LC number, return the sortable shelf key:
             LCCallNumber callNum = new LCCallNumber(current);
             if (callNum.isValid()) {
-                return callNum.getShelfKey();
+                return callNum.getShelfKey();   // RETURN first valid
+            }
+            if (firstCall == null) {
+                firstCall = current;
             }
         }
 
-        // If we made it this far, we didn't find a valid sortable LC number:
-        return null;
+        // If we made it this far, did not find a valid LC number, so use what we have:
+        return new LCCallNumber(firstCall).getShelfKey();
     }
 
     /**
