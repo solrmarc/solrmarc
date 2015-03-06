@@ -1089,7 +1089,7 @@ public class VuFindIndexer extends SolrIndexer
      *
      * @param record current MARC record
      * @param fieldSpec which MARC fields / subfields need to be analyzed
-     * @return String containing the first valid Dewey number encountered, normalized
+     * @return String containing the first valid LC number encountered, normalized
      *         for sorting purposes.
      */
     public String getLCSortable(Record record, String fieldSpec) {
@@ -1107,7 +1107,7 @@ public class VuFindIndexer extends SolrIndexer
             }
         }
 
-        // If we made it this far, we didn't find a valid sortable Dewey number:
+        // If we made it this far, we didn't find a valid sortable LC number:
         return null;
     }
 
@@ -1121,7 +1121,7 @@ public class VuFindIndexer extends SolrIndexer
      * @param fieldSpec  which MARC fields / subfields need to be analyzed
      * @param callTypeSf  subfield containing call number type, single character only
      * @param callType  literal call number code
-     * @return sort key for first identified Dewey call number
+     * @return sort key for first identified LC call number
      */
     public static String getLCSortableByType(
             Record record, String fieldSpec, String callTypeSf, String callType) {
@@ -1151,7 +1151,7 @@ public class VuFindIndexer extends SolrIndexer
                         callTypeMatch = true;
                     }
                 }
-                // take the first call number coded as Dewey
+                // take the first call number coded as LC
                 if (callTypeMatch) {
                     sortKey = new LCCallNumber(df.getSubfieldsAsString(sfSpec)).getShelfKey();
                     break;
