@@ -3297,7 +3297,7 @@ public class BlacklightIndexer extends SolrIndexer
                     }
                 }
             }
-
+            fieldsTrimmed.add(field);
         }
         return fieldsTrimmed;
     }
