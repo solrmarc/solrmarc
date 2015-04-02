@@ -835,7 +835,7 @@ public class GetFormatMixin extends SolrIndexerMixin
      *   Leader/06 e, f, k, o, r     AND     006/12 (008/29) o
 
      */
-    public boolean isOnlineFormatTypes(final Record record)
+    public String isOnlineFormatTypes(final Record record)
     {
         char typeOfRecord = record.getLeader().getTypeOfRecord();
         ControlField field008 = ((ControlField)record.getVariableField("008"));
@@ -846,26 +846,26 @@ public class GetFormatMixin extends SolrIndexerMixin
         String types2 = "efgkorm";
         if (types1.indexOf(typeOfRecord) != -1)
         {
-            if (field008Str.length() > 23 && field008Str.charAt(23) == 'o') return(true);
-            if (setContainsAt(fields006, 6, "o", true))   return(true);
+            if (field008Str.length() > 23 && field008Str.charAt(23) == 'o') return("field 008 position 23 = 'o'");
+            if (setContainsAt(fields006, 6, "o", true))   return("field 006 position 6 ='o'");
             if (typeOfRecord == 'a' || typeOfRecord == 'i' || typeOfRecord == 'j' || typeOfRecord == 't')
             {
-                if (setContainsAt(fields007, 0, "cr", true))   return(true);
+                if (setContainsAt(fields007, 0, "cr", true))   return("field 007 startswith ='cr'");
             }
         }
         if (types2.indexOf(typeOfRecord) != -1)
         {
-            if (field008Str.length() > 29 && field008Str.charAt(29) == 'o') return(true);
-            if (setContainsAt(fields006, 12, "o", true))   return(true);
+            if (field008Str.length() > 29 && field008Str.charAt(29) == 'o') return("field 008 position 29 = 'o'");
+            if (setContainsAt(fields006, 12, "o", true))   return("field 006 position 12 ='o'");
             if (typeOfRecord == 'g')
             {
                 if (setContainsAt(fields007, 0, "v...z", true))   
                 {
-                    if (this.hasFullText(record))  return(true);
+                    return("field 007 startswith ='v...z'");
                 }
             }
         }
-        return(false);
+        return(null);
     }
     
     private boolean setContainsAt(List<VariableField> fields, int offset, String match, boolean ignoreCase)
@@ -905,20 +905,20 @@ public class GetFormatMixin extends SolrIndexerMixin
     {
         // see if we have full-text link
 
-        boolean online = isOnlineFormatTypes(record);
+        String onlineAccordingTo = isOnlineFormatTypes(record);
         boolean hasFullLink = hasFullText(record);
         boolean hasSupplLink = hasSupplText(record);
         
         // if so, and this is a book, add e-book as well
-        if (online && !hasFullLink && !hasSupplLink)
+        if (onlineAccordingTo != null && !hasFullLink && !hasSupplLink)
         {
-            addFormatError(record.getControlNumber(), "856", "n/a", ErrorHandler.MINOR_ERROR, "Record claims to be \"Online\" but has no valid 856 field");                
+            addFormatError(record.getControlNumber(), "856", "n/a", ErrorHandler.MINOR_ERROR, "Record claims to be \"Online\" in "+ onlineAccordingTo + " but has no valid 856 field");                
         }
-        else if (online && !hasFullLink)
+        else if (onlineAccordingTo != null && !hasFullLink)
         {
             formats.add(MediaType.OnlineExtra.toString());                
         }
-        else if (hasFullLink && !online)
+        else if (hasFullLink && onlineAccordingTo == null)
         {
             addFormatError(record.getControlNumber(), "856", "n/a", ErrorHandler.INFO, "Record has valid 856 field, but is missing declarations of online");                
         }
@@ -1518,8 +1518,26 @@ public class GetFormatMixin extends SolrIndexerMixin
                     break;
 
                 case 'o': // o - Online
-
-                    formStr.add(FormOfItem.Online.toString());
+//                    {
+//                        boolean online = true;
+//                        boolean hasFullLink = hasFullText(record);
+//                        boolean hasSupplLink = hasSupplText(record);
+//                        
+//                        // if so, and this is a book, add e-book as well
+//                        if (online && !hasFullLink && !hasSupplLink)
+//                        {
+//                            addFormatError(record.getControlNumber(), "856", "n/a", ErrorHandler.MINOR_ERROR, "Record claims to be \"Online\" in field:"+fieldFormat.getTag()+" position:"+position+" but has no valid 856 field");                
+//                        }
+//                        else if (online && !hasFullLink)
+//                        {
+//                            formStr.add(MediaType.OnlineExtra.toString());                
+//                        }
+//                        
+//                        if (hasFullLink == true)
+//                        {
+//                            formStr.add(FormOfItem.Online.toString());
+//                        }
+//                    }
                     break;
 
                 case 'q': // q - Direct electronic
