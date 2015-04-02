@@ -18,6 +18,26 @@ import org.solrmarc.tools.Utils;
 
 public class GetFormatMixin extends SolrIndexerMixin
 {
+    Set<String> errorsFound = null;
+    
+    public void perRecordInit(Record record)
+    {
+        errorsFound = new LinkedHashSet<String>();
+    }
+    
+    public void addFormatError(String controlNum, String field, String subfield, int severity, String message)
+    {
+        String errorStr = controlNum+":"+field+":"+subfield+" : "+message;
+        if (!errorsFound.contains(errorStr))
+        {
+            errorsFound.add(errorStr);
+            if (indexer != null && indexer.errors != null)
+            {
+                indexer.errors.addError(controlNum, field, subfield, severity, "GetFormatMixin - "+message);
+            }
+        }
+    }
+    
     private enum ProfileType
     {
         NoneDefined,
@@ -188,6 +208,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         Microopaque,
         MusicalScore,
         Online,
+        OnlineExtra,
         Painting,
         Photo,
         PhotomechanicalPrint,
@@ -754,10 +775,9 @@ public class GetFormatMixin extends SolrIndexerMixin
     {
         Set<String> formats = getContentTypes(record);
         formats.addAll( getMediaTypes(record));
-        if (recordIsMinimal(record) && indexer != null && indexer.errors != null && (record.getId() == null || (record.getId() & (long)1) == 0))
+        if (recordIsMinimal(record))
         {
-            record.setId(record.getId() == null ? (long)1 : record.getId() | (long)1);
-            indexer.errors.addError(record.getControlNumber(), "n/a", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Record contains minimal metadata, format is likely wrong");                
+            addFormatError(record.getControlNumber(), "n/a", "n/a", ErrorHandler.MINOR_ERROR, "Record contains minimal metadata, format is likely wrong");                
         }
         formats = addOnlineTypes(record, formats, false);
         if (isArchive(record)) formats.add(ControlType.Archive.toString());
@@ -786,10 +806,9 @@ public class GetFormatMixin extends SolrIndexerMixin
     {
         Set<String> formats = getContentTypes(record);
         formats.addAll( getMediaTypes(record));
-        if (recordIsMinimal(record) && indexer != null && indexer.errors != null && (record.getId() == null || (record.getId() & (long)1) == 0))
+        if (recordIsMinimal(record))
         {
-            record.setId(record.getId() == null ? (long)1 : record.getId() | (long)1);
-            indexer.errors.addError(record.getControlNumber(), "n/a", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Record contains minimal metadata, format is likely wrong");                
+            addFormatError(record.getControlNumber(), "n/a", "n/a", ErrorHandler.MINOR_ERROR, "Record contains minimal metadata, format is likely wrong");                
         }
         formats = addOnlineTypes(record, formats, false); 
         if (isArchive(record)) formats.add(ControlType.Archive.toString());
@@ -886,16 +905,31 @@ public class GetFormatMixin extends SolrIndexerMixin
     {
         // see if we have full-text link
 
-        boolean online = isOnlineFormatTypes(record) || hasFullText(record);
-
+        boolean online = isOnlineFormatTypes(record);
+        boolean hasFullLink = hasFullText(record);
+        boolean hasSupplLink = hasSupplText(record);
+        
         // if so, and this is a book, add e-book as well
-
-        if (formats.contains(ContentType.Book.toString()) && online == true)
+        if (online && !hasFullLink && !hasSupplLink)
+        {
+            addFormatError(record.getControlNumber(), "856", "n/a", ErrorHandler.MINOR_ERROR, "Record claims to be \"Online\" but has no valid 856 field");                
+        }
+        else if (online && !hasFullLink)
+        {
+            formats.add(MediaType.OnlineExtra.toString());                
+        }
+        else if (hasFullLink && !online)
+        {
+            addFormatError(record.getControlNumber(), "856", "n/a", ErrorHandler.INFO, "Record has valid 856 field, but is missing declarations of online");                
+        }
+        
+        // if so, and this is a book, add e-book as well
+        if (formats.contains(ContentType.Book.toString()) && hasFullLink == true)
         {
             formats = addToTop(formats, CombinedType.EBook.toString());
         }
 
-        if (online == true)
+        if (hasFullLink == true)
         {
             formats.add(MediaType.Online.toString());
         }
@@ -1057,11 +1091,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         if (field.getData().length()-1 < offsetInField)
         {
             typeToAdd = defaultType;
-            if (indexer != null && indexer.errors != null && (field.getId() == null || (field.getId() & (long)1) == 0))
-            {
-                field.setId(field.getId() == null ? (long)1 : field.getId() | (long)1);
-                indexer.errors.addError(record.getControlNumber(), field.getTag(), "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Fixed field "+field.getTag()+" is shorter than it ought to be");                
-            }
+            addFormatError(record.getControlNumber(), field.getTag(), "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+field.getTag()+" is shorter than it ought to be");                
         }
         else 
         {
@@ -1105,10 +1135,9 @@ public class GetFormatMixin extends SolrIndexerMixin
                         {
                             if (mainTypeMap.get(c).equals(defaultType)) isValid = true;
                         }
-                        if (!isValid && indexer != null && indexer.errors != null && (field.getId() == null || (field.getId() & (long)2) == 0))
+                        if (!isValid)
                         {
-                            field.setId(field.getId() == null ? (long)2 : field.getId() | (long)2);
-                            indexer.errors.addError(record.getControlNumber(), field.getTag(), "n/a", ErrorHandler.ERROR_TYPO, "GetFormatMixin - Visual subtype is "+type+" which is probably not valid for type "+defaultType);
+                            addFormatError(record.getControlNumber(), field.getTag(), "n/a", ErrorHandler.ERROR_TYPO, "Visual subtype is "+type+" which is probably not valid for type "+defaultType);
                         } 
                     }
                     break;
@@ -1143,11 +1172,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                         if (typeToAdd != null)  contentTypesStr.add(typeToAdd.toString());
                     }
                     contentTypesStr.add(valid[0].toString());
-                    if (indexer != null && indexer.errors != null && (field.getId() == null || (field.getId() & (long)4) == 0))
-                    {
-                        field.setId(field.getId() == null ? (long)4 : field.getId() | (long)4);
-                        indexer.errors.addError(record.getControlNumber(), field.getTag(), "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - ContentType as specified in the leader/008 field conflicts with that specified in the 245h subfield");                
-                    }
+                    addFormatError(record.getControlNumber(), field.getTag(), "n/a", ErrorHandler.MINOR_ERROR, "ContentType as specified in the leader/008 field conflicts with that specified in the 245h subfield");                
                 }
             }
             else
@@ -1332,11 +1357,12 @@ public class GetFormatMixin extends SolrIndexerMixin
                 MediaType result = mediaTypeMap.get(key);
                 if (result == MediaType.TypeObsolete)
                 {
-                    if (indexer != null && indexer.errors != null && (field007.getId() == null || (field007.getId() & (long)2) == (long)0))
-                    {
-                        field007.setId(field007.getId() == null ? (long)2 : field007.getId() | (long)2);
-                        indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - 007 field specifies "+field007Str+ " which uses an obsolete encoding");
-                    }
+                    addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "007 field specifies "+field007Str+ " which uses an obsolete encoding");
+                }
+                else if (result == MediaType.Online) 
+                {
+                    // Skip it?
+                    result = null;
                 }
                 else if (result != null)
                 {
@@ -1349,21 +1375,14 @@ public class GetFormatMixin extends SolrIndexerMixin
             }
             else
             {
-                if (indexer != null && indexer.errors != null)
-                {
-                    indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - 007 Format code '"+field007Str+"' is undefined, looking at other fields");
-                }
+                addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "007 Format code '"+field007Str+"' is undefined, looking at other fields");
             }
             if (materialGeneral == 'v') // validate form of video (disc, reel, cassette with the format of the video.  ie. You probably don't have a VHS video disc
             {
                 if (videoFormMap.containsKey(key) && videoFormMap.get(key) != field007Str.charAt(1))
                 {
-                    if (indexer != null && indexer.errors != null && (field007.getId() == null || (field007.getId() & (long)4) == (long)0))
-                    {
-                        field007.setId(field007.getId() == null ? (long)4 : field007.getId() | (long)4);
-                        String errMsg = "GetFormatMixin - Mismatch between form of video (007/01)" + field007Str.charAt(1) + " and type of video (007/04)" + key.charAt(4);
-                        indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.ERROR_TYPO, errMsg);
-                    }
+                    String errMsg = "Mismatch between form of video (007/01)" + field007Str.charAt(1) + " and type of video (007/04)" + key.charAt(4);
+                    addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.ERROR_TYPO, errMsg);
                 }
             }
         } // done with 007 fields
@@ -1378,13 +1397,8 @@ public class GetFormatMixin extends SolrIndexerMixin
             if (form.isEmpty())
             {
                 form.add(type.mapsTo);
-                if (indexer != null && indexer.errors != null && (record.getId() == null || (record.getId() & (long)2) == 0))
-                {
-                    record.setId(record.getId() == null ? (long)2 : record.getId() | (long)2);
-                    String errMsg = "GetFormatMixin - Media type not specified determining it heuristically " + type.mapsTo + "based on fields: " + type.fromFields;
-                    indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.INFO, errMsg);
-                }
-
+                String errMsg = "Media type not specified determining it heuristically " + type.mapsTo + "based on fields: " + type.fromFields;
+                addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.INFO, errMsg);
             }
             else if (form.size() == 1)
             {
@@ -1393,15 +1407,14 @@ public class GetFormatMixin extends SolrIndexerMixin
                 if (!heuristicFormMapsTo.toString().equals(specifiedForm.toString()))
                 {
                     MediaType finalAnswer = (type.sigmoidProb() > specifiedForm.sigmoidProb()) ? type.mapsTo : specifiedForm;
-                    if (indexer != null && indexer.errors != null && (record.getId() == null || (record.getId() & (long)2) == 0))
+                    if (indexer != null)
                     {
-                        record.setId(record.getId() == null ? (long)2 : record.getId() | (long)2);
-                        String errMsg = "GetFormatMixin - Mismatch between specified media type" + specifiedForm + " and heuristically determined one " + heuristicFormMapsTo + " based on fields: "+ type.fromFields;
-                        indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.INFO, errMsg);
+                        String errMsg = "Mismatch between specified media type" + specifiedForm + " and heuristically determined one " + heuristicFormMapsTo + " based on fields: "+ type.fromFields;
+                        addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.INFO, errMsg);
                         if (finalAnswer != specifiedForm)
                         {
-                            errMsg = "GetFormatMixin - Overriding specified form " + specifiedForm + " with heuristically determined one " + heuristicFormMapsTo;
-                            indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, errMsg);
+                            errMsg = "Overriding specified form " + specifiedForm + " with heuristically determined one " + heuristicFormMapsTo;
+                            addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, errMsg);
                         }
                     }
                     if (finalAnswer != specifiedForm)
@@ -1471,10 +1484,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
             if (field.length() - 1 < position)
             {
-                if (indexer != null && indexer.errors != null)
-                {
-                    indexer.errors.addError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Fixed field "+tag+" is shorter than it ought to be");
-                }
+                addFormatError(record.getControlNumber(), tag, "n/a", ErrorHandler.MINOR_ERROR, "Fixed field "+tag+" is shorter than it ought to be");
                 continue;
             }
 
@@ -1710,7 +1720,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             new007Val[2] = ' ';  // make sure character 2 of new field is blank
             String newValue = new String(new007Val);
             newValue = newValue.trim();
-            if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - totally whackadoodle 007 field found \"Its got subfields\" changing it to \'"+ newValue+ "\'");
+            if (showError) addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "totally whackadoodle 007 field found \"Its got subfields\" changing it to \'"+ newValue+ "\'");
             return(newValue);
         }
         else if (field007.getData().length() <= 2 || 
@@ -1718,37 +1728,36 @@ public class GetFormatMixin extends SolrIndexerMixin
         { 
             {
                 boolean showError = false;
-                if (indexer != null && indexer.errors != null && (field007.getId() == null || (field007.getId() & (long)1) == (long)0))
+                if (indexer != null)
                 {
                     /// set id on field to prevent multiple error messages for the same error
-                    field007.setId(field007.getId() == null ? (long)1 : field007.getId() | (long)1);
                     showError = true;
                 }
                 if (profileType == profileType.Visual && leaderType == ContentType.ProjectedMedium && 
                     ((field007.getData().length() % 6) == 0 || field007.getData().replaceFirst("-*$", "").length() == 6))
                 {
                     String newValue = field007.getData().replaceFirst("([a-z])([-a-z][-a-z][-a-z][-a-z][-a-z]).*", "v$1 $2");
-                    if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Old 007 visual material fixed field (pre-1981) mapping it from "+field007+ " to "+ newValue);
+                    if (showError) addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "Old 007 visual material fixed field (pre-1981) mapping it from "+field007+ " to "+ newValue);
                     return(newValue);
                 }
                 else if (profileType == profileType.Music && (field007.getData().matches("^sl..j.*") || field007.getData().matches("^d[abcd].[ms][cde].*") || field007.getData().matches("^de.g.*")) )
                 {
                     String newValue = field007.getData().replaceFirst("([a-z])([-a-z][-a-z][-a-z][-a-z].*)", "s$1 $2");
-                    if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Old 007 music fixed field (pre 1981)");
+                    if (showError) addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "Old 007 music fixed field (pre 1981)");
                     return(newValue);
                 }
                 else if ( field007_02 == 'r' || field007_02 == 'o')
                 {
-                    if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.ERROR_TYPO, "GetFormatMixin - Old 007 fixed field (post-1981), character 2 is '"+field007_02+"' it should be undefined.");
+                    if (showError) addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.ERROR_TYPO, "Old 007 fixed field (post-1981), character 2 is '"+field007_02+"' it should be undefined.");
                 }
                 else if (field007.getData().length() <= 2)
                 {
-                    if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Malformed 007 fixed field, field too short");
+                    if (showError) addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "Malformed 007 fixed field, field too short");
                     return (field007.getData() + "        ");
                 }
                 else
                 {
-                    if (showError) indexer.errors.addError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "GetFormatMixin - Malformed 007 fixed field, character 02 should be blank");
+                    if (showError) addFormatError(record.getControlNumber(), "007", "n/a", ErrorHandler.MINOR_ERROR, "Malformed 007 fixed field, character 02 should be blank");
                 }
             }
         }
@@ -1843,36 +1852,21 @@ public class GetFormatMixin extends SolrIndexerMixin
     {
         Set<String> urls = indexer.getFullTextUrls(record);
 
-        if (urls.size() == 0)
-        {
-            return false;
-        }
-        else
-        {
-            // double check by looking for loc.gov, which is not accounted for
-            // in parent class
-            // suggest this be factored out to SolrIndexer
+        return(urls.size() != 0 ? true : false);
+    }
 
-            boolean isFullText = false;
+    /**
+     * Whether the record contains a full-text link
+     * 
+     * @param record MARC Record
+     * @return       <code>true</code> if record contains a full-text link
+     */
 
-            List<VariableField> list856 = (List<VariableField>)record.getVariableFields("856");
+    public Boolean hasSupplText(final Record record)
+    {
+        Set<String> urls = indexer.getSupplUrls(record);
 
-            for (VariableField vf : list856)
-            {
-                DataField df = (DataField) vf;
-                List<String> possUrls = Utils.getSubfieldStrings(df, 'u');
-
-                for (String url : possUrls)
-                {
-                    if (!url.toLowerCase().contains("loc.gov"))
-                    {
-                        isFullText = true;
-                    }
-                }
-            }
-
-            return isFullText;
-        }
+        return(urls.size() != 0 ? true : false);
     }
     
     /**
