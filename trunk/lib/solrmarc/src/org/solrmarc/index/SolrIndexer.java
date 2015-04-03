@@ -2165,7 +2165,7 @@ public class SolrIndexer
                || lc.contains("guide") || lc.contains("inhalts") || lc.contains("version") || lc.contains("addendum")
                || lc.contains("abstract") || lc.contains("index") || lc.contains("digest") || lc.contains("contents")
                || lc.contains("klappentext") || lc.contains("verlagsinformation") || lc.contains("lizenzfrei") || lc.contains("rezension") 
-               || lc.contains("sample") || lc.contains("related"))
+               || lc.contains("sample") || lc.contains("related") || lc.contains("record"))
                 
                 supplmntl = true;
         }
