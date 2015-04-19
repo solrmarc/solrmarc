@@ -1131,6 +1131,21 @@ public class LCCallNumberUnitTests {
         assertEquals(callnumKey, new LCCallNumber(callnumUpper).getShelfKey());
         assertEquals(callnumKey, new LCCallNumber(callnumLower).getShelfKey());
     }
+
+    /**
+     * unit test for getShelfKey: check that mixed case user input is handled sensibly
+     */
+    @Test
+    public void testGetShelfKey_mixedCase()
+    {
+        // Check that upper case and lower case input normalizer the same
+        String callnumUpper = "PR6058.A68828";
+        String callnumMixed = "pr6058.A68828";
+        String callnumLower = "pr6058.a68828";
+        String callnumKey = new LCCallNumber(callnumUpper).getShelfKey();
+        assertEquals(callnumKey, new LCCallNumber(callnumMixed).getShelfKey());
+        assertEquals(callnumKey, new LCCallNumber(callnumLower).getShelfKey());
+    }
     
     /**
      * unit test for getShelfKey: check empty string call number
