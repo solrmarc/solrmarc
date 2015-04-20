@@ -798,6 +798,28 @@ public class BlacklightIndexer extends SolrIndexer
         return resultSet;
     } */
     
+    public Set<String> getLibLocType(final Record record, String libMatch, String locMatch, String typeMatch)
+    {
+        List<VariableField> lvf = record.getVariableFields("999");
+        Set<String> result = new LinkedHashSet<String>();
+        for (VariableField vf : lvf)
+        {
+            DataField df = (DataField)vf;
+            Subfield lib = df.getSubfield('m');
+            Subfield loc = df.getSubfield('l');
+            Subfield type = df.getSubfield('t');
+            if (lib != null && lib.getData().matches(libMatch) && 
+                loc != null && loc.getData().matches(locMatch) && 
+                type != null && type.getData().matches(typeMatch))
+            {
+                String resultStr = lib.getData() + "_" + loc.getData() + "_" + type.getData();
+                result.add(resultStr);
+            }
+        }
+        return(result);
+    }
+    
+    
     /* 
      * Extract a single cleaned call number from a record
     * @param record
