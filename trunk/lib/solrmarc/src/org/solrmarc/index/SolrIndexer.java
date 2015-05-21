@@ -1080,7 +1080,7 @@ public class SolrIndexer
             {
                 addIndexerExceptionAsField(record, indexMap, indexField, ((SolrMarcIndexerException)e.getTargetException()).getLevel());
             }
-            e.printStackTrace();   // DEBUG
+            //e.printStackTrace();   // DEBUG
 //            logger.error(record.getControlNumber() + " " + indexField + " " + e.getCause());
             logger.error("Error while indexing " + indexField + " for record " + (recCntlNum != null ? recCntlNum : "") + " -- " + e.getCause());
         }
@@ -3222,6 +3222,8 @@ public class SolrIndexer
 
     public String getDataFromVariableField(VariableField vf, String subfldTags, String separator, boolean cleanIt)
     {
+        if (subfldTags.length() > 1 && !subfldTags.startsWith("["))
+            subfldTags = '[' + subfldTags + ']';
         Pattern subfieldPattern = Pattern.compile(subfldTags.length() == 0 ? "." : subfldTags);
         DataField marcField = (DataField) vf;
         StringBuffer buffer = new StringBuffer("");
