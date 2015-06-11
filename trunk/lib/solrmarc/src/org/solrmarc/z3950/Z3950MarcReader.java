@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,28 +50,16 @@ public class Z3950MarcReader implements MarcReader
     private boolean opened = false;
     private Vector<String> recids = null;
     private int curRecNum = 0;
+    private Iterator<Record> curRecIter = null;
     private Record curRec = null;
     
-    public Z3950MarcReader(String hostPort, String[] args)
+    public Z3950MarcReader(ZClient client, String[] args)
     {
-        newclient = new ZClient();
-        Package ir_package = Package.getPackage("com.k_int.IR");
-        Package a2j_runtime_package = Package.getPackage("com.k_int.codec.runtime");         
-       
-//        System.out.println("JZKit command line z39.50 client $Revision: 1.53 $");    
-       
-        String parms[] = hostPort.split(":");
-        opened = newclient.openConnection(parms[0], parms[1]);
-        if (parms.length >= 3)
-        {
-            newclient.cmdBase(parms[3]);
-        }
-        newclient.cmdElements("F");
-        newclient.cmdFormat("usmarc");
+        newclient = client;
         recids = new Vector<String>();
         for (int i = 0; i < args.length; i++)
         {
-            if (args[i].matches("u?[0-9]+"))
+            if (args[i].matches("u?[0-9]+") || args[i].matches("[0-9]*:.*"))
             {
                 recids.add(args[i]);
             }
@@ -101,24 +90,24 @@ public class Z3950MarcReader implements MarcReader
                 {
                     System.err.println("Error: unable to find and open record-id-list: "+ filename);
                 }
-                catch (IOException e)
-                {
-                    System.err.println("Error: reading from record-id-list: "+ filename);
-                }
+//                catch (IOException e)
+//                {
+//                    System.err.println("Error: reading from record-id-list: "+ filename);
+//                }
             }
         }
     }
 
-    private int getIdFromIdString(String idstr)
+    private String getIdFromIdString(String idstr)
     {
-        int idnum = -1;
+        String idnum = null;
         if (idstr.matches("u[0-9]+"))
         {
-            idnum = Integer.parseInt(idstr.substring(1));
+            idnum = idstr.substring(1);
         }
         else if (idstr.matches("[0-9]+"))
         {
-            idnum = Integer.parseInt(idstr);
+            idnum = idstr;
         }
         return(idnum);
     }
@@ -156,37 +145,81 @@ public class Z3950MarcReader implements MarcReader
         return(curRec != null);
     }
 
+    private Iterator<Record> nextIter()
+    {
+        Iterator<Record> recIter = null;
+        String nextRecStr = (curRecNum < recids.size()) ? recids.elementAt(curRecNum++) : null;
+        if (nextRecStr == null) return(recIter);
+        String recNo = getIdFromIdString(nextRecStr);
+        if (recNo != null)
+            recIter = newclient.getRecordByIDStr(recNo);
+        else
+        {
+            String[] parts = nextRecStr.split(":", 2);
+            if (parts.length != 2) 
+                return(recIter);
+            recIter = newclient.getRecordBySearchStr(parts[0], parts[1]);
+         }
+         return(recIter);
+    }
+
     public Record next()
     {
-        Record record = null;
         if (curRec != null)
         {
             Record tmprec = curRec;
             curRec = null;
             return(tmprec);
         }
-        while (record == null)
+        while (true)
         {
-            String nextRecStr = (curRecNum < recids.size()) ? recids.elementAt(curRecNum++) : null;
-            if (nextRecStr == null) return(null);
-            int recNo = getIdFromIdString(nextRecStr);
-            record = newclient.getRecordByIDNum(recNo);
+            if (curRecIter != null && curRecIter.hasNext()) 
+                return(curRecIter.next());
+            curRecIter = nextIter();
+            if (curRecIter == null) break;
         }
-        return(record);
+        return(null);
+    }
+    
+    public static ZClient makeZClient(String hostPortDbUserPass)
+    {
+        ZClient newclient = new ZClient();
+        Package ir_package = Package.getPackage("com.k_int.IR");
+        Package a2j_runtime_package = Package.getPackage("com.k_int.codec.runtime");         
+       
+//        System.out.println("JZKit command line z39.50 client $Revision: 1.53 $");    
+       
+        String parms[] = hostPortDbUserPass.split(":");
+        String host = parms[0];
+        String port = parms[1];
+        String database = parms.length > 2 ? parms[2] : null;
+        String userId = parms.length > 3 ? parms[3] : null;
+        String pass = parms.length > 4 ? parms[4] : null;
+        boolean opened = newclient.openConnection(host, port, userId, pass);
+        if (database != null)
+        {
+            newclient.cmdBase(database);
+        }
+        newclient.cmdElements("F");
+        newclient.cmdFormat("usmarc");
+        if (opened) 
+            return(newclient);
+        else 
+            return(null);
     }
     
     public static void main(String args[])
     {
-        String server = "virgo.lib.virginia.edu:2200";
-        if (args.length > 0 && args[0].matches("[A-Za-z0-9]+[.][A-Za-z0-9]+[.][A-Za-z0-9]+[.][A-Za-z0-9]+:[0-9]+"))
+        String hostPortDbUserPass = "virgo.lib.virginia.edu:2200";
+        if (args.length > 0 && args[0].matches("[A-Za-z0-9][A-Za-z0-9.]+[A-Za-z0-9]+:[0-9]+.*"))
         {
-            server = args[0];
+            hostPortDbUserPass = args[0];
             String[] tmpArgs = args;
             args = new String[tmpArgs.length - 1];
             System.arraycopy(tmpArgs, 1, args, 0, tmpArgs.length-1);
         }
-        
-        MarcReader reader = new Z3950MarcReader(server, args);
+        ZClient zclient =  makeZClient(hostPortDbUserPass);
+        MarcReader reader = new Z3950MarcReader(zclient, args);
         OutputStream marcOutput = null;
         PrintStream output = null;
 //        if (args.length >= 2)
