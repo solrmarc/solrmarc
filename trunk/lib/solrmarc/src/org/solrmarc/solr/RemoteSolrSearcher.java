@@ -81,9 +81,24 @@ public class RemoteSolrSearcher
             {
                 record = getRecordFromJsonString(recordStr);
             }
-            else
+            else 
             {
-                record = getRecordFromRawMarc(recordStr);
+                int byte_len = 0;
+                try {
+                    byte_len = recordStr.getBytes("UTF8").length;
+                }
+                catch (UnsupportedEncodingException e)
+                {
+                }
+                if (byte_len != Integer.parseInt(recordStr.substring(0, 5)))
+                {
+                    String recid = this.getFieldVal(recordStr, "001");
+                    if (verbose) System.err.println("Error: Binary Marc record is the wrong length: "+ recid);
+                }
+                else
+                {
+                    record = getRecordFromRawMarcUTF8(recordStr);
+                }
             }
             if (record != null)  
             {
@@ -94,7 +109,27 @@ public class RemoteSolrSearcher
         output.close();
         return 0;
     }
-   
+
+    public String getFieldVal(String recordStr, String idField)
+    {
+        int offset = Integer.parseInt(recordStr.substring(12,17));
+        int dirOffset = 24;
+        String fieldNum = recordStr.substring(dirOffset, dirOffset+3);
+        while (dirOffset < offset)
+        {
+            if (fieldNum.equals(idField))
+            {
+                int length = Integer.parseInt(recordStr.substring(dirOffset + 3, dirOffset + 7));
+                int offset2 = Integer.parseInt(recordStr.substring(dirOffset + 7, dirOffset + 12));
+                String id = recordStr.substring(offset+offset2, offset+offset2+length-1).trim();
+                return(id);
+            }
+            dirOffset += 12;
+            fieldNum = recordStr.substring(dirOffset, dirOffset+3);
+        }
+        return(null);
+    }
+
     private String getFieldFromDocumentGivenDocID(String id, String solrFieldContainingEncodedMarcRecord2)
     {
         String fullURLStr = solrBaseURL + "/select/?q=id%3A"+id+"&wt=json&indent=on&qt=standard&fl="+solrFieldContainingEncodedMarcRecord2;
@@ -152,7 +187,16 @@ public class RemoteSolrSearcher
                         result = line.replaceFirst("[^:]*:\"", "");
                         result = result.replaceFirst("\"}]$", "");
                         result = result.replaceAll("\\\\\"", "\"");
+                        result = result.replaceAll("\\\\t", "\t");
+                        result = result.replaceAll("\\\\\\\\", "\\\\");
                         result = normalizeUnicode(result);
+                        if (result.getBytes("UTF-8").length != Integer.parseInt(result.substring(0, 5)))
+                        {
+                            result = result.replaceAll("\u001e\\P{InBasic_Latin}\\P{InBasic_Latin}\u001f", "\u001e  \u001f");
+                            result = result.replaceAll("\u001e\\P{InBasic_Latin}(\\p{InBasic_Latin})\u001f", "\u001e $1\u001f");
+                            result = result.replaceAll("\u001e(\\p{InBasic_Latin})\\P{InBasic_Latin}\u001f", "\u001e$1 \u001f");
+                        }
+                        result = result;
                     }
                 }
                 else
@@ -322,7 +366,7 @@ public class RemoteSolrSearcher
      * @param marcRecordStr
      * @return
      */
-    private Record getRecordFromRawMarc(String marcRecordStr)
+    private Record getRecordFromRawMarcUTF8(String marcRecordStr)
     {
         MarcStreamReader reader;
         boolean tryAgain = false;
