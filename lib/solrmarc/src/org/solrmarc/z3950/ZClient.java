@@ -19,6 +19,7 @@ package org.solrmarc.z3950;
 
 import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Vector;
 
 import com.k_int.gen.Z39_50_APDU_1995.DefaultDiagFormat_type;
@@ -87,7 +88,8 @@ public class ZClient extends SynchronousOriginBean
          newclient.verbose = true;
 
          MarcStreamWriter writer = new MarcStreamWriter(System.out);
-         Record rec = newclient.getRecordByIDNum(1);
+         Iterator<Record> recIter = newclient.getRecordByIDStr("1");
+         Record rec = recIter.next();
          writer.write(rec);
          System.err.println(rec.toString());
          
@@ -125,12 +127,36 @@ public class ZClient extends SynchronousOriginBean
         }
         return (respVal);
     }
+    
+    public boolean openConnection(String hostname, String portnum, String userID, String password)
+    {    
+        boolean respVal = false;
+        
+        try
+        {
+            if (verbose) System.err.println("Attempting connection to "+ hostname + " : " + portnum);
+            InitializeResponse_type resp = connect(hostname, portnum,
+                    ((userID == null) ? 0 : 3), userID, group, password);
+    
+            if (verbose) System.err.println("Received response from connect");
+            respVal = resp.result.booleanValue();
+            if (respVal != true)
+            {
+                if (verbose) System.err.println("  Failed to establish association");
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return (respVal);
+    }
 
-    public int cmdFind(String args)
+    public int cmdFind(String args, String resultSetName)
     {
         SearchResponse_type resp = null;
         int numResults = 0;
-        current_result_set_name = "RS" + (result_set_count++);
+        current_result_set_name = resultSetName;
 
         if (verbose) System.err.println("Calling find, query= " + args);
         try
@@ -183,27 +209,67 @@ public class ZClient extends SynchronousOriginBean
         }
         return(numResults);
     }
-
-
-    public Record getRecordByIDNum(int idnum)
+    
+    public int cmdFind(String args)
     {
-        cmdFind("@attrset bib-1 @attr 1=1016 \"^C"+idnum+"\"");
-        if (verbose) System.err.println("requesting record by ID:" + idnum);
-        Record rec = getRecord(1);
-        if (verbose) System.err.println("getting record by ID:" + idnum);
-        if (rec != null)
-        {
-            if (verbose) System.err.println("adding ID to record:" + idnum);
-            rec.addVariableField(new ControlFieldImpl("001", "u"+idnum));
-        }
-        return(rec);
+        String curResSetName = "RS" + (result_set_count++);
+        return(cmdFind(args, curResSetName));       
+    }
+
+//    public Record getRecordByIDNum(int idnum)
+//    {
+//        Iterator<Record> iter = getRecordBySearchStr("1016", "^C"+idnum);
+//        
+//        
+//        
+//        cmdFind("@attrset bib-1 @attr 1=1016 \"^C"+idnum+"\"");
+//        if (verbose) System.err.println("requesting record by ID:" + idnum);
+//        Record rec = getRecord(1);
+//        if (verbose) System.err.println("getting record by ID:" + idnum);
+//        if (rec != null)
+//        {
+//            if (verbose) System.err.println("adding ID to record:" + idnum);
+//            rec.addVariableField(new ControlFieldImpl("001", "u"+idnum));
+//        }
+//        return(rec);
+//    }
+    
+    public Iterator<Record> getRecordByIDStr(String idstr)
+    {
+        int numFound = cmdFind("@attrset bib-1 @attr 1=1016 \"^C"+idstr+"\"", "default");
+        Z3950RecordIter iter = new Z3950RecordIter(this, "default", numFound, "u"+idstr);
+        return(iter);
+        
+        
+//        cmdFind("@attrset bib-1 @attr 1=1016 \"^C"+idnum+"\"");
+//        if (verbose) System.err.println("requesting record by ID:" + idnum);
+//        Record rec = getRecord(1);
+//        if (verbose) System.err.println("getting record by ID:" + idnum);
+//        if (rec != null)
+//        {
+//            if (verbose) System.err.println("adding ID to record:" + idnum);
+//            rec.addVariableField(new ControlFieldImpl("001", "u"+idnum));
+//        }
+//        return(rec);
+    }
+    
+    public Iterator<Record> getRecordBySearchStr(String attr, String value)
+    {
+        int numFound = cmdFind("@attrset bib-1 @attr 1="+attr+" \""+value+"\"", "default");
+        Z3950RecordIter iter = new Z3950RecordIter(this, "default", numFound);
+        return(iter);
     }
     
     public Record getRecord(int startAt)
     {
+        return(getRecord(startAt, current_result_set_name));
+    }
+    
+    public Record getRecord(int startAt, String resultSetName)
+    {
         // Format for present command is n [ + n ]
         // System.err.println("Present "+args);
-        String setname = current_result_set_name;
+        String setname = resultSetName;
 
         try
         {

@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.Iterator;
 
 import org.marc4j.marc.Record;
 import org.solrmarc.marc.MarcImporter;
@@ -133,9 +134,10 @@ public class Z3950Importer
             recordCounter++;
             
             try{
-                Record record = newclient.getRecordByIDNum(recordNum);
+                Iterator<Record> recordIter = newclient.getRecordByIDStr(""+recordNum);
            //     newclient.cmdFind("@attrset bib-1 @attr 1=1016 house");
            //     Record record = newclient.getRecord(recordNum);
+                Record record = recordIter.next();
                 if (record != null)
                 {
                     //System.out.println("Adding record " + recordCounter + ": " + record.getControlNumber() + " (" + df.format( ( recordCounter/totalRecords) * 100 )  + "% complete)");
