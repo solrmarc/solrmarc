@@ -17,7 +17,9 @@ package org.solrmarc.marc;
  */
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -122,12 +124,36 @@ public class MarcPrinter extends MarcHandler
         }
 
     }
+    
+    private static boolean byteArrayContains(byte[] bytes, byte[] seq)
+    {
+        for ( int i = 0; i < bytes.length - seq.length; i++)
+        {
+            if (bytes[i] == seq[0])
+            {
+                for (int j = 0; j < seq.length; j++)
+                {
+                    if (bytes[i+j] != seq[j])
+                    {
+                        break;
+                    }
+                    if (j == seq.length-1) return(true);
+                }
+            }
+        }
+        return(false);
+    }
+
     @Override
     public int handleAll() 
     {
         // keep track of record count
         int recordCounter = 0;
         java.util.Set<String> contentMap = new java.util.LinkedHashSet<String>();
+        UnicodeToAnsel conv = null;
+        UnicodeToAnsel convNCR = null;
+        ByteArrayOutputStream baos = null;
+        
         while(reader != null && reader.hasNext())
         {
             recordCounter++;
@@ -197,6 +223,31 @@ public class MarcPrinter extends MarcHandler
                     }
                     record.getLeader().setCharCodingScheme(' ');
                     writer.write(record);
+                }
+                else if (mode.equals("untranslateNCRifneeded"))
+                {
+                    if (writer == null)
+                    {
+                        baos = new ByteArrayOutputStream();
+                        conv = new UnicodeToAnsel();
+                        convNCR = new UnicodeToAnsel(true);
+                        writer = new MarcStreamWriter(baos, "ISO8859_1", true);
+                        writer.setConverter(conv);
+                    }
+                    baos.reset();
+                    record.getLeader().setCharCodingScheme(' ');
+                    writer.setConverter(conv);
+                    writer.write(record);
+                    baos.flush();
+                    byte[] bytes = baos.toByteArray();
+                    if (byteArrayContains(bytes, "|".getBytes()))
+                    {
+                        baos.reset();
+                        writer.setConverter(convNCR);
+                        writer.write(record);
+                    }
+                    baos.flush();
+                    System.out.write(baos.toByteArray());
                 }
                 else if (mode.equals("index"))
                 {
@@ -281,6 +332,12 @@ public class MarcPrinter extends MarcHandler
             {
                 System.err.println("Error reading Marc Record: "+ me.getMessage());                                   
                 logger.error("Error reading Marc Record: "+ me.getMessage());
+                return(1);
+            }
+            catch (IOException e)
+            {
+                System.err.println("Error writing to ByteArrayOutputStream: "+ e.getMessage());
+                logger.error("Error writing to ByteArrayOutputStream: "+ e.getMessage());
                 return(1);
             }        
         }
