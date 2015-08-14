@@ -52,9 +52,11 @@ public class Z3950MarcReader implements MarcReader
     private int curRecNum = 0;
     private Iterator<Record> curRecIter = null;
     private Record curRec = null;
-    
+    private BufferedReader curRecIDFile = null;
+
     public Z3950MarcReader(ZClient client, String[] args)
     {
+        boolean usedSystemIn = false;
         newclient = client;
         recids = new Vector<String>();
         for (int i = 0; i < args.length; i++)
@@ -66,34 +68,26 @@ public class Z3950MarcReader implements MarcReader
             else
             {
                 String filename = null;
-                try
+                //try
                 {
-                    if (args[i].equals("-"))
+                    if (args[i].equals("-") && ! usedSystemIn)
                     {
-                        is = new BufferedReader(new InputStreamReader(System.in));
-                        filename = "Stdin";
+                        recids.add("file:STDIN");
+                        usedSystemIn = true;
                     }
-                    else 
+                    else
                     {
                         File recFile = new File(args[i]);
-                        is = new BufferedReader(new FileReader(recFile));
-                        filename = args[i];
-                    }
-                    curLine = readRecId(); 
-                    while (curLine != null)
-                    {
-                        recids.add(curLine);
-                        curLine = readRecId(); 
+                        if (recFile.exists())
+                        {
+                            recids.add("file:"+args[i]);
+                        }
+                        else
+                        {
+                            System.err.println("Error: unable to find and open record-id-list: "+ args[i]);
+                        }
                     }
                 }
-                catch (FileNotFoundException e)
-                {
-                    System.err.println("Error: unable to find and open record-id-list: "+ filename);
-                }
-//                catch (IOException e)
-//                {
-//                    System.err.println("Error: reading from record-id-list: "+ filename);
-//                }
             }
         }
     }
@@ -148,20 +142,79 @@ public class Z3950MarcReader implements MarcReader
     private Iterator<Record> nextIter()
     {
         Iterator<Record> recIter = null;
-        String nextRecStr = (curRecNum < recids.size()) ? recids.elementAt(curRecNum++) : null;
+        String nextRecStr = null;
+        if (curRecIDFile != null)
+        {
+            try
+            {
+                nextRecStr = curRecIDFile.readLine();
+            }
+            catch (IOException e)
+            {
+                nextRecStr = null;
+            }
+            if (nextRecStr == null)
+            {
+                curRecIDFile = null;
+            }
+        }
+        if (nextRecStr == null)
+        { 
+            nextRecStr = (curRecNum < recids.size()) ? recids.elementAt(curRecNum++) : null;
+        }
         if (nextRecStr == null) return(recIter);
-        String recNo = getIdFromIdString(nextRecStr);
-        if (recNo != null)
-            recIter = newclient.getRecordByIDStr(recNo);
+        if (nextRecStr.equals("file:STDIN"))
+        {
+            curRecIDFile = new BufferedReader(new InputStreamReader(System.in));
+            return(nextIter());
+        }
+        else if (nextRecStr.startsWith("file:"))
+        {
+            String fname = nextRecStr.substring(5);
+            File recFile = new File(fname);
+            try
+            {
+                curRecIDFile = new BufferedReader(new FileReader(recFile));
+            }
+            catch (FileNotFoundException e)
+            {
+                curRecIDFile = null;
+            }
+            return(nextIter());
+        }
         else
         {
-            String[] parts = nextRecStr.split(":", 2);
-            if (parts.length != 2) 
-                return(recIter);
-            recIter = newclient.getRecordBySearchStr(parts[0], parts[1]);
-         }
-         return(recIter);
+            String recNo = getIdFromIdString(nextRecStr);
+            if (recNo != null)
+                recIter = newclient.getRecordByIDStr(recNo);
+            else
+            {
+                String[] parts = nextRecStr.split(":", 2);
+                if (parts.length != 2)
+                    return(recIter);
+                recIter = newclient.getRecordBySearchStr(parts[0], parts[1]);
+            }
+            return(recIter);
+        }
     }
+
+//    private Iterator<Record> nextIter()
+//    {
+//        Iterator<Record> recIter = null;
+//        String nextRecStr = (curRecNum < recids.size()) ? recids.elementAt(curRecNum++) : null;
+//        if (nextRecStr == null) return(recIter);
+//        String recNo = getIdFromIdString(nextRecStr);
+//        if (recNo != null)
+//            recIter = newclient.getRecordByIDStr(recNo);
+//        else
+//        {
+//            String[] parts = nextRecStr.split(":", 2);
+//            if (parts.length != 2) 
+//                return(recIter);
+//            recIter = newclient.getRecordBySearchStr(parts[0], parts[1]);
+//         }
+//         return(recIter);
+//    }
 
     public Record next()
     {
