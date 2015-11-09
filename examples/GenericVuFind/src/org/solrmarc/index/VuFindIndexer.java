@@ -1999,7 +1999,7 @@ public class VuFindIndexer extends SolrIndexer
     ) {
         // default firstOnly to false!
         return getRelatorsFilteredByRelator(
-            record, tagList, acceptWithoutRelator, relatorConfig, false, "default_relator"
+            record, tagList, acceptWithoutRelator, relatorConfig, false, ""
         );
     }
 
@@ -2012,13 +2012,25 @@ public class VuFindIndexer extends SolrIndexer
      * @returns String[]
      */
     protected String[] loadRelatorConfig(String setting){
-        String[] parts = setting.split(":");
-        if (parts.length > 1) {
-            return parts;
+        StringBuilder relators = new StringBuilder();
+
+        // check for pipe-delimited string
+        String[] relatorSettings = setting.split("\\|");
+        for (String relatorSetting: relatorSettings) {
+            // check for colon-delimited string
+            String[] relatorArray = relatorSetting.split(":");
+            if (relatorArray.length > 1) {
+                for (int i = 0; i < relatorArray.length; i++) {
+                    relators.append(relatorArray[i]).append(",");
+                }
+            } else {
+                relators.append(this.getConfigSetting(
+                    "author-classification.ini", "AuthorRoles", relatorSetting
+                )).append(",");
+            }
         }
-        return this
-            .getConfigSetting("author-classification.ini", "AuthorRoles", setting)
-            .split(",");
+
+        return relators.toString().split(",");
     }
 
     /**
