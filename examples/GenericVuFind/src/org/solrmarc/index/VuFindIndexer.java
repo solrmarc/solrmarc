@@ -1559,8 +1559,8 @@ public class VuFindIndexer extends SolrIndexer
         Iterator<String> fieldsIter = fields.iterator();
         if (fields != null) {
             while(fieldsIter.hasNext()) {
-                // Get the current string to work on:
-                String current = fieldsIter.next();
+                // Get the current string to work on (and sanitize spaces):
+                String current = fieldsIter.next().replaceAll(" ", "%20");
                 // Filter by file extension
                 if (extension == null || current.endsWith(extension)) {
                     // Load the parser output for each tag into a string
