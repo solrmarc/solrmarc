@@ -1811,7 +1811,7 @@ public class VuFindIndexer extends SolrIndexer
      * of the same field into distinct values).
      *
      * @param tagList The field specification to parse
-     * @returns HashMap
+     * @return HashMap
      */
     protected HashMap<String, Set<String>> getParsedTagList(String tagList)
     {
@@ -1843,7 +1843,7 @@ public class VuFindIndexer extends SolrIndexer
      * @param relatorConfig        The setting in author-classification.ini which
      * defines which relator terms are acceptable (or a colon-delimited list)
      * @param firstOnly            Return first result only?
-     * @returns List result
+     * @return List result
      */
     public List<String> getAuthorsFilteredByRelator(Record record, String tagList,
         String acceptWithoutRelator, String relatorConfig, Boolean firstOnly
@@ -1889,7 +1889,7 @@ public class VuFindIndexer extends SolrIndexer
      * be accepted even if no relator subfield is defined
      * @param relatorConfig        The setting in author-classification.ini which
      * defines which relator terms are acceptable (or a colon-delimited list)
-     * @returns List result
+     * @return List result
      */
     public List<String> getAuthorsFilteredByRelator(Record record, String tagList,
         String acceptWithoutRelator, String relatorConfig
@@ -1910,7 +1910,7 @@ public class VuFindIndexer extends SolrIndexer
      * be accepted even if no relator subfield is defined
      * @param relatorConfig        The setting in author-classification.ini which
      * defines which relator terms are acceptable (or a colon-delimited list)
-     * @returns String
+     * @return String
      */
     public String getFirstAuthorFilteredByRelator(Record record, String tagList,
         String acceptWithoutRelator, String relatorConfig
@@ -1936,7 +1936,7 @@ public class VuFindIndexer extends SolrIndexer
      * @param relatorConfig        The setting in author-classification.ini which
      * defines which relator terms are acceptable (or a colon-delimited list)
      * @param firstOnly            Return first result only?
-     * @returns List result
+     * @return List result
      */
     public List getRelatorsFilteredByRelator(Record record, String tagList,
         String acceptWithoutRelator, String relatorConfig, Boolean firstOnly,
@@ -1992,7 +1992,7 @@ public class VuFindIndexer extends SolrIndexer
      * be accepted even if no relator subfield is defined
      * @param relatorConfig        The setting in author-classification.ini which
      * defines which relator terms are acceptable (or a colon-delimited list)
-     * @returns List result
+     * @return List result
      */
     public List getRelatorsFilteredByRelator(Record record, String tagList,
         String acceptWithoutRelator, String relatorConfig
@@ -2009,7 +2009,7 @@ public class VuFindIndexer extends SolrIndexer
      * instead of resorting to .ini loading.
      *
      * @param setting Setting to load from .ini or colon-delimited list.
-     * @returns String[]
+     * @return String[]
      */
     protected String[] loadRelatorConfig(String setting){
         StringBuilder relators = new StringBuilder();
@@ -2037,7 +2037,7 @@ public class VuFindIndexer extends SolrIndexer
      * Normalizes the strings in a list.
      *
      * @param stringList List of strings to be normalized
-     * @returns stringList Normalized List of strings 
+     * @return stringList Normalized List of strings 
      */
     protected List normalizeRelatorStringList(List<String> stringList)
     {
@@ -2054,7 +2054,7 @@ public class VuFindIndexer extends SolrIndexer
      * Normalizes the strings in a list of subfields.
      *
      * @param subfieldList List of subfields to be normalized
-     * @returns subfieldList Normalized List of subfields
+     * @return subfieldList Normalized List of subfields
      */
     protected List<Subfield> normalizeRelatorSubfieldList(List<Subfield> subfieldList)
     {
@@ -2070,7 +2070,7 @@ public class VuFindIndexer extends SolrIndexer
      * Normalizes a string
      *
      * @param string String to be normalized
-     * @returns string
+     * @return string
      */
     protected String normalizeRelatorString(String string)
     {
@@ -2078,5 +2078,82 @@ public class VuFindIndexer extends SolrIndexer
             .trim()
             .toLowerCase()
             .replaceAll("\\p{Punct}+", "");    //POSIX character class Punctuation: One of !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~
+    }
+
+    /**
+     * Filter values retrieved using tagList to include only those whose relator
+     * values are acceptable. Used for separating different types of authors.
+     *
+     * @param record               The record (fed in automatically)
+     * @param tagList              The field specification to read
+     * @param acceptWithoutRelator Colon-delimited list of tags whose values should
+     * be accepted even if no relator subfield is defined
+     * @param relatorConfig        The setting in author-classification.ini which
+     * defines which relator terms are acceptable (or a colon-delimited list)
+     * @param firstOnly            Return first result only?
+     * @return List result
+     */
+    public List<String> getAuthorInitialsFilteredByRelator(Record record, String tagList,
+        String acceptWithoutRelator, String relatorConfig
+    ) {
+        List<String> authors = getAuthorsFilteredByRelator(record, tagList, acceptWithoutRelator, relatorConfig);
+        List<String> result = new LinkedList<String>();
+        for (String author : authors) {
+            result.add(this.processInitials(author));
+        }
+        return result;
+    }
+
+    /**
+     * Takes a name and cuts it into initials
+     * @param authorName e.g. Yeats, William Butler
+     * @return initials e.g. w b y wb
+     */
+    protected String processInitials(String authorName) {
+        Boolean isPersonalName = false;
+        // we guess that if there is a comma before the end - this is a personal name
+        if ((authorName.indexOf(',') > 0) 
+            && (authorName.indexOf(',') < authorName.length()-1)) {
+            isPersonalName = true;
+        }
+        // get rid of non-alphabet chars but keep hyphens and accents 
+        authorName = authorName.replaceAll("[^\\p{L} -]", "").toLowerCase();
+        String[] names = authorName.split(" "); //split into tokens on spaces
+        // if this is a personal name we'll reorganise to put lastname at the end
+        String result = "";
+        if (isPersonalName) {
+            String lastName = names[0]; 
+            for (int i = 0; i < names.length-1; i++) {
+                names[i] = names[i+1];
+            }
+            names[names.length-1] = lastName;
+        }
+        // put all the initials together in a space separated string
+        for (String name : names) {
+            if (name.length() > 0) {
+                String initial = name.substring(0,1);
+                // if there is a hyphenated name, use both initials
+                if (name.indexOf('-') > 0) {
+                    int pos = name.indexOf('-');
+                    String extra = name.substring(pos+1,pos+2);
+                    initial = initial + " " + extra;
+                }
+                result += " " + initial; 
+            }
+        }
+        // grab all initials and stick them together
+        String smushAll = result.replaceAll(" ", "");
+        // if it's a long personal name, get all but the last initials as well
+        // e.g. wb for william butler yeats
+        if (names.length > 2 && isPersonalName) {
+            String smushPers = result.substring(0,result.length()-1).replaceAll(" ","");
+            result = result + " " + smushPers;
+        }
+        // now we have initials separate and together
+        if (!result.trim().equals(smushAll)) {
+            result += " " + smushAll; 
+        }
+        result = result.trim();
+        return result;
     }
 }
