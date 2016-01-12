@@ -140,6 +140,7 @@ public class MarcFilteredReader implements MarcReader
             	logger.error("Error reading Marc Record.");
             	logger.error(me.getMessage());
             }
+            if (rec == null) return(null);
             if (deleteSubfieldsSpec!= null) 
             {
                 deleteSubfields(rec);
