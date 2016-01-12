@@ -291,20 +291,33 @@ public class HathiPlunderer extends InputStream
 
 
     
-    private void processFetch(String[] fetchBuf2, int numInBuf2, OutputStream os)
+    private void processFetch(String[] fetchBuf, int numInBuf, OutputStream os)
     {
+        int numFetched = processFetch(fetchBuf, numInBuf, 0, numInBuf, os);
+        if (numFetched == numInBuf)  return;
+        
+        //  Received an error on the fetch, retry one at a time      
+        for (int i = 0; i < numInBuf; i++)
+        {
+            processFetch(fetchBuf, numInBuf, i, 1, os);
+        }
+    }
+    
+    private int processFetch(String[] fetchBuf, int numInBuf, int offsetInBuf, int numToFetch, OutputStream os)
+    {
+        HttpURLConnection httpConn = null;
         StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < numInBuf2; i++)
+        for (int i = 0; i < numToFetch && i+offsetInBuf < numInBuf; i++)
         {
             if (i > 0) buf.append("|");
-            buf.append("recordnumber:").append(fetchBuf2[i]);
+            buf.append("recordnumber:").append(fetchBuf[i+offsetInBuf]);
         }
         String fullUrlStr = urlBase + buf.toString();
         InputStream in = null; 
         try {
             URL url = new URL(fullUrlStr);
             HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
-            HttpURLConnection httpConn = (HttpURLConnection) urlConn;
+            httpConn = (HttpURLConnection) urlConn;
             httpConn.setAllowUserInteraction(false);
             httpConn.connect();
             in = httpConn.getInputStream();
@@ -316,6 +329,14 @@ public class HathiPlunderer extends InputStream
             while(true)
             {
                 read = bis.read(buffer);
+                if (buffer[0] == 10 && buffer[1] == 10 && buffer[2] == 60 && buffer[3] == 98)
+                {
+                    String bufStr = new String(buffer);
+                    if (bufStr.contains("Fatal error</b>"))
+                    {
+                        return(-1);
+                    }
+                }
                 if(read==-1)
                 {
                     break;
@@ -329,6 +350,10 @@ public class HathiPlunderer extends InputStream
             // DEBUG
 //            Log.e("DEBUG: ", e.toString());
         } 
+        finally {
+            httpConn.disconnect();
+        }
+        return(numToFetch);
     }
 
 
@@ -340,7 +365,7 @@ public class HathiPlunderer extends InputStream
             Vector<InputStream> inputs = new Vector<InputStream>();
             for (String arg : args)
             {
-                if (arg.startsWith("http://"))
+                if (arg.startsWith("http://") || arg.startsWith("https://"))
                 {
                     try
                     {
