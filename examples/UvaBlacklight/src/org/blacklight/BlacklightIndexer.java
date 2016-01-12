@@ -3357,6 +3357,73 @@ public class BlacklightIndexer extends SolrIndexer
         }
         return(result);
     }
+    
+    public List<VariableField> getUPCFieldsAsList(final Record record, String fieldSpecs[])
+    {
+        List<VariableField> fields = getFieldSetMatchingTagList(record, fieldSpecs);
+        List<VariableField> fieldsTrimmed = new ArrayList<VariableField>();
+        for (VariableField field : fields)
+        {
+            if (field instanceof DataField)
+            {
+                DataField df = (DataField)field;
+                Subfield sf2;
+                if (df.getIndicator1() == '7')
+                { 
+                    sf2 = df.getSubfield('2');
+                    if (sf2 == null || !sf2.getData().matches("upc"))
+                    {
+                        continue;
+                    }
+                }
+                else if (df.getIndicator1() != '1')
+                { 
+                    continue;
+                }
+            }
+            fieldsTrimmed.add(field);
+        }
+        return fieldsTrimmed;
+    }
+    
+    private static boolean validateCheckDigit(String s)
+    {
+        int sum = 0;
+        int len = s.length();
+        for (int off = len-2, mult = 3; off >= 0; off --, mult ^= 0x02)
+        {
+            sum += mult * (int)(s.charAt(off)-'0');
+        }
+        char check = (char)((10 - sum % 10) % 10 + '0');
+        return (check == s.charAt(len-1));
+    }
+    
+    public Set<String> getUPCFieldsAsSet(final Record record, String fieldSpec)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        String fieldSpecs[] = fieldSpec.split(":");
+        List<VariableField> fields = getUPCFieldsAsList(record, fieldSpecs);
+        for (VariableField f : fields)
+        {
+            String sfSpec = getSubfieldSpec(f.getTag(), f, fieldSpecs);
+            String resStr = null;
+            if (sfSpec != null)
+                resStr = getDataFromVariableField(f, sfSpec, null, true);
+            if (resStr != null)
+            {
+                resStr = resStr.replaceFirst("[^0-9]*([-0-9]*).*", "$1").replaceAll("-", "");                
+            }
+            if (resStr != null && (resStr.length() == 12 || resStr.length() == 13))
+            {
+                if (validateCheckDigit(resStr))
+                {
+                    result.add(resStr);
+                }
+            }
+        }
+        return(result);
+    }
+
 /*
  *     public Set<String> getSubjectFieldsAsText(final Record record, String subjectFieldSpec)
     {
