@@ -312,6 +312,7 @@ public final class Utils {
         // look for properties file in paths
         String verboseStr = System.getProperty("marc.test.verbose");
         boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
+        if (verbose)  showName = true;
         String lookedIn = "";
         String fullPathName = null;
         if (propertyPaths != null)
