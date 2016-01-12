@@ -20,6 +20,7 @@ import org.solrmarc.marc.RawRecordReader;
 public class MarcDiff
 {
     static boolean verbose = false;
+    static boolean noCompare = false;
     static String writeDifferentRecords = null;
     
     public static void main(String[] args)
@@ -38,30 +39,52 @@ public class MarcDiff
             System.arraycopy(args, 1, newArgs, 0, args.length-1);
             args = newArgs;
         }
+        if (args[0].startsWith("-nc")) 
+        {
+            noCompare = true;
+            String newArgs[] = new String[args.length-1];
+            System.arraycopy(args, 1, newArgs, 0, args.length-1);
+            args = newArgs;
+        }
         String fileStr1 = args[0];
         File file1 = new File(fileStr1);
         String fileStr2 = args[1];
         File file2 = new File(fileStr2);
         RawRecordReader reader1 = null;
-        try
+        if (fileStr1.equals("-"))
         {
-            reader1 = new RawRecordReader(new FileInputStream(file1));
+            reader1 = new RawRecordReader(System.in);
         }
-        catch (FileNotFoundException e)
+        else
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            try
+            {
+                reader1 = new RawRecordReader(new FileInputStream(file1));
+            }
+            catch (FileNotFoundException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
         RawRecordReader reader2 = null;;
-        try
+        if (fileStr2.equals("-"))
         {
-            reader2 = new RawRecordReader(new FileInputStream(file2));
+            reader2 = new RawRecordReader(System.in);
         }
-        catch (FileNotFoundException e)
+        else
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            try
+            {
+                reader2 = new RawRecordReader(new FileInputStream(file2));
+            }
+            catch (FileNotFoundException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
+
         RawRecord rec1 = null;
         RawRecord rec2 = null;
         Comparator<String> comp = new StringNaturalCompare();
@@ -70,7 +93,7 @@ public class MarcDiff
             if (reader2.hasNext()) rec2 = reader2.next();
             while (rec1 != null && rec2 != null)
             {
-                int compVal = comp.compare(rec1.getRecordId(), rec2.getRecordId());
+                int compVal = noCompare ? 0 : comp.compare(rec1.getRecordId(), rec2.getRecordId());
                 if (compVal == 0)
                 {
                     byte rec1bytes[] = rec1.getRecordBytes();
