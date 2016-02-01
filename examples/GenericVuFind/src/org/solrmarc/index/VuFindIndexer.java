@@ -416,9 +416,12 @@ public class VuFindIndexer extends SolrIndexer
         for (VariableField vf : list260)
         {
             DataField df = (DataField) vf;
-            Subfield current = df.getSubfield('b');
-            if (current != null) {
-                publishers.add(current.getData());
+            String currentString = "";
+            for (Subfield current : df.getSubfields('b')) {
+                currentString = currentString.trim().concat(" " + current.getData()).trim();
+            }
+            if (currentString.length() > 0) {
+                publishers.add(currentString);
             }
         }
 
@@ -431,16 +434,19 @@ public class VuFindIndexer extends SolrIndexer
         for (VariableField vf : list264)
         {
             DataField df = (DataField) vf;
-            Subfield currentName = df.getSubfield('b');
-            if (currentName != null) {
+            String currentString = "";
+            for (Subfield current : df.getSubfields('b')) {
+                currentString = currentString.trim().concat(" " + current.getData()).trim();
+            }
+            if (currentString.length() > 0) {
                 char ind2 = df.getIndicator2();
                 switch (ind2)
                 {
                     case '1':
-                        pubNames.add(currentName.getData());
+                        pubNames.add(currentString);
                         break;
                     case '4':
-                        copyNames.add(currentName.getData());
+                        copyNames.add(currentString);
                         break;
                 }
             }
@@ -464,9 +470,14 @@ public class VuFindIndexer extends SolrIndexer
         Set<String> dates = new LinkedHashSet<String>();
 
         // First check old-style 260c date:
-        String oldStyle = getDate(record);
-        if (oldStyle != null && oldStyle.length() > 0) {
-            dates.add(oldStyle);
+        List<VariableField> list260 = record.getVariableFields("260");
+        for (VariableField vf : list260) {
+            DataField df = (DataField) vf;
+            List<Subfield> currentDates = df.getSubfields('c');
+            for (Subfield sf : currentDates) {
+                String currentDateStr = Utils.cleanDate(sf.getData());
+                dates.add(currentDateStr);
+            }
         }
 
         // Now track down relevant RDA-style 264c dates; we only care about
@@ -475,12 +486,11 @@ public class VuFindIndexer extends SolrIndexer
         Set<String> pubDates = new LinkedHashSet<String>();
         Set<String> copyDates = new LinkedHashSet<String>();
         List<VariableField> list264 = record.getVariableFields("264");
-        for (VariableField vf : list264)
-        {
+        for (VariableField vf : list264) {
             DataField df = (DataField) vf;
-            Subfield currentDate = df.getSubfield('c');
-            if (currentDate != null) {
-                String currentDateStr = Utils.cleanDate(currentDate.getData());
+            List<Subfield> currentDates = df.getSubfields('c');
+            for (Subfield sf : currentDates) {
+                String currentDateStr = Utils.cleanDate(sf.getData());
                 char ind2 = df.getIndicator2();
                 switch (ind2)
                 {
