@@ -35,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 import java.util.Set;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -2165,5 +2166,31 @@ public class VuFindIndexer extends SolrIndexer
         }
         result = result.trim();
         return result;
+    }
+
+    /**
+     * Normalize trailing punctuation. This mimics the functionality built into VuFind's
+     * textFacet field type, so that you can get equivalent values when indexing into
+     * a string field. (Useful for docValues support).
+     *
+     * Can return null
+     *
+     * @param record current MARC record
+     * @param fieldSpec which MARC fields / subfields need to be analyzed
+     * @return Set containing normalized values
+     */
+    public Set<String> normalizeTrailingPunctuation(Record record, String fieldSpec) {
+        // Initialize our return value:
+        Set<String> result = new LinkedHashSet<String>();
+
+        // Loop through the specified MARC fields:
+        Set<String> input = getFieldList(record, fieldSpec);
+        Pattern pattern = Pattern.compile("(?<!\b[A-Z])[.\\s]*$");
+        for (String current: input) {
+            result.add(pattern.matcher(current).replaceAll(""));
+        }
+
+        // If we found no matches, return null; otherwise, return our results:
+        return result.isEmpty() ? null : result;
     }
 }
