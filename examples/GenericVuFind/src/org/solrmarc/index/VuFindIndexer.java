@@ -545,6 +545,7 @@ public class VuFindIndexer extends SolrIndexer
         String formatString;
         char formatCode = ' ';
         char formatCode2 = ' ';
+        char formatCode4 = ' ';
 
         // check if there's an h in the 245
         if (title != null) {
@@ -567,6 +568,7 @@ public class VuFindIndexer extends SolrIndexer
                 formatString = formatField.getData().toUpperCase();
                 formatCode = formatString.length() > 0 ? formatString.charAt(0) : ' ';
                 formatCode2 = formatString.length() > 1 ? formatString.charAt(1) : ' ';
+                formatCode4 = formatString.length() > 4 ? formatString.charAt(4) : ' ';
                 switch (formatCode) {
                     case 'A':
                         switch(formatCode2) {
@@ -709,7 +711,15 @@ public class VuFindIndexer extends SolrIndexer
                                 result.add("VideoCartridge");
                                 break;
                             case 'D':
-                                result.add("VideoDisc");
+                                switch(formatCode4) {
+                                    case 'S':
+                                        result.add("BRDisc");
+                                        break;
+                                    case 'V':
+                                    default:
+                                        result.add("VideoDisc");
+                                        break;
+                                }
                                 break;
                             case 'F':
                                 result.add("VideoCassette");
