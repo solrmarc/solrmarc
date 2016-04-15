@@ -1,0 +1,76 @@
+<project name="MyProject" default="compile" basedir=".">
+    <description>
+        simple example build file
+    </description>
+    <!-- set global properties for this build -->
+    <property name="src" location="src"/>
+    <property name="src.tests" location="test"/>
+    <property name="build" location="out/production"/>
+    <property name="build.tests" location="out/test"/>
+    <property name="dist" location="dist"/>
+    <property name="reports.tests" location="logs"/>
+
+    <!-- import other ant scripts -->
+    <property name="buildtools.path" location="buildtools" />
+
+    <import file="${buildtools.path}/parser_tasks.xml" optional="true" />
+
+
+    <target name="init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build}"/>
+    </target>
+
+    <target name="precompile" description="run jflex and cup to generate javafiles for parser and scanner" >
+		<jflex file="${src}/playground/solrmarc/index/specification/conditional/Scanner.flex" verbose="true" 
+			   outdir="${src}/playground/solrmarc/index/specification/conditional" nobak="true" />
+    	
+        <cup srcfile="${src}/playground/solrmarc/index/specification/conditional/ConditionalParser.cup"
+             destdir="${src}/playground/solrmarc/index/specification/conditional/"
+             package="playground.solrmarc.index.specification.conditional" 
+             parser="ConditionalParser"
+        />
+	</target>
+
+    <target name="compile" depends="init,precompile"
+            description="compile the source">
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac srcdir="${src}" destdir="${build}">
+            <classpath>
+                <fileset dir="lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="test">
+        <junit printsummary="yes" haltonfailure="false">
+            <classpath>
+                <fileset dir="lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+                <pathelement location="${build}"/>
+                <pathelement location="${build.tests}"/>
+                <pathelement path="${java.class.path}"/>
+            </classpath>
+
+            <formatter type="plain"/>
+
+            <batchtest fork="yes" todir="${reports.tests}">
+                <fileset dir="${src.tests}">
+                    <include name="**/*Test*.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+    <target name="clean"
+            description="clean up">
+        <!-- Delete the ${build} and ${dist} directory trees -->
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+</project>
