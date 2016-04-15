@@ -14,6 +14,7 @@
 	<classpathentry kind="lib" path="lib/reflections-0.9.10.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.16.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.7.16.jar"/>
+	<classpathentry kind="lib" path="lib/miglayout15-swing.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="SolrMarc-Indexer-Tests/bin"/>
 </classpath>
