@@ -9,19 +9,18 @@ import org.marc4j.marc.VariableField;
 
 import playground.solrmarc.index.indexer.FullSym;
 
-
 public class ConditionIndicator extends Condition
 {
     int indicatorNum;
     final String value;
     final Pattern valuePattern;
     int op;
-      
+
     public ConditionIndicator(String indicatorStr, String value, int op)
     {
-    	this(null, indicatorStr, value, op);
+        this(null, indicatorStr, value, op);
     }
-    
+
     public ConditionIndicator(String fieldTag, String indicatorStr, String value, int op)
     {
         super(fieldTag);
@@ -31,14 +30,15 @@ public class ConditionIndicator extends Condition
         if (op == FullSym.MATCH)
         {
             Pattern tmp;
-            try {
-            	tmp = Pattern.compile(value);
+            try
+            {
+                tmp = Pattern.compile(value);
             }
             catch (PatternSyntaxException pse)
             {
-            	tmp = Pattern.compile("");
-            	ConditionalParser.addError("Invalid Regular Expression in Condition: " + value);
-            	ConditionalParser.addError(pse.getMessage());
+                tmp = Pattern.compile("");
+                ConditionalParser.addError("Invalid Regular Expression in Condition: " + value);
+                ConditionalParser.addError(pse.getMessage());
             }
             valuePattern = tmp;
         }
@@ -47,17 +47,20 @@ public class ConditionIndicator extends Condition
             valuePattern = null;
         }
     }
-    
+
     @Override
     public boolean matches(final VariableField f)
     {
-        if (f instanceof ControlField) return(false);
-        final char indVal = (indicatorNum == 1) ? ((DataField)f).getIndicator1() : ((DataField)f).getIndicator2();
+        if (f instanceof ControlField) return (false);
+        final char indVal = (indicatorNum == 1) ? ((DataField) f).getIndicator1() : ((DataField) f).getIndicator2();
         switch (op) {
-            case FullSym.EQU:  return(value.charAt(0) == indVal);
-            case FullSym.NEQ:  return(value.charAt(0) != indVal);
-            case FullSym.MATCH:  return(valuePattern.matcher(""+indVal).matches());
+            case FullSym.EQU:
+                return (value.charAt(0) == indVal);
+            case FullSym.NEQ:
+                return (value.charAt(0) != indVal);
+            case FullSym.MATCH:
+                return (valuePattern.matcher("" + indVal).matches());
         }
-        return(false);
+        return (false);
     }
 }

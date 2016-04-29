@@ -1,6 +1,5 @@
 package playground.solrmarc.index.utils;
 
-
 import playground.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.reflections.Reflections;
@@ -9,7 +8,6 @@ import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 
 import java.util.Set;
-
 
 public class ReflectionUtils
 {

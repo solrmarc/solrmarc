@@ -10,16 +10,18 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
-public class DateRecordIndexedValueExtractor implements AbstractMultiValueExtractor {
+public class DateRecordIndexedValueExtractor implements AbstractMultiValueExtractor
+{
     private final static String currentDate;
 
-    static {
+    static
+    {
         final SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
         currentDate = df.format(new Date());
     }
 
     @Override
-    public Collection<String> extract(final Record record) 
+    public Collection<String> extract(final Record record)
     {
         return Collections.singletonList(currentDate);
     }

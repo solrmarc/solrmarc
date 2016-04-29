@@ -17,12 +17,12 @@ public class CompositeSpecification extends Specification
     List<String> tagsUsed = null;
     String tags[] = null;
     boolean duplicateTags = false;
-    
+
     public CompositeSpecification()
     {
-        
+
     }
-    
+
     public CompositeSpecification(Specification spec)
     {
         addSpec(spec);
@@ -41,34 +41,34 @@ public class CompositeSpecification extends Specification
 
         if (spec instanceof SingleSpecification)
         {
-            if (tagsUsed.contains(((SingleSpecification)spec).tag))
+            if (tagsUsed.contains(((SingleSpecification) spec).tag))
             {
-                duplicateTags = true; 
+                duplicateTags = true;
             }
-            else 
+            else
             {
-                tagsUsed.add(((SingleSpecification)spec).tag);
+                tagsUsed.add(((SingleSpecification) spec).tag);
             }
-            pieces.add((SingleSpecification)spec);
+            pieces.add((SingleSpecification) spec);
         }
         else
         {
-            for (String t : ((CompositeSpecification)spec).tagsUsed)
+            for (String t : ((CompositeSpecification) spec).tagsUsed)
             {
                 if (tagsUsed.contains(t))
-                 {
-                    duplicateTags = true; 
-                 }
+                {
+                    duplicateTags = true;
+                }
                 else
                 {
                     tagsUsed.add(t);
                 }
             }
-            pieces.addAll(((CompositeSpecification)spec).pieces);
+            pieces.addAll(((CompositeSpecification) spec).pieces);
         }
-        
+
     }
-    
+
     public void addConditional(Condition cond)
     {
         for (Specification spec : pieces)
@@ -76,38 +76,37 @@ public class CompositeSpecification extends Specification
             spec.addConditional(cond);
         }
     }
-    
+
     @Override
     public List<FieldMatch> getFieldMatches(Record record)
     {
         List<FieldMatch> result = null;
         if (!hasDuplicateTags())
         {
-            return(super.getFieldMatches(record));
+            return (super.getFieldMatches(record));
         }
         else
         {
             result = new ArrayList<FieldMatch>();
             for (SingleSpecification spec : pieces)
             {
-                List<VariableField> fields = record.getVariableFields(spec.tag);              
-                for (VariableField vf : fields) 
+                List<VariableField> fields = record.getVariableFields(spec.tag);
+                for (VariableField vf : fields)
                 {
                     if (spec.cond == null || spec.cond.matches(record, vf))
                     {
-                        result.add(new FieldMatch(vf,spec));
+                        result.add(new FieldMatch(vf, spec));
                     }
                 }
             }
-            return(result);
+            return (result);
         }
     }
-   
+
     public String[] getTags()
     {
-        if (tags == null)
-            tags = tagsUsed.toArray(new String[tagsUsed.size()]);
-        return(tags);
+        if (tags == null) tags = tagsUsed.toArray(new String[tagsUsed.size()]);
+        return (tags);
     }
 
     @Override
@@ -116,7 +115,7 @@ public class CompositeSpecification extends Specification
         for (SingleSpecification spec : pieces)
         {
             SingleSpecification thatMatches = spec.getMatchingSpec(tag, f);
-            if (thatMatches != null) return(thatMatches);
+            if (thatMatches != null) return (thatMatches);
         }
         return null;
     }

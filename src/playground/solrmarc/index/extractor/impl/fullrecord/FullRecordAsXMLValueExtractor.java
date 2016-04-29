@@ -5,9 +5,9 @@ import org.marc4j.MarcXmlWriter;
 
 import java.io.ByteArrayOutputStream;
 
-public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtractor 
+public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtractor
 {
-    public FullRecordAsXMLValueExtractor() 
+    public FullRecordAsXMLValueExtractor()
     {
         super();
     }

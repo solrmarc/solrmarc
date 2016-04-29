@@ -5,15 +5,16 @@ import playground.solrmarc.index.collector.MultiValueCollector;
 import java.util.Collection;
 import java.util.Collections;
 
-public class FirstObjectMultiValueCollector extends MultiValueCollector 
+public class FirstObjectMultiValueCollector extends MultiValueCollector
 {
     public final static String KEYWORD = "first";
+
     @Override
-    public Collection<String> collect(final Collection<String> values) 
+    public Collection<String> collect(final Collection<String> values)
     {
-        if (values == null || values.isEmpty()) 
+        if (values == null || values.isEmpty())
         {
-            return(values);
+            return (values);
         }
         return Collections.singletonList(values.iterator().next());
     }

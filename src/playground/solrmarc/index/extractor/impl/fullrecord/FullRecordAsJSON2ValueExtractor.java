@@ -7,7 +7,7 @@ import java.io.ByteArrayOutputStream;
 
 public class FullRecordAsJSON2ValueExtractor extends AbstractFullRecordValueExtractor
 {
-    public FullRecordAsJSON2ValueExtractor() 
+    public FullRecordAsJSON2ValueExtractor()
     {
         super();
     }

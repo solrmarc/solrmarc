@@ -1,12 +1,6 @@
 package playground.solrmarc.index.fieldmatch;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.marc4j.marc.VariableField;
-
-import playground.solrmarc.tools.Utils;
 
 public final class FieldFormatterSimple extends FieldFormatterDecorator
 {
@@ -21,8 +15,10 @@ public final class FieldFormatterSimple extends FieldFormatterDecorator
         result.add(buffer.toString());
         buffer.setLength(0);
     }
-    
+
     @Override
-    public void addAfterField(Collection<String> result) {}
+    public void addAfterField(Collection<String> result)
+    {
+    }
 
 }

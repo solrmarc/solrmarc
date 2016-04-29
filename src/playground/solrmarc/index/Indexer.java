@@ -1,6 +1,5 @@
 package playground.solrmarc.index;
 
-
 import playground.solrmarc.index.indexer.AbstractValueIndexer;
 import playground.solrmarc.solr.SolrProxy;
 import org.marc4j.MarcReader;
@@ -10,7 +9,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 public class Indexer
 {
@@ -41,21 +39,21 @@ public class Indexer
             final Collection<String> data = indexer.getFieldData(record);
             for (String fieldName : indexer.getSolrFieldNames())
             {
-            	if (data.size() == 0) 
-            	{ 
-            		/* do_nothing() */
-            	}
-            	else if (data.size() == 1) 
-            	{
-            		document.put(fieldName, data.iterator().next());
-            	}
-            	else 
-            	{
-            		for (String dataVal : data) 
-            		{
-            			document.put(fieldName, dataVal);
-            		}
-            	}
+                if (data.size() == 0)
+                {
+                    /* do_nothing() */
+                }
+                else if (data.size() == 1)
+                {
+                    document.put(fieldName, data.iterator().next());
+                }
+                else
+                {
+                    for (String dataVal : data)
+                    {
+                        document.put(fieldName, dataVal);
+                    }
+                }
             }
         }
         return document;

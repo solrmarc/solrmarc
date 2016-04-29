@@ -10,16 +10,19 @@ public class ConstantMultiValueExtractor implements AbstractMultiValueExtractor
 {
     private final Collection<String> constantValues;
 
-    public ConstantMultiValueExtractor(final Collection<String> constantValues) {
+    public ConstantMultiValueExtractor(final Collection<String> constantValues)
+    {
         this.constantValues = constantValues;
     }
 
-    public ConstantMultiValueExtractor(String string) {
-    	this.constantValues = Collections.singletonList(string);
-	}
+    public ConstantMultiValueExtractor(String string)
+    {
+        this.constantValues = Collections.singletonList(string);
+    }
 
-	@Override
-    public Collection<String> extract(final Record record) {
+    @Override
+    public Collection<String> extract(final Record record)
+    {
         return constantValues;
     }
 }

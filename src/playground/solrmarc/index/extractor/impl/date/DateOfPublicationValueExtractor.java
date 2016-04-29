@@ -7,11 +7,10 @@ import org.marc4j.marc.Record;
 
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 
-
-public class DateOfPublicationValueExtractor implements AbstractMultiValueExtractor 
+public class DateOfPublicationValueExtractor implements AbstractMultiValueExtractor
 {
     @Override
-    public Collection<String> extract(final Record record) 
+    public Collection<String> extract(final Record record)
     {
         // TODO: Use VuFindIndexer#getPublicationDate(Record)
         return null;

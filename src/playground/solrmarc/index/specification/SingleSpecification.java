@@ -8,17 +8,15 @@ import playground.solrmarc.index.fieldmatch.FieldFormatter;
 import playground.solrmarc.index.fieldmatch.FieldFormatterBase;
 import playground.solrmarc.index.specification.conditional.Condition;
 
-
 public abstract class SingleSpecification extends Specification
 {
     protected static FieldFormatter SINGLE_FMT = new FieldFormatterBase(true);
     protected String tag;
     Condition cond = null;
     protected FieldFormatter fmt;
-  //  protected FieldMatchCollector coll;
+    // protected FieldMatchCollector coll;
     String[] tags;
-    
-    
+
     public SingleSpecification(String tag, Condition cond)
     {
         this.tag = tag;
@@ -36,13 +34,13 @@ public abstract class SingleSpecification extends Specification
 
     public String getTag()
     {
-        return tag; 
+        return tag;
     }
-    
+
     @Override
     public String[] getTags()
     {
-        return tags; 
+        return tags;
     }
 
     @Override
@@ -51,17 +49,16 @@ public abstract class SingleSpecification extends Specification
         String stag = this.tag;
         if (tag.equals(stag))
         {
-            return(this);
+            return (this);
         }
         return null;
     }
 
-    abstract public void addFieldValues(Collection<String>result, VariableField vf) throws Exception;
+    abstract public void addFieldValues(Collection<String> result, VariableField vf) throws Exception;
 
     public void setFormatter(FieldFormatter fmt)
     {
         this.fmt = fmt;
     }
 
-    
 }

@@ -8,7 +8,6 @@ import org.marc4j.marc.VariableField;
 
 import playground.solrmarc.index.indexer.FullSym;
 
-
 public class ConditionPosition extends Condition
 {
     int offset;
@@ -16,57 +15,60 @@ public class ConditionPosition extends Condition
     final String value;
     final Pattern valuePattern;
     int op;
-    
+
     public ConditionPosition(String offsetStr, String value, int op)
     {
-    	this(null, offsetStr, value, op);
+        this(null, offsetStr, value, op);
     }
-    
+
     public ConditionPosition(String fieldTag, String offsetStr, String value, int op)
     {
         super(fieldTag);
         offset = Integer.parseInt(offsetStr.replaceAll("\\[([0-9]+)(-[0-9]+)?\\]", "$1"));
         endOffset = offset;
         String endOffsetStr = offsetStr.replaceAll("\\[([0-9]+)(-)?([0-9]+)?\\]", "$3");
-        if (endOffsetStr != null && endOffsetStr.length() > 0) 
-            endOffset = Integer.parseInt(endOffsetStr);
+        if (endOffsetStr != null && endOffsetStr.length() > 0) endOffset = Integer.parseInt(endOffsetStr);
         this.op = op;
         this.value = value;
         if (op == FullSym.MATCH)
         {
             Pattern tmp;
-            try {
-            	tmp = Pattern.compile(value);
+            try
+            {
+                tmp = Pattern.compile(value);
             }
             catch (PatternSyntaxException pse)
             {
-            	tmp = Pattern.compile("");
-            	ConditionalParser.addError("Invalid Regular Expression in Condition: " + value);
-            	ConditionalParser.addError(pse.getMessage());
+                tmp = Pattern.compile("");
+                ConditionalParser.addError("Invalid Regular Expression in Condition: " + value);
+                ConditionalParser.addError(pse.getMessage());
             }
             valuePattern = tmp;
         }
-        else 
+        else
         {
             valuePattern = null;
         }
     }
-        
+
     @Override
     public boolean matches(final VariableField f)
     {
-        if (! (f instanceof ControlField)) return(false);
-        
-        final String data = ((ControlField)f).getData();
-        if (data.length() < offset) return(false); 
-        final String posVal = data.substring(offset, endOffset+1);
-        
+        if (!(f instanceof ControlField)) return (false);
+
+        final String data = ((ControlField) f).getData();
+        if (data.length() < offset) return (false);
+        final String posVal = data.substring(offset, endOffset + 1);
+
         switch (op) {
-            case FullSym.EQU:  return(posVal.equals(value));
-            case FullSym.NEQ:  return(!posVal.equals(value));
-            case FullSym.MATCH:  return(valuePattern.matcher(posVal).matches());
+            case FullSym.EQU:
+                return (posVal.equals(value));
+            case FullSym.NEQ:
+                return (!posVal.equals(value));
+            case FullSym.MATCH:
+                return (valuePattern.matcher(posVal).matches());
         }
-        return(false);
+        return (false);
     }
-   
+
 }

@@ -13,19 +13,19 @@ public class FieldFormatterMapped extends FieldFormatterDecorator
         super(toDecorate);
         this.map = null;
     }
-    
+
     public FieldFormatterMapped(FieldFormatter toDecorate, AbstractMultiValueMapping map)
     {
         super(toDecorate);
         this.map = map;
     }
-    
+
     @Override
     public Collection<String> handleMapping(Collection<String> cleaned) throws Exception
     {
-    	Collection<String> result = super.handleMapping(cleaned);
-    	result = map.map(result);
-    	return(result);
-	}
+        Collection<String> result = super.handleMapping(cleaned);
+        result = map.map(result);
+        return (result);
+    }
 
 }

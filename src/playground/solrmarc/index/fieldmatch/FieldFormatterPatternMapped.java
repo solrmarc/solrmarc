@@ -8,7 +8,7 @@ import playground.solrmarc.index.mapping.impl.PatternMappingFactory;
 
 public final class FieldFormatterPatternMapped extends FieldFormatterMapped
 {
-    //static TranslationMappingFactory mapFactory = null;
+    // static TranslationMappingFactory mapFactory = null;
 
     public FieldFormatterPatternMapped(FieldFormatter toDecorate, String patternMapSpec)
     {

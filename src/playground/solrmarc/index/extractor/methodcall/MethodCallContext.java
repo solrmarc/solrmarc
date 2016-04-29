@@ -7,14 +7,17 @@ import playground.solrmarc.tools.Utils;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class MethodCallContext {
+public class MethodCallContext
+{
     private String typeName;
     private String objectName;
     private String methodName;
     private String[] parameters;
     private Class<?>[] parameterTypes;
 
-    protected MethodCallContext(final String typeName, final String objectName, final String methodName, final String[] parameters, final Class<?>[] parameterTypes) {
+    protected MethodCallContext(final String typeName, final String objectName, final String methodName,
+            final String[] parameters, final Class<?>[] parameterTypes)
+    {
         this.typeName = typeName;
         this.objectName = objectName;
         this.methodName = methodName;
@@ -32,7 +35,7 @@ public class MethodCallContext {
         final Class<?>[] parameterTypes = getExtractorParameterTypes(parameters);
         return new MethodCallContext(typeName, objectName, methodName, parameters, parameterTypes);
     }
-    
+
     public static MethodCallContext parseContextFromMappingSpecification(StringReader mappingConfiguration)
     {
         final String typeName = getTypeName(mappingConfiguration);
@@ -43,30 +46,33 @@ public class MethodCallContext {
         final Class<?>[] parameterTypes = getMappingParameterTypes(parameters);
         return new MethodCallContext(typeName, objectName, methodName, parameters, parameterTypes);
     }
-	
+
     public static MethodCallContext parseContextFromMapParts(String[] mapParts)
-	{
+    {
         final String typeName = mapParts[0];
         final String objectName = mapParts[1];
-//        mappingConfiguration.skipUntilAfter(' ');
+        // mappingConfiguration.skipUntilAfter(' ');
         final String methodName = mapParts[2];
         final String[] parameters = getParameters(mapParts, 3);
         final Class<?>[] parameterTypes = getMappingParameterTypes(parameters);
         return new MethodCallContext(typeName, objectName, methodName, parameters, parameterTypes);
-	}
+    }
 
-	protected static String getTypeName(final StringReader mappingConfiguration)
+    protected static String getTypeName(final StringReader mappingConfiguration)
     {
         final int index = mappingConfiguration.indexOfFirst('(', ',');
         if (index == -1)
         {
-            throw new IllegalArgumentException("Syntax error: missing open parenthesis or comma in " + mappingConfiguration.toString());
+            throw new IllegalArgumentException(
+                    "Syntax error: missing open parenthesis or comma in " + mappingConfiguration.toString());
         }
         return mappingConfiguration.readString(index);
     }
 
-    protected static String getObjectName(final StringReader mappingConfiguration) {
-        if (mappingConfiguration.charAt(0) == '(') {
+    protected static String getObjectName(final StringReader mappingConfiguration)
+    {
+        if (mappingConfiguration.charAt(0) == '(')
+        {
             mappingConfiguration.skip(1);
             final String mixinName = mappingConfiguration.readStringUntil(')').trim();
             mappingConfiguration.skip(1); // skip the closing parenthesis.
@@ -75,23 +81,29 @@ public class MethodCallContext {
         return null;
     }
 
-    protected static String getMethodName(final StringReader mappingConfiguration) {
+    protected static String getMethodName(final StringReader mappingConfiguration)
+    {
         final int index = mappingConfiguration.indexOfFirst('(', ',');
-        if (index < 0) {
+        if (index < 0)
+        {
             return mappingConfiguration.readAll().trim();
-        } else {
+        }
+        else
+        {
             return mappingConfiguration.readString(index).trim();
         }
     }
 
-    protected static Class[] getExtractorParameterTypes(final String[] parameters) {
+    protected static Class[] getExtractorParameterTypes(final String[] parameters)
+    {
         final Class[] parameterTypes = new Class[parameters.length + 1];
         parameterTypes[0] = Record.class;
         Arrays.fill(parameterTypes, 1, parameters.length + 1, String.class);
         return parameterTypes;
     }
 
-    protected static Class[] getMappingParameterTypes(final String[] parameters) {
+    protected static Class[] getMappingParameterTypes(final String[] parameters)
+    {
         final Class[] parameterTypes = new Class[parameters.length + 1];
         parameterTypes[0] = Collection.class;
         Arrays.fill(parameterTypes, 1, parameters.length + 1, String.class);
@@ -106,7 +118,8 @@ public class MethodCallContext {
             return new String[0];
         }
         final int indexCloseParenthesis = mappingConfiguration.indexOf(')');
-        final String parametersString = mappingConfiguration.readString(indexOpenParenthesis + 1, indexCloseParenthesis).trim();
+        final String parametersString = mappingConfiguration.readString(indexOpenParenthesis + 1, indexCloseParenthesis)
+                .trim();
         if (parametersString.isEmpty())
         {
             return new String[0];
@@ -122,40 +135,46 @@ public class MethodCallContext {
 
     private static String[] getParameters(String[] mapParts, int numToDiscard)
     {
-		if (mapParts.length <= numToDiscard)
-		{
-			return new String[0];
-		}
-		else 
-		{
-			String result[] = new String[mapParts.length - numToDiscard];
-			System.arraycopy(mapParts, numToDiscard,  result,  0,  mapParts.length - numToDiscard);
-			return result;
-		}
-	}
+        if (mapParts.length <= numToDiscard)
+        {
+            return new String[0];
+        }
+        else
+        {
+            String result[] = new String[mapParts.length - numToDiscard];
+            System.arraycopy(mapParts, numToDiscard, result, 0, mapParts.length - numToDiscard);
+            return result;
+        }
+    }
 
-    public String getTypeName() {
+    public String getTypeName()
+    {
         return typeName;
     }
 
-    public String getObjectName() {
+    public String getObjectName()
+    {
         return objectName;
     }
 
-    public String getMethodName() {
+    public String getMethodName()
+    {
         return methodName;
     }
 
-    public String[] getParameters() {
+    public String[] getParameters()
+    {
         return parameters;
     }
 
-    public Class<?>[] getParameterTypes() {
+    public Class<?>[] getParameterTypes()
+    {
         return parameterTypes;
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return objectName + "." + methodName + Arrays.toString(parameterTypes);
     }
 

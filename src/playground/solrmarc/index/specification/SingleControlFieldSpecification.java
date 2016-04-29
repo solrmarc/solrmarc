@@ -11,17 +11,17 @@ public class SingleControlFieldSpecification extends SingleSpecification
 {
     int start;
     int end;
-    
-    public SingleControlFieldSpecification(String tag, int start, int end,  Condition cond)
+
+    public SingleControlFieldSpecification(String tag, int start, int end, Condition cond)
     {
         super(tag, cond);
         this.start = start;
         this.end = end;
     }
-        
+
     public SingleControlFieldSpecification(String tag, int start, Condition cond)
     {
-        this(tag, start, start+1, cond);
+        this(tag, start, start + 1, cond);
     }
 
     public SingleControlFieldSpecification(String tag, Condition cond)
@@ -36,7 +36,7 @@ public class SingleControlFieldSpecification extends SingleSpecification
 
     public SingleControlFieldSpecification(String tag, int start)
     {
-        this(tag, start, start+1, null);
+        this(tag, start, start + 1, null);
     }
 
     public SingleControlFieldSpecification(String tag)
@@ -44,7 +44,6 @@ public class SingleControlFieldSpecification extends SingleSpecification
         this(tag, -1, -1, null);
     }
 
-    
     @Override
     public void addConditional(Condition cond)
     {
@@ -53,26 +52,26 @@ public class SingleControlFieldSpecification extends SingleSpecification
 
     public String getTag()
     {
-        return tag; 
+        return tag;
     }
-    
+
     @Override
     public String[] getTags()
     {
-        return tags; 
+        return tags;
     }
 
     @Override
     public void addFieldValues(Collection<String> result, VariableField vf) throws Exception
     {
         final String data;
-        if (start == -1 && end == -1) 
+        if (start == -1 && end == -1)
         {
             data = ((ControlField) vf).getData();
         }
         else
         {
-            data = ((ControlField) vf).getData().substring(start, end+1);
+            data = ((ControlField) vf).getData().substring(start, end + 1);
         }
         fmt.start();
         fmt.addTag(vf);

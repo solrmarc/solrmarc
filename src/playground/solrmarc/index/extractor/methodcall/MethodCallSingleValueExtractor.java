@@ -1,6 +1,5 @@
 package playground.solrmarc.index.extractor.methodcall;
 
-
 import java.util.Collection;
 import java.util.Collections;
 
@@ -9,15 +8,20 @@ import org.marc4j.marc.Record;
 
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 
-
-public class MethodCallSingleValueExtractor implements AbstractMultiValueExtractor {
+public class MethodCallSingleValueExtractor implements AbstractMultiValueExtractor
+{
     private final AbstractExtractorMethodCall<String> methodCall;
     private final Object[] parameters;
 
-    public MethodCallSingleValueExtractor(final AbstractExtractorMethodCall<String> methodCall, final Object[] parameters) {
-        if (methodCall == null) {
+    public MethodCallSingleValueExtractor(final AbstractExtractorMethodCall<String> methodCall,
+            final Object[] parameters)
+    {
+        if (methodCall == null)
+        {
             throw new NullPointerException("CustomObject is null");
-        } else if (parameters == null) {
+        }
+        else if (parameters == null)
+        {
             throw new NullPointerException("Custom parameters is null");
         }
 
@@ -27,7 +31,8 @@ public class MethodCallSingleValueExtractor implements AbstractMultiValueExtract
     }
 
     @Override
-    public Collection<String> extract(final Record record) throws Exception {
+    public Collection<String> extract(final Record record) throws Exception
+    {
         return Collections.singletonList(methodCall.invoke(record, parameters));
     }
 }

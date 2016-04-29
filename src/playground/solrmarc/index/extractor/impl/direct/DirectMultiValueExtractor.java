@@ -15,69 +15,68 @@ import java.util.LinkedHashSet;
 
 public class DirectMultiValueExtractor implements AbstractMultiValueExtractor
 {
-	public static final String UNIQUE = "unique";
-	public static final String FIRST = "first";
-	private FieldFormatter fmt;
-    private Specification fieldsAndSubfieldSpec;	
-	
-	public Specification getFieldsAndSubfieldSpec()
-	{
-		return fieldsAndSubfieldSpec;
-	}
+    public static final String UNIQUE = "unique";
+    public static final String FIRST = "first";
+    private FieldFormatter fmt;
+    private Specification fieldsAndSubfieldSpec;
 
-	public void setFieldsAndSubfieldSpec(Specification fieldsAndSubfieldSpec)
-	{
-		this.fieldsAndSubfieldSpec = fieldsAndSubfieldSpec;
-	}
+    public Specification getFieldsAndSubfieldSpec()
+    {
+        return fieldsAndSubfieldSpec;
+    }
 
-	public FieldFormatter getFormatter()
-	{
-		return fmt;
-	}
+    public void setFieldsAndSubfieldSpec(Specification fieldsAndSubfieldSpec)
+    {
+        this.fieldsAndSubfieldSpec = fieldsAndSubfieldSpec;
+    }
 
-	public void setFormatter(FieldFormatter fmt)
-	{
-		this.fmt = fmt;
-		if (fieldsAndSubfieldSpec != null)
-			fieldsAndSubfieldSpec.setFormatter(fmt);
-	}
+    public FieldFormatter getFormatter()
+    {
+        return fmt;
+    }
 
-	boolean unique = false;
-	boolean firstOnly = false;
-	
-	public boolean isUnique() 
-	{
-		return unique;
-	}
+    public void setFormatter(FieldFormatter fmt)
+    {
+        this.fmt = fmt;
+        if (fieldsAndSubfieldSpec != null) fieldsAndSubfieldSpec.setFormatter(fmt);
+    }
 
-	public void setUnique(boolean unique) 
-	{
-		this.unique = unique;
-	}
+    boolean unique = false;
+    boolean firstOnly = false;
 
-	public boolean firstOnly()
-	{
-		return(firstOnly);
-	}
-	
-	public void setFirstOnly(boolean firstOnly) 
-	{
-		this.firstOnly = firstOnly;
-	}
+    public boolean isUnique()
+    {
+        return unique;
+    }
 
-    public DirectMultiValueExtractor(final String fieldsAndSubfields) 
+    public void setUnique(boolean unique)
+    {
+        this.unique = unique;
+    }
+
+    public boolean firstOnly()
+    {
+        return (firstOnly);
+    }
+
+    public void setFirstOnly(boolean firstOnly)
+    {
+        this.firstOnly = firstOnly;
+    }
+
+    public DirectMultiValueExtractor(final String fieldsAndSubfields)
     {
         fieldsAndSubfieldSpec = AbstractSpecificationFactory.createSpecification(fieldsAndSubfields);
         fmt = new FieldFormatterBase(false);
     }
-    
-    public DirectMultiValueExtractor(Specification fieldSpec) 
+
+    public DirectMultiValueExtractor(Specification fieldSpec)
     {
         fieldsAndSubfieldSpec = fieldSpec;
         fmt = new FieldFormatterBase(false);
     }
 
-    public final Collection<FieldMatch> getFieldMatches(final Record record) 
+    public final Collection<FieldMatch> getFieldMatches(final Record record)
     {
         Collection<FieldMatch> result = fieldsAndSubfieldSpec.getFieldMatches(record);
         return result;
@@ -88,7 +87,7 @@ public class DirectMultiValueExtractor implements AbstractMultiValueExtractor
     {
         Collection<String> result = makeEmptyResult();
         extract(result, record);
-        return(result);
+        return (result);
     }
 
     public void extract(Collection<String> result, final Record record) throws Exception
@@ -101,16 +100,16 @@ public class DirectMultiValueExtractor implements AbstractMultiValueExtractor
 
     private Collection<String> makeEmptyResult()
     {
-		Collection<String> results;
-		if (unique)
-		{
-			results = new LinkedHashSet<String>();
-		}
-		else
-		{
-			results = new ArrayList<String>();
-		}
-		return(results);
+        Collection<String> results;
+        if (unique)
+        {
+            results = new LinkedHashSet<String>();
+        }
+        else
+        {
+            results = new ArrayList<String>();
+        }
+        return (results);
     }
 
 }

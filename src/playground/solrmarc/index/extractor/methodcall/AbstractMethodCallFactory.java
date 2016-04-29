@@ -1,49 +1,60 @@
 package playground.solrmarc.index.extractor.methodcall;
 
-
 import playground.solrmarc.index.extractor.AbstractValueExtractor;
 import playground.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import playground.solrmarc.index.utils.StringReader;
 
 import java.util.Collection;
 
-
-public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFactory {
+public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFactory
+{
     protected final MethodCallManager methodCallManager;
 
-    public AbstractMethodCallFactory() {
+    public AbstractMethodCallFactory()
+    {
         this(MethodCallManager.instance());
     }
 
-    public AbstractMethodCallFactory(final MethodCallManager methodCallManager) {
+    public AbstractMethodCallFactory(final MethodCallManager methodCallManager)
+    {
         this.methodCallManager = methodCallManager;
     }
 
-    public void addMethodsFromClasses(Collection<Class<?>> classes) {
-        try {
-            for (final Class<?> aClass : classes) {
+    public void addMethodsFromClasses(Collection<Class<?>> classes)
+    {
+        try
+        {
+            for (final Class<?> aClass : classes)
+            {
                 methodCallManager.add(aClass.newInstance());
             }
-        } catch (InstantiationException | IllegalAccessException e) {
+        }
+        catch (InstantiationException | IllegalAccessException e)
+        {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration) {
+    public AbstractValueExtractor<?> createExtractor(final String solrFieldName,
+            final StringReader mappingConfiguration)
+    {
         MethodCallContext context = MethodCallContext.parseContextFromExtractorSpecification(mappingConfiguration);
         final AbstractExtractorMethodCall<?> methodCall = methodCallManager.getExtractorMethodCallForContext(context);
         if (methodCall instanceof MultiValueExtractorMethodCall)
         {
-            return new MethodCallMultiValueExtractor((MultiValueExtractorMethodCall) methodCall, context.getParameters());
-        } 
+            return new MethodCallMultiValueExtractor((MultiValueExtractorMethodCall) methodCall,
+                    context.getParameters());
+        }
         else if (methodCall instanceof SingleValueExtractorMethodCall)
         {
-            return new MethodCallSingleValueExtractor((SingleValueExtractorMethodCall) methodCall, context.getParameters());
+            return new MethodCallSingleValueExtractor((SingleValueExtractorMethodCall) methodCall,
+                    context.getParameters());
         }
-        else 
+        else
         {
-            throw new IllegalArgumentException("Unknown method: " + context.toString() + ". Known methods are: \n" + methodCallManager.loadedExtractorMixinsToString());
+            throw new IllegalArgumentException("Unknown method: " + context.toString() + ". Known methods are: \n"
+                    + methodCallManager.loadedExtractorMixinsToString());
         }
     }
 }

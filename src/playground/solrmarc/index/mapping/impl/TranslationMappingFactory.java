@@ -1,6 +1,5 @@
 package playground.solrmarc.index.mapping.impl;
 
-import playground.solrmarc.index.mapping.AbstractSingleValueMapping;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.apache.log4j.Logger;
@@ -12,57 +11,74 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class TranslationMappingFactory extends AbstractValueMappingFactory {
+public class TranslationMappingFactory extends AbstractValueMappingFactory
+{
     private final static Logger logger = Logger.getLogger(TranslationMappingFactory.class);
     private final static Map<String, Properties> translationMappingFiles = new HashMap<>();
 
     @Override
-    public boolean canHandle(String mappingConfiguration) {
-        return mappingConfiguration.endsWith(".properties") || (mappingConfiguration.contains(".properties(") && mappingConfiguration.endsWith(")"));
+    public boolean canHandle(String mappingConfiguration)
+    {
+        return mappingConfiguration.endsWith(".properties")
+                || (mappingConfiguration.contains(".properties(") && mappingConfiguration.endsWith(")"));
     }
 
-    private Properties loadTranslationMappingFile(String translationMappingFileName, String subMappingName) {
+    private Properties loadTranslationMappingFile(String translationMappingFileName, String subMappingName)
+    {
         Properties properties = translationMappingFiles.get(translationMappingFileName + "(" + subMappingName + ")");
-        if (properties != null) {
+        if (properties != null)
+        {
             return properties;
         }
         properties = translationMappingFiles.get(translationMappingFileName + "(null)");
-        if (properties != null) {
+        if (properties != null)
+        {
             properties = getSubTranslationMapping(properties, subMappingName);
             translationMappingFiles.put(translationMappingFileName + "(" + subMappingName + ")", properties);
             return properties;
         }
-        try {
+        try
+        {
             properties = new Properties();
             logger.debug("Load translation map: ./translation_maps/" + translationMappingFileName);
             File file = new File(".");
             logger.debug("current Directory = " + file.getAbsolutePath());
-            
+
             FileInputStream inputStream = new FileInputStream("./translation_maps/" + translationMappingFileName);
             properties.load(inputStream);
             translationMappingFiles.put(translationMappingFileName + "(null)", properties);
-            if (subMappingName != null) {
+            if (subMappingName != null)
+            {
                 properties = getSubTranslationMapping(properties, subMappingName);
                 translationMappingFiles.put(translationMappingFileName + "(" + subMappingName + ")", properties);
             }
             return properties;
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             throw new IllegalStateException(e);
         }
     }
 
-    private Properties getSubTranslationMapping(Properties translationMapping, String mappingPrefix) {
+    private Properties getSubTranslationMapping(Properties translationMapping, String mappingPrefix)
+    {
         Properties mappings = new Properties();
-        for (String key : translationMapping.stringPropertyNames()) {
-            if (key.startsWith(mappingPrefix)) {
+        for (String key : translationMapping.stringPropertyNames())
+        {
+            if (key.startsWith(mappingPrefix))
+            {
                 String value = translationMapping.getProperty(key);
-                if (value.equals("null")) {
+                if (value.equals("null"))
+                {
                     value = null;
                 }
-                if (key.length() == mappingPrefix.length()) {
+                if (key.length() == mappingPrefix.length())
+                {
                     // remove prefix. There is no period.
                     mappings.setProperty("", value);
-                } else {
+                }
+                else
+                {
                     // remove prefix and period.
                     mappings.setProperty(key.substring(mappingPrefix.length() + 1), value);
                 }
@@ -71,31 +87,42 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory {
         return mappings;
     }
 
-    private String getTranslationMappingFileName(String mappingConfiguration) {
+    private String getTranslationMappingFileName(String mappingConfiguration)
+    {
         int index = mappingConfiguration.indexOf('(');
-        if (index != -1) {
+        if (index != -1)
+        {
             return mappingConfiguration.substring(0, index);
-        } else {
+        }
+        else
+        {
             return mappingConfiguration;
         }
     }
 
-    private String getSubMappingName(String mappingConfiguration) {
+    private String getSubMappingName(String mappingConfiguration)
+    {
         int index = mappingConfiguration.indexOf('(');
-        if (index != -1) {
+        if (index != -1)
+        {
             return mappingConfiguration.substring(index + 1, mappingConfiguration.length() - 1);
-        } else {
+        }
+        else
+        {
             return null;
         }
     }
 
-//    @Override
-//    public AbstractSingleValueMapping createSingleValueMapping(String mappingConfiguration) {
-//        final String translationMappingFileName = getTranslationMappingFileName(mappingConfiguration);
-//        final String subMappingName = getSubMappingName(mappingConfiguration);
-//        final Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
-//        return new SingleValueTranslationMapping(translationMapping);
-//    }
+    // @Override
+    // public AbstractSingleValueMapping createSingleValueMapping(String
+    // mappingConfiguration) {
+    // final String translationMappingFileName =
+    // getTranslationMappingFileName(mappingConfiguration);
+    // final String subMappingName = getSubMappingName(mappingConfiguration);
+    // final Properties translationMapping =
+    // loadTranslationMappingFile(translationMappingFileName, subMappingName);
+    // return new SingleValueTranslationMapping(translationMapping);
+    // }
 
     @Override
     public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration)
@@ -106,12 +133,12 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory {
         return new MultiValueTranslationMapping(translationMapping);
     }
 
-	@Override
-	public AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
-	{
+    @Override
+    public AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
+    {
         String translationMappingFileName = getTranslationMappingFileName(mapParts[0]);
         final String subMappingName = mapParts.length > 1 ? mapParts[1] : null;
         Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
         return new MultiValueTranslationMapping(translationMapping);
-	}
+    }
 }

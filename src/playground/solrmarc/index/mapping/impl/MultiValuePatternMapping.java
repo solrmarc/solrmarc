@@ -7,16 +7,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class MultiValuePatternMapping implements AbstractMultiValueMapping {
+public class MultiValuePatternMapping implements AbstractMultiValueMapping
+{
     private final List<PatternMapping> patternMappings;
     private final boolean applyAll;
-    
+
     public MultiValuePatternMapping(List<PatternMapping> patternMappings, boolean applyAll)
     {
         this.patternMappings = patternMappings;
         this.applyAll = applyAll;
     }
-    
+
     public MultiValuePatternMapping(List<PatternMapping> patternMappings)
     {
         this.patternMappings = patternMappings;
@@ -26,21 +27,21 @@ public class MultiValuePatternMapping implements AbstractMultiValueMapping {
     @Override
     public Collection<String> map(final Collection<String> values)
     {
-    	List<String> mappedValues = new ArrayList<>(values.size());
+        List<String> mappedValues = new ArrayList<>(values.size());
         if (applyAll)
         {
-            for (String value : values) 
+            for (String value : values)
             {
                 value = PatternMapping.mapSingleValue(patternMappings, value);
                 if (value != null && value.length() > 0) mappedValues.add(value);
-            }        	
+            }
         }
         else
         {
-	        for (String value : values) 
-	        {
-	            PatternMapping.mapValues(patternMappings, value, mappedValues);
-	        }
+            for (String value : values)
+            {
+                PatternMapping.mapValues(patternMappings, value, mappedValues);
+            }
         }
         return mappedValues;
     }

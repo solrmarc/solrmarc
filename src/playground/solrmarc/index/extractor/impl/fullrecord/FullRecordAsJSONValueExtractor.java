@@ -5,9 +5,9 @@ import org.marc4j.MarcWriter;
 
 import java.io.ByteArrayOutputStream;
 
-public class FullRecordAsJSONValueExtractor extends AbstractFullRecordValueExtractor 
+public class FullRecordAsJSONValueExtractor extends AbstractFullRecordValueExtractor
 {
-    public FullRecordAsJSONValueExtractor() 
+    public FullRecordAsJSONValueExtractor()
     {
         super();
     }
@@ -17,5 +17,5 @@ public class FullRecordAsJSONValueExtractor extends AbstractFullRecordValueExtra
     {
         return new MarcJsonWriter(outputStream, MarcJsonWriter.MARC_JSON);
     }
-    
+
 }

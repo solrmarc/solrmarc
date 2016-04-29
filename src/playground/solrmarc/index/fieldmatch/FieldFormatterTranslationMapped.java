@@ -9,7 +9,7 @@ public final class FieldFormatterTranslationMapped extends FieldFormatterMapped
     public FieldFormatterTranslationMapped(FieldFormatter toDecorate, String translationMapPropertyFileSpec)
     {
         super(toDecorate);
-        if (mapFactory == null)  mapFactory = new TranslationMappingFactory();
+        if (mapFactory == null) mapFactory = new TranslationMappingFactory();
         map = mapFactory.createMultiValueMapping(translationMapPropertyFileSpec);
     }
 }

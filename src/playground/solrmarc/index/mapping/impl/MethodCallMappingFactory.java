@@ -10,57 +10,68 @@ import playground.solrmarc.index.utils.StringReader;
 
 import java.util.Collection;
 
-public class MethodCallMappingFactory extends AbstractValueMappingFactory {
+public class MethodCallMappingFactory extends AbstractValueMappingFactory
+{
     protected final MethodCallManager methodCallManager;
 
-    public MethodCallMappingFactory() {
+    public MethodCallMappingFactory()
+    {
         this(MethodCallManager.instance());
     }
 
-    public MethodCallMappingFactory(final MethodCallManager methodCallManager) {
+    public MethodCallMappingFactory(final MethodCallManager methodCallManager)
+    {
         this.methodCallManager = methodCallManager;
     }
 
-    public void addMethodsFromClasses(Collection<Class<?>> classes) {
-        try {
-            for (final Class<?> aClass : classes) {
+    public void addMethodsFromClasses(Collection<Class<?>> classes)
+    {
+        try
+        {
+            for (final Class<?> aClass : classes)
+            {
                 methodCallManager.add(aClass.newInstance());
             }
-        } catch (InstantiationException | IllegalAccessException e) {
+        }
+        catch (InstantiationException | IllegalAccessException e)
+        {
             throw new RuntimeException(e);
         }
     }
 
-	@Override
-    public boolean canHandle(String mappingConfiguration) {
+    @Override
+    public boolean canHandle(String mappingConfiguration)
+    {
         return (mappingConfiguration.startsWith("custom_map"));
     }
 
-    private AbstractMultiValueMapping createMultiValueMapping(MethodCallContext context) 
+    private AbstractMultiValueMapping createMultiValueMapping(MethodCallContext context)
     {
         final AbstractMappingMethodCall<?> methodCall = methodCallManager.getMappingMethodCallForContext(context);
         if (methodCall instanceof MultiValueMappingMethodCall)
         {
             return new MethodCallMultiValueMapping((MultiValueMappingMethodCall) methodCall, context.getParameters());
-        } 
-        else 
+        }
+        else
         {
-            throw new IllegalArgumentException("Unknown mapping method: " + context.toString() + ". Known methods are: \n" + methodCallManager.loadedExtractorMixinsToString());
+            throw new IllegalArgumentException("Unknown mapping method: " + context.toString()
+                    + ". Known methods are: \n" + methodCallManager.loadedExtractorMixinsToString());
         }
     }
-    
+
     @Override
-    public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration) 
+    public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration)
     {
-    	MethodCallContext context = MethodCallContext.parseContextFromMappingSpecification(new StringReader(mappingConfiguration));
-    	return createMultiValueMapping(context);
+        MethodCallContext context = MethodCallContext
+                .parseContextFromMappingSpecification(new StringReader(mappingConfiguration));
+        return createMultiValueMapping(context);
     }
-    
-	@Override
-	public AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
-	{
-    	MethodCallContext context = MethodCallContext.parseContextFromMapParts(mapParts);
-    	return createMultiValueMapping(context);
-	}
-    
+
+    @Override
+    public AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
+    {
+        MethodCallContext context = MethodCallContext.parseContextFromMapParts(mapParts);
+        return createMultiValueMapping(context);
+    }
+
 }
