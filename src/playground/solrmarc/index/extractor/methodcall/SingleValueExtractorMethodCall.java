@@ -4,11 +4,11 @@ package playground.solrmarc.index.extractor.methodcall;
 import java.lang.reflect.Method;
 
 
-public class SingleValueMethodCall extends AbstractMethodCall<String> {
+public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<String> {
     private final Object mixin;
     private final Method method;
 
-    public SingleValueMethodCall(final Object mixin, final Method method) {
+    public SingleValueExtractorMethodCall(final Object mixin, final Method method) {
         super(mixin.getClass().getSimpleName(), method.getName());
         this.mixin = mixin;
         this.method = method;

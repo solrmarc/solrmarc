@@ -1,6 +1,9 @@
 package playground.solrmarc.index.specification.conditional;
 
+import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
+
+import playground.solrmarc.index.indexer.FullSym;
 
 
 public class ConditionComposite extends Condition
@@ -23,12 +26,13 @@ public class ConditionComposite extends Condition
         this.op = op;
     }
       
-    public boolean matches(VariableField f)
+    @Override
+    public boolean matches(final Record r, final VariableField f)
     {
         switch (op) {
-            case sym.AND:  return(o1.matches(f) && o2.matches(f));
-            case sym.OR:   return(o1.matches(f) || o2.matches(f));
-            case sym.NOT:  return(!o1.matches(f));
+            case FullSym.AND:  return(o1.matches(r, f) && o2.matches(r, f));
+            case FullSym.OR:   return(o1.matches(r, f) || o2.matches(r, f));
+            case FullSym.NOT:  return(!o1.matches(r, f));
         }
         return(false);
     }

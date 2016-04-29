@@ -39,7 +39,7 @@ public class FieldMatch //extends AbstractFieldMatch
         this.spec = spec;
     }
     
-    public void addValuesTo(Collection<String> results)
+    public void addValuesTo(Collection<String> results) throws Exception
     {
         spec.addFieldValues(results, vf);
     }

@@ -8,21 +8,55 @@ import java.lang.reflect.Modifier;
 import java.util.*;
 
 
+
 public class MethodCallManager {
-    private final Map<String, AbstractMethodCall<?>> methodCalls = new HashMap<>();
+    /* a static singleton manager */
+	private static MethodCallManager theManager = new MethodCallManager();
+    
+    private final Map<String, AbstractExtractorMethodCall<?>> extractorMethodCalls = new HashMap<>();
+    private final Map<String, AbstractMappingMethodCall<?>> mappingMethodCalls = new HashMap<>();
+    
+    public static MethodCallManager instance() { return(theManager); }
 
     private Set<Class<?>> classes = new HashSet<>();
-
-    private boolean isValidMixinMethod(Method method) {
+    
+    /* private to prevent multiple instances from being created */
+    private MethodCallManager(){}
+    
+    private boolean isValidExtractorMethod(Method method)
+    {
         final Class<?>[] parameterTypes = method.getParameterTypes();
-        if (parameterTypes.length == 0
-                || !parameterTypes[0].equals(Record.class)
-                || (!Collection.class.isAssignableFrom(method.getReturnType()) && !String.class.isAssignableFrom(method.getReturnType()))
-                || !Modifier.isPublic(method.getModifiers())) {
+        if (parameterTypes.length == 0 ||
+            !parameterTypes[0].equals(Record.class) ||
+            (!Collection.class.isAssignableFrom(method.getReturnType()) && !String.class.isAssignableFrom(method.getReturnType())) ||
+            !Modifier.isPublic(method.getModifiers())) 
+        {
             return false;
         }
-        for (int i = 1; i < parameterTypes.length; i++) {
-            if (parameterTypes[i] != String.class) {
+        for (int i = 1; i < parameterTypes.length; i++)
+        {
+            if (parameterTypes[i] != String.class)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private boolean isValidMappingMethod(Method method)
+    {
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length == 0 ||
+        	!Collection.class.isAssignableFrom(parameterTypes[0]) ||
+            !Collection.class.isAssignableFrom(method.getReturnType()) ||
+            !Modifier.isPublic(method.getModifiers())) 
+        {
+            return false;
+        }
+        for (int i = 1; i < parameterTypes.length; i++)
+        {
+            if (parameterTypes[i] != String.class)
+            {
                 return false;
             }
         }
@@ -42,29 +76,53 @@ public class MethodCallManager {
 
     private void add(Object mixin, Class clazz, boolean addMethodsAsDefault) {
         classes.add(clazz);
-        for (final Method method : clazz.getDeclaredMethods()) {
-            if (isValidMixinMethod(method)) {
+        for (final Method method : clazz.getDeclaredMethods())
+        {
+            if (isValidExtractorMethod(method))
+            {
                 final Class<?>[] parameterTypes = method.getParameterTypes();
-                AbstractMethodCall<?> methodCall = null;
-                if (Collection.class.isAssignableFrom(method.getReturnType())) {
-                    methodCall = createMultiValueMethodCall(mixin, method);
-                } else if (String.class.isAssignableFrom(method.getReturnType())) {
-                    methodCall = createSingleValueMethodCall(mixin, method);
+                AbstractExtractorMethodCall<?> methodCall = null;
+                if (Collection.class.isAssignableFrom(method.getReturnType()))
+                {
+                    methodCall = createMultiValueExtractorMethodCall(mixin, method);
+                } 
+                else if (String.class.isAssignableFrom(method.getReturnType()))
+                {
+                    methodCall = createSingleValueExtractorMethodCall(mixin, method);
                 }
-                if (addMethodsAsDefault) {
-                    methodCalls.put(toCacheKey(method, parameterTypes), methodCall);
+                if (addMethodsAsDefault)
+                {
+                    extractorMethodCalls.put(toCacheKey(method, parameterTypes), methodCall);
                 }
-                methodCalls.put(toCacheKey(mixin, method, parameterTypes), methodCall);
+                extractorMethodCalls.put(toCacheKey(mixin, method, parameterTypes), methodCall);
+            }
+            else if (isValidMappingMethod(method))
+            {
+                final Class<?>[] parameterTypes = method.getParameterTypes();
+                AbstractMappingMethodCall<?> methodCall = null;
+                if (Collection.class.isAssignableFrom(method.getReturnType()))
+                {
+                    methodCall = createMultiValueMappingMethodCall(mixin, method);
+                } 
+                if (addMethodsAsDefault)
+                {
+                    mappingMethodCalls.put(toCacheKey(method, parameterTypes), methodCall);
+                }
+                mappingMethodCalls.put(toCacheKey(mixin, method, parameterTypes), methodCall);
             }
         }
     }
 
-    protected SingleValueMethodCall createSingleValueMethodCall(Object object, Method method) {
-        return new SingleValueMethodCall(object, method);
+    protected AbstractMappingMethodCall<?> createMultiValueMappingMethodCall(Object object, Method method) {
+		return new MultiValueMappingMethodCall(object, method);
+	}
+
+	protected SingleValueExtractorMethodCall createSingleValueExtractorMethodCall(Object object, Method method) {
+        return new SingleValueExtractorMethodCall(object, method);
     }
 
-    protected MultiValueMethodCall createMultiValueMethodCall(Object object, Method method) {
-        return new MultiValueMethodCall(object, method);
+    protected MultiValueExtractorMethodCall createMultiValueExtractorMethodCall(Object object, Method method) {
+        return new MultiValueExtractorMethodCall(object, method);
     }
 
     /**
@@ -85,9 +143,14 @@ public class MethodCallManager {
         return null;
     }
 
-    public AbstractMethodCall<?> getMethodCallForContext(MethodCallContext context) {
+    public AbstractExtractorMethodCall<?> getExtractorMethodCallForContext(MethodCallContext context) {
         final String key = toCacheKey(context.getObjectName(), context.getMethodName(), context.getParameterTypes());
-        return methodCalls.get(key);
+        return extractorMethodCalls.get(key);
+    }
+    
+    public AbstractMappingMethodCall<?> getMappingMethodCallForContext(MethodCallContext context) {
+        final String key = toCacheKey(context.getObjectName(), context.getMethodName(), context.getParameterTypes());
+        return mappingMethodCalls.get(key);
     }
 
     private String toCacheKey(Object mixin, Method method, Class<?>... pameterTypes) {
@@ -102,13 +165,35 @@ public class MethodCallManager {
         return className + ';' + methodName + ';' + parameterTypes.length;
     }
 
-    public String loadedMixinsToString() {
-        List<String> lines = new ArrayList<>(methodCalls.size());
-        for (final String key : methodCalls.keySet()) {
+    public String loadedExtractorMixinsToString() {
+        List<String> lines = new ArrayList<>(extractorMethodCalls.size());
+        for (final String key : extractorMethodCalls.keySet())
+        {
             // Method calls are added twice. Once with a class name, once with 'null' as class name.
             // It doesn't matter which one we take, but we don't want to show both entries.
-            if (!key.startsWith("null")) {
-                final AbstractMethodCall<?> call = methodCalls.get(key);
+            if (!key.startsWith("null"))
+            {
+                final AbstractExtractorMethodCall<?> call = extractorMethodCalls.get(key);
+                lines.add("- " + call.getObjectName() + "::" + call.getMethodName());
+            }
+        }
+        Collections.sort(lines);
+        final StringBuilder buffer = new StringBuilder();
+        for (final String line : lines) {
+            buffer.append(line).append('\n');
+        }
+        return buffer.toString().trim();
+    }
+    
+    public String loadedMappingMixinsToString() {
+        List<String> lines = new ArrayList<>(mappingMethodCalls.size());
+        for (final String key : mappingMethodCalls.keySet())
+        {
+            // Method calls are added twice. Once with a class name, once with 'null' as class name.
+            // It doesn't matter which one we take, but we don't want to show both entries.
+            if (!key.startsWith("null"))
+            {
+                final AbstractMappingMethodCall<?> call = mappingMethodCalls.get(key);
                 lines.add("- " + call.getObjectName() + "::" + call.getMethodName());
             }
         }

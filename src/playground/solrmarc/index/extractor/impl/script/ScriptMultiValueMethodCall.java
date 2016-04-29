@@ -2,11 +2,11 @@ package playground.solrmarc.index.extractor.impl.script;
 
 import bsh.BshMethod;
 import bsh.Interpreter;
-import playground.solrmarc.index.extractor.methodcall.AbstractMethodCall;
+import playground.solrmarc.index.extractor.methodcall.AbstractExtractorMethodCall;
 
 import java.util.Collection;
 
-public class ScriptMultiValueMethodCall extends AbstractMethodCall<Collection<String>> 
+public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Collection<String>> 
 {
     private final Interpreter interpreter;
     private final BshMethod method;

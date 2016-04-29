@@ -3,12 +3,10 @@ package playground.solrmarc.index.specification.conditional;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-//import java_cup.runtime.Symbol;
-
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.VariableField;
 
-import playground.solrmarc.index.indexer.IndexerSpecException;
+import playground.solrmarc.index.indexer.FullSym;
 
 
 public class ConditionPosition extends Condition
@@ -19,16 +17,22 @@ public class ConditionPosition extends Condition
     final Pattern valuePattern;
     int op;
     
-    public ConditionPosition(String s1, String s2, int op)
+    public ConditionPosition(String offsetStr, String value, int op)
     {
-        offset = Integer.parseInt(s1.replaceAll("\\[([0-9]+)(-[0-9]+)?\\]", "$1"));
+    	this(null, offsetStr, value, op);
+    }
+    
+    public ConditionPosition(String fieldTag, String offsetStr, String value, int op)
+    {
+        super(fieldTag);
+        offset = Integer.parseInt(offsetStr.replaceAll("\\[([0-9]+)(-[0-9]+)?\\]", "$1"));
         endOffset = offset;
-        String endOffsetStr = s1.replaceAll("\\[([0-9]+)(-)?([0-9]+)?\\]", "$3");
+        String endOffsetStr = offsetStr.replaceAll("\\[([0-9]+)(-)?([0-9]+)?\\]", "$3");
         if (endOffsetStr != null && endOffsetStr.length() > 0) 
             endOffset = Integer.parseInt(endOffsetStr);
         this.op = op;
-        this.value = s2;
-        if (op == sym.MATCH)
+        this.value = value;
+        if (op == FullSym.MATCH)
         {
             Pattern tmp;
             try {
@@ -47,8 +51,9 @@ public class ConditionPosition extends Condition
             valuePattern = null;
         }
     }
-    
-    public boolean matches(VariableField f)
+        
+    @Override
+    public boolean matches(final VariableField f)
     {
         if (! (f instanceof ControlField)) return(false);
         
@@ -57,9 +62,9 @@ public class ConditionPosition extends Condition
         final String posVal = data.substring(offset, endOffset+1);
         
         switch (op) {
-            case sym.EQU:  return(posVal.equals(value));
-            case sym.NEQ:  return(!posVal.equals(value));
-            case sym.MATCH:  return(valuePattern.matcher(posVal).matches());
+            case FullSym.EQU:  return(posVal.equals(value));
+            case FullSym.NEQ:  return(!posVal.equals(value));
+            case FullSym.MATCH:  return(valuePattern.matcher(posVal).matches());
         }
         return(false);
     }

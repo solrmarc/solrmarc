@@ -8,10 +8,10 @@ import java.util.Collection;
 
 
 public class MethodCallMultiValueExtractor implements AbstractMultiValueExtractor {
-    private final AbstractMethodCall<Collection<String>> methodCall;
+    private final AbstractExtractorMethodCall<Collection<String>> methodCall;
     private final Object[] parameters;
 
-    public MethodCallMultiValueExtractor(final AbstractMethodCall<Collection<String>> methodCall, final Object[] parameters) {
+    public MethodCallMultiValueExtractor(final AbstractExtractorMethodCall<Collection<String>> methodCall, final Object[] parameters) {
         if (methodCall == null) {
             throw new NullPointerException("CustomObject is null");
         } else if (parameters == null) {

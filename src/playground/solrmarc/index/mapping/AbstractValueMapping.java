@@ -7,5 +7,5 @@ public interface AbstractValueMapping<T> {
             ""
     };
 
-    T map(final T value);
+    T map(final T value) throws Exception;
 }

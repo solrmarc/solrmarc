@@ -1,12 +1,12 @@
 package playground.solrmarc.index.extractor.methodcall;
 
-import org.marc4j.marc.Record;
+import java.util.Collection;
 
-public abstract class AbstractMethodCall<T> {
+public abstract class AbstractMappingMethodCall<T> {
     private final String objectName;
     private final String methodName;
 
-    protected AbstractMethodCall(final String objectName, final String methodName) {
+    protected AbstractMappingMethodCall(final String objectName, final String methodName) {
         this.objectName = objectName;
         this.methodName = methodName;
     }
@@ -18,8 +18,8 @@ public abstract class AbstractMethodCall<T> {
      * @param parameters the parameters of this call.
      * @return the return value of this call.
      */
-    public T invoke(final Record record, final Object[] parameters) throws Exception {
-        parameters[0] = record;
+    public T invoke(final Collection<String> incoming, final Object[] parameters) throws Exception {
+        parameters[0] = incoming;
         return invoke(parameters);
     }
 

@@ -1,12 +1,16 @@
 package playground.solrmarc.index.extractor.impl.date;
 
-import playground.solrmarc.index.extractor.AbstractSingleValueExtractor;
+//import playground.solrmarc.index.extractor.AbstractSingleValueExtractor;
 import org.marc4j.marc.Record;
 
+import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
+
 import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
-public class DateRecordIndexedValueExtractor implements AbstractSingleValueExtractor {
+public class DateRecordIndexedValueExtractor implements AbstractMultiValueExtractor {
     private final static String currentDate;
 
     static {
@@ -15,7 +19,8 @@ public class DateRecordIndexedValueExtractor implements AbstractSingleValueExtra
     }
 
     @Override
-    public String extract(final Record record) {
-        return currentDate;
+    public Collection<String> extract(final Record record) 
+    {
+        return Collections.singletonList(currentDate);
     }
 }

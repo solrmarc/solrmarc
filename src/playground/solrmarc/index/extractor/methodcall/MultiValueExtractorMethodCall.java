@@ -5,11 +5,11 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 
 
-public class MultiValueMethodCall extends AbstractMethodCall<Collection<String>> {
+public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<Collection<String>> {
     private final Object mixin;
     private final Method method;
 
-    public MultiValueMethodCall(final Object mixin, final Method method) {
+    public MultiValueExtractorMethodCall(final Object mixin, final Method method) {
         super(mixin.getClass().getSimpleName(), method.getName());
         this.mixin = mixin;
         this.method = method;

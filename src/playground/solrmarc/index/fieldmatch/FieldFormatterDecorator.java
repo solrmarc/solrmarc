@@ -172,7 +172,7 @@ public class FieldFormatterDecorator extends FieldFormatter
 	}
 
 	@Override
-	public Collection<String> handleMapping(Collection<String> cleaned)
+	public Collection<String> handleMapping(Collection<String> cleaned) throws Exception
 	{
 		return(toDecorate.handleMapping(cleaned));
 	}

@@ -14,10 +14,10 @@ import java.util.Map;
 
 public class Indexer
 {
-    private final List<AbstractValueIndexer> indexers;
+    private final List<AbstractValueIndexer<?>> indexers;
     private final SolrProxy solrProxy;
 
-    public Indexer(final List<AbstractValueIndexer> indexers, final SolrProxy solrProxy)
+    public Indexer(final List<AbstractValueIndexer<?>> indexers, final SolrProxy solrProxy)
     {
         this.indexers = indexers;
         this.solrProxy = solrProxy;
@@ -49,9 +49,12 @@ public class Indexer
             	{
             		document.put(fieldName, data.iterator().next());
             	}
-            	if (data.size() == 1) 
+            	else 
             	{
-            		document.put(fieldName, data.iterator().next());
+            		for (String dataVal : data) 
+            		{
+            			document.put(fieldName, dataVal);
+            		}
             	}
             }
         }

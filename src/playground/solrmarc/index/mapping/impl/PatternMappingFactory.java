@@ -14,27 +14,38 @@ import java.util.regex.PatternSyntaxException;
 public class PatternMappingFactory extends AbstractValueMappingFactory {
     @Override
     public boolean canHandle(String mappingConfiguration) {
-        return mappingConfiguration.startsWith("map(") && mappingConfiguration.endsWith(")");
+        return (mappingConfiguration.startsWith("map") ||
+        	    mappingConfiguration.startsWith("filter"));
     }
 
-    @Override
-    public AbstractSingleValueMapping createSingleValueMapping(String mappingConfiguration) 
-    {
-//        final String mappingName = mappingConfiguration.substring(4, mappingConfiguration.length() - 1);
-//        List<PatternMapping> patternMappings = PatternMappingValueExtractorFactory.getPatternMappingsForName(mappingName);
-    	List<PatternMapping> patternMappings = pattermMappingsFromString(mappingConfiguration.substring(4, mappingConfiguration.length() - 1));
-        return new SingleValuePatternMapping(patternMappings);
-    }
+//    @Override
+//    public AbstractSingleValueMapping createSingleValueMapping(String mappingConfiguration) 
+//    {
+////        final String mappingName = mappingConfiguration.substring(4, mappingConfiguration.length() - 1);
+////        List<PatternMapping> patternMappings = PatternMappingValueExtractorFactory.getPatternMappingsForName(mappingName);
+//    	List<PatternMapping> patternMappings = pattermMappingsFromString(mappingConfiguration.substring(4, mappingConfiguration.length() - 1));
+//        return new SingleValuePatternMapping(patternMappings);
+//    }
 
     @Override
     public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration) 
     {
  //       final String mappingName = mappingConfiguration.substring(4, mappingConfiguration.length() - 1);
  //       List<PatternMapping> patternMappings = PatternMappingValueExtractorFactory.getPatternMappingsForName(mappingName);
-    	List<PatternMapping> patternMappings = pattermMappingsFromString(mappingConfiguration.substring(4, mappingConfiguration.length() - 1));
-        return new MultiValuePatternMapping(patternMappings);
+    	int parenLoc = mappingConfiguration.indexOf("(");
+		List<PatternMapping> patternMappings = pattermMappingsFromString(mappingConfiguration.substring(parenLoc+1, mappingConfiguration.length() - 1));
+    	boolean isFilter = mappingConfiguration.startsWith("filter(");
+        return new MultiValuePatternMapping(patternMappings, isFilter);
     }
-    
+	
+    @Override
+	public AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
+    {
+		List<PatternMapping> patternMappings = pattermMappingsFromString(mapParts[1]);
+    	boolean isFilter = mapParts[0].equals("filter(");
+        return new MultiValuePatternMapping(patternMappings, isFilter);
+	}
+
     public static List<PatternMapping> pattermMappingsFromString(String mapSpec)
     {
         final String mapParts[] = mapSpec.split("[|][|]");
@@ -60,4 +71,5 @@ public class PatternMappingFactory extends AbstractValueMappingFactory {
         }
         return(pm);
     }
+
 }

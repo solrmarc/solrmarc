@@ -21,10 +21,13 @@ import playground.solrmarc.index.specification.conditional.ConditionalParser;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+
 import java.awt.event.ActionEvent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -219,8 +222,21 @@ public class SolrMarcDebug {
 		mntmOpenConfig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e)
 			{
-				File f = new File("resources/testSpec.properties");
-				FileReader reader = null;
+				File f = null; //new File("resources/testSpec.properties");
+			    JFileChooser chooser = new JFileChooser("resources");
+			    FileNameExtensionFilter filter = new FileNameExtensionFilter("Index Property Files", "properties");
+			    chooser.setFileFilter(filter);
+			    int returnVal = chooser.showOpenDialog(frmSolrmarcIndexSpecification);
+			    if(returnVal == JFileChooser.APPROVE_OPTION)
+			    {
+			    	f = chooser.getSelectedFile();
+			    }
+			    else 
+			    {
+			    	return;
+			    }
+			    
+			    FileReader reader = null;
 				try {
 					configPane.read( new FileReader(f), null);
 				} 
@@ -250,7 +266,21 @@ public class SolrMarcDebug {
 
 		mntmOpenMarcRecord.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				File f = new File("resources/specTestRecs.mrc");
+			//	File f = new File("resources/specTestRecs.mrc");
+				File f = null; //new File("resources/testSpec.properties");
+			    JFileChooser chooser = new JFileChooser("resources");
+			    FileNameExtensionFilter filter = new FileNameExtensionFilter("MARC Record Files", "mrc", "xml");
+			    chooser.setFileFilter(filter);
+			    int returnVal = chooser.showOpenDialog(frmSolrmarcIndexSpecification);
+			    if(returnVal == JFileChooser.APPROVE_OPTION)
+			    {
+			    	f = chooser.getSelectedFile();
+			    }
+			    else 
+			    {
+			    	return;
+			    }
+			    
 				MarcPermissiveStreamReader reader;
 				String firstId = null;
 				try {
@@ -355,23 +385,23 @@ public class SolrMarcDebug {
 			Collection<String> results = null;
 			try {
 				results = indexer.getFieldData(rec);
+				for (String fieldName : fieldNameList)
+				{
+					for (String result : results)
+				    {
+						String outLine = fieldName + " : " + result + "\n";
+						try {
+							doc.insertString(doc.getLength(), outLine, null);
+						}
+						catch(BadLocationException exc) {
+							exc.printStackTrace();
+					   	}
+	
+				    }
+				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-			for (String fieldName : fieldNameList)
-			{
-				for (String result : results)
-			    {
-					String outLine = fieldName + " : " + result + "\n";
-					try {
-						doc.insertString(doc.getLength(), outLine, null);
-					}
-					catch(BadLocationException exc) {
-						exc.printStackTrace();
-				   	}
-
-			    }
 			}
 		}
 //		if (formatSpecStr.contains("unique"))

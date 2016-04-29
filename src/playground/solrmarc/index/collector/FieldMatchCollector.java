@@ -46,7 +46,7 @@ public class FieldMatchCollector implements AbstractValueCollector<Collection<Fi
 	}
 	
 	@Override
-	public Collection<String> collect(Collection<FieldMatch> values) 
+	public Collection<String> collect(Collection<FieldMatch> values) throws Exception 
 	{
 		Collection<String> results = makeCollection();
 		for (FieldMatch fm : values)

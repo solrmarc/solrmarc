@@ -18,7 +18,8 @@ public class JavaValueExtractorFactory extends AbstractMethodCallFactory {
            throw new RuntimeException(e);
         }
         addMethodsFromClasses(Arrays.asList(JavaValueExtractorUtils.getClasses()));
-        logger.trace("Java methods:\n" + methodCallManager.loadedMixinsToString());
+        logger.trace("Java extractor methods:\n" + methodCallManager.loadedExtractorMixinsToString());
+        logger.trace("Java mapping methods:\n" + methodCallManager.loadedMappingMixinsToString());
     }
 
     @Override

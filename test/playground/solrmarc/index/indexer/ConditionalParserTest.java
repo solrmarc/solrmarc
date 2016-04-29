@@ -106,8 +106,17 @@ public class ConditionalParserTest
         System.out.println();
         System.out.println(specLabel);
        
-        Object result = fmc.collect(fieldMatches);
-        if (result instanceof String)
+        Object result = null;
+		try {
+			result = fmc.collect(fieldMatches);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        if (result == null)
+        {
+        }
+        else if (result instanceof String)
         {
             System.out.println("Result: "+result);            
         }

@@ -16,6 +16,7 @@ import java.util.LinkedHashSet;
 public class DirectMultiValueExtractor implements AbstractMultiValueExtractor
 {
 	public static final String UNIQUE = "unique";
+	public static final String FIRST = "first";
 	private FieldFormatter fmt;
     private Specification fieldsAndSubfieldSpec;	
 	
@@ -42,6 +43,7 @@ public class DirectMultiValueExtractor implements AbstractMultiValueExtractor
 	}
 
 	boolean unique = false;
+	boolean firstOnly = false;
 	
 	public boolean isUnique() 
 	{
@@ -53,10 +55,25 @@ public class DirectMultiValueExtractor implements AbstractMultiValueExtractor
 		this.unique = unique;
 	}
 
- 
+	public boolean firstOnly()
+	{
+		return(firstOnly);
+	}
+	
+	public void setFirstOnly(boolean firstOnly) 
+	{
+		this.firstOnly = firstOnly;
+	}
+
     public DirectMultiValueExtractor(final String fieldsAndSubfields) 
     {
         fieldsAndSubfieldSpec = AbstractSpecificationFactory.createSpecification(fieldsAndSubfields);
+        fmt = new FieldFormatterBase(false);
+    }
+    
+    public DirectMultiValueExtractor(Specification fieldSpec) 
+    {
+        fieldsAndSubfieldSpec = fieldSpec;
         fmt = new FieldFormatterBase(false);
     }
 
@@ -95,4 +112,5 @@ public class DirectMultiValueExtractor implements AbstractMultiValueExtractor
 		}
 		return(results);
     }
+
 }

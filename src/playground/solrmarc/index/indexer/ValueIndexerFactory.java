@@ -1,9 +1,6 @@
 package playground.solrmarc.index.indexer;
 
-
-import playground.solrmarc.index.collector.FieldMatchCollector;
 import playground.solrmarc.index.collector.MultiValueCollector;
-import playground.solrmarc.index.collector.SingleValueCollector;
 import playground.solrmarc.index.collector.impl.FirstObjectMultiValueCollector;
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 import playground.solrmarc.index.extractor.AbstractSingleValueExtractor;
@@ -15,7 +12,6 @@ import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
 import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
 import playground.solrmarc.index.fieldmatch.FieldFormatterMapped;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
-import playground.solrmarc.index.mapping.AbstractSingleValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
 import playground.solrmarc.index.specification.ErrorSpecification;
 import playground.solrmarc.index.utils.ReflectionUtils;
@@ -24,7 +20,6 @@ import org.apache.log4j.Logger;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
@@ -37,16 +32,17 @@ public class ValueIndexerFactory
     private final static Pattern COMMA_SPLIT_PATTERN = Pattern.compile(",");
     private final static FirstObjectMultiValueCollector FIRST_OBJECT_COLLECTOR = new FirstObjectMultiValueCollector();
     private final static MultiValueCollector MULTI_VALUE_COLLECTOR = new MultiValueCollector();
-    private final static FieldMatchCollector MULTI_VALUE_FM_COLLECTOR = new FieldMatchCollector();
-    private final static FieldMatchCollector MULTI_VALUE_UNIQUE_FM_COLLECTOR = new FieldMatchCollector(true);
+//    private final static FieldMatchCollector MULTI_VALUE_FM_COLLECTOR = new FieldMatchCollector();
+//    private final static FieldMatchCollector MULTI_VALUE_UNIQUE_FM_COLLECTOR = new FieldMatchCollector(true);
  //   private final static JoiningMultiValueCollector JOINING_MULTI_VALUE_COLLECTOR = new JoiningMultiValueCollector();
-    private final static SingleValueCollector SINGLE_VALUE_COLLECTOR = new SingleValueCollector();
+ //   private final static SingleValueCollector SINGLE_VALUE_COLLECTOR = new SingleValueCollector();
 
     private final static Logger logger = Logger.getLogger(ValueIndexerFactory.class);
     private final List<AbstractValueExtractorFactory> extractorFactories;
     private final List<AbstractValueMappingFactory> mappingFactories;
     private List<IndexerSpecException> validationExceptions;
-    
+	private static FullConditionalParser parser = null;
+
 
     public List<IndexerSpecException> getValidationExceptions() {
 		return validationExceptions;
@@ -86,7 +82,7 @@ public class ValueIndexerFactory
     {
         final List<AbstractValueIndexer<?>> valueIndexers = new ArrayList<>();
         validationExceptions.clear();
-
+        if (parser == null) parser = new FullConditionalParser(true);
         for (final String singleSpec : configSpecs)
         {
             if (singleSpec.startsWith("#") || (!singleSpec.contains(":") && !singleSpec.contains("="))) continue;
@@ -94,7 +90,7 @@ public class ValueIndexerFactory
         	final String solrFieldName = specParts[0].trim();
         	final String mappingDefinition = specParts[1].trim();
             try {
-            	final AbstractValueIndexer<?> valueIndexer = createValueIndexer(solrFieldName, mappingDefinition);
+            	MultiValueIndexer valueIndexer = parser.parse(singleSpec);
                 if (valueIndexer != null)
                 {
                     valueIndexers.add(valueIndexer);
@@ -102,12 +98,38 @@ public class ValueIndexerFactory
             }
             catch (IndexerSpecException ise)
             {
-            	ise.setSolrFieldAndSpec(solrFieldName,mappingDefinition);
+            	ise.setSolrFieldAndSpec(solrFieldName, mappingDefinition);
             	validationExceptions.add(ise);
             }
         }
         return valueIndexers;
     }
+//    public List<AbstractValueIndexer<?>> createValueIndexers(String configSpecs[]) throws IllegalAccessException, InstantiationException
+//    {
+//        final List<AbstractValueIndexer<?>> valueIndexers = new ArrayList<>();
+//        validationExceptions.clear();
+//
+//        for (final String singleSpec : configSpecs)
+//        {
+//            if (singleSpec.startsWith("#") || (!singleSpec.contains(":") && !singleSpec.contains("="))) continue;
+//        	final String[] specParts = singleSpec.split("[ ]?[:=][ ]?", 2);
+//        	final String solrFieldName = specParts[0].trim();
+//        	final String mappingDefinition = specParts[1].trim();
+//            try {
+//            	final AbstractValueIndexer<?> valueIndexer = createValueIndexer(solrFieldName, mappingDefinition);
+//                if (valueIndexer != null)
+//                {
+//                    valueIndexers.add(valueIndexer);
+//                }
+//            }
+//            catch (IndexerSpecException ise)
+//            {
+//            	ise.setSolrFieldAndSpec(solrFieldName,mappingDefinition);
+//            	validationExceptions.add(ise);
+//            }
+//        }
+//        return valueIndexers;
+//    }
 
     private List<AbstractValueExtractorFactory> createExtractorFactories(final Set<Class<? extends AbstractValueExtractorFactory>> factoryClasses) throws IllegalAccessException, InstantiationException
     {
@@ -166,7 +188,7 @@ public class ValueIndexerFactory
         	}
             decorateMultiValueExtractor(solrFieldName, multiValueExtractor, configurationReader);
             final AbstractMultiValueMapping[] mappings = new AbstractMultiValueMapping[0];
-            final MultiValueCollector collector = MULTI_VALUE_COLLECTOR;
+            final MultiValueCollector collector = (multiValueExtractor.firstOnly()) ?  FIRST_OBJECT_COLLECTOR : MULTI_VALUE_COLLECTOR;
             return new MultiValueIndexer(solrFieldName, multiValueExtractor, mappings, collector);
         } 
         else if (extractor instanceof AbstractMultiValueExtractor)
@@ -179,9 +201,11 @@ public class ValueIndexerFactory
         else if (extractor instanceof AbstractSingleValueExtractor)
         {
             final AbstractSingleValueExtractor singleValueExtractor = (AbstractSingleValueExtractor) extractor;
-            final AbstractSingleValueMapping[] mappings = createSingleValueMappings(configurationReader);
-            final SingleValueCollector collector = createSingleValueCollector(configurationReader);
-            return new SingleValueIndexer(solrFieldName, singleValueExtractor, mappings, collector);
+            final AbstractMultiValueMapping[] mappings = createMultiValueMappings(configurationReader);
+//            final AbstractSingleValueMapping[] mappings = createSingleValueMappings(configurationReader);
+            final MultiValueCollector collector = createMultiValueCollector(configurationReader);
+//            final SingleValueCollector collector = createSingleValueCollector(configurationReader);
+            return new MultiValueIndexer(solrFieldName, singleValueExtractor, mappings, collector);
         } 
         else
         {
@@ -223,6 +247,10 @@ public class ValueIndexerFactory
         	else if (mappingConfig.equals("unique"))
         	{
         		multiValueExtractor.setUnique(true);
+        	}
+        	else if (mappingConfig.equals("first"))
+        	{
+        		multiValueExtractor.setFirstOnly(true);
         	}
         	else if (mappingConfig.equals("cleanEach"))
         	{
@@ -318,56 +346,59 @@ public class ValueIndexerFactory
     /**
      * @see ValueIndexerFactory#createMultiValueMappings(StringReader)
      */
-    private AbstractSingleValueMapping[] createSingleValueMappings(final StringReader mappingConfiguration)
-    {
-        List<AbstractSingleValueMapping> mappings = new ArrayList<>();
-        mappingConfiguration.skipUntilAfter(',');
-
-        mappingConfiguration.mark();
-        final String config = mappingConfiguration.readAll().trim();
-        mappingConfiguration.reset();
-
-        if (config.isEmpty())
-        {
-            return new AbstractSingleValueMapping[0];
-        }
-
-        for (final String mappingConfig : COMMA_SPLIT_PATTERN.split(config))
-        {
-            if (!isAValueMappingConfiguration(mappingConfig))
-            {
-                break;
-            }
-            AbstractSingleValueMapping valueMapping = createSingleValueMapping(mappingConfig.trim());
-            if (valueMapping != null)
-            {
-                mappings.add(valueMapping);
-            }
-            mappingConfiguration.skip(mappingConfig.length() + 1);
-        }
-        return mappings.toArray(new AbstractSingleValueMapping[mappings.size()]);
-    }
+//    private AbstractSingleValueMapping[] createSingleValueMappings(final StringReader mappingConfiguration)
+//    {
+//        List<AbstractSingleValueMapping> mappings = new ArrayList<>();
+//        mappingConfiguration.skipUntilAfter(',');
+//
+//        mappingConfiguration.mark();
+//        final String config = mappingConfiguration.readAll().trim();
+//        mappingConfiguration.reset();
+//
+//        if (config.isEmpty())
+//        {
+//            return new AbstractSingleValueMapping[0];
+//        }
+//
+//        for (final String mappingConfig : COMMA_SPLIT_PATTERN.split(config))
+//        {
+//            if (!isAValueMappingConfiguration(mappingConfig))
+//            {
+//                break;
+//            }
+//            AbstractSingleValueMapping valueMapping = createSingleValueMapping(mappingConfig.trim());
+//            if (valueMapping != null)
+//            {
+//                mappings.add(valueMapping);
+//            }
+//            mappingConfiguration.skip(mappingConfig.length() + 1);
+//        }
+//        return mappings.toArray(new AbstractSingleValueMapping[mappings.size()]);
+//    }
 
     private boolean isAValueMappingConfiguration(final String configuration)
     {
-        if (configuration.matches("[A-Z0-9a-z_]+[.]properties([(][A-Za-z0-9]*[)])?") || configuration.startsWith("map("))
+        if (configuration.matches("[A-Z0-9a-z_]+[.]properties([(][A-Za-z0-9]*[)])?") || 
+        		configuration.startsWith("map(") || 
+        		configuration.startsWith("filter(") || 
+        		configuration.startsWith("custom_map("))
         {
         	return(true);
         }
         return(false);
     }
 
-    private AbstractSingleValueMapping createSingleValueMapping(final String mappingConfig)
-    {
-        for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
-        {
-            if (mappingFactory.canHandle(mappingConfig))
-            {
-                return mappingFactory.createSingleValueMapping(mappingConfig);
-            }
-        }
-        throw new IndexerSpecException("Could not handle impl: " + mappingConfig + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
-    }
+//    private AbstractSingleValueMapping createSingleValueMapping(final String mappingConfig)
+//    {
+//        for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
+//        {
+//            if (mappingFactory.canHandle(mappingConfig))
+//            {
+//                return mappingFactory.createSingleValueMapping(mappingConfig);
+//            }
+//        }
+//        throw new IndexerSpecException("Could not handle impl: " + mappingConfig + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
+//    }
 
     private AbstractMultiValueMapping createMultiValueMapping(final String mappingConfig)
     {
@@ -413,9 +444,9 @@ public class ValueIndexerFactory
 //        throw new IndexerSpecException("The impl couldn't be identified. " + configurationReader);
 //    }
 
-    private SingleValueCollector createSingleValueCollector(StringReader configurationReader)
-    {
-        // TODO: Factory!
-        return SINGLE_VALUE_COLLECTOR;
-    }
+//    private SingleValueCollector createSingleValueCollector(StringReader configurationReader)
+//    {
+//        // TODO: Factory!
+//        return SINGLE_VALUE_COLLECTOR;
+//    }
 }

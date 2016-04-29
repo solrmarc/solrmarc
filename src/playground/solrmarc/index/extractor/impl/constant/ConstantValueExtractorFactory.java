@@ -16,11 +16,16 @@ public class ConstantValueExtractorFactory extends AbstractValueExtractorFactory
     @Override
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration) {
         final List<String> values = parseMappingConfiguration(mappingConfiguration.readAll());
-        if (values.isEmpty()) {
+        if (values.isEmpty()) 
+        {
             return null;
-        } else if (values.size() == 1) {
-            return new ConstantSingleValueExtractor(values.get(0));
-        } else {
+        } 
+//        else if (values.size() == 1) 
+//        {
+//            return new ConstantSingleValueExtractor(values.get(0));
+//        } 
+        else 
+        {
             return new ConstantMultiValueExtractor(values);
         }
     }

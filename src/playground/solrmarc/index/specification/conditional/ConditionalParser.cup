@@ -118,9 +118,12 @@ expr ::= expr:e1 AND expr:e2 				{: RESULT = new ConditionComposite(e1, e2, sym.
        | expr_part:e						{: RESULT = e; :}
        ;
        
-expr_part ::= SUBFIELD:s1 op:i value:s2		{: RESULT = new ConditionSubfield(s1, s2, ((int)i));:} 
-            | IND:s1 op:i value:s2			{: RESULT = new ConditionIndicator(s1, s2, ((int)i)); :} 
-            | POSITION:s1 op:i value:s2		{: RESULT = new ConditionPosition(s1, s2, ((int)i)); :} 
+expr_part ::= SUBFIELD:s1 op:i value:s2		                {: RESULT = new ConditionSubfield(s1, s2, ((int)i)); :} 
+            | IND:s1 op:i value:s2			                {: RESULT = new ConditionIndicator(s1, s2, ((int)i)); :} 
+            | POSITION:s1 op:i value:s2		                {: RESULT = new ConditionPosition(s1, s2, ((int)i)); :} 
+            | FIELDSPEC:s1 SUBFIELD:s2 op:i value:s3		{: RESULT = new ConditionSubfield(s1, s2, s3, ((int)i)); :} 
+            | FIELDSPEC:s1 IND:s2 op:i value:s3			    {: RESULT = new ConditionIndicator(s1, s2, s3, ((int)i)); :} 
+            | FIELDSPEC:s1 POSITION:s2 op:i value:s3		{: RESULT = new ConditionPosition(s1, s2, s3, ((int)i)); :} 
             ;
 op ::= EQU 									{: RESULT = new Integer(sym.EQU); :}
      | NEQ 									{: RESULT = new Integer(sym.NEQ); :}

@@ -1,14 +1,14 @@
 package playground.solrmarc.index;
 
 
-import playground.solrmarc.index.collector.SingleValueCollector;
-import playground.solrmarc.index.extractor.impl.constant.ConstantSingleValueExtractor;
+import playground.solrmarc.index.collector.MultiValueCollector;
+import playground.solrmarc.index.extractor.impl.constant.ConstantMultiValueExtractor;
 import playground.solrmarc.index.extractor.impl.patternMapping.PatternMapping;
 import playground.solrmarc.index.indexer.AbstractValueIndexer;
-import playground.solrmarc.index.indexer.SingleValueIndexer;
-import playground.solrmarc.index.mapping.AbstractSingleValueMapping;
-import playground.solrmarc.index.mapping.impl.SingleValuePatternMapping;
-import playground.solrmarc.index.mapping.impl.SingleValueTranslationMapping;
+import playground.solrmarc.index.indexer.MultiValueIndexer;
+import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
+import playground.solrmarc.index.mapping.impl.MultiValuePatternMapping;
+import playground.solrmarc.index.mapping.impl.MultiValueTranslationMapping;
 import playground.solrmarc.solr.SolrProxy;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Before;
@@ -33,19 +33,19 @@ public class IndexerTests
 {
     private Record testRecord;
     private Properties translationMappingProperties = new Properties();
-    private final AbstractSingleValueMapping[] translationMapping = new AbstractSingleValueMapping[]{
-            new SingleValueTranslationMapping(translationMappingProperties)
+    private final AbstractMultiValueMapping[] translationMapping = new AbstractMultiValueMapping[]{
+            new MultiValueTranslationMapping(translationMappingProperties)
     };
-    private final AbstractSingleValueMapping[] patternMapping = new AbstractSingleValueMapping[]{
-            new SingleValuePatternMapping(Collections.singletonList(new PatternMapping("[A-Z]", "X", 0)))
+    private final AbstractMultiValueMapping[] patternMapping = new AbstractMultiValueMapping[]{
+            new MultiValuePatternMapping(Collections.singletonList(new PatternMapping("[A-Z]", "X", 0)))
     };
-    private final AbstractSingleValueMapping[] translationAndPatternMapping = new AbstractSingleValueMapping[]{
-            new SingleValueTranslationMapping(translationMappingProperties),
-            new SingleValuePatternMapping(Collections.singletonList(new PatternMapping("[A-Z]", "X", 0)))
+    private final AbstractMultiValueMapping[] translationAndPatternMapping = new AbstractMultiValueMapping[]{
+            new MultiValueTranslationMapping(translationMappingProperties),
+            new MultiValuePatternMapping(Collections.singletonList(new PatternMapping("[A-Z]", "X", 0)))
     };
-    private final AbstractSingleValueMapping[] noMappings = new AbstractSingleValueMapping[0];
-    private final SingleValueCollector singleCollector = new SingleValueCollector();
-    private final ConstantSingleValueExtractor constantExtractor = new ConstantSingleValueExtractor("Foo Bar");
+    private final AbstractMultiValueMapping[] noMappings = new AbstractMultiValueMapping[0];
+    private final MultiValueCollector singleCollector = new MultiValueCollector();
+    private final ConstantMultiValueExtractor constantExtractor = new ConstantMultiValueExtractor("Foo Bar");
 
     static
     {
@@ -65,9 +65,9 @@ public class IndexerTests
     @Test
     public void testNoMappings() throws Exception
     {
-        final SingleValueIndexer valueIndexer = new SingleValueIndexer("testField", constantExtractor, noMappings, singleCollector);
+        final MultiValueIndexer valueIndexer = new MultiValueIndexer("testField", constantExtractor, noMappings, singleCollector);
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
-        final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer>singletonList(valueIndexer), proxy);
+        final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer<?>>singletonList(valueIndexer), proxy);
 
         indexer.index(new TestReader(Collections.singletonList(testRecord)));
 
@@ -79,9 +79,9 @@ public class IndexerTests
     @Test
     public void testWithTranslationMap() throws Exception
     {
-        final SingleValueIndexer valueIndexer = new SingleValueIndexer("testField", constantExtractor, translationMapping, singleCollector);
+        final MultiValueIndexer valueIndexer = new MultiValueIndexer("testField", constantExtractor, translationMapping, singleCollector);
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
-        final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer>singletonList(valueIndexer), proxy);
+        final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer<?>>singletonList(valueIndexer), proxy);
 
         indexer.index(new TestReader(Collections.singletonList(testRecord)));
 
@@ -93,9 +93,9 @@ public class IndexerTests
     @Test
     public void testWithPatternMap() throws Exception
     {
-        final SingleValueIndexer valueIndexer = new SingleValueIndexer("testField", constantExtractor, patternMapping, singleCollector);
+        final MultiValueIndexer valueIndexer = new MultiValueIndexer("testField", constantExtractor, patternMapping, singleCollector);
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
-        final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer>singletonList(valueIndexer), proxy);
+        final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer<?>>singletonList(valueIndexer), proxy);
 
         indexer.index(new TestReader(Collections.singletonList(testRecord)));
 
@@ -107,9 +107,9 @@ public class IndexerTests
     @Test
     public void testWithTranslationAndPatternMap() throws Exception
     {
-        final SingleValueIndexer valueIndexer = new SingleValueIndexer("testField", constantExtractor, translationAndPatternMapping, singleCollector);
+        final MultiValueIndexer valueIndexer = new MultiValueIndexer("testField", constantExtractor, translationAndPatternMapping, singleCollector);
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
-        final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer>singletonList(valueIndexer), proxy);
+        final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer<?>>singletonList(valueIndexer), proxy);
 
         indexer.index(new TestReader(Collections.singletonList(testRecord)));
 
@@ -122,7 +122,7 @@ public class IndexerTests
     public void testNoValueIndexer() throws Exception
     {
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
-        final Indexer indexer = new Indexer(new ArrayList<AbstractValueIndexer>(), proxy);
+        final Indexer indexer = new Indexer(new ArrayList<AbstractValueIndexer<?>>(), proxy);
         indexer.index(new TestReader(Collections.singletonList(testRecord)));
 
         List<Map> documents = extractDocuments(proxy);

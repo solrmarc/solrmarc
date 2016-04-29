@@ -71,7 +71,7 @@ public class SingleDataFieldSpecification extends SingleSpecification
 //    }
 //    
     @Override
-    public void addFieldValues(Collection<String>result, VariableField vf)
+    public void addFieldValues(Collection<String>result, VariableField vf) throws Exception
     {
         DataField df = (DataField) vf;
         fmt.start();

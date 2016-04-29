@@ -73,6 +73,7 @@ white_space = {new_line} | [ \t\f]
 
 <CONDITIONAL>{
 /* keywords */
+[0][0][0-9]				  { return sf.newSymbol("FIELDSPEC", sym.FIELDSPEC, yytext()); }
 "$"[a-z0-9A-Z]            { return sf.newSymbol("SUBFIELD",sym.SUBFIELD, yytext().substring(1,2)); }
 "ind"[12]                 { return sf.newSymbol("IND",sym.IND, yytext().substring(3,4)); }
 "ind"[03-9]               { error("Illegal indicator specification <"+ yytext()+">"); }

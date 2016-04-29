@@ -108,7 +108,7 @@ public class AbstractSpecificationFactory
         }
         else if (tag.startsWith("LNK"))
         {
-            return(new SingleLinkedDataFieldSpecification(tag.substring(3), subfields, cond));
+            return(new SingleLinkedDataFieldSpecification(tag, subfields, cond));
         }
         else 
         {

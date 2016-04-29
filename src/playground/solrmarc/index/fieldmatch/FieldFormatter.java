@@ -59,7 +59,7 @@ public abstract class FieldFormatter {
 
     public abstract void addCode(String codeStr);
 
-    public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data)
+    public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data) throws Exception
     {
     	final String cleaned = cleanData(vf, isSubfieldA, data);
     	final List<String> cleanedDataAsList = (cleaned == null || cleaned.length() == 0) ? Collections.emptyList() : Collections.singletonList(cleaned);
@@ -77,7 +77,7 @@ public abstract class FieldFormatter {
 
     public abstract String cleanData(VariableField vf, boolean isSubfieldA, String data);
 
-    public abstract Collection<String> handleMapping(Collection<String> cleaned);
+    public abstract Collection<String> handleMapping(Collection<String> cleaned) throws Exception;
 
 	public abstract void setUnique();
 

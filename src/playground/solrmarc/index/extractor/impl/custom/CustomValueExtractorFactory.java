@@ -14,7 +14,7 @@ public class CustomValueExtractorFactory extends AbstractMethodCallFactory {
     public CustomValueExtractorFactory() {
         Collection<Class<?>> classes = (Collection) ReflectionUtils.getSubclasses(Mixin.class);
         addMethodsFromClasses(classes);
-        logger.trace("Custom methods:\n" + methodCallManager.loadedMixinsToString());
+        logger.trace("Custom methods:\n" + methodCallManager.loadedExtractorMixinsToString());
     }
 
     @Override

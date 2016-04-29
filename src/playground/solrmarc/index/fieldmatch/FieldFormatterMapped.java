@@ -21,7 +21,7 @@ public class FieldFormatterMapped extends FieldFormatterDecorator
     }
     
     @Override
-    public Collection<String> handleMapping(Collection<String> cleaned)
+    public Collection<String> handleMapping(Collection<String> cleaned) throws Exception
     {
     	Collection<String> result = super.handleMapping(cleaned);
     	result = map.map(result);

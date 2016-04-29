@@ -12,7 +12,7 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
     protected final MethodCallManager methodCallManager;
 
     public AbstractMethodCallFactory() {
-        this(new MethodCallManager());
+        this(MethodCallManager.instance());
     }
 
     public AbstractMethodCallFactory(final MethodCallManager methodCallManager) {
@@ -31,14 +31,19 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
 
     @Override
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration) {
-        MethodCallContext context = MethodCallContext.getContextForMappingConfiguration(mappingConfiguration);
-        final AbstractMethodCall<?> methodCall = methodCallManager.getMethodCallForContext(context);
-        if (methodCall instanceof MultiValueMethodCall) {
-            return new MethodCallMultiValueExtractor((MultiValueMethodCall) methodCall, context.getParameters());
-        } else if (methodCall instanceof SingleValueMethodCall) {
-            return new MethodCallSingleValueExtractor((SingleValueMethodCall) methodCall, context.getParameters());
-        } else {
-            throw new IllegalArgumentException("Unknown method: " + context.toString() + ". Known methods are: \n" + methodCallManager.loadedMixinsToString());
+        MethodCallContext context = MethodCallContext.parseContextFromExtractorSpecification(mappingConfiguration);
+        final AbstractExtractorMethodCall<?> methodCall = methodCallManager.getExtractorMethodCallForContext(context);
+        if (methodCall instanceof MultiValueExtractorMethodCall)
+        {
+            return new MethodCallMultiValueExtractor((MultiValueExtractorMethodCall) methodCall, context.getParameters());
+        } 
+        else if (methodCall instanceof SingleValueExtractorMethodCall)
+        {
+            return new MethodCallSingleValueExtractor((SingleValueExtractorMethodCall) methodCall, context.getParameters());
+        }
+        else 
+        {
+            throw new IllegalArgumentException("Unknown method: " + context.toString() + ". Known methods are: \n" + methodCallManager.loadedExtractorMixinsToString());
         }
     }
 }

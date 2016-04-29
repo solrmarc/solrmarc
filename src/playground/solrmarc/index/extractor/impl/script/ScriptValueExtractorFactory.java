@@ -77,17 +77,21 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory {
 
     @Override
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration) {
-        MethodCallContext context = MethodCallContext.getContextForMappingConfiguration(mappingConfiguration);
+        MethodCallContext context = MethodCallContext.parseContextFromExtractorSpecification(mappingConfiguration);
         final String scriptFileName = context.getObjectName();
 
         final Interpreter interpreter = getInterpreter(scriptFileName);
         final BshMethod method = getBeanShellMethod(interpreter, context.getMethodName(), context.getParameterTypes());
-        if (method == null) {
+        if (method == null) 
+        {
             throw new IllegalStateException("Couldn't find bean shell method " + context.getMethodName() + Arrays.toString(context.getParameters()) + " in script file " + scriptFileName);
         }
-        if (Collection.class.isAssignableFrom(method.getReturnType())) {
+        if (Collection.class.isAssignableFrom(method.getReturnType())) 
+        {
             return new MethodCallMultiValueExtractor(new ScriptMultiValueMethodCall(interpreter, method, scriptFileName), context.getParameters());
-        } else {
+        } 
+        else 
+        {
             return new MethodCallSingleValueExtractor(new ScriptSingleValueMethodCall(interpreter, method, scriptFileName), context.getParameters());
         }
     }

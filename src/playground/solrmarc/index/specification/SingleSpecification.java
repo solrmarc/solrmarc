@@ -56,7 +56,7 @@ public abstract class SingleSpecification extends Specification
         return null;
     }
 
-    abstract public void addFieldValues(Collection<String>result, VariableField vf);
+    abstract public void addFieldValues(Collection<String>result, VariableField vf) throws Exception;
 
     public void setFormatter(FieldFormatter fmt)
     {

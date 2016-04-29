@@ -93,7 +93,7 @@ public class CompositeSpecification extends Specification
                 List<VariableField> fields = record.getVariableFields(spec.tag);              
                 for (VariableField vf : fields) 
                 {
-                    if (spec.cond == null || spec.cond.matches(vf))
+                    if (spec.cond == null || spec.cond.matches(record, vf))
                     {
                         result.add(new FieldMatch(vf,spec));
                     }
@@ -122,7 +122,7 @@ public class CompositeSpecification extends Specification
     }
 
     @Override
-    public void addFieldValues(Collection<String> result, VariableField vf)
+    public void addFieldValues(Collection<String> result, VariableField vf) throws Exception
     {
         for (SingleSpecification spec : pieces)
         {

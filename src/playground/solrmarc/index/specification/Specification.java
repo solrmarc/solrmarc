@@ -25,7 +25,7 @@ public abstract class Specification
         for (VariableField vf : fields) 
         {
             SingleSpecification specUsed = this.getMatchingSpec(vf.getTag(), vf);
-            if (specUsed != null && (specUsed.cond == null || specUsed.cond.matches(vf)))
+            if (specUsed != null && (specUsed.cond == null || specUsed.cond.matches(record, vf)))
             {
                 result.add(new FieldMatch(vf,specUsed));
             }
@@ -37,7 +37,7 @@ public abstract class Specification
 
     abstract protected SingleSpecification getMatchingSpec(String tag, VariableField f);
     
-    abstract public void addFieldValues(Collection<String> result, VariableField vf);
+    abstract public void addFieldValues(Collection<String> result, VariableField vf) throws Exception;
 
     public String getSpecLabel()
     {

@@ -1,7 +1,6 @@
 package playground.solrmarc.index.specification;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.VariableField;
@@ -64,7 +63,7 @@ public class SingleControlFieldSpecification extends SingleSpecification
     }
 
     @Override
-    public void addFieldValues(Collection<String> result, VariableField vf)
+    public void addFieldValues(Collection<String> result, VariableField vf) throws Exception
     {
         final String data;
         if (start == -1 && end == -1) 

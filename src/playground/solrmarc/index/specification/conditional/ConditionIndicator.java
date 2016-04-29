@@ -7,7 +7,7 @@ import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.VariableField;
 
-import playground.solrmarc.index.indexer.IndexerSpecException;
+import playground.solrmarc.index.indexer.FullSym;
 
 
 public class ConditionIndicator extends Condition
@@ -17,12 +17,18 @@ public class ConditionIndicator extends Condition
     final Pattern valuePattern;
     int op;
       
-    public ConditionIndicator(String s1, String s2, int op)
+    public ConditionIndicator(String indicatorStr, String value, int op)
     {
-        this.indicatorNum = (s1.equals("1")) ? 1 : 2;
-        this.value = s2;
+    	this(null, indicatorStr, value, op);
+    }
+    
+    public ConditionIndicator(String fieldTag, String indicatorStr, String value, int op)
+    {
+        super(fieldTag);
+        this.indicatorNum = (indicatorStr.equals("1")) ? 1 : 2;
+        this.value = value;
         this.op = op;
-        if (op == sym.MATCH)
+        if (op == FullSym.MATCH)
         {
             Pattern tmp;
             try {
@@ -42,14 +48,15 @@ public class ConditionIndicator extends Condition
         }
     }
     
-    public boolean matches(VariableField f)
+    @Override
+    public boolean matches(final VariableField f)
     {
         if (f instanceof ControlField) return(false);
         final char indVal = (indicatorNum == 1) ? ((DataField)f).getIndicator1() : ((DataField)f).getIndicator2();
         switch (op) {
-            case sym.EQU:  return(value.charAt(0) == indVal);
-            case sym.NEQ:  return(value.charAt(0) != indVal);
-            case sym.MATCH:  return(valuePattern.matcher(""+indVal).matches());
+            case FullSym.EQU:  return(value.charAt(0) == indVal);
+            case FullSym.NEQ:  return(value.charAt(0) != indVal);
+            case FullSym.MATCH:  return(valuePattern.matcher(""+indVal).matches());
         }
         return(false);
     }

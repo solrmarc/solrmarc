@@ -3,10 +3,10 @@ package playground.solrmarc.index.extractor.impl.script;
 
 import bsh.BshMethod;
 import bsh.Interpreter;
-import playground.solrmarc.index.extractor.methodcall.AbstractMethodCall;
+import playground.solrmarc.index.extractor.methodcall.AbstractExtractorMethodCall;
 
 
-public class ScriptSingleValueMethodCall extends AbstractMethodCall<String> {
+public class ScriptSingleValueMethodCall extends AbstractExtractorMethodCall<String> {
     private final Interpreter interpreter;
     private final BshMethod method;
 

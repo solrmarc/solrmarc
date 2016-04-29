@@ -4,14 +4,12 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-//import java_cup.runtime.Symbol;
-
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
-import playground.solrmarc.index.indexer.IndexerSpecException;
+import playground.solrmarc.index.indexer.FullSym;
 
 
 public class ConditionSubfield extends Condition
@@ -21,13 +19,19 @@ public class ConditionSubfield extends Condition
     final Pattern valuePattern;
     int op;
        
-    public ConditionSubfield(String s1, String s2, int op)
+    public ConditionSubfield(String offsetStr, String value, int op)
     {
-        this.sfCode = s1.charAt(0);
-        this.value = s2;
+    	this(null, offsetStr, value, op);
+    }
+    
+    public ConditionSubfield(String fieldTag, String offsetStr, String value, int op)
+    {
+        super(fieldTag);
+        this.sfCode = offsetStr.charAt(0);
+        this.value = value;
         this.op = op;
 
-        if (op == sym.MATCH)
+        if (op == FullSym.MATCH)
         {
             Pattern tmp;
             try {
@@ -47,7 +51,8 @@ public class ConditionSubfield extends Condition
         }
     }
     
-    public boolean matches(VariableField f)
+    @Override
+    public boolean matches(final VariableField f)
     {
         if (f instanceof ControlField) return(false);
         final List<Subfield> sfl = ((DataField)f).getSubfields(sfCode);
@@ -55,11 +60,11 @@ public class ConditionSubfield extends Condition
         {
             String sfVal = (sf == null) ? null : sf.getData();
             switch (op) {
-                case sym.EQU:  { if (sfVal.equals(value)) return(true); break; }
-                case sym.NEQ:  { if (sfVal.equals(value)) return(false); break; }
-                case sym.MATCH: { if (valuePattern != null && valuePattern.matcher(sfVal).matches()) return(true); break; }
+                case FullSym.EQU:  { if (sfVal.equals(value)) return(true); break; }
+                case FullSym.NEQ:  { if (sfVal.equals(value)) return(false); break; }
+                case FullSym.MATCH: { if (valuePattern != null && valuePattern.matcher(sfVal).matches()) return(true); break; }
             }
         }
-        return(op == sym.NEQ ? true : false);
+        return(op == FullSym.NEQ ? true : false);
     }
 }

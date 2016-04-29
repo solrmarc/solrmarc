@@ -4,6 +4,7 @@ import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 import org.marc4j.marc.Record;
 
 import java.util.Collection;
+import java.util.Collections;
 
 public class ConstantMultiValueExtractor implements AbstractMultiValueExtractor
 {
@@ -13,7 +14,11 @@ public class ConstantMultiValueExtractor implements AbstractMultiValueExtractor
         this.constantValues = constantValues;
     }
 
-    @Override
+    public ConstantMultiValueExtractor(String string) {
+    	this.constantValues = Collections.singletonList(string);
+	}
+
+	@Override
     public Collection<String> extract(final Record record) {
         return constantValues;
     }

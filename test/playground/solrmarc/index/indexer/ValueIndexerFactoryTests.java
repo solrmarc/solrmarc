@@ -59,7 +59,7 @@ public class ValueIndexerFactoryTests
         final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
         assertEquals(1, valueIndexers.size());
 
-        final SingleValueIndexer indexer = (SingleValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("constant", indexer.getSolrFieldNames().iterator().next());
         assertEquals("Test constant", indexer.getFieldData(null).iterator().next());
@@ -74,7 +74,7 @@ public class ValueIndexerFactoryTests
         final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
         assertEquals(1, valueIndexers.size());
 
-        final SingleValueIndexer indexer = (SingleValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("fullRecord", indexer.getSolrFieldNames().iterator().next());
         @SuppressWarnings("unused")
@@ -144,7 +144,7 @@ public class ValueIndexerFactoryTests
         final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
         assertEquals(1, valueIndexers.size());
 
-        final SingleValueIndexer indexer = (SingleValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("mixin", indexer.getSolrFieldNames().iterator().next());
         assertEquals("<null>", indexer.getFieldData(null).iterator().next());
@@ -178,7 +178,7 @@ public class ValueIndexerFactoryTests
         final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
         assertEquals(1, valueIndexers.size());
 
-        final SingleValueIndexer indexer = (SingleValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("constant", indexer.getSolrFieldNames().iterator().next());
         assertEquals("<null>", indexer.getFieldData(null).iterator().next());
@@ -193,7 +193,7 @@ public class ValueIndexerFactoryTests
         final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
         assertEquals(1, valueIndexers.size());
 
-        final SingleValueIndexer indexer = (SingleValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("constant", indexer.getSolrFieldNames().iterator().next());
         assertEquals("Overwritten in ChildMixin", indexer.getFieldData(null).iterator().next());

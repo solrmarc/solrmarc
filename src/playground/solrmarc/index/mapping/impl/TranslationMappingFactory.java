@@ -89,19 +89,29 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory {
         }
     }
 
-    @Override
-    public AbstractSingleValueMapping createSingleValueMapping(String mappingConfiguration) {
-        final String translationMappingFileName = getTranslationMappingFileName(mappingConfiguration);
-        final String subMappingName = getSubMappingName(mappingConfiguration);
-        final Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
-        return new SingleValueTranslationMapping(translationMapping);
-    }
+//    @Override
+//    public AbstractSingleValueMapping createSingleValueMapping(String mappingConfiguration) {
+//        final String translationMappingFileName = getTranslationMappingFileName(mappingConfiguration);
+//        final String subMappingName = getSubMappingName(mappingConfiguration);
+//        final Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
+//        return new SingleValueTranslationMapping(translationMapping);
+//    }
 
     @Override
-    public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration) {
+    public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration)
+    {
         String translationMappingFileName = getTranslationMappingFileName(mappingConfiguration);
         final String subMappingName = getSubMappingName(mappingConfiguration);
         Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
         return new MultiValueTranslationMapping(translationMapping);
     }
+
+	@Override
+	public AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
+	{
+        String translationMappingFileName = getTranslationMappingFileName(mapParts[0]);
+        final String subMappingName = mapParts.length > 1 ? mapParts[1] : null;
+        Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
+        return new MultiValueTranslationMapping(translationMapping);
+	}
 }

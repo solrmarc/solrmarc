@@ -32,6 +32,15 @@
              package="playground.solrmarc.index.specification.conditional" 
              parser="ConditionalParser"
         />
+		<jflex file="${src}/playground/solrmarc/index/indexer/FullScanner.flex" verbose="true" 
+			   outdir="${src}/playground/solrmarc/index/indexer/" nobak="true" />
+    	
+        <cup srcfile="${src}/playground/solrmarc/index/indexer/FullConditionalParser.cup"
+             destdir="${src}/playground/solrmarc/index/indexer"
+             package="playground.solrmarc.index.indexer"
+        	 symbols="FullSym"
+             parser="FullConditionalParser"
+        />
 	</target>
 
     <target name="compile" depends="init,precompile"

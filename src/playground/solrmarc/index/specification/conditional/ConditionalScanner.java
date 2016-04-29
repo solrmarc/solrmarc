@@ -66,13 +66,13 @@ public class ConditionalScanner extends playground.solrmarc.index.specification.
     "\1\7\1\10\2\11\1\12\1\1\1\13\2\1\1\14"+
     "\1\15\1\16\1\17\1\20\1\21\1\1\1\22\1\23"+
     "\1\24\1\25\1\1\1\26\1\27\1\1\1\30\1\31"+
-    "\4\0\1\32\1\33\1\34\1\35\1\0\1\36\1\0"+
-    "\1\17\1\37\1\0\1\24\1\25\4\0\2\40\1\0"+
-    "\1\41\2\0\1\42\1\0\1\30\2\0\1\43\1\44"+
-    "\1\0\1\45\2\0";
+    "\4\0\1\32\1\33\1\34\1\35\2\0\1\36\1\0"+
+    "\1\17\1\37\1\0\1\24\1\25\4\0\2\40\1\41"+
+    "\1\0\1\42\2\0\1\43\1\0\1\30\2\0\1\44"+
+    "\1\45\1\0\1\46\2\0";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[77];
+    int [] result = new int[79];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -99,17 +99,17 @@ public class ConditionalScanner extends playground.solrmarc.index.specification.
   private static final String ZZ_ROWMAP_PACKED_0 =
     "\0\0\0\57\0\136\0\215\0\274\0\353\0\u011a\0\274"+
     "\0\274\0\u0149\0\u0178\0\274\0\274\0\u01a7\0\274\0\u01d6"+
-    "\0\274\0\u0205\0\274\0\u0234\0\274\0\u0263\0\u0292\0\274"+
-    "\0\274\0\274\0\u02c1\0\u02f0\0\274\0\u031f\0\274\0\274"+
-    "\0\u034e\0\u037d\0\u03ac\0\274\0\274\0\u03db\0\u040a\0\274"+
-    "\0\u0439\0\u0468\0\u0497\0\u04c6\0\274\0\274\0\274\0\274"+
-    "\0\u04f5\0\274\0\u0524\0\274\0\274\0\u0553\0\274\0\274"+
-    "\0\u0582\0\u05b1\0\u05e0\0\u060f\0\274\0\u063e\0\u066d\0\274"+
-    "\0\u069c\0\u06cb\0\274\0\u06fa\0\274\0\353\0\u0729\0\274"+
-    "\0\274\0\u0758\0\274\0\u0787\0\u07b6";
+    "\0\u0205\0\u0234\0\274\0\u0263\0\274\0\u0292\0\u02c1\0\274"+
+    "\0\274\0\274\0\u02f0\0\u031f\0\274\0\u034e\0\274\0\274"+
+    "\0\u037d\0\u03ac\0\u03db\0\274\0\274\0\u040a\0\u0439\0\274"+
+    "\0\u0468\0\u0497\0\u04c6\0\u04f5\0\274\0\274\0\274\0\274"+
+    "\0\u0524\0\u0553\0\274\0\u0582\0\274\0\274\0\u05b1\0\274"+
+    "\0\274\0\u05e0\0\u060f\0\u063e\0\u066d\0\274\0\u069c\0\274"+
+    "\0\u06cb\0\274\0\u06fa\0\u0729\0\274\0\u0758\0\274\0\353"+
+    "\0\u0787\0\274\0\274\0\u07b6\0\274\0\u07e5\0\u0814";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[77];
+    int [] result = new int[79];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -145,26 +145,27 @@ public class ConditionalScanner extends playground.solrmarc.index.specification.
     "\1\52\62\0\1\53\1\54\2\53\53\0\4\53\43\0"+
     "\3\16\2\0\24\16\1\0\21\16\1\0\3\16\26\0"+
     "\1\55\2\0\1\56\7\0\1\57\14\0\1\60\1\0"+
-    "\2\22\25\0\1\22\27\0\2\61\25\0\1\61\27\0"+
-    "\2\62\5\0\4\62\4\0\1\62\4\0\4\62\6\0"+
-    "\7\62\10\0\1\62\26\0\1\63\64\0\1\64\56\0"+
-    "\1\65\62\0\1\66\66\0\1\67\57\0\1\70\5\0"+
-    "\53\71\1\72\3\71\1\0\2\61\14\0\1\73\1\74"+
-    "\4\0\3\74\1\61\6\0\7\74\10\0\1\74\1\0"+
-    "\2\47\15\0\1\47\4\0\4\47\6\0\7\47\10\0"+
-    "\1\47\1\0\2\75\25\0\1\75\33\0\1\10\61\0"+
-    "\4\75\53\0\2\75\1\76\1\75\44\0\2\61\16\0"+
-    "\1\77\1\100\5\0\1\61\55\0\1\101\70\0\1\102"+
-    "\67\0\1\103\4\0\3\104\2\0\47\104\2\0\1\104"+
-    "\20\0\1\74\4\0\3\74\7\0\7\74\10\0\1\74"+
-    "\1\0\2\74\15\0\2\74\1\105\2\0\4\74\6\0"+
-    "\7\74\10\0\1\74\1\0\2\106\25\0\1\106\27\0"+
-    "\2\107\25\0\1\107\27\0\2\110\25\0\1\111\70\0"+
-    "\1\112\66\0\1\113\5\0\2\107\17\0\1\100\5\0"+
-    "\1\107\71\0\1\114\57\0\1\115\57\0\1\35\11\0";
+    "\1\61\56\0\2\22\25\0\1\22\27\0\2\62\25\0"+
+    "\1\62\27\0\2\63\5\0\4\63\4\0\1\63\4\0"+
+    "\4\63\6\0\7\63\10\0\1\63\26\0\1\64\64\0"+
+    "\1\65\56\0\1\66\62\0\1\67\66\0\1\70\57\0"+
+    "\1\71\5\0\53\72\1\73\3\72\1\0\2\62\14\0"+
+    "\1\74\1\75\4\0\3\75\1\62\6\0\7\75\10\0"+
+    "\1\75\1\0\2\47\15\0\1\47\4\0\4\47\6\0"+
+    "\7\47\10\0\1\47\1\0\2\76\25\0\1\76\33\0"+
+    "\1\10\61\0\4\76\53\0\2\76\1\77\1\76\44\0"+
+    "\2\100\25\0\1\100\27\0\2\62\16\0\1\101\1\102"+
+    "\5\0\1\62\55\0\1\103\70\0\1\104\67\0\1\105"+
+    "\4\0\3\106\2\0\47\106\2\0\1\106\20\0\1\75"+
+    "\4\0\3\75\7\0\7\75\10\0\1\75\1\0\2\75"+
+    "\15\0\2\75\1\107\2\0\4\75\6\0\7\75\10\0"+
+    "\1\75\1\0\2\110\25\0\1\110\27\0\2\111\25\0"+
+    "\1\111\27\0\2\112\25\0\1\113\70\0\1\114\66\0"+
+    "\1\115\5\0\2\111\17\0\1\102\5\0\1\111\71\0"+
+    "\1\116\57\0\1\117\57\0\1\35\11\0";
 
   private static int [] zzUnpackTrans() {
-    int [] result = new int[2021];
+    int [] result = new int[2115];
     int offset = 0;
     offset = zzUnpackTrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -203,14 +204,14 @@ public class ConditionalScanner extends playground.solrmarc.index.specification.
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
     "\4\0\1\11\2\1\2\11\2\1\2\11\1\1\1\11"+
-    "\1\1\1\11\1\1\1\11\1\1\1\11\2\1\3\11"+
-    "\2\1\1\11\1\1\2\11\3\1\2\11\2\1\1\11"+
-    "\4\0\4\11\1\0\1\11\1\0\2\11\1\0\2\11"+
-    "\4\0\1\11\1\1\1\0\1\11\2\0\1\11\1\0"+
-    "\1\11\2\0\2\11\1\0\1\11\2\0";
+    "\3\1\1\11\1\1\1\11\2\1\3\11\2\1\1\11"+
+    "\1\1\2\11\3\1\2\11\2\1\1\11\4\0\4\11"+
+    "\2\0\1\11\1\0\2\11\1\0\2\11\4\0\1\11"+
+    "\1\1\1\11\1\0\1\11\2\0\1\11\1\0\1\11"+
+    "\2\0\2\11\1\0\1\11\2\0";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[77];
+    int [] result = new int[79];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -646,152 +647,156 @@ public class ConditionalScanner extends playground.solrmarc.index.specification.
 		    		}
 		    		error("Error: Illegal character <"+ yytext()+">  found in scanner state "+ scannerStateStr);
           }
-        case 38: break;
+        case 39: break;
         case 2: 
           { /* ignore */
           }
-        case 39: break;
+        case 40: break;
         case 3: 
           { return sf.newSymbol("{",sym.LBRACE);
           }
-        case 40: break;
+        case 41: break;
         case 4: 
           { yybegin(YYINITIAL);    return sf.newSymbol(":",sym.COLON);
           }
-        case 41: break;
+        case 42: break;
         case 5: 
           { yybegin(CONDITIONAL);  return sf.newSymbol("?",sym.QUESTION);
           }
-        case 42: break;
+        case 43: break;
         case 6: 
           { string.append( yytext() );
           }
-        case 43: break;
+        case 44: break;
         case 7: 
           { yybegin(CONDITIONAL); 
       return sf.newSymbol("QUOTEDSTR",sym.QUOTEDSTR,string.toString());
           }
-        case 44: break;
+        case 45: break;
         case 8: 
           { string.append('\\');
           }
-        case 45: break;
+        case 46: break;
         case 9: 
           { return sf.newSymbol("NUMBER",sym.NUMBER, yytext());
           }
-        case 46: break;
+        case 47: break;
         case 10: 
           { yybegin(YYINITIAL);  return sf.newSymbol(":",sym.COLON);
           }
-        case 47: break;
+        case 48: break;
         case 11: 
           { yybegin(YYINITIAL);  return sf.newSymbol("}",sym.RBRACE);
           }
-        case 48: break;
+        case 49: break;
         case 12: 
           { string.setLength(0); yybegin(STRING);
           }
-        case 49: break;
+        case 50: break;
         case 13: 
           { return sf.newSymbol("(",sym.LPAREN);
           }
-        case 50: break;
+        case 51: break;
         case 14: 
           { return sf.newSymbol(")",sym.RPAREN);
           }
-        case 51: break;
+        case 52: break;
         case 15: 
           { return sf.newSymbol("EQU",sym.EQU );
           }
-        case 52: break;
+        case 53: break;
         case 16: 
           { return sf.newSymbol("NOT",sym.NOT);
           }
-        case 53: break;
+        case 54: break;
         case 17: 
           { return sf.newSymbol("MATCH",sym.MATCH);
           }
-        case 54: break;
+        case 55: break;
         case 18: 
           { return sf.newSymbol("LE",sym.LT);
           }
-        case 55: break;
+        case 56: break;
         case 19: 
           { return sf.newSymbol("GT",sym.GT);
           }
-        case 56: break;
+        case 57: break;
         case 20: 
           { return sf.newSymbol("AND",sym.AND);
           }
-        case 57: break;
+        case 58: break;
         case 21: 
           { return sf.newSymbol("OR",sym.OR);
           }
-        case 58: break;
+        case 59: break;
         case 22: 
           { yybegin(YYINITIAL);   return sf.newSymbol(":",sym.COLON);
           }
-        case 59: break;
+        case 60: break;
         case 23: 
           { yybegin(CONDITIONAL); return sf.newSymbol("?",sym.QUESTION);
           }
-        case 60: break;
+        case 61: break;
         case 24: 
           { return sf.newSymbol("SUBFIELDSPEC",sym.SUBFIELDSPEC, yytext());
           }
-        case 61: break;
+        case 62: break;
         case 25: 
           { yybegin(YYINITIAL);   return sf.newSymbol("}",sym.RBRACE);
           }
-        case 62: break;
+        case 63: break;
         case 26: 
           { string.append('\n');
           }
-        case 63: break;
+        case 64: break;
         case 27: 
           { string.append('\"');
           }
-        case 64: break;
+        case 65: break;
         case 28: 
           { string.append('\t');
           }
-        case 65: break;
+        case 66: break;
         case 29: 
           { string.append('\r');
           }
-        case 66: break;
+        case 67: break;
         case 30: 
           { return sf.newSymbol("SUBFIELD",sym.SUBFIELD, yytext().substring(1,2));
           }
-        case 67: break;
+        case 68: break;
         case 31: 
           { return sf.newSymbol("NEQ",sym.NEQ);
           }
-        case 68: break;
+        case 69: break;
         case 32: 
           { yybegin(SUBFIELDSPEC); return sf.newSymbol("FIELDSPEC",sym.FIELDSPEC, yytext());
           }
-        case 69: break;
-        case 33: 
-          { return sf.newSymbol("POSITION", sym.POSITION, yytext());
-          }
         case 70: break;
-        case 34: 
-          { return sf.newSymbol("CHAR",sym.CHAR, yytext().substring(1, 2));
+        case 33: 
+          { return sf.newSymbol("FIELDSPEC", sym.FIELDSPEC, yytext());
           }
         case 71: break;
-        case 35: 
-          { error("Illegal indicator specification <"+ yytext()+">");
+        case 34: 
+          { return sf.newSymbol("POSITION", sym.POSITION, yytext());
           }
         case 72: break;
-        case 36: 
-          { return sf.newSymbol("IND",sym.IND, yytext().substring(3,4));
+        case 35: 
+          { return sf.newSymbol("CHAR",sym.CHAR, yytext().substring(1, 2));
           }
         case 73: break;
-        case 37: 
-          { return sf.newSymbol("CHAR",sym.CHAR, yytext().substring(1, 3));
+        case 36: 
+          { error("Illegal indicator specification <"+ yytext()+">");
           }
         case 74: break;
+        case 37: 
+          { return sf.newSymbol("IND",sym.IND, yytext().substring(3,4));
+          }
+        case 75: break;
+        case 38: 
+          { return sf.newSymbol("CHAR",sym.CHAR, yytext().substring(1, 3));
+          }
+        case 76: break;
         default: 
           if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
             zzAtEOF = true;
@@ -800,7 +805,7 @@ public class ConditionalScanner extends playground.solrmarc.index.specification.
             case STRING: {
               yybegin(CONDITIONAL); error("Error: End of input encountered in quoted string: "+ string.toString());
             }
-            case 78: break;
+            case 80: break;
             default:
               {      return sf.newSymbol("EOF", sym.EOF);
  }
