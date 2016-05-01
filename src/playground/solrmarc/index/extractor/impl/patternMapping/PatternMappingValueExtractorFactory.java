@@ -78,4 +78,11 @@ public class PatternMappingValueExtractorFactory extends AbstractValueExtractorF
         return null;
     }
 
+    @Override
+    public AbstractValueExtractor<?> createExtractor(String solrFieldName, String[] parts)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

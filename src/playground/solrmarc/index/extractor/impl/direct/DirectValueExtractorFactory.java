@@ -27,4 +27,11 @@ public class DirectValueExtractorFactory extends AbstractValueExtractorFactory
             return new DirectMultiValueExtractor(indexConfiguration.readString(commaIndex));
         }
     }
+
+    @Override
+    public AbstractValueExtractor<?> createExtractor(String solrFieldName, String[] parts)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

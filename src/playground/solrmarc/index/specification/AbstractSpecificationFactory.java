@@ -47,7 +47,7 @@ public class AbstractSpecificationFactory
         // }
         if (result == null || ConditionalParser.getErrors().size() > 0)
         {
-            result = new ErrorSpecification(ConditionalParser.getErrors());
+//            result = new ErrorSpecification(ConditionalParser.getErrors());
         }
         result.setSpecLabel(specificationStr);
         return (result);

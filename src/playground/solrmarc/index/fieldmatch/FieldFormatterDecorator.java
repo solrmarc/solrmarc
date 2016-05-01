@@ -1,11 +1,13 @@
 package playground.solrmarc.index.fieldmatch;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 
 import org.marc4j.marc.VariableField;
 
-public class FieldFormatterDecorator extends FieldFormatter
+public class FieldFormatterDecorator implements FieldFormatter
 {
     final private FieldFormatter toDecorate;
 
@@ -186,5 +188,15 @@ public class FieldFormatterDecorator extends FieldFormatter
     public Collection<String> makeResult()
     {
         return (toDecorate.makeResult());
+    }
+
+    @Override
+    public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data) throws Exception
+    {
+        final String cleaned = cleanData(vf, isSubfieldA, data);
+        final List<String> cleanedDataAsList = (cleaned == null || cleaned.length() == 0) ? emptyList
+                : Collections.singletonList(cleaned);
+        Collection<String> result = handleMapping(cleanedDataAsList);
+        return (result);
     }
 }

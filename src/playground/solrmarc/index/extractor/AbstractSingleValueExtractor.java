@@ -1,5 +1,17 @@
 package playground.solrmarc.index.extractor;
 
-public interface AbstractSingleValueExtractor extends AbstractValueExtractor<String>
+public abstract class AbstractSingleValueExtractor implements AbstractValueExtractor<String>
 {
+
+    @Override
+    public void setUnique(boolean unique)
+    {
+       /* do nothing */
+    }
+
+    @Override
+    public boolean isUnique()
+    {
+        return true;
+    }
 }

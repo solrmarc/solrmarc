@@ -5,7 +5,7 @@ import org.marc4j.marc.Record;
 
 import java.util.Collection;
 
-public class MethodCallMultiValueExtractor implements AbstractMultiValueExtractor
+public class MethodCallMultiValueExtractor extends AbstractMultiValueExtractor
 {
     private final AbstractExtractorMethodCall<Collection<String>> methodCall;
     private final Object[] parameters;

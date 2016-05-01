@@ -14,6 +14,8 @@ import java.util.Collections;
 import playground.solrmarc.index.collector.MultiValueCollector;
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 import playground.solrmarc.index.extractor.AbstractSingleValueExtractor;
+import playground.solrmarc.index.extractor.AbstractValueExtractor;
+import playground.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import playground.solrmarc.index.extractor.MultiValueWrapperSingleValueExtractor;
 import playground.solrmarc.index.extractor.impl.constant.ConstantMultiValueExtractor;
 import playground.solrmarc.index.extractor.impl.date.DateValueExtractorFactory;
@@ -28,260 +30,240 @@ import playground.solrmarc.index.specification.*;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import java_cup.runtime.XMLElement;
 
-/**
- * CUP v0.11b 20140808 (SVN rev 54) generated parser.
- */
-@SuppressWarnings({ "rawtypes" })
-public class FullConditionalParser extends java_cup.runtime.lr_parser
-{
+/** CUP v0.11b 20140808 (SVN rev 54) generated parser.
+  */
+@SuppressWarnings({"rawtypes"})
+public class FullConditionalParser extends java_cup.runtime.lr_parser {
 
-    public final Class getSymbolContainer()
+ public final Class getSymbolContainer() {
+    return FullSym.class;
+}
+
+  /** Default constructor. */
+  public FullConditionalParser() {super();}
+
+  /** Constructor which sets the default scanner. */
+  public FullConditionalParser(java_cup.runtime.Scanner s) {super(s);}
+
+  /** Constructor which sets the default scanner. */
+  public FullConditionalParser(java_cup.runtime.Scanner s, java_cup.runtime.SymbolFactory sf) {super(s,sf);}
+
+  /** Production table. */
+  protected static final short _production_table[][] = 
+    unpackFromStrings(new String[] {
+    "\000\075\000\002\002\004\000\002\002\007\000\002\002" +
+    "\005\000\002\007\005\000\002\007\003\000\002\003\003" +
+    "\000\002\003\003\000\002\003\003\000\002\003\003\000" +
+    "\002\003\003\000\002\003\003\000\002\010\005\000\002" +
+    "\010\003\000\002\004\010\000\002\004\010\000\002\004" +
+    "\010\000\002\005\005\000\002\005\003\000\002\006\003" +
+    "\000\002\006\003\000\002\013\010\000\002\013\013\000" +
+    "\002\013\003\000\002\024\003\000\002\024\002\000\002" +
+    "\011\003\000\002\011\006\000\002\012\005\000\002\012" +
+    "\005\000\002\012\003\000\002\012\003\000\002\014\005" +
+    "\000\002\014\003\000\002\015\005\000\002\015\003\000" +
+    "\002\016\007\000\002\016\003\000\002\017\006\000\002" +
+    "\017\006\000\002\017\005\000\002\017\003\000\002\020" +
+    "\004\000\002\020\004\000\002\020\003\000\002\021\005" +
+    "\000\002\021\005\000\002\021\004\000\002\021\005\000" +
+    "\002\021\003\000\002\022\005\000\002\022\005\000\002" +
+    "\022\005\000\002\022\006\000\002\022\006\000\002\022" +
+    "\006\000\002\025\003\000\002\025\003\000\002\025\003" +
+    "\000\002\023\003\000\002\023\003\000\002\023\003" });
+
+  /** Access to production table. */
+  public short[][] production_table() {return _production_table;}
+
+  /** Parse-action table. */
+  protected static final short[][] _action_table = 
+    unpackFromStrings(new String[] {
+    "\000\174\000\004\007\006\001\002\000\006\014\010\026" +
+    "\011\001\002\000\004\002\007\001\002\000\006\014\ufffd" +
+    "\026\ufffd\001\002\000\004\002\001\001\002\000\004\007" +
+    "\176\001\002\000\024\003\024\004\025\005\026\006\013" +
+    "\010\022\011\017\016\015\035\023\040\027\001\002\000" +
+    "\010\002\uffe1\014\uffe1\015\uffe1\001\002\000\004\024\171" +
+    "\001\002\000\006\002\ufff8\014\ufff8\001\002\000\004\035" +
+    "\161\001\002\000\010\002\ufffb\014\ufffb\015\155\001\002" +
+    "\000\006\002\ufff9\014\ufff9\001\002\000\010\002\uffdd\014" +
+    "\uffdd\015\uffdd\001\002\000\006\002\uffff\014\133\001\002" +
+    "\000\006\002\ufffa\014\ufffa\001\002\000\016\002\uffd6\014" +
+    "\uffd6\015\uffd6\020\062\036\060\037\061\001\002\000\006" +
+    "\002\ufff7\014\ufff7\001\002\000\004\024\053\001\002\000" +
+    "\004\024\034\001\002\000\010\002\ufff5\014\ufff5\022\ufff5" +
+    "\001\002\000\010\002\ufffc\014\ufffc\022\032\001\002\000" +
+    "\010\002\uffd9\014\uffd9\015\uffd9\001\002\000\004\040\033" +
+    "\001\002\000\010\002\ufff6\014\ufff6\022\ufff6\001\002\000" +
+    "\004\012\035\001\002\000\004\025\036\001\002\000\006" +
+    "\012\uffe9\014\037\001\002\000\004\012\uffea\001\002\000" +
+    "\004\012\042\001\002\000\006\002\ufff4\014\ufff4\001\002" +
+    "\000\010\002\uffe8\014\uffe8\024\043\001\002\000\006\012" +
+    "\045\040\044\001\002\000\006\014\uffe4\025\uffe4\001\002" +
+    "\000\006\014\uffe3\025\uffe3\001\002\000\006\014\047\025" +
+    "\050\001\002\000\006\012\052\040\051\001\002\000\006" +
+    "\002\uffe7\014\uffe7\001\002\000\006\014\uffe6\025\uffe6\001" +
+    "\002\000\006\014\uffe5\025\uffe5\001\002\000\004\012\054" +
+    "\001\002\000\004\025\055\001\002\000\006\012\uffe9\014" +
+    "\037\001\002\000\004\012\042\001\002\000\006\002\ufff2" +
+    "\014\ufff2\001\002\000\012\002\uffd8\014\uffd8\015\uffd8\020" +
+    "\131\001\002\000\012\002\uffd7\014\uffd7\015\uffd7\020\127" +
+    "\001\002\000\016\023\063\024\067\033\072\034\064\035" +
+    "\071\037\066\001\002\000\016\023\063\024\067\033\072" +
+    "\034\064\035\071\037\066\001\002\000\010\026\075\027" +
+    "\074\032\073\001\002\000\016\002\uffd1\014\uffd1\015\uffd1" +
+    "\021\uffd1\022\uffd1\025\uffd1\001\002\000\010\026\075\027" +
+    "\074\032\073\001\002\000\016\023\063\024\067\033\072" +
+    "\034\064\035\071\037\066\001\002\000\014\002\uffda\014" +
+    "\uffda\015\uffda\021\114\022\115\001\002\000\010\033\105" +
+    "\034\103\037\104\001\002\000\010\026\075\027\074\032" +
+    "\073\001\002\000\010\040\uffc8\041\uffc8\042\uffc8\001\002" +
+    "\000\010\040\uffc9\041\uffc9\042\uffc9\001\002\000\010\040" +
+    "\uffca\041\uffca\042\uffca\001\002\000\010\040\077\041\102" +
+    "\042\100\001\002\000\016\002\uffc7\014\uffc7\015\uffc7\021" +
+    "\uffc7\022\uffc7\025\uffc7\001\002\000\016\002\uffc5\014\uffc5" +
+    "\015\uffc5\021\uffc5\022\uffc5\025\uffc5\001\002\000\016\002" +
+    "\uffd0\014\uffd0\015\uffd0\021\uffd0\022\uffd0\025\uffd0\001\002" +
+    "\000\016\002\uffc6\014\uffc6\015\uffc6\021\uffc6\022\uffc6\025" +
+    "\uffc6\001\002\000\010\026\075\027\074\032\073\001\002" +
+    "\000\010\026\075\027\074\032\073\001\002\000\010\026" +
+    "\075\027\074\032\073\001\002\000\010\040\077\041\102" +
+    "\042\100\001\002\000\016\002\uffcd\014\uffcd\015\uffcd\021" +
+    "\uffcd\022\uffcd\025\uffcd\001\002\000\010\040\077\041\102" +
+    "\042\100\001\002\000\016\002\uffcb\014\uffcb\015\uffcb\021" +
+    "\uffcb\022\uffcb\025\uffcb\001\002\000\010\040\077\041\102" +
+    "\042\100\001\002\000\016\002\uffcc\014\uffcc\015\uffcc\021" +
+    "\uffcc\022\uffcc\025\uffcc\001\002\000\016\023\063\024\067" +
+    "\033\072\034\064\035\071\037\066\001\002\000\016\023" +
+    "\063\024\067\033\072\034\064\035\071\037\066\001\002" +
+    "\000\016\002\uffd4\014\uffd4\015\uffd4\021\uffd4\022\uffd4\025" +
+    "\uffd4\001\002\000\016\002\uffd5\014\uffd5\015\uffd5\021\uffd5" +
+    "\022\115\025\uffd5\001\002\000\010\021\114\022\115\025" +
+    "\121\001\002\000\016\002\uffd2\014\uffd2\015\uffd2\021\uffd2" +
+    "\022\uffd2\025\uffd2\001\002\000\010\040\077\041\102\042" +
+    "\100\001\002\000\016\002\uffce\014\uffce\015\uffce\021\uffce" +
+    "\022\uffce\025\uffce\001\002\000\010\040\077\041\102\042" +
+    "\100\001\002\000\016\002\uffcf\014\uffcf\015\uffcf\021\uffcf" +
+    "\022\uffcf\025\uffcf\001\002\000\016\002\uffd3\014\uffd3\015" +
+    "\uffd3\021\114\022\115\025\uffd3\001\002\000\016\023\063" +
+    "\024\067\033\072\034\064\035\071\037\066\001\002\000" +
+    "\014\002\uffdb\014\uffdb\015\uffdb\021\114\022\115\001\002" +
+    "\000\016\023\063\024\067\033\072\034\064\035\071\037" +
+    "\066\001\002\000\014\002\uffdc\014\uffdc\015\uffdc\021\114" +
+    "\022\115\001\002\000\010\003\135\012\042\013\141\001" +
+    "\002\000\006\002\uffef\014\uffef\001\002\000\006\002\uffeb" +
+    "\014\uffeb\001\002\000\006\002\uffee\014\uffee\001\002\000" +
+    "\006\002\000\014\153\001\002\000\006\002\ufff0\014\ufff0" +
+    "\001\002\000\004\024\142\001\002\000\004\012\143\001" +
+    "\002\000\006\012\uffe9\014\037\001\002\000\004\012\145" +
+    "\001\002\000\006\024\147\025\146\001\002\000\006\002" +
+    "\uffed\014\uffed\001\002\000\006\012\045\040\044\001\002" +
+    "\000\006\014\047\025\151\001\002\000\004\025\152\001" +
+    "\002\000\006\002\uffec\014\uffec\001\002\000\010\003\135" +
+    "\012\042\013\141\001\002\000\006\002\ufff1\014\ufff1\001" +
+    "\002\000\006\016\015\035\023\001\002\000\010\002\uffe2" +
+    "\014\uffe2\015\uffe2\001\002\000\006\015\uffdf\017\uffdf\001" +
+    "\002\000\006\015\164\017\165\001\002\000\012\015\uffd6" +
+    "\017\uffd6\036\162\037\163\001\002\000\006\015\uffd8\017" +
+    "\uffd8\001\002\000\006\015\uffd7\017\uffd7\001\002\000\004" +
+    "\035\161\001\002\000\004\020\166\001\002\000\016\023" +
+    "\063\024\067\033\072\034\064\035\071\037\066\001\002" +
+    "\000\014\002\uffde\014\uffde\015\uffde\021\114\022\115\001" +
+    "\002\000\006\015\uffe0\017\uffe0\001\002\000\004\012\172" +
+    "\001\002\000\004\025\173\001\002\000\006\012\uffe9\014" +
+    "\037\001\002\000\004\012\042\001\002\000\006\002\ufff3" +
+    "\014\ufff3\001\002\000\006\014\ufffe\026\ufffe\001\002" });
+
+  /** Access to parse-action table. */
+  public short[][] action_table() {return _action_table;}
+
+  /** <code>reduce_goto</code> table. */
+  protected static final short[][] _reduce_table = 
+    unpackFromStrings(new String[] {
+    "\000\174\000\006\002\004\007\003\001\001\000\002\001" +
+    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\020\003\020\004\013\010\027\014" +
+    "\015\016\011\017\017\020\030\001\001\000\002\001\001" +
+    "\000\002\001\001\000\002\001\001\000\006\015\157\020" +
+    "\156\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
+    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
+    "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\001\001\000\004\024\037\001\001\000\002\001\001\000" +
+    "\004\011\040\001\001\000\002\001\001\000\002\001\001" +
+    "\000\004\012\045\001\001\000\002\001\001\000\002\001" +
+    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
+    "\002\001\001\000\004\024\055\001\001\000\004\011\056" +
+    "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
+    "\001\000\006\021\067\022\064\001\001\000\006\021\125" +
+    "\022\064\001\001\000\004\025\123\001\001\000\002\001" +
+    "\001\000\004\025\121\001\001\000\006\021\117\022\064" +
+    "\001\001\000\002\001\001\000\002\001\001\000\004\025" +
+    "\075\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\001\001\000\004\023\100\001\001\000\002\001\001\000" +
+    "\002\001\001\000\002\001\001\000\002\001\001\000\004" +
+    "\025\111\001\001\000\004\025\107\001\001\000\004\025" +
+    "\105\001\001\000\004\023\106\001\001\000\002\001\001" +
+    "\000\004\023\110\001\001\000\002\001\001\000\004\023" +
+    "\112\001\001\000\002\001\001\000\006\021\116\022\064" +
+    "\001\001\000\006\021\115\022\064\001\001\000\002\001" +
+    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\004\023\122\001\001\000\002\001\001\000\004\023" +
+    "\124\001\001\000\002\001\001\000\002\001\001\000\006" +
+    "\021\127\022\064\001\001\000\002\001\001\000\006\021" +
+    "\131\022\064\001\001\000\002\001\001\000\012\005\136" +
+    "\006\137\011\133\013\135\001\001\000\002\001\001\000" +
+    "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\001\001\000\002\001\001\000\002\001\001\000\004\024" +
+    "\143\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\001\001\000\004\012\147\001\001\000\002\001\001\000" +
+    "\002\001\001\000\002\001\001\000\010\006\153\011\133" +
+    "\013\135\001\001\000\002\001\001\000\010\016\155\017" +
+    "\017\020\030\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
+    "\002\001\001\000\004\020\167\001\001\000\002\001\001" +
+    "\000\006\021\166\022\064\001\001\000\002\001\001\000" +
+    "\002\001\001\000\002\001\001\000\002\001\001\000\004" +
+    "\024\173\001\001\000\004\011\174\001\001\000\002\001" +
+    "\001\000\002\001\001" });
+
+  /** Access to <code>reduce_goto</code> table. */
+  public short[][] reduce_table() {return _reduce_table;}
+
+  /** Instance of action encapsulation class. */
+  protected CUP$FullConditionalParser$actions action_obj;
+
+  /** Action encapsulation object initializer. */
+  protected void init_actions()
     {
-        return FullSym.class;
+      action_obj = new CUP$FullConditionalParser$actions(this);
     }
 
-    /** Default constructor. */
-    public FullConditionalParser()
-    {
-        super();
-    }
+  /** Invoke a user supplied parse action. */
+  public java_cup.runtime.Symbol do_action(
+    int                        act_num,
+    java_cup.runtime.lr_parser parser,
+    java.util.Stack            stack,
+    int                        top)
+    throws java.lang.Exception
+  {
+    /* call code in generated class */
+    return action_obj.CUP$FullConditionalParser$do_action(act_num, parser, stack, top);
+  }
 
-    /** Constructor which sets the default scanner. */
-    public FullConditionalParser(java_cup.runtime.Scanner s)
-    {
-        super(s);
-    }
+  /** Indicates start state. */
+  public int start_state() {return 0;}
+  /** Indicates start production. */
+  public int start_production() {return 0;}
 
-    /** Constructor which sets the default scanner. */
-    public FullConditionalParser(java_cup.runtime.Scanner s, java_cup.runtime.SymbolFactory sf)
-    {
-        super(s, sf);
-    }
+  /** <code>EOF</code> Symbol index. */
+  public int EOF_sym() {return 0;}
 
-    /** Production table. */
-    protected static final short _production_table[][] = unpackFromStrings(
-            new String[] { "\000\072\000\002\002\004\000\002\002\007\000\002\002"
-                    + "\005\000\002\007\005\000\002\007\003\000\002\003\003"
-                    + "\000\002\003\003\000\002\003\003\000\002\003\003\000"
-                    + "\002\003\003\000\002\003\003\000\002\010\005\000\002"
-                    + "\010\003\000\002\004\010\000\002\004\010\000\002\004"
-                    + "\010\000\002\005\005\000\002\005\003\000\002\006\003"
-                    + "\000\002\006\003\000\002\013\007\000\002\013\012\000"
-                    + "\002\011\003\000\002\011\006\000\002\012\005\000\002"
-                    + "\012\005\000\002\012\003\000\002\012\003\000\002\014"
-                    + "\005\000\002\014\003\000\002\015\005\000\002\015\003"
-                    + "\000\002\016\007\000\002\016\003\000\002\017\006\000"
-                    + "\002\017\006\000\002\017\005\000\002\017\003\000\002"
-                    + "\020\004\000\002\020\004\000\002\020\003\000\002\021"
-                    + "\005\000\002\021\005\000\002\021\004\000\002\021\005"
-                    + "\000\002\021\003\000\002\022\005\000\002\022\005\000"
-                    + "\002\022\005\000\002\022\006\000\002\022\006\000\002"
-                    + "\022\006\000\002\024\003\000\002\024\003\000\002\024"
-                    + "\003\000\002\023\003\000\002\023\003\000\002\023\003" + "" });
+  /** <code>error</code> Symbol index. */
+  public int error_sym() {return 1;}
 
-    /** Access to production table. */
-    public short[][] production_table()
-    {
-        return _production_table;
-    }
 
-    /** Parse-action table. */
-    protected static final short[][] _action_table = unpackFromStrings(
-            new String[] { "\000\171\000\004\010\006\001\002\000\006\004\010\025"
-                    + "\011\001\002\000\004\002\007\001\002\000\006\004\ufffd"
-                    + "\025\ufffd\001\002\000\004\002\001\001\002\000\004\010"
-                    + "\173\001\002\000\024\003\024\005\025\006\026\007\014"
-                    + "\011\022\012\016\015\013\034\023\037\027\001\002\000"
-                    + "\010\002\uffe4\004\uffe4\014\uffe4\001\002\000\004\034\163"
-                    + "\001\002\000\004\023\154\001\002\000\006\002\ufff8\004"
-                    + "\ufff8\001\002\000\006\002\ufff9\004\ufff9\001\002\000\010"
-                    + "\002\ufffb\004\ufffb\014\152\001\002\000\010\002\uffe0\004"
-                    + "\uffe0\014\uffe0\001\002\000\006\002\uffff\004\132\001\002"
-                    + "\000\006\002\ufffa\004\ufffa\001\002\000\016\002\uffd9\004"
-                    + "\uffd9\014\uffd9\017\061\035\057\036\060\001\002\000\006"
-                    + "\002\ufff7\004\ufff7\001\002\000\004\023\052\001\002\000"
-                    + "\004\023\034\001\002\000\010\002\ufff5\004\ufff5\021\ufff5"
-                    + "\001\002\000\010\002\ufffc\004\ufffc\021\032\001\002\000"
-                    + "\010\002\uffdc\004\uffdc\014\uffdc\001\002\000\004\037\033"
-                    + "\001\002\000\010\002\ufff6\004\ufff6\021\ufff6\001\002\000"
-                    + "\004\013\035\001\002\000\004\024\036\001\002\000\004"
-                    + "\004\037\001\002\000\004\013\041\001\002\000\006\002"
-                    + "\ufff4\004\ufff4\001\002\000\010\002\uffeb\004\uffeb\023\042"
-                    + "\001\002\000\006\013\044\037\043\001\002\000\006\004"
-                    + "\uffe7\024\uffe7\001\002\000\006\004\uffe6\024\uffe6\001\002"
-                    + "\000\006\004\046\024\047\001\002\000\006\013\051\037"
-                    + "\050\001\002\000\006\002\uffea\004\uffea\001\002\000\006"
-                    + "\004\uffe9\024\uffe9\001\002\000\006\004\uffe8\024\uffe8\001"
-                    + "\002\000\004\013\053\001\002\000\004\024\054\001\002"
-                    + "\000\004\004\055\001\002\000\004\013\041\001\002\000"
-                    + "\006\002\ufff2\004\ufff2\001\002\000\012\002\uffdb\004\uffdb"
-                    + "\014\uffdb\017\130\001\002\000\012\002\uffda\004\uffda\014"
-                    + "\uffda\017\126\001\002\000\016\022\062\023\066\032\071"
-                    + "\033\063\034\070\036\065\001\002\000\016\022\062\023"
-                    + "\066\032\071\033\063\034\070\036\065\001\002\000\010"
-                    + "\025\074\026\073\031\072\001\002\000\016\002\uffd4\004"
-                    + "\uffd4\014\uffd4\020\uffd4\021\uffd4\024\uffd4\001\002\000\010"
-                    + "\025\074\026\073\031\072\001\002\000\016\022\062\023"
-                    + "\066\032\071\033\063\034\070\036\065\001\002\000\014"
-                    + "\002\uffdd\004\uffdd\014\uffdd\020\113\021\114\001\002\000"
-                    + "\010\032\104\033\102\036\103\001\002\000\010\025\074"
-                    + "\026\073\031\072\001\002\000\010\037\uffcb\040\uffcb\041"
-                    + "\uffcb\001\002\000\010\037\uffcc\040\uffcc\041\uffcc\001\002"
-                    + "\000\010\037\uffcd\040\uffcd\041\uffcd\001\002\000\010\037"
-                    + "\076\040\101\041\077\001\002\000\016\002\uffca\004\uffca"
-                    + "\014\uffca\020\uffca\021\uffca\024\uffca\001\002\000\016\002"
-                    + "\uffc8\004\uffc8\014\uffc8\020\uffc8\021\uffc8\024\uffc8\001\002"
-                    + "\000\016\002\uffd3\004\uffd3\014\uffd3\020\uffd3\021\uffd3\024"
-                    + "\uffd3\001\002\000\016\002\uffc9\004\uffc9\014\uffc9\020\uffc9"
-                    + "\021\uffc9\024\uffc9\001\002\000\010\025\074\026\073\031"
-                    + "\072\001\002\000\010\025\074\026\073\031\072\001\002"
-                    + "\000\010\025\074\026\073\031\072\001\002\000\010\037"
-                    + "\076\040\101\041\077\001\002\000\016\002\uffd0\004\uffd0"
-                    + "\014\uffd0\020\uffd0\021\uffd0\024\uffd0\001\002\000\010\037"
-                    + "\076\040\101\041\077\001\002\000\016\002\uffce\004\uffce"
-                    + "\014\uffce\020\uffce\021\uffce\024\uffce\001\002\000\010\037"
-                    + "\076\040\101\041\077\001\002\000\016\002\uffcf\004\uffcf"
-                    + "\014\uffcf\020\uffcf\021\uffcf\024\uffcf\001\002\000\016\022"
-                    + "\062\023\066\032\071\033\063\034\070\036\065\001\002"
-                    + "\000\016\022\062\023\066\032\071\033\063\034\070\036"
-                    + "\065\001\002\000\016\002\uffd7\004\uffd7\014\uffd7\020\uffd7"
-                    + "\021\uffd7\024\uffd7\001\002\000\016\002\uffd8\004\uffd8\014"
-                    + "\uffd8\020\uffd8\021\114\024\uffd8\001\002\000\010\020\113"
-                    + "\021\114\024\120\001\002\000\016\002\uffd5\004\uffd5\014"
-                    + "\uffd5\020\uffd5\021\uffd5\024\uffd5\001\002\000\010\037\076"
-                    + "\040\101\041\077\001\002\000\016\002\uffd1\004\uffd1\014"
-                    + "\uffd1\020\uffd1\021\uffd1\024\uffd1\001\002\000\010\037\076"
-                    + "\040\101\041\077\001\002\000\016\002\uffd2\004\uffd2\014"
-                    + "\uffd2\020\uffd2\021\uffd2\024\uffd2\001\002\000\016\002\uffd6"
-                    + "\004\uffd6\014\uffd6\020\113\021\114\024\uffd6\001\002\000"
-                    + "\016\022\062\023\066\032\071\033\063\034\070\036\065"
-                    + "\001\002\000\014\002\uffde\004\uffde\014\uffde\020\113\021"
-                    + "\114\001\002\000\016\022\062\023\066\032\071\033\063"
-                    + "\034\070\036\065\001\002\000\014\002\uffdf\004\uffdf\014"
-                    + "\uffdf\020\113\021\114\001\002\000\004\013\135\001\002"
-                    + "\000\006\002\uffef\004\uffef\001\002\000\006\002\uffee\004"
-                    + "\uffee\001\002\000\010\002\uffeb\004\uffeb\023\142\001\002"
-                    + "\000\006\002\000\004\140\001\002\000\006\002\ufff0\004"
-                    + "\ufff0\001\002\000\004\013\135\001\002\000\006\002\ufff1"
-                    + "\004\ufff1\001\002\000\006\013\143\037\043\001\002\000"
-                    + "\010\004\uffe6\013\144\024\uffe6\001\002\000\006\023\146"
-                    + "\024\145\001\002\000\006\002\uffed\004\uffed\001\002\000"
-                    + "\006\013\044\037\043\001\002\000\006\004\046\024\150"
-                    + "\001\002\000\004\024\151\001\002\000\006\002\uffec\004"
-                    + "\uffec\001\002\000\006\015\013\034\023\001\002\000\010"
-                    + "\002\uffe5\004\uffe5\014\uffe5\001\002\000\004\013\155\001"
-                    + "\002\000\004\024\156\001\002\000\004\004\157\001\002"
-                    + "\000\004\013\041\001\002\000\006\002\ufff3\004\ufff3\001"
-                    + "\002\000\006\014\uffe2\016\uffe2\001\002\000\006\014\166"
-                    + "\016\167\001\002\000\012\014\uffd9\016\uffd9\035\164\036"
-                    + "\165\001\002\000\006\014\uffdb\016\uffdb\001\002\000\006"
-                    + "\014\uffda\016\uffda\001\002\000\004\034\163\001\002\000"
-                    + "\004\017\170\001\002\000\016\022\062\023\066\032\071"
-                    + "\033\063\034\070\036\065\001\002\000\014\002\uffe1\004"
-                    + "\uffe1\014\uffe1\020\113\021\114\001\002\000\006\014\uffe3"
-                    + "\016\uffe3\001\002\000\006\004\ufffe\025\ufffe\001\002" });
-
-    /** Access to parse-action table. */
-    public short[][] action_table()
-    {
-        return _action_table;
-    }
-
-    /** <code>reduce_goto</code> table. */
-    protected static final short[][] _reduce_table = unpackFromStrings(
-            new String[] { "\000\171\000\006\002\004\007\003\001\001\000\002\001"
-                    + "\001\000\002\001\001\000\002\001\001\000\002\001\001"
-                    + "\000\002\001\001\000\020\003\020\004\014\010\027\014"
-                    + "\016\016\011\017\017\020\030\001\001\000\002\001\001"
-                    + "\000\006\015\161\020\160\001\001\000\002\001\001\000"
-                    + "\002\001\001\000\002\001\001\000\002\001\001\000\002"
-                    + "\001\001\000\002\001\001\000\002\001\001\000\002\001"
-                    + "\001\000\002\001\001\000\002\001\001\000\002\001\001"
-                    + "\000\002\001\001\000\002\001\001\000\002\001\001\000"
-                    + "\002\001\001\000\002\001\001\000\002\001\001\000\002"
-                    + "\001\001\000\002\001\001\000\004\011\037\001\001\000"
-                    + "\002\001\001\000\002\001\001\000\004\012\044\001\001"
-                    + "\000\002\001\001\000\002\001\001\000\002\001\001\000"
-                    + "\002\001\001\000\002\001\001\000\002\001\001\000\002"
-                    + "\001\001\000\002\001\001\000\002\001\001\000\002\001"
-                    + "\001\000\004\011\055\001\001\000\002\001\001\000\002"
-                    + "\001\001\000\002\001\001\000\006\021\066\022\063\001"
-                    + "\001\000\006\021\124\022\063\001\001\000\004\024\122"
-                    + "\001\001\000\002\001\001\000\004\024\120\001\001\000"
-                    + "\006\021\116\022\063\001\001\000\002\001\001\000\002"
-                    + "\001\001\000\004\024\074\001\001\000\002\001\001\000"
-                    + "\002\001\001\000\002\001\001\000\004\023\077\001\001"
-                    + "\000\002\001\001\000\002\001\001\000\002\001\001\000"
-                    + "\002\001\001\000\004\024\110\001\001\000\004\024\106"
-                    + "\001\001\000\004\024\104\001\001\000\004\023\105\001"
-                    + "\001\000\002\001\001\000\004\023\107\001\001\000\002"
-                    + "\001\001\000\004\023\111\001\001\000\002\001\001\000"
-                    + "\006\021\115\022\063\001\001\000\006\021\114\022\063"
-                    + "\001\001\000\002\001\001\000\002\001\001\000\002\001"
-                    + "\001\000\002\001\001\000\004\023\121\001\001\000\002"
-                    + "\001\001\000\004\023\123\001\001\000\002\001\001\000"
-                    + "\002\001\001\000\006\021\126\022\063\001\001\000\002"
-                    + "\001\001\000\006\021\130\022\063\001\001\000\002\001"
-                    + "\001\000\012\005\135\006\136\011\132\013\133\001\001"
-                    + "\000\002\001\001\000\002\001\001\000\002\001\001\000"
-                    + "\002\001\001\000\002\001\001\000\010\006\140\011\132"
-                    + "\013\133\001\001\000\002\001\001\000\004\012\044\001"
-                    + "\001\000\002\001\001\000\002\001\001\000\002\001\001"
-                    + "\000\004\012\146\001\001\000\002\001\001\000\002\001"
-                    + "\001\000\002\001\001\000\010\016\152\017\017\020\030"
-                    + "\001\001\000\002\001\001\000\002\001\001\000\002\001"
-                    + "\001\000\002\001\001\000\004\011\157\001\001\000\002"
-                    + "\001\001\000\002\001\001\000\002\001\001\000\002\001"
-                    + "\001\000\002\001\001\000\002\001\001\000\004\020\171"
-                    + "\001\001\000\002\001\001\000\006\021\170\022\063\001"
-                    + "\001\000\002\001\001\000\002\001\001\000\002\001\001" + "" });
-
-    /** Access to <code>reduce_goto</code> table. */
-    public short[][] reduce_table()
-    {
-        return _reduce_table;
-    }
-
-    /** Instance of action encapsulation class. */
-    protected CUP$FullConditionalParser$actions action_obj;
-
-    /** Action encapsulation object initializer. */
-    protected void init_actions()
-    {
-        action_obj = new CUP$FullConditionalParser$actions(this);
-    }
-
-    /** Invoke a user supplied parse action. */
-    public java_cup.runtime.Symbol do_action(int act_num, java_cup.runtime.lr_parser parser, java.util.Stack stack,
-            int top) throws java.lang.Exception
-    {
-        /* call code in generated class */
-        return action_obj.CUP$FullConditionalParser$do_action(act_num, parser, stack, top);
-    }
-
-    /** Indicates start state. */
-    public int start_state()
-    {
-        return 0;
-    }
-
-    /** Indicates start production. */
-    public int start_production()
-    {
-        return 0;
-    }
-
-    /** <code>EOF</code> Symbol index. */
-    public int EOF_sym()
-    {
-        return 0;
-    }
-
-    /** <code>error</code> Symbol index. */
-    public int error_sym()
-    {
-        return 1;
-    }
 
     private final static Logger logger = Logger.getLogger(ValueIndexerFactory.class);
 
@@ -291,101 +273,131 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser
     static FullRecordValueExtractorFactory fullFactory = new FullRecordValueExtractorFactory();
     static DateValueExtractorFactory dateFactory = new DateValueExtractorFactory();
     static MultiValueCollector MULTI_VALUE_COLLECTOR = new MultiValueCollector();
+    private ValueIndexerFactory valueIndexerFactory = null;
     private List<AbstractValueMappingFactory> mappingFactories = null;
-
-    public static void setParserDebug(boolean b)
-    {
-        parser_debug = b;
-    }
-
-    public static boolean shouldParserDebug()
-    {
-        return (parser_debug);
-    }
-
-    public FullConditionalParser(boolean debug) throws IllegalAccessException, InstantiationException
-    {
+    private List<AbstractValueExtractorFactory> extractorFactories = null;
+    
+    public static void setParserDebug(boolean b) { parser_debug = b; } 
+    public static boolean shouldParserDebug()    { return(parser_debug); }
+    public FullConditionalParser(boolean debug) throws IllegalAccessException, InstantiationException 
+    { 
         super(debug ? new VerboseSymbolFactory() : new ComplexSymbolFactory());
         parser_debug = debug;
-        this.scanner = new FullConditionalScanner((ComplexSymbolFactory) getSymbolFactory());
+        this.scanner = new FullConditionalScanner((ComplexSymbolFactory)getSymbolFactory());
         this.setScanner(this.scanner);
-        this.mappingFactories = createMappingFactories(ReflectionUtils.getMappingFactoryClasses());
     }
-
+    
+    
+    public void setFactories(ValueIndexerFactory vif, List<AbstractValueExtractorFactory> extractorFactories, List<AbstractValueMappingFactory> mappingFactories)
+    {
+        this.valueIndexerFactory = vif;
+        this.extractorFactories  = extractorFactories;
+        this.mappingFactories = mappingFactories;  
+    }
+    
     public MultiValueIndexer parse(String strToParse, boolean debug)
     {
         Symbol parse_tree = null;
         MultiValueIndexer result = null;
         parser_errors = new ArrayList<String>();
         scanner.startParse(strToParse);
-        try
-        {
-            if (debug) parse_tree = this.debug_parse();
-            else parse_tree = this.parse();
+        try{
+            if (debug)
+                parse_tree = this.debug_parse();
+            else
+                parse_tree = this.parse();
         }
-        catch (Exception e)
-        {
-            parser_errors.add("Exception " + e.toString());
-            // parser_errors.add(" Input Specification "+strToParse);
+        catch (IndexerSpecException ise) {
+            parser_errors.add(ise.message());
         }
-        finally
-        {
+        catch (Exception e) {
+            parser_errors.add("Exception "+e.toString());
+            //parser_errors.add(" Input Specification "+strToParse);
+        } 
+        finally {
         }
-        if (parse_tree != null)
+        if (parse_tree != null) 
         {
             result = (MultiValueIndexer) parse_tree.value;
-            // if (result != null)
-            // {
-            // result.setSpecLabel(strToParse);
-            // }
+            if (result != null)
+            {
+                result.setSpecLabel(strToParse);
+                result.setParseErrors(parser_errors);
+            }
         }
-        return (result);
+        return(result);     
     }
-
+   
     public MultiValueIndexer parse(String strToParse)
     {
-        return (parse(strToParse, parser_debug));
+        return(parse(strToParse, parser_debug));
     }
-
+    
     private static String toDelimitedString(String[] strs, String delimiter)
     {
         StringBuilder strb = new StringBuilder();
         for (String str : strs)
         {
-            strb.append(str).append(delimiter);
+          strb.append(str).append(delimiter);
         }
         return strb.substring(0, strb.length() - delimiter.length());
-    }
-
-    private AbstractMultiValueMapping createMultiValueMapping(List<String> mapParams)
+     }
+    
+    
+    
+    private AbstractValueExtractor<?> createCustomExtractor(String parm1, String parm2, List<String> mapParams)
     {
-        if (this.mappingFactories == null)
+        String[] mapParts =new String[mapParams.size()+2];
+        mapParts[0] = parm1;
+        mapParts[1] = parm2;
+        System.arraycopy(mapParams.toArray(new String[0]), 0, mapParts, 2, mapParams.size());
+        mapParams.toArray(new String[0]);
+        for (final AbstractValueExtractorFactory factory : extractorFactories)
         {
-            try
+            if (factory.canHandle("CUP Parser", mapParts[0]))
             {
-                this.mappingFactories = createMappingFactories(ReflectionUtils.getMappingFactoryClasses());
-            }
-            catch (IllegalAccessException | InstantiationException e)
-            {
-                throw new IndexerSpecException(
-                        "Could not instantiate mapping factory\n" + mappingFactories.toString().replaceAll(",", ",\n"));
+                return factory.createExtractor("CUP Parser", mapParts);
             }
         }
-        String[] mapParts = mapParams.toArray(new String[0]);
-        for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
+        throw new IndexerSpecException("No indexer factory found for: " + toDelimitedString(mapParts, " "));
+    }
+   
+//    private AbstractValueExtractor<?> createExtractor(final String solrFieldName, final String[] mapParts)
+//    {
+//        for (final AbstractValueExtractorFactory factory : extractorFactories)
+//        {
+//            if (factory.canHandle(solrFieldName, mapParts[0]))
+//            {
+//                return factory.createExtractor(solrFieldName, mapParts);
+//            }
+//        }
+//        throw new IndexerSpecException("No indexer factory found for: " + toDelimitedString(mapParts, " "));
+//    }
+    
+    private AbstractMultiValueMapping createMultiValueMapping(List<String> mapParams)
+    {
+    	if (this.mappingFactories == null) 
+        {
+    		try {
+				this.mappingFactories = createMappingFactories(ReflectionUtils.getMappingFactoryClasses());
+			}
+    		catch (IllegalAccessException | InstantiationException e) {
+    			 throw new IndexerSpecException("Could not instantiate mapping factory\n" + mappingFactories.toString().replaceAll(",", ",\n"));
+			}
+        }
+    	String[] mapParts = mapParams.toArray(new String[0]);
+    	for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
         {
             if (mappingFactory.canHandle(mapParts[0]))
             {
                 return mappingFactory.createMultiValueMapping(mapParts);
             }
         }
-        throw new IndexerSpecException("Could not handle impl: " + toDelimitedString(mapParts, " ")
-                + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
+        throw new IndexerSpecException("Could not handle map descriptor: " + toDelimitedString(mapParts, " ")); 
+        // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
     }
 
-    private List<AbstractValueMappingFactory> createMappingFactories(
-            final Set<Class<? extends AbstractValueMappingFactory>> factoryClasses)
-            throws IllegalAccessException, InstantiationException
+    private List<AbstractValueMappingFactory> createMappingFactories(final Set<Class<? extends AbstractValueMappingFactory>> factoryClasses) throws IllegalAccessException, InstantiationException
     {
         final List<AbstractValueMappingFactory> factories = new ArrayList<>(factoryClasses.size());
         for (final Class<? extends AbstractValueMappingFactory> extractorFactoryClass : factoryClasses)
@@ -399,1343 +411,920 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser
 
     public static final List<String> getErrors()
     {
-        if (scanner.getScannerErrors().size() == 0) return (parser_errors);
-        List<String> allErrors = new ArrayList<String>();
-        allErrors.addAll(parser_errors);
-        allErrors.addAll(scanner.getScannerErrors());
-        return (allErrors);
+    	if (scanner.getScannerErrors().size() == 0)
+    		return(parser_errors);
+    	List<String> allErrors = new ArrayList<String>();
+    	allErrors.addAll(parser_errors);
+    	allErrors.addAll(scanner.getScannerErrors());
+    	return(allErrors);
     }
-
+    
     public static final void addError(String errorMsg)
     {
         parser_errors.add(errorMsg);
     }
 
-    /** Cup generated class to encapsulate user supplied action code. */
-    @SuppressWarnings({ "rawtypes", "unchecked", "unused" })
-    class CUP$FullConditionalParser$actions
+
+/** Cup generated class to encapsulate user supplied action code.*/
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
+class CUP$FullConditionalParser$actions {
+  private final FullConditionalParser parser;
+
+  /** Constructor */
+  CUP$FullConditionalParser$actions(FullConditionalParser parser) {
+    this.parser = parser;
+  }
+
+  /** Method 0 with the actual generated action code for actions 0 to 300. */
+  public final java_cup.runtime.Symbol CUP$FullConditionalParser$do_action_part00000000(
+    int                        CUP$FullConditionalParser$act_num,
+    java_cup.runtime.lr_parser CUP$FullConditionalParser$parser,
+    java.util.Stack            CUP$FullConditionalParser$stack,
+    int                        CUP$FullConditionalParser$top)
+    throws java.lang.Exception
     {
-        private final FullConditionalParser parser;
+      /* Symbol object for return from actions */
+      java_cup.runtime.Symbol CUP$FullConditionalParser$result;
 
-        /** Constructor */
-        CUP$FullConditionalParser$actions(FullConditionalParser parser)
+      /* select the action based on the action number */
+      switch (CUP$FullConditionalParser$act_num)
         {
-            this.parser = parser;
-        }
-
-        /**
-         * Method 0 with the actual generated action code for actions 0 to 300.
-         */
-        public final java_cup.runtime.Symbol CUP$FullConditionalParser$do_action_part00000000(
-                int CUP$FullConditionalParser$act_num, java_cup.runtime.lr_parser CUP$FullConditionalParser$parser,
-                java.util.Stack CUP$FullConditionalParser$stack, int CUP$FullConditionalParser$top)
-                throws java.lang.Exception
-        {
-            /* Symbol object for return from actions */
-            java_cup.runtime.Symbol CUP$FullConditionalParser$result;
-
-            /* select the action based on the action number */
-            switch (CUP$FullConditionalParser$act_num) {
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 0: // $START ::= index_spec EOF
-                {
-                    Object RESULT = null;
-                    Location start_valxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location start_valxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    AbstractValueIndexer<?> start_val = (AbstractValueIndexer<?>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    RESULT = start_val;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("$START", 0,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 1)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    /* ACCEPT */
-                    CUP$FullConditionalParser$parser.done_parsing();
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 1: // index_spec ::= field_names EQU extractor COMMA
-                        // mapping_specs
-                {
-                    AbstractValueIndexer<?> RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 4)).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 4)).xright;
-                    List<String> s = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 4)).value;
-                    Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    AbstractMultiValueExtractor e = (AbstractMultiValueExtractor) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    List<AbstractMultiValueMapping> m = (List<AbstractMultiValueMapping>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = new MultiValueIndexer(s, e, m, MULTI_VALUE_COLLECTOR);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("index_spec", 0,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 4)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 2: // index_spec ::= field_names EQU extractor
-                {
-                    AbstractValueIndexer<?> RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    List<String> s = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    AbstractMultiValueExtractor e = (AbstractMultiValueExtractor) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = new MultiValueIndexer(s, e, new AbstractMultiValueMapping[0], MULTI_VALUE_COLLECTOR);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("index_spec", 0,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 3: // field_names ::= field_names COMMA FIELDNAME
-                {
-                    List<String> RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    List<String> s = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location nxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location nxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String n = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = s;
-                    s.add(n);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_names", 5,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 4: // field_names ::= FIELDNAME
-                {
-                    List<String> RESULT = null;
-                    Location nxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location nxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String n = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ArrayList<String>();
-                    RESULT.add(n);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_names", 5,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 5: // extractor ::= strings
-                {
-                    AbstractMultiValueExtractor RESULT = null;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = new ConstantMultiValueExtractor(l);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor", 1,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 6: // extractor ::= field_spec
-                {
-                    AbstractMultiValueExtractor RESULT = null;
-                    Location fsxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location fsxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    CompositeSpecification fs = (CompositeSpecification) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = new DirectMultiValueExtractor(fs);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor", 1,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 7: // extractor ::= FULLRECORD
-                {
-                    AbstractMultiValueExtractor RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new MultiValueWrapperSingleValueExtractor((AbstractSingleValueExtractor) fullFactory
-                            .createExtractor("CUP Parser", new StringReader(s)));
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor", 1,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 8: // extractor ::= DATE
-                {
-                    AbstractMultiValueExtractor RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = (AbstractMultiValueExtractor) dateFactory.createExtractor("CUP Parser",
-                            new StringReader(s));
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor", 1,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 9: // extractor ::= custom_extractor
-                {
-                    AbstractMultiValueExtractor RESULT = null;
-                    Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    AbstractMultiValueExtractor e = (AbstractMultiValueExtractor) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor", 1,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 10: // extractor ::= error
-                {
-                    AbstractMultiValueExtractor RESULT = null;
-                    RESULT = null;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor", 1,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 11: // strings ::= strings OR QUOTEDSTR
-                {
-                    List<String> RESULT = null;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = l;
-                    l.add(s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("strings", 6,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 12: // strings ::= QUOTEDSTR
-                {
-                    List<String> RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ArrayList<String>();
-                    RESULT.add(s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("strings", 6,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 13: // custom_extractor ::= CUSTOM LPAREN IDENTIFIER RPAREN
-                         // COMMA method_plus_params
-                {
-                    AbstractMultiValueExtractor RESULT = null;
-                    Location txleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).xleft;
-                    Location txright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).xright;
-                    Object t = (Object) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).value;
-                    Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xleft;
-                    Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xright;
-                    String m = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).value;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_extractor", 2,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 5)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 14: // custom_extractor ::= JAVA LPAREN IDENTIFIER RPAREN
-                         // COMMA method_plus_params
-                {
-                    AbstractMultiValueExtractor RESULT = null;
-                    Location txleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).xleft;
-                    Location txright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).xright;
-                    Object t = (Object) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).value;
-                    Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xleft;
-                    Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xright;
-                    String m = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).value;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_extractor", 2,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 5)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 15: // custom_extractor ::= SCRIPT LPAREN IDENTIFIER RPAREN
-                         // COMMA method_plus_params
-                {
-                    AbstractMultiValueExtractor RESULT = null;
-                    Location txleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).xleft;
-                    Location txright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).xright;
-                    Object t = (Object) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).value;
-                    Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xleft;
-                    Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xright;
-                    String m = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).value;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_extractor", 2,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 5)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 16: // mapping_specs ::= mapping_specs COMMA mapping_spec
-                {
-                    List<AbstractMultiValueMapping> RESULT = null;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    List<AbstractMultiValueMapping> l = (List<AbstractMultiValueMapping>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    AbstractMultiValueMapping m = (AbstractMultiValueMapping) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = l;
-                    l.add(m);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("mapping_specs", 3,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 17: // mapping_specs ::= mapping_spec
-                {
-                    List<AbstractMultiValueMapping> RESULT = null;
-                    Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    AbstractMultiValueMapping m = (AbstractMultiValueMapping) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = new ArrayList<AbstractMultiValueMapping>();
-                    RESULT.add(m);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("mapping_specs", 3,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 18: // mapping_spec ::= method_plus_params
-                {
-                    AbstractMultiValueMapping RESULT = null;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = createMultiValueMapping(l);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("mapping_spec", 4,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 19: // mapping_spec ::= custom_map_spec
-                {
-                    AbstractMultiValueMapping RESULT = null;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = createMultiValueMapping(l);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("mapping_spec", 4,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 20: // custom_map_spec ::= IDENTIFIER LPAREN IDENTIFIER
-                         // IDENTIFIER RPAREN
-                {
-                    List<String> RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 4)).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 4)).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 4)).value;
-                    Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    String s1 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    String s2 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    RESULT = new ArrayList<String>();
-                    RESULT.add(s);
-                    RESULT.add(s1);
-                    RESULT.add(s2);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_map_spec", 9,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 4)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 21: // custom_map_spec ::= IDENTIFIER LPAREN IDENTIFIER
-                         // IDENTIFIER LPAREN params RPAREN RPAREN
-                {
-                    List<String> RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 7)).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 7)).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 7)).value;
-                    Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).xleft;
-                    Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).xright;
-                    String s1 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 5)).value;
-                    Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 4)).xleft;
-                    Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 4)).xright;
-                    String s2 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 4)).value;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    RESULT = l;
-                    RESULT.add(0, s);
-                    RESULT.add(1, s1);
-                    RESULT.add(2, s2);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_map_spec", 9,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 7)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 22: // method_plus_params ::= IDENTIFIER
-                {
-                    List<String> RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = Collections.singletonList(s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("method_plus_params", 7,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 23: // method_plus_params ::= IDENTIFIER LPAREN params
-                         // RPAREN
-                {
-                    List<String> RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).value;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    RESULT = l;
-                    RESULT.add(0, s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("method_plus_params", 7,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 3)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 24: // params ::= params COMMA QUOTEDSTR
-                {
-                    List<String> RESULT = null;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = l;
-                    l.add(s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("params", 8,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 25: // params ::= params COMMA IDENTIFIER
-                {
-                    List<String> RESULT = null;
-                    Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    List<String> l = (List<String>) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = l;
-                    l.add(s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("params", 8,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 26: // params ::= QUOTEDSTR
-                {
-                    List<String> RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ArrayList<String>();
-                    RESULT.add(s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("params", 8,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 27: // params ::= IDENTIFIER
-                {
-                    List<String> RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ArrayList<String>();
-                    RESULT.add(s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("params", 8,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 28: // field_spec ::= field_spec COLON field_spec_part
-                {
-                    CompositeSpecification RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    CompositeSpecification s = (CompositeSpecification) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    CompositeSpecification s1 = (CompositeSpecification) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    s.addSpec(s1);
-                    RESULT = s;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec", 10,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 29: // field_spec ::= field_spec_part
-                {
-                    CompositeSpecification RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    CompositeSpecification s = (CompositeSpecification) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = new CompositeSpecification(s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec", 10,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 30: // field_spec_simple ::= field_spec_simple COLON
-                         // field_spec_part_simple
-                {
-                    CompositeSpecification RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    CompositeSpecification s = (CompositeSpecification) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    SingleSpecification s1 = (SingleSpecification) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    s.addSpec(s1);
-                    RESULT = s;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_simple", 11,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 31: // field_spec_simple ::= field_spec_part_simple
-                {
-                    CompositeSpecification RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    SingleSpecification s = (SingleSpecification) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = new CompositeSpecification(s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_simple", 11,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 32: // field_spec_part ::= LBRACE field_spec_simple RBRACE
-                         // QUESTION expr
-                {
-                    CompositeSpecification RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xright;
-                    CompositeSpecification s = (CompositeSpecification) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).value;
-                    Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    Condition e = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    s.addConditional(e);
-                    RESULT = s;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part", 12,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 4)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 33: // field_spec_part ::= field_spec_part_complex
-                {
-                    CompositeSpecification RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    SingleSpecification s = (SingleSpecification) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = new CompositeSpecification(s);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part", 12,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 34: // field_spec_part_complex ::= FIELDSPEC SUBFIELDSPEC
-                         // QUESTION expr
-                {
-                    SingleSpecification RESULT = null;
-                    Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xleft;
-                    Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xright;
-                    String f = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).value;
-                    Location sfxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location sfxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    String sf = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    Condition e = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf, e);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",
-                            13,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 3)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 35: // field_spec_part_complex ::= FIELDSPEC POSITION
-                         // QUESTION expr
-                {
-                    SingleSpecification RESULT = null;
-                    Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xleft;
-                    Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xright;
-                    String f = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).value;
-                    Location pxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location pxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    String p = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    Condition e = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, p, e);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",
-                            13,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 3)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 36: // field_spec_part_complex ::= FIELDSPEC QUESTION expr
-                {
-                    SingleSpecification RESULT = null;
-                    Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    String f = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    Condition e = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, e);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",
-                            13,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 37: // field_spec_part_complex ::= field_spec_part_simple
-                {
-                    SingleSpecification RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    SingleSpecification s = (SingleSpecification) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .peek()).value;
-                    RESULT = s;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",
-                            13, ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 38: // field_spec_part_simple ::= FIELDSPEC SUBFIELDSPEC
-                {
-                    SingleSpecification RESULT = null;
-                    Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    String f = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    Location sfxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sfxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String sf = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_simple", 14,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 1)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 39: // field_spec_part_simple ::= FIELDSPEC POSITION
-                {
-                    SingleSpecification RESULT = null;
-                    Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    String f = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    Location pxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location pxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String p = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, p);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_simple", 14,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 1)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 40: // field_spec_part_simple ::= FIELDSPEC
-                {
-                    SingleSpecification RESULT = null;
-                    Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String f = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_simple", 14,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 41: // expr ::= expr AND expr
-                {
-                    Condition RESULT = null;
-                    Location e1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location e1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    Condition e1 = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location e2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location e2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    Condition e2 = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ConditionComposite(e1, e2, FullSym.AND);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr", 15,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 42: // expr ::= expr OR expr
-                {
-                    Condition RESULT = null;
-                    Location e1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location e1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    Condition e1 = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location e2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location e2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    Condition e2 = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ConditionComposite(e1, e2, FullSym.OR);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr", 15,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 43: // expr ::= NOT expr
-                {
-                    Condition RESULT = null;
-                    Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    Condition e = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ConditionComposite(e, null, FullSym.NOT);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr", 15,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 1)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 44: // expr ::= LPAREN expr RPAREN
-                {
-                    Condition RESULT = null;
-                    Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    Condition e = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    RESULT = e;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr", 15,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 45: // expr ::= expr_part
-                {
-                    Condition RESULT = null;
-                    Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    Condition e = (Condition) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = e;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr", 15,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 46: // expr_part ::= SUBFIELD op value
-                {
-                    Condition RESULT = null;
-                    Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    String s1 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    Integer i = (Integer) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s2 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ConditionSubfield(s1, s2, ((int) i));
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part", 16,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 47: // expr_part ::= IND op value
-                {
-                    Condition RESULT = null;
-                    Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    String s1 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    Integer i = (Integer) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s2 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ConditionIndicator(s1, s2, ((int) i));
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part", 16,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 48: // expr_part ::= POSITION op value
-                {
-                    Condition RESULT = null;
-                    Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    String s1 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    Integer i = (Integer) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s2 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ConditionPosition(s1, s2, ((int) i));
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part", 16,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 2)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 49: // expr_part ::= FIELDSPEC SUBFIELD op value
-                {
-                    Condition RESULT = null;
-                    Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xleft;
-                    Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xright;
-                    String s1 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).value;
-                    Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    String s2 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    Integer i = (Integer) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    Location s3xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location s3xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s3 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ConditionSubfield(s1, s2, s3, ((int) i));
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part", 16,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 3)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 50: // expr_part ::= FIELDSPEC IND op value
-                {
-                    Condition RESULT = null;
-                    Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xleft;
-                    Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xright;
-                    String s1 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).value;
-                    Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    String s2 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    Integer i = (Integer) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    Location s3xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location s3xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s3 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ConditionIndicator(s1, s2, s3, ((int) i));
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part", 16,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 3)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 51: // expr_part ::= FIELDSPEC POSITION op value
-                {
-                    Condition RESULT = null;
-                    Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xleft;
-                    Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).xright;
-                    String s1 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 3)).value;
-                    Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xleft;
-                    Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).xright;
-                    String s2 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 2)).value;
-                    Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xleft;
-                    Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).xright;
-                    Integer i = (Integer) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                            .elementAt(CUP$FullConditionalParser$top - 1)).value;
-                    Location s3xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location s3xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s3 = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = new ConditionPosition(s1, s2, s3, ((int) i));
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part", 16,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack
-                                    .elementAt(CUP$FullConditionalParser$top - 3)),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 52: // op ::= EQU
-                {
-                    Integer RESULT = null;
-                    RESULT = new Integer(FullSym.EQU);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("op", 18,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 53: // op ::= NEQ
-                {
-                    Integer RESULT = null;
-                    RESULT = new Integer(FullSym.NEQ);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("op", 18,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 54: // op ::= MATCH
-                {
-                    Integer RESULT = null;
-                    RESULT = new Integer(FullSym.MATCH);
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("op", 18,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 55: // value ::= QUOTEDSTR
-                {
-                    String RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = s;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("value", 17,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 56: // value ::= CHAR
-                {
-                    String RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = s;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("value", 17,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . . . . . . . . . . . . . . . */
-                case 57: // value ::= NUMBER
-                {
-                    String RESULT = null;
-                    Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xleft;
-                    Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol) CUP$FullConditionalParser$stack
-                            .peek()).xright;
-                    String s = (String) ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-                    RESULT = s;
-                    CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("value", 17,
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()),
-                            ((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()), RESULT);
-                }
-                    return CUP$FullConditionalParser$result;
-
-                /* . . . . . . */
-                default:
-                    throw new Exception("Invalid action number " + CUP$FullConditionalParser$act_num
-                            + "found in internal parse table");
-
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 0: // $START ::= index_spec EOF 
+            {
+              Object RESULT =null;
+		Location start_valxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location start_valxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		AbstractValueIndexer< ? > start_val = (AbstractValueIndexer< ? >)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		RESULT = start_val;
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("$START",0, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
             }
-        } /* end of method */
+          /* ACCEPT */
+          CUP$FullConditionalParser$parser.done_parsing();
+          return CUP$FullConditionalParser$result;
 
-        /** Method splitting the generated action code into several parts. */
-        public final java_cup.runtime.Symbol CUP$FullConditionalParser$do_action(int CUP$FullConditionalParser$act_num,
-                java_cup.runtime.lr_parser CUP$FullConditionalParser$parser,
-                java.util.Stack CUP$FullConditionalParser$stack, int CUP$FullConditionalParser$top)
-                throws java.lang.Exception
-        {
-            return CUP$FullConditionalParser$do_action_part00000000(CUP$FullConditionalParser$act_num,
-                    CUP$FullConditionalParser$parser, CUP$FullConditionalParser$stack, CUP$FullConditionalParser$top);
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 1: // index_spec ::= field_names EQU extractor COMMA mapping_specs 
+            {
+              AbstractValueIndexer< ? > RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-4)).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-4)).xright;
+		List<String> s = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-4)).value;
+		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		AbstractValueExtractor< ? > e = (AbstractValueExtractor< ? >)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		List<List<String>> m = (List<List<String>>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = valueIndexerFactory.makeMultiValueIndexer(s, e, m); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("index_spec",0, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-4)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 2: // index_spec ::= field_names EQU extractor 
+            {
+              AbstractValueIndexer< ? > RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		List<String> s = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		AbstractValueExtractor< ? > e = (AbstractValueExtractor< ? >)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new MultiValueIndexer(s, (AbstractMultiValueExtractor)e, new AbstractMultiValueMapping[0], MULTI_VALUE_COLLECTOR); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("index_spec",0, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 3: // field_names ::= field_names COMMA FIELDNAME 
+            {
+              List<String> RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		List<String> s = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location nxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location nxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String n = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = s; s.add(n); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_names",5, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 4: // field_names ::= FIELDNAME 
+            {
+              List<String> RESULT =null;
+		Location nxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location nxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String n = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ArrayList<String>(); RESULT.add(n); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_names",5, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 5: // extractor ::= strings 
+            {
+              AbstractValueExtractor< ? > RESULT =null;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ConstantMultiValueExtractor(l); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor",1, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 6: // extractor ::= field_spec 
+            {
+              AbstractValueExtractor< ? > RESULT =null;
+		Location fsxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location fsxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		CompositeSpecification fs = (CompositeSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new DirectMultiValueExtractor(fs);  
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor",1, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 7: // extractor ::= FULLRECORD 
+            {
+              AbstractValueExtractor< ? > RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = fullFactory.createExtractor("CUP Parser", new StringReader(s)); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor",1, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 8: // extractor ::= DATE 
+            {
+              AbstractValueExtractor< ? > RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = dateFactory.createExtractor("CUP Parser", new StringReader(s)); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor",1, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 9: // extractor ::= custom_extractor 
+            {
+              AbstractValueExtractor< ? > RESULT =null;
+		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		AbstractValueExtractor< ? > e = (AbstractValueExtractor< ? >)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = e; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor",1, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 10: // extractor ::= error 
+            {
+              AbstractValueExtractor< ? > RESULT =null;
+		 RESULT = null; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor",1, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 11: // strings ::= strings OR QUOTEDSTR 
+            {
+              List<String> RESULT =null;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = l; l.add(s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("strings",6, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 12: // strings ::= QUOTEDSTR 
+            {
+              List<String> RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ArrayList<String>(); RESULT.add(s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("strings",6, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 13: // custom_extractor ::= CUSTOM LPAREN IDENTIFIER RPAREN opt_comma method_plus_params 
+            {
+              AbstractValueExtractor< ? > RESULT =null;
+		Location txleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).xleft;
+		Location txright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).xright;
+		String t = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).value;
+		Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		String m = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = createCustomExtractor(t, m, l); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_extractor",2, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 14: // custom_extractor ::= JAVA LPAREN IDENTIFIER RPAREN opt_comma method_plus_params 
+            {
+              AbstractValueExtractor< ? > RESULT =null;
+		Location txleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).xleft;
+		Location txright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).xright;
+		String t = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).value;
+		Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		String m = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = createCustomExtractor(t, m, l); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_extractor",2, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 15: // custom_extractor ::= SCRIPT LPAREN IDENTIFIER RPAREN opt_comma method_plus_params 
+            {
+              AbstractValueExtractor< ? > RESULT =null;
+		Location txleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).xleft;
+		Location txright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).xright;
+		String t = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).value;
+		Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		String m = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = createCustomExtractor(t, m, l); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_extractor",2, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 16: // mapping_specs ::= mapping_specs COMMA mapping_spec 
+            {
+              List<List<String>> RESULT =null;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		List<List<String>> l = (List<List<String>>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		List<String> m = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = l; if (m != null) { l.add(m);} 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("mapping_specs",3, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 17: // mapping_specs ::= mapping_spec 
+            {
+              List<List<String>> RESULT =null;
+		Location mxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location mxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		List<String> m = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ArrayList<List<String>>(); if (m != null) { RESULT.add(m);} 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("mapping_specs",3, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 18: // mapping_spec ::= method_plus_params 
+            {
+              List<String> RESULT =null;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = l; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("mapping_spec",4, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 19: // mapping_spec ::= custom_map_spec 
+            {
+              List<String> RESULT =null;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = l; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("mapping_spec",4, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 20: // custom_map_spec ::= CUSTOM_MAP LPAREN IDENTIFIER opt_comma IDENTIFIER RPAREN 
+            {
+              List<String> RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)).value;
+		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		String s1 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		String s2 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		 RESULT = new ArrayList<String>(); RESULT.add(s); RESULT.add(s1); RESULT.add(s2); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_map_spec",9, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-5)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 21: // custom_map_spec ::= CUSTOM_MAP LPAREN IDENTIFIER opt_comma IDENTIFIER LPAREN params RPAREN RPAREN 
+            {
+              List<String> RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-8)).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-8)).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-8)).value;
+		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-6)).xleft;
+		Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-6)).xright;
+		String s1 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-6)).value;
+		Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-4)).xleft;
+		Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-4)).xright;
+		String s2 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-4)).value;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		 RESULT = l; RESULT.add(0, s); RESULT.add(1, s1); RESULT.add(2, s2); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_map_spec",9, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-8)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 22: // custom_map_spec ::= error 
+            {
+              List<String> RESULT =null;
+		 addError("Malformed custom_map reference : Should be \ncustom_map(fully.qualified.class.Name method)\n or  custom_map(fully.qualified.class.Name method(parm1, parm2))"); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_map_spec",9, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 23: // opt_comma ::= COMMA 
+            {
+              String RESULT =null;
+
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("opt_comma",18, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 24: // opt_comma ::= 
+            {
+              String RESULT =null;
+
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("opt_comma",18, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 25: // method_plus_params ::= IDENTIFIER 
+            {
+              List<String> RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = Collections.singletonList(s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("method_plus_params",7, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 26: // method_plus_params ::= IDENTIFIER LPAREN params RPAREN 
+            {
+              List<String> RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		 RESULT = l; RESULT.add(0, s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("method_plus_params",7, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 27: // params ::= params COMMA QUOTEDSTR 
+            {
+              List<String> RESULT =null;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = l; l.add(s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("params",8, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 28: // params ::= params COMMA IDENTIFIER 
+            {
+              List<String> RESULT =null;
+		Location lxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location lxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		List<String> l = (List<String>)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = l; l.add(s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("params",8, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 29: // params ::= QUOTEDSTR 
+            {
+              List<String> RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ArrayList<String>(); RESULT.add(s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("params",8, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 30: // params ::= IDENTIFIER 
+            {
+              List<String> RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ArrayList<String>(); RESULT.add(s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("params",8, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 31: // field_spec ::= field_spec COLON field_spec_part 
+            {
+              CompositeSpecification RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		CompositeSpecification s = (CompositeSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		CompositeSpecification s1 = (CompositeSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 s.addSpec(s1); RESULT = s; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec",10, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 32: // field_spec ::= field_spec_part 
+            {
+              CompositeSpecification RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		CompositeSpecification s = (CompositeSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new CompositeSpecification(s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec",10, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 33: // field_spec_simple ::= field_spec_simple COLON field_spec_part_simple 
+            {
+              CompositeSpecification RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		CompositeSpecification s = (CompositeSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		SingleSpecification s1 = (SingleSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 s.addSpec(s1); RESULT = s; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_simple",11, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 34: // field_spec_simple ::= field_spec_part_simple 
+            {
+              CompositeSpecification RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		SingleSpecification s = (SingleSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new CompositeSpecification(s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_simple",11, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 35: // field_spec_part ::= LBRACE field_spec_simple RBRACE QUESTION expr 
+            {
+              CompositeSpecification RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		CompositeSpecification s = (CompositeSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		Condition e = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 s.addConditional(e); RESULT = s; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part",12, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-4)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 36: // field_spec_part ::= field_spec_part_complex 
+            {
+              CompositeSpecification RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		SingleSpecification s = (SingleSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new CompositeSpecification(s); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part",12, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 37: // field_spec_part_complex ::= FIELDSPEC SUBFIELDSPEC QUESTION expr 
+            {
+              SingleSpecification RESULT =null;
+		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		String f = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location sfxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location sfxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		String sf = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		Condition e = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf, e); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",13, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 38: // field_spec_part_complex ::= FIELDSPEC POSITION QUESTION expr 
+            {
+              SingleSpecification RESULT =null;
+		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		String f = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location pxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location pxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		String p = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		Condition e = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, p, e); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",13, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 39: // field_spec_part_complex ::= FIELDSPEC QUESTION expr 
+            {
+              SingleSpecification RESULT =null;
+		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		String f = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		Condition e = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, e); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",13, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 40: // field_spec_part_complex ::= field_spec_part_simple 
+            {
+              SingleSpecification RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		SingleSpecification s = (SingleSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = s; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",13, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 41: // field_spec_part_simple ::= FIELDSPEC SUBFIELDSPEC 
+            {
+              SingleSpecification RESULT =null;
+		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		String f = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		Location sfxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sfxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String sf = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_simple",14, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 42: // field_spec_part_simple ::= FIELDSPEC POSITION 
+            {
+              SingleSpecification RESULT =null;
+		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		String f = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		Location pxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location pxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String p = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, p); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_simple",14, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 43: // field_spec_part_simple ::= FIELDSPEC 
+            {
+              SingleSpecification RESULT =null;
+		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String f = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_simple",14, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 44: // expr ::= expr AND expr 
+            {
+              Condition RESULT =null;
+		Location e1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location e1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		Condition e1 = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location e2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location e2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		Condition e2 = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ConditionComposite(e1, e2, FullSym.AND);  
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr",15, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 45: // expr ::= expr OR expr 
+            {
+              Condition RESULT =null;
+		Location e1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location e1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		Condition e1 = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location e2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location e2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		Condition e2 = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ConditionComposite(e1, e2, FullSym.OR);  
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr",15, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 46: // expr ::= NOT expr 
+            {
+              Condition RESULT =null;
+		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		Condition e = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ConditionComposite(e, null, FullSym.NOT); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr",15, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 47: // expr ::= LPAREN expr RPAREN 
+            {
+              Condition RESULT =null;
+		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		Condition e = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		 RESULT = e; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr",15, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 48: // expr ::= expr_part 
+            {
+              Condition RESULT =null;
+		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		Condition e = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = e; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr",15, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 49: // expr_part ::= SUBFIELD op value 
+            {
+              Condition RESULT =null;
+		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		String s1 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		Integer i = (Integer)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s2 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ConditionSubfield(s1, s2, ((int)i)); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part",16, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 50: // expr_part ::= IND op value 
+            {
+              Condition RESULT =null;
+		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		String s1 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		Integer i = (Integer)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s2 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ConditionIndicator(s1, s2, ((int)i)); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part",16, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 51: // expr_part ::= POSITION op value 
+            {
+              Condition RESULT =null;
+		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		String s1 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		Integer i = (Integer)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s2 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ConditionPosition(s1, s2, ((int)i)); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part",16, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 52: // expr_part ::= FIELDSPEC SUBFIELD op value 
+            {
+              Condition RESULT =null;
+		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		String s1 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		String s2 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		Integer i = (Integer)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		Location s3xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location s3xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s3 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ConditionSubfield(s1, s2, s3, ((int)i)); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part",16, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 53: // expr_part ::= FIELDSPEC IND op value 
+            {
+              Condition RESULT =null;
+		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		String s1 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		String s2 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		Integer i = (Integer)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		Location s3xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location s3xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s3 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ConditionIndicator(s1, s2, s3, ((int)i)); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part",16, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 54: // expr_part ::= FIELDSPEC POSITION op value 
+            {
+              Condition RESULT =null;
+		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
+		Location s1xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
+		String s1 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
+		Location s2xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location s2xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		String s2 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location ixleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location ixright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		Integer i = (Integer)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		Location s3xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location s3xright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s3 = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = new ConditionPosition(s1, s2, s3, ((int)i)); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("expr_part",16, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 55: // op ::= EQU 
+            {
+              Integer RESULT =null;
+		 RESULT = new Integer(FullSym.EQU); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("op",19, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 56: // op ::= NEQ 
+            {
+              Integer RESULT =null;
+		 RESULT = new Integer(FullSym.NEQ); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("op",19, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 57: // op ::= MATCH 
+            {
+              Integer RESULT =null;
+		 RESULT = new Integer(FullSym.MATCH); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("op",19, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 58: // value ::= QUOTEDSTR 
+            {
+              String RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = s; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("value",17, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 59: // value ::= CHAR 
+            {
+              String RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = s; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("value",17, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 60: // value ::= NUMBER 
+            {
+              String RESULT =null;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = s; 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("value",17, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /* . . . . . .*/
+          default:
+            throw new Exception(
+               "Invalid action number "+CUP$FullConditionalParser$act_num+"found in internal parse table");
+
         }
+    } /* end of method */
+
+  /** Method splitting the generated action code into several parts. */
+  public final java_cup.runtime.Symbol CUP$FullConditionalParser$do_action(
+    int                        CUP$FullConditionalParser$act_num,
+    java_cup.runtime.lr_parser CUP$FullConditionalParser$parser,
+    java.util.Stack            CUP$FullConditionalParser$stack,
+    int                        CUP$FullConditionalParser$top)
+    throws java.lang.Exception
+    {
+              return CUP$FullConditionalParser$do_action_part00000000(
+                               CUP$FullConditionalParser$act_num,
+                               CUP$FullConditionalParser$parser,
+                               CUP$FullConditionalParser$stack,
+                               CUP$FullConditionalParser$top);
     }
+}
 
 }

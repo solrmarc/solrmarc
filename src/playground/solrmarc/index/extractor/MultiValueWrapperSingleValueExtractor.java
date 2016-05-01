@@ -5,7 +5,7 @@ import java.util.Collections;
 
 import org.marc4j.marc.Record;
 
-public class MultiValueWrapperSingleValueExtractor implements AbstractMultiValueExtractor
+public class MultiValueWrapperSingleValueExtractor extends AbstractMultiValueExtractor
 {
 
     private final AbstractSingleValueExtractor wrapped;
@@ -22,5 +22,4 @@ public class MultiValueWrapperSingleValueExtractor implements AbstractMultiValue
         if (result == null) return (Collections.EMPTY_LIST);
         else return (Collections.singletonList(result));
     }
-
 }

@@ -88,11 +88,8 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
         return mappingConfiguration.trim().startsWith("script");
     }
 
-    @Override
-    public AbstractValueExtractor<?> createExtractor(final String solrFieldName,
-            final StringReader mappingConfiguration)
+    private AbstractValueExtractor<?> createExtractor(final String solrFieldName, MethodCallContext context)
     {
-        MethodCallContext context = MethodCallContext.parseContextFromExtractorSpecification(mappingConfiguration);
         final String scriptFileName = context.getObjectName();
 
         final Interpreter interpreter = getInterpreter(scriptFileName);
@@ -112,5 +109,19 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
             return new MethodCallSingleValueExtractor(
                     new ScriptSingleValueMethodCall(interpreter, method, scriptFileName), context.getParameters());
         }
+    }
+
+    @Override
+    public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration)
+    {
+        MethodCallContext context = MethodCallContext.parseContextFromExtractorSpecification(mappingConfiguration);
+        return(createExtractor(solrFieldName, context));
+    }
+
+    @Override
+    public AbstractValueExtractor<?> createExtractor(String solrFieldName, String[] parts)
+    {
+        MethodCallContext context = MethodCallContext.parseContextFromExtractorParts(parts);
+        return(createExtractor(solrFieldName, context));
     }
 }

@@ -13,12 +13,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-public class DirectMultiValueExtractor implements AbstractMultiValueExtractor
+public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
 {
     public static final String UNIQUE = "unique";
     public static final String FIRST = "first";
     private FieldFormatter fmt;
     private Specification fieldsAndSubfieldSpec;
+
+    public DirectMultiValueExtractor(final String fieldsAndSubfields)
+    {
+        fieldsAndSubfieldSpec = AbstractSpecificationFactory.createSpecification(fieldsAndSubfields);
+        fmt = new FieldFormatterBase(false);
+    }
+
+    public DirectMultiValueExtractor(Specification fieldSpec)
+    {
+        fieldsAndSubfieldSpec = fieldSpec;
+        fmt = new FieldFormatterBase(false);
+    }
 
     public Specification getFieldsAndSubfieldSpec()
     {
@@ -64,32 +76,14 @@ public class DirectMultiValueExtractor implements AbstractMultiValueExtractor
         this.firstOnly = firstOnly;
     }
 
-    public DirectMultiValueExtractor(final String fieldsAndSubfields)
-    {
-        fieldsAndSubfieldSpec = AbstractSpecificationFactory.createSpecification(fieldsAndSubfields);
-        fmt = new FieldFormatterBase(false);
-    }
-
-    public DirectMultiValueExtractor(Specification fieldSpec)
-    {
-        fieldsAndSubfieldSpec = fieldSpec;
-        fmt = new FieldFormatterBase(false);
-    }
-
     public final Collection<FieldMatch> getFieldMatches(final Record record)
     {
         Collection<FieldMatch> result = fieldsAndSubfieldSpec.getFieldMatches(record);
         return result;
     }
 
+ 
     @Override
-    public Collection<String> extract(final Record record) throws Exception
-    {
-        Collection<String> result = makeEmptyResult();
-        extract(result, record);
-        return (result);
-    }
-
     public void extract(Collection<String> result, final Record record) throws Exception
     {
         for (FieldMatch fm : getFieldMatches(record))
@@ -98,18 +92,5 @@ public class DirectMultiValueExtractor implements AbstractMultiValueExtractor
         }
     }
 
-    private Collection<String> makeEmptyResult()
-    {
-        Collection<String> results;
-        if (unique)
-        {
-            results = new LinkedHashSet<String>();
-        }
-        else
-        {
-            results = new ArrayList<String>();
-        }
-        return (results);
-    }
 
 }

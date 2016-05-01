@@ -35,11 +35,8 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
         }
     }
 
-    @Override
-    public AbstractValueExtractor<?> createExtractor(final String solrFieldName,
-            final StringReader mappingConfiguration)
+    public AbstractValueExtractor<?> createExtractor(final String solrFieldName, MethodCallContext context)
     {
-        MethodCallContext context = MethodCallContext.parseContextFromExtractorSpecification(mappingConfiguration);
         final AbstractExtractorMethodCall<?> methodCall = methodCallManager.getExtractorMethodCallForContext(context);
         if (methodCall instanceof MultiValueExtractorMethodCall)
         {
@@ -56,5 +53,19 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
             throw new IllegalArgumentException("Unknown method: " + context.toString() + ". Known methods are: \n"
                     + methodCallManager.loadedExtractorMixinsToString());
         }
+    }
+
+    @Override
+    public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration)
+    {
+        MethodCallContext context = MethodCallContext.parseContextFromExtractorSpecification(mappingConfiguration);
+        return createExtractor(solrFieldName, context);
+    }
+    
+    @Override
+    public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final String[] parts)
+    {
+        MethodCallContext context = MethodCallContext.parseContextFromExtractorParts(parts);
+        return createExtractor(solrFieldName, context);
     }
 }

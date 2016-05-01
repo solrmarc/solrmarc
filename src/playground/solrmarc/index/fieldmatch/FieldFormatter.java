@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.marc4j.marc.VariableField;
 
-public abstract class FieldFormatter
+public interface FieldFormatter
 {
 
     public final static EnumSet<eCleanVal> TITLE_SORT_UPPER = EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.STRIP_ACCCENTS,
@@ -15,7 +15,8 @@ public abstract class FieldFormatter
     public final static EnumSet<eCleanVal> TITLE_SORT_LOWER = EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.STRIP_ACCCENTS,
             eCleanVal.STRIP_ALL_PUNCT, eCleanVal.TO_LOWER, eCleanVal.STRIP_INDICATOR_2);
 
-    protected static StringBuilder buffer = new StringBuilder();
+    public static StringBuilder buffer = new StringBuilder();
+    public static List<String> emptyList = Collections.emptyList();
 
     public enum eCleanVal
     {
@@ -54,14 +55,15 @@ public abstract class FieldFormatter
 
     public abstract void addCode(String codeStr);
 
-    public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data) throws Exception
-    {
-        final String cleaned = cleanData(vf, isSubfieldA, data);
-        final List<String> cleanedDataAsList = (cleaned == null || cleaned.length() == 0) ? Collections.emptyList()
-                : Collections.singletonList(cleaned);
-        Collection<String> result = handleMapping(cleanedDataAsList);
-        return (result);
-    }
+    public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data) throws Exception;
+//  public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data) throws Exception
+//    {
+//        final String cleaned = cleanData(vf, isSubfieldA, data);
+//        final List<String> cleanedDataAsList = (cleaned == null || cleaned.length() == 0) ? emptyList
+//                : Collections.singletonList(cleaned);
+//        Collection<String> result = handleMapping(cleanedDataAsList);
+//        return (result);
+//    }
 
     public abstract void addVal(String data);
 

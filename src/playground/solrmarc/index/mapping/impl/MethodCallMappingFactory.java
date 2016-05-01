@@ -4,6 +4,7 @@ import playground.solrmarc.index.extractor.methodcall.AbstractMappingMethodCall;
 import playground.solrmarc.index.extractor.methodcall.MethodCallContext;
 import playground.solrmarc.index.extractor.methodcall.MethodCallManager;
 import playground.solrmarc.index.extractor.methodcall.MultiValueMappingMethodCall;
+import playground.solrmarc.index.indexer.IndexerSpecException;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
 import playground.solrmarc.index.utils.StringReader;
@@ -54,8 +55,8 @@ public class MethodCallMappingFactory extends AbstractValueMappingFactory
         }
         else
         {
-            throw new IllegalArgumentException("Unknown mapping method: " + context.toString()
-                    + ". Known methods are: \n" + methodCallManager.loadedExtractorMixinsToString());
+            throw new IndexerSpecException("Unknown custom mapping method: " + context.toString()
+                    + " -- Known methods are: \n" + methodCallManager.loadedMappingMixinsToString());
         }
     }
 

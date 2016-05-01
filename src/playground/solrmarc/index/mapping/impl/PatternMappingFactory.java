@@ -56,6 +56,11 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
     public static List<PatternMapping> pattermMappingsFromString(String mapSpec)
     {
         final String mapParts[] = mapSpec.split("[|][|]");
+        return pattermMappingsFromStrings(mapParts);
+    }
+    
+    public static List<PatternMapping> pattermMappingsFromStrings(String[] mapParts)
+    {
         List<PatternMapping> pm = new ArrayList<PatternMapping>(mapParts.length);
 
         for (int i = 0; i < mapParts.length; i++)

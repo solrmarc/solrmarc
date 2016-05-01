@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
-public class DateRecordIndexedValueExtractor implements AbstractMultiValueExtractor
+public class DateRecordIndexedValueExtractor extends AbstractMultiValueExtractor
 {
     private final static String currentDate;
 

@@ -7,7 +7,7 @@ import org.marc4j.marc.Record;
 
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 
-public class DateOfPublicationValueExtractor implements AbstractMultiValueExtractor
+public class DateOfPublicationValueExtractor extends AbstractMultiValueExtractor
 {
     @Override
     public Collection<String> extract(final Record record)

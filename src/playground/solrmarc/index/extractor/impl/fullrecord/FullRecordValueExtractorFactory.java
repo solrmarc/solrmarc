@@ -16,11 +16,10 @@ public class FullRecordValueExtractorFactory extends AbstractValueExtractorFacto
                 || mapping.startsWith("text");
     }
 
-    @Override
-    public AbstractValueExtractor<?> createExtractor(final String solrFieldName,
-            final StringReader mappingConfiguration)
+ 
+    
+    AbstractValueExtractor<?> createExtractor(final String solrFieldName, final String mapping)
     {
-        final String mapping = mappingConfiguration.readAll().toLowerCase();
         if (mapping.startsWith("raw") || mapping.startsWith("FullRecordAsMARC".toLowerCase()))
         {
             return new FullRecordAsMarcValueExtractor();
@@ -41,7 +40,19 @@ public class FullRecordValueExtractorFactory extends AbstractValueExtractorFacto
         {
             return new FullRecordAsTextValueExtractor();
         }
-        throw new IllegalArgumentException(
-                "Unknown impl configuration: " + solrFieldName + " = " + mappingConfiguration);
+        throw new IllegalArgumentException("Unknown impl configuration: " + solrFieldName + " = " + mapping);
+    }
+    
+    @Override
+    public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration)
+    {
+        final String mapping = mappingConfiguration.readAll().toLowerCase();
+        return createExtractor(solrFieldName, mapping);
+    }
+
+    @Override
+    public AbstractValueExtractor<?> createExtractor(String solrFieldName, String[] parts)
+    {
+        return createExtractor(solrFieldName, parts[0]);
     }
 }

@@ -8,7 +8,7 @@ import org.marc4j.marc.Record;
 
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 
-public class MethodCallSingleValueExtractor implements AbstractMultiValueExtractor
+public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor
 {
     private final AbstractExtractorMethodCall<String> methodCall;
     private final Object[] parameters;

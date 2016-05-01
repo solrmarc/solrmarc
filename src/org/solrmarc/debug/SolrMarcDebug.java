@@ -47,8 +47,10 @@ public class SolrMarcDebug
     private JTextPane configPane;
     private JTextPane outputPane;
     private JTextPane errorPane;
+    private JTextPane recordPane;
     ValueIndexerFactory indexerFactory = null;
-
+    JComboBox<String> marcIdentifier = null;
+    
     /**
      * Launch the application.
      */
@@ -146,7 +148,7 @@ public class SolrMarcDebug
         JScrollPane scrollPane = new JScrollPane();
         frmSolrmarcIndexSpecification.getContentPane().add(scrollPane, "cell 0 0,grow");
 
-        JTextPane recordPane = new JTextPane();
+        recordPane = new JTextPane();
         recordPane.setEditable(false);
         scrollPane.setViewportView(recordPane);
 
@@ -154,7 +156,7 @@ public class SolrMarcDebug
         frmSolrmarcIndexSpecification.getContentPane().add(panel_1, "cell 0 1 2 1,grow");
         panel_1.setLayout(new MigLayout("", "[grow][][]", "[][grow][]"));
 
-        JComboBox<String> marcIdentifier = new JComboBox<String>();
+        marcIdentifier = new JComboBox<String>();
 
         JButton btnPrevRecord = new JButton("< Prev");
         btnPrevRecord.addActionListener(new ActionListener()

@@ -7,15 +7,19 @@ import playground.solrmarc.index.mapping.AbstractValueMapping;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.marc4j.marc.Record;
 
 public abstract class AbstractValueIndexer<T>
 {
     private Collection<String> solrFieldNames;
-    private final AbstractValueExtractor<T> extractor;
+    protected final AbstractValueExtractor<T> extractor;
     protected final AbstractValueMapping<T>[] mappings;
-    private final AbstractValueCollector<T> collector;
+    protected final AbstractValueCollector<T> collector;
+    private String specLabel;
+    private List<String> parseErrors;
 
     public AbstractValueIndexer(final String solrFieldName, final AbstractValueExtractor<T> extractor,
             final AbstractValueMapping<T>[] mappings, final AbstractValueCollector<T> collector)
@@ -52,13 +56,34 @@ public abstract class AbstractValueIndexer<T>
         this.mappings = mappings.toArray(tmp);
         this.collector = collector;
     }
+    
+    public String getSpecLabel()
+    {
+        return specLabel;
+    }
+
+    public void setSpecLabel(String specLabel)
+    {
+        this.specLabel = specLabel;
+    }
+
+    public List<String> getParseErrors()
+    {
+        return parseErrors;
+    }
+
+    public void setParseErrors(List<String> parseErrors)
+    {
+        this.parseErrors = parseErrors;
+    }
 
     public Collection<String> getFieldData(Record record) throws Exception
     {
+        if (extractor == null) return Collections.emptyList();
         T values = extractor.extract(record);
         if (values == null)
         {
-            return null;
+            return  Collections.emptyList();
         }
         for (final AbstractValueMapping<T> mapping : mappings)
         {

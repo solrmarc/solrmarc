@@ -36,6 +36,17 @@ public class MethodCallContext
         return new MethodCallContext(typeName, objectName, methodName, parameters, parameterTypes);
     }
 
+    public static MethodCallContext parseContextFromExtractorParts(String[] extParts)
+    {
+        final String typeName = extParts[0];
+        final String objectName = extParts[1];
+      //  mappingConfiguration.skipUntilAfter(',');
+        final String methodName = extParts[2];
+        final String[] parameters = getParameters(extParts, 3);
+        final Class<?>[] parameterTypes = getExtractorParameterTypes(parameters);
+        return new MethodCallContext(typeName, objectName, methodName, parameters, parameterTypes);
+    }
+
     public static MethodCallContext parseContextFromMappingSpecification(StringReader mappingConfiguration)
     {
         final String typeName = getTypeName(mappingConfiguration);

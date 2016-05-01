@@ -16,4 +16,11 @@ public final class FieldFormatterPatternMapped extends FieldFormatterMapped
         List<PatternMapping> pm = PatternMappingFactory.pattermMappingsFromString(patternMapSpec);
         map = new MultiValuePatternMapping(pm);
     }
+    
+    public FieldFormatterPatternMapped(FieldFormatter toDecorate, String[] patternMapSpecs)
+    {
+        super(toDecorate);
+        List<PatternMapping> pm = PatternMappingFactory.pattermMappingsFromStrings(patternMapSpecs);
+        map = new MultiValuePatternMapping(pm);
+    }
 }

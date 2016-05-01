@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
  * the writer and reads the formatted text from the writer's outputStream. The
  * formatted text will be the return value of the extraction.
  */
-public abstract class AbstractFullRecordValueExtractor implements AbstractSingleValueExtractor
+public abstract class AbstractFullRecordValueExtractor extends AbstractSingleValueExtractor
 {
     protected MarcWriter writer;
     private final ByteArrayOutputStream outputStream;

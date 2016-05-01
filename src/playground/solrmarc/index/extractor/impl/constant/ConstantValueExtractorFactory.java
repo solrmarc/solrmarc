@@ -33,6 +33,13 @@ public class ConstantValueExtractorFactory extends AbstractValueExtractorFactory
             return new ConstantMultiValueExtractor(values);
         }
     }
+    
+    @Override
+    public AbstractValueExtractor<?> createExtractor(String solrFieldName, String[] parts)
+    {
+        return new ConstantMultiValueExtractor(parts);
+    }
+
 
     private List<String> parseMappingConfiguration(final String mappingConfiguration)
     {
@@ -94,4 +101,5 @@ public class ConstantValueExtractorFactory extends AbstractValueExtractorFactory
         }
         return values;
     }
+
 }

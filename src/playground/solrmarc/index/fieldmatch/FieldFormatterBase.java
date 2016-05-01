@@ -4,21 +4,26 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.VariableField;
 
+
 import playground.solrmarc.tools.Utils;
 
-public class FieldFormatterBase extends FieldFormatter
+public class FieldFormatterBase implements FieldFormatter
 {
     String indicatorFmt = null;
     String sfCodeFmt = null;
     String separator = null;
     boolean unique = false;
     EnumSet<eCleanVal> cleanVal = EnumSet.noneOf(eCleanVal.class);
+ //   protected static StringBuilder buffer = new StringBuilder();
+ //   protected static List<String> emptyList = Collections.emptyList();
 
     String fieldTagFmt = null;
 
@@ -391,6 +396,15 @@ public class FieldFormatterBase extends FieldFormatter
             result = new ArrayList<String>();
         }
         return result;
+    }
+
+    @Override
+    public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data)
+    {
+        final String cleaned = cleanData(vf, isSubfieldA, data);
+        final List<String> cleanedDataAsList = (cleaned == null || cleaned.length() == 0) ? emptyList : Collections.singletonList(cleaned);
+        Collection<String> result = handleMapping(cleanedDataAsList);
+        return (result);
     }
 
 }

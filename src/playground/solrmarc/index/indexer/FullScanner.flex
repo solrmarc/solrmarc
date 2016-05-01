@@ -50,7 +50,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 IntLiteral = 0 | [1-9][0-9]*
 new_line = \r|\n|\r\n
 white_space = {new_line} | [ \t\f]
-identifier = [A-Za-z0-9][A-Z_a-z0-9.]*[A-Za-z0-9]
+identifier = [A-Za-z0-9][A-Z_a-z0-9./\\]*[A-Za-z0-9]
 fullrecord = "xml"|"raw"|"json"|"json2"|"text"|"FullRecordAs"[A-Za-z0-9]*
 datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
 %state STARTSPEC STRING CONDITIONAL SUBFIELDSPEC CUSTOMSPEC CUSTOMMETHOD CUSTOMPARAM MAPSPEC CONSTANT 
@@ -73,9 +73,9 @@ datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
 "?"                     { yybegin(CONDITIONAL);  return sf.newSymbol("?",FullSym.QUESTION); }
 ","                     { yybegin(MAPSPEC);      return sf.newSymbol(",", FullSym.COMMA); }
 {white_space}           { /* ignore */ }
-"script"                { yybegin(CUSTOMSPEC);   return sf.newSymbol("SCRIPT", FullSym.SCRIPT ); }
-"custom"                { yybegin(CUSTOMSPEC);   return sf.newSymbol("CUSTOM", FullSym.CUSTOM ); }
-"java"                  { yybegin(CUSTOMSPEC);   return sf.newSymbol("JAVA", FullSym.JAVA ); }
+"script"                { yybegin(CUSTOMSPEC);   return sf.newSymbol("SCRIPT", FullSym.SCRIPT, yytext() ); }
+"custom"                { yybegin(CUSTOMSPEC);   return sf.newSymbol("CUSTOM", FullSym.CUSTOM, yytext() ); }
+"java"                  { yybegin(CUSTOMSPEC);   return sf.newSymbol("JAVA", FullSym.JAVA, yytext() ); }
 {fullrecord}            { yybegin(MAPSPEC);      return sf.newSymbol("FULLRECORD", FullSym.FULLRECORD, yytext()); }
 {datespec}              { yybegin(MAPSPEC);      return sf.newSymbol("DATE", FullSym.DATE, yytext()); }
 \"                      { save_zzLexicalState = CONSTANT; string.setLength(0); yybegin(STRING); }
@@ -99,6 +99,7 @@ datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
 {identifier}			{ return sf.newSymbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
 "("                     { yybegin(CUSTOMPARAM); return sf.newSymbol("(",FullSym.LPAREN); }
 ","                     { yybegin(MAPSPEC); return sf.newSymbol(",", FullSym.COMMA); }
+{white_space}           { /* ignore */ }
 }
 
 <CUSTOMPARAM>{
@@ -112,9 +113,11 @@ datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
 
 <MAPSPEC>{
 ","                     { return sf.newSymbol(",", FullSym.COMMA); }
-{identifier}			{ return sf.newSymbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
+"custom_map"            { return sf.newSymbol("CUSTOM_MAP", FullSym.CUSTOM_MAP, yytext()); }
+{identifier}            { return sf.newSymbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
 "("                     { yybegin(CUSTOMPARAM); return sf.newSymbol("(",FullSym.LPAREN); }
 ")"                     { return sf.newSymbol(")",FullSym.RPAREN); }
+{white_space}           { /* ignore */ }
 }
 
 <SUBFIELDSPEC>{
@@ -144,6 +147,7 @@ datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
 
 ":"	              { yybegin(STARTSPEC);  return sf.newSymbol(":", FullSym.COLON);  }
 [}]				  { yybegin(STARTSPEC);  return sf.newSymbol("}", FullSym.RBRACE);  }
+","               { yybegin(MAPSPEC);  return sf.newSymbol(",", FullSym.COMMA);  }
 "("               { return sf.newSymbol("(",FullSym.LPAREN); }
 ")"               { return sf.newSymbol(")",FullSym.RPAREN); }
 "=="|"="          { return sf.newSymbol("EQU",FullSym.EQU ); }

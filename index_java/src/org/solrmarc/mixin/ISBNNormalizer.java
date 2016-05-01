@@ -29,6 +29,11 @@ public class ISBNNormalizer implements Mixin {
     public static final Pattern ISBN13Pat =
             Pattern.compile("^.*?(978[\\d\\-]{10,})(?:\\D|\\Z).*$");
 
+    public static Collection<String> filterISBN(Collection <String> isbnList)
+    {
+        return(filterISBN(isbnList, "13"));
+    }
+    
     public static Collection<String> filterISBN(Collection <String> isbnList, String output)
     {
     	Collection<String> result = Set.class.isAssignableFrom(isbnList.getClass()) ? new LinkedHashSet<String>() : new ArrayList<String>();

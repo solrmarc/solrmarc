@@ -6,43 +6,75 @@
 package playground.solrmarc.index.indexer;
 
 /** CUP generated class containing symbol constants. */
-public class FullSym
-{
-    /* terminals */
-    public static final int SUBFIELD = 24;
-    public static final int AND = 14;
-    public static final int LT = 22;
-    public static final int CUSTOM = 4;
-    public static final int QUESTION = 13;
-    public static final int RPAREN = 18;
-    public static final int OR = 15;
-    public static final int RBRACE = 12;
-    public static final int CHAR = 30;
-    public static final int FULLRECORD = 7;
-    public static final int DATE = 8;
-    public static final int NOT = 16;
-    public static final int IDENTIFIER = 9;
-    public static final int GT = 21;
-    public static final int LPAREN = 17;
-    public static final int COLON = 10;
-    public static final int LBRACE = 11;
-    public static final int SCRIPT = 3;
-    public static final int QUOTEDSTR = 29;
-    public static final int IND = 25;
-    public static final int COMMA = 2;
-    public static final int NUMBER = 31;
-    public static final int EOF = 0;
-    public static final int POSITION = 28;
-    public static final int FIELDNAME = 6;
-    public static final int error = 1;
-    public static final int JAVA = 5;
-    public static final int SUBFIELDSPEC = 27;
-    public static final int NEQ = 20;
-    public static final int MATCH = 23;
-    public static final int EQU = 19;
-    public static final int FIELDSPEC = 26;
-    public static final String[] terminalNames = new String[] { "EOF", "error", "COMMA", "SCRIPT", "CUSTOM", "JAVA",
-            "FIELDNAME", "FULLRECORD", "DATE", "IDENTIFIER", "COLON", "LBRACE", "RBRACE", "QUESTION", "AND", "OR",
-            "NOT", "LPAREN", "RPAREN", "EQU", "NEQ", "GT", "LT", "MATCH", "SUBFIELD", "IND", "FIELDSPEC",
-            "SUBFIELDSPEC", "POSITION", "QUOTEDSTR", "CHAR", "NUMBER" };
+public class FullSym {
+  /* terminals */
+  public static final int SUBFIELD = 25;
+  public static final int AND = 15;
+  public static final int LT = 23;
+  public static final int CUSTOM = 3;
+  public static final int QUESTION = 14;
+  public static final int RPAREN = 19;
+  public static final int OR = 16;
+  public static final int RBRACE = 13;
+  public static final int CHAR = 31;
+  public static final int FULLRECORD = 6;
+  public static final int DATE = 7;
+  public static final int NOT = 17;
+  public static final int IDENTIFIER = 8;
+  public static final int GT = 22;
+  public static final int LPAREN = 18;
+  public static final int COLON = 11;
+  public static final int LBRACE = 12;
+  public static final int SCRIPT = 2;
+  public static final int QUOTEDSTR = 30;
+  public static final int IND = 26;
+  public static final int COMMA = 10;
+  public static final int CUSTOM_MAP = 9;
+  public static final int NUMBER = 32;
+  public static final int EOF = 0;
+  public static final int POSITION = 29;
+  public static final int FIELDNAME = 5;
+  public static final int error = 1;
+  public static final int JAVA = 4;
+  public static final int SUBFIELDSPEC = 28;
+  public static final int NEQ = 21;
+  public static final int MATCH = 24;
+  public static final int EQU = 20;
+  public static final int FIELDSPEC = 27;
+  public static final String[] terminalNames = new String[] {
+  "EOF",
+  "error",
+  "SCRIPT",
+  "CUSTOM",
+  "JAVA",
+  "FIELDNAME",
+  "FULLRECORD",
+  "DATE",
+  "IDENTIFIER",
+  "CUSTOM_MAP",
+  "COMMA",
+  "COLON",
+  "LBRACE",
+  "RBRACE",
+  "QUESTION",
+  "AND",
+  "OR",
+  "NOT",
+  "LPAREN",
+  "RPAREN",
+  "EQU",
+  "NEQ",
+  "GT",
+  "LT",
+  "MATCH",
+  "SUBFIELD",
+  "IND",
+  "FIELDSPEC",
+  "SUBFIELDSPEC",
+  "POSITION",
+  "QUOTEDSTR",
+  "CHAR",
+  "NUMBER"
+  };
 }
+

@@ -9,6 +9,7 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
+import playground.solrmarc.index.indexer.FullConditionalParser;
 import playground.solrmarc.index.indexer.FullSym;
 
 public class ConditionSubfield extends Condition
@@ -40,8 +41,8 @@ public class ConditionSubfield extends Condition
             catch (PatternSyntaxException pse)
             {
                 tmp = Pattern.compile("");
-                ConditionalParser.addError("Invalid Regular Expression in Condition: " + value);
-                ConditionalParser.addError(pse.getMessage());
+                FullConditionalParser.addError("Invalid Regular Expression in Condition: " + value);
+                FullConditionalParser.addError(pse.getMessage());
             }
             valuePattern = tmp;
         }
