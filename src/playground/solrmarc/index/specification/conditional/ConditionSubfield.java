@@ -66,6 +66,16 @@ public class ConditionSubfield extends Condition
                     if (sfVal.equals(value)) return (true);
                     break;
                 }
+                case FullSym.LT:
+                {
+                    if (sfVal.startsWith(value)) return (true);
+                    break;
+                }
+                case FullSym.GT:
+                {
+                    if (sfVal.endsWith(value)) return (true);
+                    break;
+                }
                 case FullSym.NEQ:
                 {
                     if (sfVal.equals(value)) return (false);

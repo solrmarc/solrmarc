@@ -6,34 +6,57 @@
 package playground.solrmarc.index.specification.conditional;
 
 /** CUP generated class containing symbol constants. */
-public class sym
-{
-    /* terminals */
-    public static final int SUBFIELD = 16;
-    public static final int AND = 6;
-    public static final int LT = 14;
-    public static final int QUESTION = 5;
-    public static final int OR = 7;
-    public static final int RBRACE = 4;
-    public static final int RPAREN = 10;
-    public static final int CHAR = 22;
-    public static final int NOT = 8;
-    public static final int LPAREN = 9;
-    public static final int GT = 13;
-    public static final int COLON = 2;
-    public static final int LBRACE = 3;
-    public static final int QUOTEDSTR = 21;
-    public static final int IND = 17;
-    public static final int NUMBER = 23;
-    public static final int EOF = 0;
-    public static final int POSITION = 20;
-    public static final int error = 1;
-    public static final int SUBFIELDSPEC = 19;
-    public static final int NEQ = 12;
-    public static final int MATCH = 15;
-    public static final int EQU = 11;
-    public static final int FIELDSPEC = 18;
-    public static final String[] terminalNames = new String[] { "EOF", "error", "COLON", "LBRACE", "RBRACE", "QUESTION",
-            "AND", "OR", "NOT", "LPAREN", "RPAREN", "EQU", "NEQ", "GT", "LT", "MATCH", "SUBFIELD", "IND", "FIELDSPEC",
-            "SUBFIELDSPEC", "POSITION", "QUOTEDSTR", "CHAR", "NUMBER" };
+public class sym {
+  /* terminals */
+  public static final int SUBFIELD = 16;
+  public static final int AND = 6;
+  public static final int LT = 14;
+  public static final int QUESTION = 5;
+  public static final int OR = 7;
+  public static final int RBRACE = 4;
+  public static final int RPAREN = 10;
+  public static final int CHAR = 22;
+  public static final int NOT = 8;
+  public static final int LPAREN = 9;
+  public static final int GT = 13;
+  public static final int COLON = 2;
+  public static final int LBRACE = 3;
+  public static final int QUOTEDSTR = 21;
+  public static final int IND = 17;
+  public static final int NUMBER = 23;
+  public static final int EOF = 0;
+  public static final int POSITION = 20;
+  public static final int error = 1;
+  public static final int SUBFIELDSPEC = 19;
+  public static final int NEQ = 12;
+  public static final int MATCH = 15;
+  public static final int EQU = 11;
+  public static final int FIELDSPEC = 18;
+  public static final String[] terminalNames = new String[] {
+  "EOF",
+  "error",
+  "COLON",
+  "LBRACE",
+  "RBRACE",
+  "QUESTION",
+  "AND",
+  "OR",
+  "NOT",
+  "LPAREN",
+  "RPAREN",
+  "EQU",
+  "NEQ",
+  "GT",
+  "LT",
+  "MATCH",
+  "SUBFIELD",
+  "IND",
+  "FIELDSPEC",
+  "SUBFIELDSPEC",
+  "POSITION",
+  "QUOTEDSTR",
+  "CHAR",
+  "NUMBER"
+  };
 }
+

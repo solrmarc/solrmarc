@@ -17,14 +17,14 @@ public class FullSym {
   public static final int OR = 16;
   public static final int RBRACE = 13;
   public static final int CHAR = 31;
-  public static final int FULLRECORD = 6;
   public static final int DATE = 7;
+  public static final int FULLRECORD = 6;
   public static final int NOT = 17;
   public static final int IDENTIFIER = 8;
   public static final int GT = 22;
   public static final int LPAREN = 18;
-  public static final int COLON = 11;
   public static final int LBRACE = 12;
+  public static final int COLON = 11;
   public static final int SCRIPT = 2;
   public static final int QUOTEDSTR = 30;
   public static final int IND = 26;

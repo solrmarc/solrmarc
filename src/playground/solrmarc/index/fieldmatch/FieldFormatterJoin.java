@@ -19,6 +19,15 @@ public class FieldFormatterJoin extends FieldFormatterDecorator
         setSeparator(separator);
     }
 
+    public FieldFormatterJoin()
+    {
+    }
+
+    public FieldFormatterJoin(String separator)
+    {
+        setSeparator(separator);
+    }
+
     @Override
     public void addAfterSubfield(Collection<String> result)
     {

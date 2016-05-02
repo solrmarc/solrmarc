@@ -2,7 +2,9 @@ package playground.solrmarc.index.extractor.impl.direct;
 
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 import playground.solrmarc.index.fieldmatch.FieldFormatter;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
 import playground.solrmarc.index.fieldmatch.FieldFormatterBase;
+import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
 import playground.solrmarc.index.fieldmatch.FieldMatch;
 import playground.solrmarc.index.specification.AbstractSpecificationFactory;
 import playground.solrmarc.index.specification.Specification;
@@ -11,25 +13,26 @@ import org.marc4j.marc.Record;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 
 public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
 {
     public static final String UNIQUE = "unique";
     public static final String FIRST = "first";
-    private FieldFormatter fmt;
+//    private FieldFormatter fmt;
     private Specification fieldsAndSubfieldSpec;
 
     public DirectMultiValueExtractor(final String fieldsAndSubfields)
     {
         fieldsAndSubfieldSpec = AbstractSpecificationFactory.createSpecification(fieldsAndSubfields);
-        fmt = new FieldFormatterBase(false);
+ //       fmt = fieldsAndSubfieldSpec.getFormatter();
     }
 
     public DirectMultiValueExtractor(Specification fieldSpec)
     {
         fieldsAndSubfieldSpec = fieldSpec;
-        fmt = new FieldFormatterBase(false);
+ //       fmt = fieldsAndSubfieldSpec.getFormatter();
     }
 
     public Specification getFieldsAndSubfieldSpec()
@@ -42,16 +45,21 @@ public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
         this.fieldsAndSubfieldSpec = fieldsAndSubfieldSpec;
     }
 
-    public FieldFormatter getFormatter()
+    public void addFormatter(FieldFormatterDecorator fmt)
     {
-        return fmt;
+        this.fieldsAndSubfieldSpec.addFormatter(fmt);
     }
-
-    public void setFormatter(FieldFormatter fmt)
-    {
-        this.fmt = fmt;
-        if (fieldsAndSubfieldSpec != null) fieldsAndSubfieldSpec.setFormatter(fmt);
-    }
+    
+//    public FieldFormatter getFormatter()
+//    {
+//        return fmt;
+//    }
+//
+//    public void setFormatter(FieldFormatter fmt)
+//    {
+//        this.fmt = fmt;
+//        if (fieldsAndSubfieldSpec != null) fieldsAndSubfieldSpec.setFormatter(fmt);
+//    }
 
     boolean unique = false;
     boolean firstOnly = false;
@@ -90,6 +98,16 @@ public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
         {
             fm.addValuesTo(result);
         }
+    }
+
+    public void addCleanVal(eCleanVal cleanVal)
+    {
+        fieldsAndSubfieldSpec.addCleanVal(cleanVal);
+    }
+
+    public void setCleanVal(EnumSet<eCleanVal> of)
+    {
+        fieldsAndSubfieldSpec.setCleanVal(of);        
     }
 
 

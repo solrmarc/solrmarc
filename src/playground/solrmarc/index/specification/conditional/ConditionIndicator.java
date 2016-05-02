@@ -57,6 +57,10 @@ public class ConditionIndicator extends Condition
         switch (op) {
             case FullSym.EQU:
                 return (value.charAt(0) == indVal);
+            case FullSym.LT:
+                return (value.charAt(0) < indVal);
+            case FullSym.GT:
+                return (value.charAt(0) > indVal);
             case FullSym.NEQ:
                 return (value.charAt(0) != indVal);
             case FullSym.MATCH:

@@ -11,6 +11,7 @@ import playground.solrmarc.index.fieldmatch.FieldFormatter;
 import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
 import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
 import playground.solrmarc.index.fieldmatch.FieldFormatterMapped;
+import playground.solrmarc.index.fieldmatch.FieldFormatterSubstring;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
 //import playground.solrmarc.index.specification.ErrorSpecification;
@@ -352,7 +353,6 @@ public class ValueIndexerFactory
             return;
         }
 
-        FieldFormatter fmt = multiValueExtractor.getFormatter();
         for (List<String> mapSpec : mapSpecs)
         {
             String mapParts[] = mapSpec.toArray(new String[0]);
@@ -360,11 +360,22 @@ public class ValueIndexerFactory
             {
                 if (mapParts.length > 1)
                 {
-                    fmt = new FieldFormatterJoin(fmt, mapParts[1]);
+                    multiValueExtractor.addFormatter(new FieldFormatterJoin(mapParts[1]));
                 }
                 else
                 {
-                    fmt = new FieldFormatterJoin(fmt);
+                    multiValueExtractor.addFormatter(new FieldFormatterJoin());
+                }
+            }
+            else if (mapParts[0].equals("substring"))
+            {
+                if (mapParts.length > 2)
+                {
+                    multiValueExtractor.addFormatter(new FieldFormatterSubstring(mapParts[1], mapParts[2]));
+                }
+                else
+                {
+                    multiValueExtractor.addFormatter(new FieldFormatterSubstring(mapParts[1]));
                 }
             }
             else if (mapParts[0].equals("unique"))
@@ -377,69 +388,67 @@ public class ValueIndexerFactory
             }
             else if (mapParts[0].equals("cleanEach"))
             {
-                fmt.addCleanVal(eCleanVal.CLEAN_EACH);
+                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);
             }
             else if (mapParts[0].equals("cleanEnd"))
             {
-                fmt.addCleanVal(eCleanVal.CLEAN_END);
+                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_END);
             }
             else if (mapParts[0].equals("clean"))
             {
-                fmt.addCleanVal(eCleanVal.CLEAN_EACH);
-                fmt.addCleanVal(eCleanVal.CLEAN_END);
+                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);
+                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_END);
             }
             else if (mapParts[0].equals("stripAccent"))
             {
-                fmt.addCleanVal(eCleanVal.STRIP_ACCCENTS);
+                multiValueExtractor.addCleanVal(eCleanVal.STRIP_ACCCENTS);
             }
             else if (mapParts[0].equals("stripPunct"))
             {
-                fmt.addCleanVal(eCleanVal.STRIP_ALL_PUNCT);
+                multiValueExtractor.addCleanVal(eCleanVal.STRIP_ALL_PUNCT);
             }
             else if (mapParts[0].equals("stripInd2"))
             {
-                fmt.addCleanVal(eCleanVal.STRIP_INDICATOR_2);
+                multiValueExtractor.addCleanVal(eCleanVal.STRIP_INDICATOR_2);
             }
             else if (mapParts[0].equals("toUpper"))
             {
-                fmt.addCleanVal(eCleanVal.TO_UPPER);
+                multiValueExtractor.addCleanVal(eCleanVal.TO_UPPER);
             }
             else if (mapParts[0].equals("toLower"))
             {
-                fmt.addCleanVal(eCleanVal.TO_LOWER);
+                multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
             }
             else if (mapParts[0].equals("toUpper"))
             {
-                fmt.addCleanVal(eCleanVal.TO_UPPER);
+                multiValueExtractor.addCleanVal(eCleanVal.TO_UPPER);
             }
             else if (mapParts[0].equals("toLower"))
             {
-                fmt.addCleanVal(eCleanVal.TO_LOWER);
+                multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
             }
             else if (mapParts[0].equals("titleSortUpper"))
             {
-                fmt.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS,
+                multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS,
                         eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR_2));
-                fmt.addCleanVal(eCleanVal.TO_UPPER);
+                multiValueExtractor.addCleanVal(eCleanVal.TO_UPPER);
             }
             else if (mapParts[0].equals("titleSortLower"))
             {
-                fmt.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS,
+                multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS,
                         eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR_2));
-                fmt.addCleanVal(eCleanVal.TO_LOWER);
+                multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
             }
             else if (isAValueMappingConfiguration(mapParts[0]))
             {
                 AbstractMultiValueMapping valueMapping = createMultiValueMapping(mapParts);
-                fmt = new FieldFormatterMapped(fmt, valueMapping);
+                multiValueExtractor.addFormatter(new FieldFormatterMapped(valueMapping));
             }
             else
             {
                 validationExceptions.add(new IndexerSpecException("Illegal format specification: " + toDelimitedString(mapParts, " ")));
             }
         }
-
-        multiValueExtractor.setFormatter(fmt);
 
     }
 
@@ -458,7 +467,7 @@ public class ValueIndexerFactory
             return;
         }
 
-        FieldFormatter fmt = multiValueExtractor.getFormatter();
+ //       FieldFormatter fmt = multiValueExtractor.getFormatter();
         for (String mappingConfig : COMMA_SPLIT_PATTERN.split(configurationData))
         {
             mappingConfig = mappingConfig.trim();
@@ -468,13 +477,24 @@ public class ValueIndexerFactory
                 final int closeParanthisis = mappingConfig.indexOf(')');
                 if (openParanthisis >= 0 && closeParanthisis >= 0)
                 {
-                    fmt = new FieldFormatterJoin(fmt, mappingConfig.substring(openParanthisis + 1, closeParanthisis));
+                    multiValueExtractor.addFormatter(new FieldFormatterJoin(mappingConfig.substring(openParanthisis + 1, closeParanthisis)));
                 }
                 else
                 {
-                    fmt = new FieldFormatterJoin(fmt);
+                    multiValueExtractor.addFormatter(new FieldFormatterJoin());
                 }
             }
+//            else if (mapParts[0].equals("substring"))
+//            {
+//                if (mapParts.length > 2)
+//                {
+//                    fmt = new FieldFormatterSubstring(fmt, mapParts[1], mapParts[2]);
+//                }
+//                else
+//                {
+//                    fmt = new FieldFormatterSubstring(fmt, mapParts[1]);
+//                }
+//            }
             else if (mappingConfig.equals("unique"))
             {
                 multiValueExtractor.setUnique(true);
@@ -485,37 +505,37 @@ public class ValueIndexerFactory
             }
             else if (mappingConfig.equals("cleanEach"))
             {
-                fmt.addCleanVal(eCleanVal.CLEAN_EACH);
+                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);
             }
             else if (mappingConfig.equals("cleanEnd"))
             {
-                fmt.addCleanVal(eCleanVal.CLEAN_END);
+                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_END);
             }
             else if (mappingConfig.equals("clean"))
             {
-                fmt.addCleanVal(eCleanVal.CLEAN_EACH);
-                fmt.addCleanVal(eCleanVal.CLEAN_END);
+                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);
+                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_END);
             }
             else if (mappingConfig.equals("stripAccent"))
             {
-                fmt.addCleanVal(eCleanVal.STRIP_ACCCENTS);
+                multiValueExtractor.addCleanVal(eCleanVal.STRIP_ACCCENTS);
             }
             else if (mappingConfig.equals("titleSortUpper"))
             {
-                fmt.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS,
+                multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS,
                         eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR_2));
-                fmt.addCleanVal(eCleanVal.TO_UPPER);
+                multiValueExtractor.addCleanVal(eCleanVal.TO_UPPER);
             }
             else if (mappingConfig.equals("titleSortLower"))
             {
-                fmt.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS,
+                multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS,
                         eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR_2));
-                fmt.addCleanVal(eCleanVal.TO_LOWER);
+                multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
             }
             else if (isAValueMappingConfiguration(mappingConfig))
             {
-                AbstractMultiValueMapping valueMapping = createMultiValueMapping(mappingConfig.trim());
-                fmt = new FieldFormatterMapped(fmt, valueMapping);
+                AbstractMultiValueMapping valueMapping = createMultiValueMapping(mappingConfig);
+                multiValueExtractor.addFormatter(new FieldFormatterMapped(valueMapping));
             }
             else
             {
@@ -523,9 +543,6 @@ public class ValueIndexerFactory
             }
             mappingConfiguration.skip(mappingConfig.length() + 1);
         }
-
-        multiValueExtractor.setFormatter(fmt);
-
     }
 
     private AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration)

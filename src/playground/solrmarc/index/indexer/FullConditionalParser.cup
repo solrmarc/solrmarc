@@ -275,14 +275,13 @@ field_spec_part ::= LBRACE field_spec_simple:s RBRACE QUESTION expr:e 		{: s.add
                   | field_spec_part_complex:s								{: RESULT = new CompositeSpecification(s); :}
                   ;
                                     
-field_spec_part_complex ::= FIELDSPEC:f SUBFIELDSPEC:sf QUESTION expr:e 	{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf, e); :}
-                          | FIELDSPEC:f POSITION:p QUESTION expr:e			{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, p, e); :} 
-                          | FIELDSPEC:f QUESTION expr:e						{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, e); :} 
+field_spec_part_complex ::= field_spec_part_simple:s QUESTION expr:e 	    {: RESULT = s; s.addConditional(e); :}
                           | field_spec_part_simple:s 						{: RESULT = s; :}
                           ;
                           
 field_spec_part_simple ::= FIELDSPEC:f SUBFIELDSPEC:sf 						{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf); :} 
-                         | FIELDSPEC:f POSITION:p							{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, p); :} 
+                         | FIELDSPEC:f SUBFIELDSPEC:sf POSITION:p           {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf, p); :} 
+                         | FIELDSPEC:f POSITION:p                           {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, p); :} 
                          | FIELDSPEC:f 										{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null); :} 
                          ;
                          
@@ -302,7 +301,9 @@ expr_part ::= SUBFIELD:s1 op:i value:s2		                {: RESULT = new Conditi
             ;
 op ::= EQU 									{: RESULT = new Integer(FullSym.EQU); :}
      | NEQ 									{: RESULT = new Integer(FullSym.NEQ); :}
-     | MATCH								{: RESULT = new Integer(FullSym.MATCH); :}
+     | MATCH                                {: RESULT = new Integer(FullSym.MATCH); :}
+     | LT                                   {: RESULT = new Integer(FullSym.LT); :}
+     | GT                                   {: RESULT = new Integer(FullSym.GT); :}
      ;
      
 value ::= QUOTEDSTR:s						{: RESULT = s; :} 

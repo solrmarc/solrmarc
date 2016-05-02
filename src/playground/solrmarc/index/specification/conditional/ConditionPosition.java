@@ -64,6 +64,10 @@ public class ConditionPosition extends Condition
         switch (op) {
             case FullSym.EQU:
                 return (posVal.equals(value));
+            case FullSym.LT:
+                return (posVal.startsWith(value));
+            case FullSym.GT:
+                return (posVal.endsWith(value));
             case FullSym.NEQ:
                 return (!posVal.equals(value));
             case FullSym.MATCH:

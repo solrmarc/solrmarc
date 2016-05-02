@@ -8,6 +8,10 @@ public final class FieldFormatterSimple extends FieldFormatterDecorator
     {
         super(toDecorate);
     }
+    
+    public FieldFormatterSimple()
+    {
+    }
 
     @Override
     public void addAfterSubfield(Collection<String> result)

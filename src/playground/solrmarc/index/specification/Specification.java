@@ -2,12 +2,15 @@ package playground.solrmarc.index.specification;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
 
 import playground.solrmarc.index.fieldmatch.FieldFormatter;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
+import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
 import playground.solrmarc.index.fieldmatch.FieldMatch;
 import playground.solrmarc.index.specification.conditional.Condition;
 
@@ -54,6 +57,12 @@ public abstract class Specification
         this.specLabel = specLabel;
     }
 
+    public abstract void addFormatter(FieldFormatterDecorator fmt);
+   
     public abstract void setFormatter(FieldFormatter fmt);
+
+    public abstract void addCleanVal(eCleanVal cleanVal);
+
+    public abstract void setCleanVal(EnumSet<eCleanVal> of);
 
 }

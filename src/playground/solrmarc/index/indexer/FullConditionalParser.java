@@ -51,7 +51,7 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
   /** Production table. */
   protected static final short _production_table[][] = 
     unpackFromStrings(new String[] {
-    "\000\075\000\002\002\004\000\002\002\007\000\002\002" +
+    "\000\076\000\002\002\004\000\002\002\007\000\002\002" +
     "\005\000\002\007\005\000\002\007\003\000\002\003\003" +
     "\000\002\003\003\000\002\003\003\000\002\003\003\000" +
     "\002\003\003\000\002\003\003\000\002\010\005\000\002" +
@@ -62,14 +62,15 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
     "\011\003\000\002\011\006\000\002\012\005\000\002\012" +
     "\005\000\002\012\003\000\002\012\003\000\002\014\005" +
     "\000\002\014\003\000\002\015\005\000\002\015\003\000" +
-    "\002\016\007\000\002\016\003\000\002\017\006\000\002" +
-    "\017\006\000\002\017\005\000\002\017\003\000\002\020" +
-    "\004\000\002\020\004\000\002\020\003\000\002\021\005" +
-    "\000\002\021\005\000\002\021\004\000\002\021\005\000" +
-    "\002\021\003\000\002\022\005\000\002\022\005\000\002" +
-    "\022\005\000\002\022\006\000\002\022\006\000\002\022" +
-    "\006\000\002\025\003\000\002\025\003\000\002\025\003" +
-    "\000\002\023\003\000\002\023\003\000\002\023\003" });
+    "\002\016\007\000\002\016\003\000\002\017\005\000\002" +
+    "\017\003\000\002\020\004\000\002\020\005\000\002\020" +
+    "\004\000\002\020\003\000\002\021\005\000\002\021\005" +
+    "\000\002\021\004\000\002\021\005\000\002\021\003\000" +
+    "\002\022\005\000\002\022\005\000\002\022\005\000\002" +
+    "\022\006\000\002\022\006\000\002\022\006\000\002\025" +
+    "\003\000\002\025\003\000\002\025\003\000\002\025\003" +
+    "\000\002\025\003\000\002\023\003\000\002\023\003\000" +
+    "\002\023\003" });
 
   /** Access to production table. */
   public short[][] production_table() {return _production_table;}
@@ -77,101 +78,100 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
   /** Parse-action table. */
   protected static final short[][] _action_table = 
     unpackFromStrings(new String[] {
-    "\000\174\000\004\007\006\001\002\000\006\014\010\026" +
+    "\000\170\000\004\007\006\001\002\000\006\014\010\026" +
     "\011\001\002\000\004\002\007\001\002\000\006\014\ufffd" +
     "\026\ufffd\001\002\000\004\002\001\001\002\000\004\007" +
-    "\176\001\002\000\024\003\024\004\025\005\026\006\013" +
+    "\172\001\002\000\024\003\024\004\025\005\026\006\013" +
     "\010\022\011\017\016\015\035\023\040\027\001\002\000" +
-    "\010\002\uffe1\014\uffe1\015\uffe1\001\002\000\004\024\171" +
+    "\010\002\uffe1\014\uffe1\015\uffe1\001\002\000\004\024\165" +
     "\001\002\000\006\002\ufff8\014\ufff8\001\002\000\004\035" +
-    "\161\001\002\000\010\002\ufffb\014\ufffb\015\155\001\002" +
+    "\023\001\002\000\010\002\ufffb\014\ufffb\015\154\001\002" +
     "\000\006\002\ufff9\014\ufff9\001\002\000\010\002\uffdd\014" +
-    "\uffdd\015\uffdd\001\002\000\006\002\uffff\014\133\001\002" +
-    "\000\006\002\ufffa\014\ufffa\001\002\000\016\002\uffd6\014" +
-    "\uffd6\015\uffd6\020\062\036\060\037\061\001\002\000\006" +
-    "\002\ufff7\014\ufff7\001\002\000\004\024\053\001\002\000" +
-    "\004\024\034\001\002\000\010\002\ufff5\014\ufff5\022\ufff5" +
-    "\001\002\000\010\002\ufffc\014\ufffc\022\032\001\002\000" +
-    "\010\002\uffd9\014\uffd9\015\uffd9\001\002\000\004\040\033" +
-    "\001\002\000\010\002\ufff6\014\ufff6\022\ufff6\001\002\000" +
-    "\004\012\035\001\002\000\004\025\036\001\002\000\006" +
-    "\012\uffe9\014\037\001\002\000\004\012\uffea\001\002\000" +
-    "\004\012\042\001\002\000\006\002\ufff4\014\ufff4\001\002" +
-    "\000\010\002\uffe8\014\uffe8\024\043\001\002\000\006\012" +
-    "\045\040\044\001\002\000\006\014\uffe4\025\uffe4\001\002" +
-    "\000\006\014\uffe3\025\uffe3\001\002\000\006\014\047\025" +
-    "\050\001\002\000\006\012\052\040\051\001\002\000\006" +
-    "\002\uffe7\014\uffe7\001\002\000\006\014\uffe6\025\uffe6\001" +
-    "\002\000\006\014\uffe5\025\uffe5\001\002\000\004\012\054" +
-    "\001\002\000\004\025\055\001\002\000\006\012\uffe9\014" +
-    "\037\001\002\000\004\012\042\001\002\000\006\002\ufff2" +
-    "\014\ufff2\001\002\000\012\002\uffd8\014\uffd8\015\uffd8\020" +
-    "\131\001\002\000\012\002\uffd7\014\uffd7\015\uffd7\020\127" +
-    "\001\002\000\016\023\063\024\067\033\072\034\064\035" +
-    "\071\037\066\001\002\000\016\023\063\024\067\033\072" +
-    "\034\064\035\071\037\066\001\002\000\010\026\075\027" +
-    "\074\032\073\001\002\000\016\002\uffd1\014\uffd1\015\uffd1" +
-    "\021\uffd1\022\uffd1\025\uffd1\001\002\000\010\026\075\027" +
-    "\074\032\073\001\002\000\016\023\063\024\067\033\072" +
-    "\034\064\035\071\037\066\001\002\000\014\002\uffda\014" +
-    "\uffda\015\uffda\021\114\022\115\001\002\000\010\033\105" +
-    "\034\103\037\104\001\002\000\010\026\075\027\074\032" +
-    "\073\001\002\000\010\040\uffc8\041\uffc8\042\uffc8\001\002" +
-    "\000\010\040\uffc9\041\uffc9\042\uffc9\001\002\000\010\040" +
-    "\uffca\041\uffca\042\uffca\001\002\000\010\040\077\041\102" +
-    "\042\100\001\002\000\016\002\uffc7\014\uffc7\015\uffc7\021" +
-    "\uffc7\022\uffc7\025\uffc7\001\002\000\016\002\uffc5\014\uffc5" +
-    "\015\uffc5\021\uffc5\022\uffc5\025\uffc5\001\002\000\016\002" +
-    "\uffd0\014\uffd0\015\uffd0\021\uffd0\022\uffd0\025\uffd0\001\002" +
-    "\000\016\002\uffc6\014\uffc6\015\uffc6\021\uffc6\022\uffc6\025" +
-    "\uffc6\001\002\000\010\026\075\027\074\032\073\001\002" +
-    "\000\010\026\075\027\074\032\073\001\002\000\010\026" +
-    "\075\027\074\032\073\001\002\000\010\040\077\041\102" +
-    "\042\100\001\002\000\016\002\uffcd\014\uffcd\015\uffcd\021" +
-    "\uffcd\022\uffcd\025\uffcd\001\002\000\010\040\077\041\102" +
-    "\042\100\001\002\000\016\002\uffcb\014\uffcb\015\uffcb\021" +
-    "\uffcb\022\uffcb\025\uffcb\001\002\000\010\040\077\041\102" +
-    "\042\100\001\002\000\016\002\uffcc\014\uffcc\015\uffcc\021" +
-    "\uffcc\022\uffcc\025\uffcc\001\002\000\016\023\063\024\067" +
-    "\033\072\034\064\035\071\037\066\001\002\000\016\023" +
-    "\063\024\067\033\072\034\064\035\071\037\066\001\002" +
-    "\000\016\002\uffd4\014\uffd4\015\uffd4\021\uffd4\022\uffd4\025" +
-    "\uffd4\001\002\000\016\002\uffd5\014\uffd5\015\uffd5\021\uffd5" +
-    "\022\115\025\uffd5\001\002\000\010\021\114\022\115\025" +
-    "\121\001\002\000\016\002\uffd2\014\uffd2\015\uffd2\021\uffd2" +
-    "\022\uffd2\025\uffd2\001\002\000\010\040\077\041\102\042" +
-    "\100\001\002\000\016\002\uffce\014\uffce\015\uffce\021\uffce" +
-    "\022\uffce\025\uffce\001\002\000\010\040\077\041\102\042" +
-    "\100\001\002\000\016\002\uffcf\014\uffcf\015\uffcf\021\uffcf" +
-    "\022\uffcf\025\uffcf\001\002\000\016\002\uffd3\014\uffd3\015" +
-    "\uffd3\021\114\022\115\025\uffd3\001\002\000\016\023\063" +
-    "\024\067\033\072\034\064\035\071\037\066\001\002\000" +
-    "\014\002\uffdb\014\uffdb\015\uffdb\021\114\022\115\001\002" +
-    "\000\016\023\063\024\067\033\072\034\064\035\071\037" +
-    "\066\001\002\000\014\002\uffdc\014\uffdc\015\uffdc\021\114" +
-    "\022\115\001\002\000\010\003\135\012\042\013\141\001" +
-    "\002\000\006\002\uffef\014\uffef\001\002\000\006\002\uffeb" +
-    "\014\uffeb\001\002\000\006\002\uffee\014\uffee\001\002\000" +
-    "\006\002\000\014\153\001\002\000\006\002\ufff0\014\ufff0" +
-    "\001\002\000\004\024\142\001\002\000\004\012\143\001" +
-    "\002\000\006\012\uffe9\014\037\001\002\000\004\012\145" +
-    "\001\002\000\006\024\147\025\146\001\002\000\006\002" +
-    "\uffed\014\uffed\001\002\000\006\012\045\040\044\001\002" +
-    "\000\006\014\047\025\151\001\002\000\004\025\152\001" +
-    "\002\000\006\002\uffec\014\uffec\001\002\000\010\003\135" +
-    "\012\042\013\141\001\002\000\006\002\ufff1\014\ufff1\001" +
-    "\002\000\006\016\015\035\023\001\002\000\010\002\uffe2" +
-    "\014\uffe2\015\uffe2\001\002\000\006\015\uffdf\017\uffdf\001" +
-    "\002\000\006\015\164\017\165\001\002\000\012\015\uffd6" +
-    "\017\uffd6\036\162\037\163\001\002\000\006\015\uffd8\017" +
-    "\uffd8\001\002\000\006\015\uffd7\017\uffd7\001\002\000\004" +
-    "\035\161\001\002\000\004\020\166\001\002\000\016\023" +
-    "\063\024\067\033\072\034\064\035\071\037\066\001\002" +
-    "\000\014\002\uffde\014\uffde\015\uffde\021\114\022\115\001" +
-    "\002\000\006\015\uffe0\017\uffe0\001\002\000\004\012\172" +
-    "\001\002\000\004\025\173\001\002\000\006\012\uffe9\014" +
-    "\037\001\002\000\004\012\042\001\002\000\006\002\ufff3" +
-    "\014\ufff3\001\002\000\006\014\ufffe\026\ufffe\001\002" });
+    "\uffdd\015\uffdd\001\002\000\006\002\uffff\014\132\001\002" +
+    "\000\006\002\ufffa\014\ufffa\001\002\000\020\002\uffd7\014" +
+    "\uffd7\015\uffd7\017\uffd7\020\uffd7\036\127\037\130\001\002" +
+    "\000\006\002\ufff7\014\ufff7\001\002\000\004\024\122\001" +
+    "\002\000\004\024\103\001\002\000\010\002\ufff5\014\ufff5" +
+    "\022\ufff5\001\002\000\010\002\ufffc\014\ufffc\022\101\001" +
+    "\002\000\012\002\uffdb\014\uffdb\015\uffdb\020\032\001\002" +
+    "\000\016\023\033\024\037\033\042\034\034\035\040\037" +
+    "\036\001\002\000\016\023\033\024\037\033\042\034\034" +
+    "\035\040\037\036\001\002\000\014\026\047\027\046\030" +
+    "\044\031\043\032\045\001\002\000\016\002\uffd2\014\uffd2" +
+    "\015\uffd2\021\uffd2\022\uffd2\025\uffd2\001\002\000\014\026" +
+    "\047\027\046\030\044\031\043\032\045\001\002\000\016" +
+    "\023\033\024\037\033\042\034\034\035\040\037\036\001" +
+    "\002\000\010\033\063\034\061\037\062\001\002\000\014" +
+    "\002\uffdc\014\uffdc\015\uffdc\021\055\022\056\001\002\000" +
+    "\014\026\047\027\046\030\044\031\043\032\045\001\002" +
+    "\000\010\040\uffc8\041\uffc8\042\uffc8\001\002\000\010\040" +
+    "\uffc7\041\uffc7\042\uffc7\001\002\000\010\040\uffc9\041\uffc9" +
+    "\042\uffc9\001\002\000\010\040\uffca\041\uffca\042\uffca\001" +
+    "\002\000\010\040\uffcb\041\uffcb\042\uffcb\001\002\000\010" +
+    "\040\052\041\054\042\051\001\002\000\016\002\uffc4\014" +
+    "\uffc4\015\uffc4\021\uffc4\022\uffc4\025\uffc4\001\002\000\016" +
+    "\002\uffc6\014\uffc6\015\uffc6\021\uffc6\022\uffc6\025\uffc6\001" +
+    "\002\000\016\002\uffd1\014\uffd1\015\uffd1\021\uffd1\022\uffd1" +
+    "\025\uffd1\001\002\000\016\002\uffc5\014\uffc5\015\uffc5\021" +
+    "\uffc5\022\uffc5\025\uffc5\001\002\000\016\023\033\024\037" +
+    "\033\042\034\034\035\040\037\036\001\002\000\016\023" +
+    "\033\024\037\033\042\034\034\035\040\037\036\001\002" +
+    "\000\016\002\uffd5\014\uffd5\015\uffd5\021\uffd5\022\uffd5\025" +
+    "\uffd5\001\002\000\016\002\uffd6\014\uffd6\015\uffd6\021\uffd6" +
+    "\022\056\025\uffd6\001\002\000\014\026\047\027\046\030" +
+    "\044\031\043\032\045\001\002\000\014\026\047\027\046" +
+    "\030\044\031\043\032\045\001\002\000\014\026\047\027" +
+    "\046\030\044\031\043\032\045\001\002\000\010\040\052" +
+    "\041\054\042\051\001\002\000\016\002\uffce\014\uffce\015" +
+    "\uffce\021\uffce\022\uffce\025\uffce\001\002\000\010\040\052" +
+    "\041\054\042\051\001\002\000\016\002\uffcc\014\uffcc\015" +
+    "\uffcc\021\uffcc\022\uffcc\025\uffcc\001\002\000\010\040\052" +
+    "\041\054\042\051\001\002\000\016\002\uffcd\014\uffcd\015" +
+    "\uffcd\021\uffcd\022\uffcd\025\uffcd\001\002\000\010\021\055" +
+    "\022\056\025\073\001\002\000\016\002\uffd3\014\uffd3\015" +
+    "\uffd3\021\uffd3\022\uffd3\025\uffd3\001\002\000\010\040\052" +
+    "\041\054\042\051\001\002\000\016\002\uffcf\014\uffcf\015" +
+    "\uffcf\021\uffcf\022\uffcf\025\uffcf\001\002\000\010\040\052" +
+    "\041\054\042\051\001\002\000\016\002\uffd0\014\uffd0\015" +
+    "\uffd0\021\uffd0\022\uffd0\025\uffd0\001\002\000\016\002\uffd4" +
+    "\014\uffd4\015\uffd4\021\055\022\056\025\uffd4\001\002\000" +
+    "\004\040\102\001\002\000\010\002\ufff6\014\ufff6\022\ufff6" +
+    "\001\002\000\004\012\104\001\002\000\004\025\105\001" +
+    "\002\000\006\012\uffe9\014\106\001\002\000\004\012\uffea" +
+    "\001\002\000\004\012\111\001\002\000\006\002\ufff4\014" +
+    "\ufff4\001\002\000\010\002\uffe8\014\uffe8\024\112\001\002" +
+    "\000\006\012\114\040\113\001\002\000\006\014\uffe4\025" +
+    "\uffe4\001\002\000\006\014\uffe3\025\uffe3\001\002\000\006" +
+    "\014\116\025\117\001\002\000\006\012\121\040\120\001" +
+    "\002\000\006\002\uffe7\014\uffe7\001\002\000\006\014\uffe6" +
+    "\025\uffe6\001\002\000\006\014\uffe5\025\uffe5\001\002\000" +
+    "\004\012\123\001\002\000\004\025\124\001\002\000\006" +
+    "\012\uffe9\014\106\001\002\000\004\012\111\001\002\000" +
+    "\006\002\ufff2\014\ufff2\001\002\000\016\002\uffda\014\uffda" +
+    "\015\uffda\017\uffda\020\uffda\037\131\001\002\000\014\002" +
+    "\uffd8\014\uffd8\015\uffd8\017\uffd8\020\uffd8\001\002\000\014" +
+    "\002\uffd9\014\uffd9\015\uffd9\017\uffd9\020\uffd9\001\002\000" +
+    "\010\003\134\012\111\013\140\001\002\000\006\002\uffef" +
+    "\014\uffef\001\002\000\006\002\uffeb\014\uffeb\001\002\000" +
+    "\006\002\uffee\014\uffee\001\002\000\006\002\000\014\152" +
+    "\001\002\000\006\002\ufff0\014\ufff0\001\002\000\004\024" +
+    "\141\001\002\000\004\012\142\001\002\000\006\012\uffe9" +
+    "\014\106\001\002\000\004\012\144\001\002\000\006\024" +
+    "\146\025\145\001\002\000\006\002\uffed\014\uffed\001\002" +
+    "\000\006\012\114\040\113\001\002\000\006\014\116\025" +
+    "\150\001\002\000\004\025\151\001\002\000\006\002\uffec" +
+    "\014\uffec\001\002\000\010\003\134\012\111\013\140\001" +
+    "\002\000\006\002\ufff1\014\ufff1\001\002\000\006\016\015" +
+    "\035\023\001\002\000\010\002\uffe2\014\uffe2\015\uffe2\001" +
+    "\002\000\006\015\uffdf\017\uffdf\001\002\000\006\015\160" +
+    "\017\161\001\002\000\004\035\023\001\002\000\004\020" +
+    "\162\001\002\000\016\023\033\024\037\033\042\034\034" +
+    "\035\040\037\036\001\002\000\014\002\uffde\014\uffde\015" +
+    "\uffde\021\055\022\056\001\002\000\006\015\uffe0\017\uffe0" +
+    "\001\002\000\004\012\166\001\002\000\004\025\167\001" +
+    "\002\000\006\012\uffe9\014\106\001\002\000\004\012\111" +
+    "\001\002\000\006\002\ufff3\014\ufff3\001\002\000\006\014" +
+    "\ufffe\026\ufffe\001\002" });
 
   /** Access to parse-action table. */
   public short[][] action_table() {return _action_table;}
@@ -179,54 +179,52 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
   /** <code>reduce_goto</code> table. */
   protected static final short[][] _reduce_table = 
     unpackFromStrings(new String[] {
-    "\000\174\000\006\002\004\007\003\001\001\000\002\001" +
+    "\000\170\000\006\002\004\007\003\001\001\000\002\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
     "\000\002\001\001\000\020\003\020\004\013\010\027\014" +
     "\015\016\011\017\017\020\030\001\001\000\002\001\001" +
-    "\000\002\001\001\000\002\001\001\000\006\015\157\020" +
-    "\156\001\001\000\002\001\001\000\002\001\001\000\002" +
+    "\000\002\001\001\000\002\001\001\000\006\015\156\020" +
+    "\155\001\001\000\002\001\001\000\002\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
-    "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
-    "\001\001\000\004\024\037\001\001\000\002\001\001\000" +
-    "\004\011\040\001\001\000\002\001\001\000\002\001\001" +
-    "\000\004\012\045\001\001\000\002\001\001\000\002\001" +
+    "\006\021\040\022\034\001\001\000\006\021\077\022\034" +
+    "\001\001\000\004\025\075\001\001\000\002\001\001\000" +
+    "\004\025\073\001\001\000\006\021\071\022\034\001\001" +
+    "\000\002\001\001\000\002\001\001\000\004\025\047\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\002\001\001\000\004\023\052\001" +
+    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\006\021\057\022\034\001\001\000" +
+    "\006\021\056\022\034\001\001\000\002\001\001\000\002" +
+    "\001\001\000\004\025\067\001\001\000\004\025\065\001" +
+    "\001\000\004\025\063\001\001\000\004\023\064\001\001" +
+    "\000\002\001\001\000\004\023\066\001\001\000\002\001" +
+    "\001\000\004\023\070\001\001\000\002\001\001\000\002" +
+    "\001\001\000\002\001\001\000\004\023\074\001\001\000" +
+    "\002\001\001\000\004\023\076\001\001\000\002\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
-    "\002\001\001\000\004\024\055\001\001\000\004\011\056" +
+    "\002\001\001\000\002\001\001\000\004\024\106\001\001" +
+    "\000\002\001\001\000\004\011\107\001\001\000\002\001" +
+    "\001\000\002\001\001\000\004\012\114\001\001\000\002" +
     "\001\001\000\002\001\001\000\002\001\001\000\002\001" +
-    "\001\000\006\021\067\022\064\001\001\000\006\021\125" +
-    "\022\064\001\001\000\004\025\123\001\001\000\002\001" +
-    "\001\000\004\025\121\001\001\000\006\021\117\022\064" +
-    "\001\001\000\002\001\001\000\002\001\001\000\004\025" +
-    "\075\001\001\000\002\001\001\000\002\001\001\000\002" +
-    "\001\001\000\004\023\100\001\001\000\002\001\001\000" +
-    "\002\001\001\000\002\001\001\000\002\001\001\000\004" +
-    "\025\111\001\001\000\004\025\107\001\001\000\004\025" +
-    "\105\001\001\000\004\023\106\001\001\000\002\001\001" +
-    "\000\004\023\110\001\001\000\002\001\001\000\004\023" +
-    "\112\001\001\000\002\001\001\000\006\021\116\022\064" +
-    "\001\001\000\006\021\115\022\064\001\001\000\002\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
-    "\000\004\023\122\001\001\000\002\001\001\000\004\023" +
-    "\124\001\001\000\002\001\001\000\002\001\001\000\006" +
-    "\021\127\022\064\001\001\000\002\001\001\000\006\021" +
-    "\131\022\064\001\001\000\002\001\001\000\012\005\136" +
-    "\006\137\011\133\013\135\001\001\000\002\001\001\000" +
-    "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
-    "\001\001\000\002\001\001\000\002\001\001\000\004\024" +
-    "\143\001\001\000\002\001\001\000\002\001\001\000\002" +
-    "\001\001\000\004\012\147\001\001\000\002\001\001\000" +
-    "\002\001\001\000\002\001\001\000\010\006\153\011\133" +
-    "\013\135\001\001\000\002\001\001\000\010\016\155\017" +
-    "\017\020\030\001\001\000\002\001\001\000\002\001\001" +
+    "\000\002\001\001\000\002\001\001\000\004\024\124\001" +
+    "\001\000\004\011\125\001\001\000\002\001\001\000\002" +
+    "\001\001\000\002\001\001\000\002\001\001\000\012\005" +
+    "\135\006\136\011\132\013\134\001\001\000\002\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
-    "\002\001\001\000\004\020\167\001\001\000\002\001\001" +
-    "\000\006\021\166\022\064\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\004" +
-    "\024\173\001\001\000\004\011\174\001\001\000\002\001" +
-    "\001\000\002\001\001" });
+    "\024\142\001\001\000\002\001\001\000\002\001\001\000" +
+    "\002\001\001\000\004\012\146\001\001\000\002\001\001" +
+    "\000\002\001\001\000\002\001\001\000\010\006\152\011" +
+    "\132\013\134\001\001\000\002\001\001\000\010\016\154" +
+    "\017\017\020\030\001\001\000\002\001\001\000\002\001" +
+    "\001\000\002\001\001\000\004\020\163\001\001\000\002" +
+    "\001\001\000\006\021\162\022\034\001\001\000\002\001" +
+    "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
+    "\000\004\024\167\001\001\000\004\011\170\001\001\000" +
+    "\002\001\001\000\002\001\001" });
 
   /** Access to <code>reduce_goto</code> table. */
   public short[][] reduce_table() {return _reduce_table;}
@@ -953,58 +951,22 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 37: // field_spec_part_complex ::= FIELDSPEC SUBFIELDSPEC QUESTION expr 
+          case 37: // field_spec_part_complex ::= field_spec_part_simple QUESTION expr 
             {
               SingleSpecification RESULT =null;
-		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
-		Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
-		String f = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
-		Location sfxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
-		Location sfxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
-		String sf = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		SingleSpecification s = (SingleSpecification)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
 		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
 		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
 		Condition e = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf, e); 
-              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",13, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
-            }
-          return CUP$FullConditionalParser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 38: // field_spec_part_complex ::= FIELDSPEC POSITION QUESTION expr 
-            {
-              SingleSpecification RESULT =null;
-		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
-		Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xright;
-		String f = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).value;
-		Location pxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
-		Location pxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
-		String p = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
-		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
-		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
-		Condition e = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, p, e); 
-              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",13, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
-            }
-          return CUP$FullConditionalParser$result;
-
-          /*. . . . . . . . . . . . . . . . . . . .*/
-          case 39: // field_spec_part_complex ::= FIELDSPEC QUESTION expr 
-            {
-              SingleSpecification RESULT =null;
-		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
-		Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
-		String f = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
-		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
-		Location exright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
-		Condition e = (Condition)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, e); 
+		 RESULT = s; s.addConditional(e); 
               CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_complex",13, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
             }
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 40: // field_spec_part_complex ::= field_spec_part_simple 
+          case 38: // field_spec_part_complex ::= field_spec_part_simple 
             {
               SingleSpecification RESULT =null;
 		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
@@ -1016,7 +978,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 41: // field_spec_part_simple ::= FIELDSPEC SUBFIELDSPEC 
+          case 39: // field_spec_part_simple ::= FIELDSPEC SUBFIELDSPEC 
             {
               SingleSpecification RESULT =null;
 		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
@@ -1031,7 +993,25 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 42: // field_spec_part_simple ::= FIELDSPEC POSITION 
+          case 40: // field_spec_part_simple ::= FIELDSPEC SUBFIELDSPEC POSITION 
+            {
+              SingleSpecification RESULT =null;
+		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
+		Location fxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xright;
+		String f = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).value;
+		Location sfxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
+		Location sfxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xright;
+		String sf = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).value;
+		Location pxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
+		Location pxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
+		String p = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
+		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf, p); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_simple",14, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 41: // field_spec_part_simple ::= FIELDSPEC POSITION 
             {
               SingleSpecification RESULT =null;
 		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
@@ -1040,13 +1020,13 @@ class CUP$FullConditionalParser$actions {
 		Location pxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
 		Location pxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
 		String p = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, p); 
+		 RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, p); 
               CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("field_spec_part_simple",14, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
             }
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 43: // field_spec_part_simple ::= FIELDSPEC 
+          case 42: // field_spec_part_simple ::= FIELDSPEC 
             {
               SingleSpecification RESULT =null;
 		Location fxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
@@ -1058,7 +1038,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 44: // expr ::= expr AND expr 
+          case 43: // expr ::= expr AND expr 
             {
               Condition RESULT =null;
 		Location e1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
@@ -1073,7 +1053,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 45: // expr ::= expr OR expr 
+          case 44: // expr ::= expr OR expr 
             {
               Condition RESULT =null;
 		Location e1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
@@ -1088,7 +1068,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 46: // expr ::= NOT expr 
+          case 45: // expr ::= NOT expr 
             {
               Condition RESULT =null;
 		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
@@ -1100,7 +1080,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 47: // expr ::= LPAREN expr RPAREN 
+          case 46: // expr ::= LPAREN expr RPAREN 
             {
               Condition RESULT =null;
 		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-1)).xleft;
@@ -1112,7 +1092,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 48: // expr ::= expr_part 
+          case 47: // expr ::= expr_part 
             {
               Condition RESULT =null;
 		Location exleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
@@ -1124,7 +1104,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 49: // expr_part ::= SUBFIELD op value 
+          case 48: // expr_part ::= SUBFIELD op value 
             {
               Condition RESULT =null;
 		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
@@ -1142,7 +1122,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 50: // expr_part ::= IND op value 
+          case 49: // expr_part ::= IND op value 
             {
               Condition RESULT =null;
 		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
@@ -1160,7 +1140,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 51: // expr_part ::= POSITION op value 
+          case 50: // expr_part ::= POSITION op value 
             {
               Condition RESULT =null;
 		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-2)).xleft;
@@ -1178,7 +1158,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 52: // expr_part ::= FIELDSPEC SUBFIELD op value 
+          case 51: // expr_part ::= FIELDSPEC SUBFIELD op value 
             {
               Condition RESULT =null;
 		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
@@ -1199,7 +1179,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 53: // expr_part ::= FIELDSPEC IND op value 
+          case 52: // expr_part ::= FIELDSPEC IND op value 
             {
               Condition RESULT =null;
 		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
@@ -1220,7 +1200,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 54: // expr_part ::= FIELDSPEC POSITION op value 
+          case 53: // expr_part ::= FIELDSPEC POSITION op value 
             {
               Condition RESULT =null;
 		Location s1xleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.elementAt(CUP$FullConditionalParser$top-3)).xleft;
@@ -1241,7 +1221,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 55: // op ::= EQU 
+          case 54: // op ::= EQU 
             {
               Integer RESULT =null;
 		 RESULT = new Integer(FullSym.EQU); 
@@ -1250,7 +1230,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 56: // op ::= NEQ 
+          case 55: // op ::= NEQ 
             {
               Integer RESULT =null;
 		 RESULT = new Integer(FullSym.NEQ); 
@@ -1259,7 +1239,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 57: // op ::= MATCH 
+          case 56: // op ::= MATCH 
             {
               Integer RESULT =null;
 		 RESULT = new Integer(FullSym.MATCH); 
@@ -1268,7 +1248,25 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 58: // value ::= QUOTEDSTR 
+          case 57: // op ::= LT 
+            {
+              Integer RESULT =null;
+		 RESULT = new Integer(FullSym.LT); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("op",19, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 58: // op ::= GT 
+            {
+              Integer RESULT =null;
+		 RESULT = new Integer(FullSym.GT); 
+              CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("op",19, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
+            }
+          return CUP$FullConditionalParser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 59: // value ::= QUOTEDSTR 
             {
               String RESULT =null;
 		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
@@ -1280,7 +1278,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 59: // value ::= CHAR 
+          case 60: // value ::= CHAR 
             {
               String RESULT =null;
 		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
@@ -1292,7 +1290,7 @@ class CUP$FullConditionalParser$actions {
           return CUP$FullConditionalParser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 60: // value ::= NUMBER 
+          case 61: // value ::= NUMBER 
             {
               String RESULT =null;
 		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;

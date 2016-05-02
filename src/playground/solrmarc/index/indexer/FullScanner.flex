@@ -122,13 +122,13 @@ datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
 
 <SUBFIELDSPEC>{
 "[""^"?[a-z][-a-z0-9]*"]"   { return sf.newSymbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
-[a-z][a-z0-9]*          { return sf.newSymbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
-"["[0-9]+(-[0-9]+)?"]"  { return sf.newSymbol("POSITION", FullSym.POSITION, yytext()); }
-{white_space}           { /* ignore */ }
-":"						{ yybegin(STARTSPEC);   return sf.newSymbol(":",FullSym.COLON);  }
-","				        { yybegin(MAPSPEC);  return sf.newSymbol(",", FullSym.COMMA);  }
-[}]				        { yybegin(STARTSPEC);   return sf.newSymbol("}",FullSym.RBRACE);  }
-[?]				  		{ yybegin(CONDITIONAL); return sf.newSymbol("?",FullSym.QUESTION);  }
+[a-z][a-z0-9]*              { return sf.newSymbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
+"["[0-9]+(-[0-9]+)?"]"      { return sf.newSymbol("POSITION", FullSym.POSITION, yytext()); }
+{white_space}               { /* ignore */ }
+":"						    { yybegin(STARTSPEC);   return sf.newSymbol(":",FullSym.COLON);  }
+","				            { yybegin(MAPSPEC);  return sf.newSymbol(",", FullSym.COMMA);  }
+[}]				            { yybegin(STARTSPEC);   return sf.newSymbol("}",FullSym.RBRACE);  }
+[?]				  		    { yybegin(CONDITIONAL); return sf.newSymbol("?",FullSym.QUESTION);  }
 }
 
 <CONDITIONAL>{
@@ -153,8 +153,8 @@ datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
 "=="|"="          { return sf.newSymbol("EQU",FullSym.EQU ); }
 "!="              { return sf.newSymbol("NEQ",FullSym.NEQ); }
 "~"|"matches"     { return sf.newSymbol("MATCH",FullSym.MATCH); }
-"<"               { return sf.newSymbol("LE",FullSym.LT); }
-">"               { return sf.newSymbol("GT",FullSym.GT); }
+"<"|"startsWith"  { return sf.newSymbol("LE",FullSym.LT); }
+">"|"endsWith"    { return sf.newSymbol("GT",FullSym.GT); }
 "&&"|"&"          { return sf.newSymbol("AND",FullSym.AND); }
 "||"|"|"          { return sf.newSymbol("OR",FullSym.OR); }
 "!"               { return sf.newSymbol("NOT",FullSym.NOT); }

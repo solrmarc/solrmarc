@@ -48,7 +48,15 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
     @Override
     public AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
     {
-        List<PatternMapping> patternMappings = pattermMappingsFromString(mapParts[1]);
+        List<PatternMapping> patternMappings;
+        if (mapParts.length > 2)
+        {
+            patternMappings = pattermMappingsFromStrings(mapParts, 1);
+        }
+        else
+        {
+            patternMappings = pattermMappingsFromString(mapParts[1]);
+        }
         boolean isFilter = mapParts[0].equals("filter(");
         return new MultiValuePatternMapping(patternMappings, isFilter);
     }
@@ -56,14 +64,14 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
     public static List<PatternMapping> pattermMappingsFromString(String mapSpec)
     {
         final String mapParts[] = mapSpec.split("[|][|]");
-        return pattermMappingsFromStrings(mapParts);
+        return pattermMappingsFromStrings(mapParts, 0);
     }
     
-    public static List<PatternMapping> pattermMappingsFromStrings(String[] mapParts)
+    public static List<PatternMapping> pattermMappingsFromStrings(String[] mapParts, int offset)
     {
         List<PatternMapping> pm = new ArrayList<PatternMapping>(mapParts.length);
 
-        for (int i = 0; i < mapParts.length; i++)
+        for (int i = offset; i < mapParts.length; i++)
         {
             String mapEntry[] = mapParts[i].split("[ ]*=>[ ]*", 2);
             if (mapEntry.length == 2)

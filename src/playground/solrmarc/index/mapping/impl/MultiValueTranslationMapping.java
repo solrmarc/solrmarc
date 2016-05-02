@@ -34,15 +34,18 @@ public class MultiValueTranslationMapping implements AbstractMultiValueMapping
         for (String value : values)
         {
             final String translation = translationMapping.getProperty(value, defaultValue);
-            if (translation != null && translation.contains("|"))
+            if (translation != null)
             {
-                // TODO: This splitting should be done in the factory somehow.
-                String[] translationParts = SEPARATOR_PATTERN.split(translation);
-                Collections.addAll(mappedValues, translationParts);
-            }
-            else
-            {
-                mappedValues.add(translation);
+                if (translation.contains("|"))
+                {
+                    // TODO: This splitting should be done in the factory somehow.
+                    String[] translationParts = SEPARATOR_PATTERN.split(translation);
+                    Collections.addAll(mappedValues, translationParts);
+                }
+                else
+                {
+                    mappedValues.add(translation);
+                }
             }
         }
         return mappedValues;

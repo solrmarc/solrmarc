@@ -2,6 +2,7 @@ package playground.solrmarc.index.specification;
 
 import org.marc4j.marc.impl.Verifier;
 
+import playground.solrmarc.index.fieldmatch.FieldFormatterSubstring;
 import playground.solrmarc.index.specification.conditional.Condition;
 import playground.solrmarc.index.specification.conditional.ConditionalParser;
 
@@ -87,33 +88,43 @@ public class AbstractSpecificationFactory
         return makeSingleSpecification(tag, subfields);
     }
 
-    public static SingleSpecification makeSingleSpecification(String tag, String subfields)
+    public static SingleSpecification makeSingleSpecification(final String tag, final String subfields)
     {
-        return makeSingleSpecification(tag, subfields, null);
+        return makeSingleSpecification(tag, subfields, null, null);
     }
 
-    public static SingleSpecification makeSingleSpecification(final String tag, final String subfields, Condition cond)
+    public static SingleSpecification makeSingleSpecification(final String tag, final String subfields, final String position)
     {
+        return makeSingleSpecification(tag, subfields, position, null);
+    }
+
+    public static SingleSpecification makeSingleSpecification(final String tag, final String subfields, final String position, Condition cond)
+    {
+        SingleSpecification spec;
         if (Verifier.isControlField(tag))
         {
-            final String s1 = subfields;
-            if (subfields == null || subfields.length() == 0)
-            {
-                return (new SingleControlFieldSpecification(tag));
-            }
-            int offset = Integer.parseInt(s1.replaceAll("\\[([0-9]+)(-[0-9]+)?\\]", "$1"));
-            String endOffsetStr = s1.replaceAll("\\[([0-9]+)(-)?([0-9]+)?\\]", "$3");
-            int endOffset = offset;
-            if (endOffsetStr != null && endOffsetStr.length() > 0) endOffset = Integer.parseInt(endOffsetStr);
-            return (new SingleControlFieldSpecification(tag, offset, endOffset, cond));
+            spec = new SingleControlFieldSpecification(tag, cond);
         }
         else if (tag.startsWith("LNK"))
         {
-            return (new SingleLinkedDataFieldSpecification(tag, subfields, cond));
+            spec = new SingleLinkedDataFieldSpecification(tag, subfields, cond);
         }
         else
         {
-            return (new SingleDataFieldSpecification(tag, subfields, cond));
+            spec = new SingleDataFieldSpecification(tag, subfields, cond);
         }
+        if (position == null || position.length() == 0)
+        {
+            return(spec);
+        }
+        try {
+            int offset = Integer.parseInt(position.replaceAll("\\[([0-9]+)(-[0-9]+)?\\]", "$1"));
+            String endOffsetStr = position.replaceAll("\\[([0-9]+)(-)?([0-9]+)?\\]", "$3");
+            int endOffset = offset;
+            if (endOffsetStr != null && endOffsetStr.length() > 0) endOffset = Integer.parseInt(endOffsetStr);
+            spec.addFormatter(new FieldFormatterSubstring(offset, endOffset));
+        }
+        catch (NumberFormatException nfe) { /* eat it */ }
+        return(spec);
     }
 }

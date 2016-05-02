@@ -6,17 +6,17 @@ import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 
 public class FieldFormatterMapped extends FieldFormatterDecorator
 {
-    AbstractMultiValueMapping map;
+    final AbstractMultiValueMapping map;
 
-    public FieldFormatterMapped(FieldFormatter toDecorate)
+
+    public FieldFormatterMapped(FieldFormatter toDecorator, AbstractMultiValueMapping map)
     {
-        super(toDecorate);
-        this.map = null;
+        super(toDecorator); 
+        this.map = map;
     }
-
-    public FieldFormatterMapped(FieldFormatter toDecorate, AbstractMultiValueMapping map)
+    
+    public FieldFormatterMapped(AbstractMultiValueMapping map)
     {
-        super(toDecorate);
         this.map = map;
     }
 

@@ -1,11 +1,14 @@
 package playground.solrmarc.index.specification;
 
 import java.util.Collection;
+import java.util.EnumSet;
 
 import org.marc4j.marc.VariableField;
 
 import playground.solrmarc.index.fieldmatch.FieldFormatter;
 import playground.solrmarc.index.fieldmatch.FieldFormatterBase;
+import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
 import playground.solrmarc.index.specification.conditional.Condition;
 
 public abstract class SingleSpecification extends Specification
@@ -56,9 +59,29 @@ public abstract class SingleSpecification extends Specification
 
     abstract public void addFieldValues(Collection<String> result, VariableField vf) throws Exception;
 
+    @Override 
+    public void addFormatter(FieldFormatterDecorator newFmt)
+    {
+        newFmt.decorate(this.fmt);
+        this.fmt = newFmt;
+    }
+    
+    @Override
     public void setFormatter(FieldFormatter fmt)
     {
         this.fmt = fmt;
     }
+    
+    public void addCleanVal(eCleanVal cleanVal)
+    {
+        fmt.addCleanVal(cleanVal);
+    }
+
+    public void setCleanVal(EnumSet<eCleanVal> of)
+    {
+        fmt.setCleanVal(of);
+    }
+
+
 
 }

@@ -2,13 +2,16 @@ package playground.solrmarc.index.specification;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
 
 import playground.solrmarc.index.fieldmatch.FieldFormatter;
+import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
 import playground.solrmarc.index.fieldmatch.FieldMatch;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
 import playground.solrmarc.index.specification.conditional.Condition;
 
 public class CompositeSpecification extends Specification
@@ -130,11 +133,44 @@ public class CompositeSpecification extends Specification
     }
 
     @Override
-    public void setFormatter(final FieldFormatter fmt)
+    public void addFormatter(FieldFormatterDecorator fmt)
+    {
+        for (SingleSpecification spec : pieces)
+        {
+            try
+            {
+                spec.addFormatter(fmt.clone());
+            }
+            catch (CloneNotSupportedException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    @Override
+    public void setFormatter(FieldFormatter fmt)
     {
         for (SingleSpecification spec : pieces)
         {
             spec.setFormatter(fmt);
+        }
+    }
+
+    public void addCleanVal(eCleanVal cleanVal)
+    {
+        for (SingleSpecification spec : pieces)
+        {
+            spec.addCleanVal(cleanVal);
+        }
+    }
+
+    public void setCleanVal(EnumSet<eCleanVal> of)
+    {
+        for (SingleSpecification spec : pieces)
+        {
+            spec.setCleanVal(of);
         }
     }
 }
