@@ -16,8 +16,8 @@ import playground.solrmarc.index.specification.conditional.Condition;
 
 public class SingleDataFieldSpecification extends SingleSpecification
 {
-    static FieldFormatter SINGLE_FMT = new FieldFormatterSimple(new FieldFormatterBase(true));
-    static FieldFormatter JOIN_FMT = new FieldFormatterJoin(new FieldFormatterBase(true));
+//    static FieldFormatter SINGLE_FMT = new FieldFormatterSimple(new FieldFormatterBase(true));
+//    static FieldFormatter JOIN_FMT = new FieldFormatterJoin(new FieldFormatterBase(true));
 
     String subfields;
     Pattern subfieldPattern;
@@ -39,8 +39,8 @@ public class SingleDataFieldSpecification extends SingleSpecification
         super(tag, cond);
         this.subfields = subfields;
         subfieldPattern = makePattern(subfields);
-        if (subfields.length() == 1) fmt = SINGLE_FMT;
-        else fmt = JOIN_FMT;
+        if (subfields.length() == 1) fmt =  new FieldFormatterSimple(new FieldFormatterBase(true));
+        else fmt = new FieldFormatterJoin(new FieldFormatterBase(true));
     }
 
     public SingleDataFieldSpecification(String tag, String subfields)

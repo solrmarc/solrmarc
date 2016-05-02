@@ -350,9 +350,9 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addSeparator(int cnt)
     {
-        if (separator != null)
+        if (getSeparator() != null)
         {
-            if (cnt != 0) buffer.append(separator);
+            if (cnt != 0) buffer.append(getSeparator());
         }
     }
 

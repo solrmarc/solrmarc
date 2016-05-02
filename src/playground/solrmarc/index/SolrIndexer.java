@@ -2,9 +2,11 @@ package playground.solrmarc.index;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.marc4j.marc.Record;
@@ -14,8 +16,40 @@ import playground.solrmarc.index.fieldmatch.FieldMatch;
 import playground.solrmarc.index.specification.AbstractSpecificationFactory;
 import playground.solrmarc.index.specification.Specification;
 
+/**
+ * class SolrIndexer
+ * 
+ * This class exists solely for backwards compatibility purposes.  The intention is that if a previous custom function
+ * was being used, one that provides the same functionality can be found here.  Furthermore if there were many helper functions
+ * that could have been used to create your own custom indexing functions those helper functions should be found here as well.
+ * 
+ * In most cases the methods found here are merely shims to translate the desired method to use the newer functionality that 
+ * is now available.
+ * 
+ * 
+ * @author rh9ec
+ *
+ */
+
+
 public class SolrIndexer
 {
+    static Map<String, Specification> specCache = new HashMap<String, Specification>(); 
+    
+    private static Specification getOrCreateSpecification(String tagStr)
+    {
+        if (specCache.containsKey(tagStr))
+        {
+            return(specCache.get(tagStr));
+        }
+        else
+        {
+            Specification spec = AbstractSpecificationFactory.createSpecification(tagStr);
+            specCache.put(tagStr,  spec);
+            return(spec);
+        }
+    }
+    
     /**
      * Get <code>Collection</code> of Strings as indicated by tagStr. For each field 
      * spec in the tagStr that is NOT about bytes (i.e. not a 008[7-12] type fieldspec),  
@@ -43,7 +77,7 @@ public class SolrIndexer
      */
     public static void getFieldListCollector(Record record, String tagStr,  Collection<String> collector)
     {
-        Specification spec = AbstractSpecificationFactory.createSpecification(tagStr);
+        Specification spec = getOrCreateSpecification(tagStr);
         for (FieldMatch fm : spec.getFieldMatches(record))
         {
             try

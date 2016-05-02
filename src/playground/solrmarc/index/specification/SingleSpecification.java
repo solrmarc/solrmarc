@@ -13,7 +13,7 @@ import playground.solrmarc.index.specification.conditional.Condition;
 
 public abstract class SingleSpecification extends Specification
 {
-    protected static FieldFormatter SINGLE_FMT = new FieldFormatterBase(true);
+ //   protected static FieldFormatter SINGLE_FMT = new FieldFormatterBase(true);
     protected String tag;
     Condition cond = null;
     protected FieldFormatter fmt;
@@ -26,7 +26,7 @@ public abstract class SingleSpecification extends Specification
         this.cond = cond;
         tags = new String[1];
         tags[0] = tag;
-        fmt = SINGLE_FMT;
+        fmt = new FieldFormatterBase(true);
     }
 
     @Override

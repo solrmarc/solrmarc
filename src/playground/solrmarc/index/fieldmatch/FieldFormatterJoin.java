@@ -7,25 +7,36 @@ import playground.solrmarc.tools.Utils;
 public class FieldFormatterJoin extends FieldFormatterDecorator
 {
     public final static String KEYWORD = "join";
-
+    private final String joinSeparator;
+    
     public FieldFormatterJoin(FieldFormatter toDecorate)
     {
         super(toDecorate);
+        joinSeparator = null;
     }
 
     public FieldFormatterJoin(FieldFormatter toDecorate, String separator)
     {
         super(toDecorate);
-        setSeparator(separator);
+        joinSeparator = separator;
+        toDecorate.setSeparator(separator);
     }
 
     public FieldFormatterJoin()
     {
+        joinSeparator = null;
     }
 
     public FieldFormatterJoin(String separator)
     {
-        setSeparator(separator);
+        joinSeparator = separator;
+    }
+    
+    @Override
+    public void decorate(FieldFormatter decorate)
+    {
+        super.decorate(decorate);
+        super.setSeparator(joinSeparator);
     }
 
     @Override
