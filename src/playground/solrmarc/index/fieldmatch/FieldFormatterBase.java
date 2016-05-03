@@ -20,7 +20,11 @@ public class FieldFormatterBase implements FieldFormatter
     String indicatorFmt = null;
     String sfCodeFmt = null;
     String separator = null;
+    
     boolean unique = false;
+    eJoinVal joinVal = eJoinVal.SEPARATE;
+    int trimStart = -1;
+    int trimEnd = -1;
     EnumSet<eCleanVal> cleanVal = EnumSet.noneOf(eCleanVal.class);
  //   protected static StringBuilder buffer = new StringBuilder();
  //   protected static List<String> emptyList = Collections.emptyList();
@@ -60,9 +64,10 @@ public class FieldFormatterBase implements FieldFormatter
      * lang.String)
      */
     @Override
-    public void setFieldTagFmt(String fieldTagFmt)
+    public FieldFormatter setFieldTagFmt(String fieldTagFmt)
     {
         this.fieldTagFmt = fieldTagFmt;
+        return(this);
     }
 
     /*
@@ -85,9 +90,10 @@ public class FieldFormatterBase implements FieldFormatter
      * lang.String)
      */
     @Override
-    public void setIndicatorFmt(String indicatorFmt)
+    public FieldFormatter setIndicatorFmt(String indicatorFmt)
     {
         this.indicatorFmt = indicatorFmt;
+        return(this);
     }
 
     /*
@@ -109,9 +115,10 @@ public class FieldFormatterBase implements FieldFormatter
      * lang.String)
      */
     @Override
-    public void setSfCodeFmt(String sfCodeFmt)
+    public FieldFormatter setSfCodeFmt(String sfCodeFmt)
     {
         this.sfCodeFmt = sfCodeFmt;
+        return(this);
     }
 
     /*
@@ -133,39 +140,10 @@ public class FieldFormatterBase implements FieldFormatter
      * lang.String)
      */
     @Override
-    public void setUnique()
-    {
-        this.unique = true;
-    }
-
-    @Override
-    public void unsetUnique()
-    {
-        this.unique = false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see playground.solrmarc.index.fieldmatch.FieldFormatter#getSeparator()
-     */
-    @Override
-    public boolean isUnique()
-    {
-        return unique;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * playground.solrmarc.index.fieldmatch.FieldFormatter#setSeparator(java.
-     * lang.String)
-     */
-    @Override
-    public void setSeparator(String separator)
+    public FieldFormatter setSeparator(String separator)
     {
         this.separator = separator;
+        return(this);
     }
 
     /*
@@ -187,9 +165,10 @@ public class FieldFormatterBase implements FieldFormatter
      * .EnumSet)
      */
     @Override
-    public void setCleanVal(EnumSet<eCleanVal> cleanVal)
+    public FieldFormatter setCleanVal(EnumSet<eCleanVal> cleanVal)
     {
         this.cleanVal = cleanVal;
+        return(this);
     }
 
     /*
@@ -199,13 +178,32 @@ public class FieldFormatterBase implements FieldFormatter
      * playground.solrmarc.index.fieldmatch.FieldFormatterBase.eCleanVal)
      */
     @Override
-    public void addCleanVal(eCleanVal cleanVal)
+    public FieldFormatter addCleanVal(eCleanVal cleanVal)
     {
         this.cleanVal.add(cleanVal);
+        return(this);
     }
 
-    // Map<String, String> separatorMap = null;
-    // List<AbstractValueMapping> theMaps = null;
+    @Override
+    public eJoinVal getJoinVal()
+    {
+        return joinVal;
+    }
+
+    @Override
+    public FieldFormatter setJoinVal(eJoinVal joinVal)
+    {
+        this.joinVal = joinVal;
+        return(this);
+    }
+
+    @Override
+    public FieldFormatter setSubstring(int offset, int endOffset)
+    {
+        this.trimStart = offset;
+        this.trimEnd = endOffset;
+        return(this);
+    }
 
     /*
      * (non-Javadoc)
@@ -276,10 +274,23 @@ public class FieldFormatterBase implements FieldFormatter
         return (cleaned);
     }
 
+    private final String trimData(final String data)
+    {
+        try
+        {
+            return (trimStart == -1 && trimEnd == -1) ? data : data.substring(trimStart, trimEnd + 1);
+        }
+        catch (IndexOutOfBoundsException ioobe)
+        {
+            return("");
+        }
+    }
+    
     public String cleanData(VariableField vf, boolean isSubfieldA, String data)
     {
+        final String trimmed = trimData(data);
         final EnumSet<eCleanVal> cleanVal = getCleanVal();
-        String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? Utils.cleanData(data) : data;
+        String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? Utils.cleanData(trimmed) : trimmed;
         if (!cleanVal.contains(eCleanVal.STRIP_ACCCENTS) && !cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)
                 && !cleanVal.contains(eCleanVal.TO_LOWER) && !cleanVal.contains(eCleanVal.TO_UPPER)
                 && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_2))
@@ -366,8 +377,11 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addAfterSubfield(Collection<String> result)
     {
-        result.add(buffer.toString());
-        buffer.setLength(0);
+        if (joinVal == eJoinVal.SEPARATE)
+        {
+            result.add(buffer.toString());
+            buffer.setLength(0);
+        }
     }
 
     /*
@@ -380,7 +394,11 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addAfterField(Collection<String> result)
     {
-
+        if (joinVal == eJoinVal.JOIN)
+        {
+            result.add(buffer.toString());
+            buffer.setLength(0);
+        }
     }
 
     @Override

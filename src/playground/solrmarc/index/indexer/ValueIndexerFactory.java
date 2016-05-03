@@ -7,11 +7,11 @@ import playground.solrmarc.index.extractor.AbstractSingleValueExtractor;
 import playground.solrmarc.index.extractor.AbstractValueExtractor;
 import playground.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import playground.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
-import playground.solrmarc.index.fieldmatch.FieldFormatter;
 import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
-import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
+//import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
 import playground.solrmarc.index.fieldmatch.FieldFormatterMapped;
-import playground.solrmarc.index.fieldmatch.FieldFormatterSubstring;
+//import playground.solrmarc.index.fieldmatch.FieldFormatterSubstring;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
 //import playground.solrmarc.index.specification.ErrorSpecification;
@@ -358,24 +358,31 @@ public class ValueIndexerFactory
             String mapParts[] = mapSpec.toArray(new String[0]);
             if (mapParts[0].equals("join"))
             {
+                multiValueExtractor.setJoinVal(eJoinVal.JOIN);
                 if (mapParts.length > 1)
                 {
-                    multiValueExtractor.addFormatter(new FieldFormatterJoin(mapParts[1]));
+                    multiValueExtractor.setSeparator(mapParts[1]);
                 }
-                else
-                {
-                    multiValueExtractor.addFormatter(new FieldFormatterJoin());
-                }
+            }
+            else if (mapParts[0].equals("separate"))
+            {
+                multiValueExtractor.setJoinVal(eJoinVal.SEPARATE);
             }
             else if (mapParts[0].equals("substring"))
             {
-                if (mapParts.length > 2)
-                {
-                    multiValueExtractor.addFormatter(new FieldFormatterSubstring(mapParts[1], mapParts[2]));
+                try {
+                    if (mapParts.length > 2)
+                    {
+                        multiValueExtractor.setSubstring(mapParts[1], mapParts[2]);
+                    }
+                    else
+                    {
+                        multiValueExtractor.setSubstring(mapParts[1], mapParts[1]);
+                    }
                 }
-                else
+                catch (IndexerSpecException ise)
                 {
-                    multiValueExtractor.addFormatter(new FieldFormatterSubstring(mapParts[1]));
+                    validationExceptions.add(ise);
                 }
             }
             else if (mapParts[0].equals("unique"))
@@ -473,17 +480,19 @@ public class ValueIndexerFactory
             mappingConfig = mappingConfig.trim();
             if (mappingConfig.startsWith("join"))
             {
+                multiValueExtractor.setJoinVal(eJoinVal.JOIN);
                 final int openParanthisis = mappingConfig.indexOf('(');
                 final int closeParanthisis = mappingConfig.indexOf(')');
                 if (openParanthisis >= 0 && closeParanthisis >= 0)
                 {
-                    multiValueExtractor.addFormatter(new FieldFormatterJoin(mappingConfig.substring(openParanthisis + 1, closeParanthisis)));
-                }
-                else
-                {
-                    multiValueExtractor.addFormatter(new FieldFormatterJoin());
+                    multiValueExtractor.setSeparator(mappingConfig.substring(openParanthisis + 1, closeParanthisis));
                 }
             }
+            else if (mappingConfig.equals("separate"))
+            {
+                multiValueExtractor.setJoinVal(eJoinVal.SEPARATE);
+            }
+
 //            else if (mapParts[0].equals("substring"))
 //            {
 //                if (mapParts.length > 2)

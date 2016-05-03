@@ -18,6 +18,11 @@ public interface FieldFormatter
     public static StringBuilder buffer = new StringBuilder();
     public static List<String> emptyList = Collections.emptyList();
 
+    public enum eJoinVal
+    {
+        SEPARATE, JOIN;
+    };
+
     public enum eCleanVal
     {
         CLEAN_END, CLEAN_EACH, STRIP_ALL_PUNCT, STRIP_ACCCENTS, TO_UPPER, TO_LOWER, STRIP_INDICATOR_2;
@@ -25,25 +30,31 @@ public interface FieldFormatter
 
     public abstract String getFieldTagFmt();
 
-    public abstract void setFieldTagFmt(String fieldTagFmt);
+    public abstract FieldFormatter setFieldTagFmt(String fieldTagFmt);
 
     public abstract String getIndicatorFmt();
 
-    public abstract void setIndicatorFmt(String indicatorFmt);
+    public abstract FieldFormatter setIndicatorFmt(String indicatorFmt);
 
     public abstract String getSfCodeFmt();
 
-    public abstract void setSfCodeFmt(String sfCodeFmt);
+    public abstract FieldFormatter setSfCodeFmt(String sfCodeFmt);
 
     public abstract String getSeparator();
 
-    public abstract void setSeparator(String separator);
+    public abstract FieldFormatter setSeparator(String separator);
 
+    public abstract eJoinVal getJoinVal();
+
+    public abstract FieldFormatter setJoinVal(eJoinVal joinVal);
+    
+    public abstract FieldFormatter setSubstring(int offset, int endOffset);
+ 
     public abstract EnumSet<eCleanVal> getCleanVal();
 
-    public abstract void setCleanVal(EnumSet<eCleanVal> cleanVal);
+    public abstract FieldFormatter setCleanVal(EnumSet<eCleanVal> cleanVal);
 
-    public abstract void addCleanVal(eCleanVal cleanVal);
+    public abstract FieldFormatter addCleanVal(eCleanVal cleanVal);
 
     public abstract Collection<String> start();
 
@@ -77,10 +88,5 @@ public interface FieldFormatter
 
     public abstract Collection<String> handleMapping(Collection<String> cleaned) throws Exception;
 
-    public abstract void setUnique();
-
-    public abstract void unsetUnique();
-
-    public abstract boolean isUnique();
 
 }

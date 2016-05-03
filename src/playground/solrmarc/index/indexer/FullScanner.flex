@@ -107,6 +107,7 @@ datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
 "("                     { return sf.newSymbol("(",FullSym.LPAREN); }
 ","                     { return sf.newSymbol(",", FullSym.COMMA); }
 {identifier}  			{ return sf.newSymbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
+{IntLiteral}			{ return sf.newSymbol("NUMBER",FullSym.NUMBER, yytext()); }
 ")"                     { yybegin(MAPSPEC); return sf.newSymbol(")",FullSym.RPAREN); }
 {white_space}           { /* ignore */ }
 }

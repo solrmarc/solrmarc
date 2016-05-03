@@ -37,9 +37,10 @@ public class FieldFormatterDecorator implements FieldFormatter, Cloneable
     }
 
     @Override
-    public void setFieldTagFmt(String fieldTagFmt)
+    public FieldFormatter setFieldTagFmt(String fieldTagFmt)
     {
         toDecorate.setFieldTagFmt(fieldTagFmt);
+        return(this);
     }
 
     @Override
@@ -49,9 +50,10 @@ public class FieldFormatterDecorator implements FieldFormatter, Cloneable
     }
 
     @Override
-    public void setIndicatorFmt(String indicatorFmt)
+    public FieldFormatter setIndicatorFmt(String indicatorFmt)
     {
         toDecorate.setIndicatorFmt(indicatorFmt);
+        return(this);
     }
 
     @Override
@@ -61,9 +63,10 @@ public class FieldFormatterDecorator implements FieldFormatter, Cloneable
     }
 
     @Override
-    public void setSfCodeFmt(String sfCodeFmt)
+    public FieldFormatter setSfCodeFmt(String sfCodeFmt)
     {
         toDecorate.setSfCodeFmt(sfCodeFmt);
+        return(this);
     }
 
     @Override
@@ -73,40 +76,31 @@ public class FieldFormatterDecorator implements FieldFormatter, Cloneable
     }
 
     @Override
-    public void setSeparator(String separator)
+    public FieldFormatter setSeparator(String separator)
     {
         toDecorate.setSeparator(separator);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * playground.solrmarc.index.fieldmatch.FieldFormatter#setSeparator(java.
-     * lang.String)
-     */
-    @Override
-    public void setUnique()
-    {
-        toDecorate.setUnique();
+        return(this);
     }
 
     @Override
-    public void unsetUnique()
+    public eJoinVal getJoinVal()
     {
-        toDecorate.unsetUnique();
+        return (toDecorate.getJoinVal());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see playground.solrmarc.index.fieldmatch.FieldFormatter#getSeparator()
-     */
     @Override
-    public boolean isUnique()
+    public FieldFormatter setJoinVal(eJoinVal joinVal)
     {
-        return toDecorate.isUnique();
+        toDecorate.setJoinVal(joinVal);
+        return(this);
     }
+
+    @Override
+    public FieldFormatter setSubstring(int offset, int endOffset)
+    {
+        return(toDecorate.setSubstring(offset, endOffset));
+    }
+
 
     @Override
     public EnumSet<eCleanVal> getCleanVal()
@@ -115,15 +109,17 @@ public class FieldFormatterDecorator implements FieldFormatter, Cloneable
     }
 
     @Override
-    public void setCleanVal(EnumSet<eCleanVal> cleanVal)
+    public FieldFormatter setCleanVal(EnumSet<eCleanVal> cleanVal)
     {
         toDecorate.setCleanVal(cleanVal);
+        return(this);
     }
 
     @Override
-    public void addCleanVal(eCleanVal cleanVal)
+    public FieldFormatter addCleanVal(eCleanVal cleanVal)
     {
         toDecorate.addCleanVal(cleanVal);
+        return(this);
     }
 
     @Override

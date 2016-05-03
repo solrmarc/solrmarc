@@ -13,8 +13,9 @@ import org.marc4j.marc.Record;
 
 import playground.solrmarc.index.collector.FieldMatchCollector;
 import playground.solrmarc.index.fieldmatch.FieldFormatter;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
 import playground.solrmarc.index.fieldmatch.FieldFormatterBase;
-import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
+//import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
 import playground.solrmarc.index.fieldmatch.FieldFormatterPatternMapped;
 import playground.solrmarc.index.fieldmatch.FieldFormatterTranslationMapped;
 import playground.solrmarc.index.fieldmatch.FieldMatch;
@@ -59,9 +60,9 @@ public class ConditionalParserTest
         Specification spec4 = testString("035a?($a~\"\\(OCoLC\\)[0-9]+\")");
         Specification spec5 = testString("999m");
         Specification spec6 = testString("000[6]?([6]~\"[cdj]\")");
-        spec1.setFormatter(new FieldFormatterJoin(new FieldFormatterBase(true), " -- "));
+        spec1.setFormatter(new FieldFormatterBase(true).setSeparator(" -- ").setJoinVal(eJoinVal.JOIN));
         spec2.setFormatter(new FieldFormatterPatternMapped(new FieldFormatterBase(true), "(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2||.*[^0-9].*=>"));
-        spec3.setFormatter(new FieldFormatterJoin(new FieldFormatterBase(FieldFormatter.TITLE_SORT_LOWER), " : "));
+        spec3.setFormatter(new FieldFormatterBase(FieldFormatter.TITLE_SORT_LOWER).setSeparator(" : ").setJoinVal(eJoinVal.JOIN));
         spec4.setFormatter(new FieldFormatterPatternMapped(new FieldFormatterBase(true), ".*\\(OCoLC\\)([0-9]*)=>$1"));
         spec5.setFormatter(new FieldFormatterTranslationMapped(new FieldFormatterBase(true), "library_map.properties"));
         spec6.setFormatter(new FieldFormatterPatternMapped(new FieldFormatterBase(true), "[cd]=>Scores||[j]=>Recordings||[cdj]=>Recordings and/or Scores"));

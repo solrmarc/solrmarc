@@ -9,6 +9,7 @@ import playground.solrmarc.index.fieldmatch.FieldFormatter;
 import playground.solrmarc.index.fieldmatch.FieldFormatterBase;
 import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
 import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
 import playground.solrmarc.index.specification.conditional.Condition;
 
 public abstract class SingleSpecification extends Specification
@@ -82,6 +83,20 @@ public abstract class SingleSpecification extends Specification
         fmt.setCleanVal(of);
     }
 
+    public void setJoinVal(eJoinVal joinVal)
+    {
+        fmt.setJoinVal(joinVal);
+    }
+
+    public void setSubstring(int offset, int endOffset)
+    {
+        fmt.setSubstring(offset, endOffset);
+    }
+
+    public void setSeparator(String separator)
+    {
+        fmt.setSeparator(separator);
+    }
 
 
 }

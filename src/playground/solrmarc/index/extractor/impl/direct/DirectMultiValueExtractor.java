@@ -3,6 +3,8 @@ package playground.solrmarc.index.extractor.impl.direct;
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 import playground.solrmarc.index.fieldmatch.FieldFormatter;
 import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
+import playground.solrmarc.index.indexer.IndexerSpecException;
 import playground.solrmarc.index.fieldmatch.FieldFormatterBase;
 import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
 import playground.solrmarc.index.fieldmatch.FieldMatch;
@@ -108,6 +110,40 @@ public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
     public void setCleanVal(EnumSet<eCleanVal> of)
     {
         fieldsAndSubfieldSpec.setCleanVal(of);        
+    }
+    
+    public void setJoinVal(eJoinVal joinVal)
+    {
+        fieldsAndSubfieldSpec.setJoinVal(joinVal);        
+    }
+
+    public void setSeparator(String separator)
+    {
+        fieldsAndSubfieldSpec.setSeparator(separator);
+    }
+
+    public void setSubstring(String startStr, String endStr)
+    {
+        int start, end;
+        try {
+            start = Integer.parseInt(startStr);
+        }
+        catch (NumberFormatException nfe)
+        {
+            throw new IndexerSpecException("Illegal substring specification: " + startStr);
+        }
+        try {
+            end = Integer.parseInt(endStr);
+        }
+        catch (NumberFormatException nfe)
+        {
+            throw new IndexerSpecException("Illegal substring specification: " + endStr);
+        }
+        if (start < 0 || end < 0 || start > end)
+        {
+            throw new IndexerSpecException("Illegal substring interval: " + start + " " + end);
+        }
+        fieldsAndSubfieldSpec.setSubstring(start, end);
     }
 
 

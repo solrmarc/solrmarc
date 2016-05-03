@@ -10,6 +10,7 @@ import org.marc4j.marc.VariableField;
 
 import playground.solrmarc.index.fieldmatch.FieldFormatter;
 import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
 import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
 import playground.solrmarc.index.fieldmatch.FieldMatch;
 import playground.solrmarc.index.specification.conditional.Condition;
@@ -64,5 +65,11 @@ public abstract class Specification
     public abstract void addCleanVal(eCleanVal cleanVal);
 
     public abstract void setCleanVal(EnumSet<eCleanVal> of);
+   
+    public abstract void setJoinVal(eJoinVal cleanVal);
+    
+    public abstract void setSubstring(int offset, int endOffset);
 
+    public abstract void setSeparator(String string);
+    
 }

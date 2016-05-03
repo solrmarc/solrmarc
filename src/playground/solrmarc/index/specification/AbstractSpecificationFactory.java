@@ -2,7 +2,7 @@ package playground.solrmarc.index.specification;
 
 import org.marc4j.marc.impl.Verifier;
 
-import playground.solrmarc.index.fieldmatch.FieldFormatterSubstring;
+//import playground.solrmarc.index.fieldmatch.FieldFormatterSubstring;
 import playground.solrmarc.index.specification.conditional.Condition;
 import playground.solrmarc.index.specification.conditional.ConditionalParser;
 
@@ -122,7 +122,7 @@ public class AbstractSpecificationFactory
             String endOffsetStr = position.replaceAll("\\[([0-9]+)(-)?([0-9]+)?\\]", "$3");
             int endOffset = offset;
             if (endOffsetStr != null && endOffsetStr.length() > 0) endOffset = Integer.parseInt(endOffsetStr);
-            spec.addFormatter(new FieldFormatterSubstring(offset, endOffset));
+            spec.setSubstring(offset, endOffset);
         }
         catch (NumberFormatException nfe) { /* eat it */ }
         return(spec);

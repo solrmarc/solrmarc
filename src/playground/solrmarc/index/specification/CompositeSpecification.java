@@ -12,6 +12,7 @@ import playground.solrmarc.index.fieldmatch.FieldFormatter;
 import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
 import playground.solrmarc.index.fieldmatch.FieldMatch;
 import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
 import playground.solrmarc.index.specification.conditional.Condition;
 
 public class CompositeSpecification extends Specification
@@ -173,4 +174,29 @@ public class CompositeSpecification extends Specification
             spec.setCleanVal(of);
         }
     }
+    
+    public void setJoinVal(eJoinVal joinVal)
+    {
+        for (SingleSpecification spec : pieces)
+        {
+            spec.setJoinVal(joinVal);
+        }
+    }
+    
+    public void setSubstring(int offset, int endOffset)
+    {
+        for (SingleSpecification spec : pieces)
+        {
+            spec.setSubstring(offset, endOffset);
+        }
+    }
+    
+    public void setSeparator(String separator)
+    {
+        for (SingleSpecification spec : pieces)
+        {
+            spec.setSeparator(separator);
+        }
+    }
+
 }

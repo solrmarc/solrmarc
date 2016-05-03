@@ -9,9 +9,10 @@ import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
 import playground.solrmarc.index.fieldmatch.FieldFormatter;
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
 import playground.solrmarc.index.fieldmatch.FieldFormatterBase;
-import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
-import playground.solrmarc.index.fieldmatch.FieldFormatterSimple;
+//import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
+//import playground.solrmarc.index.fieldmatch.FieldFormatterSimple;
 import playground.solrmarc.index.specification.conditional.Condition;
 
 public class SingleDataFieldSpecification extends SingleSpecification
@@ -39,8 +40,10 @@ public class SingleDataFieldSpecification extends SingleSpecification
         super(tag, cond);
         this.subfields = subfields;
         subfieldPattern = makePattern(subfields);
-        if (subfields.length() == 1) fmt =  new FieldFormatterSimple(new FieldFormatterBase(true));
-        else fmt = new FieldFormatterJoin(new FieldFormatterBase(true));
+        if (subfields.length() == 1) 
+            fmt =  new FieldFormatterBase(false).setJoinVal(eJoinVal.SEPARATE);
+        else 
+            fmt = new FieldFormatterBase(false).setJoinVal(eJoinVal.JOIN);
     }
 
     public SingleDataFieldSpecification(String tag, String subfields)

@@ -199,7 +199,7 @@ non terminal List<String> field_names, strings, method_plus_params, params, cust
 non terminal CompositeSpecification field_spec, field_spec_simple, field_spec_part;
 non terminal SingleSpecification field_spec_part_complex, field_spec_part_simple;
 non terminal Condition expr, expr_part;
-non terminal String value, opt_comma;
+non terminal String value, opt_comma, param;
 non terminal Integer  op;
 
 precedence nonassoc NOT;
@@ -257,10 +257,13 @@ method_plus_params ::=  IDENTIFIER:s                                        {: R
                     |   IDENTIFIER:s LPAREN params:l RPAREN                 {: RESULT = l; RESULT.add(0, s); :}
                     ;
 
-params   ::= params:l COMMA QUOTEDSTR:s                                     {: RESULT = l; l.add(s); :}
-           | params:l COMMA IDENTIFIER:s                                    {: RESULT = l; l.add(s); :}
-           | QUOTEDSTR:s                                                    {: RESULT = new ArrayList<String>(); RESULT.add(s); :}
-           | IDENTIFIER:s                                                   {: RESULT = new ArrayList<String>(); RESULT.add(s); :}
+params   ::= params:l COMMA param:s                                         {: RESULT = l; l.add(s); :}
+           | param:s                                                        {: RESULT = new ArrayList<String>(); RESULT.add(s); :}
+           ;
+           
+param    ::= QUOTEDSTR:s                                                    {: RESULT = s; :}
+           | IDENTIFIER:s                                                   {: RESULT = s; :}
+           | NUMBER:s                                                       {: RESULT = s; :}
            ;
                                       
 field_spec ::= field_spec:s COLON field_spec_part:s1						{: s.addSpec(s1); RESULT = s; :}
