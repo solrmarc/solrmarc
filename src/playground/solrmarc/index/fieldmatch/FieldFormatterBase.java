@@ -11,9 +11,9 @@ import java.util.List;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.tools.Utils;
 
 
-import playground.solrmarc.tools.Utils;
 
 public class FieldFormatterBase implements FieldFormatter
 {

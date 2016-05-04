@@ -99,18 +99,7 @@ public class SolrMarcDebug
      */
     private void initialize()
     {
-        try
-        {
-            indexerFactory = new ValueIndexerFactory();
-        }
-        catch (InstantiationException e2)
-        {
-            e2.printStackTrace();
-        }
-        catch (IllegalAccessException e2)
-        {
-            e2.printStackTrace();
-        }
+        indexerFactory = ValueIndexerFactory.instance();
 
         recordMap = new LinkedHashMap<String, Record>();
 

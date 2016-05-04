@@ -52,11 +52,25 @@ public class ValueIndexerFactory
         return validationExceptions;
     }
 
-    public ValueIndexerFactory() throws InstantiationException, IllegalAccessException
+    private static ValueIndexerFactory theFactory = new ValueIndexerFactory();
+    
+    public static ValueIndexerFactory instance()
     {
-        this.extractorFactories = createExtractorFactories(ReflectionUtils.getExtractorFactoryClasses());
-        this.mappingFactories = createMappingFactories(ReflectionUtils.getMappingFactoryClasses());
+        return(theFactory);
+    }
+    
+    private ValueIndexerFactory()
+    {
         validationExceptions = new ArrayList<IndexerSpecException>();
+        try
+        {
+            this.extractorFactories = createExtractorFactories(ReflectionUtils.getExtractorFactoryClasses());
+            this.mappingFactories = createMappingFactories(ReflectionUtils.getMappingFactoryClasses());
+        }
+        catch (IllegalAccessException | InstantiationException e)
+        {
+            throw new IndexerSpecException(e, "Error creating extractor or mapping factories");
+        }
     }
 
     public List<AbstractValueIndexer<?>> createValueIndexers(Properties indexerProperties)
@@ -686,7 +700,7 @@ public class ValueIndexerFactory
         // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
     }
 
-    private AbstractMultiValueMapping createMultiValueMapping(final String mappingConfig)
+    public AbstractMultiValueMapping createMultiValueMapping(final String mappingConfig)
     {
         for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
         {

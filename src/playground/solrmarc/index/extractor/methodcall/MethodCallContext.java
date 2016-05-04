@@ -2,7 +2,7 @@ package playground.solrmarc.index.extractor.methodcall;
 
 import playground.solrmarc.index.utils.StringReader;
 import org.marc4j.marc.Record;
-import playground.solrmarc.tools.Utils;
+import org.solrmarc.tools.Utils;
 
 import java.util.Arrays;
 import java.util.Collection;

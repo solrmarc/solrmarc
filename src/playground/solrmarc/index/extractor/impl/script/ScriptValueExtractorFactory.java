@@ -10,8 +10,8 @@ import playground.solrmarc.index.extractor.methodcall.MethodCallContext;
 import playground.solrmarc.index.extractor.methodcall.MethodCallMultiValueExtractor;
 import playground.solrmarc.index.extractor.methodcall.MethodCallSingleValueExtractor;
 import playground.solrmarc.index.utils.StringReader;
-import playground.solrmarc.tools.Utils;
 import org.apache.log4j.Logger;
+import org.solrmarc.tools.Utils;
 
 import java.io.IOException;
 import java.io.InputStream;

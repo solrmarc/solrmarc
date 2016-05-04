@@ -63,7 +63,7 @@ public class MoreValueIndexerFactoryTests
 
     private List<AbstractValueIndexer<?>> createIndexers(Properties configs) throws IllegalAccessException, InstantiationException
     {
-        final ValueIndexerFactory factory = new ValueIndexerFactory();
+        final ValueIndexerFactory factory = ValueIndexerFactory.instance();
         return factory.createValueIndexers(configs);
     }
 }

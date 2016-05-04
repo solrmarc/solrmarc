@@ -13,6 +13,7 @@ public class IndexerSpecException extends RuntimeException
     private static final long serialVersionUID = 1L;
 
 //    ErrorSpecification errMsgs;
+    Throwable cause;
     String solrField;
     String spec;
     String message;
@@ -25,9 +26,20 @@ public class IndexerSpecException extends RuntimeException
 //        this.message = null;
 //    }
 
+    public IndexerSpecException(Throwable cause, String solrField, String spec, String message)
+    {
+//        this.errMsgs = null;
+        this.cause = cause;
+        this.solrField = solrField;
+        this.spec = spec;
+        this.message = message;
+
+    }
+
     public IndexerSpecException(String solrField, String spec, String message)
     {
 //        this.errMsgs = null;
+        this.cause = null;
         this.solrField = solrField;
         this.spec = spec;
         this.message = message;
@@ -42,9 +54,20 @@ public class IndexerSpecException extends RuntimeException
 //        this.message = null;
 //    }
 
+    public IndexerSpecException(Throwable cause, String message)
+    {
+//        this.errMsgs = null;
+        this.cause = cause;
+        this.solrField = null;
+        this.spec = null;
+        this.message = message;
+
+    }
+    
     public IndexerSpecException(String message)
     {
 //        this.errMsgs = null;
+        this.cause = null;
         this.solrField = null;
         this.spec = null;
         this.message = message;

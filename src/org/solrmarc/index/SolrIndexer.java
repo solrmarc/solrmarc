@@ -15,8 +15,13 @@ import org.marc4j.marc.Record;
 //import org.solrmarc.tools.Utils;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.tools.Utils;
 
+import playground.solrmarc.index.fieldmatch.FieldFormatterMapped;
 import playground.solrmarc.index.fieldmatch.FieldMatch;
+import playground.solrmarc.index.indexer.AbstractValueIndexer;
+import playground.solrmarc.index.indexer.ValueIndexerFactory;
+import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.specification.AbstractSpecificationFactory;
 import playground.solrmarc.index.specification.Specification;
 
@@ -24,7 +29,7 @@ import playground.solrmarc.index.specification.Specification;
  * class SolrIndexer
  * 
  * This class exists solely for backwards compatibility purposes.  The intention is that if a previous custom function
- * was being used, one that provides the same functionality can be found here.  Furthermore if there were many helper functions
+ * was being used, one that provides the same functionality can be found here.  Furthermore if there were any helper functions
  * that could have been used to create your own custom indexing functions those helper functions should be found here as well.
  * 
  * In most cases the methods found here are merely shims to translate the desired method to use the newer functionality that 
@@ -40,15 +45,59 @@ public class SolrIndexer
 {
     static Map<String, Specification> specCache = new HashMap<String, Specification>(); 
     
-    private static Specification getOrCreateSpecification(String tagStr)
+    private static Specification getOrCreateSpecificationMapped(String tagStr, String map)
     {
-        if (specCache.containsKey(tagStr))
+        String key = (map == null) ? tagStr : tagStr + map;
+        if (specCache.containsKey(key))
         {
-            return(specCache.get(tagStr));
+            return(specCache.get(key));
         }
         else
         {
             Specification spec = AbstractSpecificationFactory.createSpecification(tagStr);
+            if (map != null)
+            {
+                AbstractMultiValueMapping valueMapping = ValueIndexerFactory.instance().createMultiValueMapping(map);
+                spec.addFormatter(new FieldFormatterMapped(valueMapping));
+            }
+            specCache.put(tagStr,  spec);
+            return(spec);
+        }
+    }
+    
+    private static Specification getOrCreateSpecification(String tagStr, String separator)
+    {
+        String key = (separator == null) ? tagStr : tagStr + "[" + separator + "]";
+        if (specCache.containsKey(key))
+        {
+            return(specCache.get(key));
+        }
+        else
+        {
+            Specification spec = AbstractSpecificationFactory.createSpecification(tagStr);
+            if (separator != null)
+            {
+                spec.setSeparator(separator);
+            }
+            specCache.put(tagStr,  spec);
+            return(spec);
+        }
+    }
+    
+    private static Specification getOrCreateSpecification(String tagStr, int start, int end)
+    {
+        String key = (start == -1 && end == -1) ? tagStr : tagStr + "_" + start + "_" + end;
+        if (specCache.containsKey(key))
+        {
+            return(specCache.get(key));
+        }
+        else
+        {
+            Specification spec = AbstractSpecificationFactory.createSpecification(tagStr);
+            if (start != -1 && end != -1)
+            {
+                spec.setSubstring(start, end);
+            }
             specCache.put(tagStr,  spec);
             return(spec);
         }
@@ -79,9 +128,8 @@ public class SolrIndexer
      *            values, a <code>List</code> will allow values to repeat. 
      * @throws Exception 
      */
-    public static void getFieldListCollector(Record record, String tagStr,  Collection<String> collector)
+    private static void getFieldListCollector(Record record, Specification spec,  Collection<String> collector)
     {
-        Specification spec = getOrCreateSpecification(tagStr);
         for (FieldMatch fm : spec.getFieldMatches(record))
         {
             try
@@ -96,7 +144,14 @@ public class SolrIndexer
         }
         return;
     }
+    
+    public static void getFieldListCollector(Record record, String tagStr, String mapStr,  Collection<String> collector)
+    {
+        Specification spec = getOrCreateSpecificationMapped(tagStr, mapStr);
+        getFieldListCollector(record, spec,  collector);
+    }
 
+    
     /**
      * Get Set of Strings as indicated by tagStr. For each field spec in the
      * tagStr that is NOT about bytes (i.e. not a 008[7-12] type fieldspec), the
@@ -123,7 +178,14 @@ public class SolrIndexer
     public static Set<String> getFieldList(Record record, String tagStr)
     {
         Set<String> result = new LinkedHashSet<String>();
-        getFieldListCollector(record, tagStr, result);
+        getFieldListCollector(record, tagStr, null, result);
+        return result;
+    }
+   
+    public static Set<String> getMappedFieldList(Record record, String tagStr, String mapStr)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        getFieldListCollector(record, tagStr, mapStr, result);
         return result;
     }
 
@@ -152,7 +214,7 @@ public class SolrIndexer
     public static List<String> getFieldListAsList(Record record, String tagStr) 
     {
         List<String> result = new ArrayList<String>();
-        getFieldListCollector(record, tagStr, result);
+        getFieldListCollector(record, tagStr, null, result);
         return result;
     }
 
@@ -174,6 +236,22 @@ public class SolrIndexer
             return iter.next();
         else
             return null;
+    }
+
+    /**
+     * Get the first field value, which is mapped to another value. If there is
+     * no mapping for the value, use the mapping for the empty key, if it
+     * exists, o.w., use the mapping for the __DEFAULT key, if it exists.
+     * @param record - the marc record object
+     * @param mapName - name of translation map to use to xform values
+     * @param tagStr - which field(s)/subfield(s) to use
+     * @return first value as a string
+     */
+    public String getFirstFieldVal(Record record, String mapName, String tagStr)
+    {
+        Set<String> result = getMappedFieldList(record, tagStr, mapName);
+        Iterator<String> iter = result.iterator();
+        return (iter.hasNext())? iter.next() : null;
     }
 
     public static boolean isControlField(String fieldTag)
@@ -200,56 +278,8 @@ public class SolrIndexer
     public static void getSubfieldDataCollector(Record record, String fldTag, String subfldsStr, 
                                                 String separator, Collection<String> collector)
     {
-        // Process Leader
-        if (fldTag.equals("000"))
-        {
-            collector.add(record.getLeader().toString());
-            return;
-        }
-
-        // Loop through Data and Control Fields
-        // int iTag = new Integer(fldTag).intValue();
-        List<VariableField> varFlds = record.getVariableFields(fldTag);
-        for (VariableField vf : varFlds)
-        {
-            if (!isControlField(fldTag) && subfldsStr != null)
-            {
-                // DataField
-                DataField dfield = (DataField) vf;
-
-                if (subfldsStr.length() > 1 || separator != null)
-                {
-                    // concatenate subfields using specified separator or space
-                    StringBuffer buffer = new StringBuffer("");
-                    List<Subfield> subFlds = dfield.getSubfields();
-                    for (Subfield sf : subFlds)
-                    {
-                        if (subfldsStr.indexOf(sf.getCode()) != -1)
-                        {
-                            if (buffer.length() > 0)
-                                buffer.append(separator != null ? separator : " ");
-                            buffer.append(sf.getData().trim());
-                        }
-                    }
-                    if (buffer.length() > 0)
-                        collector.add(buffer.toString());
-                }
-                else
-                {
-                    // get all instances of the single subfield
-                    List<Subfield> subFlds = dfield.getSubfields(subfldsStr.charAt(0));
-                    for (Subfield sf : subFlds)
-                    {
-                        collector.add(sf.getData().trim());
-                    }
-                }
-            }
-            else
-            {
-                // Control Field
-                collector.add(((ControlField) vf).getData().trim());
-            }
-        }
+        Specification spec = getOrCreateSpecification(fldTag+subfldsStr, separator);
+        getFieldListCollector(record, spec, collector);
         return;
     }
 
@@ -267,56 +297,8 @@ public class SolrIndexer
     public static void getSubfieldDataCollector(Record record, String fldTag, String subfldStr, 
                        int beginIx, int endIx, Collection<String> collector)
     {
-        // Process Leader
-        if (fldTag.equals("000"))
-        {
-            collector.add(record.getLeader().toString().substring(beginIx, endIx));
-            return;
-        }
-
-        // Loop through Data and Control Fields
-        List<VariableField> varFlds = record.getVariableFields(fldTag);
-        for (VariableField vf : varFlds)
-        {
-            if (!isControlField(fldTag) && subfldStr != null)
-            {
-                // Data Field
-                DataField dfield = (DataField) vf;
-                if (subfldStr.length() > 1)
-                {
-                    // automatic concatenation of grouped subfields
-                    StringBuffer buffer = new StringBuffer("");
-                    List<Subfield> subFlds = dfield.getSubfields();
-                    for (Subfield sf : subFlds)
-                    {
-                        if (subfldStr.indexOf(sf.getCode()) != -1 && 
-                                sf.getData().length() >= endIx)
-                        {
-                            if (buffer.length() > 0)
-                                buffer.append(" ");
-                            buffer.append(sf.getData().substring(beginIx, endIx));
-                        }
-                    }
-                    collector.add(buffer.toString());
-                }
-                else
-                {
-                    // get all instances of the single subfield
-                    List<Subfield> subFlds = dfield.getSubfields(subfldStr.charAt(0));
-                    for (Subfield sf : subFlds)
-                    {
-                        if (sf.getData().length() >= endIx)
-                            collector.add(sf.getData().substring(beginIx, endIx));
-                    }
-                }
-            }
-            else  // Control Field
-            {
-                String cfldData = ((ControlField) vf).getData();
-                if (cfldData.length() >= endIx)
-                    collector.add(cfldData.substring(beginIx, endIx));
-            }
-        }
+        Specification spec = getOrCreateSpecification(fldTag+subfldStr, beginIx, endIx);
+        getFieldListCollector(record, spec, collector);
         return;
     }
     
@@ -355,6 +337,75 @@ public class SolrIndexer
         SolrIndexer.getSubfieldDataCollector(record, fldTag, subfldStr, beginIx, endIx, result);
         return result;
     }
- 
+
+    /**
+     * remove trailing punctuation (default trailing characters to be removed)
+     *    See org.solrmarc.tools.Utils.cleanData() for details on the 
+     *     punctuation removal
+     * @param record marc record object
+     * @param fieldSpec - the field to have trailing punctuation removed
+     * @return Set of strings containing the field values with trailing
+     *         punctuation removed
+     */
+    public Set<String> removeTrailingPunct(Record record, String fieldSpec)
+    {
+        Set<String> result = getFieldList(record, fieldSpec);
+        Set<String> newResult = new LinkedHashSet<String>();
+        for (String s : result)
+        {
+            newResult.add(Utils.cleanData(s));
+        }
+        return newResult;
+    }
+
+    /**
+     * Stub more advanced version of getDate that looks in the 008 field as well as the 260c field
+     * this routine does some simple sanity checking to ensure that the date to return makes sense. 
+     * @param record - the marc record object
+     * @return 260c or 008[7-10] or 008[11-14], "cleaned" per org.solrmarc.tools.Utils.cleanDate()
+     */
+    public String getPublicationDate(final Record record)
+    {
+        AbstractValueIndexer<?> indDate = ValueIndexerFactory.instance().createValueIndexer("publicationDate", 
+                "008[7-10]:008[11-14]:260c:264c?(ind2=1||ind2=4),clean, first, " +
+                "map(\"(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2\",\".*[^0-9].*=>\")");
+        Collection<String> result;
+        try
+        {
+            result = indDate.getFieldData(record);
+        }
+        catch (Exception e)
+        {
+            return(null);
+        }
+        Iterator<String> iter = result.iterator();
+        return (iter.hasNext() ? iter.next() : null);
+        
+//        String field008 = getFirstFieldVal(record, "008");
+//        String pubDateFull = getFieldVals(record, "260c", ", ");
+//        String pubDateJustDigits = pubDateFull.replaceAll("[^0-9]", "");       
+//        String pubDate260c = getDate(record);
+//        if (field008 == null || field008.length() < 16) 
+//        {
+//            return(pubDate260c);
+//        }
+//        String field008_d1 = field008.substring(7, 11);
+//        String field008_d2 = field008.substring(11, 15);
+//        String retVal = null;
+//        char dateType = field008.charAt(6);
+//        if (dateType == 'r' && field008_d2.equals(pubDate260c)) retVal = field008_d2;
+//        else if (field008_d1.equals(pubDate260c))               retVal = field008_d1;
+//        else if (field008_d2.equals(pubDate260c))               retVal = field008_d2;
+//        else if (pubDateJustDigits.length() == 4 && pubDate260c != null &&
+//                 pubDate260c.matches("(20|19|18|17|16|15)[0-9][0-9]"))
+//                                                                retVal = pubDate260c;
+//        else if (field008_d1.matches("(20|1[98765432])[0-9][0-9]"))        
+//                                                                retVal = field008_d1;
+//        else if (field008_d2.matches("(20|1[98765432])[0-9][0-9]"))        
+//                                                                retVal = field008_d2;
+//        else                                                    retVal = pubDate260c;
+//        return(retVal);
+    }
+  
 
 }
