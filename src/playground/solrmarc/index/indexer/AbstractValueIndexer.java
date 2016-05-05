@@ -1,6 +1,6 @@
 package playground.solrmarc.index.indexer;
 
-import playground.solrmarc.index.collector.AbstractValueCollector;
+import playground.solrmarc.index.collector.MultiValueCollector;
 import playground.solrmarc.index.extractor.AbstractValueExtractor;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMapping;
@@ -17,12 +17,12 @@ public abstract class AbstractValueIndexer<T>
     private Collection<String> solrFieldNames;
     protected final AbstractValueExtractor<T> extractor;
     protected final AbstractValueMapping<T>[] mappings;
-    protected final AbstractValueCollector<T> collector;
+    protected final MultiValueCollector collector;
     private String specLabel;
     private List<String> parseErrors;
 
     public AbstractValueIndexer(final String solrFieldName, final AbstractValueExtractor<T> extractor,
-            final AbstractValueMapping<T>[] mappings, final AbstractValueCollector<T> collector)
+            final AbstractValueMapping<T>[] mappings, final MultiValueCollector collector)
     {
         this.solrFieldNames = new ArrayList<String>();
         String[] fieldNames = solrFieldName.split("[ ]?,[ ]?");
@@ -36,7 +36,7 @@ public abstract class AbstractValueIndexer<T>
     }
 
     public AbstractValueIndexer(final Collection<String> solrFieldNames, final AbstractValueExtractor<T> extractor,
-            final AbstractValueMapping<T>[] mappings, final AbstractValueCollector<T> collector)
+            final AbstractValueMapping<T>[] mappings, final MultiValueCollector collector)
     {
         this.solrFieldNames = new ArrayList<String>();
         this.solrFieldNames.addAll(solrFieldNames);
@@ -46,7 +46,7 @@ public abstract class AbstractValueIndexer<T>
     }
 
     public AbstractValueIndexer(final Collection<String> solrFieldNames, final AbstractValueExtractor<T> extractor,
-            final Collection<AbstractMultiValueMapping> mappings, final AbstractValueCollector<T> collector)
+            final Collection<AbstractMultiValueMapping> mappings, final MultiValueCollector collector)
     {
         this.solrFieldNames = new ArrayList<String>();
         this.solrFieldNames.addAll(solrFieldNames);
@@ -77,6 +77,7 @@ public abstract class AbstractValueIndexer<T>
         this.parseErrors = parseErrors;
     }
 
+    @SuppressWarnings("unchecked")
     public Collection<String> getFieldData(Record record) throws Exception
     {
         if (extractor == null) return Collections.emptyList();
@@ -89,7 +90,11 @@ public abstract class AbstractValueIndexer<T>
         {
             values = mapping.map(values);
         }
-        Collection<String> result = collector.collect(values);
+        Collection<String> result = null;
+        if (values instanceof Collection) 
+            result = collector.collect((Collection<String>)values);
+        else if (values instanceof String)
+            result = collector.collect(Collections.singletonList((String)values));
         return (result);
     }
 

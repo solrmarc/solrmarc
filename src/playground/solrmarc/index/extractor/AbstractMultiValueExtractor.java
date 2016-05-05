@@ -8,18 +8,18 @@ import org.marc4j.marc.Record;
 
 public abstract class AbstractMultiValueExtractor implements AbstractValueExtractor<Collection<String>>
 {
-    @Override
-    public boolean isUnique()
-    {
-        return true;
-    }
-
-    @Override
-    public void setUnique(boolean unique)
-    {
-        //
-    }
-    
+//    @Override
+//    public boolean isUnique()
+//    {
+//        return true;
+//    }
+//
+//    @Override
+//    public void setUnique(boolean unique)
+//    {
+//        //
+//    }
+//    
     @Override
     public Collection<String> extract(final Record record) throws Exception
     {
@@ -31,11 +31,11 @@ public abstract class AbstractMultiValueExtractor implements AbstractValueExtrac
     private Collection<String> makeEmptyResult()
     {
         Collection<String> results;
-        if (isUnique())
-        {
-            results = new LinkedHashSet<String>();
-        }
-        else
+//        if (isUnique())
+//        {
+//            results = new LinkedHashSet<String>();
+//        }
+//        else
         {
             results = new ArrayList<String>();
         }

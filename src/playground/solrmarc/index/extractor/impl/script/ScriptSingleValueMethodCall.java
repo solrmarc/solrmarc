@@ -30,6 +30,10 @@ public class ScriptSingleValueMethodCall extends AbstractExtractorMethodCall<Str
     @Override
     public String invoke(final Object[] parameters) throws Exception
     {
-        return (String) method.invoke(parameters, interpreter);
+       Object result = method.invoke(parameters, interpreter);
+       if (result instanceof String)  
+           return((String)result);
+       else 
+           return(null);
     }
 }

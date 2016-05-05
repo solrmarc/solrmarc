@@ -594,6 +594,63 @@ public final class Utils
 
         return currResult;
     }
+    
+//    public static String cleanData2(String origStr)
+//    {
+//        String currResult = origStr;
+//        String prevResult;
+//        int offsetStart = 0;
+//        int offsetEnd = currResult.length()-1;
+//        char chars[] = currResult.toCharArray();
+//        char c = chars[offsetEnd];
+//        if ()
+//        {
+//            prevResult = currResult;
+//            currResult = currResult.trim();
+//
+//            currResult = currResult.replaceAll(" *([,/;:])$", "");
+//
+//            // trailing period removed in certain circumstances
+//            if (currResult.endsWith("."))
+//            {
+//                if (currResult.matches(".*[JS]r\\.$"))
+//                {
+//                    // dont strip period off of Jr. or Sr.
+//                }
+//                else if (currResult.matches(".*\\w\\w\\.$"))
+//                {
+//                    currResult = currResult.substring(0, currResult.length() - 1);
+//                }
+//                else if (currResult.matches(".*\\p{L}\\p{L}\\.$"))
+//                {
+//                    currResult = currResult.substring(0, currResult.length() - 1);
+//                }
+//                else if (currResult.matches(".*[0-9]\\.$"))
+//                {
+//                    currResult = currResult.substring(0, currResult.length() - 1);
+//                }
+//                else if (currResult
+//                        .matches(".*\\w\\p{InCombiningDiacriticalMarks}?\\w\\p{InCombiningDiacriticalMarks}?\\.$"))
+//                {
+//                    currResult = currResult.substring(0, currResult.length() - 1);
+//                }
+//                else if (currResult.matches(".*\\p{Punct}\\.$"))
+//                {
+//                    currResult = currResult.substring(0, currResult.length() - 1);
+//                }
+//            }
+//
+//            currResult = removeOuterBrackets(currResult);
+//
+//            if (currResult.length() == 0) return currResult;
+//
+//        } while (!currResult.equals(prevResult));
+//
+//        // if (!currResult.equals(origStr))
+//        // System.out.println(origStr + " -> "+ currResult);
+//
+//        return currResult;
+//    }
 
     /**
      * Call cleanData on an entire set of Strings has a side effect of deleting
@@ -760,6 +817,38 @@ public final class Utils
 
         return result.trim();
     }
+    
+//    /**
+//     * Remove single square bracket characters if they are the start and/or end
+//     * chars (matched or unmatched) and are the only square bracket chars in the
+//     * string.
+//     */
+//    public static String removeOuterBrackets1(final String origStr)
+//    {
+//        if (origStr == null || origStr.length() == 0) return origStr;
+//
+//        String result = origStr.trim();
+//        boolean changed = false;
+//        int startOffset = 0;
+//        int endOffset = result.length();
+//        if (result.length() > 0)
+//        {
+//            boolean openBracketFirst = result.charAt(0) == '[';
+//            boolean closeBracketLast = result.endsWith("]");
+//            if (openBracketFirst && result.lastIndexOf(']', result.length() - 2) == -1)
+//            {    
+//                // only square brackets are at beginning and end
+//                endOffset--; changed = true;
+//            }
+//            if (openBracketFirst && result.indexOf(']') == -1)
+//            {
+//                // starts with '[' but no ']'; remove open bracket
+//                startOffset++; changed = true;
+//            }
+//        }
+//        if (changed) result = result.substring(startOffset, endOffset);
+//        return result.trim();
+//    }
 
     /**
      * Calculate time from milliseconds

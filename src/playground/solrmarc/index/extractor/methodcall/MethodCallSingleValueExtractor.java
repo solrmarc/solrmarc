@@ -33,6 +33,10 @@ public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor
     @Override
     public Collection<String> extract(final Record record) throws Exception
     {
-        return Collections.singletonList(methodCall.invoke(record, parameters));
+        Object result = methodCall.invoke(record, parameters);
+        if (result == null)
+            return(Collections.EMPTY_LIST);
+        else
+            return(Collections.singletonList((String)result));
     }
 }

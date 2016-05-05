@@ -9,10 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.marc4j.marc.*;
-import playground.solrmarc.tools.Utils;
-//import org.solrmarc.marc.MarcImporter;
-//import org.solrmarc.tools.Utils;
-//import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.marc.MarcImporter;
+import org.solrmarc.tools.Utils;
+import org.solrmarc.index.SolrIndexer;
 
 private final static Pattern FOUR_DIGIT_PATTERN_BRACES = Pattern.compile("\\[[12]\\d{3,3}\\]");
 private final static Pattern FOUR_DIGIT_PATTERN_ONE_BRACE = Pattern.compile("\\[[12]\\d{3,3}");

@@ -406,6 +406,18 @@ public class SolrIndexer
 //        else                                                    retVal = pubDate260c;
 //        return(retVal);
     }
+
+    public Set<String> getFullTextUrls(Record record)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public Set<String> getSupplUrls(Record record)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
   
 
 }

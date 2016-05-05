@@ -2,13 +2,13 @@ package playground.solrmarc.index;
 
 
 import playground.solrmarc.index.collector.MultiValueCollector;
-import playground.solrmarc.index.collector.SingleValueCollector;
+//import playground.solrmarc.index.collector.SingleValueCollector;
 import playground.solrmarc.index.extractor.impl.constant.ConstantMultiValueExtractor;
 import playground.solrmarc.index.extractor.impl.patternMapping.PatternMapping;
 import playground.solrmarc.index.indexer.AbstractValueIndexer;
 import playground.solrmarc.index.indexer.MultiValueIndexer;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
-import playground.solrmarc.index.mapping.AbstractSingleValueMapping;
+//import playground.solrmarc.index.mapping.AbstractSingleValueMapping;
 import playground.solrmarc.index.mapping.impl.MultiValuePatternMapping;
 import playground.solrmarc.index.mapping.impl.MultiValueTranslationMapping;
 import playground.solrmarc.solr.SolrProxy;
@@ -17,9 +17,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
-import org.marc4j.marc.MarcFactory;
+//import org.marc4j.marc.MarcFactory;
 import org.marc4j.marc.Record;
-import org.marc4j.marc.impl.RecordImpl;
+//import org.marc4j.marc.impl.RecordImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 

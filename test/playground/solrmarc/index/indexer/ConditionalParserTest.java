@@ -11,7 +11,7 @@ import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 
-import playground.solrmarc.index.collector.FieldMatchCollector;
+// playground.solrmarc.index.collector.FieldMatchCollector;
 import playground.solrmarc.index.fieldmatch.FieldFormatter;
 import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
 import playground.solrmarc.index.fieldmatch.FieldFormatterBase;

@@ -1,7 +1,7 @@
 package playground.solrmarc.index.indexer;
 
 import playground.solrmarc.index.collector.MultiValueCollector;
-import playground.solrmarc.index.collector.impl.FirstObjectMultiValueCollector;
+//import playground.solrmarc.index.collector.impl.FirstObjectMultiValueCollector;
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 import playground.solrmarc.index.extractor.AbstractSingleValueExtractor;
 import playground.solrmarc.index.extractor.AbstractValueExtractor;
@@ -30,8 +30,8 @@ import java.util.regex.Pattern;
 public class ValueIndexerFactory
 {
     private final static Pattern COMMA_SPLIT_PATTERN = Pattern.compile(",");
-    private final static FirstObjectMultiValueCollector FIRST_OBJECT_COLLECTOR = new FirstObjectMultiValueCollector();
-    private final static MultiValueCollector MULTI_VALUE_COLLECTOR = new MultiValueCollector();
+//    private final static FirstObjectMultiValueCollector FIRST_OBJECT_COLLECTOR = new FirstObjectMultiValueCollector();
+//    private final static MultiValueCollector MULTI_VALUE_COLLECTOR = new MultiValueCollector();
     // private final static FieldMatchCollector MULTI_VALUE_FM_COLLECTOR = new
     // FieldMatchCollector();
     // private final static FieldMatchCollector MULTI_VALUE_UNIQUE_FM_COLLECTOR
@@ -237,8 +237,7 @@ public class ValueIndexerFactory
 //            }
             decorateMultiValueExtractor(solrFieldName, multiValueExtractor, configurationReader);
             final AbstractMultiValueMapping[] mappings = new AbstractMultiValueMapping[0];
-            final MultiValueCollector collector = (multiValueExtractor.firstOnly()) ? FIRST_OBJECT_COLLECTOR
-                    : MULTI_VALUE_COLLECTOR;
+            final MultiValueCollector collector = createMultiValueCollector(configurationReader);
             return new MultiValueIndexer(solrFieldName, multiValueExtractor, mappings, collector);
         }
         else if (extractor instanceof AbstractMultiValueExtractor)
@@ -323,9 +322,13 @@ public class ValueIndexerFactory
                 String mapParts[] = mapSpec.toArray(new String[0]);
                 if (mapParts[0].equals("unique"))
                 {
-                    extractor.setUnique(true);
+                    /* ignore */ //extractor.setUnique(true);
                 }
                 else if (mapParts[0].equals("first"))
+                {
+                    /* ignore */
+                }
+                else if (mapParts[0].equals("sort"))
                 {
                     /* ignore */
                 }
@@ -346,13 +349,21 @@ public class ValueIndexerFactory
 
     private MultiValueCollector createMultiValueCollector(List<List<String>> mapSpecs)
     {
-        MultiValueCollector collector = MULTI_VALUE_COLLECTOR;
+        MultiValueCollector collector = new MultiValueCollector();
         for (List<String> mapSpec : mapSpecs)
         {
             String mapParts[] = mapSpec.toArray(new String[0]);
-            if (mapParts[0].equals("first"))
+            if (mapParts[0].equals("unique"))
             {
-                collector = FIRST_OBJECT_COLLECTOR;
+                collector.setUnique(true);
+            }
+            else if (mapParts[0].equals("first"))
+            {
+                collector.setFirst(true);
+            }
+            else if (mapParts[0].equals("sort"))
+            {
+                collector.setSortComparator(mapParts[1], mapParts[2]);
             }
         }
         return collector;
@@ -370,7 +381,11 @@ public class ValueIndexerFactory
         for (List<String> mapSpec : mapSpecs)
         {
             String mapParts[] = mapSpec.toArray(new String[0]);
-            if (mapParts[0].equals("join"))
+            if (mapParts[0].equals("sort") || mapParts[0].equals("unique") || mapParts[0].equals("first"))
+            {
+                /* ignore, handle it elsewhere */
+            }
+            else if (mapParts[0].equals("join"))
             {
                 multiValueExtractor.setJoinVal(eJoinVal.JOIN);
                 if (mapParts.length > 1)
@@ -381,6 +396,13 @@ public class ValueIndexerFactory
             else if (mapParts[0].equals("separate"))
             {
                 multiValueExtractor.setJoinVal(eJoinVal.SEPARATE);
+            }
+            else if (mapParts[0].equals("format"))
+            {
+                if (mapParts.length > 1)
+                {
+                 //   multiValueExtractor.setSeparator(mapParts[1]);
+                }
             }
             else if (mapParts[0].equals("substring"))
             {
@@ -399,14 +421,14 @@ public class ValueIndexerFactory
                     validationExceptions.add(ise);
                 }
             }
-            else if (mapParts[0].equals("unique"))
-            {
-                multiValueExtractor.setUnique(true);
-            }
-            else if (mapParts[0].equals("first"))
-            {
-               /* ignore */
-            }
+//            else if (mapParts[0].equals("unique"))
+//            {
+//                multiValueExtractor.setUnique(true);
+//            }
+//            else if (mapParts[0].equals("first"))
+//            {
+//               /* ignore */
+//            }
             else if (mapParts[0].equals("cleanEach"))
             {
                 multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);
@@ -713,25 +735,60 @@ public class ValueIndexerFactory
                 + mappingFactories.toString().replaceAll(",", ",\n"));
     }
 
+    /**
+     *   Note:  this probably doesn't work !!!!!
+     *   really.
+     *
+     * @param configurationReader
+     * @return
+     */
     private MultiValueCollector createMultiValueCollector(StringReader configurationReader)
     {
         // TODO: Factory!
         configurationReader.skipUntilAfter(',');
         configurationReader.mark();
-        String collectorIdentifier = configurationReader.readAll().trim();
+        MultiValueCollector collector = new MultiValueCollector();
+        // Note:  this probably doesn't work !!!!!
+        // really.
+        do {
+            String collectorIdentifier = configurationReader.readStringUntil(',').trim();
+            if (collectorIdentifier.equals("unique"))
+            {
+                collector.setUnique(true);
+            }
+            else if (collectorIdentifier.equals("first"))
+            {
+                collector.setFirst(true);
+            }
+            else if (collectorIdentifier.startsWith("sort"))
+            {
+                String parms[] = collectorIdentifier.substring(5).split("[,)][ ]*", 3);
+                collector.setSortComparator(parms[1], parms[2]);
+            }
+            configurationReader.skipUntilAfter(',');
+        } while (configurationReader.isEmpty());
         configurationReader.reset();
 
-        if (collectorIdentifier.isEmpty())
-        {
-            return MULTI_VALUE_COLLECTOR;
-        }
-        else if (collectorIdentifier.startsWith("first"))
-        {
-            return FIRST_OBJECT_COLLECTOR;
-        }
-        throw new IndexerSpecException(
-                "The named collector implementation be identified. " + configurationReader.getLookahead());
+        return collector;
     }
+//    {
+//        // TODO: Factory!
+//        configurationReader.skipUntilAfter(',');
+//        configurationReader.mark();
+//        String collectorIdentifier = configurationReader.readAll().trim();
+//        configurationReader.reset();
+//
+//        if (collectorIdentifier.isEmpty())
+//        {
+//            return MULTI_VALUE_COLLECTOR;
+//        }
+//        else if (collectorIdentifier.startsWith("first"))
+//        {
+//            return FIRST_OBJECT_COLLECTOR;
+//        }
+//        throw new IndexerSpecException(
+//                "The named collector implementation be identified. " + configurationReader.getLookahead());
+//    }
 
     // private FieldMatchCollector createCollector(DirectMultiValueExtractor
     // multiValueExtractor, StringReader configurationReader)

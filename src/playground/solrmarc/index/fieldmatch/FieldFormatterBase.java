@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.VariableField;
@@ -286,6 +287,8 @@ public class FieldFormatterBase implements FieldFormatter
         }
     }
     
+    private static Pattern ACCENTS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+    
     public String cleanData(VariableField vf, boolean isSubfieldA, String data)
     {
         final String trimmed = trimData(data);
@@ -300,7 +303,7 @@ public class FieldFormatterBase implements FieldFormatter
         // Do more extensive cleaning of data.
         if (cleanVal.contains(eCleanVal.STRIP_ACCCENTS))
         {
-            str = Normalizer.normalize(str, Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+            str = ACCENTS.matcher(Normalizer.normalize(str, Form.NFD)).replaceAll("");
             StringBuilder folded = new StringBuilder();
             boolean replaced = false;
             for (char c : str.toCharArray())
