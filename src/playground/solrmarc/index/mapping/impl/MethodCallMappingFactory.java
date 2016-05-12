@@ -4,6 +4,7 @@ import playground.solrmarc.index.extractor.methodcall.AbstractMappingMethodCall;
 import playground.solrmarc.index.extractor.methodcall.MethodCallContext;
 import playground.solrmarc.index.extractor.methodcall.MethodCallManager;
 import playground.solrmarc.index.extractor.methodcall.MultiValueMappingMethodCall;
+import playground.solrmarc.index.extractor.methodcall.SingleValueMappingMethodCall;
 import playground.solrmarc.index.indexer.IndexerSpecException;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
@@ -53,6 +54,10 @@ public class MethodCallMappingFactory extends AbstractValueMappingFactory
         {
             return new MethodCallMultiValueMapping((MultiValueMappingMethodCall) methodCall, context.getParameters());
         }
+        else if (methodCall instanceof SingleValueMappingMethodCall)
+        {
+            return new MethodCallSingleValueMapping((SingleValueMappingMethodCall) methodCall, context.getParameters());
+        }
         else
         {
             throw new IndexerSpecException("Unknown custom mapping method: " + context.toString()
@@ -63,8 +68,7 @@ public class MethodCallMappingFactory extends AbstractValueMappingFactory
     @Override
     public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration)
     {
-        MethodCallContext context = MethodCallContext
-                .parseContextFromMappingSpecification(new StringReader(mappingConfiguration));
+        MethodCallContext context = MethodCallContext.parseContextFromMappingSpecification(new StringReader(mappingConfiguration));
         return createMultiValueMapping(context);
     }
 

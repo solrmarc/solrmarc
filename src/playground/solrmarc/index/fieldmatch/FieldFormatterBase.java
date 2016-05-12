@@ -14,6 +14,8 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.tools.Utils;
 
+import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
+
 
 
 public class FieldFormatterBase implements FieldFormatter
@@ -399,7 +401,9 @@ public class FieldFormatterBase implements FieldFormatter
     {
         if (joinVal == eJoinVal.JOIN)
         {
-            result.add(buffer.toString());
+            if (buffer.length() == 0) return;
+            final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? Utils.cleanData(buffer.toString()) : buffer.toString();
+            if (field.length() > 0) result.add(field);
             buffer.setLength(0);
         }
     }

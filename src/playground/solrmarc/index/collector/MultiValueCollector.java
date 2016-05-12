@@ -11,6 +11,8 @@ import java.util.TreeSet;
 
 import org.solrmarc.tools.StringNaturalCompare;
 
+import playground.solrmarc.index.indexer.IndexerSpecException;
+
 public class MultiValueCollector //implements AbstractValueCollector<Collection<String>>
 {
     boolean isUnique = false;
@@ -63,8 +65,14 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
             comp = new LengthComp();
         else if (compStr.equals("length") && dir.equals("desc")) 
             comp = Collections.reverseOrder( new LengthComp()); 
-        else
-        { /* throw an IndexerSpecException here */ }
+        else if (!compStr.equals("length") && !compStr.equals("num") && !compStr.equals("str"))
+        { 
+            throw new IndexerSpecException("Invalid sort specification, valid values are \"str\"  \"num\"  \"length\" ");
+        }
+        else 
+        { 
+            throw new IndexerSpecException("Invalid sort direction, valid values are \"asc\"  \"desc\" ");
+        }
         return(comp);
     }
 

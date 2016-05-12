@@ -30,6 +30,7 @@ public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor
         System.arraycopy(parameters, 0, this.parameters, 1, parameters.length);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<String> extract(final Record record) throws Exception
     {

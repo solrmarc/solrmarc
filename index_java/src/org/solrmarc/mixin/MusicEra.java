@@ -12,7 +12,7 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 //import org.solrmarc.tools.Utils;
 
-import playground.solrmarc.index.SolrIndexer;
+import org.solrmarc.index.SolrIndexer;
 import playground.solrmarc.index.extractor.impl.custom.Mixin;
 
 

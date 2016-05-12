@@ -266,7 +266,7 @@ public class ValueIndexerFactory
         }
     }
 
-    public AbstractValueIndexer<?> makeMultiValueIndexer(List<String> fieldnames, AbstractValueExtractor<?> extractor, List<List<String>> mapSpecs)
+    public AbstractValueIndexer<?> makeMultiValueIndexer(String origSpec, List<String> fieldnames, AbstractValueExtractor<?> extractor, List<List<String>> mapSpecs)
     {
         if (extractor instanceof DirectMultiValueExtractor)
         {
@@ -275,8 +275,12 @@ public class ValueIndexerFactory
 //            {
 //  //              throw new IndexerSpecException((ErrorSpecification) multiValueExtractor.getFieldsAndSubfieldSpec());
 //            }
-            decorateMultiValueExtractor(fieldnames, multiValueExtractor, mapSpecs);
-            final AbstractMultiValueMapping[] mappings = new AbstractMultiValueMapping[0];
+            int indexOfJoin = decorateMultiValueExtractor(origSpec, fieldnames, multiValueExtractor, mapSpecs);
+            final List<AbstractMultiValueMapping> mappings;
+            if (indexOfJoin != -1)
+                mappings = createMultiValueMappings(origSpec, mapSpecs, indexOfJoin);
+            else 
+                mappings = new ArrayList<AbstractMultiValueMapping>();
             final MultiValueCollector collector = createMultiValueCollector(mapSpecs);
 
             return new MultiValueIndexer(fieldnames, multiValueExtractor, mappings, collector);
@@ -284,14 +288,14 @@ public class ValueIndexerFactory
         else if (extractor instanceof AbstractMultiValueExtractor)
         {
             final AbstractMultiValueExtractor multiValueExtractor = (AbstractMultiValueExtractor) extractor;
-            final List<AbstractMultiValueMapping> mappings = createMultiValueMappings(multiValueExtractor, mapSpecs);
+            final List<AbstractMultiValueMapping> mappings = createMultiValueMappings(origSpec, mapSpecs);
             final MultiValueCollector collector = createMultiValueCollector(mapSpecs);
             return new MultiValueIndexer(fieldnames, multiValueExtractor, mappings, collector);
         }
         else if (extractor instanceof AbstractSingleValueExtractor)
         {
             final AbstractSingleValueExtractor singleValueExtractor = (AbstractSingleValueExtractor) extractor;
-            final List<AbstractMultiValueMapping> mappings = createMultiValueMappings(singleValueExtractor, mapSpecs);
+            final List<AbstractMultiValueMapping> mappings = createMultiValueMappings(origSpec, mapSpecs);
             // final AbstractSingleValueMapping[] mappings =
             // createSingleValueMappings(configurationReader);
             final MultiValueCollector collector = createMultiValueCollector(mapSpecs);
@@ -306,29 +310,30 @@ public class ValueIndexerFactory
                             + extractor.getClass().getName());
         } 
     }
-    
-    private List<AbstractMultiValueMapping> createMultiValueMappings(AbstractValueExtractor<?> extractor, List<List<String>> mapSpecs)
+
+    private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs)
+    {
+        return(createMultiValueMappings(origSpec, mapSpecs, -1));
+    }
+
+    private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs, int indexOfJoin)
     {
         List<AbstractMultiValueMapping> maps = new ArrayList<AbstractMultiValueMapping>(mapSpecs.size());
         if (mapSpecs.size() == 0)
         {
             return maps;
         }
-        for (List<String> spec : mapSpecs)
+        int currentIndex = 0;
+        for (List<String> mapSpec : mapSpecs)
         {
-
-            for (List<String> mapSpec : mapSpecs)
+            if (currentIndex > indexOfJoin)
             {
                 String mapParts[] = mapSpec.toArray(new String[0]);
-                if (mapParts[0].equals("unique"))
-                {
-                    /* ignore */ //extractor.setUnique(true);
-                }
-                else if (mapParts[0].equals("first"))
+                if (isACollectorConfiguration(mapParts[0]))
                 {
                     /* ignore */
                 }
-                else if (mapParts[0].equals("sort"))
+                else if (isADecoratorConfiguration(mapParts[0]))
                 {
                     /* ignore */
                 }
@@ -339,12 +344,19 @@ public class ValueIndexerFactory
                 }
                 else
                 {
-                    validationExceptions.add(new IndexerSpecException("Illegal format specification: " + toDelimitedString(mapParts, " ")));
+                    validationExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + toDelimitedString(mapParts, " ")));
                 }
             }
-            
+            currentIndex++;
         }
         return maps;
+    }
+
+    private boolean isACollectorConfiguration(String string)
+    {
+        if (string.equals("unique") || string.equals("first") || string.equals("sort"))
+            return(true);
+        return(false);
     }
 
     private MultiValueCollector createMultiValueCollector(List<List<String>> mapSpecs)
@@ -353,35 +365,51 @@ public class ValueIndexerFactory
         for (List<String> mapSpec : mapSpecs)
         {
             String mapParts[] = mapSpec.toArray(new String[0]);
-            if (mapParts[0].equals("unique"))
-            {
-                collector.setUnique(true);
-            }
-            else if (mapParts[0].equals("first"))
-            {
-                collector.setFirst(true);
-            }
-            else if (mapParts[0].equals("sort"))
-            {
-                collector.setSortComparator(mapParts[1], mapParts[2]);
+            if (isACollectorConfiguration(mapParts[0]))
+            {    
+                if (mapParts[0].equals("unique"))
+                {
+                    collector.setUnique(true);
+                }
+                else if (mapParts[0].equals("first"))
+                {
+                    collector.setFirst(true);
+                }
+                else if (mapParts[0].equals("sort"))
+                {
+                    collector.setSortComparator(mapParts[1], mapParts[2]);
+                }
             }
         }
         return collector;
     }
 
-    private void decorateMultiValueExtractor(List<String> fieldnames, DirectMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs)
+    boolean isADecoratorConfiguration(String str)
+    {
+        if (str.equals("join") || str.equals("separate") || str.equals("format") || str.equals("substring") || 
+            str.equals("cleanEach") || str.equals("cleanEnd") || str.equals("clean") || str.equals("stripAccent") || 
+            str.equals("stripPunct") || str.equals("stripInd2") || str.equals("toUpper") || str.equals("toLower") || 
+            str.equals("toUpper") || str.equals("toLower") || str.equals("titleSortUpper") || str.equals("titleSortLower"))
+            return(true);
+        return(false);
+    }
+    
+    
+    private int decorateMultiValueExtractor(String origSpec, List<String> fieldnames, DirectMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs)
     {
         // List<AbstractMultiValueMapping> mappings = new ArrayList<>();
 
         if (mapSpecs.size() == 0)
         {
-            return;
+            return -1;
         }
-
+        
+        int currentIndex = 0;
+        int joinIndex = -1;
         for (List<String> mapSpec : mapSpecs)
         {
             String mapParts[] = mapSpec.toArray(new String[0]);
-            if (mapParts[0].equals("sort") || mapParts[0].equals("unique") || mapParts[0].equals("first"))
+            if (isACollectorConfiguration(mapParts[0]))
             {
                 /* ignore, handle it elsewhere */
             }
@@ -392,6 +420,7 @@ public class ValueIndexerFactory
                 {
                     multiValueExtractor.setSeparator(mapParts[1]);
                 }
+                joinIndex = currentIndex;
             }
             else if (mapParts[0].equals("separate"))
             {
@@ -418,17 +447,10 @@ public class ValueIndexerFactory
                 }
                 catch (IndexerSpecException ise)
                 {
+                    ise.setSolrFieldAndSpec(origSpec);
                     validationExceptions.add(ise);
                 }
             }
-//            else if (mapParts[0].equals("unique"))
-//            {
-//                multiValueExtractor.setUnique(true);
-//            }
-//            else if (mapParts[0].equals("first"))
-//            {
-//               /* ignore */
-//            }
             else if (mapParts[0].equals("cleanEach"))
             {
                 multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);
@@ -482,16 +504,22 @@ public class ValueIndexerFactory
                         eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR_2));
                 multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
             }
-            else if (isAValueMappingConfiguration(mapParts[0]))
+            else if (isAValueMappingConfiguration(mapParts[0]) && joinIndex == -1)
             {
                 AbstractMultiValueMapping valueMapping = createMultiValueMapping(mapParts);
                 multiValueExtractor.addFormatter(new FieldFormatterMapped(valueMapping));
             }
+            else if (isAValueMappingConfiguration(mapParts[0]) && joinIndex != -1)
+            {
+                // post join map specification
+            }
             else
             {
-                validationExceptions.add(new IndexerSpecException("Illegal format specification: " + toDelimitedString(mapParts, " ")));
+                validationExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + toDelimitedString(mapParts, " ")));
             }
+            currentIndex ++;
         }
+        return(joinIndex);
 
     }
 
@@ -514,7 +542,11 @@ public class ValueIndexerFactory
         for (String mappingConfig : COMMA_SPLIT_PATTERN.split(configurationData))
         {
             mappingConfig = mappingConfig.trim();
-            if (mappingConfig.startsWith("join"))
+            if (mappingConfig.startsWith("sort") || mappingConfig.startsWith("unique") || mappingConfig.startsWith("first"))
+            {
+                /* ignore, handle it elsewhere */
+            }
+            else if (mappingConfig.startsWith("join"))
             {
                 multiValueExtractor.setJoinVal(eJoinVal.JOIN);
                 final int openParanthisis = mappingConfig.indexOf('(');
@@ -540,14 +572,14 @@ public class ValueIndexerFactory
 //                    fmt = new FieldFormatterSubstring(fmt, mapParts[1]);
 //                }
 //            }
-            else if (mappingConfig.equals("unique"))
-            {
-                multiValueExtractor.setUnique(true);
-            }
-            else if (mappingConfig.equals("first"))
-            {
-                multiValueExtractor.setFirstOnly(true);
-            }
+//            else if (mappingConfig.equals("unique"))
+//            {
+//                multiValueExtractor.setUnique(true);
+//            }
+//            else if (mappingConfig.equals("first"))
+//            {
+//                multiValueExtractor.setFirstOnly(true);
+//            }
             else if (mappingConfig.equals("cleanEach"))
             {
                 multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);

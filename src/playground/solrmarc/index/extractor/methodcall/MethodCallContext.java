@@ -116,7 +116,7 @@ public class MethodCallContext
     protected static Class[] getMappingParameterTypes(final String[] parameters)
     {
         final Class[] parameterTypes = new Class[parameters.length + 1];
-        parameterTypes[0] = Collection.class;
+        parameterTypes[0] = Object.class;
         Arrays.fill(parameterTypes, 1, parameters.length + 1, String.class);
         return parameterTypes;
     }

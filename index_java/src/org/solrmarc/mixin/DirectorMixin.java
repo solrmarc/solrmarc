@@ -12,7 +12,7 @@ import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
 import playground.solrmarc.index.extractor.impl.custom.Mixin;
-import playground.solrmarc.tools.Utils;
+import org.solrmarc.tools.Utils;
 
 public class DirectorMixin implements Mixin
 {

@@ -85,6 +85,7 @@ datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
   \"                    { save_zzLexicalState = CONSTANT; string.setLength(0); yybegin(STRING); }
 "||"|"|"                { return sf.newSymbol("OR",FullSym.OR); }
 ","                     { yybegin(MAPSPEC);  return sf.newSymbol(",", FullSym.COMMA); }
+{white_space}           { /* ignore */ }
 }
 
 <CUSTOMSPEC>{
@@ -154,6 +155,7 @@ datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
 "=="|"="          { return sf.newSymbol("EQU",FullSym.EQU ); }
 "!="              { return sf.newSymbol("NEQ",FullSym.NEQ); }
 "~"|"matches"     { return sf.newSymbol("MATCH",FullSym.MATCH); }
+"contains"        { return sf.newSymbol("CONTAINS",FullSym.CONTAINS); }
 "<"|"startsWith"  { return sf.newSymbol("LE",FullSym.LT); }
 ">"|"endsWith"    { return sf.newSymbol("GT",FullSym.GT); }
 "&&"|"&"          { return sf.newSymbol("AND",FullSym.AND); }

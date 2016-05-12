@@ -49,9 +49,12 @@ public class MethodCallManager
     private boolean isValidMappingMethod(Method method)
     {
         final Class<?>[] parameterTypes = method.getParameterTypes();
-        if (parameterTypes.length == 0 || !Collection.class.isAssignableFrom(parameterTypes[0])
-                || !Collection.class.isAssignableFrom(method.getReturnType())
-                || !Modifier.isPublic(method.getModifiers()))
+        if (!(parameterTypes.length > 0 && Modifier.isPublic(method.getModifiers())&& 
+                ((Collection.class.isAssignableFrom(parameterTypes[0])                // its first parameter is a collction
+                    && Collection.class.isAssignableFrom(method.getReturnType())) ||  // and it returns a collection 
+                (parameterTypes[0].equals(String.class)                               // OR its first parameter is a String
+                    && method.getReturnType().equals(String.class))                   // and it returns a String
+                )))
         {
             return false;
         }
@@ -109,6 +112,10 @@ public class MethodCallManager
                 {
                     methodCall = createMultiValueMappingMethodCall(mixin, method);
                 }
+                else if (method.getReturnType().equals(String.class))
+                {
+                    methodCall = createSingleValueMappingMethodCall(mixin, method);
+                }
                 if (addMethodsAsDefault)
                 {
                     mappingMethodCalls.put(toCacheKey(method, parameterTypes), methodCall);
@@ -121,6 +128,11 @@ public class MethodCallManager
     protected AbstractMappingMethodCall<?> createMultiValueMappingMethodCall(Object object, Method method)
     {
         return new MultiValueMappingMethodCall(object, method);
+    }
+
+    protected AbstractMappingMethodCall<?> createSingleValueMappingMethodCall(Object object, Method method)
+    {
+        return new SingleValueMappingMethodCall(object, method);
     }
 
     protected SingleValueExtractorMethodCall createSingleValueExtractorMethodCall(Object object, Method method)

@@ -8,7 +8,7 @@ package playground.solrmarc.index.indexer;
 /** CUP generated class containing symbol constants. */
 public class FullSym {
   /* terminals */
-  public static final int SUBFIELD = 25;
+  public static final int SUBFIELD = 26;
   public static final int AND = 15;
   public static final int LT = 23;
   public static final int CUSTOM = 3;
@@ -16,7 +16,7 @@ public class FullSym {
   public static final int RPAREN = 19;
   public static final int OR = 16;
   public static final int RBRACE = 13;
-  public static final int CHAR = 31;
+  public static final int CHAR = 32;
   public static final int FULLRECORD = 6;
   public static final int DATE = 7;
   public static final int NOT = 17;
@@ -26,21 +26,22 @@ public class FullSym {
   public static final int COLON = 11;
   public static final int LBRACE = 12;
   public static final int SCRIPT = 2;
-  public static final int QUOTEDSTR = 30;
-  public static final int IND = 26;
+  public static final int CONTAINS = 25;
+  public static final int QUOTEDSTR = 31;
+  public static final int IND = 27;
   public static final int COMMA = 10;
   public static final int CUSTOM_MAP = 9;
-  public static final int NUMBER = 32;
+  public static final int NUMBER = 33;
   public static final int EOF = 0;
-  public static final int POSITION = 29;
+  public static final int POSITION = 30;
   public static final int FIELDNAME = 5;
   public static final int error = 1;
   public static final int JAVA = 4;
-  public static final int SUBFIELDSPEC = 28;
+  public static final int SUBFIELDSPEC = 29;
   public static final int NEQ = 21;
   public static final int MATCH = 24;
   public static final int EQU = 20;
-  public static final int FIELDSPEC = 27;
+  public static final int FIELDSPEC = 28;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -67,6 +68,7 @@ public class FullSym {
   "GT",
   "LT",
   "MATCH",
+  "CONTAINS",
   "SUBFIELD",
   "IND",
   "FIELDSPEC",

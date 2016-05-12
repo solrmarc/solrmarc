@@ -22,7 +22,7 @@ public abstract class AbstractMappingMethodCall<T>
      *            the parameters of this call.
      * @return the return value of this call.
      */
-    public T invoke(final Collection<String> incoming, final Object[] parameters) throws Exception
+    public T invoke(final T incoming, final Object[] parameters) throws Exception
     {
         parameters[0] = incoming;
         return invoke(parameters);

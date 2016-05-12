@@ -20,8 +20,8 @@ import java.util.LinkedHashSet;
 
 public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
 {
-    public static final String UNIQUE = "unique";
-    public static final String FIRST = "first";
+//    public static final String UNIQUE = "unique";
+//    public static final String FIRST = "first";
 //    private FieldFormatter fmt;
     private Specification fieldsAndSubfieldSpec;
 
@@ -63,28 +63,28 @@ public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
 //        if (fieldsAndSubfieldSpec != null) fieldsAndSubfieldSpec.setFormatter(fmt);
 //    }
 
-    boolean unique = false;
-    boolean firstOnly = false;
-
-    public boolean isUnique()
-    {
-        return unique;
-    }
-
-    public void setUnique(boolean unique)
-    {
-        this.unique = unique;
-    }
-
-    public boolean firstOnly()
-    {
-        return (firstOnly);
-    }
-
-    public void setFirstOnly(boolean firstOnly)
-    {
-        this.firstOnly = firstOnly;
-    }
+//    boolean unique = false;
+//    boolean firstOnly = false;
+//
+//    public boolean isUnique()
+//    {
+//        return unique;
+//    }
+//
+//    public void setUnique(boolean unique)
+//    {
+//        this.unique = unique;
+//    }
+//
+//    public boolean firstOnly()
+//    {
+//        return (firstOnly);
+//    }
+//
+//    public void setFirstOnly(boolean firstOnly)
+//    {
+//        this.firstOnly = firstOnly;
+//    }
 
     public final Collection<FieldMatch> getFieldMatches(final Record record)
     {

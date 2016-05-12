@@ -3,6 +3,7 @@ package playground.solrmarc.index.mapping.impl;
 import java.util.Collection;
 
 import playground.solrmarc.index.extractor.methodcall.MultiValueMappingMethodCall;
+import playground.solrmarc.index.extractor.methodcall.SingleValueMappingMethodCall;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 
 public class MethodCallMultiValueMapping implements AbstractMultiValueMapping

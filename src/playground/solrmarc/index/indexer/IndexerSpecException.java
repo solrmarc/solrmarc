@@ -45,6 +45,17 @@ public class IndexerSpecException extends RuntimeException
         this.message = message;
 
     }
+    
+    public IndexerSpecException(String solrFieldAndSpec, String message)
+    {
+//        this.errMsgs = null;
+        this.cause = null;
+        String[] tmp = solrFieldAndSpec.split("[ ]*=[ ]*", 2);
+        this.solrField = tmp[0];
+        this.spec = tmp[1];
+        this.message = message;
+
+    }
 
 //    public IndexerSpecException(ErrorSpecification errMsgs)
 //    {
@@ -107,5 +118,12 @@ public class IndexerSpecException extends RuntimeException
             build.append(solrField).append(" : ").append(message).append("\n");
         }
         return (build.toString());
+    }
+
+    public void setSolrFieldAndSpec(final String solrFieldAndSpec)
+    {
+        String[] tmp = solrFieldAndSpec.split("[ ]*=[ ]*", 2);
+        this.solrField = tmp[0];
+        this.spec = tmp[1];
     }
 }

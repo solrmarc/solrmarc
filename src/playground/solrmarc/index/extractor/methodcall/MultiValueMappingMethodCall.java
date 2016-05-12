@@ -22,6 +22,7 @@ public class MultiValueMappingMethodCall extends AbstractMappingMethodCall<Colle
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<String> invoke(final Object[] parameters) throws Exception
     {

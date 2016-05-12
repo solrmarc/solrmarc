@@ -22,6 +22,7 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<String> invoke(final Object[] parameters) throws Exception
     {

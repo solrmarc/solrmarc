@@ -31,6 +31,7 @@ parser code {:
     static List<String> parser_errors = null;
     static FullRecordValueExtractorFactory fullFactory = new FullRecordValueExtractorFactory();
     static DateValueExtractorFactory dateFactory = new DateValueExtractorFactory();
+    static String cacheOfStrToParse;
     static MultiValueCollector MULTI_VALUE_COLLECTOR = new MultiValueCollector();
     private ValueIndexerFactory valueIndexerFactory = null;
     private List<AbstractValueMappingFactory> mappingFactories = null;
@@ -56,6 +57,7 @@ parser code {:
     
     public MultiValueIndexer parse(String strToParse, boolean debug)
     {
+        cacheOfStrToParse = strToParse;
         Symbol parse_tree = null;
         MultiValueIndexer result = null;
         parser_errors = new ArrayList<String>();
@@ -188,7 +190,7 @@ parser code {:
 
 terminal String SCRIPT, CUSTOM, JAVA;
 terminal String FIELDNAME, FULLRECORD, DATE, IDENTIFIER, CUSTOM_MAP;
-terminal COMMA, COLON, LBRACE, RBRACE, QUESTION, AND, OR, NOT, LPAREN, RPAREN, EQU, NEQ, GT, LT, MATCH;
+terminal COMMA, COLON, LBRACE, RBRACE, QUESTION, AND, OR, NOT, LPAREN, RPAREN, EQU, NEQ, GT, LT, MATCH, CONTAINS;
 terminal String SUBFIELD, IND, FIELDSPEC, SUBFIELDSPEC, POSITION, QUOTEDSTR, CHAR, NUMBER;
  
 non terminal AbstractValueIndexer<?> index_spec;
@@ -208,7 +210,7 @@ precedence left OR;
 
 start with index_spec;
 
-index_spec ::= field_names:s EQU extractor:e COMMA mapping_specs:m          {: RESULT = valueIndexerFactory.makeMultiValueIndexer(s, e, m); :}
+index_spec ::= field_names:s EQU extractor:e COMMA mapping_specs:m          {: RESULT = valueIndexerFactory.makeMultiValueIndexer(cacheOfStrToParse, s, e, m); :}
              | field_names:s EQU extractor:e                                {: RESULT = new MultiValueIndexer(s, (AbstractMultiValueExtractor)e, new AbstractMultiValueMapping[0], MULTI_VALUE_COLLECTOR); :}
              ; 
              
@@ -305,6 +307,7 @@ expr_part ::= SUBFIELD:s1 op:i value:s2		                {: RESULT = new Conditi
 op ::= EQU 									{: RESULT = new Integer(FullSym.EQU); :}
      | NEQ 									{: RESULT = new Integer(FullSym.NEQ); :}
      | MATCH                                {: RESULT = new Integer(FullSym.MATCH); :}
+     | CONTAINS                             {: RESULT = new Integer(FullSym.CONTAINS); :}
      | LT                                   {: RESULT = new Integer(FullSym.LT); :}
      | GT                                   {: RESULT = new Integer(FullSym.GT); :}
      ;

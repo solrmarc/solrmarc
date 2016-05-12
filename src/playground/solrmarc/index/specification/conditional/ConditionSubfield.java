@@ -66,6 +66,11 @@ public class ConditionSubfield extends Condition
                     if (sfVal.equals(value)) return (true);
                     break;
                 }
+                case FullSym.CONTAINS:
+                {
+                    if (sfVal.contains(value)) return (true);
+                    break;
+                }
                 case FullSym.LT:
                 {
                     if (sfVal.startsWith(value)) return (true);
