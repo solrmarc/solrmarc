@@ -84,6 +84,9 @@ public class VuFindIndexer extends SolrIndexer
     // VuFind-specific configs:
     private Properties vuFindConfigs = null;
 
+    // Cache for .ini file locations
+    private HashMap<String, String> configFileLocations = new HashMap<String, String>();
+
     /**
      * Default constructor
      * @param propertiesMapFile the {@code x_index.properties} file mapping solr
@@ -117,6 +120,11 @@ public class VuFindIndexer extends SolrIndexer
      */
     private File findConfigFile(String filename)
     {
+        // If we have a cached value, return it now:
+        if (configFileLocations.containsKey(filename)) {
+            return new File(configFileLocations.get(filename));
+        }
+
         // Find VuFind's home directory in the environment; if it's not available,
         // try using a relative path on the assumption that we are currently in
         // VuFind's import subdirectory:
@@ -136,18 +144,23 @@ public class VuFindIndexer extends SolrIndexer
 
         // Try several different locations for the file -- VuFind 2 local dir,
         // VuFind 2 base dir, VuFind 1 base dir.
-        File file;
+        File file = null;
         if (vufindLocal != null) {
             file = new File(vufindLocal + "/" + relativeConfigPath + "/" + filename);
-            if (file.exists()) {
-                return file;
-            }
+            logger.info("Checking for config file at " + file.getPath());
         }
-        file = new File(vufindHome + "/" + relativeConfigPath + "/" + filename);
+        if (file == null || !file.exists()) {
+            file = new File(vufindHome + "/" + relativeConfigPath + "/" + filename);
+            logger.info("Checking for config file at " + file.getPath());
+        }
+        if (!file.exists()) {
+            file = new File(vufindHome + "/web/conf/" + filename);
+            logger.info("Checking for config file at " + file.getPath());
+        }
+        configFileLocations.put(filename, file.getPath());
         if (file.exists()) {
-            return file;
+            logger.info("Found " + filename);
         }
-        file = new File(vufindHome + "/web/conf/" + filename);
         return file;
     }
 
