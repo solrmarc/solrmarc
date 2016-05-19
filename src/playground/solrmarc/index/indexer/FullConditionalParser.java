@@ -771,7 +771,7 @@ class CUP$FullConditionalParser$actions {
           case 22: // custom_map_spec ::= error 
             {
               List<String> RESULT =null;
-		 addError("Malformed custom_map reference : Should be \ncustom_map(fully.qualified.class.Name method)\n or  custom_map(fully.qualified.class.Name method(parm1, parm2))"); 
+		 FullConditionalParser.addError("Malformed custom_map reference : Should be \ncustom_map(fully.qualified.class.Name method)\n or  custom_map(fully.qualified.class.Name method(parm1, parm2))"); 
               CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("custom_map_spec",9, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
             }
           return CUP$FullConditionalParser$result;

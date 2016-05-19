@@ -30,16 +30,6 @@ import java.util.regex.Pattern;
 public class ValueIndexerFactory
 {
     private final static Pattern COMMA_SPLIT_PATTERN = Pattern.compile(",");
-//    private final static FirstObjectMultiValueCollector FIRST_OBJECT_COLLECTOR = new FirstObjectMultiValueCollector();
-//    private final static MultiValueCollector MULTI_VALUE_COLLECTOR = new MultiValueCollector();
-    // private final static FieldMatchCollector MULTI_VALUE_FM_COLLECTOR = new
-    // FieldMatchCollector();
-    // private final static FieldMatchCollector MULTI_VALUE_UNIQUE_FM_COLLECTOR
-    // = new FieldMatchCollector(true);
-    // private final static JoiningMultiValueCollector
-    // JOINING_MULTI_VALUE_COLLECTOR = new JoiningMultiValueCollector();
-    // private final static SingleValueCollector SINGLE_VALUE_COLLECTOR = new
-    // SingleValueCollector();
 
     private final static Logger logger = Logger.getLogger(ValueIndexerFactory.class);
     private final List<AbstractValueExtractorFactory> extractorFactories;
@@ -47,11 +37,11 @@ public class ValueIndexerFactory
     private List<IndexerSpecException> validationExceptions;
     private static FullConditionalParser parser = null;
 
-    public List<IndexerSpecException> getValidationExceptions()
-    {
-        return validationExceptions;
-    }
-
+    /**
+     *  The next three functions make the ValueIndexerFactory implement the Singleton pattern
+     *  To create of use a Factory  do:
+     *  ValueIndexerFactory.instance()
+     */
     private static ValueIndexerFactory theFactory = new ValueIndexerFactory();
     
     public static ValueIndexerFactory instance()
@@ -73,41 +63,29 @@ public class ValueIndexerFactory
         }
     }
 
-    public List<AbstractValueIndexer<?>> createValueIndexers(Properties indexerProperties)
-            throws IllegalAccessException, InstantiationException
+    /**
+     * Return ALL of the exceptions encountered while processing indexing specification
+     * @return
+     */
+    public List<IndexerSpecException> getValidationExceptions()
     {
-        final List<AbstractValueIndexer<?>> valueIndexers = new ArrayList<>();
-        validationExceptions.clear();
-        for (final String solrFieldName : indexerProperties.stringPropertyNames())
-        {
-            final String mappingDefinition = indexerProperties.getProperty(solrFieldName);
-            try
-            {
-                final AbstractValueIndexer<?> valueIndexer = createValueIndexer(solrFieldName, mappingDefinition);
-                if (valueIndexer != null)
-                {
-                    valueIndexers.add(valueIndexer);
-                }
-            }
-            catch (IndexerSpecException ise)
-            {
-                ise.setSolrFieldAndSpec(solrFieldName, mappingDefinition);
-                validationExceptions.add(ise);
-            }
-        }
-        return valueIndexers;
+        return validationExceptions;
     }
 
+    static boolean debug_parse = false;
+    
     public List<AbstractValueIndexer<?>> createValueIndexers(String configSpecs[])
             throws IllegalAccessException, InstantiationException
     {
         final List<AbstractValueIndexer<?>> valueIndexers = new ArrayList<>();
         validationExceptions.clear();
-        if (parser == null) parser = new FullConditionalParser(true);
+        if (parser == null) parser = new FullConditionalParser(debug_parse);
         parser.setFactories(this, this.extractorFactories, this.mappingFactories);
         for (final String singleSpec : configSpecs)
         {
             if (singleSpec.startsWith("#") || (!singleSpec.contains(":") && !singleSpec.contains("="))) continue;
+            if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map.")) continue;
+            
             final String[] specParts = singleSpec.split("[ ]?[:=][ ]?", 2);
             final String solrFieldName = specParts[0].trim();
             final String mappingDefinition = specParts[1].trim();
@@ -140,35 +118,6 @@ public class ValueIndexerFactory
         }
         return valueIndexers;
     }
-    // public List<AbstractValueIndexer<?>> createValueIndexers(String
-    // configSpecs[]) throws IllegalAccessException, InstantiationException
-    // {
-    // final List<AbstractValueIndexer<?>> valueIndexers = new ArrayList<>();
-    // validationExceptions.clear();
-    //
-    // for (final String singleSpec : configSpecs)
-    // {
-    // if (singleSpec.startsWith("#") || (!singleSpec.contains(":") &&
-    // !singleSpec.contains("="))) continue;
-    // final String[] specParts = singleSpec.split("[ ]?[:=][ ]?", 2);
-    // final String solrFieldName = specParts[0].trim();
-    // final String mappingDefinition = specParts[1].trim();
-    // try {
-    // final AbstractValueIndexer<?> valueIndexer =
-    // createValueIndexer(solrFieldName, mappingDefinition);
-    // if (valueIndexer != null)
-    // {
-    // valueIndexers.add(valueIndexer);
-    // }
-    // }
-    // catch (IndexerSpecException ise)
-    // {
-    // ise.setSolrFieldAndSpec(solrFieldName,mappingDefinition);
-    // validationExceptions.add(ise);
-    // }
-    // }
-    // return valueIndexers;
-    // }
 
     private List<AbstractValueExtractorFactory> createExtractorFactories(
             final Set<Class<? extends AbstractValueExtractorFactory>> factoryClasses)
@@ -201,80 +150,28 @@ public class ValueIndexerFactory
         }
         return factories;
     }
-
+ 
+    
     /**
-     * Creates an indexer representing the indexer process for one solr field
-     * (given by solrFieldName), defined by the mappingConfiguration.
+     * Creates an indexer representing the indexer process for one (or more) solr field
+     * (given by fieldnames), Where the extractor has already been created in the parser handling code, and the
+     * maps definitions following the extractor have been pulled out as a list of lists of strings.
      *
+     * @param origSpec
+     *            the original index specification (for debugging purposes).
      * @param solrFieldName
-     *            the name of the solr field.
-     * @param mappingConfiguration
-     *            the configuration definition for this indexer.
+     *            the name (or names) of the solr field(s) this spec should generate.
+     * @param extractor
+     *            the extractor object created by the parser handling code (or perhaps one manually created)
+     * @param mapSpecs
+     *            the mapping/collector specifications definition for this indexer.
      * @return an indexer representing the indexer process for one solr field.
      */
-    public AbstractValueIndexer<?> createValueIndexer(final String solrFieldName, final String mappingConfiguration)
-    {
-        final StringReader configurationReader = new StringReader(mappingConfiguration);
-        final AbstractValueExtractor<?> extractor;
-        try
-        {
-            extractor = createExtractor(solrFieldName, configurationReader);
-        }
-        finally
-        {
-        }
-
-        if (extractor == null)
-        {
-            return null;
-        }
-        else if (extractor instanceof DirectMultiValueExtractor)
-        {
-            final DirectMultiValueExtractor multiValueExtractor = (DirectMultiValueExtractor) extractor;
-//            if (multiValueExtractor.getFieldsAndSubfieldSpec() instanceof ErrorSpecification)
-//            {
-//  //              throw new IndexerSpecException((ErrorSpecification) multiValueExtractor.getFieldsAndSubfieldSpec());
-//            }
-            decorateMultiValueExtractor(solrFieldName, multiValueExtractor, configurationReader);
-            final AbstractMultiValueMapping[] mappings = new AbstractMultiValueMapping[0];
-            final MultiValueCollector collector = createMultiValueCollector(configurationReader);
-            return new MultiValueIndexer(solrFieldName, multiValueExtractor, mappings, collector);
-        }
-        else if (extractor instanceof AbstractMultiValueExtractor)
-        {
-            final AbstractMultiValueExtractor multiValueExtractor = (AbstractMultiValueExtractor) extractor;
-            final AbstractMultiValueMapping[] mappings = createMultiValueMappings(configurationReader);
-            final MultiValueCollector collector = createMultiValueCollector(configurationReader);
-            return new MultiValueIndexer(solrFieldName, multiValueExtractor, mappings, collector);
-        }
-        else if (extractor instanceof AbstractSingleValueExtractor)
-        {
-            final AbstractSingleValueExtractor singleValueExtractor = (AbstractSingleValueExtractor) extractor;
-            final AbstractMultiValueMapping[] mappings = createMultiValueMappings(configurationReader);
-            // final AbstractSingleValueMapping[] mappings =
-            // createSingleValueMappings(configurationReader);
-            final MultiValueCollector collector = createMultiValueCollector(configurationReader);
-            // final SingleValueCollector collector =
-            // createSingleValueCollector(configurationReader);
-            return new MultiValueIndexer(solrFieldName, singleValueExtractor, mappings, collector);
-        }
-        else
-        {
-            throw new IllegalArgumentException(
-                    "Only subclasses of AbstractMultiValueExtractor or AbstractSingleValueExtractor are allowed, but not "
-                            + extractor.getClass().getName());
-        }
-    }
-
     public AbstractValueIndexer<?> makeMultiValueIndexer(String origSpec, List<String> fieldnames, AbstractValueExtractor<?> extractor, List<List<String>> mapSpecs)
     {
         if (extractor instanceof DirectMultiValueExtractor)
         {
             final DirectMultiValueExtractor multiValueExtractor = (DirectMultiValueExtractor) extractor;
-//            if (multiValueExtractor.getFieldsAndSubfieldSpec() instanceof ErrorSpecification)
-//            {
-//  //              throw new IndexerSpecException((ErrorSpecification) multiValueExtractor.getFieldsAndSubfieldSpec());
-//            }
             int indexOfJoin = decorateMultiValueExtractor(origSpec, fieldnames, multiValueExtractor, mapSpecs);
             final List<AbstractMultiValueMapping> mappings;
             if (indexOfJoin != -1)
@@ -296,11 +193,7 @@ public class ValueIndexerFactory
         {
             final AbstractSingleValueExtractor singleValueExtractor = (AbstractSingleValueExtractor) extractor;
             final List<AbstractMultiValueMapping> mappings = createMultiValueMappings(origSpec, mapSpecs);
-            // final AbstractSingleValueMapping[] mappings =
-            // createSingleValueMappings(configurationReader);
             final MultiValueCollector collector = createMultiValueCollector(mapSpecs);
-            // final SingleValueCollector collector =
-            // createSingleValueCollector(configurationReader);
             return new MultiValueIndexer(fieldnames, singleValueExtractor, mappings, collector);
         }
         else
@@ -311,79 +204,7 @@ public class ValueIndexerFactory
         } 
     }
 
-    private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs)
-    {
-        return(createMultiValueMappings(origSpec, mapSpecs, -1));
-    }
-
-    private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs, int indexOfJoin)
-    {
-        List<AbstractMultiValueMapping> maps = new ArrayList<AbstractMultiValueMapping>(mapSpecs.size());
-        if (mapSpecs.size() == 0)
-        {
-            return maps;
-        }
-        int currentIndex = 0;
-        for (List<String> mapSpec : mapSpecs)
-        {
-            if (currentIndex > indexOfJoin)
-            {
-                String mapParts[] = mapSpec.toArray(new String[0]);
-                if (isACollectorConfiguration(mapParts[0]))
-                {
-                    /* ignore */
-                }
-                else if (isADecoratorConfiguration(mapParts[0]))
-                {
-                    /* ignore */
-                }
-                else if (isAValueMappingConfiguration(mapParts[0]))
-                {
-                    AbstractMultiValueMapping valueMapping = createMultiValueMapping(mapParts);
-                    if (valueMapping != null) maps.add(valueMapping);
-                }
-                else
-                {
-                    validationExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + toDelimitedString(mapParts, " ")));
-                }
-            }
-            currentIndex++;
-        }
-        return maps;
-    }
-
-    private boolean isACollectorConfiguration(String string)
-    {
-        if (string.equals("unique") || string.equals("first") || string.equals("sort"))
-            return(true);
-        return(false);
-    }
-
-    private MultiValueCollector createMultiValueCollector(List<List<String>> mapSpecs)
-    {
-        MultiValueCollector collector = new MultiValueCollector();
-        for (List<String> mapSpec : mapSpecs)
-        {
-            String mapParts[] = mapSpec.toArray(new String[0]);
-            if (isACollectorConfiguration(mapParts[0]))
-            {    
-                if (mapParts[0].equals("unique"))
-                {
-                    collector.setUnique(true);
-                }
-                else if (mapParts[0].equals("first"))
-                {
-                    collector.setFirst(true);
-                }
-                else if (mapParts[0].equals("sort"))
-                {
-                    collector.setSortComparator(mapParts[1], mapParts[2]);
-                }
-            }
-        }
-        return collector;
-    }
-
+    
     boolean isADecoratorConfiguration(String str)
     {
         if (str.equals("join") || str.equals("separate") || str.equals("format") || str.equals("substring") || 
@@ -393,12 +214,9 @@ public class ValueIndexerFactory
             return(true);
         return(false);
     }
-    
-    
+      
     private int decorateMultiValueExtractor(String origSpec, List<String> fieldnames, DirectMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs)
     {
-        // List<AbstractMultiValueMapping> mappings = new ArrayList<>();
-
         if (mapSpecs.size() == 0)
         {
             return -1;
@@ -430,7 +248,7 @@ public class ValueIndexerFactory
             {
                 if (mapParts.length > 1)
                 {
-                 //   multiValueExtractor.setSeparator(mapParts[1]);
+                 //  not yet handled
                 }
             }
             else if (mapParts[0].equals("substring"))
@@ -512,6 +330,9 @@ public class ValueIndexerFactory
             else if (isAValueMappingConfiguration(mapParts[0]) && joinIndex != -1)
             {
                 // post join map specification
+                //    mapping specs before "join" are applied before the join operation
+                //    mapping spec that are after "join" are applied to the joined output. 
+                //    and are handled elsewhere.
             }
             else
             {
@@ -523,190 +344,7 @@ public class ValueIndexerFactory
 
     }
 
-    private void decorateMultiValueExtractor(final String solrFieldName, DirectMultiValueExtractor multiValueExtractor,
-            StringReader mappingConfiguration)
-    {
-        // List<AbstractMultiValueMapping> mappings = new ArrayList<>();
-        mappingConfiguration.skipUntilAfter(',');
-
-        mappingConfiguration.mark();
-        final String configurationData = mappingConfiguration.readAll().trim();
-        mappingConfiguration.reset();
-
-        if (configurationData.isEmpty())
-        {
-            return;
-        }
-
- //       FieldFormatter fmt = multiValueExtractor.getFormatter();
-        for (String mappingConfig : COMMA_SPLIT_PATTERN.split(configurationData))
-        {
-            mappingConfig = mappingConfig.trim();
-            if (mappingConfig.startsWith("sort") || mappingConfig.startsWith("unique") || mappingConfig.startsWith("first"))
-            {
-                /* ignore, handle it elsewhere */
-            }
-            else if (mappingConfig.startsWith("join"))
-            {
-                multiValueExtractor.setJoinVal(eJoinVal.JOIN);
-                final int openParanthisis = mappingConfig.indexOf('(');
-                final int closeParanthisis = mappingConfig.indexOf(')');
-                if (openParanthisis >= 0 && closeParanthisis >= 0)
-                {
-                    multiValueExtractor.setSeparator(mappingConfig.substring(openParanthisis + 1, closeParanthisis));
-                }
-            }
-            else if (mappingConfig.equals("separate"))
-            {
-                multiValueExtractor.setJoinVal(eJoinVal.SEPARATE);
-            }
-
-//            else if (mapParts[0].equals("substring"))
-//            {
-//                if (mapParts.length > 2)
-//                {
-//                    fmt = new FieldFormatterSubstring(fmt, mapParts[1], mapParts[2]);
-//                }
-//                else
-//                {
-//                    fmt = new FieldFormatterSubstring(fmt, mapParts[1]);
-//                }
-//            }
-//            else if (mappingConfig.equals("unique"))
-//            {
-//                multiValueExtractor.setUnique(true);
-//            }
-//            else if (mappingConfig.equals("first"))
-//            {
-//                multiValueExtractor.setFirstOnly(true);
-//            }
-            else if (mappingConfig.equals("cleanEach"))
-            {
-                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);
-            }
-            else if (mappingConfig.equals("cleanEnd"))
-            {
-                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_END);
-            }
-            else if (mappingConfig.equals("clean"))
-            {
-                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);
-                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_END);
-            }
-            else if (mappingConfig.equals("stripAccent"))
-            {
-                multiValueExtractor.addCleanVal(eCleanVal.STRIP_ACCCENTS);
-            }
-            else if (mappingConfig.equals("titleSortUpper"))
-            {
-                multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS,
-                        eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR_2));
-                multiValueExtractor.addCleanVal(eCleanVal.TO_UPPER);
-            }
-            else if (mappingConfig.equals("titleSortLower"))
-            {
-                multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS,
-                        eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR_2));
-                multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
-            }
-            else if (isAValueMappingConfiguration(mappingConfig))
-            {
-                AbstractMultiValueMapping valueMapping = createMultiValueMapping(mappingConfig);
-                multiValueExtractor.addFormatter(new FieldFormatterMapped(valueMapping));
-            }
-            else
-            {
-                validationExceptions.add(new IndexerSpecException("Illegal format specification: " + mappingConfiguration.getLookahead()));
-            }
-            mappingConfiguration.skip(mappingConfig.length() + 1);
-        }
-    }
-
-    private AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration)
-    {
-        for (final AbstractValueExtractorFactory factory : extractorFactories)
-        {
-            if (factory.canHandle(solrFieldName, mappingConfiguration.getLookahead()))
-            {
-                return factory.createExtractor(solrFieldName, mappingConfiguration);
-            }
-        }
-        throw new IndexerSpecException("No indexer factory found for: " + mappingConfiguration.getLookahead());
-    }
-
-    /**
-     * Creates a bunch of value mappings in the same order as they are given in
-     * the settings.
-     *
-     * @param mappingConfiguration
-     *            the date of the current configuration line
-     * @return an array of mappings.
-     */
-    private AbstractMultiValueMapping[] createMultiValueMappings(final StringReader mappingConfiguration)
-    {
-        List<AbstractMultiValueMapping> mappings = new ArrayList<>();
-        mappingConfiguration.skipUntilAfter(',');
-
-        mappingConfiguration.mark();
-        final String configurationData = mappingConfiguration.readAll().trim();
-        mappingConfiguration.reset();
-
-        if (configurationData.isEmpty())
-        {
-            return new AbstractMultiValueMapping[0];
-        }
-
-        for (final String mappingConfig : COMMA_SPLIT_PATTERN.split(configurationData))
-        {
-            if (!isAValueMappingConfiguration(mappingConfig))
-            {
-                break;
-            }
-            AbstractMultiValueMapping valueMapping = createMultiValueMapping(mappingConfig.trim());
-            if (valueMapping != null)
-            {
-                mappings.add(valueMapping);
-            }
-            mappingConfiguration.skip(mappingConfig.length() + 1);
-        }
-        return mappings.toArray(new AbstractMultiValueMapping[mappings.size()]);
-    }
-
-    /**
-     * @see ValueIndexerFactory#createMultiValueMappings(StringReader)
-     */
-    // private AbstractSingleValueMapping[] createSingleValueMappings(final
-    // StringReader mappingConfiguration)
-    // {
-    // List<AbstractSingleValueMapping> mappings = new ArrayList<>();
-    // mappingConfiguration.skipUntilAfter(',');
-    //
-    // mappingConfiguration.mark();
-    // final String config = mappingConfiguration.readAll().trim();
-    // mappingConfiguration.reset();
-    //
-    // if (config.isEmpty())
-    // {
-    // return new AbstractSingleValueMapping[0];
-    // }
-    //
-    // for (final String mappingConfig : COMMA_SPLIT_PATTERN.split(config))
-    // {
-    // if (!isAValueMappingConfiguration(mappingConfig))
-    // {
-    // break;
-    // }
-    // AbstractSingleValueMapping valueMapping =
-    // createSingleValueMapping(mappingConfig.trim());
-    // if (valueMapping != null)
-    // {
-    // mappings.add(valueMapping);
-    // }
-    // mappingConfiguration.skip(mappingConfig.length() + 1);
-    // }
-    // return mappings.toArray(new AbstractSingleValueMapping[mappings.size()]);
-    // }
-
+    
     private boolean isAValueMappingConfiguration(final String configuration)
     {
         if (configuration.matches("[A-Z0-9a-z_]+[.]properties([(][A-Za-z0-9]*[)])?") || configuration.startsWith("map")
@@ -717,20 +355,96 @@ public class ValueIndexerFactory
         return (false);
     }
 
-    // private AbstractSingleValueMapping createSingleValueMapping(final String
-    // mappingConfig)
-    // {
-    // for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
-    // {
-    // if (mappingFactory.canHandle(mappingConfig))
-    // {
-    // return mappingFactory.createSingleValueMapping(mappingConfig);
-    // }
-    // }
-    // throw new IndexerSpecException("Could not handle impl: " + mappingConfig
-    // + "\nLoaded impl factories:\n" +
-    // mappingFactories.toString().replaceAll(",", ",\n"));
-    // }
+    private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs)
+    {
+        return(createMultiValueMappings(origSpec, mapSpecs, -1));
+    }
+
+    /**
+     * Creates the multivalue mappers as specified to be appended to a extractor.
+     * (given by fieldnames), Where the extractor has already been created in the parser handling code, and the
+     * maps definitions following the extractor have been pulled out as a list of lists of strings.
+     *
+     * @param origSpec
+     *            the original index specification (for debugging purposes).
+     * @param mapSpecs
+     *            the mapping/collector specifications definition for this indexer.
+     * @param indexOfJoin 
+     *            index within mapSpecs where the "join" specification occurs.
+     *            mapping specs before "join" are applied before the join operation
+     *            mapping spec that are after "join" are applied to the joined output.           
+     * @return an list of multi value mappings
+     */
+    private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs, int indexOfJoin)
+    {
+        List<AbstractMultiValueMapping> maps = new ArrayList<AbstractMultiValueMapping>(mapSpecs.size());
+        if (mapSpecs.size() == 0)
+        {
+            return maps;
+        }
+        int currentIndex = 0;
+        for (List<String> mapSpec : mapSpecs)
+        {
+            if (currentIndex > indexOfJoin)
+            {
+                String mapParts[] = mapSpec.toArray(new String[0]);
+                if (isACollectorConfiguration(mapParts[0]))
+                {
+                    /* ignore */
+                }
+                else if (isADecoratorConfiguration(mapParts[0]))
+                {
+                    /* ignore */
+                }
+                else if (isAValueMappingConfiguration(mapParts[0]))
+                {
+                    AbstractMultiValueMapping valueMapping = createMultiValueMapping(mapParts);
+                    if (valueMapping != null) maps.add(valueMapping);
+                }
+                else
+                {
+                    validationExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + toDelimitedString(mapParts, " ")));
+                }
+            }
+            currentIndex++;
+        }
+        return maps;
+    }
+
+    
+    
+    private boolean isACollectorConfiguration(String string)
+    {
+        if (string.equals("unique") || string.equals("first") || string.equals("sort"))
+            return(true);
+        return(false);
+    }
+
+    private MultiValueCollector createMultiValueCollector(List<List<String>> mapSpecs)
+    {
+        MultiValueCollector collector = new MultiValueCollector();
+        for (List<String> mapSpec : mapSpecs)
+        {
+            String mapParts[] = mapSpec.toArray(new String[0]);
+            if (isACollectorConfiguration(mapParts[0]))
+            {    
+                if (mapParts[0].equals("unique"))
+                {
+                    collector.setUnique(true);
+                }
+                else if (mapParts[0].equals("first"))
+                {
+                    collector.setFirst(true);
+                }
+                else if (mapParts[0].equals("sort"))
+                {
+                    collector.setSortComparator(mapParts[1], mapParts[2]);
+                }
+            }
+        }
+        return collector;
+    }
+
     private static String toDelimitedString(String[] strs, String delimiter)
     {
         StringBuilder strb = new StringBuilder();
@@ -754,93 +468,4 @@ public class ValueIndexerFactory
         // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
     }
 
-    public AbstractMultiValueMapping createMultiValueMapping(final String mappingConfig)
-    {
-        for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
-        {
-            if (mappingFactory.canHandle(mappingConfig))
-            {
-                return mappingFactory.createMultiValueMapping(mappingConfig);
-            }
-        }
-        throw new IndexerSpecException("Could not handle impl: " + mappingConfig + "\nLoaded impl factories:\n"
-                + mappingFactories.toString().replaceAll(",", ",\n"));
-    }
-
-    /**
-     *   Note:  this probably doesn't work !!!!!
-     *   really.
-     *
-     * @param configurationReader
-     * @return
-     */
-    private MultiValueCollector createMultiValueCollector(StringReader configurationReader)
-    {
-        // TODO: Factory!
-        configurationReader.skipUntilAfter(',');
-        configurationReader.mark();
-        MultiValueCollector collector = new MultiValueCollector();
-        // Note:  this probably doesn't work !!!!!
-        // really.
-        do {
-            String collectorIdentifier = configurationReader.readStringUntil(',').trim();
-            if (collectorIdentifier.equals("unique"))
-            {
-                collector.setUnique(true);
-            }
-            else if (collectorIdentifier.equals("first"))
-            {
-                collector.setFirst(true);
-            }
-            else if (collectorIdentifier.startsWith("sort"))
-            {
-                String parms[] = collectorIdentifier.substring(5).split("[,)][ ]*", 3);
-                collector.setSortComparator(parms[1], parms[2]);
-            }
-            configurationReader.skipUntilAfter(',');
-        } while (configurationReader.isEmpty());
-        configurationReader.reset();
-
-        return collector;
-    }
-//    {
-//        // TODO: Factory!
-//        configurationReader.skipUntilAfter(',');
-//        configurationReader.mark();
-//        String collectorIdentifier = configurationReader.readAll().trim();
-//        configurationReader.reset();
-//
-//        if (collectorIdentifier.isEmpty())
-//        {
-//            return MULTI_VALUE_COLLECTOR;
-//        }
-//        else if (collectorIdentifier.startsWith("first"))
-//        {
-//            return FIRST_OBJECT_COLLECTOR;
-//        }
-//        throw new IndexerSpecException(
-//                "The named collector implementation be identified. " + configurationReader.getLookahead());
-//    }
-
-    // private FieldMatchCollector createCollector(DirectMultiValueExtractor
-    // multiValueExtractor, StringReader configurationReader)
-    // {
-    // configurationReader.skipUntilAfter(',');
-    // configurationReader.mark();
-    // String collectorIdentifier = configurationReader.readAll().trim();
-    // configurationReader.reset();
-    // if (collectorIdentifier.startsWith(DirectMultiValueExtractor.UNIQUE))
-    // {
-    // multiValueExtractor.setUnique(true);
-    // }
-    // throw new IndexerSpecException("The impl couldn't be identified. " +
-    // configurationReader);
-    // }
-
-    // private SingleValueCollector createSingleValueCollector(StringReader
-    // configurationReader)
-    // {
-    // // TODO: Factory!
-    // return SINGLE_VALUE_COLLECTOR;
-    // }
 }

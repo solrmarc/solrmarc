@@ -17,10 +17,11 @@ import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.tools.Utils;
 
+import playground.solrmarc.index.extractor.impl.custom.Mixin;
 import playground.solrmarc.index.fieldmatch.FieldFormatterMapped;
 import playground.solrmarc.index.fieldmatch.FieldMatch;
 import playground.solrmarc.index.indexer.AbstractValueIndexer;
-import playground.solrmarc.index.indexer.ValueIndexerFactory;
+import playground.solrmarc.index.indexer.ValueIndexerStringReaderFactory;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.specification.AbstractSpecificationFactory;
 import playground.solrmarc.index.specification.Specification;
@@ -41,7 +42,7 @@ import playground.solrmarc.index.specification.Specification;
  */
 
 
-public class SolrIndexer
+public class SolrIndexer implements Mixin
 {
     static Map<String, Specification> specCache = new HashMap<String, Specification>(); 
     
@@ -57,7 +58,7 @@ public class SolrIndexer
             Specification spec = AbstractSpecificationFactory.createSpecification(tagStr);
             if (map != null)
             {
-                AbstractMultiValueMapping valueMapping = ValueIndexerFactory.instance().createMultiValueMapping(map);
+                AbstractMultiValueMapping valueMapping = ValueIndexerStringReaderFactory.instance().createMultiValueMapping(map);
                 spec.addFormatter(new FieldFormatterMapped(valueMapping));
             }
             specCache.put(tagStr,  spec);
@@ -366,7 +367,7 @@ public class SolrIndexer
      */
     public String getPublicationDate(final Record record)
     {
-        AbstractValueIndexer<?> indDate = ValueIndexerFactory.instance().createValueIndexer("publicationDate", 
+        AbstractValueIndexer<?> indDate = ValueIndexerStringReaderFactory.instance().createValueIndexer("publicationDate", 
                 "008[7-10]:008[11-14]:260c:264c?(ind2=1||ind2=4),clean, first, " +
                 "map(\"(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2\",\".*[^0-9].*=>\")");
         Collection<String> result;
@@ -409,15 +410,178 @@ public class SolrIndexer
 
     public Set<String> getFullTextUrls(Record record)
     {
-        // TODO Auto-generated method stub
-        return null;
+        Set<String> result = new LinkedHashSet<String>();
+        Specification spec = getOrCreateSpecification("{856uz3}?((ind1 = 4 || (ind1 = 7 & $x startsWith \"http\")) && (ind2 = 0 || (ind2 = 1 )))", "||");
+        getFieldListCollector(record, spec, result);
+        return result;
     }
 
     public Set<String> getSupplUrls(Record record)
     {
-        // TODO Auto-generated method stub
-        return null;
+        Set<String> result = new LinkedHashSet<String>();
+        Specification spec = getOrCreateSpecification("{856uz3}?((ind1 = 4 || (ind1 = 7 & $x startsWith \"http\")) && (ind2 = 2 || (ind2 = 1)))", "||");
+        getFieldListCollector(record, spec, result);
+        return result;
+    }
+
+    /**
+     * extract all the subfields requested in requested marc fields. Each
+     * instance of each marc field will be put in a separate result (but the
+     * subfields will be concatenated into a single value for each marc field)
+     * 
+     * @param record
+     *            marc record object
+     * @param fieldSpec -
+     *            the desired marc fields and subfields as given in the
+     *            xxx_index.properties file
+     * @param separator -
+     *            the character to use between subfield values in the solr field
+     *            contents
+     * @return Set of values (as strings) for solr field
+     */
+    public static Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        Specification spec = getOrCreateSpecification(fieldSpec, separator);
+        getFieldListCollector(record, spec, result);
+        return result;
     }
   
+    /**
+     * extract all the subfields requested in requested marc fields. Each
+     * instance of each marc field will be put in a separate result (but the
+     * subfields will be concatenated into a single value for each marc field)
+     * 
+     * @param record
+     *            marc record object
+     * @param fieldSpec -
+     *            the desired marc fields and subfields as given in the
+     *            xxx_index.properties file
+     * @param separator -
+     *            the character to use between subfield values in the solr field
+     *            contents
+     * @return Set of values (as strings) for solr field
+     */
+    public static List<String> getAllSubfieldsAsList(final Record record, String fieldSpec, String separator)
+    {
+        List<String> result = new ArrayList<String>();
+        Specification spec = getOrCreateSpecification(fieldSpec, separator);
+        getFieldListCollector(record, spec, result);
+        return result;
+    }
 
+    /**
+     * Loops through all datafields and creates a field for "all fields"
+     * searching. Shameless stolen from Vufind Indexer Custom Code
+     * 
+     * @param record
+     *            marc record object
+     * @param lowerBoundStr -
+     *            the "lowest" marc field to include (e.g. 100). defaults to 100
+     *            if value passed doesn't parse as an integer
+     * @param upperBoundStr -
+     *            one more than the "highest" marc field to include (e.g. 900
+     *            will include up to 899). Defaults to 900 if value passed
+     *            doesn't parse as an integer
+     * @return a string containing ALL subfields of ALL marc fields within the
+     *         range indicated by the bound string arguments.
+     */
+    public String getAllSearchableFields(final Record record, String lowerBoundStr, String upperBoundStr)
+    {
+        StringBuffer buffer = new StringBuffer("");
+        int lowerBound = localParseInt(lowerBoundStr, 100);
+        int upperBound = localParseInt(upperBoundStr, 900);
+
+        List<DataField> fields = record.getDataFields();
+        for (DataField field : fields)
+        {
+            // Get all fields starting with the 100 and ending with the 839
+            // This will ignore any "code" fields and only use textual fields
+            int tag = localParseInt(field.getTag(), -1);
+            if ((tag >= lowerBound) && (tag < upperBound))
+            {
+                // Loop through subfields
+                List<Subfield> subfields = field.getSubfields();
+                for (Subfield subfield : subfields)
+                {
+                    if (buffer.length() > 0)
+                        buffer.append(" ");
+                    buffer.append(subfield.getData());
+                }
+            }
+        }
+        return buffer.toString();
+    }
+
+    /**
+     * Loops through all datafields and creates a field for "all fields"
+     * searching. Shameless stolen from Vufind Indexer Custom Code
+     * 
+     * @param record
+     *            marc record object
+     * @param lowerBoundStr -
+     *            the "lowest" marc field to include (e.g. 100). defaults to 100
+     *            if value passed doesn't parse as an integer
+     * @param upperBoundStr -
+     *            one more than the "highest" marc field to include (e.g. 900
+     *            will include up to 899). Defaults to 900 if value passed
+     *            doesn't parse as an integer
+     * @return a Set of strings containing ALL subfields of ALL marc fields within the
+     *         range indicated by the bound string arguments, with one string for each field encountered.
+     */
+    public Set<String> getAllSearchableFieldsAsSet(final Record record, String lowerBoundStr, String upperBoundStr)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        int lowerBound = localParseInt(lowerBoundStr, 100);
+        int upperBound = localParseInt(upperBoundStr, 900);
+
+        List<DataField> fields = record.getDataFields();
+        for (DataField field : fields)
+        {
+            // Get all fields starting with the 100 and ending with the 839
+            // This will ignore any "code" fields and only use textual fields
+            int tag = localParseInt(field.getTag(), -1);
+            if ((tag >= lowerBound) && (tag < upperBound))
+            {
+                // Loop through subfields
+                StringBuffer buffer = new StringBuffer("");
+                List<Subfield> subfields = field.getSubfields();
+                for (Subfield subfield : subfields)
+                {
+                    if (buffer.length() > 0)
+                        buffer.append(" ");
+                    buffer.append(subfield.getData());
+                }
+                result.add(buffer.toString());
+            }
+        }
+        return result;
+    }
+    /**
+     * return an int for the passed string
+     * @param str
+     * @param defValue - default value, if string doesn't parse into int
+     */
+    private int localParseInt(String str, int defValue)
+    {
+        int value = defValue;
+        try
+        {
+            value = Integer.parseInt(str);
+        }
+        catch (NumberFormatException nfe)
+        {
+            // provided value is not valid numeric string
+            // Ignoring it and moving happily on.
+        }
+        return (value);
+    }
+
+    public List<VariableField> getFieldSetMatchingTagList(Record record, String tagList)
+    {
+        String tags[] = tagList.split(":");
+        return(record.getVariableFields(tags));
+    }
+
+    
 }

@@ -18,14 +18,15 @@ public class DateValueExtractorFactory extends AbstractValueExtractorFactory
 
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final String mapping)
     {
-        if (mapping.startsWith("date".toLowerCase()) || mapping.startsWith("dateOfPublication".toLowerCase()))
-        {
-            return new DateOfPublicationValueExtractor();
-        }
-        else if (mapping.startsWith("dateRecordIndexed".toLowerCase()) || mapping.startsWith("index_date".toLowerCase()))
+        if (mapping.startsWith("dateRecordIndexed".toLowerCase()) || mapping.startsWith("index_date".toLowerCase()))
         {
             return new DateRecordIndexedValueExtractor();
         }
+        else if (mapping.startsWith("date".toLowerCase()) || mapping.startsWith("dateOfPublication".toLowerCase()))
+        {
+            return new DateOfPublicationValueExtractor();
+        }
+         
         throw new IllegalArgumentException("Unknown impl configuration: " + solrFieldName + " = " + mapping);
 
     }

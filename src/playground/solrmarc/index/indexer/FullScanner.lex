@@ -57,7 +57,7 @@ datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
 
 %%
 <YYINITIAL>{
-[A-Za-z][A-Za-z_0-9]*   { return sf.newSymbol("FIELDNAME", FullSym.FIELDNAME, yytext()); }
+[A-Za-z][-A-Za-z_0-9]*  { return sf.newSymbol("FIELDNAME", FullSym.FIELDNAME, yytext()); }
 ","                     { return sf.newSymbol(",", FullSym.COMMA); }
 {white_space}           { /* ignore */ }
 "="                     { yybegin(STARTSPEC); return sf.newSymbol("EQU", FullSym.EQU ); }

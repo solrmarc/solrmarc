@@ -10,7 +10,8 @@ public class MultiValueTranslationMapping implements AbstractMultiValueMapping
     private final static Pattern SEPARATOR_PATTERN = Pattern.compile("[|]");
     private final Properties translationMapping;
     private final String defaultValue;
-
+    private boolean displayRaw = false;
+    
     public MultiValueTranslationMapping(Properties translationMapping)
     {
         this.translationMapping = translationMapping;
@@ -24,6 +25,9 @@ public class MultiValueTranslationMapping implements AbstractMultiValueMapping
                 break;
             }
         }
+        String dRaw = translationMapping.getProperty(displayRawIfMissing);
+        if (dRaw!= null && dRaw.equals("true")) 
+            displayRaw = true;
         this.defaultValue = property;
     }
 
@@ -46,6 +50,10 @@ public class MultiValueTranslationMapping implements AbstractMultiValueMapping
                 {
                     mappedValues.add(translation);
                 }
+            }
+            else if (displayRaw)
+            {
+                mappedValues.add(value);
             }
         }
         return mappedValues;

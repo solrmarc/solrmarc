@@ -50,7 +50,7 @@ public class AbstractSpecificationFactory
         {
 //            result = new ErrorSpecification(ConditionalParser.getErrors());
         }
-        result.setSpecLabel(specificationStr);
+        if (result != null) result.setSpecLabel(specificationStr);
         return (result);
 
         // int start = 0;

@@ -16,26 +16,29 @@ import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.tools.Utils;
 
+import playground.solrmarc.index.indexer.ValueIndexerStringReaderFactory;
+import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
+
 public class GetFormatMixin extends SolrIndexerMixin
 {
     Set<String> errorsFound = null;
     
-    public void perRecordInit(Record record)
-    {
-        errorsFound = new LinkedHashSet<String>();
-    }
+//    public void perRecordInit(Record record)
+//    {
+//        errorsFound = new LinkedHashSet<String>();
+//    }
     
     public void addFormatError(String controlNum, String field, String subfield, int severity, String message)
     {
         String errorStr = controlNum+":"+field+":"+subfield+" : "+message;
-        if (!errorsFound.contains(errorStr))
-        {
-            errorsFound.add(errorStr);
+//        if (!errorsFound.contains(errorStr))
+//        {
+//            errorsFound.add(errorStr);
 //            if (indexer != null && indexer.errors != null)
 //            {
 ////                indexer.errors.addError(controlNum, field, subfield, severity, "GetFormatMixin - "+message);
 //            }
-        }
+ //       }
     }
     
     private enum ProfileType
@@ -782,17 +785,17 @@ public class GetFormatMixin extends SolrIndexerMixin
         formats = addOnlineTypes(record, formats, false);
         if (isArchive(record)) formats.add(ControlType.Archive.toString());
         String mapName = null;
+        AbstractMultiValueMapping theMap = ValueIndexerStringReaderFactory.instance().createMultiValueMapping(mapFileName);
+        Set<String>formatsMapped = new LinkedHashSet<String>();
         try
         {
-            mapName = indexer.loadTranslationMap(null, mapFileName);
+            formatsMapped.addAll(theMap.map(formats));
         }
-        catch (IllegalArgumentException e)
+        catch (Exception e)
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        Map<String, String> translationMap = indexer.findMap(mapName);
-        Set<String>formatsMapped = Utils.remap(formats, translationMap, true);
         return(formatsMapped);
     }
     
@@ -1709,7 +1712,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             // catch the really wackadoodle 007 fields like this:   v|bd|dc|ev|fa|gi|hz|iu
             // and fix them (in this case the answer should be: vd cvaizu
             boolean showError = false;
-            if (indexer != null && indexer.errors != null && (field007.getId() == null || (field007.getId() & (long)1) == (long)0))
+            if (indexer != null && /*indexer.errors != null &&*/ (field007.getId() == null || (field007.getId() & (long)1) == (long)0))
             {
                 /// set id on field to prevent multiple error messages for the same error
                 field007.setId(field007.getId() == null ? (long)1 : field007.getId() | (long)1);

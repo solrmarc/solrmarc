@@ -1,3 +1,5 @@
+package playground.solrmarc.index.indexer;
+
 import java_cup.runtime.*;
 import java.util.List;
 import java.util.Set;
@@ -250,7 +252,7 @@ custom_map_spec ::=  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 R
                                                                             {: RESULT = new ArrayList<String>(); RESULT.add(s); RESULT.add(s1); RESULT.add(s2); :}
                   |  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 LPAREN params:l RPAREN RPAREN 
                                                                             {: RESULT = l; RESULT.add(0, s); RESULT.add(1, s1); RESULT.add(2, s2); :}
-				  | error                                                   {: addError("Malformed custom_map reference : Should be \ncustom_map(fully.qualified.class.Name method)\n or  custom_map(fully.qualified.class.Name method(parm1, parm2))"); :}
+				  | error                                                   {: FullConditionalParser.addError("Malformed custom_map reference : Should be \ncustom_map(fully.qualified.class.Name method)\n or  custom_map(fully.qualified.class.Name method(parm1, parm2))"); :}
 
                   ;
 opt_comma  ::=  COMMA | ;

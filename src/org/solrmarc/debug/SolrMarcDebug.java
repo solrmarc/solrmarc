@@ -100,7 +100,7 @@ public class SolrMarcDebug
     }
 
     static ConditionalParser parser = null;
-    static boolean do_debug_parse = true;
+    static boolean do_debug_parse = false;
 
     public static Specification buildSpecificationFromString(String conditional)
     {

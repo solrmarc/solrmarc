@@ -92,8 +92,8 @@ white_space = {new_line} | [ \t\f]
 "=="|"="          { return sf.newSymbol("EQU",sym.EQU ); }
 "!="              { return sf.newSymbol("NEQ",sym.NEQ); }
 "~"|"matches"     { return sf.newSymbol("MATCH",sym.MATCH); }
-"<"|"startsWith"  { return sf.newSymbol("LE",FullSym.LT); }
-">"|"endsWith"    { return sf.newSymbol("GT",FullSym.GT); }
+"<"|"startsWith"  { return sf.newSymbol("LE",sym.LT); }
+">"|"endsWith"    { return sf.newSymbol("GT",sym.GT); }
 "&&"|"&"          { return sf.newSymbol("AND",sym.AND); }
 "||"|"|"          { return sf.newSymbol("OR",sym.OR); }
 "!"               { return sf.newSymbol("NOT",sym.NOT); }
