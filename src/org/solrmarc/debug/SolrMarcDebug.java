@@ -40,9 +40,11 @@ import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
 
 import org.marc4j.MarcPermissiveStreamReader;
+import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.debug.CompoundUndoManager.RedoAction;
 import org.solrmarc.debug.CompoundUndoManager.UndoAction;
+import org.solrmarc.marc.MarcReaderFactory;
 
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -57,6 +59,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 public class SolrMarcDebug
 {
@@ -75,7 +78,9 @@ public class SolrMarcDebug
     protected Action redoAction;
     protected CompoundUndoManager undo = null;
     HashMap<Object, Action> actions;
-
+    String previousConfigText = "";
+    List<AbstractValueIndexer<?>> indexers = null;
+    
     /**
      * Launch the application.
      */
@@ -100,7 +105,7 @@ public class SolrMarcDebug
     }
 
     static ConditionalParser parser = null;
-    static boolean do_debug_parse = false;
+    static boolean do_debug_parse = true;
 
     public static Specification buildSpecificationFromString(String conditional)
     {
@@ -310,6 +315,23 @@ public class SolrMarcDebug
             @Override
             public void actionPerformed(ActionEvent e)
             {
+                File f1 = new File("resources/marcreader.properties");
+                Properties readerProps = new Properties();
+                try
+                {
+                    readerProps.load(new FileInputStream(f1));
+                }
+                catch (FileNotFoundException e2)
+                {
+                    // TODO Auto-generated catch block
+                    e2.printStackTrace();
+                }
+                catch (IOException e2)
+                {
+                    // TODO Auto-generated catch block
+                    e2.printStackTrace();
+                }
+                
                 // File f = new File("resources/specTestRecs.mrc");
                 File f = null; // new File("resources/testSpec.properties");
                 JFileChooser chooser = new JFileChooser("resources");
@@ -325,11 +347,11 @@ public class SolrMarcDebug
                     return;
                 }
 
-                MarcPermissiveStreamReader reader;
+                MarcReader reader;
                 String firstId = null;
                 try
                 {
-                    reader = new MarcPermissiveStreamReader(new FileInputStream(f), true, true, "BESTGUESS");
+                    reader = MarcReaderFactory.instance().makeReader(new FileInputStream(f), readerProps);
                     while (reader.hasNext())
                     {
                         Record record = reader.next();
@@ -456,25 +478,28 @@ public class SolrMarcDebug
         // String formatSpecStr = formatSpec.getText();
         // if (fieldSpecStr.length() == 0 || formatSpecStr.length() == 0)
         // return(null);
-
-        List<AbstractValueIndexer<?>> indexers = null;
-        try
+        
+        String currentConfigText = configPane.getText();
+        if (! currentConfigText.equals(previousConfigText) || indexers == null)
         {
-            indexers = indexerFactory.createValueIndexers(configPane.getText().split("\n"));
+            try
+            {
+                indexers = indexerFactory.createValueIndexers(currentConfigText.split("\n"));
+                previousConfigText = currentConfigText;
+            }
+            catch (IllegalAccessException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (InstantiationException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            List<IndexerSpecException> exceptions = indexerFactory.getValidationExceptions();
+            errorPane.setText(getTextForExceptions(exceptions));
         }
-        catch (IllegalAccessException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (InstantiationException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        List<IndexerSpecException> exceptions = indexerFactory.getValidationExceptions();
-        errorPane.setText(getTextForExceptions(exceptions));
-
         // MultiValueIndexer indexer =
         // (MultiValueIndexer)indexerFactory.createValueIndexer(solrFieldName,
         // fieldSpecStr);
@@ -512,26 +537,6 @@ public class SolrMarcDebug
                 e.printStackTrace();
             }
         }
-        // if (formatSpecStr.contains("unique"))
-        // {
-        // result = new LinkedHashSet<String>();
-        // }
-        // else
-        // {
-        // result = new ArrayList<String>();
-        // }
-        // theSpec.setFormatter(new FieldFormatterJoin(new
-        // FieldFormatterBase(true), " -- "));
-        // theSpec.setFormatter(new FieldFormatterPatternMapped(new
-        // FieldFormatterBase(true),
-        // "(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2||.*[^0-9].*=>"));
-        // Collection<FieldMatch> values = theSpec.getFieldMatches(rec);
-        // for (FieldMatch fm : values)
-        // {
-        // SingleSpecification spec = fm.getSpec();
-        // VariableField vf = fm.getVf();
-        // spec.addFieldValues(result, vf);
-        // }
     }
 
     private String getTextForExceptions(List<IndexerSpecException> exceptions)
@@ -543,249 +548,4 @@ public class SolrMarcDebug
         }
         return (text.toString());
     }
-
-/*    protected class MyCompoundEdit extends CompoundEdit
-    {
-        boolean isUnDone = false;
-
-        public int getLength()
-        {
-            return edits.size();
-        }
-
-        public void undo() throws CannotUndoException
-        {
-            super.undo();
-            isUnDone = true;
-        }
-
-        public void redo() throws CannotUndoException
-        {
-            super.redo();
-            isUnDone = false;
-        }
-
-        public boolean canUndo()
-        {
-            return edits.size() > 0 && !isUnDone;
-        }
-
-        public boolean canRedo()
-        {
-            return edits.size() > 0 && isUnDone;
-        }
-
-    }
-
-    //This one listens for edits that can be undone.
-    protected class MyUndoableEditListener implements UndoableEditListener
-    {
-        String lastEditName = null;
-        ArrayList<MyCompoundEdit> edits = new ArrayList<MyCompoundEdit>();
-        MyCompoundEdit current;
-        int pointer = -1;
-
-        public void undoableEditHappened(UndoableEditEvent e)
-        {
-            UndoableEdit edit = e.getEdit();
-            if (edit instanceof AbstractDocument.DefaultDocumentEvent)
-            {
-                try
-                {
-                    AbstractDocument.DefaultDocumentEvent event = (AbstractDocument.DefaultDocumentEvent) edit;
-                    int start = event.getOffset();
-                    int len = event.getLength();
-                    String text = event.getDocument().getText(start, len);
-                    boolean isNeedStart = false;
-                    if (current == null)
-                    {
-                        isNeedStart = true;
-                    }
-                    else if (text.contains("\n"))
-                    {
-                        isNeedStart = true;
-                    }
-                    else if (lastEditName == null || !lastEditName.equals(edit.getPresentationName()))
-                    {
-                        isNeedStart = true;
-                    }
-
-                    while (pointer < edits.size() - 1)
-                    {
-                        edits.remove(edits.size() - 1);
-                        isNeedStart = true;
-                    }
-                    if (isNeedStart)
-                    {
-                        createCompoundEdit();
-                    }
-
-                    current.addEdit(edit);
-                    lastEditName = edit.getPresentationName();
-
-                    refreshControls();
-                }
-                catch (BadLocationException e1)
-                {
-                    e1.printStackTrace();
-                }
-            }
-        }
-
-        public void discardAllEdits()
-        {
-            edits = new ArrayList<MyCompoundEdit>();
-            current = null;
-            pointer = -1;
-            refreshControls();
-        }
-
-        public void createCompoundEdit()
-        {
-            if (current == null)
-            {
-                current = new MyCompoundEdit();
-            }
-            else if (current.getLength() > 0)
-            {
-                current = new MyCompoundEdit();
-            }
-
-            edits.add(current);
-            pointer++;
-        }
-
-        public void undo() throws CannotUndoException
-        {
-            if (!canUndo())
-            {
-                throw new CannotUndoException();
-            }
-
-            MyCompoundEdit u = edits.get(pointer);
-            u.undo();
-            pointer--;
-
-            refreshControls();
-        }
-
-        public void redo() throws CannotUndoException
-        {
-            if (!canRedo())
-            {
-                throw new CannotUndoException();
-            }
-
-            pointer++;
-            MyCompoundEdit u = edits.get(pointer);
-            u.redo();
-
-            refreshControls();
-        }
-
-        public boolean canUndo()
-        {
-            return pointer >= 0;
-        }
-
-        public boolean canRedo()
-        {
-            return edits.size() > 0 && pointer < edits.size() - 1;
-        }
-
-        public void refreshControls()
-        {
-            undoAction.setEnabled(canUndo());
-            redoAction.setEnabled(canRedo());
-        }
-
-        public String getUndoPresentationName()
-        {
-            if (current == null) return(null);
-            return current.getUndoPresentationName();
-        }
-
-        public Object getRedoPresentationName()
-        {
-            if (current == null) return(null);
-            return current.getRedoPresentationName();
-        }
-    }
-
-    class UndoAction extends AbstractAction
-    {
-        public UndoAction()
-        {
-            super("Undo");
-            setEnabled(false);
-            this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_DOWN_MASK));
-        }
-
-        public void actionPerformed(ActionEvent e)
-        {
-            try
-            {
-                undo.undo();
-            }
-            catch (CannotUndoException ex)
-            {
-                System.out.println("Unable to undo: " + ex);
-                ex.printStackTrace();
-            }
-            updateUndoState();
-            redoAction.updateRedoState();
-        }
-
-        protected void updateUndoState()
-        {
-            if (undo.canUndo())
-            {
-                setEnabled(true);
- //               putValue(Action.NAME, undo.getUndoPresentationName());
-            }
-            else
-            {
-                setEnabled(false);
-                putValue(Action.NAME, "Undo");
-            }
-        }
-    }
-
-    class RedoAction extends AbstractAction {
-        public RedoAction() {
-            super("Redo");
-            setEnabled(false);
-            this.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_DOWN_MASK));
-        }
-
-        public void actionPerformed(ActionEvent e) {
-            try {
-                undo.redo();
-            } catch (CannotRedoException ex) {
-                System.out.println("Unable to redo: " + ex);
-                ex.printStackTrace();
-            }
-            updateRedoState();
-            undoAction.updateUndoState();
-        }
-
-        protected void updateRedoState() {
-            if (undo.canRedo()) {
-                setEnabled(true);
- //               putValue(Action.NAME, undo.getRedoPresentationName());
-            } else {
-                setEnabled(false);
-                putValue(Action.NAME, "Redo");
-            }
-        }
-    }
-*/
-    // private class SwingAction extends AbstractAction {
-    // public SwingAction() {
-    // putValue(NAME, "SwingAction");
-    // putValue(SHORT_DESCRIPTION, "Some short description");
-    // }
-    // public void actionPerformed(ActionEvent e) {
-    // }
-    // }
 }

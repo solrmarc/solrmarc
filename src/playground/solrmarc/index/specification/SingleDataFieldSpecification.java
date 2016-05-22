@@ -8,9 +8,9 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
-import playground.solrmarc.index.fieldmatch.FieldFormatter;
-import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
-import playground.solrmarc.index.fieldmatch.FieldFormatterBase;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter;
+import playground.solrmarc.index.extractor.formatter.FieldFormatterBase;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 //import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
 //import playground.solrmarc.index.fieldmatch.FieldFormatterSimple;
 import playground.solrmarc.index.specification.conditional.Condition;

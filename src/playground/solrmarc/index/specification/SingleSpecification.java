@@ -5,11 +5,11 @@ import java.util.EnumSet;
 
 import org.marc4j.marc.VariableField;
 
-import playground.solrmarc.index.fieldmatch.FieldFormatter;
-import playground.solrmarc.index.fieldmatch.FieldFormatterBase;
-import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
-import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
-import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter;
+import playground.solrmarc.index.extractor.formatter.FieldFormatterBase;
+import playground.solrmarc.index.extractor.formatter.FieldFormatterDecorator;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import playground.solrmarc.index.specification.conditional.Condition;
 
 public abstract class SingleSpecification extends Specification

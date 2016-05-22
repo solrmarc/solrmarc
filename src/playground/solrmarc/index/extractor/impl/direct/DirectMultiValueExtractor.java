@@ -1,13 +1,12 @@
 package playground.solrmarc.index.extractor.impl.direct;
 
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
-import playground.solrmarc.index.fieldmatch.FieldFormatter;
-import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
-import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter;
+import playground.solrmarc.index.extractor.formatter.FieldFormatterBase;
+import playground.solrmarc.index.extractor.formatter.FieldFormatterDecorator;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import playground.solrmarc.index.indexer.IndexerSpecException;
-import playground.solrmarc.index.fieldmatch.FieldFormatterBase;
-import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
-import playground.solrmarc.index.fieldmatch.FieldMatch;
 import playground.solrmarc.index.specification.AbstractSpecificationFactory;
 import playground.solrmarc.index.specification.Specification;
 

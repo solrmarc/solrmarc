@@ -11,7 +11,7 @@ import playground.solrmarc.index.extractor.methodcall.MethodCallMultiValueExtrac
 import playground.solrmarc.index.extractor.methodcall.MethodCallSingleValueExtractor;
 import playground.solrmarc.index.utils.StringReader;
 import org.apache.log4j.Logger;
-import org.solrmarc.tools.Utils;
+import org.solrmarc.tools.PropertyUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,11 +40,11 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
         logger.debug("Load bean shell script: " + scriptFileName);
         bsh = new Interpreter();
         bsh.setClassLoader(this.getClass().getClassLoader());
-        InputStream script = Utils.getPropertyFileInputStream(paths, scriptFileName);
+        InputStream script = PropertyUtils.getPropertyFileInputStream(paths, scriptFileName);
         String scriptContents;
         try
         {
-            scriptContents = Utils.readStreamIntoString(script);
+            scriptContents = PropertyUtils.readStreamIntoString(script);
             bsh.eval(scriptContents);
             bsh.set("indexer", SOLR_INDEXER);
             bsh.setOut(System.out);
@@ -63,7 +63,7 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
     }
 
     private BshMethod getBeanShellMethod(final Interpreter interpreter, final String methodName,
-            final Class[] parameterTypes)
+            final Class<?>[] parameterTypes)
     {
         BshMethod method = methods.get(methodName + Arrays.toString(parameterTypes));
         if (method != null)

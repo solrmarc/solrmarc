@@ -17,9 +17,9 @@ import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.tools.Utils;
 
+import playground.solrmarc.index.extractor.formatter.FieldFormatterMapped;
 import playground.solrmarc.index.extractor.impl.custom.Mixin;
-import playground.solrmarc.index.fieldmatch.FieldFormatterMapped;
-import playground.solrmarc.index.fieldmatch.FieldMatch;
+import playground.solrmarc.index.extractor.impl.direct.FieldMatch;
 import playground.solrmarc.index.indexer.AbstractValueIndexer;
 import playground.solrmarc.index.indexer.ValueIndexerStringReaderFactory;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;

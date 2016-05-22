@@ -49,6 +49,14 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
         }
     }
     
+    private class NaturalComp implements Comparator<String> {
+
+        public int compare(String s1, String s2)
+        {
+            return s1.compareTo(s2);
+        }
+    }
+    
     private Comparator<String> setComparator(String compStr, String dir)                       
     {
         Comparator<String> comp = null;
@@ -56,7 +64,7 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
         if (compStr.equals("str") && dir.equals("desc")) 
             comp = Collections.reverseOrder();
         else if (compStr.equals("str") && dir.equals("asc")) 
-            comp = Collections.reverseOrder(Collections.reverseOrder()); // really?
+            comp = new NaturalComp();
         else if (compStr.equals("num") && dir.equals("asc")) 
             comp = new StringNaturalCompare();
         else if (compStr.equals("num") && dir.equals("desc")) 

@@ -22,13 +22,14 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
         {
             throw new NullPointerException("Interpreter is null.");
         }
-        else if (!String.class.isAssignableFrom(this.method.getReturnType()))
+        else if (!Collection.class.isAssignableFrom(this.method.getReturnType()))
         {
-            throw new IllegalArgumentException("The method's return type has to be assignable to String:\nScript:  "
+            throw new IllegalArgumentException("The method's return type has to be assignable to Collection:\nScript:  "
                     + scriptFileName + "\nMethod: " + method.toString());
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<String> invoke(final Object[] parameters) throws Exception
     {

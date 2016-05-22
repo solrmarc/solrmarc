@@ -1,22 +1,17 @@
 package playground.solrmarc.index.indexer;
 
 import playground.solrmarc.index.collector.MultiValueCollector;
-//import playground.solrmarc.index.collector.impl.FirstObjectMultiValueCollector;
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
 import playground.solrmarc.index.extractor.AbstractSingleValueExtractor;
 import playground.solrmarc.index.extractor.AbstractValueExtractor;
 import playground.solrmarc.index.extractor.AbstractValueExtractorFactory;
+import playground.solrmarc.index.extractor.formatter.FieldFormatterMapped;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import playground.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
-import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
-import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
-//import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
-import playground.solrmarc.index.fieldmatch.FieldFormatterMapped;
-//import playground.solrmarc.index.fieldmatch.FieldFormatterSubstring;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
-//import playground.solrmarc.index.specification.ErrorSpecification;
 import playground.solrmarc.index.utils.ReflectionUtils;
-import playground.solrmarc.index.utils.StringReader;
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.Modifier;
@@ -25,17 +20,15 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 public class ValueIndexerFactory
 {
-    private final static Pattern COMMA_SPLIT_PATTERN = Pattern.compile(",");
-
     private final static Logger logger = Logger.getLogger(ValueIndexerFactory.class);
     private final List<AbstractValueExtractorFactory> extractorFactories;
     private final List<AbstractValueMappingFactory> mappingFactories;
     private List<IndexerSpecException> validationExceptions;
-    private static FullConditionalParser parser = null;
+    private FullConditionalParser parser = null;    
+    private Properties localMappingProperties = null;
 
     /**
      *  The next three functions make the ValueIndexerFactory implement the Singleton pattern
@@ -72,7 +65,12 @@ public class ValueIndexerFactory
         return validationExceptions;
     }
 
-    static boolean debug_parse = false;
+    public Properties getLocalMappingProperties()
+    {
+        return localMappingProperties;
+    }
+    
+    static boolean debug_parse = true;
     
     public List<AbstractValueIndexer<?>> createValueIndexers(String configSpecs[])
             throws IllegalAccessException, InstantiationException
@@ -81,10 +79,21 @@ public class ValueIndexerFactory
         validationExceptions.clear();
         if (parser == null) parser = new FullConditionalParser(debug_parse);
         parser.setFactories(this, this.extractorFactories, this.mappingFactories);
+        localMappingProperties = new Properties();
+
+        for (final String singleSpec : configSpecs)
+        {
+            if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map.")) 
+            {
+                final String[] specParts = singleSpec.split("[ ]?[:=][ ]?", 2);
+                localMappingProperties.put(specParts[0].trim(), specParts[1].trim());
+            }
+        }
         for (final String singleSpec : configSpecs)
         {
             if (singleSpec.startsWith("#") || (!singleSpec.contains(":") && !singleSpec.contains("="))) continue;
             if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map.")) continue;
+            if (singleSpec.startsWith("marc.") || singleSpec.startsWith("solrmarc.")) continue;
             
             final String[] specParts = singleSpec.split("[ ]?[:=][ ]?", 2);
             final String solrFieldName = specParts[0].trim();
@@ -347,8 +356,11 @@ public class ValueIndexerFactory
     
     private boolean isAValueMappingConfiguration(final String configuration)
     {
-        if (configuration.matches("[A-Z0-9a-z_]+[.]properties([(][A-Za-z0-9]*[)])?") || configuration.startsWith("map")
-                || configuration.startsWith("filter") || configuration.startsWith("custom_map"))
+        if (configuration.matches("[A-Z0-9a-z_]+[.]properties([(][A-Za-z0-9]*[)])?") || 
+                configuration.matches("[(]this[)][.]properties([(][A-Za-z0-9]*[)])?") || 
+                configuration.startsWith("map") || 
+                configuration.startsWith("filter") || 
+                configuration.startsWith("custom_map"))
         {
             return (true);
         }

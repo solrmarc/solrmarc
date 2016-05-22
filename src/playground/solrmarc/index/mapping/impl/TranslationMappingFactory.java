@@ -1,5 +1,6 @@
 package playground.solrmarc.index.mapping.impl;
 
+import playground.solrmarc.index.indexer.ValueIndexerFactory;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.apache.log4j.Logger;
@@ -7,6 +8,7 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -30,7 +32,14 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
         {
             return properties;
         }
-        properties = translationMappingFiles.get(translationMappingFileName + "(null)");
+        if (translationMappingFileName.equals("(this).properties"))
+        {
+            properties = ValueIndexerFactory.instance().getLocalMappingProperties();
+        }
+        else
+        {
+            properties = translationMappingFiles.get(translationMappingFileName + "(null)");
+        }
         if (properties != null)
         {
             properties = getSubTranslationMapping(properties, subMappingName);
@@ -59,7 +68,7 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
             throw new IllegalStateException(e);
         }
     }
-
+    
     private Properties getSubTranslationMapping(Properties translationMapping, String mappingPrefix)
     {
         Properties mappings = new Properties();
@@ -89,6 +98,8 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
 
     private String getTranslationMappingFileName(String mappingConfiguration)
     {
+        if (mappingConfiguration.equals("(this).properties"))
+            return(mappingConfiguration);
         int index = mappingConfiguration.indexOf('(');
         if (index != -1)
         {

@@ -259,6 +259,7 @@ opt_comma  ::=  COMMA | ;
 
 method_plus_params ::=  IDENTIFIER:s                                        {: RESULT = Collections.singletonList(s); :}
                     |   IDENTIFIER:s LPAREN params:l RPAREN                 {: RESULT = l; RESULT.add(0, s); :}
+                    |   LPAREN params:l RPAREN                              {: RESULT = l; RESULT.add(0, "(this).properties"); :}
                     ;
 
 params   ::= params:l COMMA param:s                                         {: RESULT = l; l.add(s); :}

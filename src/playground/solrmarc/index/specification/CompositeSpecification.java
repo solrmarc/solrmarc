@@ -8,11 +8,11 @@ import java.util.List;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
 
-import playground.solrmarc.index.fieldmatch.FieldFormatter;
-import playground.solrmarc.index.fieldmatch.FieldFormatterDecorator;
-import playground.solrmarc.index.fieldmatch.FieldMatch;
-import playground.solrmarc.index.fieldmatch.FieldFormatter.eCleanVal;
-import playground.solrmarc.index.fieldmatch.FieldFormatter.eJoinVal;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter;
+import playground.solrmarc.index.extractor.formatter.FieldFormatterDecorator;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
+import playground.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
+import playground.solrmarc.index.extractor.impl.direct.FieldMatch;
 import playground.solrmarc.index.specification.conditional.Condition;
 
 public class CompositeSpecification extends Specification
