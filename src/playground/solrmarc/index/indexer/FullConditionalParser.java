@@ -418,6 +418,19 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
         return factories;
     }
 
+    private AbstractMultiValueExtractor makeMultiValueExtractor(Object extractor)
+    {
+        if (AbstractMultiValueExtractor.class.isAssignableFrom(extractor.getClass()))   
+        {
+            return((AbstractMultiValueExtractor)extractor);
+        }
+        else if (AbstractSingleValueExtractor.class.isAssignableFrom(extractor.getClass())) 
+        {
+            return(new MultiValueWrapperSingleValueExtractor((AbstractSingleValueExtractor)extractor));
+        }
+        return(null);
+    }
+    
     public static final List<String> getErrors()
     {
     	if (scanner.getScannerErrors().size() == 0)
@@ -563,7 +576,7 @@ class CUP$FullConditionalParser$actions {
 		Location sxleft = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xleft;
 		Location sxright = ((java_cup.runtime.ComplexSymbolFactory.ComplexSymbol)CUP$FullConditionalParser$stack.peek()).xright;
 		String s = (String)((java_cup.runtime.Symbol) CUP$FullConditionalParser$stack.peek()).value;
-		 RESULT = fullFactory.createExtractor("CUP Parser", new StringReader(s)); 
+		 RESULT = makeMultiValueExtractor(fullFactory.createExtractor("CUP Parser", new StringReader(s))); 
               CUP$FullConditionalParser$result = parser.getSymbolFactory().newSymbol("extractor",1, ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), ((java_cup.runtime.Symbol)CUP$FullConditionalParser$stack.peek()), RESULT);
             }
           return CUP$FullConditionalParser$result;

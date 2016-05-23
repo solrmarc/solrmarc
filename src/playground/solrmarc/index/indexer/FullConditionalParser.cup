@@ -172,6 +172,19 @@ parser code {:
         return factories;
     }
 
+    private AbstractMultiValueExtractor makeMultiValueExtractor(Object extractor)
+    {
+        if (AbstractMultiValueExtractor.class.isAssignableFrom(extractor.getClass()))   
+        {
+            return((AbstractMultiValueExtractor)extractor);
+        }
+        else if (AbstractSingleValueExtractor.class.isAssignableFrom(extractor.getClass())) 
+        {
+            return(new MultiValueWrapperSingleValueExtractor((AbstractSingleValueExtractor)extractor));
+        }
+        return(null);
+    }
+    
     public static final List<String> getErrors()
     {
     	if (scanner.getScannerErrors().size() == 0)
@@ -222,7 +235,7 @@ field_names ::= field_names:s COMMA FIELDNAME:n                             {: R
               
 extractor ::= strings:l                                                     {: RESULT = new ConstantMultiValueExtractor(l); :}
             | field_spec:fs                                                 {: RESULT = new DirectMultiValueExtractor(fs);  :} 
-            | FULLRECORD:s                                                  {: RESULT = fullFactory.createExtractor("CUP Parser", new StringReader(s)); :}
+            | FULLRECORD:s                                                  {: RESULT = makeMultiValueExtractor(fullFactory.createExtractor("CUP Parser", new StringReader(s))); :}
             | DATE:s                                                        {: RESULT = dateFactory.createExtractor("CUP Parser", new StringReader(s)); :}
             | custom_extractor:e                                            {: RESULT = e; :}
             | error                                                         {: RESULT = null; :}
