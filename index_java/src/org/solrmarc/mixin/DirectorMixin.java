@@ -130,6 +130,7 @@ public class DirectorMixin implements Mixin
         return false;
     }
 
+
     /**
      * Routine that actually does the work to heuristically determine the Director of a video based on the text of the string passed in
      * 
@@ -145,41 +146,41 @@ public class DirectorMixin implements Mixin
          responsibility = responsibility.replaceAll("\\[sic[.]?[]]", "");
         responsibility = responsibility.replaceAll("([a-z][a-z][a-z])[.]", "$1;");
         responsibility = responsibility.replaceAll("([a-z][a-z])[.]  ", "$1;  ");
-        responsibility = responsibility.replaceAll("direção de produção", "producer");//porteguese
-        responsibility = responsibility.replaceAll("direct(or|ion|eur) de (la )?[ ]?produc[ct]i(o�?|o)n", "producer");//french/spanish
-        responsibility = responsibility.replaceAll("direcci(o�?|o)n art\\B*", "artguy");//spanish
+        responsibility = responsibility.replaceAll("direc\u0327a\u0303o de produc\u0327a\u0303o", "producer");//porteguese
+        responsibility = responsibility.replaceAll("direct(or|ion|eur) de (la )?[ ]?produc[ct]i(o\u0301|o)n", "producer");//french/spanish
+        responsibility = responsibility.replaceAll("direcci(o\u0301|o)n art\\B*", "artguy");//spanish
         responsibility = responsibility.replaceAll("produit par\\b", "produced by");
 
-        String responsibility1 = responsibility.replaceAll("[Rr]eg(i|i�?)[ea]?\\b", "didrector");//german/italian/swedish
+        String responsibility1 = responsibility.replaceAll("[Rr]eg(i|i\u0301)[ea]?\\b", "didrector");//german/italian/swedish
         responsibility1 = responsibility1.replaceAll("[Rr]eggia\\b", "didrector");//spanish
-        responsibility1 = responsibility1.replaceAll("[Rr]e(ž|z)ie", "didrector");//czech
-        responsibility1 = responsibility1.replaceAll("[Rr]e(ż|z|a)yseria", "didrector");//polish
-        responsibility1 = responsibility1.replaceAll("[Dd]irecci(o�?|o)n", "didrector");//spanish
-        responsibility1 = responsibility1.replaceAll("[Rr](e�?|e)alisation", "didrection");//french
-        responsibility1 = responsibility1.replaceAll("[Rr]ealizaci(o�?|o)n", "didrection");//spanish
-        responsibility1 = responsibility1.replaceAll("[Rr]e�?alise�?( et [a-z]*)? (par|by)", "didrected$1 by");//french
+        responsibility1 = responsibility1.replaceAll("[Rr]e(z\u030c|z)ie", "didrector");//czech
+        responsibility1 = responsibility1.replaceAll("[Rr]e(z\u0307|z|a)yseria", "didrector");//polish
+        responsibility1 = responsibility1.replaceAll("[Dd]irecci(o\u0301|o)n", "didrector");//spanish
+        responsibility1 = responsibility1.replaceAll("[Rr](e\u0301|e)alisation", "didrection");//french
+        responsibility1 = responsibility1.replaceAll("[Rr]ealizaci(o\u0301|o)n", "didrection");//spanish
+        responsibility1 = responsibility1.replaceAll("[Rr]e\u0301alise\u0301( et [a-z]*)? (par|by)", "didrected$1 by");//french
         responsibility1 = responsibility1.replaceAll("[Dd]irected por", "didrected by");//spanish
-        responsibility1 = responsibility1.replaceAll("[Dd]irige�? par", "didrected by");//french
-        responsibility1 = responsibility1.replaceAll("[Dd]irrecio�?n", "didrection");//spanish
-        responsibility1 = responsibility1.replaceAll("[Dd]irecci�?on", "didrection");//spanish
+        responsibility1 = responsibility1.replaceAll("[Dd]irige\u0301 par", "didrected by");//french
+        responsibility1 = responsibility1.replaceAll("[Dd]irrecio\u0301n", "didrection");//spanish
+        responsibility1 = responsibility1.replaceAll("[Dd]irecci\u0301on", "didrection");//spanish
         responsibility1 = responsibility1.replaceAll("[Dd]irector(a|es)", "didrector");//spanish
-        responsibility1 = responsibility1.replaceAll("[Dd]ire(ç|c)ão", "didrector");//porteguese
+        responsibility1 = responsibility1.replaceAll("[Dd]ire(c\u0327|c)a\u0303o", "didrector");//porteguese
         responsibility1 = responsibility1.replaceAll("[Dd]iretto da", "didrector");//italian
         responsibility1 = responsibility1.replaceAll("[Dd]irecteur", "didrector");//french
         responsibility1 = responsibility1.replaceAll("[Dd]irect(e|io)r", "didrector");//typo
         responsibility1 = responsibility1.replaceAll("[Dd]irigid[oa]", "didrector");//porteguese
-        responsibility1 = responsibility1.replaceAll("[Tt]asriṭ u-vimui", "didrector");//hebrew
-        responsibility1 = responsibility1.replaceAll("[Ii]khr(ā|a)j", "didrector");//arabic
+        responsibility1 = responsibility1.replaceAll("[Tt]asrit\u0323 u-vimui", "didrector");//hebrew
+        responsibility1 = responsibility1.replaceAll("[Ii]khr(a\u0304|a)j", "didrector");//arabic
         responsibility1 = responsibility1.replaceAll("[Rr]ezhisser[a]?", "didrector");//russian
-        responsibility1 = responsibility1.replaceAll("[Yy]öneten", "didrector");//turkish
-        responsibility1 = responsibility1.replaceAll("[Nn]irdes�?aka", "didrector");//hindi
+        responsibility1 = responsibility1.replaceAll("[Yy]o\u0308neten", "didrector");//turkish
+        responsibility1 = responsibility1.replaceAll("[Nn]irdes\u0301aka", "didrector");//hindi
         responsibility1 = responsibility1.replaceAll("[Pp]ostanovka", "didrector");//russian
         responsibility1 = responsibility1.replaceAll("(un )?film[e]? d[ei]\\b", "a flim by");//french
         responsibility1 = responsibility1.replaceAll("un film d'", "a flim by ");//french
         responsibility1 = responsibility1.replaceAll("(an|en) film av", "a flim by"); //swedish
         responsibility1 = responsibility1.replaceAll("[Ee]in [Ff]ilm von", "a flim by"); //german
-        responsibility1 = responsibility1.replaceAll("un(e|a) pel(i�?|i)cula de", "a flim by");//spanish
-        responsibility1 = responsibility1.replaceAll("[Mm]is[e]? en sc(e|è)ne( de)?", "a flim by");//french
+        responsibility1 = responsibility1.replaceAll("un(e|a) pel(i\u0301|i)cula de", "a flim by");//spanish
+        responsibility1 = responsibility1.replaceAll("[Mm]is[e]? en sc(e|e\u0300)ne( de)?", "a flim by");//french
         responsibility1 = responsibility1.replaceAll("Film by", "a flim by");
         //responsibility1 = responsibility1.replaceAll("\\bpar\\b", "maybe by");
         //responsibility1 = responsibility1.replaceAll("^by", "maybe by");
@@ -193,7 +194,7 @@ public class DirectorMixin implements Mixin
         responsibility1 = responsibility1.replaceAll("[Dd]ao yan", "didrector");//chinese
         responsibility1 = responsibility1.replaceAll("[Kk]antoku", "didrector");//japanese
         responsibility1 = responsibility1.replaceAll("[Kk]amdok", "didrector");//korean
-        responsibility1 = responsibility1.replaceAll("[Yy]ŏnchʻul", "didrector");//korean
+        responsibility1 = responsibility1.replaceAll("[Yy]o\u0306nch\u02bbul", "didrector");//korean
         if (!responsibility1.equals(responsibility))
         {
             responsibility = responsibility1;
@@ -265,9 +266,9 @@ public class DirectorMixin implements Mixin
                     {
                         part = part1;
                     }
-                    if (part.matches(".*[Dd]irector[s]? (of|de|de la) ([Pp]h|[Ff])otogra(ph|f)(y|(i|i�?)[ea]).*"))
+                    if (part.matches(".*[Dd]irector[s]? (of|de|de la) ([Pp]h|[Ff])otogra(ph|f)(y|(i|i\u0301)[ea]).*"))
                     {
-                        part = part.replaceFirst("[Dd]irector[s]? (of|de|de la) ([Pp]h|[Ff])otogra(ph|f)(y|(i|i�?)[ea])", "cinematographer");
+                        part = part.replaceFirst("[Dd]irector[s]? (of|de|de la) ([Pp]h|[Ff])otogra(ph|f)(y|(i|i\u0301)[ea])", "cinematographer");
                     }
                     if (part.matches(".*[Dd]irector[s]? (of|de|de la) ([Aa]nimation).*"))
                     {
@@ -293,7 +294,7 @@ public class DirectorMixin implements Mixin
                     if (part.matches(".*[Dd]irector[^A-Z]*") && !part.matches(".*of the [Dd]irector.*"))
                     {
                         if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotography|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Dd]ance|[Ee]diting) [Dd]irector.*" ) ||
-                                part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotograf(i|i�?)a)|(de arte)).*"))
+                                part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotograf(i|i\u0301)a)|(de arte)).*"))
                             continue;
                         part = part.replaceAll(" *[\\[]", ", ");
                         part = part.replaceAll("^\"", "");
@@ -330,7 +331,7 @@ public class DirectorMixin implements Mixin
                     else if (part.matches(".*[Dd]irect(ed|ion).*?by.*")|| part.matches(".*a film by.*") || part.matches(".*maybe by.*"))
                     {
                         if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotographic|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Dd]ance|[Ee]diting) [Dd]irection.*?by.*" ) ||
-                                part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotograf(i|i�?)a)|(de arte)).*"))
+                                part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotograf(i|i\u0301)a)|(de arte)).*"))
                             continue;
                         part = part.replaceFirst(".*[Dd]irect(ed|ion).*?by[]:,)]?[ ]?", "directified by ");
                         part = part.replaceFirst(".*a film by", "directified by ");
@@ -343,7 +344,7 @@ public class DirectorMixin implements Mixin
                         part = part.replaceAll("[.][.][.]", "");
                         part = part.replaceAll("([A-Z][^ .][^ .][^ .]+)[.].*", "$1");
                         part = part.replaceAll("brothers", "Brothers");
-                        part = part.replaceAll("directified by[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*ʻ]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|zur |von |van |de[rl]?[ ]?|the |d[']|al-|da-)+).*", "$1");
+                        part = part.replaceAll("directified by[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*\u02bb]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|zur |von |van |de[rl]?[ ]?|the |d[']|al-|da-)+).*", "$1");
                         part = part.replaceAll("^([A-Z][^ .]+) & ([A-Z][^ .,]+) ([A-Z][^ .,]+)", "$1 $3 & $2 $3");
                         part = part.replaceAll("([,][ ]?|[ ]?&[ ]?)", "|");
                         part = part.replaceAll("[#]", ",");
@@ -367,7 +368,7 @@ public class DirectorMixin implements Mixin
                         part = part.replaceAll("[.][.][.]", "");
                         part = part.replaceAll("([A-Z][^ .][^ .][^ .]+)[.].*", "$1");
                         part = part.replaceAll("brothers", "Brothers");
-                        part = part.replaceAll("directified by[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*ʻ]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|zur |von |van |de[rl]?[ ]?|the |d[']|al-|da-)+).*", "$1");
+                        part = part.replaceAll("directified by[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*\u02bb]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|zur |von |van |de[rl]?[ ]?|the |d[']|al-|da-)+).*", "$1");
                         part = part.replaceAll("^([A-Z][^ .]+) & ([A-Z][^ .,]+) ([A-Z][^ .,]+)", "$1 $3 & $2 $3");
                         part = part.replaceAll("([,][ ]?|[ ]?&[ ]?)", "|");
                         part = part.replaceAll("[#]", ",");
@@ -383,7 +384,7 @@ public class DirectorMixin implements Mixin
                     else if (part.matches(".*[Dd]irector[^a-rt-z\'].*[A-Z].*"))
                     {
                         if (part.matches(".*([Aa]rt(istic)?|[Mm]usic(al)?|[Ss]tage|[Pp]roduction|[Pp]roject|[Pp]hotography|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Dd]ance|[Ee]diting) [Dd]irector.*" ) ||
-                                part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotograf(i|i�?)a)|(de arte)).*"))
+                                part.matches(".*[Dd]irector[s]? ((of[ ]?(([Pp]hotography)))|(de (la )?fotograf(i|i\u0301)a)|(de arte)).*"))
                             continue;
                         part = part.replaceFirst("Executive", "executive");
                         part = part.replaceFirst("Writer", "writer");
@@ -400,7 +401,7 @@ public class DirectorMixin implements Mixin
                         part = part.replaceAll("director (for|and|of)( [A-Z][A-Za-z]*)+", "director");
                         if (!greedy)
                             part = part.replaceFirst("director( and [a-z]*)?, [a-z].*", "");
-                        part = part.replaceFirst("director[^A-Z]* ([ʻ*]?[A-Z])", "director= $1");
+                        part = part.replaceFirst("director[^A-Z]* ([\u02bb*]?[A-Z])", "director= $1");
                         part = part.replaceFirst("with the [a-z][A-Za-z ]*", "");
                         part = part.replaceFirst("et al", "");
                         if (!greedy)
@@ -409,9 +410,9 @@ public class DirectorMixin implements Mixin
                         part = part.replaceAll(",[ ]?[a-z].*", "");
                         part = part.replaceAll("= [^(]*[)], ", ": ");
                         if (greedy)
-                            part = part.replaceAll("director=[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*ʻ]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|von |zur |van |de[rl]?[ ]?|the |in |d[']|al-|da-)+)[^|&]*", "$1");
+                            part = part.replaceAll("director=[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*\u02bb]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|von |zur |van |de[rl]?[ ]?|the |in |d[']|al-|da-)+)[^|&]*", "$1");
                         else // strict
-                            part = part.replaceAll("director=[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*ʻ]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|von |zur |van |de[rl]?[ ]?|the |in |d[']|al-|da-)+)( [a-z].*|$)", "$1");
+                            part = part.replaceAll("director=[ a-z,]*(([\"]?([A-Z]|\\p{Lu}|[*\u02bb]|\\p{M})[^ ]*[\"]?[,]?[ ]*|[ ]?&[ ]|von |zur |van |de[rl]?[ ]?|the |in |d[']|al-|da-)+)( [a-z].*|$)", "$1");
                         part = part.replaceAll("^([A-Z][^ .]+) & ([A-Z][^ .]+) ([A-Z][^ .]+)", "$1 $3 & $2 $3");
                         part = part.replaceAll("([,][ ]?|[ ]?[|&][ ]?)", "|");
                         part = part.replaceAll("[#]", ",");
@@ -426,7 +427,7 @@ public class DirectorMixin implements Mixin
                     else if (part.matches(".*[Dd]irection.*"))
                     {
                         if (part.matches(".*([Aa]rt|[Mm]usic(al)?|[Ss]tage|[Pp]roject|[Aa]nimation|[Mm]edical|[Cc]asting|[Tt]echnical|[Oo]rchestra|[Ee]diting) [Dd]irection.*" )||
-                                part.matches(".*[Dd]irection (of )?(de )?(la )?((f|ph)otogra(f|ph)ie|production|[Cc]in(e�?|e)matographie|artistique|art[e]?|musicale).*"))
+                                part.matches(".*[Dd]irection (of )?(de )?(la )?((f|ph)otogra(f|ph)ie|production|[Cc]in(e\u0301|e)matographie|artistique|art[e]?|musicale).*"))
                             continue;
                         part = part.replaceFirst(".*[Dd]irection[^A-Z]*", "direction: ");
                         part = part.replaceAll(", (Jr[.]?|Sr[.]?|Inc[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.])", "# $1");
@@ -452,8 +453,8 @@ public class DirectorMixin implements Mixin
     private static String handleASoAndSoFilm(String responsibility)
     {
         String aOrAn = "\\ba[n]?[ ]+";   // matches   a or an  but has boundary marker so as to not match   pa or man   
-        String namePart = "(?:\\p{Lu}(?:\\p{L}|\\p{M}|[-'])*(?:\\p{Ll}|\\p{M}))"; //  Example matches:   Jadme-Lillo  or  Sa�?nchez  or SiCa  or  O'Malley
-        String initialOrNamePart = "(?:\\p{Lu}[.]|"+namePart+")"; //  Example matches:   B.  or  Jadme-Lillo  or  Sa�?nchez  or SiCa  or  O'Malley
+        String namePart = "(?:\\p{Lu}(?:\\p{L}|\\p{M}|[-'])*(?:\\p{Ll}|\\p{M}))"; //  Example matches:   Jadme-Lillo  or  Sa\u0301nchez  or SiCa  or  O'Malley
+        String initialOrNamePart = "(?:\\p{Lu}[.]|"+namePart+")"; //  Example matches:   B.  or  Jadme-Lillo  or  Sa\u0301nchez  or SiCa  or  O'Malley
         String optionalSuffix = "(?:[,]? (?:Jr[.]?|Sr[.]?|II|III|IV|M[.]D[.]|B[.]S[.]N[.]))?"; //  Example matches:    , Jr.  or , III   or   , M.D.
         String nameGap = "[- ]";
         String film = " film\\b";  // matches film  but not films uses boundary marker

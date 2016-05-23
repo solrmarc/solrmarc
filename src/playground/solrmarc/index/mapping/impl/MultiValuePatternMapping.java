@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class MultiValuePatternMapping implements AbstractMultiValueMapping
+public class MultiValuePatternMapping extends AbstractMultiValueMapping
 {
     private final List<PatternMapping> patternMappings;
     private final boolean applyAll;

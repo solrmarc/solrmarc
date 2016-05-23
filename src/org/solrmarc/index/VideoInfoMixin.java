@@ -17,7 +17,7 @@ import org.solrmarc.tools.Utils;
 public class VideoInfoMixin extends SolrIndexerMixin
 {
     Pattern releaseDatePattern = null;
-    boolean isVideo = false;
+    boolean isVideo = true;
 
     public void perRecordInit(Record record)
     {
@@ -288,6 +288,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
         }
         return false;
     }
+
 
     /**
      * Routine that actually does the work to heuristically determine the Director of a video based on the text of the string passed in
@@ -651,6 +652,8 @@ public class VideoInfoMixin extends SolrIndexerMixin
     {
         if (subpart.matches(".*[(].*[)]"));
             subpart = subpart.replaceAll("(.*)[(].*[)]", "$1");
+        if (subpart.matches("[^()]*[)]"));
+            subpart = subpart.replaceAll("([^()]*)[)]", "$1");
         if (subpart.matches("\".*") || subpart.matches(".*\""))
             subpart = subpart.replaceAll("\"?(.*?)\"?", "$1");
         if (subpart.matches(".* for .*"))

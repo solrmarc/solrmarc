@@ -244,12 +244,17 @@ public class SolrMarcDebug
             public void actionPerformed(ActionEvent e)
             {
                 @SuppressWarnings("unchecked")
-                String fKey = ((JComboBox<String>) e.getSource()).getSelectedItem().toString();
-                Record rec = recordMap.get(fKey);
-                recordPane.setText(rec.toString());
-                recordPane.setCaretPosition(0);
-                // String fieldNameStr = fieldName.getText();
-                processRecordToOutput(rec);
+                JComboBox<String> source = ((JComboBox<String>) e.getSource());
+                Object selected = source.getSelectedItem();
+                if (selected != null)
+                {
+                    String fKey = selected.toString();
+                    Record rec = recordMap.get(fKey);
+                    recordPane.setText(rec.toString());
+                    recordPane.setCaretPosition(0);
+                    // String fieldNameStr = fieldName.getText();
+                    processRecordToOutput(rec);
+                }
             }
 
         });

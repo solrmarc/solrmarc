@@ -337,16 +337,6 @@ public class ValueIndexerStringReaderFactory
         return (false);
     }
 
-    private static String toDelimitedString(String[] strs, String delimiter)
-    {
-        StringBuilder strb = new StringBuilder();
-        for (String str : strs)
-        {
-          strb.append(str).append(delimiter);
-        }
-        return strb.substring(0, strb.length() - delimiter.length());
-     }
-
     public AbstractMultiValueMapping createMultiValueMapping(final String mappingConfig)
     {
         for (final AbstractValueMappingFactory mappingFactory : mappingFactories)

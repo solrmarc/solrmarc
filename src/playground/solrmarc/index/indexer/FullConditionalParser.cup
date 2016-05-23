@@ -251,6 +251,10 @@ custom_extractor ::= CUSTOM:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_p
                                                                             {: RESULT = createCustomExtractor(t, m, l); :} 
                   |  SCRIPT:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_params:l
                                                                             {: RESULT = createCustomExtractor(t, m, l); :} 
+                  |  CUSTOM:t COMMA method_plus_params:l  
+                                                                            {: RESULT = createCustomExtractor(t, null, l); :} 
+                  |  JAVA:t COMMA method_plus_params:l
+                                                                            {: RESULT = createCustomExtractor(t, null, l); :} 
                   ;
 
 mapping_specs ::= mapping_specs:l COMMA mapping_spec:m               		{: RESULT = l; if (m != null) { l.add(m);} :}

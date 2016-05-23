@@ -52,7 +52,7 @@ new_line = \r|\n|\r\n
 white_space = {new_line} | [ \t\f]
 identifier = [A-Za-z0-9][A-Z_a-z0-9./\\]*[A-Za-z0-9]
 fullrecord = "xml"|"raw"|"json"|"json2"|"text"|"FullRecordAs"[A-Za-z0-9]*
-datespec = "date"|"dateOfPublication"|"dateRecordIndexed"|"index_date"
+datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 %state STARTSPEC STRING CONDITIONAL SUBFIELDSPEC CUSTOMSPEC CUSTOMMETHOD CUSTOMPARAM MAPSPEC CONSTANT 
 
 %%

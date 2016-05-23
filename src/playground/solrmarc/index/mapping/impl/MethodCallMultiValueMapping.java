@@ -6,7 +6,7 @@ import playground.solrmarc.index.extractor.methodcall.MultiValueMappingMethodCal
 import playground.solrmarc.index.extractor.methodcall.SingleValueMappingMethodCall;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 
-public class MethodCallMultiValueMapping implements AbstractMultiValueMapping
+public class MethodCallMultiValueMapping extends AbstractMultiValueMapping
 {
 
     private final Object[] parameters;

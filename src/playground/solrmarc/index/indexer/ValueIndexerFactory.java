@@ -467,6 +467,19 @@ public class ValueIndexerFactory
         return strb.substring(0, strb.length() - delimiter.length());
      }
 
+    public AbstractMultiValueMapping createMultiValueMapping(final String mappingConfig)
+    {
+        for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
+        {
+            if (mappingFactory.canHandle(mappingConfig))
+            {
+                return mappingFactory.createMultiValueMapping(mappingConfig);
+            }
+        }
+        throw new IndexerSpecException("Could not handle impl: " + mappingConfig + "\nLoaded impl factories:\n"
+                + mappingFactories.toString().replaceAll(",", ",\n"));
+    }
+
     private AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
     {
         for (final AbstractValueMappingFactory mappingFactory : mappingFactories)

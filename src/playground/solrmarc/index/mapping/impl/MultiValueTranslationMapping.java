@@ -5,7 +5,7 @@ import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class MultiValueTranslationMapping implements AbstractMultiValueMapping
+public class MultiValueTranslationMapping extends AbstractMultiValueMapping
 {
     private final static Pattern SEPARATOR_PATTERN = Pattern.compile("[|]");
     private final Properties translationMapping;
