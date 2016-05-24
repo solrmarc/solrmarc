@@ -77,8 +77,6 @@ public class ValueIndexerFactory
     {
         final List<AbstractValueIndexer<?>> valueIndexers = new ArrayList<>();
         validationExceptions.clear();
-        if (parser == null) parser = new FullConditionalParser(debug_parse);
-        parser.setFactories(this, this.extractorFactories, this.mappingFactories);
         localMappingProperties = new Properties();
 
         for (final String singleSpec : configSpecs)
@@ -100,7 +98,7 @@ public class ValueIndexerFactory
             final String mappingDefinition = specParts[1].trim();
             try
             {
-                MultiValueIndexer valueIndexer = parser.parse(singleSpec);
+                MultiValueIndexer valueIndexer = createValueIndexer(singleSpec);
                 if (valueIndexer != null)
                 {
                     valueIndexers.add(valueIndexer);
@@ -128,6 +126,30 @@ public class ValueIndexerFactory
         return valueIndexers;
     }
 
+    public MultiValueIndexer createValueIndexer(String singleSpec)
+    {
+        if (parser == null) 
+        {
+            try
+            {
+                parser = new FullConditionalParser(debug_parse);
+                parser.setFactories(this, this.extractorFactories, this.mappingFactories);
+            }
+            catch (IllegalAccessException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (InstantiationException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        MultiValueIndexer valueIndexer = parser.parse(singleSpec);
+        return(valueIndexer);
+    }
+    
     private List<AbstractValueExtractorFactory> createExtractorFactories(
             final Set<Class<? extends AbstractValueExtractorFactory>> factoryClasses)
             throws IllegalAccessException, InstantiationException

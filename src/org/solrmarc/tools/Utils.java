@@ -679,7 +679,7 @@ public final class Utils
      *            Regex String pattern to match
      * @return If the set contains the pattern, return true, else false
      */
-    public static boolean setItemContains(Set<String> set, String pattern)
+    public static boolean setItemContains(Collection<String> set, String pattern)
     {
         if (set.isEmpty())
         {

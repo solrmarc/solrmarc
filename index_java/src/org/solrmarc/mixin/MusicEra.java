@@ -25,7 +25,7 @@ public class MusicEra implements Mixin {
     public Set<String> getEra(Record record) 
     {
         Set<String> result = new LinkedHashSet<String>();
-        String eraField = SolrIndexer.getFirstFieldVal(record, "045a");
+        String eraField = SolrIndexer.instance().getFirstFieldVal(record, "045a");
         if (eraField == null)
             return result;
 

@@ -1196,7 +1196,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             contentTypesStr.add(govDocType.toString());
         }
-        Set<String> holdings = SolrIndexer.getAllSubfields(record, "999t", "");
+        Set<String> holdings = SolrIndexer.instance().getAllSubfields(record, "999t", "");
         for (String holding : holdings)
         {
             if (holding.equals("EQUIPMENT") || holding.equals("HS-DVDPLYR") || holding.equals("EQUIP-3DAY") || holding.equals("CELLPHONE") ||  
@@ -1621,7 +1621,7 @@ public class GetFormatMixin extends SolrIndexerMixin
                 addPossibleForm( possibleForms, MediaType.VideoBeta, new MediaTypeHeuristic(MediaType.VideoBeta,  0.7, note.getTag()));
             }
         }
-        Set<String> forms = SolrIndexer.getAllSubfields(record, "300[abc]", "--");
+        Set<String> forms = SolrIndexer.instance().getAllSubfields(record, "300[abc]", "--");
         for (String form : forms)
         {
             if (form.matches(".*[Vv]ideo[ ]?disc.*--.*--.*12 cm.*"))
