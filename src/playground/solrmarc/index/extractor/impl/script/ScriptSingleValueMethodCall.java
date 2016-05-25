@@ -9,10 +9,9 @@ public class ScriptSingleValueMethodCall extends AbstractExtractorMethodCall<Str
     private final Interpreter interpreter;
     private final BshMethod method;
 
-    public ScriptSingleValueMethodCall(final Interpreter interpreter, final BshMethod method,
-            final String scriptFileName)
+    public ScriptSingleValueMethodCall(final Interpreter interpreter, final BshMethod method, final String scriptFileName)
     {
-        super(scriptFileName, method.getName());
+        super(scriptFileName, method.getName(), false);
         this.interpreter = interpreter;
         this.method = method;
 
@@ -35,5 +34,11 @@ public class ScriptSingleValueMethodCall extends AbstractExtractorMethodCall<Str
            return((String)result);
        else 
            return(null);
+    }
+
+    @Override
+    public void invokePerRecordInit(Object[] record) throws Exception
+    {
+        // TODO Implement perRecordInit support in scripts.
     }
 }

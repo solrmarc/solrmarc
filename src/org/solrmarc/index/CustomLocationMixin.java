@@ -57,7 +57,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
      * @param record -  The MARC record that is being indexed.
      * @throws Exception 
      */
-    protected void perRecordInit(Record record) throws Exception
+    public void perRecordInit(Record record) throws Exception
     {
         String fieldSpec = "999awi';'";
         trimmedHoldingsList = getTrimmedHoldingsList(record, "999");        
@@ -467,7 +467,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
             while (result == null && prefix.length() > 0)
             {
                 result = transMap.mapSingle(prefix);
-                if (result == null && prefix.length() == 2)
+                if (result == null && prefix.length() == 1)
                 {
                     break;
                 }
@@ -477,7 +477,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
                 }
             }
         }
-        if (mapName.equals("callnumber_map"))
+        if (mapName.equals("callnumber_map.properties"))
         {
             int partNum = Utils.isNumber(part) ? Integer.parseInt(part) : 0;
             if (result == null) return(result);
@@ -514,6 +514,199 @@ public class CustomLocationMixin extends SolrIndexerMixin
                 return(prefix + " - " + result);
             }
                
+        }
+    }
+    /* 
+     * Extract a single cleaned call number from a record
+    * @param record
+    * @return Clean call number
+    */
+   public String getCallNumberCleanedNew(final Record record, String sortable)
+   {
+       boolean sortableFlag = (sortable != null && ( sortable.equals("sortable") || sortable.equals("true")));
+       String result = bestSingleCallNumber;
+       if (result == null) return(result);
+       String resultParts[] = result.split(":", 2);
+       if (sortableFlag && ( resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1]))))
+           result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber(), null);
+       else if (resultParts[1].startsWith("M@"))
+           result = result.replaceAll("M@", "MSS ");
+       return(result);
+
+   }
+   public String getShelfKey(final Record record)
+   {
+       String callnum = bestSingleCallNumber;
+       String result = null;
+       if (callnum == null) return(null);
+       String resultParts[] = callnum.split(":", 2);
+       if ( resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1])))
+           result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber(), null);
+       return(result);
+   }
+   
+   public String getReverseShelfKey(final Record record)
+   {
+       String shelfKey = getShelfKey(record);
+       if (shelfKey == null) return(shelfKey);
+       String revShelfKey = CallNumUtils.getReverseShelfKey(shelfKey);
+       return(revShelfKey);
+   }
+ 
+   public Set<String> getCallNumbersCleanedNewNo050(final Record record, String conflatePrefixes)
+   {
+       return(getCallNumbersCleanedNew(record, conflatePrefixes, this.callNumberFieldListNo050, this.callNumberClusterMapNo050));
+   }
+
+   
+   public Set<String> getCallNumbersCleanedNew(final Record record, String conflatePrefixes)
+   {
+       return(getCallNumbersCleanedNew(record, conflatePrefixes, this.callNumberFieldList, this.callNumberClusterMap));
+   }
+
+   
+   private String getCommonPrefix(String string1, String string2, Comparator comp)
+   {
+       int l1 = string1.length();
+       int l2 = string2.length();
+       int l = Math.min(l1, l2);
+       int prefixLen = l;
+       for (int i = 0; i < l; i++)
+       {
+           if (comp.compare(string1.substring(i, i+1), string2.substring(i, i+1))!= 0)
+           {
+               prefixLen = i;
+               break;
+           }
+       }
+       return(string1.substring(0, prefixLen));
+   }
+
+   private String getCallNum(final String callNum)
+   {
+       String callNumParts[] = callNum.split(":", 2);
+       return (callNumParts[1]);
+   }
+
+   /**
+    * Extract a set of cleaned call numbers from a record
+    * @param record
+    * @return Clean call number
+    */
+    public Set<String> getCallNumbersCleanedNew(final Record record, String conflatePrefixes, 
+                                                Set<String> localCallNumberFieldList, 
+                                                Map<String, Set<String>> localCallNumberClusterMap)
+    {
+        boolean conflate = !conflatePrefixes.equalsIgnoreCase("false");
+        
+        if (!conflate)
+        {
+            Set<String> fieldList = localCallNumberFieldList;
+            if (fieldList == null || fieldList.isEmpty())  
+            {
+                return(null);
+            }
+
+            Comparator<String> comp = new StringNaturalCompare();
+            Set<String> resultNormed = new TreeSet<String>(comp);
+            for (String field : fieldList)
+            {
+                String fieldParts[] = field.split(":", 2);
+                String callNum = fieldParts[1];
+                String val = callNum.trim().replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
+                String nVal = val.replaceAll("^([A-Z][A-Z]?[A-Z]?) ([0-9])", "$1$2");
+                if (!nVal.equals(val))
+                {
+                    val = nVal;
+                }
+                val = val.replaceFirst("M@", "MSS ");
+                resultNormed.add(val);
+            }
+            return resultNormed;
+        }
+        else
+        {
+            Map<String, Set<String>> resultNormed = localCallNumberClusterMap;
+            if (resultNormed == null || resultNormed.size() == 0) return(null);
+            Set<String> keys = resultNormed.keySet();
+            Set<String> results = new TreeSet<String>(normedComparator);
+            for (String key : keys)
+            {
+                Set<String> values = resultNormed.get(key);
+                String valueArr[] = values.toArray(new String[0]);
+                for (int i = 0; i < valueArr.length; i++)
+                {
+                    valueArr[i] = getCallNum(valueArr[i]);
+                }
+                if (valueArr.length == 1)
+                {
+                    results.add(valueArr[0].replaceAll("M@", "MSS "));
+                }
+                else
+                {
+                    String prefix = valueArr[0];
+                    for (int i = 1; i < valueArr.length; i++)
+                    {
+                        prefix = getCommonPrefix(prefix, valueArr[i], normedComparator);
+                    }
+                    if (prefix.lastIndexOf(' ') != -1)
+                    {
+                        prefix = prefix.substring(0, prefix.lastIndexOf(' '));
+                    }
+                    StringBuffer sb = new StringBuffer(prefix);
+                    String sep = " ";
+                    for (int i = 0; i < valueArr.length; i++)
+                    {
+                        valueArr[i] = valueArr[i].substring(prefix.length());
+                    }
+                    Comparator<String> comp = new StringNaturalCompare();
+                    Arrays.sort(valueArr, comp);
+                    for (int i = 0; i < valueArr.length; i++)
+                    {
+                        if (valueArr[i].length() > 0) 
+                        {
+                            sb.append(sep).append(valueArr[i]);
+                            sep = ",";
+                        }
+                    }
+                    if (prefix.startsWith("M@"))
+                    {
+                        if (sb.length() > 100 || valueArr.length > 2)
+                        {
+                            int cntBoxes = 0, cntFolders = 0, cntVolumes = 0;
+                            for (int i = 0; i < valueArr.length; i++)
+                            {
+                                if (valueArr[i].contains("Box")) cntBoxes++;
+                                if (valueArr[i].contains("Folder")) cntFolders++;   
+                                if (valueArr[i].contains("Volume")) cntVolumes++;   
+                            }
+                            String label = "Boxes";
+                            if (cntFolders > cntBoxes && cntFolders > cntVolumes) label = "Folders";
+                            else if (cntVolumes > cntBoxes && cntVolumes > cntFolders) label = "Volumes";
+                            prefix = prefix.replaceFirst("M@", "MSS ");
+                            results.add(prefix + " (" + valueArr.length + " " + label + ")");
+                        }
+                        else
+                        {
+                            String value = sb.toString();
+                            value = value.replaceAll("M@", "MSS ");
+                            results.add(value);
+                        }
+                    }
+                    else
+                    {
+                        if (sb.length() > 100 || valueArr.length > 10)
+                        {
+                            results.add(prefix + " (" + valueArr.length + " volumes)");
+                        }
+                        else
+                        {
+                            results.add(sb.toString());
+                        }
+                    }
+                }
+            }
+            return (results);
         }
     }
     

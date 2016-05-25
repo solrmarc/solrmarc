@@ -7,13 +7,15 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
 {
     private final Object mixin;
     private final Method method;
+    private final Method perRecordInit;
 
-    public MultiValueExtractorMethodCall(final Object mixin, final Method method)
+    public MultiValueExtractorMethodCall(final Object mixin, final Method method, final Method perRecordInit)
     {
-        super(mixin.getClass().getSimpleName(), method.getName());
+        super(mixin.getClass().getSimpleName(), method.getName(), perRecordInit != null);
         this.mixin = mixin;
         this.method = method;
-
+        this.perRecordInit = perRecordInit;
+        
         if (!Collection.class.isAssignableFrom(this.method.getReturnType()))
         {
             throw new IllegalArgumentException(
@@ -22,10 +24,17 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
         }
     }
 
+    @Override
+    public void invokePerRecordInit(final Object[] record) throws Exception
+    {
+        perRecordInit.invoke(mixin, record);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Collection<String> invoke(final Object[] parameters) throws Exception
     {
         return (Collection<String>) method.invoke(mixin, parameters);
     }
+    
 }

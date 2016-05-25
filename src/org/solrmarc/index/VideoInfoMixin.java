@@ -21,11 +21,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
 
     public void perRecordInit(Record record)
     {
-//        Set<String> formats = indexer.getFormatMapped(record, "video_format_map.properties");
-//        if (org.solrmarc.tools.Utils.setItemContains(formats, "Video"))
-//        {
-//            isVideo = true;
-//        }
+        isVideo = (record.getLeader().getTypeOfRecord() == 'g');
     }
     
     /**

@@ -1,5 +1,6 @@
 package playground.solrmarc.index.mapping.impl;
 
+import playground.solrmarc.index.indexer.IndexerSpecException;
 import playground.solrmarc.index.indexer.ValueIndexerFactory;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
@@ -65,7 +66,7 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
         }
         catch (IOException e)
         {
-            throw new IllegalStateException(e);
+            throw new IndexerSpecException(e, "Cant find translation map: " +translationMappingFileName);
         }
     }
     

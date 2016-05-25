@@ -6,12 +6,14 @@ public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<
 {
     private final Object mixin;
     private final Method method;
+    private final Method perRecordInit;
 
-    public SingleValueExtractorMethodCall(final Object mixin, final Method method)
+    public SingleValueExtractorMethodCall(final Object mixin, final Method method, final Method perRecordInit)
     {
-        super(mixin.getClass().getSimpleName(), method.getName());
+        super(mixin.getClass().getSimpleName(), method.getName(), perRecordInit != null);
         this.mixin = mixin;
         this.method = method;
+        this.perRecordInit = perRecordInit;
 
         if (!String.class.isAssignableFrom(this.method.getReturnType()))
         {
@@ -22,8 +24,15 @@ public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<
     }
 
     @Override
+    public void invokePerRecordInit(Object[] record) throws Exception
+    {
+        perRecordInit.invoke(mixin, record);
+    }
+    
+    @Override
     public String invoke(final Object[] parameters) throws Exception
     {
         return (String) method.invoke(mixin, parameters);
     }
+
 }

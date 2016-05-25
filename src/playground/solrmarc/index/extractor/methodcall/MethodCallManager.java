@@ -26,6 +26,17 @@ public class MethodCallManager
     {
     }
 
+    private boolean isPerRecordInitMethod(Method method)
+    {
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length != 1 || !parameterTypes[0].equals(Record.class)
+                || !void.class.isAssignableFrom(method.getReturnType())
+                || !Modifier.isPublic(method.getModifiers()))
+            return(false);
+        return(true);
+    }
+
+    
     private boolean isValidExtractorMethod(Method method)
     {
         final Class<?>[] parameterTypes = method.getParameterTypes();
@@ -84,6 +95,14 @@ public class MethodCallManager
     private void add(Object mixin, Class clazz, boolean addMethodsAsDefault)
     {
         classes.add(clazz);
+        Method hasPerRecordInit = null;
+        for (final Method method : clazz.getDeclaredMethods())
+        {
+            if (isPerRecordInitMethod(method))
+            {
+                hasPerRecordInit = method;
+            }          
+        }
         for (final Method method : clazz.getDeclaredMethods())
         {
             if (isValidExtractorMethod(method))
@@ -92,11 +111,11 @@ public class MethodCallManager
                 AbstractExtractorMethodCall<?> methodCall = null;
                 if (Collection.class.isAssignableFrom(method.getReturnType()))
                 {
-                    methodCall = createMultiValueExtractorMethodCall(mixin, method);
+                    methodCall = createMultiValueExtractorMethodCall(mixin, method, hasPerRecordInit);
                 }
                 else if (String.class.isAssignableFrom(method.getReturnType()))
                 {
-                    methodCall = createSingleValueExtractorMethodCall(mixin, method);
+                    methodCall = createSingleValueExtractorMethodCall(mixin, method, hasPerRecordInit);
                 }
                 if (addMethodsAsDefault)
                 {
@@ -135,14 +154,14 @@ public class MethodCallManager
         return new SingleValueMappingMethodCall(object, method);
     }
 
-    protected SingleValueExtractorMethodCall createSingleValueExtractorMethodCall(Object object, Method method)
+    protected SingleValueExtractorMethodCall createSingleValueExtractorMethodCall(Object object, Method method, Method perRecordInit)
     {
-        return new SingleValueExtractorMethodCall(object, method);
+        return new SingleValueExtractorMethodCall(object, method, perRecordInit);
     }
 
-    protected MultiValueExtractorMethodCall createMultiValueExtractorMethodCall(Object object, Method method)
+    protected MultiValueExtractorMethodCall createMultiValueExtractorMethodCall(Object object, Method method, Method perRecordInit)
     {
-        return new MultiValueExtractorMethodCall(object, method);
+        return new MultiValueExtractorMethodCall(object, method, perRecordInit);
     }
 
     /**

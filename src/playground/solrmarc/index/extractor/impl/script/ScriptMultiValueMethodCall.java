@@ -14,7 +14,7 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
     public ScriptMultiValueMethodCall(final Interpreter interpreter, final BshMethod method,
             final String scriptFileName)
     {
-        super(scriptFileName, method.getName());
+        super(scriptFileName, method.getName(), false);
         this.interpreter = interpreter;
         this.method = method;
 
@@ -34,5 +34,11 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
     public Collection<String> invoke(final Object[] parameters) throws Exception
     {
         return (Collection<String>) method.invoke(parameters, interpreter);
+    }
+
+    @Override
+    public void invokePerRecordInit(Object[] record) throws Exception
+    {
+        // TODO Implement perRecordInit support in scripts.
     }
 }
