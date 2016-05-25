@@ -31,7 +31,7 @@ import org.solrmarc.tools.Utils;
 import playground.solrmarc.index.indexer.ValueIndexerFactory;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 
-public class CustomLocationMixin
+public class CustomLocationMixin extends SolrIndexerMixin
 {
     Map<String, String> addnlShadowedIds = null;
     Map<String, String> boundWithIds = null;
@@ -605,57 +605,57 @@ public class CustomLocationMixin
         return(resultSet);
     }
     
-    public Set<String> getCustomLanguage(final Record record, String propertiesMap)
-    {
-        Set<String> resultSet = new LinkedHashSet<String>();
-        AbstractMultiValueMapping map = ValueIndexerFactory.instance().createMultiValueMapping(propertiesMap);
-
-        String primaryLanguage = SolrIndexer.instance().getFirstFieldVal(record, propertiesMap, "008[35-37]");
-        Collection<String> otherLanguages = SolrIndexer.instance().getFieldList(record, "041a:041d");
-        otherLanguages = map.map(otherLanguages);
-        Collection<String> translatedFrom = SolrIndexer.instance().getFieldList(record, "041h");
-        translatedFrom = map.map(translatedFrom);
-        Collection<String> subtitleLanguage = SolrIndexer.instance().getFieldList(record, "041b");
-        subtitleLanguage = map.map(subtitleLanguage);
-        Collection<String> format = SolrIndexer.instance().getCombinedFormat(record);
-        boolean isBook = Utils.setItemContains(format, "Book") || Utils.setItemContains(format, "Journal");
-        boolean isDVD = Utils.setItemContains(format, "DVD") ;
-        Collection<String> notesFields = SolrIndexer.instance().getFieldList(record, "500a");
-        boolean isTranslated = Utils.setItemContains(notesFields, "[Tt]ranslat((ed)|(ion))");
-        if (primaryLanguage != null)  resultSet.add(primaryLanguage);
-        if (primaryLanguage != null && Utils.setItemContains(otherLanguages, primaryLanguage))
-        {
-            otherLanguages.remove(primaryLanguage);
-        }
-        if (isBook && isTranslated && otherLanguages.size() == 1 && translatedFrom.size() == 0)
-        {
-            copySetWithSuffix(resultSet, otherLanguages, " (translated from)");
-        }
-        else 
-        {
-            if (isDVD)
-                copySetWithSuffix(resultSet, otherLanguages, " (dubbed in)");
-            else
-                copySetWithSuffix(resultSet, otherLanguages, " (also in)");
-            
-            if (primaryLanguage != null && Utils.setItemContains(translatedFrom, primaryLanguage))
-            {
-                translatedFrom.remove(primaryLanguage);
-            }
-            copySetWithSuffix(resultSet, translatedFrom, " (translated from)");
-        }
-        copySetWithSuffix(resultSet, subtitleLanguage, (isBook ? " (summary in)" : " (subtitles in)") );
-        return(resultSet);
-    }
+//    public Set<String> getCustomLanguage(final Record record, String propertiesMap)
+//    {
+//        Set<String> resultSet = new LinkedHashSet<String>();
+//        AbstractMultiValueMapping map = ValueIndexerFactory.instance().createMultiValueMapping(propertiesMap);
+//
+//        String primaryLanguage = SolrIndexer.instance().getFirstFieldVal(record, propertiesMap, "008[35-37]");
+//        Collection<String> otherLanguages = SolrIndexer.instance().getFieldList(record, "041a:041d");
+//        otherLanguages = map.map(otherLanguages);
+//        Collection<String> translatedFrom = SolrIndexer.instance().getFieldList(record, "041h");
+//        translatedFrom = map.map(translatedFrom);
+//        Collection<String> subtitleLanguage = SolrIndexer.instance().getFieldList(record, "041b");
+//        subtitleLanguage = map.map(subtitleLanguage);
+//        Collection<String> format = SolrIndexer.instance().getCombinedFormat(record);
+//        boolean isBook = Utils.setItemContains(format, "Book") || Utils.setItemContains(format, "Journal");
+//        boolean isDVD = Utils.setItemContains(format, "DVD") ;
+//        Collection<String> notesFields = SolrIndexer.instance().getFieldList(record, "500a");
+//        boolean isTranslated = Utils.setItemContains(notesFields, "[Tt]ranslat((ed)|(ion))");
+//        if (primaryLanguage != null)  resultSet.add(primaryLanguage);
+//        if (primaryLanguage != null && Utils.setItemContains(otherLanguages, primaryLanguage))
+//        {
+//            otherLanguages.remove(primaryLanguage);
+//        }
+//        if (isBook && isTranslated && otherLanguages.size() == 1 && translatedFrom.size() == 0)
+//        {
+//            copySetWithSuffix(resultSet, otherLanguages, " (translated from)");
+//        }
+//        else 
+//        {
+//            if (isDVD)
+//                copySetWithSuffix(resultSet, otherLanguages, " (dubbed in)");
+//            else
+//                copySetWithSuffix(resultSet, otherLanguages, " (also in)");
+//            
+//            if (primaryLanguage != null && Utils.setItemContains(translatedFrom, primaryLanguage))
+//            {
+//                translatedFrom.remove(primaryLanguage);
+//            }
+//            copySetWithSuffix(resultSet, translatedFrom, " (translated from)");
+//        }
+//        copySetWithSuffix(resultSet, subtitleLanguage, (isBook ? " (summary in)" : " (subtitles in)") );
+//        return(resultSet);
+//    }
     
-    private void copySetWithSuffix(Collection<String> resultSet, Collection<String> languageList, String suffix)
-    {
-        for (String language : languageList)
-        {
-            String toAdd = language + suffix;
-            resultSet.add(toAdd);
-        }  
-    }
+//    private void copySetWithSuffix(Collection<String> resultSet, Collection<String> languageList, String suffix)
+//    {
+//        for (String language : languageList)
+//        {
+//            String toAdd = language + suffix;
+//            resultSet.add(toAdd);
+//        }  
+//    }
 
     public String getShadowedLocation(final Record record, String propertiesMap, String returnHidden, String processExtra) throws Exception
     {
