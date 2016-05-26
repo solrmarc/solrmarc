@@ -6,6 +6,7 @@ import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 public class MultiValuePatternMapping extends AbstractMultiValueMapping
 {

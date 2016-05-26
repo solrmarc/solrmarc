@@ -1,5 +1,6 @@
 package playground.solrmarc.index.mapping.impl;
 
+import playground.solrmarc.index.extractor.impl.patternMapping.PatternMapping;
 import playground.solrmarc.index.indexer.IndexerSpecException;
 import playground.solrmarc.index.indexer.ValueIndexerFactory;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
@@ -11,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -142,7 +144,15 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
         String translationMappingFileName = getTranslationMappingFileName(mappingConfiguration);
         final String subMappingName = getSubMappingName(mappingConfiguration);
         Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
-        return new MultiValueTranslationMapping(translationMapping);
+        if (translationMapping.containsKey("pattern_0"))
+        {
+            List<PatternMapping> patternMappings = PatternMappingFactory.pattermMappingsFromPatternProperties(translationMapping);
+            return new MultiValuePatternMapping(patternMappings);
+        }
+        else
+        {
+            return new MultiValueTranslationMapping(translationMapping);
+        }
     }
 
     @Override
@@ -151,6 +161,14 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
         String translationMappingFileName = getTranslationMappingFileName(mapParts[0]);
         final String subMappingName = mapParts.length > 1 ? mapParts[1] : null;
         Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
-        return new MultiValueTranslationMapping(translationMapping);
+        if (translationMapping.containsKey("pattern_0"))
+        {
+            List<PatternMapping> patternMappings = PatternMappingFactory.pattermMappingsFromPatternProperties(translationMapping);
+            return new MultiValuePatternMapping(patternMappings);
+        }
+        else
+        {
+            return new MultiValueTranslationMapping(translationMapping);
+        }
     }
 }

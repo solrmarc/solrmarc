@@ -7,6 +7,7 @@ import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.PatternSyntaxException;
 
 public class PatternMappingFactory extends AbstractValueMappingFactory
@@ -74,6 +75,36 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
         for (int i = offset; i < mapParts.length; i++)
         {
             String mapEntry[] = mapParts[i].split("[ ]*=>[ ]*", 2);
+            if (mapEntry.length == 2)
+            {
+                try
+                {
+                    pm.add(new PatternMapping(mapEntry[0], mapEntry[1], i));
+                }
+                catch (PatternSyntaxException pse)
+                {
+                    throw new IndexerSpecException(
+                            "Malformed regular expression in pattern map : " + mapEntry[0] + "\n" + pse.getMessage());
+                }
+                catch (IndexOutOfBoundsException ioobe)
+                {
+                    throw new IndexerSpecException(
+                            "Unknown group in replacement string : " + mapEntry[1] + "\n" + ioobe.getMessage());
+                }
+            }
+        }
+        return (pm);
+    }
+    
+    public static List<PatternMapping> pattermMappingsFromPatternProperties(Properties props)
+    {
+        List<PatternMapping> pm = new ArrayList<PatternMapping>(props.size());
+
+        for (int i = 0; i < props.size(); i++)
+        {
+            String key = "pattern_"+i;
+            String value = props.getProperty(key);
+            String mapEntry[] = value.split("[ ]*=>[ ]*", 2);
             if (mapEntry.length == 2)
             {
                 try

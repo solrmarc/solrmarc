@@ -89,6 +89,13 @@ public class PatternMapping
      */
     public String map(final String value)
     {
-        return inputMatcher.replaceAll(outputPattern);
+        if (outputPattern.contains("$"))
+        {
+            return inputMatcher.replaceAll(outputPattern);
+        }
+        else
+        {
+            return outputPattern;
+        }
     }
 }
