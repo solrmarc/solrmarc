@@ -198,5 +198,13 @@ public class CompositeSpecification extends Specification
             spec.setSeparator(separator);
         }
     }
+   
+    public void setFormatPatterns(final String[] mapParts)
+    {
+        for (SingleSpecification spec : pieces)
+        {
+            spec.setFormatPatterns( mapParts);
+        }
+    }
 
 }

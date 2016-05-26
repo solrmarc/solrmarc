@@ -83,4 +83,5 @@ public class SingleControlFieldSpecification extends SingleSpecification
         }
         fmt.addAfterField(result);
     }
+
 }

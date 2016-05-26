@@ -57,13 +57,13 @@ public class FieldFormatterDecorator implements FieldFormatter, Cloneable
     }
 
     @Override
-    public String getSfCodeFmt()
+    public String getSfCodeFmt(char sfcode)
     {
-        return (toDecorate.getSfCodeFmt());
+        return (toDecorate.getSfCodeFmt(sfcode));
     }
 
     @Override
-    public FieldFormatter setSfCodeFmt(String sfCodeFmt)
+    public FieldFormatter setSfCodeFmt(String[] sfCodeFmt)
     {
         toDecorate.setSfCodeFmt(sfCodeFmt);
         return(this);
@@ -72,7 +72,7 @@ public class FieldFormatterDecorator implements FieldFormatter, Cloneable
     @Override
     public String getSeparator()
     {
-        return (toDecorate.getSfCodeFmt());
+        return (toDecorate.getSeparator());
     }
 
     @Override
@@ -145,7 +145,7 @@ public class FieldFormatterDecorator implements FieldFormatter, Cloneable
     {
         toDecorate.addCode(codeStr);
     }
-
+    
     // @Override
     // public Collection<String> prepData(VariableField vf, boolean isSubfieldA,
     // String data)
@@ -209,4 +209,11 @@ public class FieldFormatterDecorator implements FieldFormatter, Cloneable
         Collection<String> result = handleMapping(cleanedDataAsList);
         return (result);
     }
+
+    @Override
+    public String handleSubFieldFormat(String sfCode, String mappedDataVal)
+    {
+        return (toDecorate.handleSubFieldFormat(sfCode, mappedDataVal));
+    }
+
 }

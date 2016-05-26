@@ -145,5 +145,10 @@ public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
         fieldsAndSubfieldSpec.setSubstring(start, end);
     }
 
+    public void setFormatPatterns(String[] mapParts)
+    {
+        fieldsAndSubfieldSpec.setFormatPatterns(mapParts);
+    }
+
 
 }

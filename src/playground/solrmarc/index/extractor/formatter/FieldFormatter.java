@@ -36,9 +36,9 @@ public interface FieldFormatter
 
     public abstract FieldFormatter setIndicatorFmt(String indicatorFmt);
 
-    public abstract String getSfCodeFmt();
+    public abstract String getSfCodeFmt(char sfCode);
 
-    public abstract FieldFormatter setSfCodeFmt(String sfCodeFmt);
+    public abstract FieldFormatter setSfCodeFmt(String[] sfCodeFmt);
 
     public abstract String getSeparator();
 
@@ -87,6 +87,11 @@ public interface FieldFormatter
     public abstract String cleanData(VariableField vf, boolean isSubfieldA, String data);
 
     public abstract Collection<String> handleMapping(Collection<String> cleaned) throws Exception;
+
+    public abstract String handleSubFieldFormat(String sfCode, String mappedDataVal);
+
+//    public abstract void setFormatPatterns(String[] mapParts);
+
 
 
 }

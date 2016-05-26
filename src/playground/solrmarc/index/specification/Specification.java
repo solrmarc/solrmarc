@@ -71,5 +71,7 @@ public abstract class Specification
     public abstract void setSubstring(int offset, int endOffset);
 
     public abstract void setSeparator(String string);
+
+    public abstract void setFormatPatterns(String[] mapParts);
     
 }

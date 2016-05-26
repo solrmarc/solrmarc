@@ -98,5 +98,10 @@ public abstract class SingleSpecification extends Specification
         fmt.setSeparator(separator);
     }
 
+    public void setFormatPatterns(String[] mapParts)
+    {
+        fmt.setSfCodeFmt(mapParts);
+    }
+
 
 }

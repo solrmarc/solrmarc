@@ -87,6 +87,7 @@ public class SingleDataFieldSpecification extends SingleSpecification
                 Collection<String> prepped = fmt.prepData(vf, (subfield.getCode() == 'a'), subfield.getData());
                 for (String val : prepped)
                 {
+                    val = fmt.handleSubFieldFormat(codeStr, val);
                     fmt.addVal(val);
                     fmt.addAfterSubfield(result);
                 }

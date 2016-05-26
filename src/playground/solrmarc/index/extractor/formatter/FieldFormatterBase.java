@@ -6,22 +6,22 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.tools.Utils;
 
-import playground.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
-
 
 
 public class FieldFormatterBase implements FieldFormatter
 {
     String indicatorFmt = null;
-    String sfCodeFmt = null;
+    Map<String, String> sfCodeMap = null;
     String separator = null;
     
     boolean unique = false;
@@ -105,9 +105,13 @@ public class FieldFormatterBase implements FieldFormatter
      * @see playground.solrmarc.index.fieldmatch.FieldFormatter#getSfCodeFmt()
      */
     @Override
-    public String getSfCodeFmt()
+    public String getSfCodeFmt(char sfCode)
     {
-        return sfCodeFmt;
+        if (sfCodeMap != null && sfCodeMap.containsKey(sfCode))
+        {
+            return(sfCodeMap.get(sfCode));
+        }
+        return(null);
     }
 
     /*
@@ -118,9 +122,14 @@ public class FieldFormatterBase implements FieldFormatter
      * lang.String)
      */
     @Override
-    public FieldFormatter setSfCodeFmt(String sfCodeFmt)
+    public FieldFormatter setSfCodeFmt(String[] mapParts)
     {
-        this.sfCodeFmt = sfCodeFmt;
+        if (sfCodeMap == null)  sfCodeMap = new LinkedHashMap<String, String>();
+        for (String part : mapParts)
+        {
+            String[] pieces = part.split("=>", 2);
+            if (pieces.length == 2) sfCodeMap.put(pieces[0], pieces[1]);
+        }
         return(this);
     }
 
@@ -265,16 +274,25 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addCode(String codeStr)
     {
-        if (sfCodeFmt != null)
-        {
-            buffer.append(sfCodeFmt.replaceAll("%sf", codeStr));
-        }
+//        if (sfCodeFmt != null)
+//        {
+//            buffer.append(sfCodeFmt.replaceAll("%sf", codeStr));
+//        }
     }
 
     @Override
     public Collection<String> handleMapping(Collection<String> cleaned)
     {
         return (cleaned);
+    }
+
+    @Override
+    public String handleSubFieldFormat(String sfCode, String mappedDataVal)
+    {
+        if (sfCodeMap == null || !sfCodeMap.containsKey(sfCode)) return (mappedDataVal);
+        String value = sfCodeMap.get(sfCode);
+        value = value.replace("$"+sfCode, mappedDataVal);
+        return(value);
     }
 
     private final String trimData(final String data)

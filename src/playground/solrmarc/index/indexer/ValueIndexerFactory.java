@@ -279,7 +279,7 @@ public class ValueIndexerFactory
             {
                 if (mapParts.length > 1)
                 {
-                 //  not yet handled
+                    multiValueExtractor.setFormatPatterns(mapParts);
                 }
             }
             else if (mapParts[0].equals("substring"))
