@@ -40,10 +40,7 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
         // List<PatternMapping> patternMappings =
         // PatternMappingValueExtractorFactory.getPatternMappingsForName(mappingName);
         int parenLoc = mappingConfiguration.indexOf("(");
-        List<PatternMapping> patternMappings = pattermMappingsFromString(
-                mappingConfiguration.substring(parenLoc + 1, mappingConfiguration.length() - 1));
-        boolean isFilter = mappingConfiguration.startsWith("filter(");
-        return new MultiValuePatternMapping(patternMappings, isFilter);
+        return getMultiValuePattermMappingsFromString( mappingConfiguration.substring(parenLoc + 1, mappingConfiguration.length() - 1));
     }
 
     @Override
@@ -52,26 +49,26 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
         List<PatternMapping> patternMappings;
         if (mapParts.length > 2)
         {
-            patternMappings = pattermMappingsFromStrings(mapParts, 1);
+            return(getMultiValuePattermMappingsFromStrings(mapParts, 1));
         }
         else
         {
-            patternMappings = pattermMappingsFromString(mapParts[1]);
+            return(getMultiValuePattermMappingsFromString(mapParts[1]));
         }
-        boolean isFilter = mapParts[0].equals("filter(");
-        return new MultiValuePatternMapping(patternMappings, isFilter);
+     //   return new MultiValuePatternMapping(patternMappings, isFilter);
     }
 
-    public static List<PatternMapping> pattermMappingsFromString(String mapSpec)
+    public static MultiValuePatternMapping getMultiValuePattermMappingsFromString(String mapSpec)
     {
         final String mapParts[] = mapSpec.split("[|][|]");
-        return pattermMappingsFromStrings(mapParts, 0);
+        return getMultiValuePattermMappingsFromStrings(mapParts, 0);
     }
     
-    public static List<PatternMapping> pattermMappingsFromStrings(String[] mapParts, int offset)
+    public static MultiValuePatternMapping getMultiValuePattermMappingsFromStrings(String[] mapParts, int offset)
     {
         List<PatternMapping> pm = new ArrayList<PatternMapping>(mapParts.length);
-
+        boolean matchAll = false;
+        boolean keepRaw = false;
         for (int i = offset; i < mapParts.length; i++)
         {
             String mapEntry[] = mapParts[i].split("[ ]*=>[ ]*", 2);
@@ -92,13 +89,23 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
                             "Unknown group in replacement string : " + mapEntry[1] + "\n" + ioobe.getMessage());
                 }
             }
+            else if (mapEntry.length == 1 && mapEntry[0].equals("matchAll"))
+            {
+                matchAll = true;
+            }
+            else if (mapEntry.length == 1 && mapEntry[0].equals("keepRaw"))
+            {
+                keepRaw = true;
+            }
         }
-        return (pm);
+        return new MultiValuePatternMapping(pm, matchAll, keepRaw);
     }
     
-    public static List<PatternMapping> pattermMappingsFromPatternProperties(Properties props)
+    public static MultiValuePatternMapping pattermMappingsFromPatternProperties(Properties props)
     {
         List<PatternMapping> pm = new ArrayList<PatternMapping>(props.size());
+        boolean matchAll = false;
+        boolean keepRaw = false;
 
         for (int i = 0; i < props.size(); i++)
         {
@@ -122,8 +129,16 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
                             "Unknown group in replacement string : " + mapEntry[1] + "\n" + ioobe.getMessage());
                 }
             }
+            else if (mapEntry.length == 1 && mapEntry.equals("matchAll"))
+            {
+                matchAll = true;
+            }
+            else if (mapEntry.length == 1 && mapEntry.equals("keepRaw"))
+            {
+                keepRaw = true;
+            }
         }
-        return (pm);
+        return new MultiValuePatternMapping(pm, matchAll, keepRaw);
     }
 
 }

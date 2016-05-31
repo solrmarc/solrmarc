@@ -146,8 +146,7 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
         Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
         if (translationMapping.containsKey("pattern_0"))
         {
-            List<PatternMapping> patternMappings = PatternMappingFactory.pattermMappingsFromPatternProperties(translationMapping);
-            return new MultiValuePatternMapping(patternMappings);
+            return PatternMappingFactory.pattermMappingsFromPatternProperties(translationMapping);
         }
         else
         {
@@ -163,8 +162,7 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
         Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
         if (translationMapping.containsKey("pattern_0"))
         {
-            List<PatternMapping> patternMappings = PatternMappingFactory.pattermMappingsFromPatternProperties(translationMapping);
-            return new MultiValuePatternMapping(patternMappings);
+            return PatternMappingFactory.pattermMappingsFromPatternProperties(translationMapping);
         }
         else
         {

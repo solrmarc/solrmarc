@@ -12,17 +12,20 @@ public class MultiValuePatternMapping extends AbstractMultiValueMapping
 {
     private final List<PatternMapping> patternMappings;
     private final boolean applyAll;
-
-    public MultiValuePatternMapping(List<PatternMapping> patternMappings, boolean applyAll)
+    private final boolean keepRaw; 
+    
+    public MultiValuePatternMapping(List<PatternMapping> patternMappings, boolean applyAll, boolean keepRaw)
     {
         this.patternMappings = patternMappings;
         this.applyAll = applyAll;
+        this.keepRaw = keepRaw;
     }
 
     public MultiValuePatternMapping(List<PatternMapping> patternMappings)
     {
         this.patternMappings = patternMappings;
         this.applyAll = false;
+        this.keepRaw = false;
     }
 
     @Override
@@ -43,6 +46,10 @@ public class MultiValuePatternMapping extends AbstractMultiValueMapping
             {
                 PatternMapping.mapValues(patternMappings, value, mappedValues);
             }
+        }
+        if (mappedValues.size()== 0 && keepRaw == true)
+        {
+            mappedValues.addAll(values);
         }
         return mappedValues;
     }
