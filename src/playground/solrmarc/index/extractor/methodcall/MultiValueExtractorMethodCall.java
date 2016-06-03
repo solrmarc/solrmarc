@@ -24,6 +24,12 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
         }
     }
 
+    @Override 
+    protected boolean perRecordInitCalled(Object[] record)
+    {
+        return (MethodCallManager.instance().alreadyCalledFor(perRecordInit, record[0]));
+    }
+    
     @Override
     public void invokePerRecordInit(final Object[] record) throws Exception
     {

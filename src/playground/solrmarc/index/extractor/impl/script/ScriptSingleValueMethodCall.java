@@ -41,4 +41,11 @@ public class ScriptSingleValueMethodCall extends AbstractExtractorMethodCall<Str
     {
         // TODO Implement perRecordInit support in scripts.
     }
+
+    @Override
+    protected boolean perRecordInitCalled(Object[] record)
+    {
+        // TODO Implement perRecordInit support in scripts.
+        return false;
+    }
 }

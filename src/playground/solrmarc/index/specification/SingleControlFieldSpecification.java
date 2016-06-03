@@ -9,36 +9,11 @@ import playground.solrmarc.index.specification.conditional.Condition;
 
 public class SingleControlFieldSpecification extends SingleSpecification
 {
-//    int start;
-//    int end;
-
-//    public SingleControlFieldSpecification(String tag, int start, int end, Condition cond)
-//    {
-//        super(tag, cond);
-//        this.start = start;
-//        this.end = end;
-//    }
-//
-//    public SingleControlFieldSpecification(String tag, int start, Condition cond)
-//    {
-//        this(tag, start, start + 1, cond);
-//    }
-
     public SingleControlFieldSpecification(String tag, Condition cond)
     {
         super(tag, cond);
     }
 
-//    public SingleControlFieldSpecification(String tag, int start, int end)
-//    {
-//        this(tag, start, end, null);
-//    }
-//
-//    public SingleControlFieldSpecification(String tag, int start)
-//    {
-//        this(tag, start, start + 1, null);
-//    }
-//
     public SingleControlFieldSpecification(String tag)
     {
         this(tag, null);

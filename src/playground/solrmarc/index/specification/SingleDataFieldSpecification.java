@@ -22,7 +22,7 @@ public class SingleDataFieldSpecification extends SingleSpecification
 
     String subfields;
     Pattern subfieldPattern;
-    public final String separator = null;
+//    public final String separator = null;
     public final boolean cleanAll = true;
     public final boolean cleanEnd = true;
 
@@ -41,9 +41,9 @@ public class SingleDataFieldSpecification extends SingleSpecification
         this.subfields = subfields;
         subfieldPattern = makePattern(subfields);
         if (subfields.length() == 1) 
-            fmt =  new FieldFormatterBase(false).setJoinVal(eJoinVal.SEPARATE);
+            fmt = new FieldFormatterBase(false).setJoinVal(eJoinVal.SEPARATE);
         else 
-            fmt = new FieldFormatterBase(false).setJoinVal(eJoinVal.JOIN);
+            fmt = new FieldFormatterBase(false).setJoinVal(eJoinVal.JOIN).setSeparator(" ");
     }
 
     public SingleDataFieldSpecification(String tag, String subfields)

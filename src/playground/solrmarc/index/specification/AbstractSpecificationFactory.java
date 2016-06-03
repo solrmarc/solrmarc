@@ -34,6 +34,13 @@ public class AbstractSpecificationFactory
     public static Specification createSpecification(final String specificationStr)
     {
         if (parser == null) parser = new ConditionalParser(do_debug_parse);
+        String specToUse = specificationStr;
+        String separator = null;
+        if (specificationStr.matches("[^']*'[^']*'"))
+        {
+            specToUse = specificationStr.substring(0, specificationStr.indexOf("'"));
+            separator = specificationStr.substring(specificationStr.indexOf("'")+1, specificationStr.lastIndexOf("'"));
+        }
         Specification result = null;
         try
         {
@@ -42,6 +49,8 @@ public class AbstractSpecificationFactory
         finally
         {
         }
+        if (separator != null)  
+            result.setSeparator(separator);
         // catch (ParseError e)
         // {
         //

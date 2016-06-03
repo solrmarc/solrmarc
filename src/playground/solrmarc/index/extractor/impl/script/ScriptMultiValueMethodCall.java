@@ -41,4 +41,12 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
     {
         // TODO Implement perRecordInit support in scripts.
     }
+    
+    @Override
+    protected boolean perRecordInitCalled(Object[] record)
+    {
+        // TODO Implement perRecordInit support in scripts.
+        return false;
+    }
+
 }

@@ -15,7 +15,7 @@ public class MarcReaderFactory {
 	protected ErrorHandler errors = null;
  
 	/** The full class name of SolrIndexer or the subclass to be used */
-	protected Properties configProps;
+	//protected Properties configProps;
     protected boolean inputTypeXML = false;
     protected boolean inputTypeBinary = false;
     protected boolean inputTypeJSON = false;
@@ -57,20 +57,20 @@ public class MarcReaderFactory {
 	{
         MarcReader reader; 
         setMarc4JProperties(config);
-        solrmarcPath = PropertyUtils.getProperty(configProps, "solrmarc.path");
-        solrmarcPath = normalizePathsProperty(homeDir, solrmarcPath);
+        solrmarcPath = PropertyUtils.getProperty(config, "solrmarc.path");
+        solrmarcPath = normalizePathsProperty(homeDir, solrmarcPath, config);
 
-        siteSpecificPath = PropertyUtils.getProperty(configProps, "solrmarc.site.path");
-        siteSpecificPath = normalizePathsProperty(homeDir, siteSpecificPath);
+        siteSpecificPath = PropertyUtils.getProperty(config, "solrmarc.site.path");
+        siteSpecificPath = normalizePathsProperty(homeDir, siteSpecificPath, config);
         
         combineConsecutiveRecordsFields = PropertyUtils.getProperty(config, "marc.combine_records");
         if (combineConsecutiveRecordsFields != null && combineConsecutiveRecordsFields.length() == 0) 
             combineConsecutiveRecordsFields = null;
         
-        permissiveReader = Boolean.parseBoolean(PropertyUtils.getProperty(configProps, "marc.permissive"));
-        if (PropertyUtils.getProperty(configProps, "marc.default_encoding") != null)
+        permissiveReader = Boolean.parseBoolean(PropertyUtils.getProperty(config, "marc.permissive"));
+        if (PropertyUtils.getProperty(config, "marc.default_encoding") != null)
         {
-            defaultEncoding = PropertyUtils.getProperty(configProps, "marc.default_encoding").trim();    
+            defaultEncoding = PropertyUtils.getProperty(config, "marc.default_encoding").trim();    
         }
         else
         {
@@ -78,8 +78,8 @@ public class MarcReaderFactory {
         }
 //        verbose = Boolean.parseBoolean(PropertyUtils.getProperty(configProps, "marc.verbose"));
 //        includeErrors = Boolean.parseBoolean(PropertyUtils.getProperty(configProps, "marc.include_errors"));
-        to_utf_8 = Boolean.parseBoolean(PropertyUtils.getProperty(configProps, "marc.to_utf_8"));
-        unicodeNormalize = PropertyUtils.getProperty(configProps, "marc.unicode_normalize");
+        to_utf_8 = Boolean.parseBoolean(PropertyUtils.getProperty(config, "marc.to_utf_8"));
+        unicodeNormalize = PropertyUtils.getProperty(config, "marc.unicode_normalize");
         if (unicodeNormalize != null) 
         {
             unicodeNormalize = handleUnicodeNormalizeParm(unicodeNormalize);
@@ -129,8 +129,8 @@ public class MarcReaderFactory {
         
         if (reader != null && combineConsecutiveRecordsFields != null)
         {
-            String combineLeftField = PropertyUtils.getProperty(configProps, "marc.combine_records.left_field");
-            String combineRightField = PropertyUtils.getProperty(configProps, "marc.combine_records.right_field");
+            String combineLeftField = PropertyUtils.getProperty(config, "marc.combine_records.left_field");
+            String combineRightField = PropertyUtils.getProperty(config, "marc.combine_records.right_field");
             if (errors == null)
             {
                 reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields, combineLeftField, combineRightField);
@@ -145,11 +145,11 @@ public class MarcReaderFactory {
         
         // Add FilteredReader if requested
 
-        String marcIncludeIfPresent = PropertyUtils.getProperty(configProps, "marc.include_if_present");
-        String marcIncludeIfMissing = PropertyUtils.getProperty(configProps, "marc.include_if_missing");
-        String marcDeleteSubfields = PropertyUtils.getProperty(configProps, "marc.delete_subfields");
+        String marcIncludeIfPresent = PropertyUtils.getProperty(config, "marc.include_if_present");
+        String marcIncludeIfMissing = PropertyUtils.getProperty(config, "marc.include_if_missing");
+        String marcDeleteSubfields = PropertyUtils.getProperty(config, "marc.delete_subfields");
         if (marcDeleteSubfields != null && marcDeleteSubfields.equals("nomap")) marcDeleteSubfields = null;
-        String marcRemapRecord = PropertyUtils.getProperty(configProps, "marc.reader.remap");
+        String marcRemapRecord = PropertyUtils.getProperty(config, "marc.reader.remap");
         if (marcRemapRecord != null && marcRemapRecord.equals("nomap")) marcRemapRecord = null;
         if (marcDeleteSubfields != null)  marcDeleteSubfields = marcDeleteSubfields.trim();
         if (reader != null && (marcIncludeIfPresent != null || marcIncludeIfMissing != null || marcDeleteSubfields != null || marcRemapRecord != null))
@@ -157,7 +157,7 @@ public class MarcReaderFactory {
             if (marcRemapRecord != null)
             {
                 String remapFilename =  marcRemapRecord.trim();
-                String configFilePath = PropertyUtils.getProperty(configProps, "config.file.dir");
+                String configFilePath = PropertyUtils.getProperty(config, "config.file.dir");
                 String propertySearchPath[] = PropertyUtils.makePropertySearchPath(solrmarcPath, siteSpecificPath, configFilePath, homeDir);
                 String remapURL = PropertyUtils.getPropertyFileAbsoluteURL(propertySearchPath, remapFilename, false, null);
                 reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing, marcDeleteSubfields, remapURL);
@@ -178,13 +178,13 @@ public class MarcReaderFactory {
 
 	}
 	
-	private void setMarc4JProperties(Properties configProps2)
+	private void setMarc4JProperties(Properties configProps)
     {
-        for (String prop : configProps2.stringPropertyNames())
+        for (String prop : configProps.stringPropertyNames())
         {
             if (prop.startsWith("org.marc4j."))
             {
-                String value = configProps2.getProperty(prop);
+                String value = configProps.getProperty(prop);
                 System.setProperty(prop, value);
             }
             else if (PropertyUtils.getProperty(configProps, "marc.override")!= null)
@@ -247,16 +247,17 @@ public class MarcReaderFactory {
      *            program is found
      * @param path
      *            - one or more : separated paths to be normalized.
+     * @param config 
      * @return normalized form of "homeDir/path"
      */
-    private String normalizePathsProperty(String homeDir, String path)
+    private String normalizePathsProperty(String homeDir, String path, Properties config)
     {
         if (path == null) return (null);
         String paths[] = path.split("[|]");
         StringBuffer result = new StringBuffer();
         for (String part : paths)
         {
-            String resolved = normalizePathProperty(homeDir, part);
+            String resolved = normalizePathProperty(homeDir, part, config);
             if (result.length() > 0) result.append("|");
             result.append(resolved);
         }
@@ -279,15 +280,16 @@ public class MarcReaderFactory {
      *            program is found
      * @param path
      *            - a possibly relative file path to be normalized.
+     * @param config 
      * @return normalized form of "homeDir/path"
      */
-    private String normalizePathProperty(String homeDir, String path)
+    private String normalizePathProperty(String homeDir, String path, Properties config)
     {
         if (path != null)
         {
-            if (path.contains("${config.file.dir}") && configProps.getProperty("config.file.dir") != null)
+            if (path.contains("${config.file.dir}") && config.getProperty("config.file.dir") != null)
             {
-                path = path.replace("${config.file.dir}", configProps.getProperty("config.file.dir"));
+                path = path.replace("${config.file.dir}", config.getProperty("config.file.dir"));
             }
             if (path.contains("${solrmarc.jar.dir}") && homeDir != null)
             {
@@ -296,7 +298,7 @@ public class MarcReaderFactory {
             while (path.matches(".*$\\{[a-z.]+\\}.*"))
             {
                 String pattern = path.replaceFirst("$\\{([a-z.]+)\\}", "$1");
-                String replace = PropertyUtils.getProperty(configProps, pattern);
+                String replace = PropertyUtils.getProperty(config, pattern);
                 if (pattern != null && replace != null)
                 {
                     path.replace("${" + pattern + "}", replace);

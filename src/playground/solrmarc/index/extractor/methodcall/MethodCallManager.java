@@ -11,6 +11,7 @@ public class MethodCallManager
     /* a static singleton manager */
     private static MethodCallManager theManager = new MethodCallManager();
 
+    private final Map<Method, String> perRecordInitMap = new HashMap<>();
     private final Map<String, AbstractExtractorMethodCall<?>> extractorMethodCalls = new HashMap<>();
     private final Map<String, AbstractMappingMethodCall<?>> mappingMethodCalls = new HashMap<>();
 
@@ -101,6 +102,10 @@ public class MethodCallManager
             if (isPerRecordInitMethod(method))
             {
                 hasPerRecordInit = method;
+                if (!perRecordInitMap.containsKey(method))
+                {
+                    perRecordInitMap.put(method, "");
+                }
             }          
         }
         for (final Method method : clazz.getDeclaredMethods())
@@ -260,4 +265,32 @@ public class MethodCallManager
         }
         return buffer.toString().trim();
     }
+
+//    public final String getRecordLastCalledFor(Method perRecordInit)
+//    {
+//        final String result = perRecordInitMap.get(perRecordInit);
+//        return(result);
+//    }
+    
+    public final boolean alreadyCalledFor(Method perRecordInit, Object record)
+    {
+        String recId = "";
+        if (record instanceof Record)
+        {
+            Record rec = (Record)record;
+            recId = rec.getControlNumber();
+        }
+        final String result = perRecordInitMap.get(perRecordInit);
+        if (!result.equals(recId))
+        {
+            perRecordInitMap.put(perRecordInit, recId);
+            return(false);
+        }
+        return(true);
+    }
+    
+//    public final void setRecordLastCalledFor(Method perRecordInit, String recordID)
+//    {
+//        perRecordInitMap.put(perRecordInit, recordID);
+//    }
 }

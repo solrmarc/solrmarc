@@ -23,6 +23,12 @@ public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<
         }
     }
 
+    @Override 
+    protected boolean perRecordInitCalled(Object[] record)
+    {
+        return (MethodCallManager.instance().alreadyCalledFor(perRecordInit, record[0]));
+    }
+
     @Override
     public void invokePerRecordInit(Object[] record) throws Exception
     {

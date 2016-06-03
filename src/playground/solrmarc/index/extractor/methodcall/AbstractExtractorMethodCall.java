@@ -29,15 +29,16 @@ public abstract class AbstractExtractorMethodCall<T>
     public T invoke(final Record record, final Object[] parameters) throws Exception
     {
         parameters[0] = record;
-        if (hasPerRecordInit && record.getId() == null)
+        if (hasPerRecordInit && !perRecordInitCalled(new Object[]{record}))
         {
-            record.setId(new Long(1));
             invokePerRecordInit(new Object[]{record});
         }
         return invoke(parameters);
     }
 
-    public abstract void invokePerRecordInit(Object[] record) throws Exception;
+    protected abstract boolean perRecordInitCalled(Object[] record);
+
+    protected abstract void invokePerRecordInit(Object[] record) throws Exception;
 
     public abstract T invoke(final Object[] parameters) throws Exception;
 
