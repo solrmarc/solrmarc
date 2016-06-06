@@ -13,7 +13,7 @@ public class IndexerSpecException extends RuntimeException
     private static final long serialVersionUID = 1L;
 
 //    ErrorSpecification errMsgs;
-    Throwable cause;
+    //Throwable cause;
     String solrField;
     String spec;
     String message;
@@ -29,7 +29,7 @@ public class IndexerSpecException extends RuntimeException
     public IndexerSpecException(Throwable cause, String solrField, String spec, String message)
     {
 //        this.errMsgs = null;
-        this.cause = cause;
+        this.initCause(cause);
         this.solrField = solrField;
         this.spec = spec;
         this.message = message;
@@ -39,7 +39,7 @@ public class IndexerSpecException extends RuntimeException
     public IndexerSpecException(String solrField, String spec, String message)
     {
 //        this.errMsgs = null;
-        this.cause = null;
+   //     this.cause = null;
         this.solrField = solrField;
         this.spec = spec;
         this.message = message;
@@ -49,7 +49,7 @@ public class IndexerSpecException extends RuntimeException
     public IndexerSpecException(String solrFieldAndSpec, String message)
     {
 //        this.errMsgs = null;
-        this.cause = null;
+ //      this.cause = null;
         String[] tmp = solrFieldAndSpec.split("[ ]*=[ ]*", 2);
         this.solrField = tmp[0];
         this.spec = tmp[1];
@@ -68,7 +68,7 @@ public class IndexerSpecException extends RuntimeException
     public IndexerSpecException(Throwable cause, String message)
     {
 //        this.errMsgs = null;
-        this.cause = cause;
+        this.initCause(cause);
         this.solrField = null;
         this.spec = null;
         this.message = message;
@@ -78,7 +78,7 @@ public class IndexerSpecException extends RuntimeException
     public IndexerSpecException(String message)
     {
 //        this.errMsgs = null;
-        this.cause = null;
+     //   this.cause = null;
         this.solrField = null;
         this.spec = null;
         this.message = message;
@@ -96,23 +96,25 @@ public class IndexerSpecException extends RuntimeException
         return message;
     }
     
-    @Override
-    public String getMessage()
+    public String getSolrField()
+    {
+        return solrField;
+    }
+    
+    public String getSpecMessage()
     {
         StringBuilder build = new StringBuilder();
         if (solrField != null && spec != null)
         {
             build.append(solrField).append(" = ").append(spec).append("\n");
         }
-//        if (errMsgs != null)
-//        {
-//            List<String> msgs = new ArrayList<String>();
-//            errMsgs.addFieldValues(msgs, null);
-//            for (String msg : msgs)
-//            {
-//                build.append(solrField).append(" : ").append(msg).append("\n");
-//            }
-//        }
+        return(build.toString());
+    }
+    
+    @Override
+    public String getMessage()
+    {
+        StringBuilder build = new StringBuilder();
         if (message != null)
         {
             build.append(solrField).append(" : ").append(message).append("\n");

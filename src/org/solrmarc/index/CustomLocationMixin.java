@@ -565,7 +565,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
    }
 
    
-   private String getCommonPrefix(String string1, String string2, Comparator comp)
+   private String getCommonPrefix(String string1, String string2, Comparator<String> comp)
    {
        int l1 = string1.length();
        int l2 = string2.length();

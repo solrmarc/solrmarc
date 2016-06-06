@@ -547,9 +547,19 @@ public class SolrMarcDebug
     private String getTextForExceptions(List<IndexerSpecException> exceptions)
     {
         StringBuilder text = new StringBuilder();
+        String lastSpec = "";
         for (IndexerSpecException e : exceptions)
         {
+            String specMessage = e.getSpecMessage();
+            if (!specMessage.equals(lastSpec))
+            {
+                text.append(specMessage);
+            }
             text.append(e.getMessage());
+            for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause())
+            {
+                text.append(e.getSolrField()).append(" : ").append(cause.getMessage());
+            }
         }
         return (text.toString());
     }

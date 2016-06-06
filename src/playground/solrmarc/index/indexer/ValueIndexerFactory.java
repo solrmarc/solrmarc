@@ -103,18 +103,10 @@ public class ValueIndexerFactory
                 {
                     valueIndexers.add(valueIndexer);
                 }
-                boolean first = true;
-                for (String err  : parser.getErrors())
+                for (IndexerSpecException ise  : parser.getErrors())
                 {
-                    if (first) 
-                    {
-                        first = false;
-                        validationExceptions.add(new IndexerSpecException(solrFieldName, mappingDefinition, err));
-                    }
-                    else 
-                    {
-                        validationExceptions.add(new IndexerSpecException(solrFieldName, null, err));
-                    }
+                    ise.setSolrFieldAndSpec(solrFieldName, mappingDefinition);
+                    validationExceptions.add(ise);
                 }
             }
             catch (IndexerSpecException ise)

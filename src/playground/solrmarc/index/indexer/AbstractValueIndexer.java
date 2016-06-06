@@ -19,7 +19,7 @@ public abstract class AbstractValueIndexer<T>
     protected final AbstractValueMapping<T>[] mappings;
     protected final MultiValueCollector collector;
     private String specLabel;
-    private List<String> parseErrors;
+ //   private List<String> parseErrors;
 
     public AbstractValueIndexer(final String solrFieldName, final AbstractValueExtractor<T> extractor,
             final AbstractValueMapping<T>[] mappings, final MultiValueCollector collector)
@@ -67,16 +67,16 @@ public abstract class AbstractValueIndexer<T>
         this.specLabel = specLabel;
     }
 
-    public List<String> getParseErrors()
-    {
-        return parseErrors;
-    }
-
-    public void setParseErrors(List<String> parseErrors)
-    {
-        this.parseErrors = parseErrors;
-    }
-
+//    public List<String> getParseErrors()
+//    {
+//        return parseErrors;
+//    }
+//
+//    public void setParseErrors(List<String> parseErrors)
+//    {
+//        this.parseErrors = parseErrors;
+//    }
+//
     @SuppressWarnings("unchecked")
     public Collection<String> getFieldData(Record record) throws Exception
     {

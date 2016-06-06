@@ -2,6 +2,8 @@ package playground.solrmarc.index.extractor.methodcall;
 
 import java.lang.reflect.Method;
 
+import playground.solrmarc.index.indexer.IndexerSpecException;
+
 public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<String>
 {
     private final Object mixin;

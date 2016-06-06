@@ -281,7 +281,7 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
 
     static FullConditionalScanner scanner;
     static boolean parser_debug;
-    static List<String> parser_errors = null;
+    static List<IndexerSpecException> parser_errors = null;
     static FullRecordValueExtractorFactory fullFactory = new FullRecordValueExtractorFactory();
     static DateValueExtractorFactory dateFactory = new DateValueExtractorFactory();
     static String cacheOfStrToParse;
@@ -313,7 +313,7 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
         cacheOfStrToParse = strToParse;
         Symbol parse_tree = null;
         MultiValueIndexer result = null;
-        parser_errors = new ArrayList<String>();
+        parser_errors = new ArrayList<IndexerSpecException>();
         scanner.startParse(strToParse);
         try{
             if (debug)
@@ -322,10 +322,10 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
                 parse_tree = this.parse();
         }
         catch (IndexerSpecException ise) {
-            parser_errors.add(ise.message());
+            parser_errors.add(ise);
         }
         catch (Exception e) {
-            parser_errors.add("Exception "+e.toString());
+            parser_errors.add(new IndexerSpecException(e, " "));
             //parser_errors.add(" Input Specification "+strToParse);
         } 
         finally {
@@ -336,7 +336,7 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
             if (result != null)
             {
                 result.setSpecLabel(strToParse);
-                result.setParseErrors(parser_errors);
+             //   result.setParseErrors(parser_errors);
             }
         }
         return(result);     
@@ -436,19 +436,27 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
         return(null);
     }
     
-    public static final List<String> getErrors()
+    public static final List<IndexerSpecException> getErrors()
     {
     	if (scanner.getScannerErrors().size() == 0)
     		return(parser_errors);
-    	List<String> allErrors = new ArrayList<String>();
+    	List<IndexerSpecException> allErrors = new ArrayList<IndexerSpecException>();
     	allErrors.addAll(parser_errors);
-    	allErrors.addAll(scanner.getScannerErrors());
+    	for (String errMsg : scanner.getScannerErrors())
+    	{
+    	    allErrors.add(new IndexerSpecException(errMsg));
+    	}
     	return(allErrors);
     }
     
     public static final void addError(String errorMsg)
     {
-        parser_errors.add(errorMsg);
+        parser_errors.add(new IndexerSpecException(errorMsg));
+    }
+    
+    public static final void addError(IndexerSpecException exception)
+    {
+        parser_errors.add(exception);
     }
 
 

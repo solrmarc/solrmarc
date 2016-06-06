@@ -7,6 +7,7 @@ import java.util.Collections;
 import org.marc4j.marc.Record;
 
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
+import playground.solrmarc.index.indexer.IndexerSpecException;
 
 public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor
 {
@@ -28,6 +29,13 @@ public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor
         this.methodCall = methodCall;
         this.parameters = new Object[parameters.length + 1];
         System.arraycopy(parameters, 0, this.parameters, 1, parameters.length);
+        try { 
+            extract(StaticMarcTestRecords.testRecord[0]);
+        }
+        catch (Exception e)
+        {
+            throw new IndexerSpecException(e, "Error on test invocation of custom method: " + methodCall.getMethodName());
+        }
     }
 
     @SuppressWarnings("unchecked")

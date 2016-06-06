@@ -1,7 +1,5 @@
 package playground.solrmarc.index.extractor.methodcall;
 
-import java.lang.reflect.Method;
-
 import org.marc4j.marc.Record;
 
 public abstract class AbstractExtractorMethodCall<T>
