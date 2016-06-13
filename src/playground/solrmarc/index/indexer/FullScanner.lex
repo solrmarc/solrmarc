@@ -1,17 +1,18 @@
 package playground.solrmarc.index.indexer;
 
-import java_cup.runtime.SymbolFactory;
 import java.util.List;
 import java.util.ArrayList;
-//import java.io.StringReader;
 import playground.solrmarc.index.utils.StringReader;
 import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.Symbol;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 %%
 %public
 %class FullConditionalScanner
 %cup
 %extends playground.solrmarc.index.indexer.FullSym
+%char
 %{
     int save_zzLexicalState;
     
@@ -24,7 +25,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 		scanner_errors = new ArrayList<String>();
     }
     
-    SymbolFactory sf;
+    ComplexSymbolFactory sf;
     
     public void startParse(String strToParse)
     {
@@ -41,6 +42,19 @@ import java_cup.runtime.ComplexSymbolFactory;
     {
     	return(scanner_errors);
     }
+    
+    private Symbol symbol(String name, int sym) 
+    {
+        return sf.newSymbol(name, sym, new Location(yyline+1, yycolumn+1, yychar), new Location(yyline+1, yycolumn+yylength(), yychar+yylength()));
+    }
+
+    private Symbol symbol(String name, int sym, Object val)
+    {
+        Location left = new Location(yyline+1,yycolumn+1,yychar);
+        Location right= new Location(yyline+1,yycolumn+yylength(), yychar+yylength());
+        return sf.newSymbol(name, sym, left, right,val);
+    }
+      
 %}
 
 %eofval{
@@ -57,119 +71,119 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 
 %%
 <YYINITIAL>{
-[A-Za-z][-A-Za-z_0-9]*  { return sf.newSymbol("FIELDNAME", FullSym.FIELDNAME, yytext()); }
-","                     { return sf.newSymbol(",", FullSym.COMMA); }
+[A-Za-z][-A-Za-z_0-9]*  { return symbol("FIELDNAME", FullSym.FIELDNAME, yytext()); }
+","                     { return symbol(",", FullSym.COMMA); }
 {white_space}           { /* ignore */ }
-"="                     { yybegin(STARTSPEC); return sf.newSymbol("EQU", FullSym.EQU ); }
+"="                     { yybegin(STARTSPEC); return symbol("EQU", FullSym.EQU ); }
 ^"#".*                  { /* ignore as comment */ }
 }
 
 <STARTSPEC>{
-[{]						{ return sf.newSymbol("{",FullSym.LBRACE); }
-[0-9][0-9][0-9]   		{ yybegin(SUBFIELDSPEC); return sf.newSymbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());  }
-"LNK"[0-9][0-9][0-9]    { yybegin(SUBFIELDSPEC); return sf.newSymbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());  }
-[A-Z][A-Z][A-Z]   		{ yybegin(SUBFIELDSPEC); return sf.newSymbol("FIELDSPEC",FullSym.FIELDSPEC, yytext()); }
-":"						{ yybegin(STARTSPEC);    return sf.newSymbol(":",FullSym.COLON);  }
-"?"                     { yybegin(CONDITIONAL);  return sf.newSymbol("?",FullSym.QUESTION); }
-","                     { yybegin(MAPSPEC);      return sf.newSymbol(",", FullSym.COMMA); }
+[{]						{ return symbol("{",FullSym.LBRACE); }
+[0-9][0-9][0-9]   		{ yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());  }
+"LNK"[0-9][0-9][0-9]    { yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());  }
+[A-Z][A-Z][A-Z]   		{ yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext()); }
+":"						{ yybegin(STARTSPEC);    return symbol(":",FullSym.COLON);  }
+"?"                     { yybegin(CONDITIONAL);  return symbol("?",FullSym.QUESTION); }
+","                     { yybegin(MAPSPEC);      return symbol(",", FullSym.COMMA); }
 {white_space}           { /* ignore */ }
-"script"                { yybegin(CUSTOMSPEC);   return sf.newSymbol("SCRIPT", FullSym.SCRIPT, yytext() ); }
-"custom"                { yybegin(CUSTOMSPEC);   return sf.newSymbol("CUSTOM", FullSym.CUSTOM, yytext() ); }
-"java"                  { yybegin(CUSTOMSPEC);   return sf.newSymbol("JAVA", FullSym.JAVA, yytext() ); }
-{fullrecord}            { yybegin(MAPSPEC);      return sf.newSymbol("FULLRECORD", FullSym.FULLRECORD, yytext()); }
-{datespec}              { yybegin(MAPSPEC);      return sf.newSymbol("DATE", FullSym.DATE, yytext()); }
+"script"                { yybegin(CUSTOMSPEC);   return symbol("SCRIPT", FullSym.SCRIPT, yytext() ); }
+"custom"                { yybegin(CUSTOMSPEC);   return symbol("CUSTOM", FullSym.CUSTOM, yytext() ); }
+"java"                  { yybegin(CUSTOMSPEC);   return symbol("JAVA", FullSym.JAVA, yytext() ); }
+{fullrecord}            { yybegin(MAPSPEC);      return symbol("FULLRECORD", FullSym.FULLRECORD, yytext()); }
+{datespec}              { yybegin(MAPSPEC);      return symbol("DATE", FullSym.DATE, yytext()); }
 \"                      { save_zzLexicalState = CONSTANT; string.setLength(0); yybegin(STRING); }
 }
 
 <CONSTANT>{
   \"                    { save_zzLexicalState = CONSTANT; string.setLength(0); yybegin(STRING); }
-"||"|"|"                { return sf.newSymbol("OR",FullSym.OR); }
-","                     { yybegin(MAPSPEC);  return sf.newSymbol(",", FullSym.COMMA); }
+"||"|"|"                { return symbol("OR",FullSym.OR); }
+","                     { yybegin(MAPSPEC);  return symbol(",", FullSym.COMMA); }
 {white_space}           { /* ignore */ }
 }
 
 <CUSTOMSPEC>{
-"("                     { return sf.newSymbol("(",FullSym.LPAREN); }
-")"                     { return sf.newSymbol(")",FullSym.RPAREN); }
-","                     { yybegin(CUSTOMMETHOD); return sf.newSymbol(",", FullSym.COMMA); }
-{identifier}			{ return sf.newSymbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
+"("                     { return symbol("(",FullSym.LPAREN); }
+")"                     { return symbol(")",FullSym.RPAREN); }
+","                     { yybegin(CUSTOMMETHOD); return symbol(",", FullSym.COMMA); }
+{identifier}			{ return symbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
 {white_space}           { /* ignore */ }
 }
 
 <CUSTOMMETHOD>{
-{identifier}			{ return sf.newSymbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
-"("                     { yybegin(CUSTOMPARAM); return sf.newSymbol("(",FullSym.LPAREN); }
-","                     { yybegin(MAPSPEC); return sf.newSymbol(",", FullSym.COMMA); }
+{identifier}			{ return symbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
+"("                     { yybegin(CUSTOMPARAM); return symbol("(",FullSym.LPAREN); }
+","                     { yybegin(MAPSPEC); return symbol(",", FullSym.COMMA); }
 {white_space}           { /* ignore */ }
 }
 
 <CUSTOMPARAM>{
 \"                      { save_zzLexicalState = CUSTOMPARAM; string.setLength(0); yybegin(STRING); }
-"("                     { return sf.newSymbol("(",FullSym.LPAREN); }
-","                     { return sf.newSymbol(",", FullSym.COMMA); }
-{identifier}  			{ return sf.newSymbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
-{IntLiteral}			{ return sf.newSymbol("NUMBER",FullSym.NUMBER, yytext()); }
-")"                     { yybegin(MAPSPEC); return sf.newSymbol(")",FullSym.RPAREN); }
+"("                     { return symbol("(",FullSym.LPAREN); }
+","                     { return symbol(",", FullSym.COMMA); }
+{identifier}  			{ return symbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
+{IntLiteral}			{ return symbol("NUMBER",FullSym.NUMBER, yytext()); }
+")"                     { yybegin(MAPSPEC); return symbol(")",FullSym.RPAREN); }
 {white_space}           { /* ignore */ }
 }
 
 <MAPSPEC>{
-","                     { return sf.newSymbol(",", FullSym.COMMA); }
-"custom_map"            { return sf.newSymbol("CUSTOM_MAP", FullSym.CUSTOM_MAP, yytext()); }
-{identifier}            { return sf.newSymbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
-"("                     { yybegin(CUSTOMPARAM); return sf.newSymbol("(",FullSym.LPAREN); }
-")"                     { return sf.newSymbol(")",FullSym.RPAREN); }
+","                     { return symbol(",", FullSym.COMMA); }
+"custom_map"            { return symbol("CUSTOM_MAP", FullSym.CUSTOM_MAP, yytext()); }
+{identifier}            { return symbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
+"("                     { yybegin(CUSTOMPARAM); return symbol("(",FullSym.LPAREN); }
+")"                     { return symbol(")",FullSym.RPAREN); }
 {white_space}           { /* ignore */ }
 }
 
 <SUBFIELDSPEC>{
-"[""^"?[a-z][-a-z0-9]*"]"   { return sf.newSymbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
-[a-z][a-z0-9]*              { return sf.newSymbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
-"["[0-9]+(-[0-9]+)?"]"      { return sf.newSymbol("POSITION", FullSym.POSITION, yytext()); }
+"[""^"?[a-z][-a-z0-9]*"]"   { return symbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
+[a-z][a-z0-9]*              { return symbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
+"["[0-9]+(-[0-9]+)?"]"      { return symbol("POSITION", FullSym.POSITION, yytext()); }
 {white_space}               { /* ignore */ }
-":"						    { yybegin(STARTSPEC);   return sf.newSymbol(":",FullSym.COLON);  }
-","				            { yybegin(MAPSPEC);  return sf.newSymbol(",", FullSym.COMMA);  }
-[}]				            { yybegin(STARTSPEC);   return sf.newSymbol("}",FullSym.RBRACE);  }
-[?]				  		    { yybegin(CONDITIONAL); return sf.newSymbol("?",FullSym.QUESTION);  }
+":"						    { yybegin(STARTSPEC);   return symbol(":",FullSym.COLON);  }
+","				            { yybegin(MAPSPEC);  return symbol(",", FullSym.COMMA);  }
+[}]				            { yybegin(STARTSPEC);   return symbol("}",FullSym.RBRACE);  }
+[?]				  		    { yybegin(CONDITIONAL); return symbol("?",FullSym.QUESTION);  }
 }
 
 <CONDITIONAL>{
 /* keywords */
-[0][0][0-9]				  { return sf.newSymbol("FIELDSPEC", FullSym.FIELDSPEC, yytext()); }
-"$"[a-z0-9A-Z]            { return sf.newSymbol("SUBFIELD",FullSym.SUBFIELD, yytext().substring(1,2)); }
-"ind"[12]                 { return sf.newSymbol("IND",FullSym.IND, yytext().substring(3,4)); }
+[0][0][0-9]				  { return symbol("FIELDSPEC", FullSym.FIELDSPEC, yytext()); }
+"$"[a-z0-9A-Z]            { return symbol("SUBFIELD",FullSym.SUBFIELD, yytext().substring(1,2)); }
+"ind"[12]                 { return symbol("IND",FullSym.IND, yytext().substring(3,4)); }
 "ind"[03-9]               { error("Illegal indicator specification <"+ yytext()+">"); }
-"["[0-9]+(-[0-9]+)?"]"    { return sf.newSymbol("POSITION", FullSym.POSITION, yytext()); }
+"["[0-9]+(-[0-9]+)?"]"    { return symbol("POSITION", FullSym.POSITION, yytext()); }
 
 /* literals */
-{IntLiteral}              { return sf.newSymbol("NUMBER",FullSym.NUMBER, yytext()); }
+{IntLiteral}              { return symbol("NUMBER",FullSym.NUMBER, yytext()); }
 
 /* separators */
   \"              { string.setLength(0); save_zzLexicalState = CONDITIONAL; yybegin(STRING); }
 
-":"	              { yybegin(STARTSPEC);  return sf.newSymbol(":", FullSym.COLON);  }
-[}]				  { yybegin(STARTSPEC);  return sf.newSymbol("}", FullSym.RBRACE);  }
-","               { yybegin(MAPSPEC);  return sf.newSymbol(",", FullSym.COMMA);  }
-"("               { return sf.newSymbol("(",FullSym.LPAREN); }
-")"               { return sf.newSymbol(")",FullSym.RPAREN); }
-"=="|"="          { return sf.newSymbol("EQU",FullSym.EQU ); }
-"!="              { return sf.newSymbol("NEQ",FullSym.NEQ); }
-"~"|"matches"     { return sf.newSymbol("MATCH",FullSym.MATCH); }
-"contains"        { return sf.newSymbol("CONTAINS",FullSym.CONTAINS); }
-"<"|"startsWith"  { return sf.newSymbol("LE",FullSym.LT); }
-">"|"endsWith"    { return sf.newSymbol("GT",FullSym.GT); }
-"&&"|"&"          { return sf.newSymbol("AND",FullSym.AND); }
-"||"|"|"          { return sf.newSymbol("OR",FullSym.OR); }
-"!"               { return sf.newSymbol("NOT",FullSym.NOT); }
-'[^\\]'           { return sf.newSymbol("CHAR",FullSym.CHAR, yytext().substring(1, 2)); } 
-'\\.'             { return sf.newSymbol("CHAR",FullSym.CHAR, yytext().substring(1, 3)); } 
+":"	              { yybegin(STARTSPEC);  return symbol(":", FullSym.COLON);  }
+[}]				  { yybegin(STARTSPEC);  return symbol("}", FullSym.RBRACE);  }
+","               { yybegin(MAPSPEC);  return symbol(",", FullSym.COMMA);  }
+"("               { return symbol("(",FullSym.LPAREN); }
+")"               { return symbol(")",FullSym.RPAREN); }
+"=="|"="          { return symbol("EQU",FullSym.EQU ); }
+"!="              { return symbol("NEQ",FullSym.NEQ); }
+"~"|"matches"     { return symbol("MATCH",FullSym.MATCH); }
+"contains"        { return symbol("CONTAINS",FullSym.CONTAINS); }
+"<"|"startsWith"  { return symbol("LE",FullSym.LT); }
+">"|"endsWith"    { return symbol("GT",FullSym.GT); }
+"&&"|"&"          { return symbol("AND",FullSym.AND); }
+"||"|"|"          { return symbol("OR",FullSym.OR); }
+"!"               { return symbol("NOT",FullSym.NOT); }
+'[^\\]'           { return symbol("CHAR",FullSym.CHAR, yytext().substring(1, 2)); } 
+'\\.'             { return symbol("CHAR",FullSym.CHAR, yytext().substring(1, 3)); } 
 {white_space}     { /* ignore */ }
 
 }
 
 <STRING> {
   \"                             { yybegin(save_zzLexicalState); 
-                                   return sf.newSymbol("QUOTEDSTR",FullSym.QUOTEDSTR,string.toString()); }
+                                   return symbol("QUOTEDSTR",FullSym.QUOTEDSTR,string.toString()); }
   [^\n\r\"\\]+                   { string.append( yytext() ); }
   \\t                            { string.append('\t'); }
   \\n                            { string.append('\n'); }

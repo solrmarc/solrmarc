@@ -10,7 +10,7 @@ public class AbstractSpecificationFactory
 {
     private static ConditionalParser parser = null;
 
-    private static boolean do_debug_parse = true;
+    private static boolean do_debug_parse = false;
 
     public static boolean canHandle(final String indexConfiguration)
     {

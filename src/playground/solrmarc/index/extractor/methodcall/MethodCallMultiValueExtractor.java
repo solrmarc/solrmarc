@@ -14,32 +14,20 @@ public class MethodCallMultiValueExtractor extends AbstractMultiValueExtractor
     private final Object[] parameters;
 
     public MethodCallMultiValueExtractor(final AbstractExtractorMethodCall<Collection<String>> methodCall,
-            final Object[] parameters)
+            final Object[] staticParameters)
     {
         if (methodCall == null)
         {
             throw new NullPointerException("CustomObject is null");
         }
-        else if (parameters == null)
+        else if (staticParameters == null)
         {
             throw new NullPointerException("Custom parameters is null");
         }
 
         this.methodCall = methodCall;
-        this.parameters = new Object[parameters.length + 1];
-        System.arraycopy(parameters, 0, this.parameters, 1, parameters.length);
-        try { 
-            extract(StaticMarcTestRecords.testRecord[0]);
-        }
-        catch (InvocationTargetException ite)
-        {
-            throw new IndexerSpecException(ite.getTargetException(), "Error on test invocation of custom method: " + methodCall.getMethodName());
-        }
-        catch (Exception e)
-        {
-            throw new IndexerSpecException(e, "Error on test invocation of custom method: " + methodCall.getMethodName());
-        }
-
+        this.parameters = new Object[staticParameters.length + 1];
+        System.arraycopy(staticParameters, 0, this.parameters, 1, staticParameters.length);
     }
 
     @Override

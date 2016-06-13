@@ -45,7 +45,17 @@ public class CustomLocationMixin extends SolrIndexerMixin
     Set<String> callNumberFieldListNo050 = null;
     Map<String, Set<String>> callNumberClusterMap = null;
     Map<String, Set<String>> callNumberClusterMapNo050 = null;
-    Comparator<String> normedComparator = null;
+    
+    Comparator<String> normedComparator = new Comparator<String>() 
+    {
+        public int compare(String s1, String s2)
+        {
+            String s1Norm = s1.replaceAll("[. ]", "");
+            String s2Norm = s2.replaceAll("[. ]", "");
+            return s1Norm.compareToIgnoreCase(s2Norm);
+        }
+    };
+
     String bestSingleCallNumber = null;
     List<?> trimmedHoldingsList = null;
 

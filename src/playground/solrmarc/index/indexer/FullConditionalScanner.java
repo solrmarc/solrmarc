@@ -2,12 +2,12 @@
 
 package playground.solrmarc.index.indexer;
 
-import java_cup.runtime.SymbolFactory;
 import java.util.List;
 import java.util.ArrayList;
-//import java.io.StringReader;
 import playground.solrmarc.index.utils.StringReader;
 import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.Symbol;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 
 /**
@@ -432,7 +432,7 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
 		scanner_errors = new ArrayList<String>();
     }
     
-    SymbolFactory sf;
+    ComplexSymbolFactory sf;
     
     public void startParse(String strToParse)
     {
@@ -449,6 +449,19 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
     {
     	return(scanner_errors);
     }
+    
+    private Symbol symbol(String name, int sym) 
+    {
+        return sf.newSymbol(name, sym, new Location(yyline+1, yycolumn+1, yychar), new Location(yyline+1, yycolumn+yylength(), yychar+yylength()));
+    }
+
+    private Symbol symbol(String name, int sym, Object val)
+    {
+        Location left = new Location(yyline+1,yycolumn+1,yychar);
+        Location right= new Location(yyline+1,yycolumn+yylength(), yychar+yylength());
+        return sf.newSymbol(name, sym, left, right,val);
+    }
+      
 
 
   /**
@@ -710,6 +723,8 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
     while (true) {
       zzMarkedPosL = zzMarkedPos;
 
+      yychar+= zzMarkedPosL-zzStartRead;
+
       if (zzMarkedPosL > zzStartRead) {
         switch (zzBufferL[zzMarkedPosL-1]) {
         case '\n':
@@ -827,15 +842,15 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
           }
         case 60: break;
         case 3: 
-          { return sf.newSymbol("FIELDNAME", FullSym.FIELDNAME, yytext());
+          { return symbol("FIELDNAME", FullSym.FIELDNAME, yytext());
           }
         case 61: break;
         case 4: 
-          { return sf.newSymbol(",", FullSym.COMMA);
+          { return symbol(",", FullSym.COMMA);
           }
         case 62: break;
         case 5: 
-          { yybegin(STARTSPEC); return sf.newSymbol("EQU", FullSym.EQU );
+          { yybegin(STARTSPEC); return symbol("EQU", FullSym.EQU );
           }
         case 63: break;
         case 6: 
@@ -843,19 +858,19 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
           }
         case 64: break;
         case 7: 
-          { yybegin(MAPSPEC);      return sf.newSymbol(",", FullSym.COMMA);
+          { yybegin(MAPSPEC);      return symbol(",", FullSym.COMMA);
           }
         case 65: break;
         case 8: 
-          { return sf.newSymbol("{",FullSym.LBRACE);
+          { return symbol("{",FullSym.LBRACE);
           }
         case 66: break;
         case 9: 
-          { yybegin(STARTSPEC);    return sf.newSymbol(":",FullSym.COLON);
+          { yybegin(STARTSPEC);    return symbol(":",FullSym.COLON);
           }
         case 67: break;
         case 10: 
-          { yybegin(CONDITIONAL);  return sf.newSymbol("?",FullSym.QUESTION);
+          { yybegin(CONDITIONAL);  return symbol("?",FullSym.QUESTION);
           }
         case 68: break;
         case 11: 
@@ -868,7 +883,7 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
         case 70: break;
         case 13: 
           { yybegin(save_zzLexicalState); 
-                                   return sf.newSymbol("QUOTEDSTR",FullSym.QUOTEDSTR,string.toString());
+                                   return symbol("QUOTEDSTR",FullSym.QUOTEDSTR,string.toString());
           }
         case 71: break;
         case 14: 
@@ -876,19 +891,19 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
           }
         case 72: break;
         case 15: 
-          { return sf.newSymbol("NUMBER",FullSym.NUMBER, yytext());
+          { return symbol("NUMBER",FullSym.NUMBER, yytext());
           }
         case 73: break;
         case 16: 
-          { yybegin(MAPSPEC);  return sf.newSymbol(",", FullSym.COMMA);
+          { yybegin(MAPSPEC);  return symbol(",", FullSym.COMMA);
           }
         case 74: break;
         case 17: 
-          { return sf.newSymbol("EQU",FullSym.EQU );
+          { return symbol("EQU",FullSym.EQU );
           }
         case 75: break;
         case 18: 
-          { yybegin(STARTSPEC);  return sf.newSymbol(":", FullSym.COLON);
+          { yybegin(STARTSPEC);  return symbol(":", FullSym.COLON);
           }
         case 76: break;
         case 19: 
@@ -896,67 +911,67 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
           }
         case 77: break;
         case 20: 
-          { return sf.newSymbol("OR",FullSym.OR);
+          { return symbol("OR",FullSym.OR);
           }
         case 78: break;
         case 21: 
-          { return sf.newSymbol("(",FullSym.LPAREN);
+          { return symbol("(",FullSym.LPAREN);
           }
         case 79: break;
         case 22: 
-          { return sf.newSymbol(")",FullSym.RPAREN);
+          { return symbol(")",FullSym.RPAREN);
           }
         case 80: break;
         case 23: 
-          { yybegin(STARTSPEC);  return sf.newSymbol("}", FullSym.RBRACE);
+          { yybegin(STARTSPEC);  return symbol("}", FullSym.RBRACE);
           }
         case 81: break;
         case 24: 
-          { return sf.newSymbol("NOT",FullSym.NOT);
+          { return symbol("NOT",FullSym.NOT);
           }
         case 82: break;
         case 25: 
-          { return sf.newSymbol("MATCH",FullSym.MATCH);
+          { return symbol("MATCH",FullSym.MATCH);
           }
         case 83: break;
         case 26: 
-          { return sf.newSymbol("LE",FullSym.LT);
+          { return symbol("LE",FullSym.LT);
           }
         case 84: break;
         case 27: 
-          { return sf.newSymbol("GT",FullSym.GT);
+          { return symbol("GT",FullSym.GT);
           }
         case 85: break;
         case 28: 
-          { return sf.newSymbol("AND",FullSym.AND);
+          { return symbol("AND",FullSym.AND);
           }
         case 86: break;
         case 29: 
-          { return sf.newSymbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext());
+          { return symbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext());
           }
         case 87: break;
         case 30: 
-          { yybegin(STARTSPEC);   return sf.newSymbol(":",FullSym.COLON);
+          { yybegin(STARTSPEC);   return symbol(":",FullSym.COLON);
           }
         case 88: break;
         case 31: 
-          { yybegin(CONDITIONAL); return sf.newSymbol("?",FullSym.QUESTION);
+          { yybegin(CONDITIONAL); return symbol("?",FullSym.QUESTION);
           }
         case 89: break;
         case 32: 
-          { yybegin(STARTSPEC);   return sf.newSymbol("}",FullSym.RBRACE);
+          { yybegin(STARTSPEC);   return symbol("}",FullSym.RBRACE);
           }
         case 90: break;
         case 33: 
-          { yybegin(CUSTOMMETHOD); return sf.newSymbol(",", FullSym.COMMA);
+          { yybegin(CUSTOMMETHOD); return symbol(",", FullSym.COMMA);
           }
         case 91: break;
         case 34: 
-          { yybegin(MAPSPEC); return sf.newSymbol(",", FullSym.COMMA);
+          { yybegin(MAPSPEC); return symbol(",", FullSym.COMMA);
           }
         case 92: break;
         case 35: 
-          { yybegin(CUSTOMPARAM); return sf.newSymbol("(",FullSym.LPAREN);
+          { yybegin(CUSTOMPARAM); return symbol("(",FullSym.LPAREN);
           }
         case 93: break;
         case 36: 
@@ -964,7 +979,7 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
           }
         case 94: break;
         case 37: 
-          { yybegin(MAPSPEC); return sf.newSymbol(")",FullSym.RPAREN);
+          { yybegin(MAPSPEC); return symbol(")",FullSym.RPAREN);
           }
         case 95: break;
         case 38: 
@@ -984,43 +999,43 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
           }
         case 99: break;
         case 42: 
-          { return sf.newSymbol("SUBFIELD",FullSym.SUBFIELD, yytext().substring(1,2));
+          { return symbol("SUBFIELD",FullSym.SUBFIELD, yytext().substring(1,2));
           }
         case 100: break;
         case 43: 
-          { return sf.newSymbol("NEQ",FullSym.NEQ);
+          { return symbol("NEQ",FullSym.NEQ);
           }
         case 101: break;
         case 44: 
-          { return sf.newSymbol("IDENTIFIER", FullSym.IDENTIFIER, yytext());
+          { return symbol("IDENTIFIER", FullSym.IDENTIFIER, yytext());
           }
         case 102: break;
         case 45: 
-          { yybegin(SUBFIELDSPEC); return sf.newSymbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());
+          { yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());
           }
         case 103: break;
         case 46: 
-          { yybegin(MAPSPEC);      return sf.newSymbol("FULLRECORD", FullSym.FULLRECORD, yytext());
+          { yybegin(MAPSPEC);      return symbol("FULLRECORD", FullSym.FULLRECORD, yytext());
           }
         case 104: break;
         case 47: 
-          { return sf.newSymbol("FIELDSPEC", FullSym.FIELDSPEC, yytext());
+          { return symbol("FIELDSPEC", FullSym.FIELDSPEC, yytext());
           }
         case 105: break;
         case 48: 
-          { return sf.newSymbol("POSITION", FullSym.POSITION, yytext());
+          { return symbol("POSITION", FullSym.POSITION, yytext());
           }
         case 106: break;
         case 49: 
-          { return sf.newSymbol("CHAR",FullSym.CHAR, yytext().substring(1, 2));
+          { return symbol("CHAR",FullSym.CHAR, yytext().substring(1, 2));
           }
         case 107: break;
         case 50: 
-          { yybegin(CUSTOMSPEC);   return sf.newSymbol("JAVA", FullSym.JAVA, yytext() );
+          { yybegin(CUSTOMSPEC);   return symbol("JAVA", FullSym.JAVA, yytext() );
           }
         case 108: break;
         case 51: 
-          { yybegin(MAPSPEC);      return sf.newSymbol("DATE", FullSym.DATE, yytext());
+          { yybegin(MAPSPEC);      return symbol("DATE", FullSym.DATE, yytext());
           }
         case 109: break;
         case 52: 
@@ -1028,27 +1043,27 @@ public class FullConditionalScanner extends playground.solrmarc.index.indexer.Fu
           }
         case 110: break;
         case 53: 
-          { return sf.newSymbol("IND",FullSym.IND, yytext().substring(3,4));
+          { return symbol("IND",FullSym.IND, yytext().substring(3,4));
           }
         case 111: break;
         case 54: 
-          { return sf.newSymbol("CHAR",FullSym.CHAR, yytext().substring(1, 3));
+          { return symbol("CHAR",FullSym.CHAR, yytext().substring(1, 3));
           }
         case 112: break;
         case 55: 
-          { yybegin(CUSTOMSPEC);   return sf.newSymbol("SCRIPT", FullSym.SCRIPT, yytext() );
+          { yybegin(CUSTOMSPEC);   return symbol("SCRIPT", FullSym.SCRIPT, yytext() );
           }
         case 113: break;
         case 56: 
-          { yybegin(CUSTOMSPEC);   return sf.newSymbol("CUSTOM", FullSym.CUSTOM, yytext() );
+          { yybegin(CUSTOMSPEC);   return symbol("CUSTOM", FullSym.CUSTOM, yytext() );
           }
         case 114: break;
         case 57: 
-          { return sf.newSymbol("CONTAINS",FullSym.CONTAINS);
+          { return symbol("CONTAINS",FullSym.CONTAINS);
           }
         case 115: break;
         case 58: 
-          { return sf.newSymbol("CUSTOM_MAP", FullSym.CUSTOM_MAP, yytext());
+          { return symbol("CUSTOM_MAP", FullSym.CUSTOM_MAP, yytext());
           }
         case 116: break;
         default: 

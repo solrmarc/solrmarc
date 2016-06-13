@@ -124,7 +124,16 @@ public class MethodCallManager
                 }
                 if (addMethodsAsDefault)
                 {
-                    extractorMethodCalls.put(toCacheKey(method, parameterTypes), methodCall);
+                    // If there is already a custom method with the same name as this one replace 
+                    // the default method definition with a placeholder.
+                    if (extractorMethodCalls.containsKey(toCacheKey(method, parameterTypes)))
+                    {
+                        extractorMethodCalls.put(toCacheKey(method, parameterTypes), null);
+                    }
+                    else 
+                    {
+                        extractorMethodCalls.put(toCacheKey(method, parameterTypes), methodCall);
+                    }
                 }
                 extractorMethodCalls.put(toCacheKey(mixin, method, parameterTypes), methodCall);
             }
@@ -220,6 +229,11 @@ public class MethodCallManager
 
     public String loadedExtractorMixinsToString()
     {
+        return loadedExtractorMixinsToString(null);
+    }
+    
+    public String loadedExtractorMixinsToString(String methodNameToMatch)
+    {
         List<String> lines = new ArrayList<>(extractorMethodCalls.size());
         for (final String key : extractorMethodCalls.keySet())
         {
@@ -230,7 +244,10 @@ public class MethodCallManager
             if (!key.startsWith("null"))
             {
                 final AbstractExtractorMethodCall<?> call = extractorMethodCalls.get(key);
-                lines.add("- " + call.getObjectName() + "::" + call.getMethodName());
+                if (methodNameToMatch == null || methodNameToMatch.equals(call.getMethodName()))
+                {
+                    lines.add("- " + call.getObjectName() + "::" + call.getMethodName());
+                }
             }
         }
         Collections.sort(lines);
@@ -239,7 +256,7 @@ public class MethodCallManager
         {
             buffer.append(line).append('\n');
         }
-        return buffer.toString().trim();
+        return buffer.toString();
     }
 
     public String loadedMappingMixinsToString()

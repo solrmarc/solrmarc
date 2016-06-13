@@ -1,7 +1,11 @@
 package playground.solrmarc.solr;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+
+import org.apache.solr.common.SolrInputDocument;
 
 public interface SolrProxy
 {
@@ -21,6 +25,8 @@ public interface SolrProxy
      */
     public abstract String addDoc(Map<String, Object> fieldsMap, boolean verbose, boolean addDocToIndex)
             throws IOException;
+    
+    public abstract void addDoc(SolrInputDocument document);
 
     /**
      * delete doc from the index
@@ -45,5 +51,8 @@ public interface SolrProxy
      * close the solrCore
      */
     public abstract void close();
+
+    public abstract void addDocs(Collection<SolrInputDocument> docQ);
+
 
 }

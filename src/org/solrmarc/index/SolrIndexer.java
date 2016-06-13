@@ -44,8 +44,12 @@ import playground.solrmarc.index.specification.Specification;
 
 public class SolrIndexer implements Mixin
 {
-    static Map<String, Specification> specCache = new HashMap<String, Specification>(); 
+    private Map<String, Specification> specCache = new HashMap<String, Specification>(); 
     
+    /** map of translation maps.  keys are names of translation maps; 
+     *  values are the translation maps (hence, it's a map of maps) */
+    private Map<String, Object> transMapMap = new HashMap<String, Object>(); 
+   
     public  SolrIndexer() 
     { /* private constructor */ }
     
@@ -600,4 +604,47 @@ public class SolrIndexer implements Mixin
         return(record.getVariableFields(tags));
     }
     
+    /**
+     * public interface callable from custom indexing scripts to 
+     * load the translation map into transMapMap
+     * Simply implements a stub that calls the createMultiValueMapping method
+     * @param translationMapSpec the specification of a translation map - 
+     *   could be name of a _map.properties file, or some subset of entries in a 
+     *   _map.properties file
+     * @return the name of the translation map to be used in a subsequent call to FindMap
+     */
+    public String loadTranslationMap(String translationMapSpec) 
+    {
+        if (findMap(translationMapSpec) == null)
+        {
+            AbstractMultiValueMapping map = ValueIndexerFactory.instance().createMultiValueMapping(translationMapSpec);
+            transMapMap.put(translationMapSpec, map);
+        }
+        return(translationMapSpec);
+    }
+    
+    /**
+     * Get the appropriate Map object from populated transMapMap
+     * @param mapName the name of the translation map to find
+     * @return populated Map object
+     */
+    public Object findMap(String mapName)
+    {
+        if (transMapMap.containsKey(mapName))
+            return(transMapMap.get(mapName));
+
+        return null;
+    }
+
+    public String remap(String valueToMap, Object translationMap, boolean b) throws Exception
+    {
+        if (translationMap instanceof AbstractMultiValueMapping)
+        {
+            AbstractMultiValueMapping map = (AbstractMultiValueMapping) translationMap;
+            return(map.mapSingle(valueToMap));
+        }
+        return null;
+    }
+
+
 }

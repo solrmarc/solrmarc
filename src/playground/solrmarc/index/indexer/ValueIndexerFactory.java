@@ -9,11 +9,18 @@ import playground.solrmarc.index.extractor.formatter.FieldFormatterMapped;
 import playground.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 import playground.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import playground.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
+import playground.solrmarc.index.extractor.methodcall.StaticMarcTestRecords;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
 import playground.solrmarc.index.utils.ReflectionUtils;
 import org.apache.log4j.Logger;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -70,7 +77,44 @@ public class ValueIndexerFactory
         return localMappingProperties;
     }
     
-    static boolean debug_parse = true;
+    boolean debug_parse = false;
+    
+    public boolean isDebugParse()
+    {
+        return debug_parse;
+    }
+
+    public void setDebugParse(boolean debug_parse)
+    {
+        this.debug_parse = debug_parse;
+    }
+
+    public List<AbstractValueIndexer<?>> createValueIndexers(File indexSpecFile)
+            throws IllegalAccessException, InstantiationException
+    {
+        List<String> lines = new ArrayList<String>();
+        try
+        {
+            BufferedReader reader = new BufferedReader(new FileReader(indexSpecFile));
+            String line;
+            while ((line = reader.readLine()) != null)
+            {
+                lines.add(line);
+            }
+            return createValueIndexers(lines.toArray(new String[0]));
+        }
+        catch (FileNotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return(null);
+    }
     
     public List<AbstractValueIndexer<?>> createValueIndexers(String configSpecs[])
             throws IllegalAccessException, InstantiationException
@@ -139,6 +183,22 @@ public class ValueIndexerFactory
             }
         }
         MultiValueIndexer valueIndexer = parser.parse(singleSpec);
+        // Test fire the indexer to catch obvious error such as missing property files
+        if (valueIndexer != null)
+        {
+            try
+            {
+                valueIndexer.getFieldData(StaticMarcTestRecords.testRecord[0]);
+            }
+            catch (InvocationTargetException ite)
+            {
+                throw new IndexerSpecException(ite.getTargetException(), "Error on test invocation of custom method: " + singleSpec);
+            }
+            catch (Exception e)
+            {
+                throw new IndexerSpecException(e, "Error on test invocation of custom method: " + singleSpec);
+            }
+        }
         return(valueIndexer);
     }
     

@@ -2,6 +2,8 @@ package playground.solrmarc.index.extractor.impl.fullrecord;
 
 import java.io.ByteArrayOutputStream;
 
+import javax.xml.transform.stream.StreamResult;
+
 import org.marc4j.MarcWriter;
 import org.marc4j.marc.Record;
 
@@ -24,4 +26,5 @@ public class FullRecordAsTextValueExtractor extends AbstractFullRecordValueExtra
     {
         return null;
     }
+
 }

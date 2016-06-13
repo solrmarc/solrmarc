@@ -29,13 +29,6 @@ public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor
         this.methodCall = methodCall;
         this.parameters = new Object[parameters.length + 1];
         System.arraycopy(parameters, 0, this.parameters, 1, parameters.length);
-        try { 
-            extract(StaticMarcTestRecords.testRecord[0]);
-        }
-        catch (Exception e)
-        {
-            throw new IndexerSpecException(e, "Error on test invocation of custom method: " + methodCall.getMethodName());
-        }
     }
 
     @SuppressWarnings("unchecked")

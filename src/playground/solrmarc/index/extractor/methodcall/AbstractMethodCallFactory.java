@@ -2,6 +2,7 @@ package playground.solrmarc.index.extractor.methodcall;
 
 import playground.solrmarc.index.extractor.AbstractValueExtractor;
 import playground.solrmarc.index.extractor.AbstractValueExtractorFactory;
+import playground.solrmarc.index.indexer.IndexerSpecException;
 import playground.solrmarc.index.utils.StringReader;
 
 import java.util.Collection;
@@ -48,9 +49,14 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
             return new MethodCallSingleValueExtractor((SingleValueExtractorMethodCall) methodCall,
                     context.getParameters());
         }
+        else if (methodCall == null && context.getObjectName() == null)
+        {
+            throw new IndexerSpecException("Multiple methods with name: " + context.getMethodName() + " you must specify the class of the method you intend to use.  Known methods are: \n"
+                    + methodCallManager.loadedExtractorMixinsToString(context.getMethodName()));
+        }
         else
         {
-            throw new IllegalArgumentException("Unknown method: " + context.toString() + ". Known methods are: \n"
+            throw new IndexerSpecException("Unknown method: " + context.toString() + ". Known methods are: \n"
                     + methodCallManager.loadedExtractorMixinsToString());
         }
     }

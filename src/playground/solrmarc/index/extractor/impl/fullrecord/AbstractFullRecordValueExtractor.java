@@ -5,6 +5,7 @@ import org.marc4j.MarcWriter;
 import org.marc4j.marc.Record;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 
 /**
  * This is a base class for all full record extractors. It writes a record to
@@ -28,14 +29,14 @@ public abstract class AbstractFullRecordValueExtractor extends AbstractSingleVal
     }
 
     @Override
-    public String extract(final Record record)
+    public String extract(final Record record) throws UnsupportedEncodingException
     {
         outputStream.reset();
         writer = makeNewWriter(outputStream);
         writer.write(record);
         writer.close();
         writer = null;
-        return outputStream.toString();
+        return outputStream.toString("UTF8");
     }
 
     abstract protected MarcWriter makeNewWriter(ByteArrayOutputStream outputStream2);

@@ -26,6 +26,8 @@ import playground.solrmarc.index.mapping.AbstractValueMappingFactory;
 import playground.solrmarc.index.specification.conditional.*;
 import playground.solrmarc.index.utils.ReflectionUtils;
 import playground.solrmarc.index.utils.StringReader;
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 import playground.solrmarc.index.specification.*;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import java_cup.runtime.XMLElement;
@@ -438,15 +440,15 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
     
     public static final List<IndexerSpecException> getErrors()
     {
-    	if (scanner.getScannerErrors().size() == 0)
-    		return(parser_errors);
-    	List<IndexerSpecException> allErrors = new ArrayList<IndexerSpecException>();
-    	allErrors.addAll(parser_errors);
-    	for (String errMsg : scanner.getScannerErrors())
-    	{
-    	    allErrors.add(new IndexerSpecException(errMsg));
-    	}
-    	return(allErrors);
+        if (scanner.getScannerErrors().size() == 0)
+            return(parser_errors);
+        List<IndexerSpecException> allErrors = new ArrayList<IndexerSpecException>();
+        allErrors.addAll(parser_errors);
+        for (String errMsg : scanner.getScannerErrors())
+        {
+            allErrors.add(new IndexerSpecException(errMsg));
+        }
+        return(allErrors);
     }
     
     public static final void addError(String errorMsg)
@@ -458,6 +460,37 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
     {
         parser_errors.add(exception);
     }
+    
+    @Override
+    public void report_error(String message, Object info)
+    {
+        ComplexSymbol top = (ComplexSymbol)stack.peek();
+        if (info instanceof ComplexSymbol)
+        {
+            ComplexSymbol cs = (ComplexSymbol)info;
+            addError(message+" at input symbol \""+cs.getName()+"\" following symbol "+ top.getName() + 
+                    " (with value of : "+ cacheOfStrToParse.substring(top.left, top.right) +" )");
+            return;
+        }
+    }
+   
+    protected void my_report_expected_token_ids()
+    {
+        List<Integer> ids = expected_token_ids();
+        ArrayList<String> list = new ArrayList<String>();
+        for (Integer expected : ids)
+        {
+            list.add(symbl_name_from_id(expected));
+        }
+        addError("instead expected token classes are "+list.toString());
+    }
+    
+    public void syntax_error(Symbol cur_token)
+    {
+        report_error("Syntax error", cur_token);
+        my_report_expected_token_ids();
+    }
+
 
 
 /** Cup generated class to encapsulate user supplied action code.*/

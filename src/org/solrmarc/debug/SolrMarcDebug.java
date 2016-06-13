@@ -555,6 +555,7 @@ public class SolrMarcDebug
             {
                 text.append(specMessage);
             }
+            lastSpec = specMessage;
             text.append(e.getMessage());
             for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause())
             {
