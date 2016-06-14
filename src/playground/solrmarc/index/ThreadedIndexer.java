@@ -79,7 +79,7 @@ public class ThreadedIndexer extends Indexer
                             cnts[1] ++;
                             if (! docQ.offer(document) )
                             {
-                                Collection<SolrInputDocument> chunk = new ArrayList<SolrInputDocument>(docQ.size());
+                                final Collection<SolrInputDocument> chunk = new ArrayList<SolrInputDocument>(docQ.size());
                                 SolrInputDocument firstDoc = docQ.peek();
                                 String threadName = null;
                                 try {

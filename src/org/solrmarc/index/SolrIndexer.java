@@ -42,6 +42,7 @@ import playground.solrmarc.index.specification.Specification;
  */
 
 
+@Deprecated 
 public class SolrIndexer implements Mixin
 {
     private Map<String, Specification> specCache = new HashMap<String, Specification>(); 
