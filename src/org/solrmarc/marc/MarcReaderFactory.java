@@ -12,7 +12,7 @@ import org.solrmarc.tools.PropertyUtils;
 public class MarcReaderFactory {
 
 	protected boolean verbose = false;
-	protected ErrorHandler errors = null;
+//	protected ErrorHandler errors = null;
  
 	/** The full class name of SolrIndexer or the subclass to be used */
 	//protected Properties configProps;
@@ -117,8 +117,8 @@ public class MarcReaderFactory {
         }
         else if (permissiveReader)
         {
-            errors = new ErrorHandler();
-            reader = new MarcPermissiveStreamReader(is, errors, to_utf_8, defaultEncoding);
+      //      errors = new ErrorHandler();
+            reader = new MarcPermissiveStreamReader(is, true, to_utf_8, defaultEncoding);
         }
         else
         {
@@ -131,16 +131,16 @@ public class MarcReaderFactory {
         {
             String combineLeftField = PropertyUtils.getProperty(config, "marc.combine_records.left_field");
             String combineRightField = PropertyUtils.getProperty(config, "marc.combine_records.right_field");
-            if (errors == null)
-            {
+//            if (errors == null)
+//            {
                 reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields, combineLeftField, combineRightField);
-            }
-            else
-            {
-                ErrorHandler errors2 = errors;
-                errors = new ErrorHandler();
-                reader = new MarcCombiningReader(reader, errors, errors2, combineConsecutiveRecordsFields, combineLeftField, combineRightField);
-            }
+//            }
+//            else
+//            {
+//                ErrorHandler errors2 = errors;
+//                errors = new ErrorHandler();
+//                reader = new MarcCombiningReader(reader, errors, errors2, combineConsecutiveRecordsFields, combineLeftField, combineRightField);
+//            }
         }
         
         // Add FilteredReader if requested
