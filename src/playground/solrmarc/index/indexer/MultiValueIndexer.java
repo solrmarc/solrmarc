@@ -83,5 +83,4 @@ public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
         Collection<String> result = collector.collect(values);
         return (result);
     }
-
 }

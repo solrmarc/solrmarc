@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//import org.marc4j.ErrorHandler;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
@@ -14,13 +13,16 @@ import org.marc4j.marc.VariableField;
 import org.solrmarc.index.SolrIndexerMixin;
 import org.solrmarc.tools.Utils;
 
+import playground.solrmarc.index.indexer.IndexerSpecException;
+
 public class VideoInfoMixin extends SolrIndexerMixin
 {
     Pattern releaseDatePattern = null;
     boolean isVideo = true;
-
+    
     public void perRecordInit(Record record)
     {
+        super.perRecordInit();
         isVideo = (record.getLeader().getTypeOfRecord() == 'g');
     }
     
@@ -235,24 +237,14 @@ public class VideoInfoMixin extends SolrIndexerMixin
                 String subtitle = indexer.getFirstFieldVal(record, null, "245b");
                 if (subtitle != null && (subtitle.contains("direct") || subtitle.contains("Direct")))
                 {
-                    
-//                    if (indexer.getErrorHandler() != null)
-//                    {
-//                        indexer.getErrorHandler().addError(record.getControlNumber(), "245", "b", ErrorHandler.MINOR_ERROR, 
-//                                                           "Director information erroneously included in the 245b subtitle field");
-//                    }
+                    addError(new IndexerSpecException("Director information erroneously included in the 245b subtitle field"));
                     Set<String> directors = getVideoDirectorsFromTextField(subtitle, false);
                     result.addAll(directors);
                 }
                 String medium = indexer.getFirstFieldVal(record, null, "245h");
                 if (medium != null && (medium.contains("direct") || medium.contains("Direct")))
                 {
-//                    
-//                    if (indexer.getErrorHandler() != null)
-//                    {
-//                        indexer.getErrorHandler().addError(record.getControlNumber(), "245", "h", ErrorHandler.MINOR_ERROR, 
-//                                                           "Director information erroneously included in the 245h medium field");
-//                    }
+                    addError(new IndexerSpecException("Director information erroneously included in the 245h medium field"));
                     Set<String> directors = getVideoDirectorsFromTextField(medium, false);
                     result.addAll(directors);
                 }

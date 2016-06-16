@@ -1,16 +1,15 @@
 package org.solrmarc.marc;
 
-//import org.marc4j.ErrorHandler;
-import org.marc4j.MarcException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.Logger;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -35,8 +34,8 @@ public class MarcCombiningReader implements MarcReader
     String idsToMerge = null;
     String leftControlField = null;
     String rightControlField = null;
-//    ErrorHandler nextErrors;
-//    ErrorHandler currentErrors;
+    // Initialize logging category
+    static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
 
     
     /**
@@ -54,39 +53,8 @@ public class MarcCombiningReader implements MarcReader
         this.idsToMerge = idsToMerge;
         this.leftControlField = leftControlField;
         this.rightControlField = rightControlField;
-//        this.nextErrors = null;
-//        this.currentErrors = null;
     }
-    
-//    /**
-//     * Constructor for a "combining" Marc reader, that looks ahead at the Marc file to determine 
-//     * when the next record is a continuation of the currently read record.  Because this reader 
-//     * needs to have two records in memory to determine when the subsequent record is a continuation,
-//     * if Error Handling is being performed, this constructor needs to be used, so that the errors 
-//     * from the "next" record are not appended to the results for the "current" record.
-//     * Call this constructor in the following way:
-//     *          ErrorHandler errors2 = errors;
-//     *          errors = new ErrorHandler();
-//     *          reader = new MarcCombiningReader(reader, errors, errors2, combineConsecutiveRecordsFields);
-//     *          
-//     * @param reader - The Lower level MarcReader that returns Marc4J Record objects that are read from a Marc file.
-//     * @param currentErrors - ErrorHandler Object to use for attaching errors to a record.
-//     * @param nextErrors - ErrorHandler Object that was passed into the lower level MarcReader
-//     * @param idsToMerge - string representing a regular expression matching those fields to be merged for continuation records.
-//     * @param leftControlField - string representing a control field in the current record to use for matching purposes (null to default to 001).
-//     * @param rightControlField - string representing a control field in the next record to use for matching purposes (null to default to 001).
-//     */
-//    public MarcCombiningReader(MarcReader reader, ErrorHandler currentErrors, ErrorHandler nextErrors, String idsToMerge,
-//        String leftControlField, String rightControlField)
-//    {
-//        this.reader = reader;
-//        this.idsToMerge = idsToMerge;
-//        this.leftControlField = leftControlField;
-//        this.rightControlField = rightControlField;
-////        this.nextErrors = nextErrors;
-////        this.currentErrors = currentErrors;
-//    }
-   
+       
     public boolean hasNext()
     {
         if (currentRecord == null) 
@@ -110,7 +78,6 @@ public class MarcCombiningReader implements MarcReader
             if (nextRecord != null) 
             { 
                 currentRecord = nextRecord;
-  //              copyErrors(currentErrors, nextErrors);
                 nextRecord = null; 
             }
             if (!reader.hasNext()) 
@@ -123,7 +90,7 @@ public class MarcCombiningReader implements MarcReader
             }
 			catch (Exception e)
 			{
-				if (currentRecord != null) 
+				if (currentRecord != null)
 				{
 					String recCntlNum = currentRecord.getControlNumber();
                     throw new MarcException("Couldn't get next record after " + (recCntlNum != null ? recCntlNum : "") + " -- " + e.toString());
@@ -136,7 +103,7 @@ public class MarcCombiningReader implements MarcReader
             while (recordsMatch(currentRecord, nextRecord))
             {
                 currentRecord = combineRecords(currentRecord, nextRecord, idsToMerge);
-          //      mergeErrors(currentRecord, nextErrors);
+//                mergeErrors(currentErrors, nextErrors);
                 if (reader.hasNext())
                 {
                     try {
@@ -238,24 +205,6 @@ public class MarcCombiningReader implements MarcReader
         return false;
     }
 
-    
-//    private void copyErrors(ErrorHandler currentErr, ErrorHandler nextErr)
-//    {
-//        if (currentErr != null && nextErr != null)
-//        {
-//            currentErr.reset();
-//            mergeErrors(currentErr, nextErr);
-//        }
-//    }
-//
-//    private void mergeErrors(ErrorHandler currentErr, ErrorHandler nextErr)
-//    {
-//        if (currentErr != null && nextErr != null)
-//        {
-//            currentErr.addErrors(nextErr.getErrors());
-//        }
-//    }
-
     static public Record combineRecords(Record currentRecord, Record nextRecord, String idsToMerge)
     {
         List<VariableField> fields = nextRecord.getVariableFields();
@@ -305,7 +254,6 @@ public class MarcCombiningReader implements MarcReader
         {
             currentRecord.addErrors(nextRecord.getErrors());
         }
-
         return(currentRecord);
     }
 

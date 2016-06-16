@@ -5,8 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.solr.client.solrj.SolrResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
@@ -16,10 +17,20 @@ import playground.solrmarc.solr.SolrProxy;
 
 public class ThreadedIndexer extends Indexer
 {
+    class RecordAndResult { 
+        final Record record;
+        final SolrInputDocument solrDoc;
+        public RecordAndResult(Record rec, SolrInputDocument solrDoc)
+        {
+            this.record = rec;
+            this.solrDoc = solrDoc;
+        }
+    };
+   
     private final BlockingQueue<Record> readQ;
     private final BlockingQueue<SolrInputDocument> docQ;
-    private final BlockingQueue<SolrResponse> respQ;
-    private final BlockingQueue<Record> errQ;
+    private final BlockingQueue<RecordAndResult> errQ;
+   
     boolean doneReading = false;
     final int buffersize; 
     final int chunksize; 
@@ -30,8 +41,7 @@ public class ThreadedIndexer extends Indexer
         super(indexers, solrProxy);
         readQ = new ArrayBlockingQueue<Record>(buffersize);
         docQ = new ArrayBlockingQueue<SolrInputDocument>(buffersize);
-        respQ = new ArrayBlockingQueue<SolrResponse>(buffersize);
-        errQ = new ArrayBlockingQueue<Record>(buffersize);
+        errQ = new LinkedBlockingQueue<RecordAndResult>();
         doneReading = false;
         this.buffersize = buffersize;
         this.chunksize = chunksize;
@@ -73,9 +83,18 @@ public class ThreadedIndexer extends Indexer
                 {
                     try
                     {
-                        Record record = readQ.take();
+                        Record record = readQ.poll(10, TimeUnit.MILLISECONDS);
+                        if (record == null) 
+                            continue;
                         try { 
                             final SolrInputDocument document = indexToSolrDoc(record);
+                            if (document.containsKey("marc_error"))
+                            {
+                                if (errHandle.contains(eErrorHandleVal.RETURN_ERROR_RECORDS))
+                                    errQ.add(new RecordAndResult(record, document));
+                                if (! errHandle.contains(eErrorHandleVal.INDEX_ERROR_RECORDS))
+                                    continue;
+                            }
                             cnts[1] ++;
                             if (! docQ.offer(document) )
                             {
@@ -106,7 +125,7 @@ public class ThreadedIndexer extends Indexer
                         }
                         catch (Exception e)
                         {
-                            errQ.add(record);
+                            errQ.add(new RecordAndResult(record, null));
                         }
                     }
                     catch (InterruptedException e)

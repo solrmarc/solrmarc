@@ -501,7 +501,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
             if (result == null) return(result);
             if (result.startsWith("{"))
             {
-                String shelfKey = CallNumUtils.getLCShelfkey(valParts[1], record.getControlNumber(), null);
+                String shelfKey = CallNumUtils.getLCShelfkey(valParts[1], record.getControlNumber());
                 String keyDigits = shelfKey.substring(4, 8);
                 String ranges[] = result.replaceAll("[{]", "").split("[}]");
                 for (String range : ranges)
@@ -538,7 +538,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
        if (result == null) return(result);
        String resultParts[] = result.split(":", 2);
        if (sortableFlag && ( resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1]))))
-           result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber(), null);
+           result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber());
        else if (resultParts[1].startsWith("M@"))
            result = result.replaceAll("M@", "MSS ");
        return(result);
@@ -551,7 +551,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
        if (callnum == null) return(null);
        String resultParts[] = callnum.split(":", 2);
        if ( resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1])))
-           result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber(), null);
+           result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber());
        return(result);
    }
    

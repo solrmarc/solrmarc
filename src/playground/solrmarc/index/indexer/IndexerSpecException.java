@@ -106,7 +106,7 @@ public class IndexerSpecException extends RuntimeException
         StringBuilder build = new StringBuilder();
         if (solrField != null && spec != null)
         {
-            build.append(solrField).append(" = ").append(spec).append("\n");
+            build.append(solrField).append(" = ").append(spec);
         }
         return(build.toString());
     }
@@ -117,7 +117,10 @@ public class IndexerSpecException extends RuntimeException
         StringBuilder build = new StringBuilder();
         if (message != null)
         {
-            build.append(solrField).append(" : ").append(message).append("\n");
+            if (solrField != null)
+                build.append(solrField).append(" : ").append(message);
+            else
+                build.append(message);
         }
         return (build.toString());
     }

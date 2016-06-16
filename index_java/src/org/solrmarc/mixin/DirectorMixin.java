@@ -11,10 +11,13 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
+import org.solrmarc.index.SolrIndexerMixin;
 import playground.solrmarc.index.extractor.impl.custom.Mixin;
+import playground.solrmarc.index.indexer.IndexerSpecException;
+
 import org.solrmarc.tools.Utils;
 
-public class DirectorMixin implements Mixin
+public class DirectorMixin extends SolrIndexerMixin
 {
 //    Pattern releaseDatePattern = null;
 //    boolean isVideo = false;
@@ -78,11 +81,7 @@ public class DirectorMixin implements Mixin
                 if (subtitle != null && (subtitle.contains("direct") || subtitle.contains("Direct")))
                 {
                     
-//                    if (indexer.getErrorHandler() != null)
-//                    {
-//                        indexer.getErrorHandler().addError(record.getControlNumber(), "245", "b", ErrorHandler.MINOR_ERROR, 
-//                                                           "Director information erroneously included in the 245b subtitle field");
-//                    }
+                    addError(new IndexerSpecException("Director information erroneously included in the 245b subtitle field"));
                     Set<String> directors = getVideoDirectorsFromTextField(subtitle, false);
                     result.addAll(directors);
                 }
@@ -91,11 +90,7 @@ public class DirectorMixin implements Mixin
                 if (medium != null && (medium.contains("direct") || medium.contains("Direct")))
                 {
                     
-//                    if (indexer.getErrorHandler() != null)
-//                    {
-//                        indexer.getErrorHandler().addError(record.getControlNumber(), "245", "h", ErrorHandler.MINOR_ERROR, 
-//                                                           "Director information erroneously included in the 245h medium field");
-//                    }
+                    addError(new IndexerSpecException("Director information erroneously included in the 245h medium field"));
                     Set<String> directors = getVideoDirectorsFromTextField(medium, false);
                     result.addAll(directors);
                 }

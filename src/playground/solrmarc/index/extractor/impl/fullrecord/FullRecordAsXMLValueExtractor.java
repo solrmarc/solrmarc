@@ -1,18 +1,13 @@
 package playground.solrmarc.index.extractor.impl.fullrecord;
 
-import org.marc4j.Constants;
 import org.marc4j.MarcWriter;
 import org.marc4j.MarcXmlWriter;
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
-import org.marc4j.marc.Leader;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
-import org.xml.sax.helpers.AttributesImpl;
 
 import java.io.ByteArrayOutputStream;
-import java.io.CharArrayWriter;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 
 import javax.xml.transform.stream.StreamResult;
@@ -80,7 +75,7 @@ public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtrac
                                          new Tag("ind2", String.valueOf(field.getIndicator2())));
             for (Subfield subfield : field.getSubfields())
             {
-                startElement(sb, SUBFIELD, indent, 6, new Tag("code", ""+subfield.getCode()));
+                startElement(sb, SUBFIELD, indent, 6, new Tag("code", Character.toString(subfield.getCode())));
                 sb.append(getDataElement(subfield.getData()));
                 endElement(sb, SUBFIELD);
             }
@@ -139,5 +134,6 @@ public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtrac
     {
         return new MarcXmlWriter(streamResult);
     }
+
 
 }

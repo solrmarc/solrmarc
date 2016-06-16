@@ -13,12 +13,13 @@ public class MarcReaderFactory {
 
 	protected boolean verbose = false;
 //	protected ErrorHandler errors = null;
- 
-	/** The full class name of SolrIndexer or the subclass to be used */
+
+    /** The full class name of SolrIndexer or the subclass to be used */
 	//protected Properties configProps;
     protected boolean inputTypeXML = false;
     protected boolean inputTypeBinary = false;
     protected boolean inputTypeJSON = false;
+    protected boolean includeErrors = false;
 	protected boolean permissiveReader;
 	protected String defaultEncoding;
     protected boolean to_utf_8;
@@ -77,7 +78,7 @@ public class MarcReaderFactory {
             defaultEncoding = "BESTGUESS";
         }
 //        verbose = Boolean.parseBoolean(PropertyUtils.getProperty(configProps, "marc.verbose"));
-//        includeErrors = Boolean.parseBoolean(PropertyUtils.getProperty(configProps, "marc.include_errors"));
+        includeErrors = Boolean.parseBoolean(PropertyUtils.getProperty(config, "marc.include_errors"));
         to_utf_8 = Boolean.parseBoolean(PropertyUtils.getProperty(config, "marc.to_utf_8"));
         unicodeNormalize = PropertyUtils.getProperty(config, "marc.unicode_normalize");
         if (unicodeNormalize != null) 
@@ -117,7 +118,7 @@ public class MarcReaderFactory {
         }
         else if (permissiveReader)
         {
-      //      errors = new ErrorHandler();
+ //           errors = new ErrorHandler();
             reader = new MarcPermissiveStreamReader(is, true, to_utf_8, defaultEncoding);
         }
         else
@@ -131,16 +132,7 @@ public class MarcReaderFactory {
         {
             String combineLeftField = PropertyUtils.getProperty(config, "marc.combine_records.left_field");
             String combineRightField = PropertyUtils.getProperty(config, "marc.combine_records.right_field");
-//            if (errors == null)
-//            {
-                reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields, combineLeftField, combineRightField);
-//            }
-//            else
-//            {
-//                ErrorHandler errors2 = errors;
-//                errors = new ErrorHandler();
-//                reader = new MarcCombiningReader(reader, errors, errors2, combineConsecutiveRecordsFields, combineLeftField, combineRightField);
-//            }
+            reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields, combineLeftField, combineRightField);
         }
         
         // Add FilteredReader if requested
@@ -177,7 +169,7 @@ public class MarcReaderFactory {
         return reader;
 
 	}
-	
+	 
 	private void setMarc4JProperties(Properties configProps)
     {
         for (String prop : configProps.stringPropertyNames())

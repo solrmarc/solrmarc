@@ -1,5 +1,6 @@
 package org.solrmarc.debug;
 
+import java.awt.Color;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -7,6 +8,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import net.miginfocom.swing.MigLayout;
+import playground.solrmarc.index.Indexer.eErrorHandleVal;
 import playground.solrmarc.index.indexer.AbstractValueIndexer;
 import playground.solrmarc.index.indexer.IndexerSpecException;
 import playground.solrmarc.index.indexer.ValueIndexerFactory;
@@ -29,16 +31,20 @@ import javax.swing.JFileChooser;
 import java.awt.event.ActionEvent;
 
 import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.CompoundEdit;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
 
+import org.marc4j.MarcError;
 import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
@@ -53,6 +59,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -502,16 +509,18 @@ public class SolrMarcDebug
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            List<IndexerSpecException> exceptions = indexerFactory.getValidationExceptions();
-            errorPane.setText(getTextForExceptions(exceptions));
         }
-        // MultiValueIndexer indexer =
-        // (MultiValueIndexer)indexerFactory.createValueIndexer(solrFieldName,
-        // fieldSpecStr);
-        // MultiValueFieldMatchCollector fmc = new
-        // MultiValueFieldMatchCollector();
+        List<IndexerSpecException> exceptions = indexerFactory.getValidationExceptions();
+        errorPane.setText(getTextForExceptions(exceptions));
+        indexerFactory.clearPerRecordErrors();
         outputPane.setText("");
+        SimpleAttributeSet attributesErr = new SimpleAttributeSet();
+        attributesErr = new SimpleAttributeSet();
+        attributesErr.addAttribute(StyleConstants.CharacterConstants.Bold, Boolean.FALSE);
+        attributesErr.addAttribute(StyleConstants.CharacterConstants.Italic, Boolean.FALSE);
+        attributesErr.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.RED);
         Document doc = outputPane.getDocument();
+        
         for (AbstractValueIndexer<?> indexer : indexers)
         {
             Collection<String> fieldNameList = indexer.getSolrFieldNames();
@@ -536,12 +545,120 @@ public class SolrMarcDebug
                     }
                 }
             }
+            catch (InvocationTargetException ioe)
+            {
+                Throwable wrapped = ioe.getTargetException();
+                String outLine = "marc_error : " + indexer.getSolrFieldNames().toString() + wrapped.getMessage() + "\n";
+                try
+                {
+                    doc.insertString(doc.getLength(), outLine, attributesErr);
+                }
+                catch (BadLocationException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            catch (IllegalArgumentException e)
+            {
+                String outLine = "marc_error : " + indexer.getSolrFieldNames().toString() + e.getMessage() + "\n";
+                try
+                {
+                    doc.insertString(doc.getLength(), outLine, attributesErr);
+                }
+                catch (BadLocationException e1)
+                {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
+            catch (IndexerSpecException e)
+            {
+                String outLine = "marc_error : " + indexer.getSolrFieldNames().toString() + e.getMessage() + "\n";
+                try
+                {
+                    doc.insertString(doc.getLength(), outLine, attributesErr);
+                }
+                catch (BadLocationException e1)
+                {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                String outLine = "marc_error : " + indexer.getSolrFieldNames().toString() + e.getMessage() + "\n";
+                try
+                {
+                    doc.insertString(doc.getLength(), outLine, attributesErr);
+                }
+                catch (BadLocationException e1)
+                {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+            }
+//
+//            if (rec.hasErrors())
+//            {
+//                for (MarcError error : rec.getErrors())
+//                {
+//                    try
+//                    {
+//                        doc.insertString(doc.getLength(), "marc_error : "+error.toString()+"\n", attributesErr);
+//                    }
+//                    catch (BadLocationException e)
+//                    {
+//                        // TODO Auto-generated catch block
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+
+        }
+        List<IndexerSpecException> perRecordExceptions = indexerFactory.getPerRecordErrors();
+        try
+        {
+            doc.insertString(doc.getLength(), getTextForMarcErrorsAndExceptions(rec, perRecordExceptions), attributesErr);
+        }
+        catch (BadLocationException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+    }
+
+    private String getTextForMarcErrorsAndExceptions(Record rec, List<IndexerSpecException> exceptions)
+    {
+        StringBuilder text = new StringBuilder();
+        String lastSpec = "";
+        if (rec.hasErrors())
+        {
+            for (MarcError err : rec.getErrors())
+            {
+                text.append("Marc Record Error: ").append(err.toString()).append("\n");
             }
         }
+        if (exceptions != null)
+        {
+            for (IndexerSpecException e : exceptions)
+            {
+                if (e.getSolrField() == null) e.setSolrFieldAndSpec("marc_error", null);
+//                String specMessage = e.getSpecMessage();
+//                if (!specMessage.equals(lastSpec))
+//                {
+//                    text.append(specMessage);
+//                }
+//                lastSpec = specMessage;
+                text.append(e.getMessage()).append("\n");
+                for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause())
+                {
+                    text.append(e.getSolrField()).append(" : ").append(cause.getMessage()).append("\n");
+                }
+            }
+        }
+        return(text.toString());
     }
 
     private String getTextForExceptions(List<IndexerSpecException> exceptions)

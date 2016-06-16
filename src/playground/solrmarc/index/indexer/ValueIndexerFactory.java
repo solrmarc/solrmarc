@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -34,6 +35,7 @@ public class ValueIndexerFactory
     private final List<AbstractValueExtractorFactory> extractorFactories;
     private final List<AbstractValueMappingFactory> mappingFactories;
     private List<IndexerSpecException> validationExceptions;
+    private List<IndexerSpecException> perRecordExceptions;
     private FullConditionalParser parser = null;    
     private Properties localMappingProperties = null;
 
@@ -52,6 +54,7 @@ public class ValueIndexerFactory
     private ValueIndexerFactory()
     {
         validationExceptions = new ArrayList<IndexerSpecException>();
+        perRecordExceptions = null;
         try
         {
             this.extractorFactories = createExtractorFactories(ReflectionUtils.getExtractorFactoryClasses());
@@ -70,6 +73,33 @@ public class ValueIndexerFactory
     public List<IndexerSpecException> getValidationExceptions()
     {
         return validationExceptions;
+    }
+    
+    /**
+     * Return ALL of the exceptions encountered while processing indexing specification
+     * @return
+     */
+    public void addPerRecordError(IndexerSpecException error)
+    {
+        if (perRecordExceptions == null)
+        {
+            perRecordExceptions = new LinkedList<>();
+        }
+        perRecordExceptions.add(error);
+    }
+
+    /**
+     * Return ALL of the exceptions encountered while processing indexing specification
+     * @return
+     */
+    public List<IndexerSpecException> getPerRecordErrors()
+    {
+        return perRecordExceptions;
+    }
+
+    public void clearPerRecordErrors()
+    {
+        perRecordExceptions = null;
     }
 
     public Properties getLocalMappingProperties()
@@ -566,5 +596,6 @@ public class ValueIndexerFactory
         throw new IndexerSpecException("Could not handle map descriptor: " + toDelimitedString(mapParts, " ")); 
         // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
     }
+
 
 }
