@@ -6,11 +6,9 @@ import playground.solrmarc.index.indexer.ValueIndexerFactory;
 import playground.solrmarc.solr.SolrProxy;
 
 import org.apache.solr.common.SolrInputDocument;
-import org.marc4j.ErrorHandler;
 import org.marc4j.MarcError;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
-import org.solrmarc.marc.MarcReaderFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
