@@ -45,13 +45,13 @@ public class CompositeSpecification extends Specification
 
         if (spec instanceof SingleSpecification)
         {
-            if (tagsUsed.contains(((SingleSpecification) spec).tag))
+            if (tagsUsed.contains(((SingleSpecification) spec).tags[0]))
             {
                 duplicateTags = true;
             }
             else
             {
-                tagsUsed.add(((SingleSpecification) spec).tag);
+                tagsUsed.add(((SingleSpecification) spec).tags[0]);
             }
             pieces.add((SingleSpecification) spec);
         }

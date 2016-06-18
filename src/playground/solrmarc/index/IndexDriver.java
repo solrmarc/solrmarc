@@ -20,6 +20,7 @@ import playground.solrmarc.index.indexer.IndexerSpecException;
 import playground.solrmarc.index.indexer.ValueIndexerFactory;
 import playground.solrmarc.solr.SolrCoreLoader;
 import playground.solrmarc.solr.SolrProxy;
+import playground.solrmarc.solr.StdOutProxy;
 
 public class IndexDriver
 {
@@ -80,7 +81,14 @@ public class IndexDriver
     
     public void configureOutput(String solrURL)
     {
-        solrProxy = SolrCoreLoader.loadRemoteSolrServer(solrURL, true, false);
+        if (solrURL.equals("stdout"))
+        {
+            solrProxy = new StdOutProxy(System.out);
+        }
+        else 
+        {
+            solrProxy = SolrCoreLoader.loadRemoteSolrServer(solrURL, true, false);
+        }
     }
     
     public int processInput() throws Exception
@@ -106,7 +114,8 @@ public class IndexDriver
     {
         IndexDriver indexDriver = new IndexDriver();
         File f1 = new File("resources/marcreader.properties");
-        String inputfile = "records/uva_001.mrc";
+   //     String inputfile = "records/uva_001.mrc";
+        String inputfile = "resources/specTestRecs.mrc";
         InputStream marcdata;
         try
         {
@@ -124,11 +133,12 @@ public class IndexDriver
             e.printStackTrace();
         }
         
-        String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
+     //   String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
+        String solrURL = "stdout";
         indexDriver.configureOutput(solrURL);
 
         File f2 = new File("resources/blacklight_index.properties");
-        indexDriver.configureIndexer(f2, true);
+        indexDriver.configureIndexer(f2, false);
 
         List<IndexerSpecException> exceptions = indexDriver.indexerFactory.getValidationExceptions();
         if (!exceptions.isEmpty())
