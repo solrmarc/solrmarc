@@ -48,14 +48,19 @@ public abstract class SingleSpecification extends Specification
     }
 
     @Override
-    protected SingleSpecification getMatchingSpec(String tag, VariableField f)
+    protected SingleSpecification getMatchingSpec(final String tag, final VariableField f)
     {
-        String stag = this.tag;
-        if (tag.equals(stag))
+        if (specMatches(tag, f))
         {
             return (this);
         }
         return null;
+    }
+
+    protected boolean specMatches(String tag, VariableField f)
+    {
+        String stag = this.tag;
+        return(tag.equals(stag));        
     }
 
     abstract public void addFieldValues(Collection<String> result, VariableField vf) throws Exception;

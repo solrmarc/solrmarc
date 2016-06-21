@@ -182,7 +182,7 @@ public final class Utils
             prevResult = currResult;
             currResult = currResult.trim();
 
-            currResult = currResult.replaceAll(" *([,/;:])$", "");
+            currResult = currResult.replaceAll(" *([,/;:=])$", "");
 
             // trailing period removed in certain circumstances
             if (currResult.endsWith("."))

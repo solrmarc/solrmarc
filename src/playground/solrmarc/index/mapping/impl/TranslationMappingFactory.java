@@ -80,10 +80,10 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
             if (key.startsWith(mappingPrefix))
             {
                 String value = translationMapping.getProperty(key);
-                if (value.equals("null"))
-                {
-                    value = null;
-                }
+//                if (value.equals("null"))
+//                {
+//                    value = null;
+//                }
                 if (key.length() == mappingPrefix.length())
                 {
                     // remove prefix. There is no period.

@@ -92,12 +92,12 @@ public class CompositeSpecification extends Specification
         else
         {
             result = new ArrayList<FieldMatch>();
+            List<VariableField> fields = record.getVariableFields(getTags());
             for (SingleSpecification spec : pieces)
             {
-                List<VariableField> fields = record.getVariableFields(spec.tag);
                 for (VariableField vf : fields)
                 {
-                    if (spec.cond == null || spec.cond.matches(record, vf))
+                    if (spec.specMatches(vf.getTag(), vf) && (spec.cond == null || spec.cond.matches(record, vf)))
                     {
                         result.add(new FieldMatch(vf, spec));
                     }
