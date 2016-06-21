@@ -670,13 +670,13 @@ public class SolrMarcDebug
             String specMessage = e.getSpecMessage();
             if (!specMessage.equals(lastSpec))
             {
-                text.append(specMessage);
+                text.append(specMessage).append("\n");
             }
             lastSpec = specMessage;
-            text.append(e.getMessage());
+            text.append(e.getMessage()).append("\n");
             for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause())
             {
-                text.append(e.getSolrField()).append(" : ").append(cause.getMessage());
+                text.append(e.getSolrField()).append(" : ").append(cause.getMessage()).append("\n");
             }
         }
         return (text.toString());
