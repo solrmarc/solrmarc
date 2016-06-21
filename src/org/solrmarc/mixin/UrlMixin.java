@@ -1,4 +1,4 @@
-package org.solrmarc.index;
+package org.solrmarc.mixin;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -9,6 +9,8 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.index.SolrIndexerMixin;
 import org.solrmarc.tools.Utils;
 
 public class UrlMixin extends SolrIndexerMixin

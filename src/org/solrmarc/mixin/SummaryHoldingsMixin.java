@@ -1,4 +1,4 @@
-package org.solrmarc.index;
+package org.solrmarc.mixin;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -8,6 +8,7 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.index.SolrIndexerMixin;
 
 import playground.solrmarc.index.indexer.ValueIndexerFactory;
 import playground.solrmarc.index.mapping.AbstractMultiValueMapping;

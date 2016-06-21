@@ -1,4 +1,4 @@
-package org.solrmarc.index;
+package org.solrmarc.mixin;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -11,6 +11,8 @@ import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.index.SolrIndexerMixin;
 import org.solrmarc.tools.Utils;
 
 import playground.solrmarc.index.indexer.IndexerSpecException;

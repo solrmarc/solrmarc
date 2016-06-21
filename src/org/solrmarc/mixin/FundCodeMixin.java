@@ -1,4 +1,4 @@
-package org.solrmarc.index;
+package org.solrmarc.mixin;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.marc4j.marc.Record;
+import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.index.SolrIndexerMixin;
 import org.solrmarc.tools.Utils;
 
 import playground.solrmarc.index.indexer.IndexerSpecException;

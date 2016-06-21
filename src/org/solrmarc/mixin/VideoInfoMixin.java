@@ -1,4 +1,4 @@
-package org.solrmarc.index;
+package org.solrmarc.mixin;
 
 import java.util.LinkedHashSet;
 import java.util.List;

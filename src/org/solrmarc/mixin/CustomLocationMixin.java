@@ -1,4 +1,4 @@
-package org.solrmarc.index;
+package org.solrmarc.mixin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,6 +24,8 @@ import org.marc4j.marc.VariableField;
 import org.marc4j.marc.impl.DataFieldImpl;
 import org.marc4j.marc.impl.SubfieldImpl;
 import org.solrmarc.callnum.CallNumUtils;
+import org.solrmarc.index.SolrIndexer;
+import org.solrmarc.index.SolrIndexerMixin;
 import org.solrmarc.tools.PropertyUtils;
 import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
