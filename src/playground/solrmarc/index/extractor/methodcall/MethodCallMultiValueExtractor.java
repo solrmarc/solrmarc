@@ -1,11 +1,9 @@
 package playground.solrmarc.index.extractor.methodcall;
 
 import playground.solrmarc.index.extractor.AbstractMultiValueExtractor;
-import playground.solrmarc.index.indexer.IndexerSpecException;
 
 import org.marc4j.marc.Record;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 public class MethodCallMultiValueExtractor extends AbstractMultiValueExtractor

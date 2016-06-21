@@ -6,13 +6,15 @@ public abstract class AbstractExtractorMethodCall<T>
 {
     private final String objectName;
     private final String methodName;
+    private final int numParameters;
     private final boolean hasPerRecordInit;
 
-    protected AbstractExtractorMethodCall(final String objectName, final String methodName, final boolean hasPerRecordInit)
+    protected AbstractExtractorMethodCall(final String objectName, final String methodName, final boolean hasPerRecordInit, int numParameters)
     {
         this.objectName = objectName;
         this.methodName = methodName;
         this.hasPerRecordInit = hasPerRecordInit;
+        this.numParameters = numParameters;
     }
 
     /**
@@ -48,6 +50,11 @@ public abstract class AbstractExtractorMethodCall<T>
     public String getMethodName()
     {
         return methodName;
+    }
+
+    public int getNumParameters()
+    {
+        return numParameters;
     }
 
 }

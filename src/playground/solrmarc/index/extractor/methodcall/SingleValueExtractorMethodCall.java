@@ -10,9 +10,9 @@ public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<
     private final Method method;
     private final Method perRecordInit;
 
-    public SingleValueExtractorMethodCall(final Object mixin, final Method method, final Method perRecordInit)
+    public SingleValueExtractorMethodCall(final Object mixin, final Method method, final Method perRecordInit, int numParameters)
     {
-        super(mixin.getClass().getSimpleName(), method.getName(), perRecordInit != null);
+        super(mixin.getClass().getName(), method.getName(), perRecordInit != null, numParameters);
         this.mixin = mixin;
         this.method = method;
         this.perRecordInit = perRecordInit;

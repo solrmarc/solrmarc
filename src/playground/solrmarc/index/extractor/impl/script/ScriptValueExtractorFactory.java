@@ -102,12 +102,12 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
         if (Collection.class.isAssignableFrom(method.getReturnType()))
         {
             return new MethodCallMultiValueExtractor(
-                    new ScriptMultiValueMethodCall(interpreter, method, scriptFileName), context.getParameters());
+                    new ScriptMultiValueMethodCall(interpreter, method, scriptFileName, context.getParameters().length), context.getParameters());
         }
         else
         {
             return new MethodCallSingleValueExtractor(
-                    new ScriptSingleValueMethodCall(interpreter, method, scriptFileName), context.getParameters());
+                    new ScriptSingleValueMethodCall(interpreter, method, scriptFileName, context.getParameters().length), context.getParameters());
         }
     }
 

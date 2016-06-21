@@ -9,9 +9,9 @@ public class ScriptSingleValueMethodCall extends AbstractExtractorMethodCall<Str
     private final Interpreter interpreter;
     private final BshMethod method;
 
-    public ScriptSingleValueMethodCall(final Interpreter interpreter, final BshMethod method, final String scriptFileName)
+    public ScriptSingleValueMethodCall(final Interpreter interpreter, final BshMethod method, final String scriptFileName, int numParameters)
     {
-        super(scriptFileName, method.getName(), false);
+        super(scriptFileName, method.getName(), false, numParameters);
         this.interpreter = interpreter;
         this.method = method;
 

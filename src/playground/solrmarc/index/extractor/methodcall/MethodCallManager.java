@@ -116,11 +116,11 @@ public class MethodCallManager
                 AbstractExtractorMethodCall<?> methodCall = null;
                 if (Collection.class.isAssignableFrom(method.getReturnType()))
                 {
-                    methodCall = createMultiValueExtractorMethodCall(mixin, method, hasPerRecordInit);
+                    methodCall = createMultiValueExtractorMethodCall(mixin, method, hasPerRecordInit, parameterTypes.length);
                 }
                 else if (String.class.isAssignableFrom(method.getReturnType()))
                 {
-                    methodCall = createSingleValueExtractorMethodCall(mixin, method, hasPerRecordInit);
+                    methodCall = createSingleValueExtractorMethodCall(mixin, method, hasPerRecordInit, parameterTypes.length);
                 }
                 if (addMethodsAsDefault)
                 {
@@ -168,14 +168,14 @@ public class MethodCallManager
         return new SingleValueMappingMethodCall(object, method);
     }
 
-    protected SingleValueExtractorMethodCall createSingleValueExtractorMethodCall(Object object, Method method, Method perRecordInit)
+    protected SingleValueExtractorMethodCall createSingleValueExtractorMethodCall(Object object, Method method, Method perRecordInit, int numParameters)
     {
-        return new SingleValueExtractorMethodCall(object, method, perRecordInit);
+        return new SingleValueExtractorMethodCall(object, method, perRecordInit, numParameters);
     }
 
-    protected MultiValueExtractorMethodCall createMultiValueExtractorMethodCall(Object object, Method method, Method perRecordInit)
+    protected MultiValueExtractorMethodCall createMultiValueExtractorMethodCall(Object object, Method method, Method perRecordInit, int numParameters)
     {
-        return new MultiValueExtractorMethodCall(object, method, perRecordInit);
+        return new MultiValueExtractorMethodCall(object, method, perRecordInit, numParameters);
     }
 
     /**
@@ -229,12 +229,13 @@ public class MethodCallManager
 
     public String loadedExtractorMixinsToString()
     {
-        return loadedExtractorMixinsToString(null);
+        // get all Extractor Mixins and return them in a printable string
+        return loadedExtractorMixinsToString(getLoadedExtractorMixinsMatches(null, null, -1));
     }
     
-    public String loadedExtractorMixinsToString(String methodNameToMatch)
+    public List<AbstractExtractorMethodCall<?>> getLoadedExtractorMixinsMatches(String classNameToMatch, String methodNameToMatch, int numParameters)
     {
-        List<String> lines = new ArrayList<>(extractorMethodCalls.size());
+        List<AbstractExtractorMethodCall<?>> result = new ArrayList<>();
         for (final String key : extractorMethodCalls.keySet())
         {
             // Method calls are added twice. Once with a class name, once with
@@ -244,11 +245,27 @@ public class MethodCallManager
             if (!key.startsWith("null"))
             {
                 final AbstractExtractorMethodCall<?> call = extractorMethodCalls.get(key);
-                if (methodNameToMatch == null || methodNameToMatch.equals(call.getMethodName()))
+                if (classNameToMatch == null || classNameToMatch.equals(call.getObjectName()))
                 {
-                    lines.add("- " + call.getObjectName() + "::" + call.getMethodName());
+                    if (methodNameToMatch == null || methodNameToMatch.equals(call.getMethodName()))
+                    {
+                        if (numParameters == -1 || numParameters == call.getNumParameters())
+                        {
+                            result.add(call);
+                        }
+                    }
                 }
             }
+        }
+        return(result);
+    }
+    
+    public String loadedExtractorMixinsToString(List<AbstractExtractorMethodCall<?>> matches)
+    {
+        List<String> lines = new ArrayList<>(matches.size());
+        for (final AbstractExtractorMethodCall<?> call : matches)
+        {
+            lines.add("- " + call.getObjectName() + "::" + call.getMethodName());
         }
         Collections.sort(lines);
         final StringBuilder buffer = new StringBuilder();
@@ -258,6 +275,33 @@ public class MethodCallManager
         }
         return buffer.toString();
     }
+
+//    public String loadedExtractorMixinsToString(String methodNameToMatch)
+//    {
+//        List<String> lines = new ArrayList<>(extractorMethodCalls.size());
+//        for (final String key : extractorMethodCalls.keySet())
+//        {
+//            // Method calls are added twice. Once with a class name, once with
+//            // 'null' as class name.
+//            // It doesn't matter which one we take, but we don't want to show
+//            // both entries.
+//            if (!key.startsWith("null"))
+//            {
+//                final AbstractExtractorMethodCall<?> call = extractorMethodCalls.get(key);
+//                if (methodNameToMatch == null || methodNameToMatch.equals(call.getMethodName()))
+//                {
+//                    lines.add("- " + call.getObjectName() + "::" + call.getMethodName());
+//                }
+//            }
+//        }
+//        Collections.sort(lines);
+//        final StringBuilder buffer = new StringBuilder();
+//        for (final String line : lines)
+//        {
+//            buffer.append(line).append('\n');
+//        }
+//        return buffer.toString();
+//    }
 
     public String loadedMappingMixinsToString()
     {
@@ -305,6 +349,7 @@ public class MethodCallManager
         }
         return(true);
     }
+
     
 //    public final void setRecordLastCalledFor(Method perRecordInit, String recordID)
 //    {

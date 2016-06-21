@@ -12,9 +12,9 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
     private final BshMethod method;
 
     public ScriptMultiValueMethodCall(final Interpreter interpreter, final BshMethod method,
-            final String scriptFileName)
+            final String scriptFileName, int numParameters)
     {
-        super(scriptFileName, method.getName(), false);
+        super(scriptFileName, method.getName(), false, numParameters);
         this.interpreter = interpreter;
         this.method = method;
 
