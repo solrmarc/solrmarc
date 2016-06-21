@@ -5,10 +5,13 @@
     <!-- set global properties for this build -->
     <property name="src" location="src"/>
     <property name="src.tests" location="test"/>
-    <property name="build" location="out/production"/>
+    <property name="build" location="build"/>
     <property name="build.tests" location="out/test"/>
     <property name="dist" location="dist"/>
+    <property name="lib" location="lib"/>
+    <property name="distlib" location="dist/lib"/>
     <property name="reports.tests" location="logs"/>
+    <property name="custom.jar.name" value="solrmarc_core"/>
 
     <!-- import other ant scripts -->
     <property name="buildtools.path" location="buildtools" />
@@ -48,12 +51,53 @@
             description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
         <javac srcdir="${src}" destdir="${build}">
-            <classpath>
+            <classpath >
                 <fileset dir="lib">
                     <include name="**/*.jar"/>
                 </fileset>
             </classpath>
         </javac>
+    </target>
+
+    <target name="jar" depends="compile" unless="jar.already.run"
+            description="Build custom jar file containing custom code and log4j.properties" >
+        <mkdir dir="${dist}" />
+
+        <resources id="allclassfiles" >
+            <fileset dir="${build}" includes="**/*.class" />
+            <fileset dir="${basedir}" includes="log4j.properties" />
+        </resources>
+
+        <path id="alljarfiles" >
+            <fileset dir="${lib}" includes="*.jar" />
+        </path>
+
+    	<copy todir="${distlib}" flatten="true">
+    	  <path  refid="alljarfiles"/>
+    	</copy> 
+    	
+        <mkdir dir="${dist}/index_java/" />
+    	<copy todir="${dist}/index_java" >
+    		<fileset dir="index_java" includes="src/**/*.java"/>
+    	</copy> 
+    	
+    	<manifestclasspath property="manifest.classpath" jarfile="${dist}/${custom.jar.name}.jar">
+    	    <classpath>
+    	        <fileset dir="${distlib}" includes="*.jar"/>
+    	    </classpath>
+    	</manifestclasspath>
+    	
+        <jar destfile="${dist}/${custom.jar.name}.jar">
+        	<manifest>
+        	    <attribute name="Main-Class" value="playground.solrmarc.index.IndexDriver"/>
+        		<attribute name="Class-Path" value="${manifest.classpath}" />
+            </manifest>
+        	<fileset dir="${basedir}" includes="log4j.properties" />
+        	<fileset dir="${build}" includes="**/*.class" />
+        </jar>
+
+        <delete dir="${site.build.dir}/tmp_extra" />
+        <property name="build.already.run" value="true" />
     </target>
 
     <target name="test">

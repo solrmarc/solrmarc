@@ -6,3 +6,5 @@
 /out/
 /.settings/
 *.log
+/dist/
+/solrmarc3.out
