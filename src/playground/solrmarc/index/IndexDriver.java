@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -83,7 +85,17 @@ public class IndexDriver
     {
         if (solrURL.equals("stdout"))
         {
-            solrProxy = new StdOutProxy(System.out);
+            try
+            {
+                PrintStream out = new PrintStream(System.out, true, "UTF-8");
+                System.setOut(out);
+                solrProxy = new StdOutProxy(out);
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
         else 
         {
@@ -177,12 +189,12 @@ public class IndexDriver
             String specMessage = e.getSpecMessage();
             if (!specMessage.equals(lastSpec))
             {
-                text.append(specMessage);
+                text.append(specMessage).append("\n");
             }
-            text.append(e.getMessage());
+            text.append(e.getMessage()).append("\n");
             for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause())
             {
-                text.append(e.getSolrField()).append(" : ").append(cause.getMessage());
+                text.append(e.getSolrField()).append(" : ").append(cause.getMessage()).append("\n");
             }
         }
         return (text.toString());
