@@ -624,6 +624,11 @@ public class SolrIndexer implements Mixin
         return(translationMapSpec);
     }
     
+    public String loadTranslationMap(String ignore, String translationMapSpec) 
+    {
+        return(loadTranslationMap(translationMapSpec));
+    }
+    
     /**
      * Get the appropriate Map object from populated transMapMap
      * @param mapName the name of the translation map to find
@@ -637,6 +642,15 @@ public class SolrIndexer implements Mixin
         return null;
     }
 
+    public Collection<String> remap(Collection<String> valuesToMap, Object translationMap, boolean b) throws Exception
+    {
+        if (translationMap instanceof AbstractMultiValueMapping)
+        {
+            AbstractMultiValueMapping map = (AbstractMultiValueMapping) translationMap;
+            return(map.map(valuesToMap));
+        }
+        return null;
+    }
     public String remap(String valueToMap, Object translationMap, boolean b) throws Exception
     {
         if (translationMap instanceof AbstractMultiValueMapping)
