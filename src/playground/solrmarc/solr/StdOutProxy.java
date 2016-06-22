@@ -76,6 +76,7 @@ public class StdOutProxy implements SolrProxy
 
     public void close()
     {
+        output.flush();
     }
 
     public SolrServer getSolrServer()
@@ -85,6 +86,7 @@ public class StdOutProxy implements SolrProxy
     
     public void commit(boolean optimize) throws IOException
     {
+        output.flush();
     }
 
     public void delete(String id, boolean fromCommitted, boolean fromPending) throws IOException

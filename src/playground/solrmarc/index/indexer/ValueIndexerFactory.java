@@ -120,30 +120,16 @@ public class ValueIndexerFactory
     }
 
     public List<AbstractValueIndexer<?>> createValueIndexers(File indexSpecFile)
-            throws IllegalAccessException, InstantiationException
+            throws IllegalAccessException, InstantiationException, IOException
     {
         List<String> lines = new ArrayList<String>();
-        try
+        BufferedReader reader = new BufferedReader(new FileReader(indexSpecFile));
+        String line;
+        while ((line = reader.readLine()) != null)
         {
-            BufferedReader reader = new BufferedReader(new FileReader(indexSpecFile));
-            String line;
-            while ((line = reader.readLine()) != null)
-            {
-                lines.add(line);
-            }
-            return createValueIndexers(lines.toArray(new String[0]));
+            lines.add(line);
         }
-        catch (FileNotFoundException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return(null);
+        return createValueIndexers(lines.toArray(new String[0]));
     }
     
     public List<AbstractValueIndexer<?>> createValueIndexers(String configSpecs[])

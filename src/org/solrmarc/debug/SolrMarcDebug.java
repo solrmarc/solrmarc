@@ -2,6 +2,7 @@ package org.solrmarc.debug;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Font;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
@@ -153,6 +154,8 @@ public class SolrMarcDebug
         frmSolrmarcIndexSpecification.getContentPane().add(scrollPane, "cell 0 0,grow");
 
         recordPane = new JTextPane();
+        Font currFont = recordPane.getFont();
+        recordPane.setFont(new Font("Courier New", currFont.getStyle(), currFont.getSize()));
         recordPane.setEditable(false);
         scrollPane.setViewportView(recordPane);
 
@@ -207,6 +210,8 @@ public class SolrMarcDebug
         frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_1, "cell 0 2 2 1,grow");
 
         configPane = new JTextPane();
+        currFont = configPane.getFont();
+        configPane.setFont(new Font("Courier New", currFont.getStyle(), currFont.getSize()));
         scrollPane_1.setViewportView(configPane);
        // configPane.getDocument().
         undo = new CompoundUndoManager(configPane);
@@ -216,6 +221,8 @@ public class SolrMarcDebug
         frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_2, "cell 1 0,grow");
 
         outputPane = new JTextPane();
+        currFont = outputPane.getFont();
+        outputPane.setFont(new Font("Courier New", currFont.getStyle(), currFont.getSize()));
         outputPane.setEditable(false);
         scrollPane_2.setViewportView(outputPane);
 
@@ -223,6 +230,8 @@ public class SolrMarcDebug
         frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_3, "cell 0 3 2 1,grow");
 
         errorPane = new JTextPane();
+        currFont = errorPane.getFont();
+        errorPane.setFont(new Font("Courier New", currFont.getStyle(), currFont.getSize()));
         errorPane.setEditable(false);
         scrollPane_3.setViewportView(errorPane);
 
@@ -363,7 +372,7 @@ public class SolrMarcDebug
                 String firstId = null;
                 try
                 {
-                    reader = MarcReaderFactory.instance().makeReader(new FileInputStream(f), readerProps);
+                    reader = MarcReaderFactory.instance().makeReader(readerProps, new FileInputStream(f));
                     while (reader.hasNext())
                     {
                         Record record = reader.next();

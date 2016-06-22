@@ -2,6 +2,8 @@ package org.solrmarc.marc;
 
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -44,17 +46,67 @@ public class MarcReaderFactory {
 	    return(theFactory);
 	}
 	
-//	public MarcReader makeReader(InputStream input,  Map<String, String> config)
-//	{
-//	    Properties properties Map<String, String> map = new HashMap<String, String>();
-//	    for (String key : properties.stringPropertyNames())
-//	    {
-//	        map.put(key, properties.getProperty(key));
-//	    }
-//	    return(makeReader(input, map));
-//	}
+    public MarcReader makeReader(Properties config, String ... inputFilenames)
+    {
+        if (inputFilenames.length == 0)
+        {
+            return makeReader(config, "stdin");
+        }
+        else if (inputFilenames.length == 1)
+        {
+            return makeReader(config, inputFilenames[0]);
+        }
+        List<MarcReader> readers = new ArrayList<>();
+        for (String inputFilename : inputFilenames)
+        {
+            MarcReader reader = makeReader(config, inputFilename);
+            readers.add(reader);
+        }
+        return(new MarcMultiplexReader(readers));
+    }
+    
+    public MarcReader makeReader(Properties config, List<String> inputFilenames)
+    {
+        if (inputFilenames.size() == 0)
+        {
+            return makeReader(config, "stdin");
+        }
+        else if (inputFilenames.size() == 1)
+        {
+            return makeReader(config, inputFilenames.iterator().next());
+        }
+        List<MarcReader> readers = new ArrayList<>();
+        for (String inputFilename : inputFilenames)
+        {
+            MarcReader reader = makeReader(config, inputFilename);
+            readers.add(reader);
+        }
+        return(new MarcMultiplexReader(readers));
+    }
+    
+	public MarcReader makeReader(Properties config, String inputFilename)
+    {
+        InputStream is; 
+        if (inputFilename.equals("-") || inputFilename.equals("stdin"))
+        {
+            is = new BufferedInputStream(System.in);
+        }
+        else 
+        {
+            try
+            {
+                is = new BufferedInputStream(new FileInputStream(inputFilename));
+            }
+            catch (FileNotFoundException e)
+            {
+                logger.error("Fatal error: Exception opening InputStream" + inputFilename);
+                throw new IllegalArgumentException("Fatal error: Exception opening InputStream" + inputFilename);
+            }
+        }
+        return(makeReader(config, is));
+    }
 	
-	public MarcReader makeReader(InputStream input, Properties config)
+	public MarcReader makeReader(Properties config, InputStream input)
 	{
         MarcReader reader; 
         setMarc4JProperties(config);
@@ -90,7 +142,15 @@ public class MarcReaderFactory {
 //        else
 //            logger.debug("Attempting to read data from stdin ");
         
-        BufferedInputStream is = new BufferedInputStream(input);
+        InputStream is;
+        if (input.markSupported())
+        {
+            is = input;
+        }
+        else
+        {
+            is = new BufferedInputStream(input);
+        }
         is.mark(20);
         byte[] buffer = new byte[5];
         int numRead;
@@ -110,20 +170,27 @@ public class MarcReaderFactory {
         
         if (inputTypeXML)
         {
+            to_utf_8 = true;
             reader = new MarcUnprettyXmlReader(is);
         }
         else if (inputTypeJSON)
         {
+            to_utf_8 = true;
             reader = new MarcJsonReader(is);
         }
-        else if (permissiveReader)
+        else if (inputTypeBinary && permissiveReader)
         {
  //           errors = new ErrorHandler();
             reader = new MarcPermissiveStreamReader(is, true, to_utf_8, defaultEncoding);
         }
-        else
+        else if (inputTypeBinary)
         {
             reader = new MarcPermissiveStreamReader(is, false, to_utf_8, defaultEncoding);
+        }
+        else
+        {
+            logger.error("Fatal error: Unable to determine type of inputfile");
+            throw new IllegalArgumentException("Fatal error: Unable to determine type of inputfile");
         }
         
         // Add Combine Record reader if requested
