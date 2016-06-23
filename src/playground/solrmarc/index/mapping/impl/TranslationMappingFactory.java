@@ -53,10 +53,10 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
         {
             properties = new Properties();
             logger.debug("Load translation map: ./translation_maps/" + translationMappingFileName);
-            File file = new File(".");
-            logger.debug("current Directory = " + file.getAbsolutePath());
-
-            FileInputStream inputStream = new FileInputStream("./translation_maps/" + translationMappingFileName);
+         //   File file = new File(".");
+         //   logger.debug("current Directory = " + file.getAbsolutePath());
+            String filename = ValueIndexerFactory.instance().getHomeDir() + "/translation_maps/" + translationMappingFileName;
+            FileInputStream inputStream = new FileInputStream(filename);
             properties.load(inputStream);
             translationMappingFiles.put(translationMappingFileName + "(null)", properties);
             if (subMappingName != null)

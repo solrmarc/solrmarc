@@ -38,16 +38,19 @@ public class ValueIndexerFactory
     private List<IndexerSpecException> perRecordExceptions;
     private FullConditionalParser parser = null;    
     private Properties localMappingProperties = null;
+    private static String homeDir = ".";
 
     /**
      *  The next three functions make the ValueIndexerFactory implement the Singleton pattern
      *  To create of use a Factory  do:
      *  ValueIndexerFactory.instance()
      */
-    private static ValueIndexerFactory theFactory = new ValueIndexerFactory();
+    private static ValueIndexerFactory theFactory = null;
     
     public static ValueIndexerFactory instance()
     {
+        if (theFactory == null)
+            theFactory = new ValueIndexerFactory();
         return(theFactory);
     }
     
@@ -581,6 +584,16 @@ public class ValueIndexerFactory
         }
         throw new IndexerSpecException("Could not handle map descriptor: " + toDelimitedString(mapParts, " ")); 
         // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
+    }
+
+    public static String getHomeDir()
+    {
+        return homeDir;
+    }
+    
+    public static void setHomeDir(String dir)
+    {
+        homeDir = dir;
     }
 
 

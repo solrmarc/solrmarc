@@ -12,6 +12,7 @@ import org.solrmarc.tools.PropertyUtils;
 
 import playground.solrmarc.index.extractor.impl.custom.Mixin;
 import playground.solrmarc.index.indexer.IndexerSpecException;
+import playground.solrmarc.index.indexer.ValueIndexerFactory;
 
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class LookupMixin implements Mixin
             try
             {
                 resultMap = new LinkedHashMap<>();
-                InputStream dateFirstAddedStream = PropertyUtils.getPropertyFileInputStream(new String[]{"."}, filename);
+                InputStream dateFirstAddedStream = PropertyUtils.getPropertyFileInputStream(new String[]{ValueIndexerFactory.getHomeDir()}, filename);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(dateFirstAddedStream));
                 String line;
                 while ((line = reader.readLine())!= null)

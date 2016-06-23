@@ -2,6 +2,8 @@ package playground.solrmarc.index.extractor.impl.java;
 
 import org.apache.log4j.Logger;
 
+import playground.solrmarc.index.indexer.ValueIndexerFactory;
+
 import javax.tools.*;
 import java.io.File;
 import java.io.IOException;
@@ -13,14 +15,12 @@ import java.util.*;
 public class JavaValueExtractorUtils
 {
     private final static Logger logger = Logger.getLogger(JavaValueExtractorUtils.class);
-    private final static String SRC_DIRECTORY = "./index_java/src";
-    private final static String BIN_DIRECTORY = "./index_java/bin";
     private final static List<File> sourceFiles = new ArrayList<>();
 
     protected static void clean()
     {
         logger.debug("Clean...");
-        deleteFolder(new File(BIN_DIRECTORY));
+        deleteFolder(new File(getBinDirectory()));
     }
 
     private static void deleteFolder(File folder)
@@ -62,8 +62,8 @@ public class JavaValueExtractorUtils
         }
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-        fileManager.setLocation(StandardLocation.SOURCE_PATH, Collections.singleton(new File(SRC_DIRECTORY)));
-        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(BIN_DIRECTORY)));
+        fileManager.setLocation(StandardLocation.SOURCE_PATH, Collections.singleton(new File(getSrcDirectory())));
+        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(getBinDirectory())));
 
         final DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector();
         final Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjectsFromFiles(sourceFiles);
@@ -88,8 +88,8 @@ public class JavaValueExtractorUtils
 
     private static void createDirectories()
     {
-        final File srcDirectory = new File(SRC_DIRECTORY);
-        final File binDirectory = new File(BIN_DIRECTORY);
+        final File srcDirectory = new File(getSrcDirectory());
+        final File binDirectory = new File(getBinDirectory());
 
         if (!srcDirectory.exists())
         {
@@ -105,6 +105,16 @@ public class JavaValueExtractorUtils
                 throw new RuntimeException("Couldn't create binary directory: " + binDirectory.getAbsolutePath());
             }
         }
+    }
+
+    private static String getBinDirectory()
+    {
+        return (ValueIndexerFactory.getHomeDir() + "/index_java/bin");
+    }
+
+    private static String getSrcDirectory()
+    {
+        return (ValueIndexerFactory.getHomeDir() + "/index_java/src");
     }
 
     protected static Class<?>[] getClasses()
@@ -131,7 +141,7 @@ public class JavaValueExtractorUtils
     {
         try
         {
-            final URL url = new File(BIN_DIRECTORY).toURI().toURL();
+            final URL url = new File(getBinDirectory()).toURI().toURL();
             return new URLClassLoader(new URL[] { url });
         }
         catch (MalformedURLException e)
@@ -147,7 +157,7 @@ public class JavaValueExtractorUtils
         for (final File sourceFile : sourceFiles)
         {
             final String sourcePath = sourceFile.getPath();
-            final int pathOffset = SRC_DIRECTORY.length() + (SRC_DIRECTORY.endsWith("/") ? 0 : 1);
+            final int pathOffset = getSrcDirectory().length() + (getSrcDirectory().endsWith("/") ? 0 : 1);
             final String classPath = sourcePath.substring(pathOffset, sourcePath.length() - 5);
             final String className = classPath.replace(File.separator, ".");
             classNames.add(className);
@@ -174,7 +184,7 @@ public class JavaValueExtractorUtils
         if (sourceFiles.isEmpty())
         {
             final Queue<File> directories = new LinkedList<>();
-            directories.add(new File(SRC_DIRECTORY));
+            directories.add(new File(getSrcDirectory()));
             while (!directories.isEmpty())
             {
                 final File directory = directories.poll();
@@ -207,7 +217,7 @@ public class JavaValueExtractorUtils
     private static boolean hasChanged(File sourceFile)
     {
         final String sourcePath = sourceFile.getPath();
-        final String targetPath = BIN_DIRECTORY + sourcePath.substring(SRC_DIRECTORY.length(), sourcePath.length() - 5)
+        final String targetPath = getBinDirectory() + sourcePath.substring(getSrcDirectory().length(), sourcePath.length() - 5)
                 + ".class";
         final File targetFile = new File(targetPath);
         return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();

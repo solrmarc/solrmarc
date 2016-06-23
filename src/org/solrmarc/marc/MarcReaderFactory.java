@@ -164,6 +164,9 @@ public class MarcReaderFactory {
             throw new IllegalArgumentException("Fatal error: Exception reading from InputStream");
         }
         String filestart = new String(buffer);
+        inputTypeXML = false;
+        inputTypeBinary = false;
+        inputTypeJSON = false;
         if (filestart.equalsIgnoreCase("<?xml"))         inputTypeXML = true;
         else if (filestart.startsWith("{"))             inputTypeJSON = true;              
         else if (filestart.matches("\\d\\d\\d\\d\\d"))  inputTypeBinary = true;              

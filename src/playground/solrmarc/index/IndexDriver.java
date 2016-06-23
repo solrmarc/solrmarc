@@ -1,11 +1,9 @@
 package playground.solrmarc.index;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -38,8 +36,9 @@ public class IndexDriver
     MarcReader reader;
     SolrProxy solrProxy;
 
-    public IndexDriver()
+    public IndexDriver(String homeDirStr)
     {
+        ValueIndexerFactory.setHomeDir(homeDirStr);
         indexerFactory = ValueIndexerFactory.instance();
     }
     
@@ -48,40 +47,21 @@ public class IndexDriver
         return indexerFactory;
     }
 
-    public void configureReader(File readerProperties, List<String> inputFilenames) throws FileNotFoundException, IOException 
+    public void configureReaderProps(File readerProperties) throws FileNotFoundException, IOException 
     {
         readerProps = new Properties();
         readerProps.load(new FileInputStream(readerProperties));
+    }
+    
+    public void configureReader(List<String> inputFilenames) 
+    {
         reader = MarcReaderFactory.instance().makeReader(readerProps, inputFilenames);
     }
     
     public void configureIndexer(File indexSpecification, boolean multiThreaded) 
                 throws IllegalAccessException, InstantiationException, IOException
     {
-//        try
-//        {
-            indexers = indexerFactory.createValueIndexers(indexSpecification);
-//        }
-//        catch (IllegalAccessException e)
-//        {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        catch (InstantiationException e)
-//        {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        catch (FileNotFoundException e)
-//        {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        catch (IOException e)
-//        {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
+        indexers = indexerFactory.createValueIndexers(indexSpecification);
         boolean includeErrors = (readerProps.getProperty("marc.include_errors", "false").equals("true"));
         indexer = null;
         if (multiThreaded)
@@ -177,13 +157,18 @@ public class IndexDriver
             }
             System.exit(0);
         }
-        IndexDriver indexDriver = new IndexDriver();
+        String homeDirStr = ".";
+        if (options.has("dir"))
+        {
+            homeDirStr = options.valueOf(homeDir).getAbsolutePath();
+        }
+        IndexDriver indexDriver = new IndexDriver(homeDirStr);
         File f1 = new File(options.valueOf(readOpts));
    //     String inputfile = "records/uva_001.mrc";
         List<String> inputFiles = options.valuesOf(files);
         try
         {
-            indexDriver.configureReader(f1, inputFiles);
+            indexDriver.configureReaderProps(f1);
         }
         catch (FileNotFoundException e1)
         {
@@ -197,8 +182,8 @@ public class IndexDriver
         }
         
      //   String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
-        String solrURL = options.has("stdout") ? "stdout" : options.valueOf("solrURL").toString();
-        boolean multithread = options.has("stdout") ? false : true;
+        String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : "stdout";
+        boolean multithread = options.has("solrURL") ? true : false;
         try {
             indexDriver.configureOutput(solrURL);
         }
@@ -208,7 +193,6 @@ public class IndexDriver
             System.err.println(sre.getMessage());
             System.exit(6);
         }
-
         File f2 = options.valueOf(configSpec);
         try
         {
@@ -240,6 +224,7 @@ public class IndexDriver
         }
         else
         {
+            indexDriver.configureReader(inputFiles);
             long startTime = System.currentTimeMillis();
             long endTime = startTime;
             int numIndexed = 0;
@@ -257,6 +242,7 @@ public class IndexDriver
                 indexDriver.endProcessing();
             }
             System.err.println(""+numIndexed+ " records indexed in "+ (endTime - startTime) / 1000.0 + " seconds");
+            System.err.flush();
         }
     }
 

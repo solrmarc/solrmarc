@@ -123,7 +123,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
 
     private void loadExtraShadowedIds(String addnlShadowedFilename, String boundWithFilename)
     {
-        final String propertyFilePaths[] = {"extra_data"}; 
+        final String propertyFilePaths[] = {ValueIndexerFactory.getHomeDir()+"/extra_data"}; 
         if (addnlShadowedIds == null)
         {
             addnlShadowedIds = new LinkedHashMap<String, String>();

@@ -77,10 +77,25 @@
     	</copy> 
     	
         <mkdir dir="${dist}/index_java/" />
-    	<copy todir="${dist}/index_java" >
-    		<fileset dir="index_java" includes="src/**/*.java"/>
-    	</copy> 
-    	
+        <copy todir="${dist}/index_java" >
+            <fileset dir="index_java" includes="src/**/*.java"/>
+        </copy> 
+        
+        <mkdir dir="${dist}/translation_maps" />
+        <copy todir="${dist}/translation_maps" >
+            <fileset dir="translation_maps" includes="*.properties"/>
+        </copy> 
+        
+        <mkdir dir="${dist}/index_scripts/" />
+        <copy todir="${dist}/index_scripts/" >
+            <fileset dir="index_scripts/" includes="*.bsh"/>
+        </copy> 
+       
+    	<mkdir dir="${dist}/extra_data" />
+        <copy todir="${dist}/extra_data" >
+            <fileset dir="extra_data" includes="*"/>
+        </copy> 
+        
     	<manifestclasspath property="manifest.classpath" jarfile="${dist}/${custom.jar.name}.jar">
     	    <classpath>
     	        <fileset dir="${distlib}" includes="*.jar"/>

@@ -9,6 +9,7 @@ import playground.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import playground.solrmarc.index.extractor.methodcall.MethodCallContext;
 import playground.solrmarc.index.extractor.methodcall.MethodCallMultiValueExtractor;
 import playground.solrmarc.index.extractor.methodcall.MethodCallSingleValueExtractor;
+import playground.solrmarc.index.indexer.ValueIndexerFactory;
 import playground.solrmarc.index.utils.StringReader;
 import org.apache.log4j.Logger;
 import org.solrmarc.tools.PropertyUtils;
@@ -23,7 +24,6 @@ import java.util.Map;
 public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
 {
     // TODO: Use dynamic paths
-    private final static String paths[] = new String[] { "index_scripts" };
     private final static Logger logger = Logger.getLogger(ScriptValueExtractorFactory.class);
     // TODO: Use SolrIndexer instead of Object.
     private final static Object SOLR_INDEXER = null;
@@ -40,6 +40,7 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
         logger.debug("Load bean shell script: " + scriptFileName);
         bsh = new Interpreter();
         bsh.setClassLoader(this.getClass().getClassLoader());
+        String paths[] = new String[] { ValueIndexerFactory.instance().getHomeDir() +"/index_scripts" };
         InputStream script = PropertyUtils.getPropertyFileInputStream(paths, scriptFileName);
         String scriptContents;
         try
