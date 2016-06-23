@@ -11,6 +11,7 @@ import java.util.concurrent.BlockingQueue;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.util.NamedList;
@@ -31,11 +32,18 @@ public class SolrServerProxy implements SolrProxy
         this.coreContainerObject = coreContainerObject;
     }
     
-    public void addDoc(SolrInputDocument inputDoc)
+    public int addDoc(SolrInputDocument inputDoc)
     {
+        int num = 0;
         try
         {
-            solrserver.add(inputDoc);
+            UpdateResponse resp = solrserver.add(inputDoc);
+            int status = resp.getStatus();
+            return(++num);
+        }
+        catch (SolrException e)
+        {
+            throw(new SolrRuntimeException("SolrserverException", e));
         }
         catch (SolrServerException e)
         {
@@ -47,36 +55,62 @@ public class SolrServerProxy implements SolrProxy
         }
     }
     
-    public String addDoc(Map<String, Object> fieldsMap, boolean verbose, boolean addDocToIndex) throws IOException
+    @Override
+    public int addDocs(Collection<SolrInputDocument> docQ)
     {
-        SolrInputDocument inputDoc = new SolrInputDocument();
-        Iterator<String> keys = fieldsMap.keySet().iterator();
-        while (keys.hasNext())
+        int num = 0;
+        try
         {
-            String fldName = keys.next();
-            Object fldValObject = fieldsMap.get(fldName);
-            if (fldValObject instanceof Collection<?>)
-            {
-                Collection<?> collValObject = (Collection<?>)fldValObject;
-                for (Object item : collValObject)
-                {
-                    inputDoc.addField(fldName, item, 1.0f );
-                }
-            }
-            else if (fldValObject instanceof String)
-            {
-                inputDoc.addField(fldName, fldValObject, 1.0f );
-            }
+            UpdateResponse resp = solrserver.add(docQ);
+            NamedList<Object> respresp = resp.getResponse();
+            int size = respresp.size();
+            num += docQ.size();
+            return(num);
         }
-        if (addDocToIndex)
+        catch (SolrException e)
         {
+            throw(new SolrRuntimeException("SolrserverException", e));
         }
-
-        if (verbose || !addDocToIndex)
-            return inputDoc.toString().replaceAll("> ", "> \n");
-        else
-            return(null);
+        catch (SolrServerException e)
+        {
+            throw(new SolrRuntimeException("SolrserverException", e));
+        }
+        catch (IOException e)
+        {
+            throw(new SolrRuntimeException("SolrserverException", e));
+        }
     }
+
+//    public String addDoc(Map<String, Object> fieldsMap, boolean verbose, boolean addDocToIndex) throws IOException
+//    {
+//        SolrInputDocument inputDoc = new SolrInputDocument();
+//        Iterator<String> keys = fieldsMap.keySet().iterator();
+//        while (keys.hasNext())
+//        {
+//            String fldName = keys.next();
+//            Object fldValObject = fieldsMap.get(fldName);
+//            if (fldValObject instanceof Collection<?>)
+//            {
+//                Collection<?> collValObject = (Collection<?>)fldValObject;
+//                for (Object item : collValObject)
+//                {
+//                    inputDoc.addField(fldName, item, 1.0f );
+//                }
+//            }
+//            else if (fldValObject instanceof String)
+//            {
+//                inputDoc.addField(fldName, fldValObject, 1.0f );
+//            }
+//        }
+//        if (addDocToIndex)
+//        {
+//        }
+//
+//        if (verbose || !addDocToIndex)
+//            return inputDoc.toString().replaceAll("> ", "> \n");
+//        else
+//            return(null);
+//    }
 
     public void close()
     {
@@ -165,25 +199,6 @@ public class SolrServerProxy implements SolrProxy
         if (e.getCause() instanceof SolrServerException)
             return(true);
         return false;
-    }
-
-    @Override
-    public void addDocs(Collection<SolrInputDocument> docQ)
-    {
-        try
-        {
-            UpdateResponse resp = solrserver.add(docQ);
-            NamedList<Object> respresp = resp.getResponse();
-            int size = respresp.size();
-        }
-        catch (SolrServerException e)
-        {
-            throw(new SolrRuntimeException("SolrserverException", e));
-        }
-        catch (IOException e)
-        {
-            throw(new SolrRuntimeException("SolrserverException", e));
-        }
     }
 
 }

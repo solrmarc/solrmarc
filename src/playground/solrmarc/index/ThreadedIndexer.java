@@ -1,13 +1,16 @@
 package playground.solrmarc.index;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
@@ -16,20 +19,11 @@ import playground.solrmarc.index.indexer.AbstractValueIndexer;
 import playground.solrmarc.solr.SolrProxy;
 
 public class ThreadedIndexer extends Indexer
-{
-    class RecordAndResult { 
-        final Record record;
-        final SolrInputDocument solrDoc;
-        public RecordAndResult(Record rec, SolrInputDocument solrDoc)
-        {
-            this.record = rec;
-            this.solrDoc = solrDoc;
-        }
-    };
-   
+{   
     private final BlockingQueue<Record> readQ;
     private final BlockingQueue<SolrInputDocument> docQ;
-    private final BlockingQueue<RecordAndResult> errQ;
+    private final BlockingQueue<Record> alreadyReadQ;
+    private final BlockingQueue<Thread> threadQ;
    
     boolean doneReading = false;
     final int buffersize; 
@@ -41,15 +35,17 @@ public class ThreadedIndexer extends Indexer
         super(indexers, solrProxy);
         readQ = new ArrayBlockingQueue<Record>(buffersize);
         docQ = new ArrayBlockingQueue<SolrInputDocument>(buffersize);
-        errQ = new LinkedBlockingQueue<RecordAndResult>();
+        alreadyReadQ = new ArrayBlockingQueue<Record>(buffersize);
+        threadQ = new LinkedBlockingQueue<Thread>();
         doneReading = false;
         this.buffersize = buffersize;
         this.chunksize = chunksize;
     }
 
     @Override
-    public int indexToSolr(final MarcReader reader) throws Exception
+    public int[] indexToSolr(final MarcReader reader) throws Exception
     {
+        cnts[0] = cnts[1] = cnts[2] = 0;
         Thread readerThread = new Thread("MarcReader-Thread") { 
             @Override 
             public void run()
@@ -63,6 +59,7 @@ public class ThreadedIndexer extends Indexer
                     {
                         try
                         {
+                            // queue is full, wait until it drains sowewhat
                             sleep(10);
                         }
                         catch (InterruptedException e)
@@ -91,14 +88,17 @@ public class ThreadedIndexer extends Indexer
                             if (document.containsKey("marc_error"))
                             {
                                 if (errHandle.contains(eErrorHandleVal.RETURN_ERROR_RECORDS))
-                                    errQ.add(new RecordAndResult(record, document));
+                                    errQ.add(new AbstractMap.SimpleEntry<Record, SolrInputDocument>(record, document));
                                 if (! errHandle.contains(eErrorHandleVal.INDEX_ERROR_RECORDS))
                                     continue;
                             }
                             cnts[1] ++;
-                            if (! docQ.offer(document) )
+                            boolean offer1Worked = docQ.offer(document);
+                            boolean offer2Worked = alreadyReadQ.offer(record);
+                            if (!offer1Worked  || (doneReading && readQ.isEmpty() && !docQ.isEmpty()))
                             {
                                 final Collection<SolrInputDocument> chunk = new ArrayList<SolrInputDocument>(docQ.size());
+                                final Collection<Record> chunkRecord = new ArrayList<Record>(alreadyReadQ.size());
                                 SolrInputDocument firstDoc = docQ.peek();
                                 String threadName = null;
                                 try {
@@ -110,22 +110,23 @@ public class ThreadedIndexer extends Indexer
                                 {
                                     threadName = "Anonymous";
                                 }
-                                Thread chunkThread = new Thread(threadName) {
-                                    @Override 
-                                    public void run()
-                                    {
-                                        solrProxy.addDocs(chunk);
-                                    }
-                                };
                                 docQ.drainTo(chunk);
+                                alreadyReadQ.drainTo(chunkRecord);
                                 docQ.clear();
-                                docQ.offer(document);
+                                alreadyReadQ.clear();
+                                Thread chunkThread = new ChunkIndexerThread(threadName, chunk, chunkRecord, errQ, solrProxy, cnts); 
                                 chunkThread.start();
+                                threadQ.add(chunkThread);
+                                if (!offer1Worked) 
+                                {
+                                    docQ.offer(document);
+                                    alreadyReadQ.offer(record);
+                                }
                             }
                         }
                         catch (Exception e)
                         {
-                            errQ.add(new RecordAndResult(record, null));
+                            errQ.add(new AbstractMap.SimpleEntry<Record, SolrInputDocument>(record, null));
                         }
                     }
                     catch (InterruptedException e)
@@ -144,27 +145,12 @@ public class ThreadedIndexer extends Indexer
         
         readerThread.start();
         indexerThread.start();
-//        while (reader.hasNext())
-//        {
-//            final Record record = reader.next();
-//            try { 
-//                final SolrInputDocument document = indexToSolrDoc(record);
-//                if (! docQ.offer(document) )
-//                {
-//                    solrProxy.addDocs(docQ);
-//                    docQ.clear();
-//                    docQ.offer(document);
-//                }
-//                cnt++;
-//            }
-//            catch (Exception e)
-//            {
-//                errQ.add(record);
-//            }
-//        }
         indexerThread.join();
-        int cnt = cnts[0];
-        return(cnt);
+        for (Thread t : threadQ)
+        {
+            if (t.isAlive()) t.join();
+        }
+        return(cnts);
     }
 
 }

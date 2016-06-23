@@ -28,7 +28,7 @@ public class StdOutProxy implements SolrProxy
         this.output = out;
     }
     
-    public void addDoc(SolrInputDocument inputDoc)
+    public int addDoc(SolrInputDocument inputDoc)
     {
         ArrayList<String> fNames = new ArrayList<String>();
         fNames.addAll(inputDoc.getFieldNames());
@@ -41,38 +41,50 @@ public class StdOutProxy implements SolrProxy
                 output.print(id + " : " + fieldName + " = " + val.toString() + "\n");
             }
         }
+        return(1);
     }
     
-    public String addDoc(Map<String, Object> fieldsMap, boolean verbose, boolean addDocToIndex) throws IOException
+    @Override
+    public int addDocs(Collection<SolrInputDocument> docQ)
     {
-        SolrInputDocument inputDoc = new SolrInputDocument();
-        Iterator<String> keys = fieldsMap.keySet().iterator();
-        while (keys.hasNext())
+        int num = 0;
+        for (SolrInputDocument doc : docQ)
         {
-            String fldName = keys.next();
-            Object fldValObject = fieldsMap.get(fldName);
-            if (fldValObject instanceof Collection<?>)
-            {
-                Collection<?> collValObject = (Collection<?>)fldValObject;
-                for (Object item : collValObject)
-                {
-                    inputDoc.addField(fldName, item, 1.0f );
-                }
-            }
-            else if (fldValObject instanceof String)
-            {
-                inputDoc.addField(fldName, fldValObject, 1.0f );
-            }
+            num += this.addDoc(doc);
         }
-        if (addDocToIndex)
-        {
-        }
-
-        if (verbose || !addDocToIndex)
-            return inputDoc.toString().replaceAll("> ", "> \n");
-        else
-            return(null);
+        return(num);
     }
+
+//    public String addDoc(Map<String, Object> fieldsMap, boolean verbose, boolean addDocToIndex) throws IOException
+//    {
+//        SolrInputDocument inputDoc = new SolrInputDocument();
+//        Iterator<String> keys = fieldsMap.keySet().iterator();
+//        while (keys.hasNext())
+//        {
+//            String fldName = keys.next();
+//            Object fldValObject = fieldsMap.get(fldName);
+//            if (fldValObject instanceof Collection<?>)
+//            {
+//                Collection<?> collValObject = (Collection<?>)fldValObject;
+//                for (Object item : collValObject)
+//                {
+//                    inputDoc.addField(fldName, item, 1.0f );
+//                }
+//            }
+//            else if (fldValObject instanceof String)
+//            {
+//                inputDoc.addField(fldName, fldValObject, 1.0f );
+//            }
+//        }
+//        if (addDocToIndex)
+//        {
+//        }
+//
+//        if (verbose || !addDocToIndex)
+//            return inputDoc.toString().replaceAll("> ", "> \n");
+//        else
+//            return(null);
+//    }
 
     public void close()
     {
@@ -104,13 +116,5 @@ public class StdOutProxy implements SolrProxy
         return false;
     }
 
-    @Override
-    public void addDocs(Collection<SolrInputDocument> docQ)
-    {
-        for (SolrInputDocument doc : docQ)
-        {
-            this.addDoc(doc);
-        }
-    }
 
 }

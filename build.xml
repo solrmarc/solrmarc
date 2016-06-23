@@ -96,6 +96,11 @@
             <fileset dir="extra_data" includes="*"/>
         </copy> 
         
+    	<mkdir dir="${dist}/resources" />
+        <copy todir="${dist}/resources" >
+            <fileset dir="resources" includes="*.properties"/>
+        </copy> 
+        
     	<manifestclasspath property="manifest.classpath" jarfile="${dist}/${custom.jar.name}.jar">
     	    <classpath>
     	        <fileset dir="${distlib}" includes="*.jar"/>

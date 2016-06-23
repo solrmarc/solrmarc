@@ -13,6 +13,7 @@ import playground.solrmarc.index.mapping.impl.MultiValuePatternMapping;
 import playground.solrmarc.index.mapping.impl.MultiValueTranslationMapping;
 import playground.solrmarc.solr.SolrProxy;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.solr.common.SolrInputDocument;
 import org.junit.Before;
 import org.junit.Test;
 import org.marc4j.MarcPermissiveStreamReader;
@@ -80,9 +81,9 @@ public class RecordTests
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
         final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer<?>>singletonList(valueIndexer), proxy);
 
-        indexer.index(new TestReader(Collections.singletonList(testRecord)));
+        indexer.indexToSolr(new TestReader(Collections.singletonList(testRecord)));
 
-        List<Map> documents = extractDocuments(proxy);
+        List<SolrInputDocument> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
         assertEquals(Collections.singletonMap("testField", "Foo Bar"), documents.get(0));
     }
@@ -94,9 +95,9 @@ public class RecordTests
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
         final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer<?>>singletonList(valueIndexer), proxy);
 
-        indexer.index(new TestReader(Collections.singletonList(testRecord)));
+        indexer.indexToSolr(new TestReader(Collections.singletonList(testRecord)));
 
-        List<Map> documents = extractDocuments(proxy);
+        List<SolrInputDocument> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
         assertEquals(Collections.singletonMap("testField", "BAR FOO"), documents.get(0));
     }
@@ -108,9 +109,9 @@ public class RecordTests
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
         final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer<?>>singletonList(valueIndexer), proxy);
 
-        indexer.index(new TestReader(Collections.singletonList(testRecord)));
+        indexer.indexToSolr(new TestReader(Collections.singletonList(testRecord)));
 
-        List<Map> documents = extractDocuments(proxy);
+        List<SolrInputDocument> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
         assertEquals(Collections.singletonMap("testField", "Xoo Xar"), documents.get(0));
     }
@@ -122,9 +123,9 @@ public class RecordTests
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
         final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer<?>>singletonList(valueIndexer), proxy);
 
-        indexer.index(new TestReader(Collections.singletonList(testRecord)));
+        indexer.indexToSolr(new TestReader(Collections.singletonList(testRecord)));
 
-        List<Map> documents = extractDocuments(proxy);
+        List<SolrInputDocument> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
         assertEquals(Collections.singletonMap("testField", "XXX XXX"), documents.get(0));
     }
@@ -134,17 +135,17 @@ public class RecordTests
     {
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
         final Indexer indexer = new Indexer(new ArrayList<AbstractValueIndexer<?>>(), proxy);
-        indexer.index(new TestReader(Collections.singletonList(testRecord)));
+        indexer.indexToSolr(new TestReader(Collections.singletonList(testRecord)));
 
-        List<Map> documents = extractDocuments(proxy);
+        List<SolrInputDocument> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
         assertTrue(documents.get(0).isEmpty());
     }
 
-    private List<Map> extractDocuments(final SolrProxy proxy) throws IOException
+    private List<SolrInputDocument> extractDocuments(final SolrProxy proxy) throws IOException
     {
-        final ArgumentCaptor<Map> mapArgumentCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(proxy).addDoc(mapArgumentCaptor.capture(), anyBoolean(), anyBoolean());
+        final ArgumentCaptor<SolrInputDocument> mapArgumentCaptor = ArgumentCaptor.forClass(SolrInputDocument.class);
+        verify(proxy).addDoc(mapArgumentCaptor.capture());
         return mapArgumentCaptor.getAllValues();
     }
 

@@ -65,7 +65,7 @@ public class IndexDriver
         boolean includeErrors = (readerProps.getProperty("marc.include_errors", "false").equals("true"));
         indexer = null;
         if (multiThreaded)
-            indexer = new ThreadedIndexer(indexers, solrProxy, 500, 1000);
+            indexer = new ThreadedIndexer(indexers, solrProxy, 640, 1000);
         else 
             indexer = new Indexer(indexers, solrProxy);
         
@@ -98,10 +98,10 @@ public class IndexDriver
         }
     }
     
-    public int processInput() throws Exception
+    public int[] processInput() throws Exception
     {
-        int numIndexed = indexer.indexToSolr(reader);
-        return numIndexed;
+        int numHandled[] = indexer.indexToSolr(reader);
+        return numHandled;
     }
 
     public void endProcessing()
@@ -123,6 +123,7 @@ public class IndexDriver
         OptionSpec<String> readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
         OptionSpec<File> configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
         OptionSpec<File> homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
+        parser.accepts("debug", "non-multithreaded debug mode");
         parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
         parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format");//.availableUnless("sorlURL");
         parser.acceptsAll(Arrays.asList("?", "help"), "show this usage information").forHelp();
@@ -172,18 +173,18 @@ public class IndexDriver
         }
         catch (FileNotFoundException e1)
         {
-            System.err.println("Fatal error: Exception opening reader properties input stream" + f1.getName());
+            System.err.println("Fatal error: Exception opening reader properties input stream: " + f1.getName());
             System.exit(1);
         }
         catch (IOException e1)
         {
-            System.err.println("Fatal error: Exception opening reader properties input stream" + f1.getName());
+            System.err.println("Fatal error: Exception opening reader properties input stream: " + f1.getName());
             System.exit(1);
         }
         
      //   String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
         String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : "stdout";
-        boolean multithread = options.has("solrURL") ? true : false;
+        boolean multithread = options.has("solrURL") && !options.has("debug") ? true : false;
         try {
             indexDriver.configureOutput(solrURL);
         }
@@ -227,7 +228,7 @@ public class IndexDriver
             indexDriver.configureReader(inputFiles);
             long startTime = System.currentTimeMillis();
             long endTime = startTime;
-            int numIndexed = 0;
+            int numIndexed[] = {0, 0, 0};
             try
             {
                 numIndexed = indexDriver.processInput();
@@ -241,7 +242,9 @@ public class IndexDriver
                 endTime = System.currentTimeMillis();
                 indexDriver.endProcessing();
             }
-            System.err.println(""+numIndexed+ " records indexed in "+ (endTime - startTime) / 1000.0 + " seconds");
+            System.err.println(""+numIndexed[0]+ " records read");
+            System.err.println(""+numIndexed[1]+ " records indexed  and ");
+            System.err.println(""+numIndexed[2]+ " records sent to Solr in "+ (endTime - startTime) / 1000.0 + " seconds");
             System.err.flush();
         }
     }

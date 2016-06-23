@@ -23,10 +23,12 @@ public interface SolrProxy
      *            - map of field names and values to add to the document
      * @return a string representation of the document
      */
-    public abstract String addDoc(Map<String, Object> fieldsMap, boolean verbose, boolean addDocToIndex)
-            throws IOException;
+//    public abstract String addDoc(Map<String, Object> fieldsMap, boolean verbose, boolean addDocToIndex)
+//            throws IOException;
     
-    public abstract void addDoc(SolrInputDocument document);
+    public abstract int addDoc(SolrInputDocument document);
+
+    public abstract int addDocs(Collection<SolrInputDocument> docQ);
 
     /**
      * delete doc from the index
@@ -52,7 +54,6 @@ public interface SolrProxy
      */
     public abstract void close();
 
-    public abstract void addDocs(Collection<SolrInputDocument> docQ);
 
 
 }

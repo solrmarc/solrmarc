@@ -4,6 +4,7 @@ import playground.solrmarc.index.indexer.AbstractValueIndexer;
 import playground.solrmarc.index.indexer.IndexerSpecException;
 import playground.solrmarc.index.indexer.ValueIndexerFactory;
 import playground.solrmarc.solr.SolrProxy;
+import playground.solrmarc.solr.SolrRuntimeException;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcError;
@@ -11,17 +12,32 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Indexer
 {
+//    public class RecordAndResult { 
+//        final Record record;
+//        final SolrInputDocument solrDoc;
+//        public RecordAndResult(Record rec, SolrInputDocument solrDoc)
+//        {
+//            this.record = rec;
+//            this.solrDoc = solrDoc;
+//        }
+//    };
+    
     protected final List<AbstractValueIndexer<?>> indexers;
     protected SolrProxy solrProxy;
     public EnumSet<eErrorHandleVal> errHandle = EnumSet.noneOf(eErrorHandleVal.class);
+    protected final BlockingQueue<AbstractMap.SimpleEntry<Record, SolrInputDocument>> errQ;
+
     public enum eErrorHandleVal
     {
         RETURN_ERROR_RECORDS, INDEX_ERROR_RECORDS;
@@ -31,6 +47,7 @@ public class Indexer
     {
         this.indexers = indexers;
         this.solrProxy = solrProxy;
+        errQ = new LinkedBlockingQueue<AbstractMap.SimpleEntry<Record, SolrInputDocument>>();
     }
 
     public boolean isSet(eErrorHandleVal val)
@@ -43,18 +60,18 @@ public class Indexer
         errHandle.add(val);
     }
     
-    public int index(final MarcReader reader) throws Exception
-    {
-        int cnt = 0;
-        while (reader.hasNext())
-        {
-            final Record record = reader.next();
-            final Map<String, Object> document = index(record);
-            solrProxy.addDoc(document, false, true);
-            cnt++;
-        }
-        return(cnt);
-    }
+//    public int index(final MarcReader reader) throws Exception
+//    {
+//        int cnt = 0;
+//        while (reader.hasNext())
+//        {
+//            final Record record = reader.next();
+//            final Map<String, Object> document = index(record);
+//            solrProxy.addDoc(document, false, true);
+//            cnt++;
+//        }
+//        return(cnt);
+//    }
     
     /**
      * indexToSolr  - Reads in a MARC Record, produces SolrInputDocument for it, sends that document to solr
@@ -63,18 +80,42 @@ public class Indexer
      * @return
      * @throws Exception
      */
-    public int indexToSolr(final MarcReader reader) throws Exception
+    public int[] indexToSolr(final MarcReader reader) throws Exception
     {
-        int cnt = 0;
+        int cnts[] = new int[] { 0, 0, 0 };
         while (reader.hasNext())
         {
             final Record record = reader.next();
+            cnts[0]++;
  //           ErrorHandler errors = MarcReaderFactory.instance().getErrors();
-            final SolrInputDocument document = indexToSolrDoc(record);
-            solrProxy.addDoc(document);
-            cnt++;
+            SolrInputDocument document = null;
+            try {
+                document = indexToSolrDoc(record);
+                cnts[1]++;
+            }
+            catch (Exception e)
+            {
+                if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS))
+                {
+                    errQ.add(new AbstractMap.SimpleEntry<Record, SolrInputDocument>(record, null));
+                }               
+            }
+            try { 
+                if (document != null)
+                {
+                    solrProxy.addDoc(document);
+                    cnts[2]++;
+                }
+            }
+            catch (SolrRuntimeException sse)
+            {
+                if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS))
+                {
+                    errQ.add(new AbstractMap.SimpleEntry<Record, SolrInputDocument>(record, document));
+                }
+            }
         }
-        return(cnt);
+        return(cnts);
     }
     
     private void addExceptionsToMap(SolrInputDocument document, List<IndexerSpecException> perRecordExceptions)
@@ -207,9 +248,19 @@ public class Indexer
             catch (InvocationTargetException ioe)
             {
                 Throwable wrapped = ioe.getTargetException();
+                Exception wrappedE = (wrapped instanceof Exception) ? (Exception)wrapped : null;
                 if (errHandle.contains(eErrorHandleVal.INDEX_ERROR_RECORDS))
+                {
                     inputDoc.addField("marc_error", indexer.getSolrFieldNames().toString() + wrapped.getMessage());
-                else throw(ioe);
+                }
+                else if (wrappedE != null)
+                {
+                    throw(wrappedE);
+                }
+                else
+                {
+                    throw(ioe);
+                }
             }
             catch (Exception e)
             {
