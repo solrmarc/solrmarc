@@ -27,21 +27,21 @@
     </target>
 
     <target name="precompile" description="run jflex and cup to generate javafiles for parser and scanner" >
-		<jflex file="${src}/playground/solrmarc/index/specification/conditional/Scanner.lex" verbose="true" 
-			   outdir="${src}/playground/solrmarc/index/specification/conditional" nobak="true" />
+		<jflex file="${src}/org/solrmarc/index/specification/conditional/Scanner.lex" verbose="true" 
+			   outdir="${src}/org/solrmarc/index/specification/conditional" nobak="true" />
     	
-        <cup srcfile="${src}/playground/solrmarc/index/specification/conditional/ConditionalParser.cup"
+        <cup srcfile="${src}/org/solrmarc/index/specification/conditional/ConditionalParser.cup"
              destdir="${src}"
-             package="playground.solrmarc.index.specification.conditional"
+             package="org.solrmarc.index.specification.conditional"
        	 	 symbols="sym"
              parser="ConditionalParser"
         />
-		<jflex file="${src}/playground/solrmarc/index/indexer/FullScanner.lex" verbose="true" 
-			   outdir="${src}/playground/solrmarc/index/indexer/" nobak="true" />
+		<jflex file="${src}/org/solrmarc/index/indexer/FullScanner.lex" verbose="true" 
+			   outdir="${src}/org/solrmarc/index/indexer/" nobak="true" />
     	
-        <cup srcfile="${src}/playground/solrmarc/index/indexer/FullConditionalParser.cup"
+        <cup srcfile="${src}/org/solrmarc/index/indexer/FullConditionalParser.cup"
              destdir="${src}"
-             package="playground.solrmarc.index.indexer"
+             package="org.solrmarc.index.indexer"
         	 symbols="FullSym"
              parser="FullConditionalParser"
         />
@@ -109,7 +109,7 @@
     	
         <jar destfile="${dist}/${custom.jar.name}.jar">
         	<manifest>
-        	    <attribute name="Main-Class" value="playground.solrmarc.index.IndexDriver"/>
+        	    <attribute name="Main-Class" value="org.solrmarc.index.IndexDriver"/>
         		<attribute name="Class-Path" value="${manifest.classpath}" />
             </manifest>
         	<fileset dir="${basedir}" includes="log4j.properties" />

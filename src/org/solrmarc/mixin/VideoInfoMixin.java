@@ -11,9 +11,9 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.SolrIndexerMixin;
+import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.tools.Utils;
 
-import playground.solrmarc.index.indexer.IndexerSpecException;
 
 public class VideoInfoMixin extends SolrIndexerMixin
 {

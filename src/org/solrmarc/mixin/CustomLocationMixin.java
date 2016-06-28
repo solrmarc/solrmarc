@@ -26,12 +26,12 @@ import org.marc4j.marc.impl.SubfieldImpl;
 import org.solrmarc.callnum.CallNumUtils;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.index.SolrIndexerMixin;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.tools.PropertyUtils;
 import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
 
-import playground.solrmarc.index.indexer.ValueIndexerFactory;
-import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 
 public class CustomLocationMixin extends SolrIndexerMixin
 {

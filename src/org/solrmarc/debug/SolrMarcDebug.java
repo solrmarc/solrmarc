@@ -9,12 +9,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import net.miginfocom.swing.MigLayout;
-import playground.solrmarc.index.Indexer.eErrorHandleVal;
-import playground.solrmarc.index.indexer.AbstractValueIndexer;
-import playground.solrmarc.index.indexer.IndexerSpecException;
-import playground.solrmarc.index.indexer.ValueIndexerFactory;
-import playground.solrmarc.index.specification.Specification;
-import playground.solrmarc.index.specification.conditional.ConditionalParser;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -51,6 +45,12 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.debug.CompoundUndoManager.RedoAction;
 import org.solrmarc.debug.CompoundUndoManager.UndoAction;
+import org.solrmarc.index.driver.Indexer.eErrorHandleVal;
+import org.solrmarc.index.indexer.AbstractValueIndexer;
+import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
+import org.solrmarc.index.specification.Specification;
+import org.solrmarc.index.specification.conditional.ConditionalParser;
 import org.solrmarc.marc.MarcReaderFactory;
 
 import java.awt.event.ActionListener;

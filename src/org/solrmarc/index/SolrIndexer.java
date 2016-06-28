@@ -15,16 +15,16 @@ import org.marc4j.marc.Record;
 //import org.solrmarc.tools.Utils;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.index.extractor.formatter.FieldFormatterMapped;
+import org.solrmarc.index.extractor.impl.custom.Mixin;
+import org.solrmarc.index.extractor.impl.direct.FieldMatch;
+import org.solrmarc.index.indexer.AbstractValueIndexer;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
+import org.solrmarc.index.specification.AbstractSpecificationFactory;
+import org.solrmarc.index.specification.Specification;
 import org.solrmarc.tools.Utils;
 
-import playground.solrmarc.index.extractor.formatter.FieldFormatterMapped;
-import playground.solrmarc.index.extractor.impl.custom.Mixin;
-import playground.solrmarc.index.extractor.impl.direct.FieldMatch;
-import playground.solrmarc.index.indexer.AbstractValueIndexer;
-import playground.solrmarc.index.indexer.ValueIndexerFactory;
-import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
-import playground.solrmarc.index.specification.AbstractSpecificationFactory;
-import playground.solrmarc.index.specification.Specification;
 
 /**
  * class SolrIndexer

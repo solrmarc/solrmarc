@@ -8,11 +8,11 @@ import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 
 import org.marc4j.marc.Record;
+import org.solrmarc.index.extractor.impl.custom.Mixin;
+import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.tools.PropertyUtils;
 
-import playground.solrmarc.index.extractor.impl.custom.Mixin;
-import playground.solrmarc.index.indexer.IndexerSpecException;
-import playground.solrmarc.index.indexer.ValueIndexerFactory;
 
 import java.util.Map;
 

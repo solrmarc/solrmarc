@@ -9,9 +9,9 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.SolrIndexerMixin;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 
-import playground.solrmarc.index.indexer.ValueIndexerFactory;
-import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 
 public class SummaryHoldingsMixin extends SolrIndexerMixin
 {

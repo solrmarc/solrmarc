@@ -3,8 +3,8 @@ package org.solrmarc.callnum;
 import java.util.Collection;
 
 import org.marc4j.marc.Record;
+import org.solrmarc.index.extractor.impl.custom.Mixin;
 
-import playground.solrmarc.index.extractor.impl.custom.Mixin;
 
 public class CallNumberMixin implements Mixin
 {

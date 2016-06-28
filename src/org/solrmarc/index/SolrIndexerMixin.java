@@ -3,9 +3,10 @@ package org.solrmarc.index;
 import java.util.LinkedList;
 import java.util.List;
 
-import playground.solrmarc.index.extractor.impl.custom.Mixin;
-import playground.solrmarc.index.indexer.IndexerSpecException;
-import playground.solrmarc.index.indexer.ValueIndexerFactory;
+import org.solrmarc.index.extractor.impl.custom.Mixin;
+import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
+
 
 /**
  * class SolrIndexerMixin

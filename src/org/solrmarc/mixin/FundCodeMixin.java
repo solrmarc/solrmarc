@@ -18,9 +18,9 @@ import java.util.Set;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.index.SolrIndexerMixin;
+import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.tools.Utils;
 
-import playground.solrmarc.index.indexer.IndexerSpecException;
 
 public class FundCodeMixin extends SolrIndexerMixin
 {

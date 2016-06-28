@@ -1,0 +1,381 @@
+package org.solrmarc.index.indexer;
+
+import java_cup.runtime.*;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import org.solrmarc.index.collector.MultiValueCollector;
+import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
+import org.solrmarc.index.extractor.AbstractSingleValueExtractor;
+import org.solrmarc.index.extractor.AbstractValueExtractor;
+import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
+import org.solrmarc.index.extractor.MultiValueWrapperSingleValueExtractor;
+import org.solrmarc.index.extractor.impl.constant.ConstantMultiValueExtractor;
+import org.solrmarc.index.extractor.impl.date.DateValueExtractorFactory;
+import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
+import org.solrmarc.index.extractor.impl.fullrecord.FullRecordValueExtractorFactory;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
+import org.solrmarc.index.mapping.AbstractValueMappingFactory;
+import org.solrmarc.index.specification.conditional.*;
+import org.solrmarc.index.utils.ReflectionUtils;
+import org.solrmarc.index.utils.StringReader;
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+import org.solrmarc.index.specification.*;
+
+parser code {:
+    private final static Logger logger = Logger.getLogger(ValueIndexerFactory.class);
+
+    static FullConditionalScanner scanner;
+    static boolean parser_debug;
+    static List<IndexerSpecException> parser_errors = null;
+    static FullRecordValueExtractorFactory fullFactory = new FullRecordValueExtractorFactory();
+    static DateValueExtractorFactory dateFactory = new DateValueExtractorFactory();
+    static String cacheOfStrToParse;
+    static MultiValueCollector MULTI_VALUE_COLLECTOR = new MultiValueCollector();
+    private ValueIndexerFactory valueIndexerFactory = null;
+    private List<AbstractValueMappingFactory> mappingFactories = null;
+    private List<AbstractValueExtractorFactory> extractorFactories = null;
+    
+    public static void setParserDebug(boolean b) { parser_debug = b; } 
+    public static boolean shouldParserDebug()    { return(parser_debug); }
+    public FullConditionalParser(boolean debug) throws IllegalAccessException, InstantiationException 
+    { 
+        super(debug ? new VerboseSymbolFactory() : new ComplexSymbolFactory());
+        parser_debug = debug;
+        this.scanner = new FullConditionalScanner((ComplexSymbolFactory)getSymbolFactory());
+        this.setScanner(this.scanner);
+    }
+    
+    
+    public void setFactories(ValueIndexerFactory vif, List<AbstractValueExtractorFactory> extractorFactories, List<AbstractValueMappingFactory> mappingFactories)
+    {
+        this.valueIndexerFactory = vif;
+        this.extractorFactories  = extractorFactories;
+        this.mappingFactories = mappingFactories;  
+    }
+    
+    public MultiValueIndexer parse(String strToParse, boolean debug)
+    {
+        cacheOfStrToParse = strToParse;
+        Symbol parse_tree = null;
+        MultiValueIndexer result = null;
+        parser_errors = new ArrayList<IndexerSpecException>();
+        scanner.startParse(strToParse);
+        try{
+            if (debug)
+                parse_tree = this.debug_parse();
+            else
+                parse_tree = this.parse();
+        }
+        catch (IndexerSpecException ise) {
+            parser_errors.add(ise);
+        }
+        catch (Exception e) {
+            parser_errors.add(new IndexerSpecException(e, " "));
+            //parser_errors.add(" Input Specification "+strToParse);
+        } 
+        finally {
+        }
+        if (parse_tree != null) 
+        {
+            result = (MultiValueIndexer) parse_tree.value;
+            if (result != null)
+            {
+                result.setSpecLabel(strToParse);
+             //   result.setParseErrors(parser_errors);
+            }
+        }
+        return(result);     
+    }
+   
+    public MultiValueIndexer parse(String strToParse)
+    {
+        return(parse(strToParse, parser_debug));
+    }
+    
+    private static String toDelimitedString(String[] strs, String delimiter)
+    {
+        StringBuilder strb = new StringBuilder();
+        for (String str : strs)
+        {
+          strb.append(str).append(delimiter);
+        }
+        return strb.substring(0, strb.length() - delimiter.length());
+     }
+    
+    
+    
+    private AbstractValueExtractor<?> createCustomExtractor(String parm1, String parm2, List<String> mapParams)
+    {
+        String[] mapParts =new String[mapParams.size()+2];
+        mapParts[0] = parm1;
+        mapParts[1] = parm2;
+        System.arraycopy(mapParams.toArray(new String[0]), 0, mapParts, 2, mapParams.size());
+        mapParams.toArray(new String[0]);
+        for (final AbstractValueExtractorFactory factory : extractorFactories)
+        {
+            if (factory.canHandle("CUP Parser", mapParts[0]))
+            {
+                return factory.createExtractor("CUP Parser", mapParts);
+            }
+        }
+        throw new IndexerSpecException("No indexer factory found for: " + toDelimitedString(mapParts, " "));
+    }
+   
+//    private AbstractValueExtractor<?> createExtractor(final String solrFieldName, final String[] mapParts)
+//    {
+//        for (final AbstractValueExtractorFactory factory : extractorFactories)
+//        {
+//            if (factory.canHandle(solrFieldName, mapParts[0]))
+//            {
+//                return factory.createExtractor(solrFieldName, mapParts);
+//            }
+//        }
+//        throw new IndexerSpecException("No indexer factory found for: " + toDelimitedString(mapParts, " "));
+//    }
+    
+    private AbstractMultiValueMapping createMultiValueMapping(List<String> mapParams)
+    {
+    	if (this.mappingFactories == null) 
+        {
+    		try {
+				this.mappingFactories = createMappingFactories(ReflectionUtils.getMappingFactoryClasses());
+			}
+    		catch (IllegalAccessException | InstantiationException e) {
+    			 throw new IndexerSpecException("Could not instantiate mapping factory\n" + mappingFactories.toString().replaceAll(",", ",\n"));
+			}
+        }
+    	String[] mapParts = mapParams.toArray(new String[0]);
+    	for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
+        {
+            if (mappingFactory.canHandle(mapParts[0]))
+            {
+                return mappingFactory.createMultiValueMapping(mapParts);
+            }
+        }
+        throw new IndexerSpecException("Could not handle map descriptor: " + toDelimitedString(mapParts, " ")); 
+        // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
+    }
+
+    private List<AbstractValueMappingFactory> createMappingFactories(final Set<Class<? extends AbstractValueMappingFactory>> factoryClasses) throws IllegalAccessException, InstantiationException
+    {
+        final List<AbstractValueMappingFactory> factories = new ArrayList<>(factoryClasses.size());
+        for (final Class<? extends AbstractValueMappingFactory> extractorFactoryClass : factoryClasses)
+        {
+            logger.trace("Create value mapping factory for  s " + extractorFactoryClass);
+            final AbstractValueMappingFactory factory = extractorFactoryClass.newInstance();
+            factories.add(factory);
+        }
+        return factories;
+    }
+
+    private AbstractMultiValueExtractor makeMultiValueExtractor(Object extractor)
+    {
+        if (AbstractMultiValueExtractor.class.isAssignableFrom(extractor.getClass()))   
+        {
+            return((AbstractMultiValueExtractor)extractor);
+        }
+        else if (AbstractSingleValueExtractor.class.isAssignableFrom(extractor.getClass())) 
+        {
+            return(new MultiValueWrapperSingleValueExtractor((AbstractSingleValueExtractor)extractor));
+        }
+        return(null);
+    }
+    
+    public static final List<IndexerSpecException> getErrors()
+    {
+        if (scanner.getScannerErrors().size() == 0)
+            return(parser_errors);
+        List<IndexerSpecException> allErrors = new ArrayList<IndexerSpecException>();
+        allErrors.addAll(parser_errors);
+        for (String errMsg : scanner.getScannerErrors())
+        {
+            allErrors.add(new IndexerSpecException(errMsg));
+        }
+        return(allErrors);
+    }
+    
+    public static final void addError(String errorMsg)
+    {
+        parser_errors.add(new IndexerSpecException(errorMsg));
+    }
+    
+    public static final void addError(IndexerSpecException exception)
+    {
+        parser_errors.add(exception);
+    }
+    
+    @Override
+    public void report_error(String message, Object info)
+    {
+        ComplexSymbol top = (ComplexSymbol)stack.peek();
+        if (info instanceof ComplexSymbol)
+        {
+            ComplexSymbol cs = (ComplexSymbol)info;
+            addError(message+" at input symbol \""+cs.getName()+"\" following symbol "+ top.getName() + 
+                    " (with value of : "+ cacheOfStrToParse.substring(top.left, top.right) +" )");
+            return;
+        }
+    }
+   
+    protected void my_report_expected_token_ids()
+    {
+        List<Integer> ids = expected_token_ids();
+        ArrayList<String> list = new ArrayList<String>();
+        for (Integer expected : ids)
+        {
+            list.add(symbl_name_from_id(expected));
+        }
+        addError("instead expected token classes are "+list.toString());
+    }
+    
+    public void syntax_error(Symbol cur_token)
+    {
+        report_error("Syntax error", cur_token);
+        my_report_expected_token_ids();
+    }
+
+:}
+
+/* define how to connect to the scanner! */
+
+terminal String SCRIPT, CUSTOM, JAVA;
+terminal String FIELDNAME, FULLRECORD, DATE, IDENTIFIER, CUSTOM_MAP;
+terminal COMMA, COLON, LBRACE, RBRACE, QUESTION, AND, OR, NOT, LPAREN, RPAREN, EQU, NEQ, GT, LT, MATCH, CONTAINS;
+terminal String SUBFIELD, IND, FIELDSPEC, SUBFIELDSPEC, POSITION, QUOTEDSTR, CHAR, NUMBER;
+ 
+non terminal AbstractValueIndexer<?> index_spec;
+non terminal AbstractValueExtractor<?> extractor, custom_extractor; 
+non terminal List<List<String>> mapping_specs;
+non terminal List<String> mapping_spec;
+non terminal List<String> field_names, strings, method_plus_params, params, custom_map_spec;
+non terminal CompositeSpecification field_spec, field_spec_simple, field_spec_part;
+non terminal SingleSpecification field_spec_part_complex, field_spec_part_simple;
+non terminal Condition expr, expr_part;
+non terminal String value, opt_comma, param;
+non terminal Integer  op;
+
+precedence nonassoc NOT;
+precedence left AND;
+precedence left OR;
+
+start with index_spec;
+
+index_spec ::= field_names:s EQU extractor:e COMMA mapping_specs:m          {: RESULT = valueIndexerFactory.makeMultiValueIndexer(cacheOfStrToParse, s, e, m); :}
+             | field_names:s EQU extractor:e                                {: RESULT = new MultiValueIndexer(s, (AbstractMultiValueExtractor)e, new AbstractMultiValueMapping[0], MULTI_VALUE_COLLECTOR); :}
+             ; 
+             
+field_names ::= field_names:s COMMA FIELDNAME:n                             {: RESULT = s; s.add(n); :}
+              | FIELDNAME:n                                                 {: RESULT = new ArrayList<String>(); RESULT.add(n); :}
+              ;
+              
+extractor ::= strings:l                                                     {: RESULT = new ConstantMultiValueExtractor(l); :}
+            | field_spec:fs                                                 {: RESULT = new DirectMultiValueExtractor(fs);  :} 
+            | FULLRECORD:s                                                  {: RESULT = makeMultiValueExtractor(fullFactory.createExtractor("CUP Parser", new StringReader(s))); :}
+            | DATE:s                                                        {: RESULT = dateFactory.createExtractor("CUP Parser", new StringReader(s)); :}
+            | custom_extractor:e                                            {: RESULT = e; :}
+            | error                                                         {: RESULT = null; :}
+            ;
+            
+strings ::= strings:l OR QUOTEDSTR:s                                        {: RESULT = l; l.add(s); :}
+          | QUOTEDSTR:s                                                     {: RESULT = new ArrayList<String>(); RESULT.add(s); :}
+          ;
+          
+custom_extractor ::= CUSTOM:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_params:l  
+                                                                            {: RESULT = createCustomExtractor(t, m, l); :} 
+                  |  JAVA:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_params:l
+                                                                            {: RESULT = createCustomExtractor(t, m, l); :} 
+                  |  SCRIPT:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_params:l
+                                                                            {: RESULT = createCustomExtractor(t, m, l); :} 
+                  |  CUSTOM:t COMMA method_plus_params:l  
+                                                                            {: RESULT = createCustomExtractor(t, null, l); :} 
+                  |  JAVA:t COMMA method_plus_params:l
+                                                                            {: RESULT = createCustomExtractor(t, null, l); :} 
+                  ;
+
+mapping_specs ::= mapping_specs:l COMMA mapping_spec:m               		{: RESULT = l; if (m != null) { l.add(m);} :}
+               |  mapping_spec:m                                        	{: RESULT = new ArrayList<List<String>>(); if (m != null) { RESULT.add(m);} :}
+               ;  
+               
+mapping_spec  ::= method_plus_params:l               						{: RESULT = l; :}
+               | custom_map_spec:l                                          {: RESULT = l; :}
+               ;  
+
+custom_map_spec ::=  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 RPAREN 
+                                                                            {: RESULT = new ArrayList<String>(); RESULT.add(s); RESULT.add(s1); RESULT.add(s2); :}
+                  |  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 LPAREN params:l RPAREN RPAREN 
+                                                                            {: RESULT = l; RESULT.add(0, s); RESULT.add(1, s1); RESULT.add(2, s2); :}
+				  | error                                                   {: FullConditionalParser.addError("Malformed custom_map reference : Should be \ncustom_map(fully.qualified.class.Name method)\n or  custom_map(fully.qualified.class.Name method(parm1, parm2))"); :}
+
+                  ;
+opt_comma  ::=  COMMA | ;
+
+method_plus_params ::=  IDENTIFIER:s                                        {: RESULT = Collections.singletonList(s); :}
+                    |   IDENTIFIER:s LPAREN params:l RPAREN                 {: RESULT = l; RESULT.add(0, s); :}
+                    |   LPAREN params:l RPAREN                              {: RESULT = l; RESULT.add(0, "(this).properties"); :}
+                    ;
+
+params   ::= params:l COMMA param:s                                         {: RESULT = l; l.add(s); :}
+           | param:s                                                        {: RESULT = new ArrayList<String>(); RESULT.add(s); :}
+           ;
+           
+param    ::= QUOTEDSTR:s                                                    {: RESULT = s; :}
+           | IDENTIFIER:s                                                   {: RESULT = s; :}
+           | NUMBER:s                                                       {: RESULT = s; :}
+           ;
+                                      
+field_spec ::= field_spec:s COLON field_spec_part:s1						{: s.addSpec(s1); RESULT = s; :}
+             | field_spec_part:s											{: RESULT = new CompositeSpecification(s); :}
+             ;
+             
+field_spec_simple ::= field_spec_simple:s COLON field_spec_part_simple:s1	{: s.addSpec(s1); RESULT = s; :}
+                    | field_spec_part_simple:s								{: RESULT = new CompositeSpecification(s); :}
+                    ;
+
+field_spec_part ::= LBRACE field_spec_simple:s RBRACE QUESTION expr:e 		{: s.addConditional(e); RESULT = s; :}
+                  | field_spec_part_complex:s								{: RESULT = new CompositeSpecification(s); :}
+                  ;
+                                    
+field_spec_part_complex ::= field_spec_part_simple:s QUESTION expr:e 	    {: RESULT = s; s.addConditional(e); :}
+                          | field_spec_part_simple:s 						{: RESULT = s; :}
+                          ;
+                          
+field_spec_part_simple ::= FIELDSPEC:f SUBFIELDSPEC:sf 						{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf); :} 
+                         | FIELDSPEC:f SUBFIELDSPEC:sf POSITION:p           {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf, p); :} 
+                         | FIELDSPEC:f POSITION:p                           {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, p); :} 
+                         | FIELDSPEC:f 										{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null); :} 
+                         ;
+                         
+expr ::= expr:e1 AND expr:e2 				{: RESULT = new ConditionComposite(e1, e2, FullSym.AND);  :}
+       | expr:e1 OR expr:e2					{: RESULT = new ConditionComposite(e1, e2, FullSym.OR);  :} 
+       | NOT expr:e							{: RESULT = new ConditionComposite(e, null, FullSym.NOT); :}
+       | LPAREN expr:e RPAREN 				{: RESULT = e; :}
+       | expr_part:e						{: RESULT = e; :}
+       ;
+       
+expr_part ::= SUBFIELD:s1 op:i value:s2		                {: RESULT = new ConditionSubfield(s1, s2, ((int)i)); :} 
+            | IND:s1 op:i value:s2			                {: RESULT = new ConditionIndicator(s1, s2, ((int)i)); :} 
+            | POSITION:s1 op:i value:s2		                {: RESULT = new ConditionPosition(s1, s2, ((int)i)); :} 
+            | FIELDSPEC:s1 SUBFIELD:s2 op:i value:s3		{: RESULT = new ConditionSubfield(s1, s2, s3, ((int)i)); :} 
+            | FIELDSPEC:s1 IND:s2 op:i value:s3			    {: RESULT = new ConditionIndicator(s1, s2, s3, ((int)i)); :} 
+            | FIELDSPEC:s1 POSITION:s2 op:i value:s3		{: RESULT = new ConditionPosition(s1, s2, s3, ((int)i)); :} 
+            ;
+op ::= EQU 									{: RESULT = new Integer(FullSym.EQU); :}
+     | NEQ 									{: RESULT = new Integer(FullSym.NEQ); :}
+     | MATCH                                {: RESULT = new Integer(FullSym.MATCH); :}
+     | CONTAINS                             {: RESULT = new Integer(FullSym.CONTAINS); :}
+     | LT                                   {: RESULT = new Integer(FullSym.LT); :}
+     | GT                                   {: RESULT = new Integer(FullSym.GT); :}
+     ;
+     
+value ::= QUOTEDSTR:s						{: RESULT = s; :} 
+        | CHAR:s							{: RESULT = s; :}
+        | NUMBER:s							{: RESULT = s; :} 
+        ;
+  
+ 

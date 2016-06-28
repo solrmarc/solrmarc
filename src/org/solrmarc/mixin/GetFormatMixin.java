@@ -13,12 +13,12 @@ import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.index.SolrIndexerMixin;
+import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
+import org.solrmarc.index.indexer.ValueIndexerStringReaderFactory;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.tools.Utils;
 
-import playground.solrmarc.index.indexer.IndexerSpecException;
-import playground.solrmarc.index.indexer.ValueIndexerFactory;
-import playground.solrmarc.index.indexer.ValueIndexerStringReaderFactory;
-import playground.solrmarc.index.mapping.AbstractMultiValueMapping;
 
 public class GetFormatMixin extends SolrIndexerMixin
 {
