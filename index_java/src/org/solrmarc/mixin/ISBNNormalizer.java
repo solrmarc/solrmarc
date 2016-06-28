@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import playground.solrmarc.index.extractor.impl.custom.Mixin;
+import org.solrmarc.index.extractor.impl.custom.Mixin;
 
 /**
  * Created with IntelliJ IDEA.

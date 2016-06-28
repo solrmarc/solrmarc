@@ -12,8 +12,8 @@ import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
 import org.solrmarc.index.SolrIndexerMixin;
-import playground.solrmarc.index.extractor.impl.custom.Mixin;
-import playground.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.extractor.impl.custom.Mixin;
+import org.solrmarc.index.indexer.IndexerSpecException;
 
 import org.solrmarc.tools.Utils;
 

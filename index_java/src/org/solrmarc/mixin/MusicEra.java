@@ -13,7 +13,7 @@ import org.marc4j.marc.Subfield;
 //import org.solrmarc.tools.Utils;
 
 import org.solrmarc.index.SolrIndexer;
-import playground.solrmarc.index.extractor.impl.custom.Mixin;
+import org.solrmarc.index.extractor.impl.custom.Mixin;
 
 
 public class MusicEra implements Mixin {
