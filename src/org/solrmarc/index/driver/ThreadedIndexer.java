@@ -10,6 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcReader;
@@ -20,6 +21,7 @@ import org.solrmarc.solr.SolrProxy;
 
 public class ThreadedIndexer extends Indexer
 {   
+    private final static Logger logger = Logger.getLogger(ThreadedIndexer.class);
     private final BlockingQueue<Record> readQ;
     private final BlockingQueue<SolrInputDocument> docQ;
     private final BlockingQueue<Record> alreadyReadQ;
@@ -115,6 +117,7 @@ public class ThreadedIndexer extends Indexer
                                 docQ.clear();
                                 alreadyReadQ.clear();
                                 Thread chunkThread = new ChunkIndexerThread(threadName, chunk, chunkRecord, errQ, solrProxy, cnts); 
+                                logger.debug("Starting IndexerThread: "+ threadName);
                                 chunkThread.start();
                                 threadQ.add(chunkThread);
                                 if (!offer1Worked) 

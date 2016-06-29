@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.marc.Record;
 import org.solrmarc.solr.SolrProxy;
@@ -14,6 +15,7 @@ import org.solrmarc.solr.SolrProxy;
 
 public class ChunkIndexerThread extends Thread
 {
+    private final static Logger logger = Logger.getLogger(ChunkIndexerThread.class);
     final Collection<SolrInputDocument> chunk;
     final Collection<Record> chunkRecord;
     final SolrProxy solrProxy;
@@ -37,19 +39,20 @@ public class ChunkIndexerThread extends Thread
     public void run()
     {
         int inChunk = chunk.size();
+        @SuppressWarnings("unused")
         SolrInputDocument firstDoc = chunk.iterator().next();
-//        System.err.println("Adding chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
+        logger.debug("Adding chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
         try {
             // If all goes well, this is all we need. Add the docs, and count the docs
             int cnt = solrProxy.addDocs(chunk);
             synchronized ( cnts ) { cnts[2] += cnt; }
-//            System.err.println("Added chunk of "+cnt+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
+            logger.debug("Added chunk of "+cnt+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
         }
         catch (Exception e)
         {
             if (inChunk > 20)
             {
-//                System.err.println("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
+                logger.debug("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
                 int newChunkSize = inChunk / 4;
                 Iterator<SolrInputDocument> docI = chunk.iterator();
                 Iterator<Record> recI = chunkRecord.iterator();
@@ -93,7 +96,7 @@ public class ChunkIndexerThread extends Thread
             // less than 20 in the chunk resubmit one-by-one
             else 
             { 
-//                System.err.println("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
+                logger.debug("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
                 // error on bulk update, resubmit one-by-one
                 int num1 = 0;
                 Iterator<SolrInputDocument> docI = chunk.iterator();
@@ -102,16 +105,17 @@ public class ChunkIndexerThread extends Thread
                 {
                     SolrInputDocument doc = docI.next();
                     Record rec = recI.next();
-//                    System.err.println("Adding single doc with id : "+ doc.getFieldValue("id").toString());
+                    logger.debug("Adding single doc with id : "+ doc.getFieldValue("id").toString());
                     try
                     {
+                        @SuppressWarnings("unused")
                         int num = solrProxy.addDoc(doc);
                         num1++;
-//                        System.err.println("Added single doc with id : "+ doc.getFieldValue("id").toString());
+                        logger.debug("Added single doc with id : "+ doc.getFieldValue("id").toString());
                     }
                     catch (Exception e1)
                     {
-                        System.err.println("Failed on single doc with id : "+ doc.getFieldValue("id").toString());
+                        logger.error("Failed on single doc with id : "+ doc.getFieldValue("id").toString());
                         errQ.add(new AbstractMap.SimpleEntry<Record, SolrInputDocument>(rec, doc));
                     }
                 }

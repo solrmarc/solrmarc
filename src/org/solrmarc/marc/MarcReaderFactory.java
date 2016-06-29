@@ -3,6 +3,7 @@ package org.solrmarc.marc;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -62,7 +63,7 @@ public class MarcReaderFactory {
             MarcReader reader = makeReader(config, inputFilename);
             readers.add(reader);
         }
-        return(new MarcMultiplexReader(readers));
+        return(new MarcMultiplexReader(readers, Arrays.asList(inputFilenames)));
     }
     
     public MarcReader makeReader(Properties config, List<String> inputFilenames)
@@ -81,7 +82,7 @@ public class MarcReaderFactory {
             MarcReader reader = makeReader(config, inputFilename);
             readers.add(reader);
         }
-        return(new MarcMultiplexReader(readers));
+        return(new MarcMultiplexReader(readers, inputFilenames));
     }
     
 	public MarcReader makeReader(Properties config, String inputFilename)
@@ -138,7 +139,7 @@ public class MarcReaderFactory {
             unicodeNormalize = handleUnicodeNormalizeParm(unicodeNormalize);
         }
         
-        logger.info("Attempting to read data from stdin ");
+//        logger.info("Attempting to read data from stdin ");
 //        else
 //            logger.debug("Attempting to read data from stdin ");
         

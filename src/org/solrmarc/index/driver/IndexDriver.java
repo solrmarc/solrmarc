@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
 import org.marc4j.MarcReader;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
@@ -28,6 +29,7 @@ import joptsimple.OptionSpec;
 
 public class IndexDriver
 {
+    private final static Logger logger = Logger.getLogger(IndexDriver.class);
     Properties readerProps;
     ValueIndexerFactory indexerFactory = null;
 
@@ -35,6 +37,7 @@ public class IndexDriver
     Indexer indexer;
     MarcReader reader;
     SolrProxy solrProxy;
+    boolean verbose;
 
     public IndexDriver(String homeDirStr)
     {
@@ -64,6 +67,7 @@ public class IndexDriver
         indexers = indexerFactory.createValueIndexers(indexSpecification);
         boolean includeErrors = (readerProps.getProperty("marc.include_errors", "false").equals("true"));
         indexer = null;
+        // System.err.println("Reading and compiling index specification: "+ indexSpecification);
         if (multiThreaded)
             indexer = new ThreadedIndexer(indexers, solrProxy, 640, 1000);
         else 
@@ -173,12 +177,12 @@ public class IndexDriver
         }
         catch (FileNotFoundException e1)
         {
-            System.err.println("Fatal error: Exception opening reader properties input stream: " + f1.getName());
+            logger.fatal("Fatal error: Exception opening reader properties input stream: " + f1.getName());
             System.exit(1);
         }
         catch (IOException e1)
         {
-            System.err.println("Fatal error: Exception opening reader properties input stream: " + f1.getName());
+            logger.fatal("Fatal error: Exception opening reader properties input stream: " + f1.getName());
             System.exit(1);
         }
         
@@ -190,41 +194,41 @@ public class IndexDriver
         }
         catch (SolrRuntimeException sre)
         {
-            //System.err.println("Error connecting to solr at URL "+solrURL);
-            System.err.println(sre.getMessage());
+            logger.error("Error connecting to solr at URL "+solrURL, sre);
             System.exit(6);
         }
         File f2 = options.valueOf(configSpec);
         try
         {
+            logger.info("Reading and compiling index specification: "+ f2.getName());
             indexDriver.configureIndexer(f2, multithread);
         }
         catch (IOException e1)
         {
-            System.err.println("Error opening or reading index configuration: " + f2.getName());
+            logger.error("Error opening or reading index configuration: " + f2.getName(), e1);
             System.exit(2);
         }
         catch (IllegalAccessException e)
         {
-            System.err.println("Error processing index configuration: " + f2.getName());
-            e.printStackTrace();
+            logger.error("Error processing index configuration: " + f2.getName(), e);
             System.exit(3);
         }
         catch (InstantiationException e)
         {
-            System.err.println("Error processing index configuration: " + f2.getName());
-            e.printStackTrace();
+            logger.error("Error processing index configuration: " + f2.getName(), e);
             System.exit(4);
         }
 
         List<IndexerSpecException> exceptions = indexDriver.indexerFactory.getValidationExceptions();
         if (!exceptions.isEmpty())
         {
-            System.err.println(getTextForExceptions(exceptions));
+            logger.error("Error processing index configuration: " + f2.getName());
+            logger.error(getTextForExceptions(exceptions));
             System.exit(5);
         }
         else
         {
+            logger.info("Opening input files: "+ Arrays.toString(inputFiles.toArray()));
             indexDriver.configureReader(inputFiles);
             long startTime = System.currentTimeMillis();
             long endTime = startTime;
@@ -242,10 +246,9 @@ public class IndexDriver
                 endTime = System.currentTimeMillis();
                 indexDriver.endProcessing();
             }
-            System.err.println(""+numIndexed[0]+ " records read");
-            System.err.println(""+numIndexed[1]+ " records indexed  and ");
-            System.err.println(""+numIndexed[2]+ " records sent to Solr in "+ (endTime - startTime) / 1000.0 + " seconds");
-            System.err.flush();
+            logger.info(""+numIndexed[0]+ " records read");
+            logger.info(""+numIndexed[1]+ " records indexed  and ");
+            logger.info(""+numIndexed[2]+ " records sent to Solr in "+ (endTime - startTime) / 1000.0 + " seconds");
         }
     }
 
