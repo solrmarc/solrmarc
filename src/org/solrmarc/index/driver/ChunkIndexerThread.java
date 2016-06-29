@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.marc.Record;
 import org.solrmarc.solr.SolrProxy;
+import org.solrmarc.solr.SolrRuntimeException;
 
 
 public class ChunkIndexerThread extends Thread
@@ -116,6 +119,11 @@ public class ChunkIndexerThread extends Thread
                     catch (Exception e1)
                     {
                         logger.error("Failed on single doc with id : "+ doc.getFieldValue("id").toString());
+                        if (e1 instanceof SolrRuntimeException && e1.getCause() instanceof SolrException)
+                        {
+                            SolrException cause = (SolrException)e1.getCause();
+                            logger.error(cause.getMessage());
+                        }
                         errQ.add(new AbstractMap.SimpleEntry<Record, SolrInputDocument>(rec, doc));
                     }
                 }
