@@ -12,6 +12,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.marc.Record;
+import org.solrmarc.index.driver.Indexer.eErrorHandleVal;
 import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
 
@@ -53,12 +54,19 @@ public class ChunkIndexerThread extends Thread
         }
         catch (Exception e)
         {
-            if (inChunk > 20)
+            Iterator<SolrInputDocument> docI = chunk.iterator();
+            Iterator<Record> recI = chunkRecord.iterator();
+            
+            if (inChunk == 1)
+            {
+                SolrInputDocument doc = docI.next();
+                Record rec = recI.next();
+                singleRecordError(doc, rec, e);
+            }
+            else if (inChunk > 20)
             {
                 logger.debug("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
                 int newChunkSize = inChunk / 4;
-                Iterator<SolrInputDocument> docI = chunk.iterator();
-                Iterator<Record> recI = chunkRecord.iterator();
                 Thread subChunk[] = new Thread[4];
                 
                 for (int i = 0; i < 4; i++)
@@ -80,11 +88,13 @@ public class ChunkIndexerThread extends Thread
                             id2 = rec.getControlNumber();
                         }
                     }
+                    // Split the chunk into 4 sub-chunks, and start a ChunkIndexerThread for each of them.
                     subChunk[i] = new ChunkIndexerThread("SolrUpdateOnError_"+id1+"_"+id2, newChunk, newChunkRecord, errQ, solrProxy, cnts);
                     subChunk[i].start();
                 }
                 for (int i = 0; i < 4; i++)
                 {
+                    // Now wait for each of the 4 sub-chunks to finish.
                     try
                     {
                         subChunk[i].join();
@@ -102,8 +112,6 @@ public class ChunkIndexerThread extends Thread
                 logger.debug("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
                 // error on bulk update, resubmit one-by-one
                 int num1 = 0;
-                Iterator<SolrInputDocument> docI = chunk.iterator();
-                Iterator<Record> recI = chunkRecord.iterator();
                 while (docI.hasNext() && recI.hasNext())
                 {
                     SolrInputDocument doc = docI.next();
@@ -118,17 +126,25 @@ public class ChunkIndexerThread extends Thread
                     }
                     catch (Exception e1)
                     {
-                        logger.error("Failed on single doc with id : "+ doc.getFieldValue("id").toString());
-                        if (e1 instanceof SolrRuntimeException && e1.getCause() instanceof SolrException)
-                        {
-                            SolrException cause = (SolrException)e1.getCause();
-                            logger.error(cause.getMessage());
-                        }
-                        errQ.add(new AbstractMap.SimpleEntry<Record, SolrInputDocument>(rec, doc));
+                        singleRecordError(doc, rec, e1);
                     }
                 }
                 synchronized ( cnts ) { cnts[2] += num1; }
             }
+        }
+    }
+
+    private void singleRecordError(SolrInputDocument doc, Record rec, Exception e1)
+    {
+        logger.error("Failed on single doc with id : "+ doc.getFieldValue("id").toString());
+        if (e1 instanceof SolrRuntimeException && e1.getCause() instanceof SolrException)
+        {
+            SolrException cause = (SolrException)e1.getCause();
+            logger.error(cause.getMessage());
+        }
+        if (errQ != null)
+        {
+            errQ.add(new AbstractMap.SimpleEntry<Record, SolrInputDocument>(rec, doc));
         }
     }
 }

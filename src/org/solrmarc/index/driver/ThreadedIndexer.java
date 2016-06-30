@@ -1,6 +1,7 @@
 package org.solrmarc.index.driver;
 
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
+import org.solrmarc.index.driver.Indexer.eErrorHandleVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.solr.SolrProxy;
 
@@ -116,7 +118,8 @@ public class ThreadedIndexer extends Indexer
                                 alreadyReadQ.drainTo(chunkRecord);
                                 docQ.clear();
                                 alreadyReadQ.clear();
-                                Thread chunkThread = new ChunkIndexerThread(threadName, chunk, chunkRecord, errQ, solrProxy, cnts); 
+                                final BlockingQueue<SimpleEntry<Record, SolrInputDocument>> errQVal = (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS)) ? errQ : null;
+                                Thread chunkThread = new ChunkIndexerThread(threadName, chunk, chunkRecord, errQVal, solrProxy, cnts); 
                                 logger.debug("Starting IndexerThread: "+ threadName);
                                 chunkThread.start();
                                 threadQ.add(chunkThread);
@@ -129,7 +132,10 @@ public class ThreadedIndexer extends Indexer
                         }
                         catch (Exception e)
                         {
-                            errQ.add(new AbstractMap.SimpleEntry<Record, SolrInputDocument>(record, null));
+                            if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS))
+                            {
+                                errQ.add(new AbstractMap.SimpleEntry<Record, SolrInputDocument>(record, null));
+                            }
                         }
                     }
                     catch (InterruptedException e)
