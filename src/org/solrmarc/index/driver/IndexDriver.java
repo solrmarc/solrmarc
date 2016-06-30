@@ -6,12 +6,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
+import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcReader;
+import org.marc4j.marc.Record;
+import org.solrmarc.index.driver.RecordAndDocError.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
@@ -108,6 +114,11 @@ public class IndexDriver
         return numHandled;
     }
 
+    public Collection<RecordAndDocError>  getErrors()
+    {
+        return(indexer.errQ); 
+    }
+
     public void endProcessing()
     {
         try
@@ -127,6 +138,8 @@ public class IndexDriver
         OptionSpec<String> readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
         OptionSpec<File> configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
         OptionSpec<File> homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
+        OptionSpec<File> errorOutMarcFile = parser.accepts("err", "File to write records with errors.").withRequiredArg().ofType( File.class );
+        OptionSpec<File> errorOutDocFile = parser.accepts("err", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
         parser.accepts("debug", "non-multithreaded debug mode");
         parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
         parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format");//.availableUnless("sorlURL");
@@ -248,7 +261,27 @@ public class IndexDriver
             }
             logger.info(""+numIndexed[0]+ " records read");
             logger.info(""+numIndexed[1]+ " records indexed  and ");
-            logger.info(""+numIndexed[2]+ " records sent to Solr in "+ (endTime - startTime) / 1000.0 + " seconds");
+            long minutes = ((endTime - startTime) / 1000) / 60;
+            long seconds = (endTime - startTime) / 1000  - (minutes * 60);
+            long hundredths = (endTime - startTime) / 10  - (minutes * 6000) - (seconds * 100) + 100;
+            String hundredthsStr = (""+hundredths).substring(1);
+            String minutesStr = ((minutes > 0) ? ""+minutes+" minute"+((minutes != 1)?"s ":" ") : "");
+            String secondsStr = ""+seconds+"."+hundredthsStr+" seconds";
+            logger.info(""+numIndexed[2]+ " records sent to Solr in "+ minutesStr + secondsStr);
+            if (indexDriver.getErrors().size() > 0)
+            {
+                Collection<RecordAndDocError> errQ = indexDriver.getErrors();
+                int[] errTypeCnt = new int[]{0,0,0};
+                for (final RecordAndDocError entry : errQ)
+                {
+                    if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      errTypeCnt[0] ++;
+                    if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  errTypeCnt[1] ++;
+                    if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))      errTypeCnt[2] ++;
+                }
+                if (errTypeCnt[0] > 0) logger.warn("number of records with MARC errors:  "+ errTypeCnt[0]);
+                if (errTypeCnt[1] > 0) logger.warn("number of records with Index errors: "+ errTypeCnt[1]);
+                if (errTypeCnt[2] > 0) logger.warn("number of records with Solr errors:  "+ errTypeCnt[2]);
+            }
         }
     }
 
