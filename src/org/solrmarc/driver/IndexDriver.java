@@ -1,4 +1,4 @@
-package org.solrmarc.index.driver;
+package org.solrmarc.driver;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,11 +17,13 @@ import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
-import org.solrmarc.index.driver.RecordAndDocError.eErrorLocationVal;
+import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.marc.MarcReaderFactory;
+import org.solrmarc.solr.DevNullProxy;
 import org.solrmarc.solr.SolrCoreLoader;
 import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
@@ -75,7 +77,7 @@ public class IndexDriver
         indexer = null;
         // System.err.println("Reading and compiling index specification: "+ indexSpecification);
         if (multiThreaded)
-            indexer = new ThreadedIndexer(indexers, solrProxy, 640, 1000);
+            indexer = new ThreadedIndexer(indexers, solrProxy, 640);
         else 
             indexer = new Indexer(indexers, solrProxy);
         
@@ -102,6 +104,10 @@ public class IndexDriver
                 e.printStackTrace();
             }
         }
+        else if (solrURL.equals("devnull"))
+        {
+            solrProxy = new DevNullProxy();
+        }
         else 
         {
             solrProxy = SolrCoreLoader.loadRemoteSolrServer(solrURL, true);
@@ -114,7 +120,7 @@ public class IndexDriver
         return numHandled;
     }
 
-    public Collection<RecordAndDocError>  getErrors()
+    public Collection<RecordAndDoc>  getErrors()
     {
         return(indexer.errQ); 
     }
@@ -138,11 +144,13 @@ public class IndexDriver
         OptionSpec<String> readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
         OptionSpec<File> configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
         OptionSpec<File> homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
-        OptionSpec<File> errorOutMarcFile = parser.accepts("err", "File to write records with errors.").withRequiredArg().ofType( File.class );
-        OptionSpec<File> errorOutDocFile = parser.accepts("err", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
+        OptionSpec<File> errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.").withRequiredArg().ofType( File.class );
+        OptionSpec<File> errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
+        OptionSpec<File> errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
         parser.accepts("debug", "non-multithreaded debug mode");
         parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
         parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format");//.availableUnless("sorlURL");
+        parser.acceptsAll(Arrays.asList("null"), "discard all output, and merely show errors and warnings");//.availableUnless("sorlURL");
         parser.acceptsAll(Arrays.asList("?", "help"), "show this usage information").forHelp();
         //parser.mutuallyExclusive("stdout", "solrURL");
         OptionSpec<String> files = parser.nonOptions().ofType( String.class );
@@ -200,7 +208,7 @@ public class IndexDriver
         }
         
      //   String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
-        String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : "stdout";
+        String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : options.has("null") ? "devnull" : "stdout";
         boolean multithread = options.has("solrURL") && !options.has("debug") ? true : false;
         try {
             indexDriver.configureOutput(solrURL);
@@ -270,22 +278,30 @@ public class IndexDriver
             logger.info(""+numIndexed[2]+ " records sent to Solr in "+ minutesStr + secondsStr);
             if (indexDriver.getErrors().size() > 0)
             {
-                Collection<RecordAndDocError> errQ = indexDriver.getErrors();
-                int[] errTypeCnt = new int[]{0,0,0};
-                for (final RecordAndDocError entry : errQ)
+                Collection<RecordAndDoc> errQ = indexDriver.getErrors();
+                int[][] errTypeCnt = new int[][]{{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
+                for (final RecordAndDoc entry : errQ)
                 {
-                    if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      errTypeCnt[0] ++;
-                    if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  errTypeCnt[1] ++;
-                    if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))      errTypeCnt[2] ++;
+                    if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      errTypeCnt[0][entry.getErrLvl().ordinal()] ++;
+                    if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  errTypeCnt[1][entry.getErrLvl().ordinal()] ++;
+                    if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))      errTypeCnt[2][entry.getErrLvl().ordinal()] ++;
                 }
-                if (errTypeCnt[0] > 0) logger.warn("number of records with MARC errors:  "+ errTypeCnt[0]);
-                if (errTypeCnt[1] > 0) logger.warn("number of records with Index errors: "+ errTypeCnt[1]);
-                if (errTypeCnt[2] > 0) logger.warn("number of records with Solr errors:  "+ errTypeCnt[2]);
+                showErrReport("MARC", errTypeCnt[0]);
+                showErrReport("Index", errTypeCnt[1]);
+                showErrReport("Solr", errTypeCnt[2]);
             }
         }
     }
 
         
+    private static void showErrReport(String errLocStr, int[] errorLvlCnt)
+    {
+        for (int i = 0; i < errorLvlCnt.length; i++)
+        {
+            if (errorLvlCnt[i] > 0) logger.info( "" + errorLvlCnt[i] + " records have "+errLocStr+" errors of level: "+eErrorSeverity.values()[i].toString());
+        }
+    }
+
     private static String getTextForExceptions(List<IndexerSpecException> exceptions)
     {
         StringBuilder text = new StringBuilder();

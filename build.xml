@@ -109,7 +109,7 @@
     	
         <jar destfile="${dist}/${custom.jar.name}.jar">
         	<manifest>
-        	    <attribute name="Main-Class" value="org.solrmarc.index.driver.IndexDriver"/>
+        	    <attribute name="Main-Class" value="org.solrmarc.driver.IndexDriver"/>
         		<attribute name="Class-Path" value="${manifest.classpath}" />
             </manifest>
         	<fileset dir="${basedir}" includes="log4j.properties" />

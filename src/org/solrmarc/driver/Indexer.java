@@ -1,4 +1,4 @@
-package org.solrmarc.index.driver;
+package org.solrmarc.driver;
 
 
 import org.apache.log4j.Logger;
@@ -7,11 +7,11 @@ import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcError;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
-import org.solrmarc.index.driver.Indexer.eErrorHandleVal;
-import org.solrmarc.index.driver.RecordAndDocError.eErrorLocationVal;
-import org.solrmarc.index.driver.RecordAndDocError.eErrorSeverity;
+import org.solrmarc.driver.Indexer.eErrorHandleVal;
+import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
@@ -42,7 +42,7 @@ public class Indexer
     protected final List<AbstractValueIndexer<?>> indexers;
     protected SolrProxy solrProxy;
     public EnumSet<eErrorHandleVal> errHandle = EnumSet.noneOf(eErrorHandleVal.class);
-    protected final BlockingQueue<RecordAndDocError> errQ;
+    protected final BlockingQueue<RecordAndDoc> errQ;
 
     public enum eErrorHandleVal
     {
@@ -53,7 +53,7 @@ public class Indexer
     {
         this.indexers = indexers;
         this.solrProxy = solrProxy;
-        errQ = new LinkedBlockingQueue<RecordAndDocError>();
+        errQ = new LinkedBlockingQueue<RecordAndDoc>();
     }
 
     public boolean isSet(eErrorHandleVal val)
@@ -94,40 +94,44 @@ public class Indexer
             final Record record = reader.next();
             cnts[0]++;
  //           ErrorHandler errors = MarcReaderFactory.instance().getErrors();
-            SolrInputDocument[] documentParts = null;
-            documentParts = indexToSolrDoc(record);
+            RecordAndDoc recDoc = indexToSolrDoc(record);
             cnts[1]++;
-            SolrInputDocument document = combineDocWithErrors(documentParts, isSet(eErrorHandleVal.INDEX_ERROR_RECORDS));
-            EnumSet<eErrorLocationVal> errLocVals = getErrLocVals(documentParts);
-            if (!documentParts[1].isEmpty() || !documentParts[2].isEmpty()) 
+            if (recDoc.getErrLvl() != eErrorSeverity.NONE) 
             {
                 if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS) && !isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
                 {
-                    errQ.add(new RecordAndDocError(record, document, errLocVals, eErrorSeverity.ERROR));
+                    errQ.add(recDoc);
                 }   
             }
             try { 
-                if (document != null)
+                if (recDoc.getDoc() != null)
                 {
-                    solrProxy.addDoc(document);
+                    solrProxy.addDoc(recDoc.getDoc());
                     cnts[2]++;
+                    if (recDoc.getErrLvl() != eErrorSeverity.NONE && isSet(eErrorHandleVal.RETURN_ERROR_RECORDS)) 
+                    {
+                        if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS))
+                        {
+                            errQ.add(recDoc);
+                        }   
+                    }
                 }
             }
             catch (SolrRuntimeException sse)
             {
-                singleRecordSolrError(new RecordAndDocError(record, document, errLocVals, eErrorSeverity.ERROR), sse, errQ);
+                singleRecordSolrError(recDoc, sse, errQ);
             }
         }
         return(cnts);
     }
     
-    protected EnumSet<eErrorLocationVal> getErrLocVals(SolrInputDocument[] documentParts)
-    {
-        EnumSet<eErrorLocationVal> eLocVals = EnumSet.noneOf(eErrorLocationVal.class);
-        if (!documentParts[2].isEmpty()) eLocVals.add(eErrorLocationVal.INDEXING_ERROR);
-        if (!documentParts[1].isEmpty()) eLocVals.add(eErrorLocationVal.MARC_ERROR);
-        return eLocVals;
-    }
+//    protected EnumSet<eErrorLocationVal> getErrLocVals(SolrInputDocument[] documentParts)
+//    {
+//        EnumSet<eErrorLocationVal> eLocVals = EnumSet.noneOf(eErrorLocationVal.class);
+//        if (!documentParts[2].isEmpty()) eLocVals.add(eErrorLocationVal.INDEXING_ERROR);
+//        if (!documentParts[1].isEmpty()) eLocVals.add(eErrorLocationVal.MARC_ERROR);
+//        return eLocVals;
+//    }
 
     protected SolrInputDocument combineDocWithErrors(SolrInputDocument[] documentParts, boolean includeErrors)
     {
@@ -140,26 +144,22 @@ public class Indexer
         return result;
     }
 
-    private void addExceptionsToMap(SolrInputDocument document, List<IndexerSpecException> perRecordExceptions)
+    private eErrorSeverity addExceptionsToMap(SolrInputDocument document, List<IndexerSpecException> perRecordExceptions, eErrorSeverity errLvl)
     {
         if (perRecordExceptions != null)
         {
             for (IndexerSpecException e : perRecordExceptions)
             {
-      //          if (e.getSolrField() == null) e.setSolrFieldAndSpec("marc_error", null);
                 String specMessage = e.getSpecMessage();
-    //            if (!specMessage.equals(lastSpec))
-    //            {
-    //                text.append(specMessage);
-    //            }
-    //            lastSpec = specMessage;
                 document.addField("marc_error", e.getMessage());
+                errLvl = eErrorSeverity.max(errLvl, e.getErrLvl());
                 for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause())
                 {
                     document.addField("marc_error", e.getSolrField()+ " : " + cause.getMessage());
                 }
             }
         }
+        return(errLvl);
     }
 
 //    if (errors.hasErrors())
@@ -231,9 +231,11 @@ public class Indexer
 //        return document;
 //    }
     
-    protected SolrInputDocument[] indexToSolrDoc(final Record record) 
+    protected RecordAndDoc indexToSolrDoc(final Record record) 
     {
         SolrInputDocument[] inputDocs = new SolrInputDocument[]{ new SolrInputDocument(), new SolrInputDocument(), new SolrInputDocument() } ;
+        RecordAndDoc recDoc = new RecordAndDoc(record);
+        eErrorSeverity errLvl = eErrorSeverity.NONE;
         ValueIndexerFactory.instance().clearPerRecordErrors();
         for (final AbstractValueIndexer<?> indexer : indexers)
         {
@@ -259,33 +261,53 @@ public class Indexer
 //            {
 //                inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
 //            }
-//            catch (IndexerSpecException e)
-//            {
-//                inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
-//            }
+            catch (IndexerSpecException e)
+            {
+                inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
+                errLvl = eErrorSeverity.max(errLvl, e.getErrLvl());
+                recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
+            }
             catch (InvocationTargetException ioe)
             {
                 Throwable wrapped = ioe.getTargetException();
                 Exception wrappedE = (wrapped instanceof Exception) ? (Exception)wrapped : null;
+                if (wrappedE != null && wrappedE instanceof IndexerSpecException)
+                {
+                    errLvl = eErrorSeverity.max(errLvl, ((IndexerSpecException)wrappedE).getErrLvl());
+                }
+                else
+                {
+                    errLvl = eErrorSeverity.ERROR;
+                }
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + wrappedE.getMessage());
+                recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
             }
             catch (Exception e)
             {
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
+                errLvl = eErrorSeverity.ERROR;
+                recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
             }
         }
         if (record.hasErrors() )
         {
             addMarcErrorsToMap(inputDocs[1], record.getErrors());
+            recDoc.addErrLoc(eErrorLocationVal.MARC_ERROR);
         }
         List<IndexerSpecException> perRecordExceptions = ValueIndexerFactory.instance().getPerRecordErrors();
-        addExceptionsToMap(inputDocs[2], perRecordExceptions);
-
-        return inputDocs;
+        if (perRecordExceptions != null) 
+        {
+            errLvl = addExceptionsToMap(inputDocs[2], perRecordExceptions, errLvl);
+            recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
+        }
+        recDoc.setDoc(combineDocWithErrors(inputDocs, isSet(eErrorHandleVal.INDEX_ERROR_RECORDS)));
+        recDoc.setMaxErrLvl(errLvl);
+        
+        return recDoc;
     }
     
 
-    public static void singleRecordSolrError(RecordAndDocError recDoc, Exception e1, BlockingQueue<RecordAndDocError> errQ)
+    public static void singleRecordSolrError(RecordAndDoc recDoc, Exception e1, BlockingQueue<RecordAndDoc> errQ)
     {
         logger.error("Failed on single doc with id : "+ recDoc.getRec().getControlNumber());
         if (e1 instanceof SolrRuntimeException && e1.getCause() instanceof SolrException)

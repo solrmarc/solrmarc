@@ -16,7 +16,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.util.NamedList;
 
-public class SolrServerProxy implements SolrProxy
+public class SolrServerProxy extends SolrProxy
 {
     SolrServer solrserver;
     Object coreContainerObject = null;
@@ -193,12 +193,4 @@ public class SolrServerProxy implements SolrProxy
             throw(new SolrRuntimeException("SolrserverException", e));
         }
     }
-
-    public boolean isSolrException(Exception e)
-    {
-        if (e.getCause() instanceof SolrServerException)
-            return(true);
-        return false;
-    }
-
 }

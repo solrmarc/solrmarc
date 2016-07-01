@@ -5,15 +5,20 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 
-public interface SolrProxy
+public abstract class SolrProxy
 {
-
     /**
      * return true if exception is a SolrException
      */
-    public abstract boolean isSolrException(Exception e);
+    public final boolean isSolrException(Exception e)
+    {
+        if (e.getCause() instanceof SolrServerException)
+            return(true);
+        return false;
+    }
 
     /**
      * given a map of field names and values, create a Document and add it to

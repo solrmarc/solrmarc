@@ -1,6 +1,5 @@
-package org.solrmarc.index.driver;
+package org.solrmarc.driver;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -8,39 +7,23 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
-import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.marc.Record;
-import org.solrmarc.index.driver.RecordAndDocError.eErrorLocationVal;
-import org.solrmarc.index.driver.RecordAndDocError.eErrorSeverity;
 import org.solrmarc.solr.SolrProxy;
-import org.solrmarc.solr.SolrRuntimeException;
 
 
 public class ChunkIndexerThread extends Thread
 {
     private final static Logger logger = Logger.getLogger(ChunkIndexerThread.class);
     final Collection<SolrInputDocument> docs;
-    final Collection<RecordAndDocError> recordAndDocs;
+    final Collection<RecordAndDoc> recordAndDocs;
     final SolrProxy solrProxy;
-    final BlockingQueue<RecordAndDocError> errQ;
+    final BlockingQueue<RecordAndDoc> errQ;
 
     final int cnts[];
-    
-//    public ChunkIndexerThread(String name, Collection<SolrInputDocument> chunk, Collection<Record> chunkRecord, 
-//                       BlockingQueue<RecordAndDocError> errQ, 
-//                       SolrProxy solrProxy, final int cnts[])
-//    {
-//        super(name);
-//        this.chunk = chunk;
-//        this.chunkRecord = chunkRecord;
-//        this.cnts = cnts;
-//        this.errQ = errQ;
-//        this.solrProxy = solrProxy;
-//    }
-    
-    public ChunkIndexerThread(String threadName, Collection<RecordAndDocError> recordAndDocs,
-            BlockingQueue<RecordAndDocError> errQ, SolrProxy solrProxy, int[] cnts)
+        
+    public ChunkIndexerThread(String threadName, Collection<RecordAndDoc> recordAndDocs,
+            BlockingQueue<RecordAndDoc> errQ, SolrProxy solrProxy, int[] cnts)
     {
         super(threadName);
         this.recordAndDocs = recordAndDocs;
@@ -50,10 +33,10 @@ public class ChunkIndexerThread extends Thread
         this.solrProxy = solrProxy;
     }
 
-    private Collection<SolrInputDocument> buildDocList(final Collection<RecordAndDocError> recordAndDocs)
+    private Collection<SolrInputDocument> buildDocList(final Collection<RecordAndDoc> recordAndDocs)
     {
         Collection<SolrInputDocument> docs = new ArrayList<>(recordAndDocs.size());
-        for (RecordAndDocError recDoc : recordAndDocs)
+        for (RecordAndDoc recDoc : recordAndDocs)
         {
             docs.add(recDoc.doc);
         }
@@ -75,7 +58,7 @@ public class ChunkIndexerThread extends Thread
             
             if (errQ != null)
             {
-                for (RecordAndDocError recDoc : recordAndDocs)
+                for (RecordAndDoc recDoc : recordAndDocs)
                 {
                     if (!recDoc.errLocs.isEmpty())
                     {
@@ -86,11 +69,11 @@ public class ChunkIndexerThread extends Thread
         }
         catch (Exception e)
         {
-            Iterator<RecordAndDocError> recDocI = recordAndDocs.iterator();
+            Iterator<RecordAndDoc> recDocI = recordAndDocs.iterator();
             
             if (inChunk == 1)
             {
-                RecordAndDocError recDoc = recDocI.next();
+                RecordAndDoc recDoc = recDocI.next();
                 Indexer.singleRecordSolrError(recDoc, e, errQ);
             }
             else if (inChunk > 20)
@@ -101,14 +84,14 @@ public class ChunkIndexerThread extends Thread
                 
                 for (int i = 0; i < 4; i++)
                 {
-                    List<RecordAndDocError> newRecDoc = new ArrayList<>(newChunkSize);
+                    List<RecordAndDoc> newRecDoc = new ArrayList<>(newChunkSize);
                     String id1 = null, id2 = null;
                     for (int j = 0; j < newChunkSize; j++)
                     {
                         Record rec;
                         if (recDocI.hasNext()) 
                         {
-                            RecordAndDocError recDoc = recDocI.next();
+                            RecordAndDoc recDoc = recDocI.next();
                             newRecDoc.add(recDoc);
                             if (id1 == null) id1 = recDoc.getRec().getControlNumber();
                             id2 = recDoc.getRec().getControlNumber();
@@ -140,7 +123,7 @@ public class ChunkIndexerThread extends Thread
                 int num1 = 0;
                 while (recDocI.hasNext())
                 {
-                    RecordAndDocError recDoc = recDocI.next();
+                    RecordAndDoc recDoc = recDocI.next();
                     SolrInputDocument doc = recDoc.getDoc();
                  //   Record rec = recDoc.getRec();
                     logger.debug("Adding single doc with id : "+ doc.getFieldValue("id").toString());

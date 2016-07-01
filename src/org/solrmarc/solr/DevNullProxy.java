@@ -19,28 +19,15 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.util.NamedList;
 
-public class StdOutProxy extends SolrProxy
+public class DevNullProxy extends SolrProxy
 {
-    PrintStream output;
     
-    public StdOutProxy(PrintStream out)
+    public DevNullProxy()
     {
-        this.output = out;
     }
     
     public int addDoc(SolrInputDocument inputDoc)
     {
-        ArrayList<String> fNames = new ArrayList<String>();
-        fNames.addAll(inputDoc.getFieldNames());
-        Collections.sort(fNames);
-        String id = inputDoc.getFieldValue("id").toString();
-        for (String fieldName : fNames)
-        {
-            for (Object val : inputDoc.getFieldValues(fieldName))
-            {
-                output.print(id + " : " + fieldName + " = " + val.toString() + "\n");
-            }
-        }
         return(1);
     }
     
@@ -57,7 +44,6 @@ public class StdOutProxy extends SolrProxy
 
     public void close()
     {
-        output.flush();
     }
 
     public SolrServer getSolrServer()
@@ -67,7 +53,6 @@ public class StdOutProxy extends SolrProxy
     
     public void commit(boolean optimize) throws IOException
     {
-        output.flush();
     }
 
     public void delete(String id, boolean fromCommitted, boolean fromPending) throws IOException

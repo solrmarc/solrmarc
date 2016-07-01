@@ -7,7 +7,7 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
-import org.solrmarc.index.driver.IndexDriver;
+import org.solrmarc.driver.IndexDriver;
 
 public class MarcMultiplexReader implements MarcReader
 {

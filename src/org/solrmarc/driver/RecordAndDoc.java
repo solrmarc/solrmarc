@@ -1,4 +1,4 @@
-package org.solrmarc.index.driver;
+package org.solrmarc.driver;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -6,9 +6,11 @@ import java.util.List;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcError;
 import org.marc4j.marc.Record;
-import org.solrmarc.index.driver.RecordAndDocError.eErrorLocationVal;
+import org.solrmarc.driver.Indexer.eErrorHandleVal;
+import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
+import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 
-public class RecordAndDocError
+public class RecordAndDoc
 {
     final Record rec;
     SolrInputDocument doc;
@@ -20,12 +22,8 @@ public class RecordAndDocError
         MARC_ERROR, INDEXING_ERROR, SOLR_ERROR;
     };
 
-    public enum eErrorSeverity
-    {
-        NONE, INFO, WARN, ERROR, FATAL
-    };
 
-    public RecordAndDocError(Record rec, SolrInputDocument doc, EnumSet<eErrorLocationVal> errLocs, eErrorSeverity errLvl)
+    public RecordAndDoc(Record rec, SolrInputDocument doc, EnumSet<eErrorLocationVal> errLocs, eErrorSeverity errLvl)
     {
         this.rec = rec;
         this.doc = doc;
@@ -33,15 +31,31 @@ public class RecordAndDocError
         this.errLvl = errLvl;        
     }
     
-    public RecordAndDocError(Record rec, SolrInputDocument doc, eErrorLocationVal errLoc, eErrorSeverity errLvl)
+    public RecordAndDoc(Record rec, SolrInputDocument doc, eErrorLocationVal errLoc, eErrorSeverity errLvl)
     {
         this.rec = rec;
         this.doc = doc;
         this.errLocs = EnumSet.of(errLoc);
         this.errLvl = errLvl;        
     }
+    
+    public RecordAndDoc(Record rec, SolrInputDocument[] docs, EnumSet<eErrorLocationVal> errLocs, eErrorSeverity errLvl)
+    {
+        this.rec = rec;
+        this.doc = null;
+        this.errLocs = errLocs;
+        this.errLvl = errLvl;        
+    }
+    
+    public RecordAndDoc(Record rec, SolrInputDocument[] docs, eErrorLocationVal errLoc, eErrorSeverity errLvl)
+    {
+        this.rec = rec;
+        this.doc = null;
+        this.errLocs = EnumSet.of(errLoc);
+        this.errLvl = errLvl;        
+    }
 
-    public RecordAndDocError(Record record)
+    public RecordAndDoc(Record record)
     {
         this.rec = record;
         this.doc = null;
@@ -49,7 +63,7 @@ public class RecordAndDocError
         this.errLvl = rec.hasErrors() ? errLvlForMarcError(rec.getErrors()) : eErrorSeverity.NONE;
     }
 
-    private eErrorSeverity errLvlForMarcError(List<MarcError> errors)
+    private static eErrorSeverity errLvlForMarcError(List<MarcError> errors)
     {
         int maxSeverity = -1;
         for (MarcError err : errors)
@@ -87,6 +101,11 @@ public class RecordAndDocError
         return doc;
     }
 
+    public void setMaxErrLvl(eErrorSeverity errLvl)
+    {
+        this.errLvl = eErrorSeverity.max(this.errLvl, errLvl);
+    }
+    
     public eErrorSeverity getErrLvl()
     {
         return errLvl;
@@ -96,6 +115,12 @@ public class RecordAndDocError
     {
         errLocs.add(solrError);
     }
+
+    public void setDoc(SolrInputDocument doc)
+    {
+        this.doc = doc;
+    }
+
     
     
 }
