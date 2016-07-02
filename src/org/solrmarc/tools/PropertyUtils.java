@@ -24,7 +24,7 @@ public class PropertyUtils
     /**
      * Default Constructor It's private, so it can't be instantiated by other
      * objects
-     *
+     * 
      */
     private PropertyUtils()
     {
@@ -190,8 +190,7 @@ public class PropertyUtils
         return (getPropertyFileInputStream(propertyPaths, propertyFileName, false));
     }
 
-    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName,
-            boolean showName)
+    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName, boolean showName)
     {
         return (getPropertyFileInputStream(propertyPaths, propertyFileName, false, null));
     }
@@ -213,12 +212,11 @@ public class PropertyUtils
         return (in);
     }
 
-    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName,
-            boolean showName, String inputSource[])
+    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName, boolean showName,
+            String inputSource[])
     {
-//        InputStream in = null;
-        String fullPropertyFileURLStr = getPropertyFileAbsoluteURL(propertyPaths, propertyFileName, showName,
-                inputSource);
+        // InputStream in = null;
+        String fullPropertyFileURLStr = getPropertyFileAbsoluteURL(propertyPaths, propertyFileName, showName, inputSource);
         return (getPropertyFileInputStream(fullPropertyFileURLStr));
     }
 
@@ -284,7 +282,7 @@ public class PropertyUtils
     // else
     // logger.debug("Opening resource via URL: "+ url.toString());
     //
-    /// *
+    // / *
     // if (url == null)
     // url = utilObj.getClass().getClassLoader().getResource(propertyPath + "/"
     // + propertyFileName);
@@ -310,7 +308,7 @@ public class PropertyUtils
     public static String getPropertyFileAbsoluteURL(String[] propertyPaths, String propertyFileName, boolean showName,
             String inputSource[])
     {
- //       InputStream in = null;
+        // InputStream in = null;
         // look for properties file in paths
         String verboseStr = System.getProperty("marc.test.verbose");
         boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
@@ -337,8 +335,10 @@ public class PropertyUtils
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                    if (showName) logger.info("Opening file: " + propertyFile.getAbsolutePath());
-                    else logger.debug("Opening file: " + propertyFile.getAbsolutePath());
+                    if (showName)
+                        logger.info("Opening file: " + propertyFile.getAbsolutePath());
+                    else
+                        logger.debug("Opening file: " + propertyFile.getAbsolutePath());
                     break; // we found it!
                 }
                 if (verbose) lookedIn = lookedIn + propertyFile.getAbsolutePath() + "\n";
@@ -362,8 +362,10 @@ public class PropertyUtils
                 logger.error(errmsg);
                 throw new IllegalArgumentException(errmsg);
             }
-            if (showName) logger.info("Opening resource via URL: " + url.toString());
-            else logger.debug("Opening resource via URL: " + url.toString());
+            if (showName)
+                logger.info("Opening resource via URL: " + url.toString());
+            else
+                logger.debug("Opening resource via URL: " + url.toString());
 
             /*
              * if (url == null) url =
@@ -411,7 +413,8 @@ public class PropertyUtils
         }
     }
 
-    public static String[] makePropertySearchPath(String solrmarcPath, String siteSpecificPath, String configFilePath, String homeDir)
+    public static String[] makePropertySearchPath(String solrmarcPath, String siteSpecificPath, String configFilePath,
+            String homeDir)
     {
         ArrayList<String> propertySearchPath = new ArrayList<String>();
         Set<String> propertySearchSet = new HashSet<String>();

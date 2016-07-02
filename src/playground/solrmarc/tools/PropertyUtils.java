@@ -12,9 +12,9 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-public class PropertyUtil
+public class PropertyUtils
 {
-    protected static Logger logger = Logger.getLogger(PropertyUtil.class.getName());
+    protected static Logger logger = Logger.getLogger(PropertyUtils.class.getName());
 
     /**
      * Check first for a particular property in the System Properties, so that
@@ -176,8 +176,7 @@ public class PropertyUtil
         return (getPropertyFileInputStream(propertyPaths, propertyFileName, false));
     }
 
-    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName,
-            boolean showName)
+    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName, boolean showName)
     {
         return (getPropertyFileInputStream(propertyPaths, propertyFileName, false, null));
     }
@@ -199,12 +198,11 @@ public class PropertyUtil
         return (in);
     }
 
-    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName,
-            boolean showName, String inputSource[])
+    public static InputStream getPropertyFileInputStream(String[] propertyPaths, String propertyFileName, boolean showName,
+            String inputSource[])
     {
         InputStream in = null;
-        String fullPropertyFileURLStr = getPropertyFileAbsoluteURL(propertyPaths, propertyFileName, showName,
-                inputSource);
+        String fullPropertyFileURLStr = getPropertyFileAbsoluteURL(propertyPaths, propertyFileName, showName, inputSource);
         return (getPropertyFileInputStream(fullPropertyFileURLStr));
     }
 
@@ -270,7 +268,7 @@ public class PropertyUtil
     // else
     // logger.debug("Opening resource via URL: "+ url.toString());
     //
-    /// *
+    // / *
     // if (url == null)
     // url = utilObj.getClass().getClassLoader().getResource(propertyPath + "/"
     // + propertyFileName);
@@ -323,8 +321,10 @@ public class PropertyUtil
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                    if (showName) logger.info("Opening file: " + propertyFile.getAbsolutePath());
-                    else logger.debug("Opening file: " + propertyFile.getAbsolutePath());
+                    if (showName)
+                        logger.info("Opening file: " + propertyFile.getAbsolutePath());
+                    else
+                        logger.debug("Opening file: " + propertyFile.getAbsolutePath());
                     break; // we found it!
                 }
                 if (verbose) lookedIn = lookedIn + propertyFile.getAbsolutePath() + "\n";
@@ -340,7 +340,7 @@ public class PropertyUtil
         if (verbose) errmsg = errmsg + "\n Looked in: " + lookedIn;
         if (fullPathName == null)
         {
-            PropertyUtil utilObj = new PropertyUtil();
+            PropertyUtils utilObj = new PropertyUtils();
             URL url = utilObj.getClass().getClassLoader().getResource(propertyFileName);
             if (url == null) url = utilObj.getClass().getResource("/" + propertyFileName);
             if (url == null)
@@ -348,8 +348,10 @@ public class PropertyUtil
                 logger.error(errmsg);
                 throw new IllegalArgumentException(errmsg);
             }
-            if (showName) logger.info("Opening resource via URL: " + url.toString());
-            else logger.debug("Opening resource via URL: " + url.toString());
+            if (showName)
+                logger.info("Opening resource via URL: " + url.toString());
+            else
+                logger.debug("Opening resource via URL: " + url.toString());
 
             /*
              * if (url == null) url =

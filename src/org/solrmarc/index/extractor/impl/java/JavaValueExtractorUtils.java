@@ -2,20 +2,29 @@ package org.solrmarc.index.extractor.impl.java;
 
 import org.apache.log4j.Logger;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
+import org.solrmarc.tools.PropertyUtils;
 
 
 import javax.tools.*;
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JavaValueExtractorUtils
 {
     private final static Logger logger = Logger.getLogger(JavaValueExtractorUtils.class);
     private final static List<File> sourceFiles = new ArrayList<>();
+    private final static Map<File, String> packageNamesForFile = new LinkedHashMap<>();
+    private final static Pattern packageFinder = Pattern.compile("package[ \t]+(([a-z_][a-z0-9_]*[.])*[a-z_][a-z0-9_]*)[ \t]*;.*");
 
     protected static void clean()
     {
@@ -65,10 +74,9 @@ public class JavaValueExtractorUtils
         fileManager.setLocation(StandardLocation.SOURCE_PATH, Collections.singleton(new File(getSrcDirectory())));
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(getBinDirectory())));
 
-        final DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector();
+        final DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         final Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjectsFromFiles(sourceFiles);
-        final JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticCollector, null, null,
-                units);
+        final JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticCollector, null, null, units);
 
         logger.trace("Compile java files:\n" + sourceFiles.toString().replaceAll(",", ",\n"));
         if (!task.call())
@@ -109,12 +117,12 @@ public class JavaValueExtractorUtils
 
     private static String getBinDirectory()
     {
-        return (ValueIndexerFactory.getHomeDir() + "/index_java/bin");
+        return (ValueIndexerFactory.getHomeDir() + File.separator + "index_java" + File.separator + "bin");
     }
 
     private static String getSrcDirectory()
     {
-        return (ValueIndexerFactory.getHomeDir() + "/index_java/src");
+        return (ValueIndexerFactory.getHomeDir() + File.separator + "index_java" + File.separator + "src");
     }
 
     protected static Class<?>[] getClasses()
@@ -156,13 +164,78 @@ public class JavaValueExtractorUtils
         final List<String> classNames = new ArrayList<>();
         for (final File sourceFile : sourceFiles)
         {
-            final String sourcePath = sourceFile.getPath();
-            final int pathOffset = getSrcDirectory().length() + (getSrcDirectory().endsWith("/") ? 0 : 1);
-            final String classPath = sourcePath.substring(pathOffset, sourcePath.length() - 5);
-            final String className = classPath.replace(File.separator, ".");
-            classNames.add(className);
+            classNames.add(getClassNameForSourceFile(sourceFile));
         }
         return classNames;
+    }
+
+    private static String getClassNameForSourceFile(final File sourceFile)
+    {
+        final String sourcePath = sourceFile.getPath();
+        final int pathOffset = getSrcDirectory().length() + (getSrcDirectory().endsWith("/") ? 0 : 1);
+        final String classPath = sourcePath.substring(pathOffset, sourcePath.length() - 5);
+        String className = classPath.replace(File.separator, ".");
+        if (!className.contains("."))
+        {
+            // find package in source file
+            final String packageName = getPackageName(sourceFile);
+            className = packageName + className;
+        }
+        return(className);
+    }
+    
+    private static String getClassFileForSourceFile(final File sourceFile)
+    {
+        final String sourcePath = sourceFile.getPath();
+        final int pathOffset = getSrcDirectory().length() + (getSrcDirectory().endsWith("/") ? 0 : 1);
+        final String classPath = sourcePath.substring(pathOffset, sourcePath.length() - 5);
+        String classFile = classPath.replace(File.separator, ".");
+        if (!classPath.contains(File.separator))
+        {
+            // find package in source file
+            final String packageName = getPackageName(sourceFile);
+            classFile = packageName.replace(".", File.separator) + classFile;
+        }
+        return(getBinDirectory() + File.separator + classFile + ".class");
+    }
+
+    private static String getPackageName(File sourceFile)
+    {
+        String packageName = "";
+        if (!packageNamesForFile.containsKey(sourceFile))
+        {
+            try
+            {
+                BufferedReader srcReader = new BufferedReader(new FileReader(sourceFile));
+                String line;
+                while ((line = srcReader.readLine()) != null)
+                {
+                    Matcher matcher = packageFinder.matcher(line);
+                    if (matcher.matches())
+                    {
+                        packageName = matcher.group(1) + ".";
+                        break;
+                    }
+                }
+                srcReader.close();
+            }
+            catch (FileNotFoundException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            packageNamesForFile.put(sourceFile, packageName);
+        }
+        else
+        {
+            packageName = packageNamesForFile.get(sourceFile);
+        }
+        return packageName;
     }
 
     private static List<File> getChangedSourceFiles()
@@ -217,8 +290,8 @@ public class JavaValueExtractorUtils
     private static boolean hasChanged(File sourceFile)
     {
         final String sourcePath = sourceFile.getPath();
-        final String targetPath = getBinDirectory() + sourcePath.substring(getSrcDirectory().length(), sourcePath.length() - 5)
-                + ".class";
+        final String targetPath = getClassFileForSourceFile(new File(sourcePath));
+        //getBinDirectory() + sourcePath.substring(getSrcDirectory().length(), sourcePath.length() - 5) + ".class";
         final File targetFile = new File(targetPath);
         return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();
     }
