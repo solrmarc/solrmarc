@@ -12,6 +12,7 @@ import org.solrmarc.index.utils.StringReader;
 public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFactory
 {
     protected final MethodCallManager methodCallManager;
+    protected boolean haveShownKnownMethods = false;
 
     public AbstractMethodCallFactory()
     {
@@ -74,8 +75,16 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
                             + methodCallManager.loadedExtractorMixinsToString(matchesParmWildcard));
                 }
             }
-            throw new IndexerSpecException("Unknown method: " + context.toString() + ". Known methods are: \n"
-                    + methodCallManager.loadedExtractorMixinsToString());
+            if (!haveShownKnownMethods)
+            {
+                haveShownKnownMethods = true;
+                throw new IndexerSpecException("Unknown extractor method: " + context.toString() + ". Known methods are: \n"
+                        + methodCallManager.loadedExtractorMixinsToString());
+            }
+            else
+            {
+                throw new IndexerSpecException("Unknown extractor method: " + context.toString());
+            }
         }
         else
         {
@@ -104,11 +113,17 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
                 throw new IndexerSpecException("Multiple methods with name: " + context.getMethodName() + " but none of them require " + context.getParameterTypes().length + " parameters.  Known methods are: \n"
                         + methodCallManager.loadedExtractorMixinsToString(matchesOtherContextParmWildCard));
             }
+            else if (!haveShownKnownMethods)
+            {
+                haveShownKnownMethods = true;
+                throw new IndexerSpecException("Unknown extractor method: " + context.toString() + ". Known methods are: \n"
+                        + methodCallManager.loadedExtractorMixinsToString());
+            }
             else
             {
-                throw new IndexerSpecException("Unknown method: " + context.toString() + ". Known methods are: \n"
-                    + methodCallManager.loadedExtractorMixinsToString());
+                throw new IndexerSpecException("Unknown extractor method: " + context.toString());
             }
+
         }
     }
 

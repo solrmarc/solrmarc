@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,7 +71,13 @@ public class JavaValueExtractorUtils
             return false;
         }
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+        if (compiler == null)
+        {
+            logger.warn("Java environment at JAVA_HOME = "+System.getProperty("java.home")+ " does not have a Java compiler.");
+            logger.warn("Any custom mixin routines in "+getSrcDirectory()+ " will not be compiled and will not be available.");
+            return false;
+        }
+        final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, Charset.forName("UTF-8"));
         fileManager.setLocation(StandardLocation.SOURCE_PATH, Collections.singleton(new File(getSrcDirectory())));
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(getBinDirectory())));
 
@@ -127,22 +134,23 @@ public class JavaValueExtractorUtils
 
     protected static Class<?>[] getClasses()
     {
-        try
+        final List<String> classNames = getClassNames();
+        final List<Class<?>> classList = new ArrayList<Class<?>>(classNames.size());
+        final ClassLoader classLoader = getClassLoader();
+        for (String className : classNames)
         {
-            final List<String> classNames = getClassNames();
-            final Class[] classes = new Class[classNames.size()];
-            final ClassLoader classLoader = getClassLoader();
-            for (int i = 0; i < classes.length; i++)
+         //   final String className = classNames.get(i);
+            try
             {
-                final String className = classNames.get(i);
-                classes[i] = classLoader.loadClass(className);
+                classList.add(classLoader.loadClass(className));
             }
-            return classes;
+            catch (ClassNotFoundException e)
+            {
+                logger.warn("Unable to load custom mixin class: "+className);
+            }
         }
-        catch (ClassNotFoundException e)
-        {
-            throw new RuntimeException(e);
-        }
+        final Class<?>[] classes = classList.toArray(new Class<?>[classList.size()]);
+        return classes;
     }
 
     private static ClassLoader getClassLoader()

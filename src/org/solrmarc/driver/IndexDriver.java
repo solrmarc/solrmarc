@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
@@ -244,7 +246,7 @@ public class IndexDriver
         if (!exceptions.isEmpty())
         {
             logger.error("Error processing index configuration: " + f2.getName());
-            logger.error(getTextForExceptions(exceptions));
+            logTextForExceptions(exceptions);
             System.exit(5);
         }
         else
@@ -320,6 +322,38 @@ public class IndexDriver
             }
         }
         return (text.toString());
+    }
+    
+    private static void logTextForExceptions(List<IndexerSpecException> exceptions)
+    {
+        String lastSpec = "";
+        for (IndexerSpecException e : exceptions)
+        {
+            eErrorSeverity level = e.getErrLvl();
+            Priority priority = getPriorityForSeverity(level);
+            String specMessage = e.getSpecMessage();
+            if (!specMessage.equals(lastSpec))
+            {
+                logger.log(priority, specMessage);
+            }
+            logger.log(priority, e.getMessage());
+            for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause())
+            {
+                logger.log(priority, e.getSolrField()+" : "+cause.getMessage());
+            }
+        }
+    }
+
+    private static Priority getPriorityForSeverity(eErrorSeverity level)
+    {
+        switch (level) {
+            case NONE:  return(Level.DEBUG);
+            case INFO:  return(Level.INFO);
+            case WARN:  return(Level.WARN);
+            case ERROR: return(Level.ERROR);
+            case FATAL: return(Level.FATAL);
+        }
+        return(Level.DEBUG);
     }
 
 }
