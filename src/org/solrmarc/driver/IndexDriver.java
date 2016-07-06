@@ -6,19 +6,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.AbstractMap;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcReader;
-import org.marc4j.marc.Record;
 import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
@@ -139,6 +139,44 @@ public class IndexDriver
             e.printStackTrace();
         }
     }
+
+    private static void extendClasspathWithJar(URLClassLoader sysLoader, File jarfile) throws IOException 
+    {
+        URL urls[] = sysLoader.getURLs();
+//      String urlPath = "jar:file://" + jarfile.getAbsolutePath() + "!/";
+  //      String urlPath = "file://" + jarfile.getAbsolutePath();
+        URL ujar = jarfile.toURI().toURL();
+
+        String ujars = ujar.toString();
+        for (int i = 0; i < urls.length; i++)
+        {
+            if (urls[i].toString().equalsIgnoreCase(ujars)) return;
+        }
+        Class<URLClassLoader> sysClass = URLClassLoader.class;
+        try {
+            Method method = sysClass.getDeclaredMethod("addURL", new Class[]{URL.class});
+            method.setAccessible(true);
+            method.invoke(sysLoader, new Object[] {ujar});
+        } 
+        catch (Throwable t) 
+        {
+            t.printStackTrace();
+        }
+    }
+    
+
+    private static URLClassLoader extendClasspath(File dir) throws IOException 
+    {
+        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        for (File file : dir.listFiles())
+        {
+            if (file.getName().endsWith(".jar"))
+            {
+                extendClasspathWithJar(sysLoader, file);
+            }
+        }
+        return sysLoader;
+    }   
     
     public static void main(String[] args)
     {
@@ -190,9 +228,37 @@ public class IndexDriver
         {
             homeDirStr = options.valueOf(homeDir).getAbsolutePath();
         }
+        
+        URLClassLoader cl = null;
+        try
+        {
+            cl = extendClasspath(new File(homeDirStr, "lib-solrj"));
+        }
+        catch (IOException e2)
+        {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+        }
+        
+        try
+        {
+            Class.forName("org.apache.solr.common.SolrInputDocument");
+        }
+        catch (ClassNotFoundException e2)
+        {
+            try
+            {
+                cl.loadClass("org.apache.solr.common.SolrInputDocument");
+            }
+            catch (ClassNotFoundException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        
         IndexDriver indexDriver = new IndexDriver(homeDirStr);
         File f1 = new File(options.valueOf(readOpts));
-   //     String inputfile = "records/uva_001.mrc";
         List<String> inputFiles = options.valuesOf(files);
         try
         {
