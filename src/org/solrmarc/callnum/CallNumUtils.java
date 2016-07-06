@@ -20,8 +20,6 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.*;
 
-import com.solrmarc.icu.lang.UCharacter;
-
 /**
  * Call number utility functions for solrmarc
  *
@@ -363,6 +361,7 @@ public final class CallNumUtils {
             //  not because further on there is a second cutter preceded by
             //  a period.
             // look for period before second cutter
+            @SuppressWarnings("unused")
             String afterLCclassNCutter = rawLCcallnum.replaceFirst(LC_CLASS_N_CUTTER + " *", "");
             String cutterRegex = LC_CLASS_N_CUTTER + " *(.*)\\." + CUTTER_REGEX;
 
@@ -885,8 +884,8 @@ public final class CallNumUtils {
                         // map latin chars with diacritic to char without
                         char foldC;
 
-                        if (UCharacter.UnicodeBlock.of(c) != UCharacter.UnicodeBlock.COMBINING_DIACRITICAL_MARKS &&
-                            UCharacter.UnicodeBlock.of(c) != UCharacter.UnicodeBlock.SPACING_MODIFIER_LETTERS &&
+                        if (Character.UnicodeBlock.of(c) != Character.UnicodeBlock.COMBINING_DIACRITICAL_MARKS &&
+                            Character.UnicodeBlock.of(c) != Character.UnicodeBlock.SPACING_MODIFIER_LETTERS &&
                              (foldC = org.solrmarc.tools.Utils.foldDiacriticLatinChar(c)) != 0x00)
                             // we mapped a latin char w diacritic to plain ascii
                             reverse.append(alphanumReverseMap.get(foldC));
