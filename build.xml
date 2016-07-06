@@ -56,6 +56,11 @@
                     <include name="**/*.jar"/>
                 </fileset>
             </classpath>
+            <classpath >
+                <fileset dir="lib-solrj">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
         </javac>
     </target>
 
