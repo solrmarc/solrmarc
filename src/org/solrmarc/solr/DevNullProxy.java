@@ -1,23 +1,9 @@
 package org.solrmarc.solr;
 
 import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-
 import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.SolrInputField;
-import org.apache.solr.common.util.NamedList;
 
 public class DevNullProxy extends SolrProxy
 {
@@ -26,6 +12,7 @@ public class DevNullProxy extends SolrProxy
     {
     }
     
+    @Override
     public int addDoc(SolrInputDocument inputDoc)
     {
         return(1);
@@ -42,6 +29,7 @@ public class DevNullProxy extends SolrProxy
         return(num);
     }
 
+    @Override
     public void close()
     {
     }
@@ -51,14 +39,17 @@ public class DevNullProxy extends SolrProxy
         return(null);
     }
     
+    @Override
     public void commit(boolean optimize) throws IOException
     {
     }
 
+    @Override
     public void delete(String id, boolean fromCommitted, boolean fromPending) throws IOException
     {
     }
 
+    @Override
     public void deleteAllDocs() throws IOException
     {
     }
