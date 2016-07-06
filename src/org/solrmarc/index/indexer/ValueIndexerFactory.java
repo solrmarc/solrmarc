@@ -154,9 +154,9 @@ public class ValueIndexerFactory
         {
             if (singleSpec.startsWith("#") || (!singleSpec.contains(":") && !singleSpec.contains("="))) continue;
             if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map.")) continue;
-            if (singleSpec.startsWith("marc.") || singleSpec.startsWith("solrmarc.")) continue;
+     //       if (singleSpec.startsWith("marc.") || singleSpec.startsWith("solrmarc.")) continue;
             
-            final String[] specParts = singleSpec.split("[ ]?[:=][ ]?", 2);
+            final String[] specParts = singleSpec.split("[ ]?[:=]|([+]=)[ ]?", 2);
             final String solrFieldName = specParts[0].trim();
             final String mappingDefinition = specParts[1].trim();
             try
@@ -201,12 +201,14 @@ public class ValueIndexerFactory
                 e.printStackTrace();
             }
         }
+        logger.trace("Processing spec: "+ singleSpec);
         MultiValueIndexer valueIndexer = parser.parse(singleSpec);
         // Test fire the indexer to catch obvious error such as missing property files
         if (valueIndexer != null)
         {
             try
             {
+                logger.trace("Test firing spec: "+ singleSpec);
                 valueIndexer.getFieldData(StaticMarcTestRecords.testRecord[0]);
             }
             catch (InvocationTargetException ite)
