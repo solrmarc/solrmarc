@@ -8,9 +8,26 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
-import org.marc4j.marc.Record;
 import org.solrmarc.solr.SolrProxy;
-
+/**
+ *  <h1>ChunkIndexerThread</h1> 
+ * 
+ *  This class implements sending batches of documents to Solr.  It implements retries to cope with 
+ *  the issue where one bad document in a batch will cause all subsequent solr input documents in 
+ *  the batch to be skipped.
+ *  <br/>
+ *  To accomplish this the class will divide the batch into several smaller segments, and re-try sending 
+ *  those smaller batches.   Eventually a sub-batch containing the problem record will be sent one-by-one
+ *  to insure that all valid documents are correctly sent to Solr, while only the documents containing 
+ *  errors are skipped.   
+ *  <br/>
+ *  If the parameter errQ is not null the records that cause an error will be appended to that list and 
+ *  can subsequently be logged or fixed and retried.
+ * 
+ *  
+ * @author rh9ec
+ *
+ */
 
 public class ChunkIndexerThread extends Thread
 {
@@ -47,11 +64,10 @@ public class ChunkIndexerThread extends Thread
     public void run()
     {
         int inChunk = docs.size();
-        @SuppressWarnings("unused")
         SolrInputDocument firstDoc = docs.iterator().next();
         logger.debug("Adding chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
         try {
-            // If all goes well, this is all we need. Add the docs, and count the docs
+            // If all goes well, this is all we need. Add the docs, count the docs, and if desired return the docs with errors
             int cnt = solrProxy.addDocs(docs);
             synchronized ( cnts ) { cnts[2] += cnt; }
             logger.debug("Added chunk of "+cnt+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
@@ -88,7 +104,6 @@ public class ChunkIndexerThread extends Thread
                     String id1 = null, id2 = null;
                     for (int j = 0; j < newChunkSize; j++)
                     {
-                        Record rec;
                         if (recDocI.hasNext()) 
                         {
                             RecordAndDoc recDoc = recDocI.next();
@@ -115,7 +130,7 @@ public class ChunkIndexerThread extends Thread
                     }
                 }
             }
-            // less than 20 in the chunk resubmit one-by-one
+            // less than 20 in the chunk resubmit records one-by-one
             else 
             { 
                 logger.debug("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());

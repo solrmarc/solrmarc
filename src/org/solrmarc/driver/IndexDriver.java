@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
@@ -17,7 +18,6 @@ import java.util.Properties;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
-import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcReader;
 import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
@@ -48,11 +48,13 @@ public class IndexDriver
     MarcReader reader;
     SolrProxy solrProxy;
     boolean verbose;
+    int numIndexed[];
 
     public IndexDriver(String homeDirStr)
     {
         ValueIndexerFactory.setHomeDir(homeDirStr);
         indexerFactory = ValueIndexerFactory.instance();
+        numIndexed = new int[]{ 0, 0, 0};
     }
     
     public ValueIndexerFactory getIndexerFactory()
@@ -116,10 +118,54 @@ public class IndexDriver
         }
     }
     
-    public int[] processInput() throws Exception
+    public void processInput()
     {
-        int numHandled[] = indexer.indexToSolr(reader);
-        return numHandled;
+        String inEclipseStr = System.getProperty("runInEclipse");
+        boolean inEclipse = "true".equalsIgnoreCase(inEclipseStr);
+        if (inEclipse) 
+        {
+            Thread shutdownSimulator = new ShutdownSimulator();
+            shutdownSimulator.start();
+        }
+        Thread shutdownHook = new MyShutdownThread(indexer);
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+        long startTime = System.currentTimeMillis();
+        long endTime = startTime;
+        
+        numIndexed = indexer.indexToSolr(reader);
+        
+        endTime = System.currentTimeMillis();
+        
+        if (!indexer.isShutDown()) 
+        {
+            if (!indexer.shuttingDown)  
+                Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            indexer.endProcessing();
+        }
+        logger.info(""+numIndexed[0]+ " records read");
+        logger.info(""+numIndexed[1]+ " records indexed  and ");
+        long minutes = ((endTime - startTime) / 1000) / 60;
+        long seconds = (endTime - startTime) / 1000  - (minutes * 60);
+        long hundredths = (endTime - startTime) / 10  - (minutes * 6000) - (seconds * 100) + 100;
+        String hundredthsStr = (""+hundredths).substring(1);
+        String minutesStr = ((minutes > 0) ? ""+minutes+" minute"+((minutes != 1)?"s ":" ") : "");
+        String secondsStr = ""+seconds+"."+hundredthsStr+" seconds";
+        logger.info(""+numIndexed[2]+ " records sent to Solr in "+ minutesStr + secondsStr);
+        if (getErrors().size() > 0)
+        {
+            Collection<RecordAndDoc> errQ = getErrors();
+            int[][] errTypeCnt = new int[][]{{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
+            for (final RecordAndDoc entry : errQ)
+            {
+                if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      errTypeCnt[0][entry.getErrLvl().ordinal()] ++;
+                if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  errTypeCnt[1][entry.getErrLvl().ordinal()] ++;
+                if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))      errTypeCnt[2][entry.getErrLvl().ordinal()] ++;
+            }
+            showErrReport("MARC", errTypeCnt[0]);
+            showErrReport("Index", errTypeCnt[1]);
+            showErrReport("Solr", errTypeCnt[2]);
+        }
+
     }
 
     public Collection<RecordAndDoc>  getErrors()
@@ -127,25 +173,20 @@ public class IndexDriver
         return(indexer.errQ); 
     }
 
-    public void endProcessing()
-    {
-        try
-        {
-            solrProxy.commit(false);
-        }
-        catch (IOException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    private static void extendClasspathWithJar(URLClassLoader sysLoader, File jarfile) throws IOException 
+    private static void extendClasspathWithJar(URLClassLoader sysLoader, File jarfile)
     {
         URL urls[] = sysLoader.getURLs();
-//      String urlPath = "jar:file://" + jarfile.getAbsolutePath() + "!/";
-  //      String urlPath = "file://" + jarfile.getAbsolutePath();
-        URL ujar = jarfile.toURI().toURL();
+        URL ujar;
+        try
+        {
+            ujar = jarfile.toURI().toURL();
+        }
+        catch (MalformedURLException e)
+        {
+            // This shouldn't happen since the jarfile is passed in as a file from a directory
+            e.printStackTrace();
+            return;
+        }
 
         String ujars = ujar.toString();
         for (int i = 0; i < urls.length; i++)
@@ -163,9 +204,8 @@ public class IndexDriver
             t.printStackTrace();
         }
     }
-    
 
-    private static URLClassLoader extendClasspath(File dir) throws IOException 
+    private static void extendClasspath(File dir)
     {
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         for (File file : dir.listFiles())
@@ -175,15 +215,33 @@ public class IndexDriver
                 extendClasspathWithJar(sysLoader, file);
             }
         }
-        return sysLoader;
+        try
+        {
+            Class.forName("org.apache.solr.common.SolrInputDocument");
+        }
+        catch (ClassNotFoundException e2)
+        {
+//            try
+//            {
+//                sysLoader.loadClass("org.apache.solr.common.SolrInputDocument");
+//            }
+//            catch (ClassNotFoundException e)
+//            {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
+            throw new IndexerSpecException(e2, eErrorSeverity.FATAL, "Unable to load class \"org.apache.solr.common.SolrInputDocument\". Probably cannot find or read the SolrJ libraries");
+        }
     }   
     
+    @SuppressWarnings("unused")
     public static void main(String[] args)
     {
         OptionParser parser = new OptionParser(  );
         OptionSpec<String> readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
         OptionSpec<File> configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
         OptionSpec<File> homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
+        OptionSpec<File> solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
         OptionSpec<File> errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.").withRequiredArg().ofType( File.class );
         OptionSpec<File> errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
         OptionSpec<File> errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
@@ -228,33 +286,24 @@ public class IndexDriver
         {
             homeDirStr = options.valueOf(homeDir).getAbsolutePath();
         }
-        
-        URLClassLoader cl = null;
+        final File solrJPath;
+        if (options.has(solrjDir))
+        {
+            solrJPath = options.valueOf(solrjDir);
+        }
+        else
+        {
+            solrJPath = new File(homeDirStr, "lib-solrj");
+        }
         try
         {
-            cl = extendClasspath(new File(homeDirStr, "lib-solrj"));
+            extendClasspath(solrJPath);
         }
-        catch (IOException e2)
+        catch (IndexerSpecException ise)
         {
-            // TODO Auto-generated catch block
-            e2.printStackTrace();
-        }
-        
-        try
-        {
-            Class.forName("org.apache.solr.common.SolrInputDocument");
-        }
-        catch (ClassNotFoundException e2)
-        {
-            try
-            {
-                cl.loadClass("org.apache.solr.common.SolrInputDocument");
-            }
-            catch (ClassNotFoundException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            logger.fatal("Fatal error: Failure to load SolrJ", ise);
+            System.exit(10);
+            
         }
         
         IndexDriver indexDriver = new IndexDriver(homeDirStr);
@@ -319,45 +368,36 @@ public class IndexDriver
         {
             logger.info("Opening input files: "+ Arrays.toString(inputFiles.toArray()));
             indexDriver.configureReader(inputFiles);
-            long startTime = System.currentTimeMillis();
-            long endTime = startTime;
-            int numIndexed[] = {0, 0, 0};
-            try
-            {
-                numIndexed = indexDriver.processInput();
-            }
-            catch (Exception e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            finally {
-                endTime = System.currentTimeMillis();
-                indexDriver.endProcessing();
-            }
-            logger.info(""+numIndexed[0]+ " records read");
-            logger.info(""+numIndexed[1]+ " records indexed  and ");
-            long minutes = ((endTime - startTime) / 1000) / 60;
-            long seconds = (endTime - startTime) / 1000  - (minutes * 60);
-            long hundredths = (endTime - startTime) / 10  - (minutes * 6000) - (seconds * 100) + 100;
-            String hundredthsStr = (""+hundredths).substring(1);
-            String minutesStr = ((minutes > 0) ? ""+minutes+" minute"+((minutes != 1)?"s ":" ") : "");
-            String secondsStr = ""+seconds+"."+hundredthsStr+" seconds";
-            logger.info(""+numIndexed[2]+ " records sent to Solr in "+ minutesStr + secondsStr);
-            if (indexDriver.getErrors().size() > 0)
-            {
-                Collection<RecordAndDoc> errQ = indexDriver.getErrors();
-                int[][] errTypeCnt = new int[][]{{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
-                for (final RecordAndDoc entry : errQ)
-                {
-                    if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      errTypeCnt[0][entry.getErrLvl().ordinal()] ++;
-                    if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  errTypeCnt[1][entry.getErrLvl().ordinal()] ++;
-                    if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))      errTypeCnt[2][entry.getErrLvl().ordinal()] ++;
-                }
-                showErrReport("MARC", errTypeCnt[0]);
-                showErrReport("Index", errTypeCnt[1]);
-                showErrReport("Solr", errTypeCnt[2]);
-            }
+            
+            indexDriver.processInput();
+            
+//            }
+//            finally {
+//                indexDriver.endProcessing();
+//            }
+//            logger.info(""+numIndexed[0]+ " records read");
+//            logger.info(""+numIndexed[1]+ " records indexed  and ");
+//            long minutes = ((endTime - startTime) / 1000) / 60;
+//            long seconds = (endTime - startTime) / 1000  - (minutes * 60);
+//            long hundredths = (endTime - startTime) / 10  - (minutes * 6000) - (seconds * 100) + 100;
+//            String hundredthsStr = (""+hundredths).substring(1);
+//            String minutesStr = ((minutes > 0) ? ""+minutes+" minute"+((minutes != 1)?"s ":" ") : "");
+//            String secondsStr = ""+seconds+"."+hundredthsStr+" seconds";
+//            logger.info(""+numIndexed[2]+ " records sent to Solr in "+ minutesStr + secondsStr);
+//            if (indexDriver.getErrors().size() > 0)
+//            {
+//                Collection<RecordAndDoc> errQ = indexDriver.getErrors();
+//                int[][] errTypeCnt = new int[][]{{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
+//                for (final RecordAndDoc entry : errQ)
+//                {
+//                    if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      errTypeCnt[0][entry.getErrLvl().ordinal()] ++;
+//                    if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  errTypeCnt[1][entry.getErrLvl().ordinal()] ++;
+//                    if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))      errTypeCnt[2][entry.getErrLvl().ordinal()] ++;
+//                }
+//                showErrReport("MARC", errTypeCnt[0]);
+//                showErrReport("Index", errTypeCnt[1]);
+//                showErrReport("Solr", errTypeCnt[2]);
+//            }
         }
     }
 
@@ -370,6 +410,7 @@ public class IndexDriver
         }
     }
 
+    @SuppressWarnings("unused")
     private static String getTextForExceptions(List<IndexerSpecException> exceptions)
     {
         StringBuilder text = new StringBuilder();
@@ -420,6 +461,56 @@ public class IndexDriver
             case FATAL: return(Level.FATAL);
         }
         return(Level.DEBUG);
+    }
+
+    class ShutdownSimulator extends Thread
+    {
+        public void run()
+        {
+            System.out.println("You're using Eclipse; click in this console and " +
+                            "press ENTER to call System.exit() and run the shutdown routine.");
+            try {
+                System.in.read();
+            } 
+            catch (IOException e) 
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            System.exit(0);
+        }
+    }
+    
+    class MyShutdownThread extends Thread 
+    {
+        private Indexer indexer;
+        public MyShutdownThread(Indexer ind)
+        {
+            indexer = ind;
+        }
+        
+        public void run()
+        {
+            //System.err.println("Starting Shutdown hook");
+            logger.info("Starting Shutdown hook");
+            
+            if (!indexer.isShutDown()) 
+            {
+                logger.info("Stopping main indexer loop");
+                indexer.shutDown();
+            }
+            while (!indexer.isShutDown()) 
+            {
+                try
+                {
+                    sleep(2000);
+                }
+                catch (InterruptedException e)
+                {
+                }
+            }
+            logger.info("Finished Shutdown hook");
+        }
     }
 
 }
