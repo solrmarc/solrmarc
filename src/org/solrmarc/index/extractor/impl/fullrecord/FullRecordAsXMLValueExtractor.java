@@ -12,6 +12,19 @@ import java.io.UnsupportedEncodingException;
 
 import javax.xml.transform.stream.StreamResult;
 
+/**
+ * FullRecordAsXMLValueExtractor
+ * 
+ * Takes a MARC record and formats the entire thing in MARCXML
+ * Originally the implementation created a MarcXMLWriter and use that to write the record to a character stream.
+ * The character stream was then converted to a string to be returned as a solr field.   However that implementation 
+ * painfully slow, partly since it translated from characters to UTF-8 bytes back to characters, but also partly 
+ * because of the extra processing that a MarcXMLWriter does.
+ * 
+ * @author rh9ec
+ *
+ */
+
 public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtractor
 {
     private final static String spaces = "                                          ";

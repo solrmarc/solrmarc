@@ -1,14 +1,12 @@
 package org.solrmarc.index.extractor.impl.direct;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.specification.SingleSpecification;
 
 
-public class FieldMatch // extends AbstractFieldMatch
+public class FieldMatch
 {
     VariableField vf;
     SingleSpecification spec;

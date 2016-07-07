@@ -15,6 +15,7 @@ public class MultiValueWrapperSingleValueExtractor extends AbstractMultiValueExt
         wrapped = toWrap;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<String> extract(Record record) throws Exception
     {

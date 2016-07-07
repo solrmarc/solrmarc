@@ -6,8 +6,6 @@ import java.util.List;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcError;
 import org.marc4j.marc.Record;
-import org.solrmarc.driver.Indexer.eErrorHandleVal;
-import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 
 public class RecordAndDoc

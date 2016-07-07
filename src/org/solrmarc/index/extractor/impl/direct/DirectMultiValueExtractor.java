@@ -3,8 +3,6 @@ package org.solrmarc.index.extractor.impl.direct;
 
 import org.marc4j.marc.Record;
 import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
-import org.solrmarc.index.extractor.formatter.FieldFormatter;
-import org.solrmarc.index.extractor.formatter.FieldFormatterBase;
 import org.solrmarc.index.extractor.formatter.FieldFormatterDecorator;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
@@ -12,10 +10,8 @@ import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.specification.AbstractSpecificationFactory;
 import org.solrmarc.index.specification.Specification;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.LinkedHashSet;
 
 public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
 {

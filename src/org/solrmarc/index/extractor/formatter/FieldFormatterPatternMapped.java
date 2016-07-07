@@ -1,9 +1,5 @@
 package org.solrmarc.index.extractor.formatter;
 
-import java.util.List;
-
-import org.solrmarc.index.extractor.impl.patternMapping.PatternMapping;
-import org.solrmarc.index.mapping.impl.MultiValuePatternMapping;
 import org.solrmarc.index.mapping.impl.PatternMappingFactory;
 
 
