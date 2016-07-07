@@ -1,6 +1,5 @@
 package org.solrmarc.solr;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,26 +44,22 @@ public class StdOutProxy extends SolrProxy
         return(num);
     }
 
-    public void close()
-    {
-        output.flush();
-    }
-
     public SolrServer getSolrServer()
     {
         return(null);
     }
     
-    public void commit(boolean optimize) throws IOException
+    public void commit(boolean optimize)
     {
         output.flush();
     }
 
-    public void delete(String id, boolean fromCommitted, boolean fromPending) throws IOException
+    public void delete(String id)
     {
     }
 
-    public void deleteAllDocs() throws IOException
+    public void deleteAllDocs()
     {
     }
+
 }

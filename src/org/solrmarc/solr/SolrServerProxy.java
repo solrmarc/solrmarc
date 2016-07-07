@@ -12,13 +12,18 @@ import org.apache.solr.common.util.NamedList;
 
 public class SolrServerProxy extends SolrProxy
 {
-    SolrServer solrserver;
+    final SolrServer solrserver;
     
     public SolrServerProxy(SolrServer solrserver)
     {
         this.solrserver = solrserver;
     }
     
+    public SolrServerProxy(Object httpsolrserver)
+    {
+        this.solrserver = (SolrServer)httpsolrserver;
+    }
+
     public int addDoc(SolrInputDocument inputDoc)
     {
         int num = 0;
@@ -70,11 +75,6 @@ public class SolrServerProxy extends SolrProxy
         }
     }
 
-
-    public void close()
-    {
-    }
-
     public void commit(boolean optimize) throws IOException
     {
         try
@@ -90,23 +90,11 @@ public class SolrServerProxy extends SolrProxy
         }
     }
 
-    public void delete(String id, boolean fromCommitted, boolean fromPending) throws IOException
+    public void delete(String id) throws IOException
     {
         try
         {
             solrserver.deleteById(id);
-        }
-        catch (SolrServerException e)
-        {
-            throw(new SolrRuntimeException("SolrserverException", e));
-        }
-    }
-
-    public void deleteAllDocs() throws IOException
-    {
-        try
-        {
-            solrserver.deleteByQuery("*:*");
         }
         catch (SolrServerException e)
         {

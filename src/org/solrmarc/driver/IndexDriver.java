@@ -92,7 +92,7 @@ public class IndexDriver
         }
     }
     
-    public void configureOutput(String solrURL)
+    public void configureOutput(String solrURL, String solrJClassName)
     {
         if (solrURL.equals("stdout"))
         {
@@ -114,7 +114,7 @@ public class IndexDriver
         }
         else 
         {
-            solrProxy = SolrCoreLoader.loadRemoteSolrServer(solrURL, true);
+            solrProxy = SolrCoreLoader.loadRemoteSolrServer(solrURL, solrJClassName, true);
         }
     }
     
@@ -211,6 +211,19 @@ public class IndexDriver
     private static void extendClasspath(File dir)
     {
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        if (dir == null || !dir.isDirectory() || dir.listFiles().length == 0)
+        {
+            String dirpath;
+            try
+            {
+                dirpath = dir.getCanonicalPath();
+            }
+            catch (IOException e)
+            {
+                dirpath = dir.getAbsolutePath();
+            }
+            throw new IndexerSpecException(eErrorSeverity.FATAL, "Unable to find Jars for SolrJ in the provided directory: "+dirpath );
+        }
         for (File file : dir.listFiles())
         {
             if (file.getName().endsWith(".jar"))
@@ -237,7 +250,6 @@ public class IndexDriver
         }
     }   
     
-    @SuppressWarnings("unused")
     public static void main(String[] args)
     {
         OptionParser parser = new OptionParser(  );
@@ -245,6 +257,7 @@ public class IndexDriver
         OptionSpec<File> configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
         OptionSpec<File> homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
         OptionSpec<File> solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
+        OptionSpec<String> solrjClass = parser.accepts("solrjClassName", "SolrJ").withRequiredArg().ofType( String.class ).defaultsTo("org.apache.solr.client.solrj.impl.CommonsHttpSolrServer");
         OptionSpec<File> errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.").withRequiredArg().ofType( File.class );
         OptionSpec<File> errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
         OptionSpec<File> errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
@@ -264,12 +277,13 @@ public class IndexDriver
         {
             try
             {
-                parser.printHelpOn( System.err );
-                System.exit(0);
+                System.err.println(uoe.getMessage());
+                parser.printHelpOn(System.err);
             }
             catch (IOException e)
             {
             }
+            System.exit(1);
         }
         if (options.has("help")) 
         {
@@ -279,8 +293,6 @@ public class IndexDriver
             }
             catch (IOException e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             }
             System.exit(0);
         }
@@ -328,10 +340,11 @@ public class IndexDriver
         }
         
      //   String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
+        String solrJClassName = solrjClass.value(options);
         String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : options.has("null") ? "devnull" : "stdout";
         boolean multithread = options.has("solrURL") && !options.has("debug") ? true : false;
         try {
-            indexDriver.configureOutput(solrURL);
+            indexDriver.configureOutput(solrURL, solrJClassName);
         }
         catch (SolrRuntimeException sre)
         {
@@ -374,33 +387,6 @@ public class IndexDriver
             
             indexDriver.processInput();
             
-//            }
-//            finally {
-//                indexDriver.endProcessing();
-//            }
-//            logger.info(""+numIndexed[0]+ " records read");
-//            logger.info(""+numIndexed[1]+ " records indexed  and ");
-//            long minutes = ((endTime - startTime) / 1000) / 60;
-//            long seconds = (endTime - startTime) / 1000  - (minutes * 60);
-//            long hundredths = (endTime - startTime) / 10  - (minutes * 6000) - (seconds * 100) + 100;
-//            String hundredthsStr = (""+hundredths).substring(1);
-//            String minutesStr = ((minutes > 0) ? ""+minutes+" minute"+((minutes != 1)?"s ":" ") : "");
-//            String secondsStr = ""+seconds+"."+hundredthsStr+" seconds";
-//            logger.info(""+numIndexed[2]+ " records sent to Solr in "+ minutesStr + secondsStr);
-//            if (indexDriver.getErrors().size() > 0)
-//            {
-//                Collection<RecordAndDoc> errQ = indexDriver.getErrors();
-//                int[][] errTypeCnt = new int[][]{{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
-//                for (final RecordAndDoc entry : errQ)
-//                {
-//                    if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      errTypeCnt[0][entry.getErrLvl().ordinal()] ++;
-//                    if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  errTypeCnt[1][entry.getErrLvl().ordinal()] ++;
-//                    if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))      errTypeCnt[2][entry.getErrLvl().ordinal()] ++;
-//                }
-//                showErrReport("MARC", errTypeCnt[0]);
-//                showErrReport("Index", errTypeCnt[1]);
-//                showErrReport("Solr", errTypeCnt[2]);
-//            }
         }
     }
 
@@ -466,37 +452,16 @@ public class IndexDriver
         return(Level.DEBUG);
     }
 
-    class ShutdownSimulator extends Thread
-    {
-        public void run()
-        {
-            System.out.println("You're using Eclipse; click in this console and " +
-                            "press ENTER to call System.exit() and run the shutdown routine.");
-            while (true) 
-            {
-                try {
-                    if (System.in.available() > 0)
-                    {
-                        System.in.read();
-                    }
-                    else
-                    {
-                        sleep(2000);
-                    }
-                } 
-                catch (IOException e) 
-                {
-                    break;
-                }
-                catch (InterruptedException e)
-                {
-                    break;
-                }
-            }
-            System.exit(0);
-        }
-    }
     
+    /**
+     *  <h1>MyShutdownThread</h1>
+     *  This class implements a shutdown hook that is installed in the Java Runtime.  If a user attempts to terminate
+     *  the import process, this hook will signal the threads that are handling the import (via Thread.interrupt) and they 
+     *  will shutdown cleanly, and commit the changes to Solr before allowing the program to terminate.
+     * 
+     * @author rh9ec
+     *
+     */
     class MyShutdownThread extends Thread 
     {
         private Indexer indexer;
@@ -526,6 +491,52 @@ public class IndexDriver
                 }
             }
             logger.info("Finished Shutdown hook");
+        }
+    }
+    
+    /**
+     *  <h1>ShutdownSimulator</h1>
+     *  A small class that is only useful for debugging purposes.  Specifically for debugging the shutdown hook.
+     *  The Eclipse Java Development Environment is unable to shutdown a process it is running in a way that the
+     *  shutdown hook is invoked, instead Eclipse merely summarily destroys the process, which is unhelpful.
+     *  <br/>
+     *  To enable this feature, you must define the system property "runInEclipse" as true, usually via the 
+     *  VM arguments panel on the Arguments tab in the debug configuration dialog.    -DrunInEclipse=true
+     *  Then when the program is running in Eclipse, you will need to click in the Console window, and press [ENTER]
+     *  to simulate a CTRL-C being sent to the program.
+     * 
+     * @author rh9ec
+     *
+     */
+    class ShutdownSimulator extends Thread
+    {
+        public void run()
+        {
+            System.out.println("You're using Eclipse; click in this console and " +
+                            "press ENTER to call System.exit() and run the shutdown routine.");
+            while (true) 
+            {
+                try {
+                    if (System.in.available() > 0)
+                    {
+                        System.in.read();
+                        System.exit(0);
+                    }
+                    else
+                    {
+                        sleep(2000);
+                    }
+                } 
+                catch (IOException e) 
+                {
+                    break;
+                }
+                catch (InterruptedException e)
+                {
+                    break;
+                }
+            }
+            
         }
     }
 

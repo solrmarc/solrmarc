@@ -4,6 +4,7 @@ package org.solrmarc.driver;
 import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 import org.marc4j.MarcError;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
@@ -19,7 +20,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -153,7 +156,8 @@ public class Indexer
     
     protected RecordAndDoc indexToSolrDoc(final Record record) 
     {
-        SolrInputDocument[] inputDocs = new SolrInputDocument[]{ new SolrInputDocument(), new SolrInputDocument(), new SolrInputDocument() } ;
+        Map<String,SolrInputField> emptyMap = new LinkedHashMap<>();
+        SolrInputDocument[] inputDocs = new SolrInputDocument[]{ new SolrInputDocument(emptyMap), new SolrInputDocument(emptyMap), new SolrInputDocument(emptyMap) } ;
         RecordAndDoc recDoc = new RecordAndDoc(record);
         eErrorSeverity errLvl = eErrorSeverity.NONE;
         ValueIndexerFactory.instance().clearPerRecordErrors();
