@@ -122,9 +122,10 @@ public class IndexDriver
     {
         String inEclipseStr = System.getProperty("runInEclipse");
         boolean inEclipse = "true".equalsIgnoreCase(inEclipseStr);
+        Thread shutdownSimulator = null;
         if (inEclipse) 
         {
-            Thread shutdownSimulator = new ShutdownSimulator();
+            shutdownSimulator = new ShutdownSimulator();
             shutdownSimulator.start();
         }
         Thread shutdownHook = new MyShutdownThread(indexer);
@@ -138,6 +139,8 @@ public class IndexDriver
         
         if (!indexer.isShutDown()) 
         {
+            if (shutdownSimulator != null)
+                shutdownSimulator.interrupt();
             if (!indexer.shuttingDown)  
                 Runtime.getRuntime().removeShutdownHook(shutdownHook);
             indexer.endProcessing();
@@ -469,13 +472,26 @@ public class IndexDriver
         {
             System.out.println("You're using Eclipse; click in this console and " +
                             "press ENTER to call System.exit() and run the shutdown routine.");
-            try {
-                System.in.read();
-            } 
-            catch (IOException e) 
+            while (true) 
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                try {
+                    if (System.in.available() > 0)
+                    {
+                        System.in.read();
+                    }
+                    else
+                    {
+                        sleep(2000);
+                    }
+                } 
+                catch (IOException e) 
+                {
+                    break;
+                }
+                catch (InterruptedException e)
+                {
+                    break;
+                }
             }
             System.exit(0);
         }
