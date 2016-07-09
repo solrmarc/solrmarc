@@ -6,10 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -39,7 +35,7 @@ import joptsimple.OptionSpec;
 
 public class IndexDriver
 {
-    private final static Logger logger = Logger.getLogger(IndexDriver.class);
+    Logger logger;
     Properties readerProps;
     ValueIndexerFactory indexerFactory = null;
 
@@ -49,18 +45,163 @@ public class IndexDriver
     SolrProxy solrProxy;
     boolean verbose;
     int numIndexed[];
+    String [] args;
+    OptionSpec<String> readOpts;
+    OptionSpec<File> configSpec;
+    OptionSpec<File> homeDir;
+    OptionSpec<File> solrjDir;
+    OptionSpec<String> solrjClass;
+    OptionSpec<File> errorMarcErrOutFile;
+    OptionSpec<File> errorIndexErrOutFile;
+    OptionSpec<File> errorSolrErrOutFile;
+    OptionSpec<String> files;
 
-    public IndexDriver(String homeDirStr)
+    OptionSet options = null;
+    
+    
+    public IndexDriver(String [] args)
     {
-        ValueIndexerFactory.setHomeDir(homeDirStr);
-        indexerFactory = ValueIndexerFactory.instance();
-        numIndexed = new int[]{ 0, 0, 0};
+        logger = Logger.getLogger(IndexDriver.class);
+        this.args = args;
     }
     
-    public ValueIndexerFactory getIndexerFactory()
+    public void execute()
     {
-        return indexerFactory;
+        processArgs(args);
+        initializeFromOptions();
+
+        List<String> inputFiles = options.valuesOf(files);
+        logger.info("Opening input files: "+ Arrays.toString(inputFiles.toArray()));
+        this.configureReader(inputFiles);
+        
+        this.processInput();
     }
+    
+    
+    public void processArgs(String args[])
+    {
+        OptionParser parser = new OptionParser(  );
+        readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
+        configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
+        homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
+        solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
+        solrjClass = parser.accepts("solrjClassName", "SolrJ").withRequiredArg().ofType( String.class ).defaultsTo("org.apache.solr.client.solrj.impl.CommonsHttpSolrServer");
+        errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.").withRequiredArg().ofType( File.class );
+        errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
+        errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
+        parser.accepts("debug", "non-multithreaded debug mode");
+        parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
+        parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format");//.availableUnless("sorlURL");
+        parser.acceptsAll(Arrays.asList("null"), "discard all output, and merely show errors and warnings");//.availableUnless("sorlURL");
+        parser.acceptsAll(Arrays.asList("?", "help"), "show this usage information").forHelp();
+        //parser.mutuallyExclusive("stdout", "solrURL");
+        files = parser.nonOptions().ofType( String.class );
+
+        options = null;
+        try {
+            options = parser.parse(args );
+        }
+        catch (OptionException uoe)
+        {
+            try
+            {
+                System.err.println(uoe.getMessage());
+                parser.printHelpOn(System.err);
+            }
+            catch (IOException e)
+            {
+            }
+            System.exit(1);
+        }
+        if (options.has("help")) 
+        {
+            try
+            {
+                parser.printHelpOn(System.err);
+            }
+            catch (IOException e)
+            {
+            }
+            System.exit(0);
+        }
+        String homeDirStr = ".";
+        if (options.has("dir"))
+        {
+            homeDirStr = options.valueOf(homeDir).getAbsolutePath();
+        }
+        final File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File(homeDirStr, "lib-solrj"));
+        
+        try { 
+            Boot.extendClasspath(solrJPath);
+        }
+        catch (IndexerSpecException ise)
+        {
+            logger.fatal("Fatal error: Failure to load SolrJ", ise);
+            System.exit(10);
+        }
+        ValueIndexerFactory.setHomeDir(homeDirStr);
+        indexerFactory = ValueIndexerFactory.instance();
+
+    }
+
+    public void initializeFromOptions()
+    {
+        File f1 = new File(options.valueOf(readOpts));
+        try
+        {
+            configureReaderProps(f1);
+        }
+        catch (IOException e1)
+        {
+            logger.fatal("Fatal error: Exception opening reader properties input stream: " + f1.getName());
+            System.exit(1);
+        }
+        
+     //   String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
+        String solrJClassName = solrjClass.value(options);
+        String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : options.has("null") ? "devnull" : "stdout";
+        boolean multithread = options.has("solrURL") && !options.has("debug") ? true : false;
+        try {
+            this.configureOutput(solrURL, solrJClassName);
+        }
+        catch (SolrRuntimeException sre)
+        {
+            logger.error("Error connecting to solr at URL "+solrURL, sre);
+            System.exit(6);
+        }
+        File f2 = options.valueOf(configSpec);
+        try
+        {
+            logger.info("Reading and compiling index specification: "+ f2.getName());
+            this.configureIndexer(f2, multithread);
+        }
+        catch (IOException | IllegalAccessException | InstantiationException e1)
+        {
+            logger.error("Error opening or reading index configuration: " + f2.getName(), e1);
+            System.exit(2);
+        }
+        List<IndexerSpecException> exceptions = this.indexerFactory.getValidationExceptions();
+        if (!exceptions.isEmpty())
+        {
+            logger.error("Error processing index configuration: " + f2.getName());
+            logTextForExceptions(exceptions);
+            System.exit(5);
+        }
+
+    }
+
+    
+//    public void init(String homeDirStr)
+//    {
+//        ValueIndexerFactory.setHomeDir(homeDirStr);
+//        indexerFactory = ValueIndexerFactory.instance();
+//        numIndexed = new int[]{ 0, 0, 0};
+//    }
+//    
+//    public ValueIndexerFactory getIndexerFactory()
+//    {
+//        return indexerFactory;
+//    }
 
     public void configureReaderProps(File readerProperties) throws FileNotFoundException, IOException 
     {
@@ -154,9 +295,9 @@ public class IndexDriver
         String minutesStr = ((minutes > 0) ? ""+minutes+" minute"+((minutes != 1)?"s ":" ") : "");
         String secondsStr = ""+seconds+"."+hundredthsStr+" seconds";
         logger.info(""+numIndexed[2]+ " records sent to Solr in "+ minutesStr + secondsStr);
-        if (getErrors().size() > 0)
+        if (indexer.errQ.size() > 0)
         {
-            Collection<RecordAndDoc> errQ = getErrors();
+            Collection<RecordAndDoc> errQ = indexer.errQ;
             int[][] errTypeCnt = new int[][]{{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
             for (final RecordAndDoc entry : errQ)
             {
@@ -170,237 +311,134 @@ public class IndexDriver
         }
 
     }
-
-    public Collection<RecordAndDoc>  getErrors()
-    {
-        return(indexer.errQ); 
-    }
-
-    private static void extendClasspathWithJar(URLClassLoader sysLoader, File jarfile)
-    {
-        URL urls[] = sysLoader.getURLs();
-        URL ujar;
-        try
-        {
-            ujar = jarfile.toURI().toURL();
-        }
-        catch (MalformedURLException e)
-        {
-            // This shouldn't happen since the jarfile is passed in as a file from a directory
-            e.printStackTrace();
-            return;
-        }
-
-        String ujars = ujar.toString();
-        for (int i = 0; i < urls.length; i++)
-        {
-            if (urls[i].toString().equalsIgnoreCase(ujars)) return;
-        }
-        Class<URLClassLoader> sysClass = URLClassLoader.class;
-        try {
-            Method method = sysClass.getDeclaredMethod("addURL", new Class[]{URL.class});
-            method.setAccessible(true);
-            method.invoke(sysLoader, new Object[] {ujar});
-        } 
-        catch (Throwable t) 
-        {
-            t.printStackTrace();
-        }
-    }
-
-    private static void extendClasspath(File dir)
-    {
-        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-        if (dir == null || !dir.isDirectory() || dir.listFiles().length == 0)
-        {
-            String dirpath;
-            try
-            {
-                dirpath = dir.getCanonicalPath();
-            }
-            catch (IOException e)
-            {
-                dirpath = dir.getAbsolutePath();
-            }
-            throw new IndexerSpecException(eErrorSeverity.FATAL, "Unable to find Jars for SolrJ in the provided directory: "+dirpath );
-        }
-        for (File file : dir.listFiles())
-        {
-            if (file.getName().endsWith(".jar"))
-            {
-                extendClasspathWithJar(sysLoader, file);
-            }
-        }
-        try
-        {
-            Class.forName("org.apache.solr.common.SolrInputDocument");
-        }
-        catch (ClassNotFoundException e2)
-        {
+//
+//    public Collection<RecordAndDoc>  getErrors()
+//    {
+//        return(indexer.errQ); 
+//    }
+//
+    
+//    public static void main(String[] args)
+//    {
+//        CodeSource codeSource = IndexDriver.class.getProtectionDomain().getCodeSource();
+//        File jarFile = null;
+//        try
+//        {
+//            jarFile = new File(codeSource.getLocation().toURI().getPath());
+//        }
+//        catch (URISyntaxException e)
+//        {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        String jarDir = jarFile.getParentFile().getPath();        
+//        File libPath = new File(jarDir, "lib");
+//        try
+//        {
+//            extendClasspath(libPath);
+//        }
+//        catch (IndexerSpecException ise)
+//        {
+//            System.err.println("Fatal error: Failure to load SolrJ"+ ise.getMessage());
+//            System.exit(10);
+//        }
+//        
+//        IndexDriver driver = new IndexDriver(args);
+//    }
+    
+//    
+//    public void processArgs(String args[])
+//    {
+//        OptionParser parser = new OptionParser(  );
+//        OptionSpec<String> readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
+//        OptionSpec<File> configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
+//        OptionSpec<File> homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
+//        OptionSpec<File> solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
+//        OptionSpec<String> solrjClass = parser.accepts("solrjClassName", "SolrJ").withRequiredArg().ofType( String.class ).defaultsTo("org.apache.solr.client.solrj.impl.CommonsHttpSolrServer");
+//        OptionSpec<File> errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.").withRequiredArg().ofType( File.class );
+//        OptionSpec<File> errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
+//        OptionSpec<File> errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
+//        parser.accepts("debug", "non-multithreaded debug mode");
+//        parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
+//        parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format");//.availableUnless("sorlURL");
+//        parser.acceptsAll(Arrays.asList("null"), "discard all output, and merely show errors and warnings");//.availableUnless("sorlURL");
+//        parser.acceptsAll(Arrays.asList("?", "help"), "show this usage information").forHelp();
+//        //parser.mutuallyExclusive("stdout", "solrURL");
+//        OptionSpec<String> files = parser.nonOptions().ofType( String.class );
+//
+//        OptionSet options = null;
+//        try {
+//            options = parser.parse(args );
+//        }
+//        catch (OptionException uoe)
+//        {
 //            try
 //            {
-//                sysLoader.loadClass("org.apache.solr.common.SolrInputDocument");
+//                System.err.println(uoe.getMessage());
+//                parser.printHelpOn(System.err);
 //            }
-//            catch (ClassNotFoundException e)
+//            catch (IOException e)
 //            {
-//                // TODO Auto-generated catch block
-//                e.printStackTrace();
 //            }
-            throw new IndexerSpecException(e2, eErrorSeverity.FATAL, "Unable to load class \"org.apache.solr.common.SolrInputDocument\". Probably cannot find or read the SolrJ libraries");
-        }
-    }   
+//            System.exit(1);
+//        }
+//        if (options.has("help")) 
+//        {
+//            try
+//            {
+//                parser.printHelpOn(System.err);
+//            }
+//            catch (IOException e)
+//            {
+//            }
+//            System.exit(0);
+//        }
+//        String homeDirStr = ".";
+//        if (options.has("dir"))
+//        {
+//            homeDirStr = options.valueOf(homeDir).getAbsolutePath();
+//        }
+//        final File solrJPath;
+//        if (options.has(solrjDir))
+//        {
+//            solrJPath = options.valueOf(solrjDir);
+//        }
+//        else
+//        {
+//            solrJPath = new File(homeDirStr, "lib-solrj");
+//        }
+//        try
+//        {
+//            extendClasspath(solrJPath);
+//        }
+//        catch (IndexerSpecException ise)
+//        {
+////            logger.fatal("Fatal error: Failure to load SolrJ", ise);
+//            System.exit(10);
+//            
+//        }
+//        
+//       init(homeDirStr);
+////        
+////        
+////    }
+////    
     
-    public static void main(String[] args)
-    {
-        OptionParser parser = new OptionParser(  );
-        OptionSpec<String> readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
-        OptionSpec<File> configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
-        OptionSpec<File> homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
-        OptionSpec<File> solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
-        OptionSpec<String> solrjClass = parser.accepts("solrjClassName", "SolrJ").withRequiredArg().ofType( String.class ).defaultsTo("org.apache.solr.client.solrj.impl.CommonsHttpSolrServer");
-        OptionSpec<File> errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.").withRequiredArg().ofType( File.class );
-        OptionSpec<File> errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
-        OptionSpec<File> errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
-        parser.accepts("debug", "non-multithreaded debug mode");
-        parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
-        parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format");//.availableUnless("sorlURL");
-        parser.acceptsAll(Arrays.asList("null"), "discard all output, and merely show errors and warnings");//.availableUnless("sorlURL");
-        parser.acceptsAll(Arrays.asList("?", "help"), "show this usage information").forHelp();
-        //parser.mutuallyExclusive("stdout", "solrURL");
-        OptionSpec<String> files = parser.nonOptions().ofType( String.class );
-
-        OptionSet options = null;
-        try {
-            options = parser.parse(args );
-        }
-        catch (OptionException uoe)
-        {
-            try
-            {
-                System.err.println(uoe.getMessage());
-                parser.printHelpOn(System.err);
-            }
-            catch (IOException e)
-            {
-            }
-            System.exit(1);
-        }
-        if (options.has("help")) 
-        {
-            try
-            {
-                parser.printHelpOn(System.err);
-            }
-            catch (IOException e)
-            {
-            }
-            System.exit(0);
-        }
-        String homeDirStr = ".";
-        if (options.has("dir"))
-        {
-            homeDirStr = options.valueOf(homeDir).getAbsolutePath();
-        }
-        final File solrJPath;
-        if (options.has(solrjDir))
-        {
-            solrJPath = options.valueOf(solrjDir);
-        }
-        else
-        {
-            solrJPath = new File(homeDirStr, "lib-solrj");
-        }
-        try
-        {
-            extendClasspath(solrJPath);
-        }
-        catch (IndexerSpecException ise)
-        {
-            logger.fatal("Fatal error: Failure to load SolrJ", ise);
-            System.exit(10);
-            
-        }
-        
-        IndexDriver indexDriver = new IndexDriver(homeDirStr);
-        File f1 = new File(options.valueOf(readOpts));
-        List<String> inputFiles = options.valuesOf(files);
-        try
-        {
-            indexDriver.configureReaderProps(f1);
-        }
-        catch (FileNotFoundException e1)
-        {
-            logger.fatal("Fatal error: Exception opening reader properties input stream: " + f1.getName());
-            System.exit(1);
-        }
-        catch (IOException e1)
-        {
-            logger.fatal("Fatal error: Exception opening reader properties input stream: " + f1.getName());
-            System.exit(1);
-        }
-        
-     //   String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
-        String solrJClassName = solrjClass.value(options);
-        String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : options.has("null") ? "devnull" : "stdout";
-        boolean multithread = options.has("solrURL") && !options.has("debug") ? true : false;
-        try {
-            indexDriver.configureOutput(solrURL, solrJClassName);
-        }
-        catch (SolrRuntimeException sre)
-        {
-            logger.error("Error connecting to solr at URL "+solrURL, sre);
-            System.exit(6);
-        }
-        File f2 = options.valueOf(configSpec);
-        try
-        {
-            logger.info("Reading and compiling index specification: "+ f2.getName());
-            indexDriver.configureIndexer(f2, multithread);
-        }
-        catch (IOException e1)
-        {
-            logger.error("Error opening or reading index configuration: " + f2.getName(), e1);
-            System.exit(2);
-        }
-        catch (IllegalAccessException e)
-        {
-            logger.error("Error processing index configuration: " + f2.getName(), e);
-            System.exit(3);
-        }
-        catch (InstantiationException e)
-        {
-            logger.error("Error processing index configuration: " + f2.getName(), e);
-            System.exit(4);
-        }
-
-        List<IndexerSpecException> exceptions = indexDriver.indexerFactory.getValidationExceptions();
-        if (!exceptions.isEmpty())
-        {
-            logger.error("Error processing index configuration: " + f2.getName());
-            logTextForExceptions(exceptions);
-            System.exit(5);
-        }
-        else
-        {
-            logger.info("Opening input files: "+ Arrays.toString(inputFiles.toArray()));
-            indexDriver.configureReader(inputFiles);
-            
-            indexDriver.processInput();
-            
-        }
-    }
 
         
-    private static void showErrReport(String errLocStr, int[] errorLvlCnt)
+    private void showErrReport(String errLocStr, int[] errorLvlCnt)
     {
         for (int i = 0; i < errorLvlCnt.length; i++)
         {
-            if (errorLvlCnt[i] > 0) logger.info( "" + errorLvlCnt[i] + " records have "+errLocStr+" errors of level: "+eErrorSeverity.values()[i].toString());
+            if (errorLvlCnt[i] > 0) 
+            {
+                logger.info( "" + errorLvlCnt[i] + " records have "+errLocStr+" errors of level: "+eErrorSeverity.values()[i].toString());
+            }
         }
     }
 
     @SuppressWarnings("unused")
-    private static String getTextForExceptions(List<IndexerSpecException> exceptions)
+    private String getTextForExceptions(List<IndexerSpecException> exceptions)
     {
         StringBuilder text = new StringBuilder();
         String lastSpec = "";
@@ -420,7 +458,7 @@ public class IndexDriver
         return (text.toString());
     }
     
-    private static void logTextForExceptions(List<IndexerSpecException> exceptions)
+    private void logTextForExceptions(List<IndexerSpecException> exceptions)
     {
         String lastSpec = "";
         for (IndexerSpecException e : exceptions)
@@ -440,7 +478,7 @@ public class IndexDriver
         }
     }
 
-    private static Priority getPriorityForSeverity(eErrorSeverity level)
+    private Priority getPriorityForSeverity(eErrorSeverity level)
     {
         switch (level) {
             case NONE:  return(Level.DEBUG);
@@ -473,11 +511,11 @@ public class IndexDriver
         public void run()
         {
             //System.err.println("Starting Shutdown hook");
-            logger.info("Starting Shutdown hook");
+//            logger.info("Starting Shutdown hook");
             
             if (!indexer.isShutDown()) 
             {
-                logger.info("Stopping main indexer loop");
+//                logger.info("Stopping main indexer loop");
                 indexer.shutDown();
             }
             while (!indexer.isShutDown()) 
@@ -490,7 +528,7 @@ public class IndexDriver
                 {
                 }
             }
-            logger.info("Finished Shutdown hook");
+//            logger.info("Finished Shutdown hook");
         }
     }
     

@@ -2,10 +2,10 @@ package org.solrmarc.index.extractor.impl.java;
 
 import org.apache.log4j.Logger;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
-import org.solrmarc.tools.PropertyUtils;
 
 
 import javax.tools.*;
+import javax.tools.JavaFileManager.Location;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -77,15 +77,23 @@ public class JavaValueExtractorUtils
             logger.warn("Any custom mixin routines in "+getSrcDirectory()+ " will not be compiled and will not be available.");
             return false;
         }
+        List<File> classpath = new  ArrayList<>();
+        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        for (URL url : sysLoader.getURLs())
+        {
+            classpath.add(new File(url.getFile().substring(1)));
+        }
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, Charset.forName("UTF-8"));
         fileManager.setLocation(StandardLocation.SOURCE_PATH, Collections.singleton(new File(getSrcDirectory())));
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(getBinDirectory())));
+        fileManager.setLocation(StandardLocation.CLASS_PATH, classpath);
 
         final DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         final Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjectsFromFiles(sourceFiles);
         final JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticCollector, null, null, units);
 
         logger.trace("Compile java files:\n" + sourceFiles.toString().replaceAll(",", ",\n"));
+        
         if (!task.call())
         {
             StringBuilder buffer = new StringBuilder();
@@ -303,4 +311,7 @@ public class JavaValueExtractorUtils
         final File targetFile = new File(targetPath);
         return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();
     }
+    
+
+    
 }

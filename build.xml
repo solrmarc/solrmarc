@@ -73,14 +73,22 @@
             <fileset dir="${basedir}" includes="log4j.properties" />
         </resources>
 
-        <path id="alljarfiles" >
-            <fileset dir="${lib}" includes="*.jar" />
+        <path id="libjarfiles" >
+            <fileset dir="${lib}" includes="*.jar" excludes="jopt*.jar"/>
         </path>
 
-    	<copy todir="${distlib}" flatten="true">
-    	  <path  refid="alljarfiles"/>
-    	</copy> 
-    	
+        <copy todir="${distlib}" flatten="true">
+          <path  refid="libjarfiles"/>
+        </copy> 
+        
+        <path id="solrjjarfiles" >
+            <fileset dir="lib-solrj" includes="*.jar" />
+        </path>
+
+        <copy todir="${dist}/lib-solrj" flatten="true">
+          <path  refid="solrjjarfiles"/>
+        </copy> 
+        
         <mkdir dir="${dist}/index_java/" />
         <copy todir="${dist}/index_java" >
             <fileset dir="index_java" includes="src/**/*.java"/>
@@ -115,13 +123,12 @@
         <jar destfile="${dist}/${custom.jar.name}.jar">
         	<manifest>
         	    <attribute name="Main-Class" value="org.solrmarc.driver.IndexDriver"/>
-        		<attribute name="Class-Path" value="${manifest.classpath}" />
+        <!--		<attribute name="Class-Path" value="${manifest.classpath}" />  -->
             </manifest>
         	<fileset dir="${basedir}" includes="log4j.properties" />
         	<fileset dir="${build}" includes="**/*.class" />
         </jar>
-
-        <delete dir="${site.build.dir}/tmp_extra" />
+        <echo message="jar built" />
         <property name="build.already.run" value="true" />
     </target>
 
