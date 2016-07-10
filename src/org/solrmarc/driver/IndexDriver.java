@@ -33,9 +33,10 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 
-public class IndexDriver
+public class IndexDriver extends Boot
 {
-    Logger logger;
+    public final static Logger logger =  Logger.getLogger(IndexDriver.class);
+
     Properties readerProps;
     ValueIndexerFactory indexerFactory = null;
 
@@ -58,10 +59,14 @@ public class IndexDriver
 
     OptionSet options = null;
     
-    
+    public static void main(String[] args)
+    {
+        IndexDriver driver = new IndexDriver(args);
+        driver.execute();
+    }
+
     public IndexDriver(String [] args)
     {
-        logger = Logger.getLogger(IndexDriver.class);
         this.args = args;
     }
     

@@ -4,6 +4,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
+import org.solrmarc.driver.Boot;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 
@@ -38,4 +39,11 @@ public class ReflectionUtils
     {
         return getSubclasses(AbstractValueMappingFactory.class);
     }
+    
+    public static Set<Class<? extends Boot>> getBootableMainClasses()
+    {
+        Set<Class<? extends Boot>> objs = getSubclasses(Boot.class);
+        return (objs); 
+    }
+
 }

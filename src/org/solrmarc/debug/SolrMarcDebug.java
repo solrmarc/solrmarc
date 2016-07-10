@@ -45,6 +45,7 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.debug.CompoundUndoManager.RedoAction;
 import org.solrmarc.debug.CompoundUndoManager.UndoAction;
+import org.solrmarc.driver.Boot;
 import org.solrmarc.driver.Indexer.eErrorHandleVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
@@ -69,7 +70,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-public class SolrMarcDebug
+public class SolrMarcDebug extends Boot
 {
 
     private JFrame frmSolrmarcIndexSpecification;
