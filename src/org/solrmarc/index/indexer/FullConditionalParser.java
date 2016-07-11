@@ -24,7 +24,6 @@ import org.solrmarc.index.extractor.impl.fullrecord.FullRecordValueExtractorFact
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.solrmarc.index.specification.conditional.*;
-import org.solrmarc.index.utils.ReflectionUtils;
 import org.solrmarc.index.utils.StringReader;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -392,17 +391,12 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
     
     private AbstractMultiValueMapping createMultiValueMapping(List<String> mapParams)
     {
-    	if (this.mappingFactories == null) 
+        if (this.mappingFactories == null) 
         {
-    		try {
-				this.mappingFactories = createMappingFactories(ReflectionUtils.getMappingFactoryClasses());
-			}
-    		catch (IllegalAccessException | InstantiationException e) {
-    			 throw new IndexerSpecException("Could not instantiate mapping factory\n" + mappingFactories.toString().replaceAll(",", ",\n"));
-			}
+            this.mappingFactories = ValueIndexerFactory.instance().getMappingFactories();
         }
-    	String[] mapParts = mapParams.toArray(new String[0]);
-    	for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
+        String[] mapParts = mapParams.toArray(new String[0]);
+        for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
         {
             if (mappingFactory.canHandle(mapParts[0]))
             {
@@ -411,18 +405,6 @@ public class FullConditionalParser extends java_cup.runtime.lr_parser {
         }
         throw new IndexerSpecException("Could not handle map descriptor: " + toDelimitedString(mapParts, " ")); 
         // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
-    }
-
-    private List<AbstractValueMappingFactory> createMappingFactories(final Set<Class<? extends AbstractValueMappingFactory>> factoryClasses) throws IllegalAccessException, InstantiationException
-    {
-        final List<AbstractValueMappingFactory> factories = new ArrayList<>(factoryClasses.size());
-        for (final Class<? extends AbstractValueMappingFactory> extractorFactoryClass : factoryClasses)
-        {
-            logger.trace("Create value mapping factory for  s " + extractorFactoryClass);
-            final AbstractValueMappingFactory factory = extractorFactoryClass.newInstance();
-            factories.add(factory);
-        }
-        return factories;
     }
 
     private AbstractMultiValueExtractor makeMultiValueExtractor(Object extractor)

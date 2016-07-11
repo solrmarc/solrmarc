@@ -1,6 +1,7 @@
 package org.solrmarc.index.extractor.impl.java;
 
 import org.apache.log4j.Logger;
+import org.solrmarc.driver.Boot;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 
 
@@ -81,6 +82,7 @@ public class JavaValueExtractorUtils
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         for (URL url : sysLoader.getURLs())
         {
+            // merely discarding the last character of the URL to get the filename, feel wrong, fix this
             classpath.add(new File(url.getFile().substring(1)));
         }
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, Charset.forName("UTF-8"));
@@ -167,6 +169,7 @@ public class JavaValueExtractorUtils
         {
             final URL url = new File(getBinDirectory()).toURI().toURL();
             return new URLClassLoader(new URL[] { url });
+//            return Boot.extendClasspathWithClassDir(new File(getBinDirectory()));
         }
         catch (MalformedURLException e)
         {

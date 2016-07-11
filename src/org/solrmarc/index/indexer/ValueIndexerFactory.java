@@ -13,11 +13,11 @@ import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
 import org.solrmarc.index.extractor.methodcall.StaticMarcTestRecords;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
-import org.solrmarc.index.utils.ReflectionUtils;
+import org.solrmarc.index.utils.FastClasspathUtils;
+//import org.solrmarc.index.utils.ReflectionUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -60,8 +60,8 @@ public class ValueIndexerFactory
         perRecordExceptions = null;
         try
         {
-            this.extractorFactories = createExtractorFactories(ReflectionUtils.getExtractorFactoryClasses());
-            this.mappingFactories = createMappingFactories(ReflectionUtils.getMappingFactoryClasses());
+            this.extractorFactories = createExtractorFactories(FastClasspathUtils.getExtractorFactoryClasses());
+            this.mappingFactories = createMappingFactories(FastClasspathUtils.getMappingFactoryClasses());
         }
         catch (IllegalAccessException | InstantiationException e)
         {
@@ -89,6 +89,15 @@ public class ValueIndexerFactory
             perRecordExceptions = new LinkedList<>();
         }
         perRecordExceptions.add(error);
+    }
+    
+    /**
+     * Return the mapping factories loaded above for use in the CUP parser
+     * @return
+     */
+    public List<AbstractValueMappingFactory> getMappingFactories()
+    {
+        return mappingFactories;
     }
 
     /**

@@ -3,11 +3,8 @@
 	<classpathentry excluding="playground/solrmarc/index/indexer/FullConditionalParser_bak.java|**/*.cup|playground/solrmarc/index/collector/impl/JoiningMultiValueCollector.java|playground/solrmarc/index/indexer/MultiValueFieldMatchIndexer.java|playground/solrmarc/index/indexer/CopyOfFullConditionalParser.java|playground/solrmarc/index/specification/ErrorSpecification.java|playground/solrmarc/index/collector/AbstractValueCollector.java|playground/solrmarc/index/collector/impl/FirstObjectMultiValueCollector.java|playground/solrmarc/index/mapping/impl/SingleValuePatternMapping.java|playground/solrmarc/index/specification/conditional/ConditionalSpecificationUnused.java|playground/solrmarc/index/fieldmatch/DataFieldFormatter.java|playground/solrmarc/index/collector/MultiValueUniqueFieldMatchCollector.java|playground/solrmarc/index/fieldmatch/FieldFormatterJoin.java|playground/solrmarc/index/collector/FieldMatchCollector.java|org/solrmarc/debug/VideoInfoMixin.java|playground/solrmarc/index/collector/SingleValueCollector.java|playground/solrmarc/index/fieldmatch/FieldMatchFormatterSimple.java|playground/solrmarc/index/fieldmatch/FieldFormatterSimple.java|playground/solrmarc/index/mapping/impl/FilterValuePatternMapping.java|playground/solrmarc/index/extractor/AbstractMultiValueFieldMatchExtractor.java|playground/solrmarc/index/mapping/impl/SingleValueTranslationMapping.java|playground/solrmarc/index/extractor/impl/constant/ConstantSingleValueExtractor.java|playground/solrmarc/index/fieldmatch/FieldFormatterSubstring.java|org/solrmarc/index/VuFindIndexer.java|playground/solrmarc/index/collector/MultiValueFieldMatchCollector.java|**/*.lex|playground/solrmarc/index/fieldmatch/FieldFormatterForSort.java|playground/solrmarc/index/indexer/SingleValueIndexer.java|playground/solrmarc/index/mapping/impl/FilterMappingFactory.java|org/solrmarc/index/vufind/AuthorRelatorExtractor.java|playground/solrmarc/tools/PropertyUtil.java|playground/solrmarc/index/DiffedIndexDriver.java" kind="src" path="src"/>
 	<classpathentry excluding="org/solrmarc/index/indexer/ConditionalParserTest.java" kind="src" path="test/src"/>
 	<classpathentry kind="lib" path="lib/bsh-2.0b5.jar"/>
-	<classpathentry kind="lib" path="lib/google-collections-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/java-cup-11b-runtime.jar" sourcepath="C:/Users/rh9ec/Development/Projects/cup-source-code/src"/>
-	<classpathentry kind="lib" path="lib/javassist-3.20.0-GA.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
-	<classpathentry kind="lib" path="lib/reflections-0.9.10.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.7.16.jar"/>
 	<classpathentry kind="lib" path="lib/miglayout15-swing.jar"/>
 	<classpathentry kind="lib" path="lib/marc4j-2.7.0.jar" sourcepath="/Marc4J-GitHub"/>
@@ -17,6 +14,7 @@
 	<classpathentry kind="lib" path="lib-solrj/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="lib-solrj/jcl-over-slf4j-1.7.16.jar"/>
 	<classpathentry kind="lib" path="lib-solrj/slf4j-api-1.7.16.jar"/>
+	<classpathentry kind="lib" path="lib/fast-classpath-scanner-java7-1.90.7.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="test/lib/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="test/lib/mockito-all-1.9.5.jar"/>

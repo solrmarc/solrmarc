@@ -12,7 +12,8 @@ import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
-import org.solrmarc.index.utils.ReflectionUtils;
+import org.solrmarc.index.utils.FastClasspathUtils;
+//import org.solrmarc.index.utils.ReflectionUtils;
 import org.solrmarc.index.utils.StringReader;
 
 import java.lang.reflect.Modifier;
@@ -50,8 +51,8 @@ public class ValueIndexerStringReaderFactory
         validationExceptions = new ArrayList<IndexerSpecException>();
         try
         {
-            this.extractorFactories = createExtractorFactories(ReflectionUtils.getExtractorFactoryClasses());
-            this.mappingFactories = createMappingFactories(ReflectionUtils.getMappingFactoryClasses());
+            this.extractorFactories = createExtractorFactories(FastClasspathUtils.getExtractorFactoryClasses());
+            this.mappingFactories = createMappingFactories(FastClasspathUtils.getMappingFactoryClasses());
         }
         catch (IllegalAccessException | InstantiationException e)
         {

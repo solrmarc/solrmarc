@@ -137,7 +137,7 @@ public class IndexDriver extends Boot
         final File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File(homeDirStr, "lib-solrj"));
         
         try { 
-            Boot.extendClasspath(solrJPath);
+            Boot.extendClasspathWithJarDir(solrJPath);
         }
         catch (IndexerSpecException ise)
         {

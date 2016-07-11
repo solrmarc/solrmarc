@@ -13,7 +13,8 @@ import java.security.CodeSource;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.solrmarc.index.utils.ReflectionUtils;
+import org.solrmarc.index.utils.FastClasspathUtils;
+//import org.solrmarc.index.utils.ReflectionUtils;
 
 public class Boot
 {
@@ -73,7 +74,7 @@ public class Boot
 
     private static void findExecutables()
     {
-        Set<Class<? extends Boot>> mainClasses = ReflectionUtils.getBootableMainClasses();
+        Set<Class<? extends Boot>> mainClasses = FastClasspathUtils.getBootableMainClasses();
 
         logger.info("This class  org.solrmarc.driver.Boot  dynamically loads all of the jars in the lib directory");
         logger.info("and then calls the main method of a class that requires those jars");
@@ -104,6 +105,9 @@ public class Boot
      */
     public static void addLibDirJarstoClassPath()
     {
+        // Find the location of where this class is running from. 
+        // When run normally this would be the main solrmarc jar.
+        // when run from classdirs in eclipse, is is the project location.
         CodeSource codeSource = Boot.class.getProtectionDomain().getCodeSource();
         String jarDir;
         File jarFile = null;
@@ -126,10 +130,11 @@ public class Boot
             // IDE
             jarDir = new File(".").getAbsoluteFile().getParentFile().getAbsolutePath();
         }
+        // Now find the sub-directory "lib" as a sibling of the execution location. 
         File libPath = new File(jarDir, "lib");
         try
         {
-            extendClasspath(libPath);
+            extendClasspathWithJarDir(libPath);
         }
         catch (RuntimeException ise)
         {
@@ -182,7 +187,7 @@ public class Boot
         }
     }
 
-    public static void extendClasspath(File dir)
+    public static void extendClasspathWithJarDir(File dir)
     {
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         if (dir == null || !dir.isDirectory() || dir.listFiles().length == 0)
