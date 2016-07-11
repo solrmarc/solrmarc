@@ -54,23 +54,9 @@ public class SolrCoreLoader
             throw new SolrRuntimeException("Solr reports not OK " + urlString);
         }
         try {
-      //      Class<?> clazz = Class.forName("org.apache.solr.client.solrj.impl.ResponseParserFactory");
-//            if (useStreamingServer)
-//            {
-//                httpsolrserver = new StreamingUpdateSolrServer(urlString, 100, 2); 
-//            }
-//            else
             Class<?> httpsolrserverClass = Class.forName(fullClassName);
             Constructor<?> httpsolrserverConst = httpsolrserverClass.getDeclaredConstructor(String.class);
             httpsolrserver = httpsolrserverConst.newInstance(urlString);
-//            {
-//                httpsolrserver = new CommonsHttpSolrServer(urlString);
-//            }
-//            if (!useBinaryRequestHandler)
-//            {
-//                httpsolrserver.setRequestWriter(new RequestWriter());
-//                httpsolrserver.setParser( new XMLResponseParser());
-//            }
             Class<?> superclass = httpsolrserver.getClass().getSuperclass();
             if (superclass.getName().endsWith(".SolrServer"))
             {
@@ -86,43 +72,21 @@ public class SolrCoreLoader
         }
         catch (ClassNotFoundException e)
         {
-            e.printStackTrace();
+            throw new SolrRuntimeException("Error finding class while dynamically loading solrj", e);
         }
-        catch (NoSuchMethodException e)
+        catch (NoClassDefFoundError e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new SolrRuntimeException("Error finding class while dynamically loading solrj", e);
         }
-        catch (SecurityException e)
+        catch (NoSuchMethodException | SecurityException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new SolrRuntimeException("Error finding solrj constructor with one String parameter", e);
         }
-        catch (InstantiationException e)
+        catch (InstantiationException | IllegalAccessException  | IllegalArgumentException | InvocationTargetException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new SolrRuntimeException("Error invoking solrj constructor with one String parameter", e);
         }
-        catch (IllegalAccessException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (IllegalArgumentException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        catch (InvocationTargetException e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-//        catch (MalformedURLException e)
-//        {
-//            e.printStackTrace();
-//        }
-        return(null);
+        throw new SolrRuntimeException("Error Specified solrj class name, found, but it isnt a SolrServer or a SolrClient");
     }
 
 }

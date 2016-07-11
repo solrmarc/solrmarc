@@ -50,7 +50,7 @@ public class Boot
             catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
             {
                 logger.fatal("ERROR: Unable to invoke main method in specified main: " + args[0]);
-                System.err.println(e.getMessage());
+                logger.fatal(e.getMessage());
                 System.exit(2);
             }
             catch (ClassNotFoundException e)
@@ -100,10 +100,7 @@ public class Boot
         }
     }
 
-    /**
-     * @param args
-     */
-    public static void addLibDirJarstoClassPath()
+    public static String getDefaultHomeDir()
     {
         // Find the location of where this class is running from. 
         // When run normally this would be the main solrmarc jar.
@@ -130,8 +127,17 @@ public class Boot
             // IDE
             jarDir = new File(".").getAbsoluteFile().getParentFile().getAbsolutePath();
         }
+        return(jarDir);
+    }
+
+    /**
+     * @param args
+     */
+    public static void addLibDirJarstoClassPath()
+    {
+        String homeDir = getDefaultHomeDir();
         // Now find the sub-directory "lib" as a sibling of the execution location. 
-        File libPath = new File(jarDir, "lib");
+        File libPath = new File(homeDir, "lib");
         try
         {
             extendClasspathWithJarDir(libPath);
