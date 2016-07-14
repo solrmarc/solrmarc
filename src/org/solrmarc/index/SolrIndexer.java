@@ -8,6 +8,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
@@ -53,6 +55,9 @@ public class SolrIndexer implements Mixin
    
     public  SolrIndexer() 
     { /* private constructor */ }
+   
+    public  SolrIndexer(final String propertiesMapFile, final String[] propertyDirs) 
+    { /* Backwards compatibility constructor, the parameters are all ignored */ }
     
     static SolrIndexer theSolrIndexer = null;
     
@@ -192,10 +197,17 @@ public class SolrIndexer implements Mixin
      *         of Strings.
      * @throws Exception 
      */
-    public Set<String> getFieldList(Record record, String tagStr)
+//    public Set<String> getFieldList(Record record, String tagStr)
+//    {
+//        Set<String> result = new LinkedHashSet<String>();
+//        getFieldListCollector(record, tagStr, null, result);
+//        return result;
+//    }
+    
+    public static Set<String> getFieldList(Record record, String tagStr)
     {
         Set<String> result = new LinkedHashSet<String>();
-        getFieldListCollector(record, tagStr, null, result);
+        instance().getFieldListCollector(record, tagStr, null, result);
         return result;
     }
    
@@ -464,7 +476,34 @@ public class SolrIndexer implements Mixin
     public Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
     {
         Set<String> result = new LinkedHashSet<String>();
-        Specification spec = getOrCreateSpecification(fieldSpec, separator);
+        String [] pieces = fieldSpec.split(":");
+        String fieldSpecWithAll = Utils.join(pieces, "[a-z0-9]:") + "[a-z0-9]";
+        Specification spec = getOrCreateSpecification(fieldSpecWithAll, separator);
+        getFieldListCollector(record, spec, result);
+        return result;
+    }
+  
+    /**
+     * extract all the subfields requested in requested marc fields. Each
+     * instance of each marc field will be put in a separate result (but the
+     * subfields will be concatenated into a single value for each marc field)
+     * 
+     * @param record
+     *            marc record object
+     * @param fieldSpec -
+     *            the desired marc fields and subfields as given in the
+     *            xxx_index.properties file
+     * @param separator -
+     *            the character to use between subfield values in the solr field
+     *            contents
+     * @return Set of values (as strings) for solr field
+     */
+    public Set<String> getAllAlphaSubfields(final Record record, String fieldSpec, String separator)
+    {
+        Set<String> result = new LinkedHashSet<String>();
+        String [] pieces = fieldSpec.split(":");
+        String fieldSpecWithAll = Utils.join(pieces, "[a-z]:") + "[a-z]";
+        Specification spec = getOrCreateSpecification(fieldSpecWithAll, separator);
         getFieldListCollector(record, spec, result);
         return result;
     }
@@ -651,6 +690,7 @@ public class SolrIndexer implements Mixin
         }
         return null;
     }
+    
     public String remap(String valueToMap, Object translationMap, boolean b) throws Exception
     {
         if (translationMap instanceof AbstractMultiValueMapping)
@@ -659,6 +699,30 @@ public class SolrIndexer implements Mixin
             return(map.mapSingle(valueToMap));
         }
         return null;
+    }
+
+    public String getDataFromVariableField(VariableField vf, String subfldTags, String separator, boolean cleanIt)
+    {
+        if (subfldTags.length() > 1 && !subfldTags.startsWith("["))
+            subfldTags = '[' + subfldTags + ']';
+        Pattern subfieldPattern = Pattern.compile(subfldTags.length() == 0 ? "." : subfldTags);
+        DataField marcField = (DataField) vf;
+        StringBuffer buffer = new StringBuffer("");
+        List<Subfield> subfields = marcField.getSubfields();
+        for (Subfield subfield : subfields)
+        {
+            Matcher matcher = subfieldPattern.matcher("" + subfield.getCode());
+            if (matcher.matches())
+            {
+                if (buffer.length() > 0)
+                    buffer.append(separator != null ? separator : " ");
+                buffer.append(subfield.getData().trim());
+            }
+        }
+        if (buffer.length() > 0)
+            return(cleanIt ? Utils.cleanData(buffer.toString()) : buffer.toString());
+        else
+            return(null);
     }
 
 

@@ -15,6 +15,7 @@ import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.solrmarc.index.utils.FastClasspathUtils;
 //import org.solrmarc.index.utils.ReflectionUtils;
+import org.solrmarc.tools.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -449,7 +450,7 @@ public class ValueIndexerFactory
             }
             else
             {
-                validationExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + toDelimitedString(mapParts, " ")));
+                validationExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + Utils.join(mapParts, " ")));
             }
             currentIndex ++;
         }
@@ -519,7 +520,7 @@ public class ValueIndexerFactory
                 }
                 else
                 {
-                    validationExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + toDelimitedString(mapParts, " ")));
+                    validationExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + Utils.join(mapParts, " ")));
                 }
             }
             currentIndex++;
@@ -561,16 +562,6 @@ public class ValueIndexerFactory
         return collector;
     }
 
-    private static String toDelimitedString(String[] strs, String delimiter)
-    {
-        StringBuilder strb = new StringBuilder();
-        for (String str : strs)
-        {
-          strb.append(str).append(delimiter);
-        }
-        return strb.substring(0, strb.length() - delimiter.length());
-     }
-
     public AbstractMultiValueMapping createMultiValueMapping(final String mappingConfig)
     {
         for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
@@ -593,7 +584,7 @@ public class ValueIndexerFactory
                 return mappingFactory.createMultiValueMapping(mapParts);
             }
         }
-        throw new IndexerSpecException("Could not handle map descriptor: " + toDelimitedString(mapParts, " ")); 
+        throw new IndexerSpecException("Could not handle map descriptor: " + Utils.join(mapParts, " ")); 
         // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
     }
 

@@ -50,7 +50,7 @@
     <target name="compile" depends="init,precompile"
             description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
-        <javac srcdir="${src}" destdir="${build}" debug="true" debuglevel="lines,vars,source" >
+        <javac target="1.7" source="1.7" srcdir="${src}" destdir="${build}" debug="true" debuglevel="lines,vars,source" >
             <classpath >
                 <fileset dir="lib">
                     <include name="**/*.jar"/>

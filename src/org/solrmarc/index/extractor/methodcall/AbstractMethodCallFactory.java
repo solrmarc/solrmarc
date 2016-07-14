@@ -1,12 +1,15 @@
 package org.solrmarc.index.extractor.methodcall;
 
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 
 import org.solrmarc.index.extractor.AbstractValueExtractor;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.index.utils.StringReader;
 
 public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFactory
@@ -26,17 +29,48 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
 
     public void addMethodsFromClasses(Collection<Class<?>> classes)
     {
-        try
+        for (final Class<?> aClass : classes)
         {
-            for (final Class<?> aClass : classes)
+            try
             {
-                methodCallManager.add(aClass.newInstance());
+                Constructor<?> ctor = aClass.getConstructor();
+                methodCallManager.add(ctor.newInstance());
             }
-        }
-        catch (InstantiationException | IllegalAccessException e)
-        {
-            throw new RuntimeException(e);
-        }
+            catch (NoSuchMethodException | SecurityException e)
+            {
+                // can't call no-args constructor, check whether class extends org.solrmarc.index.SolrIndexer
+                // for backwards compatibility sake.
+                Class<?> solrIndexerClass = org.solrmarc.index.SolrIndexer.class;
+                if (solrIndexerClass.isAssignableFrom(aClass))
+                {
+                    try
+                    {
+                        Constructor<?> ctor2 = aClass.getConstructor(String.class, String[].class);
+                        // the placeholder stub implementation for org.solrmarc.index.SolrIndexer 
+                        // doesn't look at use the parameters that the Constructor requires, so fake values are used
+                        methodCallManager.add(ctor2.newInstance("", new String[]{ ValueIndexerFactory.getHomeDir() }));
+                    }
+                    catch (NoSuchMethodException  | SecurityException e1)
+                    {
+                        throw new RuntimeException("Cannot call constructor for legacy class derived from old SolrIndexer, you'll need to edit your source code", e);
+                    }
+                    catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e2)
+                    {
+                        throw new RuntimeException("Cannot call constructor for legacy class derived from old SolrIndexer, you'll need to edit your source code", e);
+                    }
+                }
+                else 
+                { 
+                     /* dynamically loaded class that has no default constructor, but also is not a legacy class that extends SolrIndexer, 
+                      * therefore don't look for custom extractor methods or custom mapping methods in the class
+                      */
+                }
+            }
+            catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+            {
+                throw new RuntimeException(e);
+            }
+       }
     }
 
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, MethodCallContext context)

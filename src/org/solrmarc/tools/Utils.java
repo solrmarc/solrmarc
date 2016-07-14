@@ -73,6 +73,29 @@ public final class Utils
     private Utils()
     {
     }
+    
+    public static String join(String[] strs, String delimiter)
+    {
+        StringBuilder strb = new StringBuilder();
+        for (String str : strs)
+        {
+            if (strb.length() != 0) strb.append(delimiter);
+            strb.append(str);
+        }
+        return strb.toString();
+    }
+    
+    public static String join(Iterable<String> strs, String delimiter)
+    {
+        StringBuilder strb = new StringBuilder();
+        for (String str : strs)
+        {
+            if (strb.length() != 0) strb.append(delimiter);
+            strb.append(str);
+        }
+        return strb.toString();
+    }
+
 
 
     /**
@@ -1216,5 +1239,38 @@ public final class Utils
         }
 
     }
-
+    
+   @Deprecated
+   /**
+    * This method has been relocated to the PropertyUtils class.   
+    * call it by:   PropertyUtils.getProperty(props, propname, defVal);
+    * @param props
+    *            property set in which to look.
+    * @param propname
+    *            name of the property to lookup.
+    * @param defVal
+    *            the default value to use if property is not defined
+    * @return value stored for that property (or the if it doesn't exist)
+    * @deprecated
+    */
+    public static String getProperty(Properties props, String propname, String defVal)
+    {
+       return PropertyUtils.getProperty(props, propname, defVal);
+    }
+   
+   /**
+    * his method has been relocated to the PropertyUtils class.   
+    * call it by:   PropertyUtils.loadProperties(propertyPaths, propertyFileName);
+    * @param propertyPaths
+    *            the directories to search for the properties file
+    * @param propertyFileName
+    *            name of the sought properties file
+    * @return Properties object
+    * @deprecated
+    */
+   @Deprecated
+   public static Properties loadProperties(String propertyPaths[], String propertyFileName)
+   {
+       return PropertyUtils.loadProperties(propertyPaths, propertyFileName);
+   }
 }

@@ -91,10 +91,10 @@ public class IndexDriver extends Boot
         configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
         homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
         solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
-        solrjClass = parser.accepts("solrjClassName", "SolrJ").withRequiredArg().ofType( String.class ).defaultsTo("org.apache.solr.client.solrj.impl.CommonsHttpSolrServer");
-        errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.").withRequiredArg().ofType( File.class );
-        errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
-        errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
+        solrjClass = parser.accepts("solrjClassName", "Classname of class to use for talking to solr").withRequiredArg().ofType( String.class ).defaultsTo("org.apache.solr.client.solrj.impl.CommonsHttpSolrServer");
+        errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
+        errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
+        errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
         parser.accepts("debug", "non-multithreaded debug mode");
         parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
         parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format");//.availableUnless("sorlURL");
@@ -119,7 +119,7 @@ public class IndexDriver extends Boot
             }
             System.exit(1);
         }
-        if (options.has("help")) 
+        if (args.length == 0 || options.has("help")) 
         {
             try
             {
@@ -138,7 +138,8 @@ public class IndexDriver extends Boot
         {
             homeDirStr = Boot.getDefaultHomeDir();
         }
-        final File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File(homeDirStr, "lib-solrj"));
+        File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File("lib-solrj"));
+        if (!solrJPath.isAbsolute())  solrJPath = new File(homeDirStr, solrJPath.getName());
         
         try { 
             Boot.extendClasspathWithJarDir(solrJPath);
