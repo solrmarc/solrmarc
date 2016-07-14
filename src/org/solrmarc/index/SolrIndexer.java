@@ -476,9 +476,9 @@ public class SolrIndexer implements Mixin
     public Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
     {
         Set<String> result = new LinkedHashSet<String>();
-        String [] pieces = fieldSpec.split(":");
-        String fieldSpecWithAll = Utils.join(pieces, "[a-z0-9]:") + "[a-z0-9]";
-        Specification spec = getOrCreateSpecification(fieldSpecWithAll, separator);
+//        String [] pieces = fieldSpec.split(":");
+//        String fieldSpecWithAll = Utils.join(pieces, "[a-z0-9]:") + "[a-z0-9]";
+        Specification spec = getOrCreateSpecification(fieldSpec, separator);
         getFieldListCollector(record, spec, result);
         return result;
     }

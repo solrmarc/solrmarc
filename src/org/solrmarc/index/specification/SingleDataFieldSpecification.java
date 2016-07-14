@@ -40,7 +40,7 @@ public class SingleDataFieldSpecification extends SingleSpecification
         super(tag, cond);
         this.subfields = subfields;
         subfieldPattern = makePattern(subfields);
-        if (subfields.length() == 1) 
+        if (subfields != null && subfields.length() == 1) 
             fmt = new FieldFormatterBase(false).setJoinVal(eJoinVal.SEPARATE);
         else 
             fmt = new FieldFormatterBase(false).setJoinVal(eJoinVal.JOIN).setSeparator(" ");
@@ -53,7 +53,7 @@ public class SingleDataFieldSpecification extends SingleSpecification
 
     private final static Pattern makePattern(String subfields)
     {
-        if (subfields.length() == 0) return (Pattern.compile("."));
+        if (subfields == null || subfields.length() == 0) return (Pattern.compile("."));
         else if (subfields.startsWith("[") && subfields.endsWith("]")) return (Pattern.compile(subfields));
         else return (Pattern.compile("[" + subfields + "]"));
     }
