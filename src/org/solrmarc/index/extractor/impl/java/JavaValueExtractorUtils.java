@@ -83,9 +83,8 @@ public class JavaValueExtractorUtils
         logger.info("Classpath for compiling java files:");
         for (URL url : sysLoader.getURLs())
         {
-            // merely discarding the last character of the URL to get the filename, feel wrong, fix this
-            classpath.add(new File(url.getFile().substring(1)));
-            logger.info("    " + url.getFile().substring(1));
+            classpath.add(new File(url.getFile()));
+            logger.debug("    " + url.getFile());
         }
         final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, Charset.forName("UTF-8"));
         fileManager.setLocation(StandardLocation.SOURCE_PATH, Collections.singleton(new File(getSrcDirectory())));
