@@ -47,10 +47,17 @@ public class Boot
                 }
                 mainMethod.invoke(null, (Object) otherArgs);
             }
-            catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+            catch (IllegalAccessException | IllegalArgumentException e)
             {
                 logger.fatal("ERROR: Unable to invoke main method in specified main: " + args[0]);
                 logger.fatal(e.getMessage());
+                System.exit(2);
+            }
+            catch (InvocationTargetException e)
+            {
+                Throwable t = e.getTargetException();
+                logger.fatal("ERROR: Unable to invoke main method in specified main: " + args[0]);
+                logger.fatal(t.getMessage());
                 System.exit(2);
             }
             catch (ClassNotFoundException e)
@@ -207,7 +214,7 @@ public class Boot
             {
                 dirpath = dir.getAbsolutePath();
             }
-            throw new RuntimeException("Unable to find any Jars in the provided directory: " + dirpath);
+            throw new RuntimeException("Unable to find any Jars in the provided directory: " + dirpath + "  define location of solrj to use with the option -solrj <dir>");
         }
         for (File file : dir.listFiles())
         {

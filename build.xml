@@ -76,11 +76,11 @@
            <path  refid="libjarfiles"/>
          </copy> 
          
-    	<manifestclasspath property="manifest.classpath" jarfile="${dist}/${custom.jar.name}.jar">
+ <!--   	<manifestclasspath property="manifest.classpath" jarfile="${dist}/${custom.jar.name}.jar">
     	    <classpath>
     	        <fileset dir="${distlib}" includes="*.jar"/>
     	    </classpath>
-    	</manifestclasspath>
+    	</manifestclasspath> -->
     	
         <jar destfile="${dist}/${custom.jar.name}.jar">
         	<manifest>
@@ -131,6 +131,9 @@
             <fileset dir="resources" includes="*.properties"/>
         </copy> 
         
+    	<copy todir="../VuFind_Config" >
+    		<fileset dir="${dist}" includes="solrmarc_core.jar" />
+    	</copy>
     </target>
 
     <target name="test">
