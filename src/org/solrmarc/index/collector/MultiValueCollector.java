@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,26 +19,33 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
     boolean isUnique = false;
 
     Comparator<String> sortComparator = null;
-    boolean first = false;
+    enum eFirstVal { ALL, FIRST, NOTFIRST };
+    public static eFirstVal fromString(String str)
+    {
+        if (str.equals("first")) return(eFirstVal.FIRST);
+        if (str.equals("notfirst")) return(eFirstVal.NOTFIRST);
+        return(eFirstVal.ALL);
+    }; 
+    eFirstVal first = eFirstVal.ALL;
     
-    public MultiValueCollector(String comp, String dir, boolean unique, boolean first)
+    public MultiValueCollector(String comp, String dir, boolean unique, String first)
     {
         isUnique = unique;
-        this.first = first;
+        this.first = fromString(first);;
         sortComparator = setComparator(comp, dir);
     }
     
-    public MultiValueCollector(boolean unique, boolean first)
+    public MultiValueCollector(boolean unique, String first)
     {
         isUnique = unique;
-        this.first = first;
+        this.first = fromString(first);;
         sortComparator = null;
     }
         
     public MultiValueCollector()
     {
         isUnique = false;
-        this.first = false;
+        this.first = eFirstVal.ALL;
         sortComparator = null;
     }
    
@@ -86,7 +94,7 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
 
     public Collection<String> collect(final Collection<String> values)
     {
-        if ((!isUnique || values instanceof Set<?> ) && sortComparator == null && !first) 
+        if ((!isUnique || values instanceof Set<?> ) && sortComparator == null && first == eFirstVal.ALL) 
             return values;
         Collection<String> result;
         if (isUnique)
@@ -112,13 +120,24 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
         {
             result = values;
         }
-        if (first)
+        if (result == null || result.isEmpty())
         {
-            if (result == null || result.isEmpty())
-            {
-                return (result);
-            }
+            return (result);
+        }
+        else if (first == eFirstVal.FIRST)
+        {
             return Collections.singletonList(result.iterator().next());
+        }
+        else if (first == eFirstVal.NOTFIRST)
+        {
+            if (result instanceof List)
+            {
+                result = ((List<String>) result).subList(1, result.size());
+            }
+            else
+            {
+                result = Collections.list(Collections.enumeration(result)).subList(1,  result.size());
+            }
         }
         return(result);
     }
@@ -145,14 +164,19 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
         return(this);
     }
 
-    public boolean isFirst()
-    {
-        return first;
-    }
+//    public boolean isFirst()
+//    {
+//        return first;
+//    }
 
-    public MultiValueCollector setFirst(boolean first)
+    public MultiValueCollector setFirst(eFirstVal first)
     {
         this.first = first;
+        return(this);
+    }
+    public MultiValueCollector setFirst(String firstStr)
+    {
+        this.first = fromString(firstStr);
         return(this);
     }
 }

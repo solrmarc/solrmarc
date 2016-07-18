@@ -49,7 +49,7 @@ public class IndexDriver extends Boot
     String homeDirStr;
     String [] args;
     OptionSpec<String> readOpts;
-    OptionSpec<File> configSpec;
+    OptionSpec<String> configSpecs;
     OptionSpec<File> homeDir;
     OptionSpec<File> solrjDir;
     OptionSpec<String> solrjClass;
@@ -88,10 +88,10 @@ public class IndexDriver extends Boot
     {
         OptionParser parser = new OptionParser(  );
         readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
-        configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
+        configSpecs = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg();
         homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
         solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
-        solrjClass = parser.accepts("solrjClassName", "Classname of class to use for talking to solr").withRequiredArg().ofType( String.class ).defaultsTo("org.apache.solr.client.solrj.impl.CommonsHttpSolrServer");
+        solrjClass = parser.accepts("solrjClassName", "Classname of class to use for talking to solr").withRequiredArg().ofType( String.class ).defaultsTo("");
         errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
         errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
         errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
@@ -177,24 +177,25 @@ public class IndexDriver extends Boot
         {
             logger.error("Error connecting to solr at URL "+solrURL, sre);
             logger.error("Exiting...");
-            System.exit(6);
+//            System.exit(6);
+            this.configureOutput("stdout", solrJClassName);
         }
-        File f2 = options.valueOf(configSpec);
+        String specs = options.valueOf(configSpecs);
         try
         {
-            logger.info("Reading and compiling index specification: "+ f2.getName());
-            this.configureIndexer(f2, multithread);
+            logger.info("Reading and compiling index specifications: "+ specs);
+            this.configureIndexer(specs, multithread);
         }
         catch (IOException | IllegalAccessException | InstantiationException e1)
         {
-            logger.error("Error opening or reading index configuration: " + f2.getName(), e1);
+            logger.error("Error opening or reading index configurations: " + specs, e1);
             logger.error("Exiting...");
             System.exit(2);
         }
         List<IndexerSpecException> exceptions = this.indexerFactory.getValidationExceptions();
         if (!exceptions.isEmpty())
         {
-            logger.error("Error processing index configuration: " + f2.getName());
+            logger.error("Error processing index configurations: " + specs);
             logTextForExceptions(exceptions);
             logger.error("Exiting...");
             System.exit(5);
@@ -226,7 +227,7 @@ public class IndexDriver extends Boot
         reader = MarcReaderFactory.instance().makeReader(readerProps, inputFilenames);
     }
     
-    public void configureIndexer(File indexSpecification, boolean multiThreaded) 
+    public void configureIndexer(String indexSpecifications, boolean multiThreaded) 
                 throws IllegalAccessException, InstantiationException, IOException
     {
         // You must set the HomeDir before instantiating the ValueIndexerFactory
@@ -234,8 +235,17 @@ public class IndexDriver extends Boot
         // If it is unspecified, the program looks in 
         ValueIndexerFactory.setHomeDir(homeDirStr);
         indexerFactory = ValueIndexerFactory.instance();
-
-        indexers = indexerFactory.createValueIndexers(indexSpecification);
+        String[] indexSpecs = indexSpecifications.split("[ ]*,[ ]*");
+        File[] specFiles = new File[indexSpecs.length];
+        int i = 0;
+        for (String indexSpec : indexSpecs)
+        {
+            File specFile = new File(indexSpec);
+            if (!specFile.isAbsolute()) specFile = new File(homeDirStr, indexSpec);
+            specFiles[i++] = specFile;
+        }
+        
+        indexers = indexerFactory.createValueIndexers(specFiles);
         boolean includeErrors = (readerProps.getProperty("marc.include_errors", "false").equals("true"));
         indexer = null;
         // System.err.println("Reading and compiling index specification: "+ indexSpecification);

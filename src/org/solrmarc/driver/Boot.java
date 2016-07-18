@@ -2,6 +2,7 @@ package org.solrmarc.driver;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -34,49 +35,102 @@ public class Boot
         }
         else
         {
-            String[] otherArgs = new String[args.length - 1];
-            System.arraycopy(args, 1, otherArgs, 0, args.length - 1);
+            String classname = null;
+            String[] otherArgs;
+            if (args[0].endsWith(".properties"))
+            {
+                classname = "org.solrmarc.driver.ConfigDriver";
+                otherArgs = args;
+            }
+            else 
+            {
+                otherArgs = new String[args.length - 1];
+                System.arraycopy(args, 1, otherArgs, 0, args.length - 1);
+            
+                try
+                {
+                    classname = classnamefromArg(args[0]);
+                }
+                catch (ClassNotFoundException e1)
+                {
+                    logger.fatal("ERROR: Unable to find main class for specified short name: " + args[0]);
+                    findExecutables();
+                    System.exit(3);
+                }
+    
+            }
+
+            invokeMain(classname, otherArgs);
+        }
+    }
+
+    protected static void invokeMain(String classname, String[] otherArgs)
+    {
+        try
+        {
+            Class<?> mainClass = Class.forName(classname);
+            Method mainMethod = mainClass.getMethod("main", String[].class);
+            if (!Modifier.isStatic(mainMethod.getModifiers()))
+            {
+                logger.fatal("ERROR: Main method is not static in class: " + classname);
+                System.exit(1);
+            }
+            mainMethod.invoke(null, (Object) otherArgs);
+        }
+        catch (IllegalAccessException | IllegalArgumentException e)
+        {
+            logger.fatal("ERROR: Unable to invoke main method in specified class: " + classname);
+            logger.fatal(e.getMessage());
+            System.exit(2);
+        }
+        catch (InvocationTargetException e)
+        {
+            Throwable t = e.getTargetException();
+            logger.fatal("ERROR: Error while invoking main method in specified class: " + classname);
+            logger.fatal(t.getMessage());
+            System.exit(2);
+        }
+        catch (ClassNotFoundException e)
+        {
+            logger.fatal("ERROR: Unable to find specified main class: " + classname);
+            findExecutables();
+            System.exit(3);
+        }
+        catch (NoSuchMethodException e)
+        {
+            logger.fatal("ERROR: Unable to find main method in specified class: " + classname);
+            System.exit(4);
+        }
+        catch (SecurityException e)
+        {
+            logger.fatal("ERROR: Unable to access main method in specified class: " + classname);
+            System.exit(5);
+        }
+    }
+
+    private static String classnamefromArg(String string) throws ClassNotFoundException
+    {
+        Set<Class<? extends Boot>> mainClasses = FastClasspathUtils.getBootableMainClasses();
+        for (Class<?> clazz : mainClasses)
+        {
+            if (string.equals(clazz.getName()))  return(clazz.getName());            
+            if (clazz.getName().endsWith("."+string))  return(clazz.getName());            
+        }
+        for (Class<?> clazz : mainClasses)
+        {
+            String shortNameStr = null;
             try
             {
-                Class<?> mainClass = Class.forName(args[0]);
-                Method mainMethod = mainClass.getMethod("main", String[].class);
-                if (!Modifier.isStatic(mainMethod.getModifiers()))
-                {
-                    logger.fatal("ERROR: Main method is not static in class: " + args[0]);
-                    System.exit(1);
-                }
-                mainMethod.invoke(null, (Object) otherArgs);
+                Field shortName = clazz.getDeclaredField("shortName");
+                shortNameStr = shortName.get(null).toString();
             }
-            catch (IllegalAccessException | IllegalArgumentException e)
+            catch (NoSuchFieldException  | SecurityException | IllegalArgumentException | IllegalAccessException e)
             {
-                logger.fatal("ERROR: Unable to invoke main method in specified main: " + args[0]);
-                logger.fatal(e.getMessage());
-                System.exit(2);
+                // no valid short name don't worry.
             }
-            catch (InvocationTargetException e)
-            {
-                Throwable t = e.getTargetException();
-                logger.fatal("ERROR: Unable to invoke main method in specified main: " + args[0]);
-                logger.fatal(t.getMessage());
-                System.exit(2);
-            }
-            catch (ClassNotFoundException e)
-            {
-                logger.fatal("ERROR: Unable to find specified main class: " + args[0]);
-                findExecutables();
-                System.exit(3);
-            }
-            catch (NoSuchMethodException e)
-            {
-                logger.fatal("ERROR: Unable to find main method in specified class: " + args[0]);
-                System.exit(4);
-            }
-            catch (SecurityException e)
-            {
-                logger.fatal("ERROR: Unable to access main method in specified class: " + args[0]);
-                System.exit(5);
-            }
+            if (shortNameStr != null && string.equals(shortNameStr))  return(clazz.getName());
         }
+        throw new ClassNotFoundException("can't find class");
     }
 
     private static void findExecutables()
@@ -95,9 +149,19 @@ public class Boot
             try
             {
                 Method mainMethod = mainClass.getMethod("main", String[].class);
+                String shortNameStr = null;
+                try
+                {
+                    Field shortName = mainClass.getDeclaredField("shortName");
+                    shortNameStr = shortName.get(null).toString();
+                }
+                catch (NoSuchFieldException  | SecurityException | IllegalArgumentException | IllegalAccessException e)
+                {
+                    // no valid short name don't worry.
+                }
                 if (Modifier.isStatic(mainMethod.getModifiers()))
                 {
-                    logger.info("    " + mainClass.getName());
+                    logger.info("    " + mainClass.getName() + ((shortNameStr != null) ? "  ("+shortNameStr+")" : ""));
                 }
             }
             catch (NoSuchMethodException e)

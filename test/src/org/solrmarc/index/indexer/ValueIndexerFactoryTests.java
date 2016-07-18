@@ -9,7 +9,7 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.MultiValueIndexer;
-import org.solrmarc.index.indexer.ValueIndexerStringReaderFactory;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -204,7 +204,7 @@ public class ValueIndexerFactoryTests
 
     private List<AbstractValueIndexer<?>> createIndexers(Properties configs) throws IllegalAccessException, InstantiationException
     {
-        final ValueIndexerStringReaderFactory factory = ValueIndexerStringReaderFactory.instance();
+        final ValueIndexerFactory factory = ValueIndexerFactory.instance();
         return factory.createValueIndexers(configs);
     }
 }

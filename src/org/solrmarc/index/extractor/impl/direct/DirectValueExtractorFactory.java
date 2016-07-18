@@ -18,15 +18,16 @@ public class DirectValueExtractorFactory extends AbstractValueExtractorFactory
     @Override
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader indexConfiguration)
     {
-        int commaIndex = indexConfiguration.indexOf(',');
-        if (commaIndex <= -1)
-        {
-            return new DirectMultiValueExtractor(indexConfiguration.readAll());
-        }
-        else
-        {
-            return new DirectMultiValueExtractor(indexConfiguration.readString(commaIndex));
-        }
+//        int commaIndex = indexConfiguration.indexOf(',');
+//        if (commaIndex <= -1)
+//        {
+//            return new DirectMultiValueExtractor(indexConfiguration.readAll());
+//        }
+//        else
+//        {
+//            return new DirectMultiValueExtractor(indexConfiguration.readString(commaIndex));
+//        }
+        return null;
     }
 
     @Override

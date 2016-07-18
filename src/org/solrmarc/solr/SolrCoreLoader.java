@@ -8,8 +8,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.apache.log4j.Logger;
+
 public class SolrCoreLoader
 {
+    public static Logger logger = Logger.getLogger(SolrCoreLoader.class); 
+
+    public final static String[] defaultSolrJClassnames = 
+        { "org.apache.solr.client.solrj.impl.HttpSolrClient", 
+          "org.apache.solr.client.solrj.impl.HttpSolrServer",
+          "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer" } ;
+    
     public static SolrProxy loadRemoteSolrServer(String solrHostUpdateURL, String fullClassName, boolean useBinaryRequestHandler) 
     {
         Object httpsolrserver;
@@ -54,7 +63,28 @@ public class SolrCoreLoader
             throw new SolrRuntimeException("Solr reports not OK " + urlString);
         }
         try {
-            Class<?> httpsolrserverClass = Class.forName(fullClassName);
+            Class<?> httpsolrserverClass = null;
+            if (fullClassName != null && fullClassName.length() > 0)
+            {
+                httpsolrserverClass = Class.forName(fullClassName);
+            }
+            else 
+            {   
+                for (String classname : defaultSolrJClassnames)
+                {
+                    try {
+                        httpsolrserverClass = Class.forName(classname);
+                    }
+                    catch (ClassNotFoundException e)
+                    {
+                        logger.debug("Didn't find class "+ classname);
+                    }
+                }
+                if (httpsolrserverClass == null)
+                {
+                    throw new SolrRuntimeException("Error finding class solrj client while dynamically loading solrj");
+                }
+            }
             Constructor<?> httpsolrserverConst = httpsolrserverClass.getDeclaredConstructor(String.class);
             httpsolrserver = httpsolrserverConst.newInstance(urlString);
             Class<?> superclass = httpsolrserver.getClass().getSuperclass();
@@ -68,7 +98,6 @@ public class SolrCoreLoader
                 solrProxy = new SolrClientProxy(httpsolrserver); 
                 return(solrProxy);
             }
-
         }
         catch (ClassNotFoundException e)
         {

@@ -21,15 +21,10 @@ public abstract class AbstractValueIndexer<T>
     private String specLabel;
  //   private List<String> parseErrors;
 
-    public AbstractValueIndexer(final String solrFieldName, final AbstractValueExtractor<T> extractor,
+    public AbstractValueIndexer(final String solrFieldNames, final AbstractValueExtractor<T> extractor,
             final AbstractValueMapping<T>[] mappings, final MultiValueCollector collector)
     {
-        this.solrFieldNames = new ArrayList<String>();
-        String[] fieldNames = solrFieldName.split("[ ]?,[ ]?");
-        for (String fName : fieldNames)
-        {
-            this.solrFieldNames.add(fName);
-        }
+        setSolrFieldNames(solrFieldNames);
         this.extractor = extractor;
         this.mappings = mappings;
         this.collector = collector;
@@ -38,8 +33,7 @@ public abstract class AbstractValueIndexer<T>
     public AbstractValueIndexer(final Collection<String> solrFieldNames, final AbstractValueExtractor<T> extractor,
             final AbstractValueMapping<T>[] mappings, final MultiValueCollector collector)
     {
-        this.solrFieldNames = new ArrayList<String>();
-        this.solrFieldNames.addAll(solrFieldNames);
+        setSolrFieldNames(solrFieldNames);
         this.extractor = extractor;
         this.mappings = mappings;
         this.collector = collector;
@@ -48,8 +42,7 @@ public abstract class AbstractValueIndexer<T>
     public AbstractValueIndexer(final Collection<String> solrFieldNames, final AbstractValueExtractor<T> extractor,
             final Collection<AbstractMultiValueMapping> mappings, final MultiValueCollector collector)
     {
-        this.solrFieldNames = new ArrayList<String>();
-        this.solrFieldNames.addAll(solrFieldNames);
+        setSolrFieldNames(solrFieldNames);
         this.extractor = extractor;
         @SuppressWarnings("unchecked")
         AbstractValueMapping<T>[] tmp = new AbstractValueMapping[mappings.size()];
@@ -97,9 +90,49 @@ public abstract class AbstractValueIndexer<T>
             result = collector.collect(Collections.singletonList((String)values));
         return (result);
     }
+   
+    @SuppressWarnings("unchecked")
+    public void getFieldData(Record record, Collection<String> result) throws Exception
+    {
+        if (extractor == null) return;
+        T values = extractor.extract(record);
+        if (values == null)
+        {
+            return;
+        }
+        for (final AbstractValueMapping<T> mapping : mappings)
+        {
+            values = mapping.map(values);
+        }
+        if (values instanceof Collection) 
+            result.addAll((Collection<String>)values);
+        else if (values instanceof String)
+            result.add((String)values);
+    }
 
     public Collection<String> getSolrFieldNames()
     {
         return solrFieldNames;
+    }
+    
+    public void setSolrFieldNames(String solrFieldNames)
+    {
+        this.solrFieldNames = new ArrayList<String>();
+        if (solrFieldNames != null)
+        {
+            // The trim and whitespace in the pattern for split may well be unnecessary since the string  
+            // should have had all whitespace removed,  but just in case.
+            String[] fieldNames = solrFieldNames.trim().split("[ \\t]*,[ \\t]*");
+            for (String fName : fieldNames)
+            {
+                this.solrFieldNames.add(fName);
+            }    
+        }
+    }
+
+    public void setSolrFieldNames(Collection<String> solrFieldNames)
+    {
+        this.solrFieldNames = new ArrayList<String>();
+        this.solrFieldNames.addAll(solrFieldNames);
     }
 }

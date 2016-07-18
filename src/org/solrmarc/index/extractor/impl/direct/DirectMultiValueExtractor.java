@@ -17,11 +17,11 @@ public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
 {
     private Specification fieldsAndSubfieldSpec;
 
-    public DirectMultiValueExtractor(final String fieldsAndSubfields)
-    {
-        fieldsAndSubfieldSpec = AbstractSpecificationFactory.createSpecification(fieldsAndSubfields);
-    }
-
+//    public DirectMultiValueExtractor(final String fieldsAndSubfields)
+//    {
+//        fieldsAndSubfieldSpec = AbstractSpecificationFactory.createSpecification(fieldsAndSubfields);
+//    }
+//
     public DirectMultiValueExtractor(Specification fieldSpec)
     {
         fieldsAndSubfieldSpec = fieldSpec;

@@ -16,7 +16,6 @@ import org.solrmarc.index.SolrIndexerMixin;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
-import org.solrmarc.index.indexer.ValueIndexerStringReaderFactory;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.tools.Utils;
 
@@ -781,7 +780,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         formats = addOnlineTypes(record, formats, false);
         if (isArchive(record)) formats.add(ControlType.Archive.toString());
         String mapName = null;
-        AbstractMultiValueMapping theMap = ValueIndexerStringReaderFactory.instance().createMultiValueMapping(mapFileName);
+        AbstractMultiValueMapping theMap = ValueIndexerFactory.instance().createMultiValueMapping(mapFileName);
         Set<String>formatsMapped = new LinkedHashSet<String>();
         try
         {

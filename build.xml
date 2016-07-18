@@ -27,7 +27,7 @@
     </target>
 
     <target name="precompile" description="run jflex and cup to generate javafiles for parser and scanner" >
-		<jflex file="${src}/org/solrmarc/index/specification/conditional/Scanner.lex" verbose="true" 
+<!--		<jflex file="${src}/org/solrmarc/index/specification/conditional/Scanner.lex" verbose="true" 
 			   outdir="${src}/org/solrmarc/index/specification/conditional" nobak="true" />
     	
         <cup srcfile="${src}/org/solrmarc/index/specification/conditional/ConditionalParser.cup"
@@ -35,7 +35,7 @@
              package="org.solrmarc.index.specification.conditional"
        	 	 symbols="sym"
              parser="ConditionalParser"
-        />
+        />  -->
 		<jflex file="${src}/org/solrmarc/index/indexer/FullScanner.lex" verbose="true" 
 			   outdir="${src}/org/solrmarc/index/indexer/" nobak="true" />
     	

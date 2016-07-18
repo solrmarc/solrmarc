@@ -874,7 +874,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
         AbstractMultiValueMapping map = ValueIndexerFactory.instance().createMultiValueMapping(propertiesMap);
         //  String mapName = loadTranslationMap(null, propertiesMap);
         
-        Set<String> fields = SolrIndexer.instance().getFieldList(record, "999aikl';'");
+        Set<String> fields = SolrIndexer.instance().getFieldList(record, "999aikl,join(\":\")");
         boolean visible = false;
         String extraString = null;
         if (processExtraShadowedIds && boundWithIds != null && boundWithIds.containsKey(record.getControlNumber().substring(1)))

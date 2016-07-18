@@ -47,7 +47,7 @@ import org.solrmarc.tools.Utils;
 @Deprecated 
 public class SolrIndexer implements Mixin
 {
-    private Map<String, Specification> specCache = new HashMap<String, Specification>(); 
+    private Map<String, AbstractValueIndexer<?>> indexerCache = new HashMap<String, AbstractValueIndexer<?>>(); 
     
     /** map of translation maps.  keys are names of translation maps; 
      *  values are the translation maps (hence, it's a map of maps) */
@@ -67,62 +67,36 @@ public class SolrIndexer implements Mixin
         return(theSolrIndexer);
     }
     
-    private Specification getOrCreateSpecificationMapped(String tagStr, String map)
+    private AbstractValueIndexer<?> getOrCreateIndexerFullSpec(String fullSpec)
     {
-        String key = (map == null) ? tagStr : tagStr + map;
-        if (specCache.containsKey(key))
+        if (indexerCache.containsKey(fullSpec))
         {
-            return(specCache.get(key));
+            return(indexerCache.get(fullSpec));
         }
         else
         {
-            Specification spec = AbstractSpecificationFactory.createSpecification(tagStr);
-            if (map != null)
-            {
-                AbstractMultiValueMapping valueMapping = ValueIndexerFactory.instance().createMultiValueMapping(map);
-                spec.addFormatter(new FieldFormatterMapped(valueMapping));
-            }
-            specCache.put(tagStr,  spec);
-            return(spec);
+            AbstractValueIndexer<?> indexer = ValueIndexerFactory.instance().createValueIndexer("", fullSpec);
+            indexerCache.put(fullSpec, indexer);
+            return(indexer);
         }
     }
     
-    private Specification getOrCreateSpecification(String tagStr, String separator)
+    private AbstractValueIndexer<?> getOrCreateIndexerMapped(String tagStr, String map)
     {
-        String key = (separator == null) ? tagStr : tagStr + "[" + separator + "]";
-        if (specCache.containsKey(key))
-        {
-            return(specCache.get(key));
-        }
-        else
-        {
-            Specification spec = AbstractSpecificationFactory.createSpecification(tagStr);
-            if (separator != null)
-            {
-                spec.setSeparator(separator);
-            }
-            specCache.put(tagStr,  spec);
-            return(spec);
-        }
+        String key = (map == null) ? tagStr : tagStr + ", " +  map;
+        return getOrCreateIndexerFullSpec(key);
     }
     
-    private Specification getOrCreateSpecification(String tagStr, int start, int end)
+    private AbstractValueIndexer<?> getOrCreateIndexer(String tagStr, String separator)
     {
-        String key = (start == -1 && end == -1) ? tagStr : tagStr + "_" + start + "_" + end;
-        if (specCache.containsKey(key))
-        {
-            return(specCache.get(key));
-        }
-        else
-        {
-            Specification spec = AbstractSpecificationFactory.createSpecification(tagStr);
-            if (start != -1 && end != -1)
-            {
-                spec.setSubstring(start, end);
-            }
-            specCache.put(tagStr,  spec);
-            return(spec);
-        }
+        String key = (separator == null) ? tagStr : tagStr + ", join(\""+separator+"\")";
+        return getOrCreateIndexerFullSpec(key);
+    }
+    
+    private AbstractValueIndexer<?> getOrCreateIndexer(String tagStr, int start, int end)
+    {
+        String key = (start == -1 && end == -1) ? tagStr : tagStr + "[" + start + "-" + end + "]";
+        return getOrCreateIndexerFullSpec(key);
     }
     
     /**
@@ -150,27 +124,23 @@ public class SolrIndexer implements Mixin
      *            values, a <code>List</code> will allow values to repeat. 
      * @throws Exception 
      */
-    private void getFieldListCollector(Record record, Specification spec,  Collection<String> collector)
+    private void getFieldListCollector(Record record, AbstractValueIndexer<?> indexer,  Collection<String> collector)
     {
-        for (FieldMatch fm : spec.getFieldMatches(record))
+        try
         {
-            try
-            {
-                fm.addValuesTo(collector);
-            }
-            catch (Exception e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            indexer.getFieldData(record, collector);
         }
-        return;
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
     
     public void getFieldListCollector(Record record, String tagStr, String mapStr,  Collection<String> collector)
     {
-        Specification spec = getOrCreateSpecificationMapped(tagStr, mapStr);
-        getFieldListCollector(record, spec,  collector);
+        AbstractValueIndexer<?> indexer = getOrCreateIndexerMapped(tagStr, mapStr);
+        getFieldListCollector(record, indexer, collector);
     }
 
     
@@ -307,8 +277,8 @@ public class SolrIndexer implements Mixin
     public void getSubfieldDataCollector(Record record, String fldTag, String subfldsStr, 
                                                 String separator, Collection<String> collector)
     {
-        Specification spec = getOrCreateSpecification(fldTag+subfldsStr, separator);
-        getFieldListCollector(record, spec, collector);
+        AbstractValueIndexer<?> indexer = getOrCreateIndexer(fldTag+subfldsStr, separator);
+        getFieldListCollector(record, indexer, collector);
         return;
     }
 
@@ -326,8 +296,8 @@ public class SolrIndexer implements Mixin
     public void getSubfieldDataCollector(Record record, String fldTag, String subfldStr, 
                        int beginIx, int endIx, Collection<String> collector)
     {
-        Specification spec = getOrCreateSpecification(fldTag+subfldStr, beginIx, endIx);
-        getFieldListCollector(record, spec, collector);
+        AbstractValueIndexer<?> indexer = getOrCreateIndexer(fldTag+subfldStr, beginIx, endIx);
+        getFieldListCollector(record, indexer, collector);
         return;
     }
     
@@ -400,7 +370,7 @@ public class SolrIndexer implements Mixin
     {
         if (indDate == null)
         {
-            indDate = ValueIndexerFactory.instance().createValueIndexer("publicationDate = " + 
+            indDate = ValueIndexerFactory.instance().createValueIndexer("publicationDate", 
                 "008[7-10]:008[11-14]:260c:264c?(ind2=1||ind2=4),clean, first, " +
                 "map(\"(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2\",\".*[^0-9].*=>\")");
         }
@@ -445,16 +415,16 @@ public class SolrIndexer implements Mixin
     public Set<String> getFullTextUrls(Record record)
     {
         Set<String> result = new LinkedHashSet<String>();
-        Specification spec = getOrCreateSpecification("{856uz3}?((ind1 = 4 || (ind1 = 7 & $x startsWith \"http\")) && (ind2 = 0 || (ind2 = 1 )))", "||");
-        getFieldListCollector(record, spec, result);
+        AbstractValueIndexer<?> indexer = getOrCreateIndexer("{856uz3}?((ind1 = 4 || (ind1 = 7 & $x startsWith \"http\")) && (ind2 = 0 || (ind2 = 1 )))", "||");
+        getFieldListCollector(record, indexer, result);
         return result;
     }
 
     public Set<String> getSupplUrls(Record record)
     {
         Set<String> result = new LinkedHashSet<String>();
-        Specification spec = getOrCreateSpecification("{856uz3}?((ind1 = 4 || (ind1 = 7 & $x startsWith \"http\")) && (ind2 = 2 || (ind2 = 1)))", "||");
-        getFieldListCollector(record, spec, result);
+        AbstractValueIndexer<?> indexer = getOrCreateIndexer("{856uz3}?((ind1 = 4 || (ind1 = 7 & $x startsWith \"http\")) && (ind2 = 2 || (ind2 = 1)))", "||");
+        getFieldListCollector(record, indexer, result);
         return result;
     }
 
@@ -476,10 +446,8 @@ public class SolrIndexer implements Mixin
     public Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
     {
         Set<String> result = new LinkedHashSet<String>();
-//        String [] pieces = fieldSpec.split(":");
-//        String fieldSpecWithAll = Utils.join(pieces, "[a-z0-9]:") + "[a-z0-9]";
-        Specification spec = getOrCreateSpecification(fieldSpec, separator);
-        getFieldListCollector(record, spec, result);
+        AbstractValueIndexer<?> indexer = getOrCreateIndexer(fieldSpec, separator);
+        getFieldListCollector(record, indexer, result);
         return result;
     }
   
@@ -503,8 +471,8 @@ public class SolrIndexer implements Mixin
         Set<String> result = new LinkedHashSet<String>();
         String [] pieces = fieldSpec.split(":");
         String fieldSpecWithAll = Utils.join(pieces, "[a-z]:") + "[a-z]";
-        Specification spec = getOrCreateSpecification(fieldSpecWithAll, separator);
-        getFieldListCollector(record, spec, result);
+        AbstractValueIndexer<?> indexer = getOrCreateIndexer(fieldSpecWithAll, separator);
+        getFieldListCollector(record, indexer, result);
         return result;
     }
   
@@ -526,8 +494,8 @@ public class SolrIndexer implements Mixin
     public List<String> getAllSubfieldsAsList(final Record record, String fieldSpec, String separator)
     {
         List<String> result = new ArrayList<String>();
-        Specification spec = getOrCreateSpecification(fieldSpec, separator);
-        getFieldListCollector(record, spec, result);
+        AbstractValueIndexer<?> indexer = getOrCreateIndexer(fieldSpec, separator);
+        getFieldListCollector(record, indexer, result);
         return result;
     }
 

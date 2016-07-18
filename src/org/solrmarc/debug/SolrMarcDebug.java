@@ -13,11 +13,11 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
+//import javax.swing.event.UndoableEditEvent;
+//import javax.swing.event.UndoableEditListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JPanel;
-import javax.swing.AbstractAction;
+//import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -25,36 +25,36 @@ import javax.swing.JFileChooser;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
+//import javax.swing.text.AbstractDocument;
+//import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.CompoundEdit;
-import javax.swing.undo.UndoManager;
-import javax.swing.undo.UndoableEdit;
+//import javax.swing.undo.CannotRedoException;
+//import javax.swing.undo.CannotUndoException;
+//import javax.swing.undo.CompoundEdit;
+//import javax.swing.undo.UndoManager;
+//import javax.swing.undo.UndoableEdit;
 
 import org.marc4j.MarcError;
-import org.marc4j.MarcPermissiveStreamReader;
+//import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
-import org.solrmarc.debug.CompoundUndoManager.RedoAction;
-import org.solrmarc.debug.CompoundUndoManager.UndoAction;
+//import org.solrmarc.debug.CompoundUndoManager.RedoAction;
+//import org.solrmarc.debug.CompoundUndoManager.UndoAction;
 import org.solrmarc.driver.Boot;
-import org.solrmarc.driver.Indexer.eErrorHandleVal;
+//import org.solrmarc.driver.Indexer.eErrorHandleVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
-import org.solrmarc.index.specification.Specification;
-import org.solrmarc.index.specification.conditional.ConditionalParser;
+//import org.solrmarc.index.specification.Specification;
+//import org.solrmarc.index.specification.conditional.ConditionalParser;
 import org.solrmarc.marc.MarcReaderFactory;
 
-import joptsimple.ArgumentAcceptingOptionSpec;
+//import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -68,7 +68,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -132,17 +132,17 @@ public class SolrMarcDebug extends Boot
         });
     }
 
-    static ConditionalParser parser = null;
-    static boolean do_debug_parse = true;
+//    static ConditionalParser parser = null;
+//    static boolean do_debug_parse = true;
 
-    public static Specification buildSpecificationFromString(String conditional)
-    {
-        if (parser == null) parser = new ConditionalParser(do_debug_parse);
-        Specification result = null;
-        result = parser.parse(conditional, do_debug_parse);
-        result.setSpecLabel(conditional);
-        return (result);
-    }
+//    public static Specification buildSpecificationFromString(String conditional)
+//    {
+////        if (parser == null) parser = new ConditionalParser(do_debug_parse);
+//        Specification result = null;
+//        result = parser.parse(conditional, do_debug_parse);
+//        result.setSpecLabel(conditional);
+//        return (result);
+//    }
 
     /**
      * Create the application.
@@ -736,7 +736,7 @@ public class SolrMarcDebug extends Boot
     private String getTextForMarcErrorsAndExceptions(Record rec, List<IndexerSpecException> exceptions)
     {
         StringBuilder text = new StringBuilder();
-        String lastSpec = "";
+//        String lastSpec = "";
         if (rec.hasErrors())
         {
             for (MarcError err : rec.getErrors())
