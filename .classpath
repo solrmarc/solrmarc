@@ -18,5 +18,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="test/lib/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="test/lib/mockito-all-1.9.5.jar"/>
-	<classpathentry kind="output" path="SolrMarc-Indexer-Tests/bin"/>
+	<classpathentry kind="output" path="build/bin"/>
 </classpath>

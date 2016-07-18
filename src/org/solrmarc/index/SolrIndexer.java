@@ -11,20 +11,14 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
-//import org.solrmarc.tools.Utils;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
-import org.solrmarc.index.extractor.formatter.FieldFormatterMapped;
 import org.solrmarc.index.extractor.impl.custom.Mixin;
-import org.solrmarc.index.extractor.impl.direct.FieldMatch;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
-import org.solrmarc.index.specification.AbstractSpecificationFactory;
-import org.solrmarc.index.specification.Specification;
 import org.solrmarc.tools.Utils;
 
 
@@ -364,52 +358,13 @@ public class SolrIndexer implements Mixin
      * @return 260c or 008[7-10] or 008[11-14], "cleaned" per org.solrmarc.tools.Utils.cleanDate()
      */
     
-    static AbstractValueIndexer<?> indDate = null;
-    
     public String getPublicationDate(final Record record)
     {
-        if (indDate == null)
-        {
-            indDate = ValueIndexerFactory.instance().createValueIndexer("publicationDate", 
-                "008[7-10]:008[11-14]:260c:264c?(ind2=1||ind2=4),clean, first, " +
-                "map(\"(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2\",\".*[^0-9].*=>\")");
-        }
-        Collection<String> result;
-        try
-        {
-            result = indDate.getFieldData(record);
-        }
-        catch (Exception e)
-        {
-            return(null);
-        }
-        Iterator<String> iter = result.iterator();
-        return (iter.hasNext() ? iter.next() : null);
-        
-//        String field008 = getFirstFieldVal(record, "008");
-//        String pubDateFull = getFieldVals(record, "260c", ", ");
-//        String pubDateJustDigits = pubDateFull.replaceAll("[^0-9]", "");       
-//        String pubDate260c = getDate(record);
-//        if (field008 == null || field008.length() < 16) 
-//        {
-//            return(pubDate260c);
-//        }
-//        String field008_d1 = field008.substring(7, 11);
-//        String field008_d2 = field008.substring(11, 15);
-//        String retVal = null;
-//        char dateType = field008.charAt(6);
-//        if (dateType == 'r' && field008_d2.equals(pubDate260c)) retVal = field008_d2;
-//        else if (field008_d1.equals(pubDate260c))               retVal = field008_d1;
-//        else if (field008_d2.equals(pubDate260c))               retVal = field008_d2;
-//        else if (pubDateJustDigits.length() == 4 && pubDate260c != null &&
-//                 pubDate260c.matches("(20|19|18|17|16|15)[0-9][0-9]"))
-//                                                                retVal = pubDate260c;
-//        else if (field008_d1.matches("(20|1[98765432])[0-9][0-9]"))        
-//                                                                retVal = field008_d1;
-//        else if (field008_d2.matches("(20|1[98765432])[0-9][0-9]"))        
-//                                                                retVal = field008_d2;
-//        else                                                    retVal = pubDate260c;
-//        return(retVal);
+        List<String> result = new ArrayList<String>();
+        AbstractValueIndexer<?> indexer = getOrCreateIndexerFullSpec("008[7-10]:008[11-14]:260c:264c?(ind2=1||ind2=4),clean, first, " +
+                    "map(\"(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2\",\".*[^0-9].*=>\")");
+        getFieldListCollector(record, indexer, result);
+        return (result.size() == 0) ? "" : result.iterator().next();
     }
 
     public Set<String> getFullTextUrls(Record record)
@@ -466,12 +421,12 @@ public class SolrIndexer implements Mixin
      *            contents
      * @return Set of values (as strings) for solr field
      */
-    public Set<String> getAllAlphaSubfields(final Record record, String fieldSpec, String separator)
+    public Set<String> getAllAlphaSubfields(final Record record, String fieldSpec, String firstAllJoin)
     {
         Set<String> result = new LinkedHashSet<String>();
         String [] pieces = fieldSpec.split(":");
-        String fieldSpecWithAll = Utils.join(pieces, "[a-z]:") + "[a-z]";
-        AbstractValueIndexer<?> indexer = getOrCreateIndexer(fieldSpecWithAll, separator);
+        String fieldSpecWithAll = Utils.join(pieces, "[a-z]:") + "[a-z]" + ", " + firstAllJoin;
+        AbstractValueIndexer<?> indexer = getOrCreateIndexerFullSpec(fieldSpecWithAll);
         getFieldListCollector(record, indexer, result);
         return result;
     }
@@ -586,6 +541,26 @@ public class SolrIndexer implements Mixin
         }
         return result;
     }
+    
+    /**
+     * Get the title (245ab) from a record, without non-filing chars as
+     * specified in 245 2nd indicator, and lowercased. 
+     * @param record - the marc record object
+     * @return 245a and 245b values concatenated, with trailing punct removed,
+     *         and with non-filing characters omitted. Null returned if no
+     *         title can be found. 
+     * 
+     * @see SolrIndexer#getTitle
+     */
+    public String getSortableTitle(Record record)
+    {
+        List<String> result = new ArrayList<String>();
+        AbstractValueIndexer<?> indexer = getOrCreateIndexerFullSpec("245abk,titleSortLower,first");
+        getFieldListCollector(record, indexer, result);
+        return (result.size() == 0) ? "" : result.iterator().next();
+    }
+
+    
     /**
      * return an int for the passed string
      * @param str

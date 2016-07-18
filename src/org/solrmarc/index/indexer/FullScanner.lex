@@ -65,6 +65,7 @@ IntLiteral = 0 | [1-9][0-9]*
 new_line = \r|\n|\r\n
 white_space = {new_line} | [ \t\f]
 identifier = [A-Za-z0-9][A-Z_a-z0-9./\\]*[A-Za-z0-9]
+nonquotedstring = [^,() \\\"]*
 fullrecord = "xml"|"raw"|"json"|"json2"|"text"|"FullRecordAs"[A-Za-z0-9]*
 datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 %state STRING CONDITIONAL SUBFIELDSPEC CUSTOMSPEC CUSTOMMETHOD CUSTOMPARAM MAPSPEC CONSTANT 
@@ -113,8 +114,7 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 \"                      { save_zzLexicalState = CUSTOMPARAM; string.setLength(0); yybegin(STRING); }
 "("                     { return symbol("(",FullSym.LPAREN); }
 ","                     { return symbol(",", FullSym.COMMA); }
-{identifier}  			{ return symbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
-{IntLiteral}			{ return symbol("NUMBER",FullSym.NUMBER, yytext()); }
+{nonquotedstring}		{ return symbol("QUOTEDSTR",FullSym.QUOTEDSTR, yytext()); }
 ")"                     { yybegin(MAPSPEC); return symbol(")",FullSym.RPAREN); }
 {white_space}           { /* ignore */ }
 }
