@@ -8,6 +8,7 @@
 *.log
 /dist/
 /solrmarc3.out
-/solr-solrj-3.6.0-sources.jar
-/solr-solrj-4.10.4-sources.jar
-/solr-solrj-5.2.1-sources.jar
+/dist - Copy/
+/lib-solrj-4.7.0/
+/lib-solrj-6.1.0/
+/tmp/
