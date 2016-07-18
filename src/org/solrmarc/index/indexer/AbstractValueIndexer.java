@@ -60,16 +60,6 @@ public abstract class AbstractValueIndexer<T>
         this.specLabel = specLabel;
     }
 
-//    public List<String> getParseErrors()
-//    {
-//        return parseErrors;
-//    }
-//
-//    public void setParseErrors(List<String> parseErrors)
-//    {
-//        this.parseErrors = parseErrors;
-//    }
-//
     @SuppressWarnings("unchecked")
     public Collection<String> getFieldData(Record record) throws Exception
     {

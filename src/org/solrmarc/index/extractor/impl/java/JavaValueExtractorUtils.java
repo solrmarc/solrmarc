@@ -80,7 +80,7 @@ public class JavaValueExtractorUtils
         }
         List<File> classpath = new  ArrayList<>();
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-        logger.info("Classpath for compiling java files:");
+        logger.debug("Classpath for compiling java files:");
         for (URL url : sysLoader.getURLs())
         {
             classpath.add(new File(url.getFile()));
