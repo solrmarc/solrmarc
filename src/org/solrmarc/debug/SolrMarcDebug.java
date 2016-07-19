@@ -201,7 +201,7 @@ public class SolrMarcDebug extends Boot
         }
         if (options.has("dir"))
         {
-            homeDirStrs = options.valueOf(homeDirs).split("|");
+            homeDirStrs = options.valueOf(homeDirs).split("[|]");
         }
         else 
         {

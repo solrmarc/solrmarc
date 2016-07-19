@@ -450,8 +450,17 @@ public class PropertyUtils
     public static File findFirstExistingFile(String[] homeDirStrs, String indexSpec)
     {
         String inputSource[] = new String[1];
-        String absPathOfFile = getPropertyFileAbsoluteURL(homeDirStrs, indexSpec, true, inputSource);
-        File firstExisting = new File(absPathOfFile); 
+        URL fileURL = null;
+        try
+        {
+            fileURL = new URL(getPropertyFileAbsoluteURL(homeDirStrs, indexSpec, true, inputSource));
+        }
+        catch (MalformedURLException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        File firstExisting = new File(fileURL.getFile()); 
         return(firstExisting);
     }
 }
