@@ -2,7 +2,6 @@ package org.solrmarc.index.utils;
 
 import org.apache.log4j.Logger;
 import org.solrmarc.driver.Boot;
-import org.solrmarc.driver.IndexDriver;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import org.solrmarc.index.extractor.impl.custom.Mixin;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
@@ -16,7 +15,7 @@ import java.util.Set;
 
 public class FastClasspathUtils
 {
-    public final static Logger logger =  Logger.getLogger(IndexDriver.class);
+    public final static Logger logger =  Logger.getLogger(FastClasspathUtils.class);
 
     private static Set <Class<? extends AbstractValueExtractorFactory>>  extractors = null;
     private static Set <Class<? extends AbstractValueMappingFactory>>    mappers = null;
