@@ -97,10 +97,10 @@ public class SolrMarcDebug extends Boot
     String previousConfigText = "";
     List<AbstractValueIndexer<?>> indexers = null;
     String [] args;
-    String homeDirStr;
+    String homeDirStrs[];
     OptionSpec<String> readOpts;
     OptionSpec<File> configSpec;
-    OptionSpec<File> homeDir;
+    OptionSpec<String> homeDirs;
     OptionSpec<File> solrjDir;
     OptionSpec<String> solrjClass;
     OptionSpec<File> errorMarcErrOutFile;
@@ -158,7 +158,7 @@ public class SolrMarcDebug extends Boot
         OptionParser parser = new OptionParser(  );
         readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
         configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
-        homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
+        homeDirs = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg();
         solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
         solrjClass = parser.accepts("solrjClassName", "SolrJ").withRequiredArg().ofType( String.class ).defaultsTo("org.apache.solr.client.solrj.impl.CommonsHttpSolrServer");
         errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.").withRequiredArg().ofType( File.class );
@@ -201,25 +201,30 @@ public class SolrMarcDebug extends Boot
         }
         if (options.has("dir"))
         {
-            homeDirStr = options.valueOf(homeDir).getAbsolutePath();
+            homeDirStrs = options.valueOf(homeDirs).split("|");
         }
         else 
         {
-            homeDirStr = Boot.getDefaultHomeDir();
+            homeDirStrs = new String[]{ Boot.getDefaultHomeDir() };
         }
         File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File("lib-solrj"));
-        if (!solrJPath.isAbsolute())  solrJPath = new File(homeDirStr, solrJPath.getName());
         
         try { 
-            Boot.extendClasspathWithJarDir(solrJPath);
+            if (solrJPath.isAbsolute()) 
+            {
+                Boot.extendClasspathWithSolJJarDir(null, solrJPath);
+            }
+            else
+            {
+                Boot.extendClasspathWithSolJJarDir(homeDirStrs, solrJPath);
+            }
         }
         catch (IndexerSpecException ise)
         {
             logger.fatal("Fatal error: Failure to load SolrJ", ise);
             logger.error("Exiting...");
             System.exit(10);
-        }
-    }
+        }    }
 
     
     /**
@@ -230,7 +235,7 @@ public class SolrMarcDebug extends Boot
         // You must set the HomeDir before instantiating the ValueIndexerFactory
         // since that directory is used as the location to look for java source files to compile and include
         // If it is unspecified, the program looks in 
-        ValueIndexerFactory.setHomeDir(homeDirStr);
+        ValueIndexerFactory.setHomeDirs(homeDirStrs);
 
         indexerFactory = ValueIndexerFactory.instance();
 
@@ -376,7 +381,7 @@ public class SolrMarcDebug extends Boot
             public void actionPerformed(ActionEvent e)
             {
                 File f = null; // new File("resources/testSpec.properties");
-                JFileChooser chooser = new JFileChooser(homeDirStr + File.separator + "resources");
+                JFileChooser chooser = new JFileChooser(homeDirStrs[0] + File.separator + "resources");
                 FileNameExtensionFilter filter = new FileNameExtensionFilter("Index Property Files", "properties");
                 chooser.setFileFilter(filter);
                 int returnVal = chooser.showOpenDialog(frmSolrmarcIndexSpecification);
@@ -431,7 +436,7 @@ public class SolrMarcDebug extends Boot
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                File f1 = new File(homeDirStr,  "resources/marcreader.properties");
+                File f1 = new File(homeDirStrs[0],  "resources/marcreader.properties");
                 Properties readerProps = new Properties();
                 try
                 {
@@ -450,7 +455,7 @@ public class SolrMarcDebug extends Boot
                 
                 // File f = new File("resources/specTestRecs.mrc");
                 File f = null; // new File("resources/testSpec.properties");
-                JFileChooser chooser = new JFileChooser(homeDirStr + File.separator + "resources");
+                JFileChooser chooser = new JFileChooser(homeDirStrs[0] + File.separator + "resources");
                 FileNameExtensionFilter filter = new FileNameExtensionFilter("MARC Record Files", "mrc", "xml");
                 chooser.setFileFilter(filter);
                 int returnVal = chooser.showOpenDialog(frmSolrmarcIndexSpecification);

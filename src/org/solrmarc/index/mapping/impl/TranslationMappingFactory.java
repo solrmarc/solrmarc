@@ -6,6 +6,7 @@ import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
+import org.solrmarc.tools.PropertyUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,15 +50,15 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
             translationMappingFiles.put(translationMappingFileName + "(" + subMappingName + ")", properties);
             return properties;
         }
-        try
-        {
-            properties = new Properties();
+//        try
+//        {
+            properties = PropertyUtils.loadProperties(ValueIndexerFactory.getHomeDirs(), "translation_maps" + File.separator + translationMappingFileName);
             logger.debug("Load translation map: ./translation_maps/" + translationMappingFileName);
          //   File file = new File(".");
          //   logger.debug("current Directory = " + file.getAbsolutePath());
-            String filename = ValueIndexerFactory.instance().getHomeDir() + "/translation_maps/" + translationMappingFileName;
-            FileInputStream inputStream = new FileInputStream(filename);
-            properties.load(inputStream);
+//            String filename = ValueIndexerFactory.getHomeDirs() + "/translation_maps/" + translationMappingFileName;
+//            FileInputStream inputStream = new FileInputStream(filename);
+//            properties.load(inputStream);
             translationMappingFiles.put(translationMappingFileName + "(null)", properties);
             if (subMappingName != null)
             {
@@ -65,11 +66,11 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
                 translationMappingFiles.put(translationMappingFileName + "(" + subMappingName + ")", properties);
             }
             return properties;
-        }
-        catch (IOException e)
-        {
-            throw new IndexerSpecException(e, "Cant find translation map: " +translationMappingFileName);
-        }
+//        }
+//        catch (IOException e)
+//        {
+//            throw new IndexerSpecException(e, "Cant find translation map: " +translationMappingFileName);
+//        }
     }
     
     private Properties getSubTranslationMapping(Properties translationMapping, String mappingPrefix)

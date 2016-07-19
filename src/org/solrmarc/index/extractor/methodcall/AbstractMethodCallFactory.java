@@ -48,7 +48,7 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
                         Constructor<?> ctor2 = aClass.getConstructor(String.class, String[].class);
                         // the placeholder stub implementation for org.solrmarc.index.SolrIndexer 
                         // doesn't look at use the parameters that the Constructor requires, so fake values are used
-                        methodCallManager.add(ctor2.newInstance("", new String[]{ ValueIndexerFactory.getHomeDir() }));
+                        methodCallManager.add(ctor2.newInstance("", ValueIndexerFactory.getHomeDirs()));
                     }
                     catch (NoSuchMethodException  | SecurityException e1)
                     {

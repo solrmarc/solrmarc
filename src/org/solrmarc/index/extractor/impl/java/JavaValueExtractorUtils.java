@@ -135,12 +135,12 @@ public class JavaValueExtractorUtils
 
     private static String getBinDirectory()
     {
-        return (ValueIndexerFactory.getHomeDir() + File.separator + "index_java" + File.separator + "bin");
+        return (ValueIndexerFactory.getDirContainingJavaSource() + File.separator + "index_java" + File.separator + "bin");
     }
 
     private static String getSrcDirectory()
     {
-        return (ValueIndexerFactory.getHomeDir() + File.separator + "index_java" + File.separator + "src");
+        return (ValueIndexerFactory.getDirContainingJavaSource() + File.separator + "index_java" + File.separator + "src");
     }
 
     protected static Class<?>[] getClasses()

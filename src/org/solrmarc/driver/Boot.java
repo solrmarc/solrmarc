@@ -14,8 +14,10 @@ import java.security.CodeSource;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.utils.FastClasspathUtils;
 //import org.solrmarc.index.utils.ReflectionUtils;
+import org.solrmarc.tools.PropertyUtils;
 
 public class Boot
 {
@@ -211,7 +213,7 @@ public class Boot
         File libPath = new File(homeDir, "lib");
         try
         {
-            extendClasspathWithJarDir(libPath);
+            extendClasspathWithLibJarDir(libPath);
         }
         catch (RuntimeException ise)
         {
@@ -264,9 +266,9 @@ public class Boot
         }
     }
 
-    public static void extendClasspathWithJarDir(File dir)
+    public static boolean extendClasspathWithJarDir(URLClassLoader sysLoader, File dir, String patternToLoad, String specialMatch)
     {
-        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        boolean foundSpecial = false;
         if (dir == null || !dir.isDirectory() || dir.listFiles().length == 0)
         {
             String dirpath;
@@ -282,10 +284,64 @@ public class Boot
         }
         for (File file : dir.listFiles())
         {
-            if (file.getName().endsWith(".jar"))
+            if (file.getName().matches(patternToLoad))
             {
                 extendClasspathWithJar(sysLoader, file);
+                if (file.getName().matches(specialMatch))
+                {
+                    foundSpecial = true;
+                }
             }
         }
+        return(foundSpecial);
+    }
+    
+    public static boolean extendClasspathWithLibJarDir(File dir)
+    {
+        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        boolean foundIt = extendClasspathWithJarDir(sysLoader, dir, ".*[.]jar", "marc4j.*[.]jar");
+        return(foundIt);
+    }
+    
+    /**
+     *  given a directory add all of the jars there to the classpath.
+     *  If none of those jars has a name containing "solrj"  then look in the parent directory of the provided directory
+     *  for a jar with a name containing "solrj"
+     * @param homeDirStrs 
+     * @param dir
+     */
+    public static void extendClasspathWithSolJJarDir(String[] homeDirStrs, File dir)
+    {
+        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        boolean foundSolrj = false;
+
+        File dirWithJars = getDirToStartFrom(homeDirStrs, dir);
+        foundSolrj = extendClasspathWithJarDir(sysLoader, dirWithJars, ".*[.]jar", ".*solrj.*[.]jar");
+        File parentDir = null;
+        if (!foundSolrj)
+        {
+            parentDir = dirWithJars.getParentFile();
+            foundSolrj = extendClasspathWithJarDir(sysLoader, parentDir, ".*solrj.*[.]jar", ".*solrj.*[.]jar");
+        }
+        
+        if (!foundSolrj)
+        {
+            throw new IndexerSpecException("Unable to find a solrj jar file in directory: "+ dir.getAbsolutePath() + ((parentDir != null) ? "( or "+parentDir.getAbsolutePath()+ ")": ""));
+        }
+    }
+
+    private static File getDirToStartFrom(String[] homeDirStrs, File dir)
+    {
+        if (homeDirStrs == null) return(dir);
+        for (String homeDirStr : homeDirStrs)
+        {
+            File dirSolrJ = new File(homeDirStr, dir.getPath());
+            if (dirSolrJ.exists())
+            {
+                logger.info("Using directory: "+ dirSolrJ.getAbsolutePath() + " as location of solrj jars");
+                return(dirSolrJ);
+            }
+        }
+        return(dir);
     }
 }

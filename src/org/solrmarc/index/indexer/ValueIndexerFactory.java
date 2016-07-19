@@ -43,7 +43,8 @@ public class ValueIndexerFactory
     private List<IndexerSpecException> perRecordExceptions;
     private FullConditionalParser parser = null;    
     private Properties localMappingProperties = null;
-    private static String homeDir = ".";
+    private static String dirContainingJavaSource = null;
+    private static String homeDirStrs[] = null;
     private final Pattern specPattern = Pattern.compile("([-A-Za-z_0-9, \\t]*)([:=]|([+]=))(.*)");
     boolean debug_parse = false;
     private boolean defaultUniqueVal = true;
@@ -707,15 +708,34 @@ public class ValueIndexerFactory
         // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
     }
 
-    public static String getHomeDir()
+    public static String getDirContainingJavaSource()
     {
-        return homeDir;
+        return dirContainingJavaSource;
     }
     
-    public static void setHomeDir(String dir)
+    public static void setDirContainingJavaSource(String[] homeDirStrs)
     {
-        homeDir = dir;
+        for (String dirStr : homeDirStrs)
+        {
+            File dir = new File(dirStr);
+            File dirIndexJava = new File(dirStr, "index_java");
+            File dirIndexJavaSrc = new File(dirIndexJava, "src");
+            if (dirIndexJava.exists() && dirIndexJavaSrc.exists())
+            {
+                logger.info("Using directory: "+ dirIndexJava.getAbsolutePath() + " as location of java sources");
+                dirContainingJavaSource = dir.getAbsolutePath();
+            }
+        }
+    }
+    
+    public static String[] getHomeDirs()
+    {
+        return(homeDirStrs);
     }
 
-
+    public static void setHomeDirs(String[] homeDirStrs)
+    {
+        ValueIndexerFactory.homeDirStrs = homeDirStrs;
+        setDirContainingJavaSource(homeDirStrs);
+    }
 }

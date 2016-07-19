@@ -447,4 +447,11 @@ public class PropertyUtils
         return (propertySearchPath.toArray(new String[0]));
     }
 
+    public static File findFirstExistingFile(String[] homeDirStrs, String indexSpec)
+    {
+        String inputSource[] = new String[1];
+        String absPathOfFile = getPropertyFileAbsoluteURL(homeDirStrs, indexSpec, true, inputSource);
+        File firstExisting = new File(absPathOfFile); 
+        return(firstExisting);
+    }
 }

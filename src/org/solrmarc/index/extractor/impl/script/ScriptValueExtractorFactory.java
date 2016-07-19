@@ -14,6 +14,7 @@ import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.index.utils.StringReader;
 import org.solrmarc.tools.PropertyUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -40,7 +41,11 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
         logger.debug("Load bean shell script: " + scriptFileName);
         bsh = new Interpreter();
         bsh.setClassLoader(this.getClass().getClassLoader());
-        String paths[] = new String[] { ValueIndexerFactory.instance().getHomeDir() +"/index_scripts" };
+        String paths[] = new String[ValueIndexerFactory.getHomeDirs().length];
+        for (int i = 0 ; i < paths.length; i++)
+        { 
+            paths[i] = (ValueIndexerFactory.getHomeDirs())[i] + File.separator + "index_scripts";
+        }
         InputStream script = PropertyUtils.getPropertyFileInputStream(paths, scriptFileName);
         String scriptContents;
         try

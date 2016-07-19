@@ -26,6 +26,7 @@ import org.solrmarc.solr.SolrCoreLoader;
 import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
 import org.solrmarc.solr.StdOutProxy;
+import org.solrmarc.tools.PropertyUtils;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -46,11 +47,11 @@ public class IndexDriver extends Boot
     SolrProxy solrProxy;
     boolean verbose;
     int numIndexed[];
-    String homeDirStr;
+    String homeDirStrs[];
     String [] args;
     OptionSpec<String> readOpts;
     OptionSpec<String> configSpecs;
-    OptionSpec<File> homeDir;
+    OptionSpec<String> homeDirs;
     OptionSpec<File> solrjDir;
     OptionSpec<String> solrjClass;
     OptionSpec<File> errorMarcErrOutFile;
@@ -89,7 +90,7 @@ public class IndexDriver extends Boot
         OptionParser parser = new OptionParser(  );
         readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
         configSpecs = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg();
-        homeDir = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( File.class );
+        homeDirs = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( String.class );
         solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
         solrjClass = parser.accepts("solrjClassName", "Classname of class to use for talking to solr").withRequiredArg().ofType( String.class ).defaultsTo("");
         errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
@@ -132,17 +133,23 @@ public class IndexDriver extends Boot
         }
         if (options.has("dir"))
         {
-            homeDirStr = options.valueOf(homeDir).getAbsolutePath();
+            homeDirStrs = options.valueOf(homeDirs).split("|");
         }
         else 
         {
-            homeDirStr = Boot.getDefaultHomeDir();
+            homeDirStrs = new String[]{ Boot.getDefaultHomeDir() };
         }
         File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File("lib-solrj"));
-        if (!solrJPath.isAbsolute())  solrJPath = new File(homeDirStr, solrJPath.getName());
         
         try { 
-            Boot.extendClasspathWithJarDir(solrJPath);
+            if (solrJPath.isAbsolute()) 
+            {
+                Boot.extendClasspathWithSolJJarDir(null, solrJPath);
+            }
+            else
+            {
+                Boot.extendClasspathWithSolJJarDir(homeDirStrs, solrJPath);
+            }
         }
         catch (IndexerSpecException ise)
         {
@@ -221,7 +228,7 @@ public class IndexDriver extends Boot
         // You must set the HomeDir before instantiating the ValueIndexerFactory
         // since that directory is used as the location to look for java source files to compile and include
         // If it is unspecified, the program looks in 
-        ValueIndexerFactory.setHomeDir(homeDirStr);
+        ValueIndexerFactory.setHomeDirs(homeDirStrs);
         indexerFactory = ValueIndexerFactory.instance();
         String[] indexSpecs = indexSpecifications.split("[ ]*,[ ]*");
         File[] specFiles = new File[indexSpecs.length];
@@ -229,7 +236,7 @@ public class IndexDriver extends Boot
         for (String indexSpec : indexSpecs)
         {
             File specFile = new File(indexSpec);
-            if (!specFile.isAbsolute()) specFile = new File(homeDirStr, indexSpec);
+            if (!specFile.isAbsolute()) specFile = PropertyUtils.findFirstExistingFile(homeDirStrs, indexSpec);
             specFiles[i++] = specFile;
         }
         
