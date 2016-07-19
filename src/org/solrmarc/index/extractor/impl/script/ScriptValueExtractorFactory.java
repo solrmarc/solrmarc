@@ -5,6 +5,7 @@ import bsh.EvalError;
 import bsh.Interpreter;
 import bsh.UtilEvalError;
 import org.apache.log4j.Logger;
+import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.index.extractor.AbstractValueExtractor;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import org.solrmarc.index.extractor.methodcall.MethodCallContext;
@@ -52,7 +53,7 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
         {
             scriptContents = PropertyUtils.readStreamIntoString(script);
             bsh.eval(scriptContents);
-            bsh.set("indexer", SOLR_INDEXER);
+            bsh.set("indexer", SolrIndexer.instance());
             bsh.setOut(System.out);
             bsh.setErr(System.err);
         }

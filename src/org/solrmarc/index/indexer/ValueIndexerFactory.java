@@ -17,6 +17,8 @@ import org.solrmarc.index.utils.FastClasspathUtils;
 //import org.solrmarc.index.utils.ReflectionUtils;
 import org.solrmarc.tools.Utils;
 
+import bsh.TargetError;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -318,6 +320,10 @@ public class ValueIndexerFactory
             catch (InvocationTargetException ite)
             {
                 throw new IndexerSpecException(ite.getTargetException(), "Error on test invocation of custom method: " + indexSpec);
+            }
+            catch (TargetError e)
+            {
+                throw new IndexerSpecException(e.getTarget(), "Error on test invocation of custom method: " + indexSpec);
             }
             catch (Exception e)
             {
