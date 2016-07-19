@@ -87,7 +87,7 @@
         	    <attribute name="Main-Class" value="org.solrmarc.driver.Boot"/>
         <!--		<attribute name="Class-Path" value="${manifest.classpath}" />  -->
             </manifest>
-        	<fileset dir="${basedir}" includes="log4j.properties" />
+   <!--      	<fileset dir="${basedir}" includes="log4j.properties" /> -->
         	<fileset dir="${build}" includes="**/*.class" />
         </jar>
         <echo message="jar built" />

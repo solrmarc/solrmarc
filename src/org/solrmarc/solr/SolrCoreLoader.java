@@ -74,6 +74,7 @@ public class SolrCoreLoader
                 {
                     try {
                         httpsolrserverClass = Class.forName(classname);
+                        break;
                     }
                     catch (ClassNotFoundException e)
                     {

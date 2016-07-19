@@ -1,12 +1,9 @@
 package org.solrmarc.index.extractor.impl.java;
 
 import org.apache.log4j.Logger;
-import org.solrmarc.driver.Boot;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 
-
 import javax.tools.*;
-import javax.tools.JavaFileManager.Location;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -52,8 +52,9 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
         }
 //        try
 //        {
-            properties = PropertyUtils.loadProperties(ValueIndexerFactory.getHomeDirs(), "translation_maps" + File.separator + translationMappingFileName);
-            logger.debug("Load translation map: ./translation_maps/" + translationMappingFileName);
+            String[] filenameOpened = new String[]{null};
+            properties = PropertyUtils.loadProperties(ValueIndexerFactory.getHomeDirs(), "translation_maps" + File.separator + translationMappingFileName, filenameOpened);
+            logger.debug("Load translation map: "+ translationMappingFileName+ " from file : " +filenameOpened[0]);
          //   File file = new File(".");
          //   logger.debug("current Directory = " + file.getAbsolutePath());
 //            String filename = ValueIndexerFactory.getHomeDirs() + "/translation_maps/" + translationMappingFileName;

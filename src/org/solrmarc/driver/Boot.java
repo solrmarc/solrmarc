@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -17,7 +18,6 @@ import org.apache.log4j.Logger;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.utils.FastClasspathUtils;
 //import org.solrmarc.index.utils.ReflectionUtils;
-import org.solrmarc.tools.PropertyUtils;
 
 public class Boot
 {
@@ -26,6 +26,7 @@ public class Boot
     static
     {
         addLibDirJarstoClassPath();
+        
         logger = Logger.getLogger(Boot.class);
     }
 
@@ -208,7 +209,9 @@ public class Boot
      */
     public static void addLibDirJarstoClassPath()
     {
-        String homeDir = getDefaultHomeDir();
+        String homePath = getDefaultHomeDir();
+        File homeDir = new File(homePath);
+        extendClasspathWithDirOfClasses(homeDir);
         // Now find the sub-directory "lib" as a sibling of the execution location. 
         File libPath = new File(homeDir, "lib");
         try
@@ -294,6 +297,31 @@ public class Boot
             }
         }
         return(foundSpecial);
+    }
+
+    private static void extendClasspathWithDirOfClasses(URLClassLoader sysLoader, File dir)
+    {
+        URI u = dir.toURI();
+        URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        Class<URLClassLoader> urlClass = URLClassLoader.class;
+        Method method;
+        try
+        {
+            method = urlClass.getDeclaredMethod("addURL", new Class[]{URL.class});
+            method.setAccessible(true);
+            method.invoke(urlClassLoader, new Object[]{u.toURL()});
+        }
+        catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | MalformedURLException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public static void extendClasspathWithDirOfClasses(File dir)
+    {
+        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        extendClasspathWithDirOfClasses(sysLoader, dir);
     }
     
     public static boolean extendClasspathWithLibJarDir(File dir)
