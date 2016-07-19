@@ -472,7 +472,7 @@ public class SolrMarcDebug extends Boot
                 String firstId = null;
                 try
                 {
-                    reader = MarcReaderFactory.instance().makeReader(readerProps, new FileInputStream(f));
+                    reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.getHomeDirs(), new FileInputStream(f));
                     while (reader.hasNext())
                     {
                         Record record = reader.next();

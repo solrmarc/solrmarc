@@ -29,9 +29,9 @@ public class MarcReaderFactory {
     protected String combineConsecutiveRecordsFields = null;
 	protected String unicodeNormalize = null;
 
-    private String solrmarcPath;
-    private String siteSpecificPath;
-    protected String homeDir = ".";
+//    private String solrmarcPath;
+//    private String siteSpecificPath;
+//    protected String homeDir = ".";
 
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcReaderFactory.class.getName());
@@ -47,45 +47,45 @@ public class MarcReaderFactory {
 	    return(theFactory);
 	}
 	
-    public MarcReader makeReader(Properties config, String ... inputFilenames)
+    public MarcReader makeReader(Properties config, String[] searchDirectories, String ... inputFilenames)
     {
         if (inputFilenames.length == 0)
         {
-            return makeReader(config, "stdin");
+            return makeReader(config, searchDirectories, "stdin");
         }
         else if (inputFilenames.length == 1)
         {
-            return makeReader(config, inputFilenames[0]);
+            return makeReader(config, searchDirectories, inputFilenames[0]);
         }
         List<MarcReader> readers = new ArrayList<>();
         for (String inputFilename : inputFilenames)
         {
-            MarcReader reader = makeReader(config, inputFilename);
+            MarcReader reader = makeReader(config, searchDirectories, inputFilename);
             readers.add(reader);
         }
         return(new MarcMultiplexReader(readers, Arrays.asList(inputFilenames)));
     }
     
-    public MarcReader makeReader(Properties config, List<String> inputFilenames)
+    public MarcReader makeReader(Properties config, String[] searchDirectories, List<String> inputFilenames)
     {
         if (inputFilenames.size() == 0)
         {
-            return makeReader(config, "stdin");
+            return makeReader(config, searchDirectories, "stdin");
         }
         else if (inputFilenames.size() == 1)
         {
-            return makeReader(config, inputFilenames.iterator().next());
+            return makeReader(config, searchDirectories, inputFilenames.iterator().next());
         }
         List<MarcReader> readers = new ArrayList<>();
         for (String inputFilename : inputFilenames)
         {
-            MarcReader reader = makeReader(config, inputFilename);
+            MarcReader reader = makeReader(config, searchDirectories, inputFilename);
             readers.add(reader);
         }
         return(new MarcMultiplexReader(readers, inputFilenames));
     }
     
-	public MarcReader makeReader(Properties config, String inputFilename)
+	public MarcReader makeReader(Properties config, String[] searchDirectories, String inputFilename)
     {
         InputStream is; 
         if (inputFilename.equals("-") || inputFilename.equals("stdin"))
@@ -104,18 +104,18 @@ public class MarcReaderFactory {
                 throw new IllegalArgumentException("Fatal error: Exception opening InputStream" + inputFilename);
             }
         }
-        return(makeReader(config, is));
+        return(makeReader(config, searchDirectories, is));
     }
 	
-	public MarcReader makeReader(Properties config, InputStream input)
+	public MarcReader makeReader(Properties config, String[] searchDirectories, InputStream input)
 	{
         MarcReader reader; 
         setMarc4JProperties(config);
-        solrmarcPath = PropertyUtils.getProperty(config, "solrmarc.path");
-        solrmarcPath = normalizePathsProperty(homeDir, solrmarcPath, config);
-
-        siteSpecificPath = PropertyUtils.getProperty(config, "solrmarc.site.path");
-        siteSpecificPath = normalizePathsProperty(homeDir, siteSpecificPath, config);
+//        solrmarcPath = PropertyUtils.getProperty(config, "solrmarc.path");
+//        solrmarcPath = normalizePathsProperty(homeDir, solrmarcPath, config);
+//
+//        siteSpecificPath = PropertyUtils.getProperty(config, "solrmarc.site.path");
+//        siteSpecificPath = normalizePathsProperty(homeDir, siteSpecificPath, config);
         
         combineConsecutiveRecordsFields = PropertyUtils.getProperty(config, "marc.combine_records");
         if (combineConsecutiveRecordsFields != null && combineConsecutiveRecordsFields.length() == 0) 
@@ -220,9 +220,9 @@ public class MarcReaderFactory {
             if (marcRemapRecord != null)
             {
                 String remapFilename =  marcRemapRecord.trim();
-                String configFilePath = PropertyUtils.getProperty(config, "config.file.dir");
-                String propertySearchPath[] = PropertyUtils.makePropertySearchPath(solrmarcPath, siteSpecificPath, configFilePath, homeDir);
-                String remapURL = PropertyUtils.getPropertyFileAbsoluteURL(propertySearchPath, remapFilename, false, null);
+//                String configFilePath = PropertyUtils.getProperty(config, "config.file.dir");
+//                String propertySearchPath[] = PropertyUtils.makePropertySearchPath(solrmarcPath, siteSpecificPath, configFilePath, homeDir);
+                String remapURL = PropertyUtils.getPropertyFileAbsoluteURL(searchDirectories, remapFilename, false, null);
                 reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing, marcDeleteSubfields, remapURL);
             }
             else

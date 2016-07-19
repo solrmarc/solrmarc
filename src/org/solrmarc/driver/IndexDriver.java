@@ -219,7 +219,7 @@ public class IndexDriver extends Boot
     
     public void configureReader(List<String> inputFilenames) 
     {
-        reader = MarcReaderFactory.instance().makeReader(readerProps, inputFilenames);
+        reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.getHomeDirs(), inputFilenames);
     }
     
     public void configureIndexer(String indexSpecifications, boolean multiThreaded) 

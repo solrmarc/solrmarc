@@ -335,7 +335,7 @@ public class PropertyUtils
         return sb.toString();
     }
 
-    public static void addToPropertySearchPath(String pathToAdd, ArrayList<String> propertySearchPath, Set<String> propertySearchSet)
+    private static void addToPropertySearchPath(String pathToAdd, ArrayList<String> propertySearchPath, Set<String> propertySearchSet)
     {
         if (!propertySearchSet.contains(pathToAdd))
         {
@@ -346,39 +346,38 @@ public class PropertyUtils
         }
     }
 
-    public static String[] makePropertySearchPath(String solrmarcPath, String siteSpecificPath, String configFilePath,
-            String homeDir)
-    {
-        ArrayList<String> propertySearchPath = new ArrayList<String>();
-        Set<String> propertySearchSet = new HashSet<String>();
-        if (siteSpecificPath != null)
-        {
-            String sitePaths[] = siteSpecificPath.split("[|]");
-            for (String site : sitePaths)
-            {
-                addToPropertySearchPath(site, propertySearchPath, propertySearchSet);
-            }
-
-        }
-        if (solrmarcPath != null)
-        {
-            String smPaths[] = solrmarcPath.split("[|]");
-            for (String path : smPaths)
-            {
-                addToPropertySearchPath(path, propertySearchPath, propertySearchSet);
-            }
-
-        }
-        if (configFilePath != null)
-        {
-            addToPropertySearchPath(configFilePath, propertySearchPath, propertySearchSet);
-        }
-        if (homeDir != null)
-        {
-            addToPropertySearchPath(homeDir, propertySearchPath, propertySearchSet);
-        }
-        return (propertySearchPath.toArray(new String[0]));
-    }
+//    public static String[] makePropertySearchPath(String solrmarcPath, String siteSpecificPath, String configFilePath, String homeDir)
+//    {
+//        ArrayList<String> propertySearchPath = new ArrayList<String>();
+//        Set<String> propertySearchSet = new HashSet<String>();
+//        if (siteSpecificPath != null)
+//        {
+//            String sitePaths[] = siteSpecificPath.split("[|]");
+//            for (String site : sitePaths)
+//            {
+//                addToPropertySearchPath(site, propertySearchPath, propertySearchSet);
+//            }
+//
+//        }
+//        if (solrmarcPath != null)
+//        {
+//            String smPaths[] = solrmarcPath.split("[|]");
+//            for (String path : smPaths)
+//            {
+//                addToPropertySearchPath(path, propertySearchPath, propertySearchSet);
+//            }
+//
+//        }
+//        if (configFilePath != null)
+//        {
+//            addToPropertySearchPath(configFilePath, propertySearchPath, propertySearchSet);
+//        }
+//        if (homeDir != null)
+//        {
+//            addToPropertySearchPath(homeDir, propertySearchPath, propertySearchSet);
+//        }
+//        return (propertySearchPath.toArray(new String[0]));
+//    }
 
     public static File findFirstExistingFile(String[] homeDirStrs, String indexSpec)
     {
