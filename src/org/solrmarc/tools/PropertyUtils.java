@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 
 public class PropertyUtils
 {
-    protected static final Logger logger = Logger.getLogger(Utils.class.getName());
+    protected static final Logger logger = Logger.getLogger(PropertyUtils.class);
     private final static String TRANS_MAP_DIR = "translation_maps";
     private final static String SCRIPTS_DIR = "index_scripts";
 

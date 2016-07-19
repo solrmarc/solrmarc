@@ -1251,7 +1251,7 @@ public final class Utils
     * @param defVal
     *            the default value to use if property is not defined
     * @return value stored for that property (or the if it doesn't exist)
-    * @deprecated
+    * @deprecated  use PropertyUtils.getProperty(Properties props, String propname, String defVal)  instead
     */
     public static String getProperty(Properties props, String propname, String defVal)
     {
@@ -1266,7 +1266,7 @@ public final class Utils
     * @param propertyFileName
     *            name of the sought properties file
     * @return Properties object
-    * @deprecated
+    * @deprecated  use PropertyUtils.loadProperties(String propertyPaths[], String propertyFileName)  instead
     */
    @Deprecated
    public static Properties loadProperties(String propertyPaths[], String propertyFileName)
