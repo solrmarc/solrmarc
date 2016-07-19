@@ -36,7 +36,7 @@ import joptsimple.OptionSpec;
 
 public class IndexDriver extends Boot
 {
-    public final static Logger logger =  Logger.getLogger(IndexDriver.class);
+    public final static Logger logger = Logger.getLogger(IndexDriver.class);
 
     Properties readerProps;
     ValueIndexerFactory indexerFactory = null;
@@ -428,14 +428,14 @@ public class IndexDriver extends Boot
         public void run()
         {
             //System.err.println("Starting Shutdown hook");
-//            logger.info("Starting Shutdown hook");
+            logger.info("Starting Shutdown hook");
             
             if (!indexer.isShutDown()) 
             {
-//                logger.info("Stopping main indexer loop");
+                logger.info("Stopping main indexer loop");
                 indexer.shutDown();
             }
-            while (!indexer.isShutDown()) 
+            while (!indexer.isShutDown())
             {
                 try
                 {
@@ -445,7 +445,7 @@ public class IndexDriver extends Boot
                 {
                 }
             }
-//            logger.info("Finished Shutdown hook");
+            logger.info("Finished Shutdown hook");
         }
     }
     
