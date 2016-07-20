@@ -90,7 +90,8 @@ public class JavaValueExtractorUtils
 
         final DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         final Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjectsFromFiles(sourceFiles);
-        final JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticCollector, null, null, units);
+        final Iterable<String> options = Collections.singletonList("-g");
+        final JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticCollector, options, null, units);
 
         logger.trace("Compile java files:\n" + sourceFiles.toString().replaceAll(",", ",\n"));
         

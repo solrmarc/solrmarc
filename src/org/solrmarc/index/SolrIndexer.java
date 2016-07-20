@@ -584,6 +584,12 @@ public class SolrIndexer implements Mixin
     public List<VariableField> getFieldSetMatchingTagList(Record record, String tagList)
     {
         String tags[] = tagList.split(":");
+        for (int i = 0; i < tags.length; i++)
+        {
+            String tag = tags[i].substring(0, 3);
+            if (tag == "LNK") tag = tags[i].substring(0, 6);
+            tags[i] = tag;
+        }
         return(record.getVariableFields(tags));
     }
     
