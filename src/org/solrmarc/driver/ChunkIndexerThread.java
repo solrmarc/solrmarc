@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
+import org.marc4j.marc.Record;
 import org.solrmarc.solr.SolrProxy;
 /**
  *  <h1>ChunkIndexerThread</h1> 
@@ -36,6 +37,8 @@ public class ChunkIndexerThread extends Thread
     final Collection<RecordAndDoc> recordAndDocs;
     final SolrProxy solrProxy;
     final BlockingQueue<RecordAndDoc> errQ;
+    String firstDocId = null;
+    String lastDocId = null;
 
     final int cnts[];
         
@@ -55,22 +58,31 @@ public class ChunkIndexerThread extends Thread
         Collection<SolrInputDocument> docs = new ArrayList<>(recordAndDocs.size());
         for (RecordAndDoc recDoc : recordAndDocs)
         {
+            String docID = controlNumOrDefault(recDoc.getRec(), "Rec with No 001");
+            if (firstDocId == null)  firstDocId = docID;
             docs.add(recDoc.doc);
+            lastDocId = docID;
         }
         return docs;
+    }
+
+    private final String controlNumOrDefault(final Record rec, final String label)
+    {
+        String docID = rec.getControlNumber();
+        if (docID == null) docID = label;
+        return(docID);
     }
 
     @Override 
     public void run()
     {
         int inChunk = docs.size();
-        SolrInputDocument firstDoc = docs.iterator().next();
-        logger.debug("Adding chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
+        logger.debug("Adding chunk of "+inChunk+ " documents -- starting with id : "+firstDocId);
         try {
             // If all goes well, this is all we need. Add the docs, count the docs, and if desired return the docs with errors
             int cnt = solrProxy.addDocs(docs);
             synchronized ( cnts ) { cnts[2] += cnt; }
-            logger.debug("Added chunk of "+cnt+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
+            logger.debug("Added chunk of "+cnt+ " documents -- starting with id : "+firstDocId);
             
             if (errQ != null)
             {
@@ -94,7 +106,7 @@ public class ChunkIndexerThread extends Thread
             }
             else if (inChunk > 20)
             {
-                logger.debug("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
+                logger.debug("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDocId);
                 int newChunkSize = inChunk / 4;
                 Thread subChunk[] = new Thread[4];
                 
@@ -108,8 +120,9 @@ public class ChunkIndexerThread extends Thread
                         {
                             RecordAndDoc recDoc = recDocI.next();
                             newRecDoc.add(recDoc);
-                            if (id1 == null) id1 = recDoc.getRec().getControlNumber();
-                            id2 = recDoc.getRec().getControlNumber();
+                            String docID = controlNumOrDefault(recDoc.getRec(), "RecCnt_" + (newChunkSize * 4 + j));
+                            if (id1 == null) id1 = docID;
+                            id2 = docID;
                         }
                     }
                     // Split the chunk into 4 sub-chunks, and start a ChunkIndexerThread for each of them.
@@ -133,7 +146,7 @@ public class ChunkIndexerThread extends Thread
             // less than 20 in the chunk resubmit records one-by-one
             else 
             { 
-                logger.debug("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDoc.getFieldValue("id").toString());
+                logger.debug("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDocId);
                 // error on bulk update, resubmit one-by-one
                 int num1 = 0;
                 while (recDocI.hasNext())
@@ -141,7 +154,7 @@ public class ChunkIndexerThread extends Thread
                     RecordAndDoc recDoc = recDocI.next();
                     SolrInputDocument doc = recDoc.getDoc();
                  //   Record rec = recDoc.getRec();
-                    logger.debug("Adding single doc with id : "+ doc.getFieldValue("id").toString());
+                    logger.debug("Adding single doc with id : "+ controlNumOrDefault(recDoc.getRec(), "RecCnt_" + (num1)));
                     try
                     {
                         @SuppressWarnings("unused")
@@ -151,7 +164,7 @@ public class ChunkIndexerThread extends Thread
                         {
                             errQ.add(recDoc);
                         }
-                        logger.debug("Added single doc with id : "+ doc.getFieldValue("id").toString());
+                        logger.debug("Added single doc with id : "+ controlNumOrDefault(recDoc.getRec(), "RecCnt_" + (num1-1)));
                     }
                     catch (Exception e1)
                     {

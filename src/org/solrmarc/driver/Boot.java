@@ -201,6 +201,7 @@ public class Boot
             // IDE
             jarDir = new File(".").getAbsoluteFile().getParentFile().getAbsolutePath();
         }
+        System.setProperty("solrmarc.jar.dir", jarDir);
         return(jarDir);
     }
 

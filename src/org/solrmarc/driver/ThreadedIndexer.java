@@ -139,8 +139,8 @@ public class ThreadedIndexer extends Indexer
                             RecordAndDoc firstDoc = docQ.peek();
                             String threadName = null;
                             try {
-                                String firstID = firstDoc.getDoc().getField("id").getValues().iterator().next().toString();
-                                String lastID = recDoc.getDoc().getField("id").getValues().iterator().next().toString();
+                                String firstID = firstDoc.getRec().getControlNumber();
+                                String lastID = recDoc.getRec().getControlNumber();
                                 threadName = "SolrUpdate-"+firstID+"-"+lastID;
                             }
                             catch (Exception e)

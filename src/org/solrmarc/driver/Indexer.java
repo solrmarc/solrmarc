@@ -234,6 +234,12 @@ public class Indexer
             SolrException cause = (SolrException)e1.getCause();
             logger.error(cause.getMessage());
         }
+        else if (e1 instanceof SolrRuntimeException && e1.getCause() instanceof InvocationTargetException)
+        {
+            InvocationTargetException cause = (InvocationTargetException)e1.getCause();
+            Throwable target = cause.getTargetException();
+            logger.error(target.getMessage());
+        }
         if (errQ != null)
         {
             recDoc.addErrLoc(eErrorLocationVal.SOLR_ERROR);
