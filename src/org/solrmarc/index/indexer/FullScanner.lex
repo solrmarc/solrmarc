@@ -3,6 +3,8 @@ package org.solrmarc.index.indexer;
 import java.util.List;
 import java.util.ArrayList;
 import org.solrmarc.index.utils.StringReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.Symbol;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -53,6 +55,19 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
         Location left = new Location(yyline+1,yycolumn+1,yychar);
         Location right= new Location(yyline+1,yycolumn+yylength(), yychar+yylength());
         return sf.newSymbol(name, sym, left, right,val);
+    }
+
+    Pattern number = Pattern.compile("[0-9]*");
+    Pattern identifier = Pattern.compile("[A-Za-z0-9][A-Z_a-z0-9./\\\\]*[A-Za-z0-9]");
+    
+    private Symbol stringIdentifierOrNumber(String value)
+    {
+        if (number.matcher(value).matches())
+            return symbol("NUMBER",FullSym.NUMBER, value);
+        else if (identifier.matcher(value).matches())
+            return symbol("IDENTIFIER", FullSym.IDENTIFIER, value);
+        else
+            return symbol("QUOTEDSTR",FullSym.QUOTEDSTR, value);
     }
       
 %}
@@ -114,7 +129,7 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 \"                      { save_zzLexicalState = CUSTOMPARAM; string.setLength(0); yybegin(STRING); }
 "("                     { return symbol("(",FullSym.LPAREN); }
 ","                     { return symbol(",", FullSym.COMMA); }
-{nonquotedstring}		{ return symbol("QUOTEDSTR",FullSym.QUOTEDSTR, yytext()); }
+{nonquotedstring}		{ return stringIdentifierOrNumber(yytext()); }
 ")"                     { yybegin(MAPSPEC); return symbol(")",FullSym.RPAREN); }
 {white_space}           { /* ignore */ }
 }

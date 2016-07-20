@@ -1,6 +1,7 @@
 package org.solrmarc.mixin;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -123,11 +124,10 @@ public class CustomLocationMixin extends SolrIndexerMixin
 
     private void loadExtraShadowedIds(String addnlShadowedFilename, String boundWithFilename)
     {
-        final String propertyFilePaths[] = {ValueIndexerFactory.getHomeDir()+"/extra_data"}; 
         if (addnlShadowedIds == null)
         {
             addnlShadowedIds = new LinkedHashMap<String, String>();
-            InputStream addnlIdsStream = PropertyUtils.getPropertyFileInputStream(propertyFilePaths, addnlShadowedFilename);
+            InputStream addnlIdsStream = PropertyUtils.getPropertyFileInputStream(ValueIndexerFactory.getHomeDirs(), "extra_data" + File.separator + addnlShadowedFilename);
             BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
             String line;
             try
@@ -159,7 +159,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
             boundWithIds = new LinkedHashMap<String, String>();
             InputStream addnlIdsStream = null;
             try {
-                addnlIdsStream = PropertyUtils.getPropertyFileInputStream(propertyFilePaths, boundWithFilename);
+                addnlIdsStream = PropertyUtils.getPropertyFileInputStream(ValueIndexerFactory.getHomeDirs(), "extra_data" + File.separator + boundWithFilename);
                 BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
                 String line;
                 while ((line = addnlIdsReader.readLine()) != null)
@@ -874,7 +874,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
         AbstractMultiValueMapping map = ValueIndexerFactory.instance().createMultiValueMapping(propertiesMap);
         //  String mapName = loadTranslationMap(null, propertiesMap);
         
-        Set<String> fields = SolrIndexer.instance().getFieldList(record, "999aikl,join(\":\")");
+        Set<String> fields = SolrIndexer.instance().getFieldList(record, "999aikl,join(\";\")");
         boolean visible = false;
         String extraString = null;
         if (processExtraShadowedIds && boundWithIds != null && boundWithIds.containsKey(record.getControlNumber().substring(1)))

@@ -1,6 +1,7 @@
 package org.solrmarc.mixin;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,7 @@ public class LookupMixin implements Mixin
             try
             {
                 resultMap = new LinkedHashMap<>();
-                InputStream dateFirstAddedStream = PropertyUtils.getPropertyFileInputStream(new String[]{ValueIndexerFactory.getHomeDir()}, filename);
+                InputStream dateFirstAddedStream = PropertyUtils.getPropertyFileInputStream(ValueIndexerFactory.getHomeDirs(), filename);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(dateFirstAddedStream));
                 String line;
                 while ((line = reader.readLine())!= null)
