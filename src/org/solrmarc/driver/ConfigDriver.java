@@ -34,6 +34,18 @@ public class ConfigDriver extends Boot
         String solrHosturl = PropertyUtils.getProperty(configProperties, "solr.hosturl");
         String solrIndexerProperties = PropertyUtils.getProperty(configProperties, "solr.indexer.properties");
         String solrmarcPath = PropertyUtils.getProperty(configProperties, "solrmarc.path");
+        
+        // get the value from the property file AND the value from the command line
+        // Iff they are different, use those two values to replace the corename in the solr URL
+        String solrCore = configProperties.getProperty("solr.core.name");
+        String systemSolrCore = PropertyUtils.getProperty(configProperties, "solr.core.name");
+        
+        if (solrCore != null && systemSolrCore != null && !solrCore.equals(systemSolrCore) && solrHosturl.contains(solrCore))
+        {
+            logger.debug("Replacing corename " + solrCore + " with corename "+ systemSolrCore);
+            solrHosturl = solrHosturl.replace(solrCore, systemSolrCore);
+            logger.debug("New sorl URL is "+ solrHosturl);
+        }
         String dirArg[] = (solrmarcPath != null && !solrmarcPath.equals(".")) 
                         ? new String[]{"-dir", solrmarcPath}  
                         : new String[0];
@@ -54,11 +66,22 @@ public class ConfigDriver extends Boot
         {
             driverArgs.add(args[i]);
         }
-        String effectiveCommandLine = "java -jar solrmarc_core.jar IndexDriver " + Utils.join(driverArgs, " ");
+        String effectiveCommandLine = "java -jar solrmarc_core.jar IndexDriver " + Utils.join(quoteIfHasSpace(driverArgs), " ");
         logger.info("Effective Command Line is:");
         logger.info("   " + effectiveCommandLine);
         
         Boot.invokeMain("org.solrmarc.driver.IndexDriver", driverArgs.toArray(new String[0]));
 
+    }
+
+    private static String[] quoteIfHasSpace(List<String> driverArgs)
+    {
+        String[] result = new String[driverArgs.size()];
+        int i = 0;
+        for (String arg : driverArgs)
+        {
+            result[i++] = (arg.contains(" ")) ? "\"" + arg +  "\"" : arg;
+        }
+        return(result);
     }
 }
