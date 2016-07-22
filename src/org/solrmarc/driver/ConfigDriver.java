@@ -44,7 +44,7 @@ public class ConfigDriver extends Boot
         {
             logger.debug("Replacing corename " + solrCore + " with corename "+ systemSolrCore);
             solrHosturl = solrHosturl.replace(solrCore, systemSolrCore);
-            logger.debug("New sorl URL is "+ solrHosturl);
+            logger.debug("New Solr URL is "+ solrHosturl);
         }
         String dirArg[] = (solrmarcPath != null && !solrmarcPath.equals(".")) 
                         ? new String[]{"-dir", solrmarcPath}  
