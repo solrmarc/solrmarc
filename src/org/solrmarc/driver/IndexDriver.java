@@ -183,10 +183,10 @@ public class IndexDriver extends Boot
         catch (SolrRuntimeException sre)
         {
             logger.error("Error connecting to solr at URL "+solrURL, sre);
-            logger.error("Normally the should exit.  For testing purposes continuing and writing out solr records insetad.");
-//            logger.error("Exiting...");
-//            System.exit(6);
-            this.configureOutput("stdout", solrJClassName);
+//            logger.error("Normally this should exit.  For testing purposes continuing and writing out solr records insetad.");
+            logger.error("Exiting...");
+            System.exit(6);
+//            this.configureOutput("stdout", solrJClassName);
         }
         String specs = options.valueOf(configSpecs);
         try
