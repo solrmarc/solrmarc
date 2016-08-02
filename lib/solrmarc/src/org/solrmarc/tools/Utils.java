@@ -49,15 +49,6 @@ public final class Utils {
     private final static Pattern FOUR_DIGIT_PATTERN_OTHER_4 = Pattern.compile("i.e. (20|19|18|17|16|15)[0-9][0-9]");
     private final static Pattern BC_DATE_PATTERN = Pattern.compile("[0-9]+ [Bb][.]?[Cc][.]?");
     private final static Pattern FOUR_DIGIT_PATTERN = Pattern.compile("\\d{4,4}");
-    private static Matcher matcher;
-    private static Matcher matcher_braces;
-    private static Matcher matcher_one_brace;
-    private static Matcher matcher_start_with_1_2;
-    private static Matcher matcher_l_plus_three_digits;
-    private static Matcher matcher_bracket_19_plus_two_digits;
-    private static Matcher matcher_ie_date;
-    private static Matcher matcher_bc_date;
-    private static Matcher matcher_three_digits_plus_unk;
     private final static DecimalFormat timeFormat = new DecimalFormat("00.00");
     protected static Logger logger = Logger.getLogger(Utils.class.getName());    
     /**
@@ -409,15 +400,15 @@ public final class Utils {
      */
     public static String cleanDate(final String date)
     {
-        matcher_braces = FOUR_DIGIT_PATTERN_BRACES.matcher(date);
-        matcher_one_brace = FOUR_DIGIT_PATTERN_ONE_BRACE.matcher(date);
-        matcher_start_with_1_2 = FOUR_DIGIT_PATTERN_STARTING_WITH_1_2.matcher(date);
-        matcher_l_plus_three_digits = FOUR_DIGIT_PATTERN_OTHER_1.matcher(date);
-        matcher_bracket_19_plus_two_digits = FOUR_DIGIT_PATTERN_OTHER_2.matcher(date);
-        matcher_three_digits_plus_unk = FOUR_DIGIT_PATTERN_OTHER_3.matcher(date);
-        matcher_ie_date = FOUR_DIGIT_PATTERN_OTHER_4.matcher(date);
-        matcher = FOUR_DIGIT_PATTERN.matcher(date);
-        matcher_bc_date = BC_DATE_PATTERN.matcher(date);
+        Matcher matcher_braces = FOUR_DIGIT_PATTERN_BRACES.matcher(date);
+        Matcher matcher_one_brace = FOUR_DIGIT_PATTERN_ONE_BRACE.matcher(date);
+        Matcher matcher_start_with_1_2 = FOUR_DIGIT_PATTERN_STARTING_WITH_1_2.matcher(date);
+        Matcher matcher_l_plus_three_digits = FOUR_DIGIT_PATTERN_OTHER_1.matcher(date);
+        Matcher matcher_bracket_19_plus_two_digits = FOUR_DIGIT_PATTERN_OTHER_2.matcher(date);
+        Matcher matcher_three_digits_plus_unk = FOUR_DIGIT_PATTERN_OTHER_3.matcher(date);
+        Matcher matcher_ie_date = FOUR_DIGIT_PATTERN_OTHER_4.matcher(date);
+        Matcher matcher = FOUR_DIGIT_PATTERN.matcher(date);
+        Matcher matcher_bc_date = BC_DATE_PATTERN.matcher(date);
         
         String cleanDate = null; // raises DD-anomaly
         
