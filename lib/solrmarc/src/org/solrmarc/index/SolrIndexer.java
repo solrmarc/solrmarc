@@ -1926,6 +1926,9 @@ public class SolrIndexer
           Subfield f = iter.next(); 
           char code = f.getCode();
           if ( code == 'a' || code == 'b' || code == 'k' ) {
+             if(titleBuilder.length() > 0) {
+               titleBuilder.append(" ");
+             }  
              titleBuilder.append(f.getData()); 
           }
         }        
