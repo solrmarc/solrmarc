@@ -8,12 +8,15 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
+import org.apache.log4j.PropertyConfigurator;
 import org.marc4j.MarcReader;
 import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
@@ -48,10 +51,12 @@ public class IndexDriver extends Boot
     boolean verbose;
     int numIndexed[];
     String homeDirStrs[];
+    String addnlLibDirStrs[];
     String [] args;
     OptionSpec<String> readOpts;
     OptionSpec<String> configSpecs;
     OptionSpec<String> homeDirs;
+    OptionSpec<String> addnlLibDirs;
     OptionSpec<File> solrjDir;
     OptionSpec<String> solrjClass;
     OptionSpec<File> errorMarcErrOutFile;
@@ -91,6 +96,7 @@ public class IndexDriver extends Boot
         readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
         configSpecs = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg();
         homeDirs = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( String.class );
+        addnlLibDirs = parser.accepts("locallib", "directory to look in for additional jars and libraries").withRequiredArg().ofType( String.class );
         solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
         solrjClass = parser.accepts("solrjClassName", "Classname of class to use for talking to solr").withRequiredArg().ofType( String.class ).defaultsTo("");
         errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
@@ -133,12 +139,13 @@ public class IndexDriver extends Boot
         }
         if (options.has("dir"))
         {
-            homeDirStrs = options.valueOf(homeDirs).split("[|]");
+            homeDirStrs = (options.valueOf(homeDirs) + "|" + Boot.getDefaultHomeDir()).split("[|]");
         }
         else 
         {
             homeDirStrs = new String[]{ Boot.getDefaultHomeDir() };
         }
+        
         File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File("lib-solrj"));
         
         try { 
@@ -157,8 +164,63 @@ public class IndexDriver extends Boot
             logger.error("Exiting...");
             System.exit(10);
         }
+        
+        // Now add local lib directories
+        try { 
+            if (options.has("locallib"))
+            {
+                addnlLibDirStrs = options.valueOf(addnlLibDirs).split("[|]");
+                Boot.extendClasspathWithLocalJarDirs(homeDirStrs, addnlLibDirStrs);
+            }
+        }
+        catch (IndexerSpecException ise)
+        {
+            logger.fatal("Fatal error: Failure to load SolrJ", ise);
+            logger.error("Exiting...");
+            System.exit(10);
+        }
+
+        if (! isLog4jConfigured()) initLogging(homeDirStrs);
+
     }
 
+    private void initLogging(String[] homeDirs)
+    {
+        if (isLog4jConfigured()) return;
+        for (String dir : homeDirs)
+        {
+            File log4jProps = new File(dir, "log4j.properties");
+            if (log4jProps.exists())
+            {
+                PropertyConfigurator.configure(log4jProps.getAbsolutePath());
+            }
+        }
+    }
+
+    /**
+     * Returns true if it appears that log4j have been previously configured. This code
+     * checks to see if there are any appenders defined for log4j which is the
+     * definitive way to tell if log4j is already initialized
+     */
+    private static boolean isLog4jConfigured()
+    {
+        Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+        if (appenders.hasMoreElements())
+        {
+            return true;
+        }
+        else
+        {
+            Enumeration loggers = LogManager.getCurrentLoggers();
+            while (loggers.hasMoreElements())
+            {
+                Logger c = (Logger) loggers.nextElement();
+                if (c.getAllAppenders().hasMoreElements()) return true;
+            }
+        }
+        return false;
+    }
+    
     public void initializeFromOptions()
     {
         File f1 = new File(options.valueOf(readOpts));

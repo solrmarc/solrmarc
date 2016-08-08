@@ -373,4 +373,26 @@ public class Boot
         }
         return(dir);
     }
+
+    public static void extendClasspathWithLocalJarDirs(String[] homeDirStrs, String[] addnlLibDirStrs)
+    {
+        for (String libdirname : addnlLibDirStrs)
+        {
+            File libDir = new File(libdirname);
+            if (!libDir.isAbsolute())
+            {
+                for (String homeDir : homeDirStrs)
+                {
+                    libDir = new File(homeDir, libdirname);
+                    if (libDir.exists() && libDir.isDirectory())
+                    {
+                        //found match
+                        break;
+                    }
+                }
+            }
+            extendClasspathWithLibJarDir(libDir);
+            extendClasspathWithDirOfClasses(libDir);
+        }       
+    }
 }
