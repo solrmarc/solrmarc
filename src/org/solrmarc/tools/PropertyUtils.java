@@ -285,30 +285,30 @@ public class PropertyUtils
         // if we didn't find it as a file, look for it as a URL
         String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
         if (verbose) errmsg = errmsg + "\n Looked in: " + lookedIn;
-        if (fullPathName == null)
-        {
-            PropertyUtils utilObj = new PropertyUtils();
-            URL url = utilObj.getClass().getClassLoader().getResource(propertyFileName);
-            if (url == null) url = utilObj.getClass().getResource("/" + propertyFileName);
-            if (url == null)
-            {
-                logger.error(errmsg);
-                throw new IllegalArgumentException(errmsg);
-            }
-            if (showName)
-                logger.info("Opening resource via URL: " + url.toString());
-            else
-                logger.debug("Opening resource via URL: " + url.toString());
-
-            /*
-             * if (url == null) url =
-             * utilObj.getClass().getClassLoader().getResource(propertyPath +
-             * "/" + propertyFileName); if (url == null) url =
-             * utilObj.getClass().getResource("/" + propertyPath + "/" +
-             * propertyFileName);
-             */
-            fullPathName = url.toExternalForm();
-        }
+//        if (fullPathName == null)
+//        {
+//            PropertyUtils utilObj = new PropertyUtils();
+//            URL url = utilObj.getClass().getClassLoader().getResource(propertyFileName);
+//            if (url == null) url = utilObj.getClass().getResource("/" + propertyFileName);
+//            if (url == null)
+//            {
+//                logger.error(errmsg);
+//                throw new IllegalArgumentException(errmsg);
+//            }
+//            if (showName)
+//                logger.info("Opening resource via URL: " + url.toString());
+//            else
+//                logger.debug("Opening resource via URL: " + url.toString());
+//
+//            /*
+//             * if (url == null) url =
+//             * utilObj.getClass().getClassLoader().getResource(propertyPath +
+//             * "/" + propertyFileName); if (url == null) url =
+//             * utilObj.getClass().getResource("/" + propertyPath + "/" +
+//             * propertyFileName);
+//             */
+//            fullPathName = url.toExternalForm();
+//        }
         return (fullPathName);
     }
 
