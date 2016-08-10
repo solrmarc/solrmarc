@@ -13,11 +13,8 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
-//import javax.swing.event.UndoableEditEvent;
-//import javax.swing.event.UndoableEditListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JPanel;
-//import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -25,40 +22,21 @@ import javax.swing.JFileChooser;
 
 import java.awt.event.ActionEvent;
 
-//import javax.swing.text.AbstractDocument;
-//import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-//import javax.swing.undo.CannotRedoException;
-//import javax.swing.undo.CannotUndoException;
-//import javax.swing.undo.CompoundEdit;
-//import javax.swing.undo.UndoManager;
-//import javax.swing.undo.UndoableEdit;
 
 import org.marc4j.MarcError;
-//import org.marc4j.MarcPermissiveStreamReader;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
-//import org.solrmarc.debug.CompoundUndoManager.RedoAction;
-//import org.solrmarc.debug.CompoundUndoManager.UndoAction;
-import org.solrmarc.driver.Boot;
-//import org.solrmarc.driver.Indexer.eErrorHandleVal;
+import org.solrmarc.driver.BootableMain;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
-//import org.solrmarc.index.specification.Specification;
-//import org.solrmarc.index.specification.conditional.ConditionalParser;
 import org.solrmarc.marc.MarcReaderFactory;
-
-//import joptsimple.ArgumentAcceptingOptionSpec;
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
 
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -68,8 +46,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-//import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -77,7 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-public class SolrMarcDebug extends Boot
+public class SolrMarcDebug extends BootableMain
 {
 
     private JFrame frmSolrmarcIndexSpecification;
@@ -96,19 +72,6 @@ public class SolrMarcDebug extends Boot
     HashMap<Object, Action> actions;
     String previousConfigText = "";
     List<AbstractValueIndexer<?>> indexers = null;
-    String [] args;
-    String homeDirStrs[];
-    OptionSpec<String> readOpts;
-    OptionSpec<File> configSpec;
-    OptionSpec<String> homeDirs;
-    OptionSpec<File> solrjDir;
-    OptionSpec<String> solrjClass;
-    OptionSpec<File> errorMarcErrOutFile;
-    OptionSpec<File> errorIndexErrOutFile;
-    OptionSpec<File> errorSolrErrOutFile;
-    OptionSpec<String> files;
-
-    OptionSet options = null;    
     /**
      * Launch the application.
      */
@@ -149,83 +112,9 @@ public class SolrMarcDebug extends Boot
      */
     public SolrMarcDebug(String args[])
     {
-        processArgs(args);
+        super.processArgs(args);
         initialize();
     }
-
-    public void processArgs(String args[])
-    {
-        OptionParser parser = new OptionParser(  );
-        readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("resources/marcreader.properties");
-        configSpec = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg().ofType( File.class );
-        homeDirs = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg();
-        solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
-        solrjClass = parser.accepts("solrjClassName", "SolrJ").withRequiredArg().ofType( String.class ).defaultsTo("org.apache.solr.client.solrj.impl.CommonsHttpSolrServer");
-        errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.").withRequiredArg().ofType( File.class );
-        errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
-        errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.").withRequiredArg().ofType( File.class );
-        parser.accepts("debug", "non-multithreaded debug mode");
-        parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
-        parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format");//.availableUnless("sorlURL");
-        parser.acceptsAll(Arrays.asList("null"), "discard all output, and merely show errors and warnings");//.availableUnless("sorlURL");
-        parser.acceptsAll(Arrays.asList("?", "help"), "show this usage information").forHelp();
-        //parser.mutuallyExclusive("stdout", "solrURL");
-        files = parser.nonOptions().ofType( String.class );
-
-        options = null;
-        try {
-            options = parser.parse(args );
-        }
-        catch (OptionException uoe)
-        {
-            try
-            {
-                System.err.println(uoe.getMessage());
-                parser.printHelpOn(System.err);
-            }
-            catch (IOException e)
-            {
-            }
-            System.exit(1);
-        }
-        if (options.has("help")) 
-        {
-            try
-            {
-                parser.printHelpOn(System.err);
-            }
-            catch (IOException e)
-            {
-            }
-            System.exit(0);
-        }
-        if (options.has("dir"))
-        {
-            homeDirStrs = options.valueOf(homeDirs).split("[|]");
-        }
-        else 
-        {
-            homeDirStrs = new String[]{ Boot.getDefaultHomeDir() };
-        }
-        File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File("lib-solrj"));
-        
-        try { 
-            if (solrJPath.isAbsolute()) 
-            {
-                Boot.extendClasspathWithSolJJarDir(null, solrJPath);
-            }
-            else
-            {
-                Boot.extendClasspathWithSolJJarDir(homeDirStrs, solrJPath);
-            }
-        }
-        catch (IndexerSpecException ise)
-        {
-            logger.fatal("Fatal error: Failure to load SolrJ", ise);
-            logger.error("Exiting...");
-            System.exit(10);
-        }    }
-
     
     /**
      * Initialize the contents of the frame.

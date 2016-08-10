@@ -26,7 +26,7 @@ public class Boot
     static
     {
         addLibDirJarstoClassPath();
-        
+
         logger = Logger.getLogger(Boot.class);
     }
 
@@ -60,9 +60,7 @@ public class Boot
                     findExecutables();
                     System.exit(3);
                 }
-    
             }
-
             invokeMain(classname, otherArgs);
         }
     }
@@ -113,7 +111,7 @@ public class Boot
 
     private static String classnamefromArg(String string) throws ClassNotFoundException
     {
-        Set<Class<? extends Boot>> mainClasses = FastClasspathUtils.getBootableMainClasses();
+        Set<Class<? extends BootableMain>> mainClasses = FastClasspathUtils.getBootableMainClasses();
         for (Class<?> clazz : mainClasses)
         {
             if (string.equals(clazz.getName()))  return(clazz.getName());            
@@ -138,7 +136,7 @@ public class Boot
 
     private static void findExecutables()
     {
-        Set<Class<? extends Boot>> mainClasses = FastClasspathUtils.getBootableMainClasses();
+        Set<Class<? extends BootableMain>> mainClasses = FastClasspathUtils.getBootableMainClasses();
 
         logger.info("This class  org.solrmarc.driver.Boot  dynamically loads all of the jars in the lib directory");
         logger.info("and then calls the main method of a class that requires those jars");
@@ -212,7 +210,7 @@ public class Boot
     {
         String homePath = getDefaultHomeDir();
         File homeDir = new File(homePath);
-        extendClasspathWithDirOfClasses(homeDir);
+    //    extendClasspathWithDirOfClasses(homeDir);
         // Now find the sub-directory "lib" as a sibling of the execution location. 
         File libPath = new File(homeDir, "lib");
         try
@@ -367,7 +365,7 @@ public class Boot
             File dirSolrJ = new File(homeDirStr, dir.getPath());
             if (dirSolrJ.exists())
             {
-                logger.info("Using directory: "+ dirSolrJ.getAbsolutePath() + " as location of solrj jars");
+//                logger.info("Using directory: "+ dirSolrJ.getAbsolutePath() + " as location of solrj jars");
                 return(dirSolrJ);
             }
         }
@@ -393,6 +391,6 @@ public class Boot
             }
             extendClasspathWithLibJarDir(libDir);
             extendClasspathWithDirOfClasses(libDir);
-        }       
+        }
     }
 }

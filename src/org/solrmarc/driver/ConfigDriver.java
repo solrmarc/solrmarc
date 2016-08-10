@@ -11,7 +11,7 @@ import org.solrmarc.tools.PropertyUtils;
 import org.solrmarc.tools.Utils;
 
 
-public class ConfigDriver extends Boot
+public class ConfigDriver extends BootableMain
 {
     public final static Logger logger =  Logger.getLogger(ConfigDriver.class);   
 

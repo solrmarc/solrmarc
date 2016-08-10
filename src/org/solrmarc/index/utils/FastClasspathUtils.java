@@ -2,6 +2,7 @@ package org.solrmarc.index.utils;
 
 import org.apache.log4j.Logger;
 import org.solrmarc.driver.Boot;
+import org.solrmarc.driver.BootableMain;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import org.solrmarc.index.extractor.impl.custom.Mixin;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
@@ -19,7 +20,7 @@ public class FastClasspathUtils
 
     private static Set <Class<? extends AbstractValueExtractorFactory>>  extractors = null;
     private static Set <Class<? extends AbstractValueMappingFactory>>    mappers = null;
-    private static Set <Class<? extends Boot>>                           bootables = null;
+    private static Set <Class<? extends BootableMain>>                   bootables = null;
     private static Set <Class<? extends Mixin>>                          mixins = null;
 
     private static void getMatchingClasses()
@@ -47,10 +48,10 @@ public class FastClasspathUtils
                     mappers.add(matchingClass);
                 }
             })
-            .matchSubclassesOf(Boot.class, new SubclassMatchProcessor<Boot>() 
+            .matchSubclassesOf(BootableMain.class, new SubclassMatchProcessor<BootableMain>() 
             {
                 @Override
-                public void processMatch(Class<? extends Boot> matchingClass) 
+                public void processMatch(Class<? extends BootableMain> matchingClass) 
                 {
                     logger.debug("Subclass of Boot: " + matchingClass);
                     bootables.add(matchingClass);
@@ -88,7 +89,7 @@ public class FastClasspathUtils
         return mappers;
     }
     
-    public static Set<Class<? extends Boot>> getBootableMainClasses()
+    public static Set<Class<? extends BootableMain>> getBootableMainClasses()
     {
         if (bootables == null)
         {
