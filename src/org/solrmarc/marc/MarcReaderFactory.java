@@ -100,7 +100,7 @@ public class MarcReaderFactory {
             }
             catch (FileNotFoundException e)
             {
-                logger.error("Fatal error: Exception opening InputStream" + inputFilename);
+                logger.error("Fatal error: Exception opening InputStream: " + inputFilename);
                 throw new IllegalArgumentException("Fatal error: Exception opening InputStream" + inputFilename);
             }
         }
