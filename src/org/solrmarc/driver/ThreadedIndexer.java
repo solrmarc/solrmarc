@@ -2,6 +2,7 @@ package org.solrmarc.driver;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -34,7 +35,6 @@ public class ThreadedIndexer extends Indexer
         super(indexers, solrProxy);
         readQ = new ArrayBlockingQueue<Record>(buffersize);
         docQ = new ArrayBlockingQueue<RecordAndDoc>(buffersize);
- //       alreadyReadQ = new ArrayBlockingQueue<RecordAndDocError>(buffersize);
         threadQ = new LinkedBlockingQueue<Thread>();
         doneReading = false;
         this.buffersize = buffersize;
@@ -54,8 +54,6 @@ public class ThreadedIndexer extends Indexer
         indexerThread.interrupt();
     }
 
-
-    
     @Override
     public int[] indexToSolr(final MarcReader reader) 
     {
@@ -119,7 +117,6 @@ public class ThreadedIndexer extends Indexer
                         if (rec == null) 
                             continue;
                         RecordAndDoc recDoc = indexToSolrDoc(rec);
-             //           recDoc.doc = combineDocWithErrors(documentParts, isSet(eErrorHandleVal.INDEX_ERROR_RECORDS));
                         if (recDoc.getErrLvl() != eErrorSeverity.NONE) 
                         {
                             if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS) && !isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
@@ -131,11 +128,9 @@ public class ThreadedIndexer extends Indexer
                         }
                         cnts[1] ++;
                         boolean offer1Worked = docQ.offer(recDoc);
-                        // boolean offer2Worked = alreadyReadQ.offer(record);
                         if (!offer1Worked  || (doneReading && readQ.isEmpty() && !docQ.isEmpty()))
                         {
                             final Collection<RecordAndDoc> chunk = new ArrayList<RecordAndDoc>(docQ.size());
-                      //      final Collection<Record> chunkRecord = new ArrayList<Record>(docQ.size());
                             RecordAndDoc firstDoc = docQ.peek();
                             String threadName = null;
                             try {
@@ -156,6 +151,16 @@ public class ThreadedIndexer extends Indexer
                             if (!offer1Worked) 
                             {
                                 docQ.offer(recDoc);
+                            }
+                            Iterator<Thread> iterTQ = threadQ.iterator();
+                            while (iterTQ.hasNext())
+                            {
+                                Thread curThread = iterTQ.next();
+                                if (!curThread.isAlive()) 
+                                {
+                                    logger.debug("Removing IndexerThread: "+ curThread.getName());
+                                    iterTQ.remove();
+                                }
                             }
                         }
                     }
