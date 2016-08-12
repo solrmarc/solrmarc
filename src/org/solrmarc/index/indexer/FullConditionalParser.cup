@@ -99,26 +99,13 @@ parser code {:
     {
         return(parse(solrFields, strToParse, parser_debug));
     }
-    
-//    private static String toDelimitedString(String[] strs, String delimiter)
-//    {
-//        StringBuilder strb = new StringBuilder();
-//        for (String str : strs)
-//        {
-//          strb.append(str).append(delimiter);
-//        }
-//        return strb.substring(0, strb.length() - delimiter.length());
-//     }
-    
-    
-    
+
     private AbstractValueExtractor<?> createCustomExtractor(String type, String classOrScriptName, List<String> methodPlusParams)
     {
         String[] specParts =new String[methodPlusParams.size()+2];
         specParts[0] = type;
         specParts[1] = classOrScriptName;
         System.arraycopy(methodPlusParams.toArray(new String[0]), 0, specParts, 2, methodPlusParams.size());
-     //   methodPlusParams.toArray(new String[0]);
         for (final AbstractValueExtractorFactory factory : extractorFactories)
         {
             if (factory.canHandle("CUP Parser", specParts[0]))
@@ -128,38 +115,6 @@ parser code {:
         }
         throw new IndexerSpecException("No indexer factory found for: " + Utils.join(specParts, " "));
     }
-   
-//    private AbstractValueExtractor<?> createExtractor(final String solrFieldName, final String[] mapParts)
-//    {
-//        for (final AbstractValueExtractorFactory factory : extractorFactories)
-//        {
-//            if (factory.canHandle(solrFieldName, mapParts[0]))
-//            {
-//                return factory.createExtractor(solrFieldName, mapParts);
-//            }
-//        }
-//        throw new IndexerSpecException("No indexer factory found for: " + Utils.join(mapParts, " "));
-//    }
-    
-    
-    
-//    private AbstractMultiValueMapping createMultiValueMapping(List<String> mapParams)
-//    {
-//        if (this.mappingFactories == null) 
-//        {
-//            this.mappingFactories = ValueIndexerFactory.instance().getMappingFactories();
-//        }
-//        String[] mapParts = mapParams.toArray(new String[0]);
-//        for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
-//        {
-//            if (mappingFactory.canHandle(mapParts[0]))
-//            {
-//                return mappingFactory.createMultiValueMapping(mapParts);
-//            }
-//        }
-//        throw new IndexerSpecException("Could not handle map descriptor: " + Utils.join(mapParts, " ")); 
-//        // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
-//    }
 
     private AbstractMultiValueExtractor makeMultiValueExtractor(Object extractor)
     {
@@ -275,6 +230,8 @@ custom_extractor ::= CUSTOM:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_p
                                                                             {: RESULT = createCustomExtractor(t, m, l); :} 
                   |  SCRIPT:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_params:l
                                                                             {: RESULT = createCustomExtractor(t, m, l); :} 
+                  |  SCRIPT:t LPAREN QUOTEDSTR:s RPAREN opt_comma method_plus_params:l
+                                                                            {: RESULT = createCustomExtractor(t, s, l); :} 
                   |  CUSTOM:t COMMA method_plus_params:l  
                                                                             {: RESULT = createCustomExtractor(t, null, l); :} 
                   |  JAVA:t COMMA method_plus_params:l
