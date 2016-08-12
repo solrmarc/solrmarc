@@ -274,6 +274,10 @@ public class PropertyUtils
                         logger.debug("Opening file: " + propertyFile.getAbsolutePath());
                     break; // we found it!
                 }
+                else
+                {
+                    logger.debug("looked for file: " + propertyFile.getAbsolutePath());
+                }
                 if (verbose) lookedIn = lookedIn + propertyFile.getAbsolutePath() + "\n";
                 if (propertyPaths != null && pathCnt < propertyPaths.length)
                 {
