@@ -259,7 +259,11 @@ public class IndexDriver extends BootableMain
         for (final RecordAndDoc entry : errQ)
         {
             if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      errTypeCnt[0][entry.getErrLvl().ordinal()] ++;
-            if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  errTypeCnt[1][entry.getErrLvl().ordinal()] ++;
+            if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  
+            {
+                logger.debug("Error Rec id = "+ entry.rec.getControlNumber());
+                errTypeCnt[1][entry.getErrLvl().ordinal()] ++;
+            }
             if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))      errTypeCnt[2][entry.getErrLvl().ordinal()] ++;
         }
         showErrReport("MARC", errTypeCnt[0]);

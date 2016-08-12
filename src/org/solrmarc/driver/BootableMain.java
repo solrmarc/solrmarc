@@ -2,26 +2,13 @@ package org.solrmarc.driver;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.CodeSource;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Set;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.solrmarc.index.indexer.IndexerSpecException;
-import org.solrmarc.index.utils.FastClasspathUtils;
-//import org.solrmarc.index.utils.ReflectionUtils;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;

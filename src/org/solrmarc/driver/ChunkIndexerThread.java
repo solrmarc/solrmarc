@@ -30,9 +30,10 @@ import org.solrmarc.solr.SolrProxy;
  *
  */
 
-public class ChunkIndexerThread extends Thread
+public class ChunkIndexerThread implements Runnable
 {
     private final static Logger logger = Logger.getLogger(ChunkIndexerThread.class);
+    final String threadName;
     final Collection<SolrInputDocument> docs;
     final Collection<RecordAndDoc> recordAndDocs;
     final SolrProxy solrProxy;
@@ -45,7 +46,7 @@ public class ChunkIndexerThread extends Thread
     public ChunkIndexerThread(String threadName, Collection<RecordAndDoc> recordAndDocs,
             BlockingQueue<RecordAndDoc> errQ, SolrProxy solrProxy, int[] cnts)
     {
-        super(threadName);
+        this.threadName = threadName; 
         this.recordAndDocs = recordAndDocs;
         this.docs = buildDocList(recordAndDocs);
         this.cnts = cnts;
@@ -76,6 +77,7 @@ public class ChunkIndexerThread extends Thread
     @Override 
     public void run()
     {
+        Thread.currentThread().setName(threadName);
         int inChunk = docs.size();
         logger.debug("Adding chunk of "+inChunk+ " documents -- starting with id : "+firstDocId);
         try {
@@ -108,7 +110,7 @@ public class ChunkIndexerThread extends Thread
             {
                 logger.debug("Failed on chunk of "+inChunk+ " documents -- starting with id : "+firstDocId);
                 int newChunkSize = inChunk / 4;
-                Thread subChunk[] = new Thread[4];
+                Runnable subChunk[] = new Runnable[4];
                 
                 for (int i = 0; i < 4; i++)
                 {
@@ -127,21 +129,21 @@ public class ChunkIndexerThread extends Thread
                     }
                     // Split the chunk into 4 sub-chunks, and start a ChunkIndexerThread for each of them.
                     subChunk[i] = new ChunkIndexerThread("SolrUpdateOnError_"+id1+"_"+id2, newRecDoc, errQ, solrProxy, cnts);
-                    subChunk[i].start();
+                    subChunk[i].run();
                 }
-                for (int i = 0; i < 4; i++)
-                {
-                    // Now wait for each of the 4 sub-chunks to finish.
-                    try
-                    {
-                        subChunk[i].join();
-                    }
-                    catch (InterruptedException e1)
-                    {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
-                }
+//                for (int i = 0; i < 4; i++)
+//                {
+//                    // Now wait for each of the 4 sub-chunks to finish.
+//                    try
+//                    {
+//                        subChunk[i].join();
+//                    }
+//                    catch (InterruptedException e1)
+//                    {
+//                        // TODO Auto-generated catch block
+//                        e1.printStackTrace();
+//                    }
+//                }
             }
             // less than 20 in the chunk resubmit records one-by-one
             else 

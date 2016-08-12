@@ -8,6 +8,7 @@ import org.apache.solr.common.SolrInputField;
 import org.marc4j.MarcError;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
+import org.solrmarc.driver.Indexer.eErrorHandleVal;
 import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
@@ -79,7 +80,12 @@ public class Indexer
                 if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS) && !isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
                 {
                     errQ.add(recDoc);
-                }   
+                }  
+                if (!isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
+                {
+                    logger.debug("Skipping error record: " + recDoc.rec.getControlNumber());
+                    continue;
+                }
             }
             try { 
                 if (recDoc.getDoc() != null)

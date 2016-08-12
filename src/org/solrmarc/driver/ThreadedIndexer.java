@@ -6,8 +6,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.marc4j.MarcReader;
@@ -21,10 +24,9 @@ public class ThreadedIndexer extends Indexer
     private final static Logger logger = Logger.getLogger(ThreadedIndexer.class);
     private final BlockingQueue<Record> readQ;
     private final BlockingQueue<RecordAndDoc> docQ;
-//    private final BlockingQueue<RecordAndDocError> alreadyReadQ;
-    private final BlockingQueue<Thread> threadQ;
     Thread readerThread;
     Thread indexerThread;
+    ExecutorService solrExecutor;
    
     boolean doneReading = false;
     final int buffersize; 
@@ -35,8 +37,9 @@ public class ThreadedIndexer extends Indexer
         super(indexers, solrProxy);
         readQ = new ArrayBlockingQueue<Record>(buffersize);
         docQ = new ArrayBlockingQueue<RecordAndDoc>(buffersize);
-        threadQ = new LinkedBlockingQueue<Thread>();
         doneReading = false;
+//        solrExecutor = Executors.newSingleThreadExecutor();
+        solrExecutor = Executors.newFixedThreadPool(3);
         this.buffersize = buffersize;
     }
 
@@ -67,7 +70,7 @@ public class ThreadedIndexer extends Indexer
                 while (reader.hasNext() && !this.isInterrupted())
                 {
                     record = reader.next();
-                    cnts[0] ++;
+                    cnts[0]++;
                     while (readQ.offer(record) == false)
                     {
                         try
@@ -124,11 +127,14 @@ public class ThreadedIndexer extends Indexer
                                 errQ.add(recDoc);
                             }               
                             if (!isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
+                            {
+                                logger.debug("Skipping error record: " + recDoc.rec.getControlNumber());
                                 continue;
+                            }
                         }
-                        cnts[1] ++;
-                        boolean offer1Worked = docQ.offer(recDoc);
-                        if (!offer1Worked  || (doneReading && readQ.isEmpty() && !docQ.isEmpty()))
+                        cnts[1]++;
+                        boolean offerWorked = docQ.offer(recDoc);
+                        if (!offerWorked  || (doneReading && readQ.isEmpty() && !docQ.isEmpty()))
                         {
                             final Collection<RecordAndDoc> chunk = new ArrayList<RecordAndDoc>(docQ.size());
                             RecordAndDoc firstDoc = docQ.peek();
@@ -144,23 +150,12 @@ public class ThreadedIndexer extends Indexer
                             }
                             docQ.drainTo(chunk);
                             final BlockingQueue<RecordAndDoc> errQVal = (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS)) ? errQ : null;
-                            Thread chunkThread = new ChunkIndexerThread(threadName, chunk, errQVal, solrProxy, cnts); 
+                            Runnable runnableChunk = new ChunkIndexerThread(threadName, chunk, errQVal, solrProxy, cnts); 
                             logger.debug("Starting IndexerThread: "+ threadName);
-                            chunkThread.start();
-                            threadQ.add(chunkThread);
-                            if (!offer1Worked) 
+                            solrExecutor.execute(runnableChunk);
+                            if (!offerWorked) 
                             {
                                 docQ.offer(recDoc);
-                            }
-                            Iterator<Thread> iterTQ = threadQ.iterator();
-                            while (iterTQ.hasNext())
-                            {
-                                Thread curThread = iterTQ.next();
-                                if (!curThread.isAlive()) 
-                                {
-                                    logger.debug("Removing IndexerThread: "+ curThread.getName());
-                                    iterTQ.remove();
-                                }
                             }
                         }
                     }
@@ -172,9 +167,16 @@ public class ThreadedIndexer extends Indexer
                 }
                 if ( this.isInterrupted())
                 {
-                    for (Thread t : threadQ)
+                    logger.warn("Indexer Thread Interrupted: shuttingDown solr ExecutorService");
+                    solrExecutor.shutdownNow();
+                    try
                     {
-                        t.interrupt();
+                        solrExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                     }
                     final Collection<RecordAndDoc> discardedDocs = new ArrayList<RecordAndDoc>(docQ.size());
                     docQ.drainTo(discardedDocs);
@@ -189,28 +191,18 @@ public class ThreadedIndexer extends Indexer
                     }
                     cnts[1] -= discardedDocs.size();
                 }
-                for (Thread t : threadQ)
+                logger.warn("Indexer Thread finished: shuttingDown solr ExecutorService slowly");
+                solrExecutor.shutdown();
+                try
                 {
-                    while (t.isAlive())
-                    {
-                        try
-                        {
-                            logger.debug("Waiting on thread: "+t.getName());
-                            t.join();
-                            logger.debug("Done with thread: "+t.getName());
-                        }
-                        catch (InterruptedException e)
-                        {
-                            if (this.isInterrupted() && t.isInterrupted())
-                            {
-                                // Its already dying, so go ahead and wait.
-                            }
-                            else
-                            {
-                                t.interrupt();
-                            }
-                        }
-                    }
+                    logger.warn("Indexer Thread finished: awaiting termination");
+                    boolean terminated = solrExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+                    logger.warn("Indexer Thread finished: all terminated : " + terminated);
+                }
+                catch (InterruptedException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
             }
         };
