@@ -25,34 +25,6 @@ public class JavaValueExtractorUtils
     private final static Pattern packageFinder = Pattern.compile("package[ \t]+(([a-z_][a-z0-9_]*[.])*[a-z_][a-z0-9_]*)[ \t]*;.*");
     private static Map<String,List<File>> sourceFilesMap = new LinkedHashMap<String, List<File>>();
 
-////    protected static void clean()
-////    {
-////        logger.debug("Clean...");
-////        deleteFolder(new File(getBinDirectory()));
-////    }
-////
-//    private static void deleteFolder(File folder)
-//    {
-//        final File[] files = folder.listFiles();
-//        if (files != null)
-//        {
-//            for (File file : files)
-//            {
-//                if (file.isDirectory())
-//                {
-//                    deleteFolder(file);
-//                }
-//                else if (!file.delete())
-//                {
-//                    throw new RuntimeException("Couldn't delete file " + file.getAbsolutePath());
-//                }
-//            }
-//        }
-//        if (!folder.delete())
-//        {
-//            throw new RuntimeException("Couldn't delete file " + folder.getAbsolutePath());
-//        }
-//    }
 
     /**
      * Compiles java sources if they have changed.
@@ -128,16 +100,6 @@ public class JavaValueExtractorUtils
             }
         }
     }
-
-//    private static String getBinDirectory()
-//    {
-//        return (ValueIndexerFactory.getDirContainingJavaSource() + File.separator + "index_java" + File.separator + "bin");
-//    }
-//
-//    private static String getSrcDirectory(String homeDirectory)
-//    {
-//        return (homeDirectory + File.separator + "index_java" + File.separator + "src");
-//    }
 
     protected static Class<?>[] getClasses()
     {

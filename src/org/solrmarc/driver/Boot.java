@@ -32,6 +32,7 @@ public class Boot
 
     public static void main(String[] args)
     {
+        org.apache.log4j.BasicConfigurator.configure();
         if (args.length == 0)
         {
             findExecutables();
@@ -114,8 +115,8 @@ public class Boot
         Set<Class<? extends BootableMain>> mainClasses = FastClasspathUtils.getBootableMainClasses();
         for (Class<?> clazz : mainClasses)
         {
-            if (string.equals(clazz.getName()))  return(clazz.getName());            
-            if (clazz.getName().endsWith("."+string))  return(clazz.getName());            
+            if (string.equals(clazz.getName()))  return(clazz.getName());
+            if (clazz.getName().endsWith("."+string))  return(clazz.getName());
         }
         for (Class<?> clazz : mainClasses)
         {

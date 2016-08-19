@@ -138,13 +138,13 @@ public class BootableMain
             System.exit(10);
         }
 
-        if (! isLog4jConfigured()) initLogging(homeDirStrs);
+        initLogging(homeDirStrs);
 
     }
 
     private void initLogging(String[] homeDirs)
     {
-        if (isLog4jConfigured()) return;
+        LogManager.resetConfiguration();
         for (String dir : homeDirs)
         {
             File log4jProps = new File(dir, "log4j.properties");
@@ -155,28 +155,28 @@ public class BootableMain
         }
     }
 
-    /**
-     * Returns true if it appears that log4j have been previously configured. This code
-     * checks to see if there are any appenders defined for log4j which is the
-     * definitive way to tell if log4j is already initialized
-     */
-    private static boolean isLog4jConfigured()
-    {
-        Enumeration<?> appenders = LogManager.getRootLogger().getAllAppenders();
-        if (appenders.hasMoreElements())
-        {
-            return true;
-        }
-        else
-        {
-            Enumeration<?> loggers = LogManager.getCurrentLoggers();
-            while (loggers.hasMoreElements())
-            {
-                Logger c = (Logger) loggers.nextElement();
-                if (c.getAllAppenders().hasMoreElements()) return true;
-            }
-        }
-        return false;
-    }
+//    /**
+//     * Returns true if it appears that log4j have been previously configured. This code
+//     * checks to see if there are any appenders defined for log4j which is the
+//     * definitive way to tell if log4j is already initialized
+//     */
+//    private static boolean isLog4jConfigured()
+//    {
+//        Enumeration<?> appenders = LogManager.getRootLogger().getAllAppenders();
+//        if (appenders.hasMoreElements())
+//        {
+//            return true;
+//        }
+//        else
+//        {
+//            Enumeration<?> loggers = LogManager.getCurrentLoggers();
+//            while (loggers.hasMoreElements())
+//            {
+//                Logger c = (Logger) loggers.nextElement();
+//                if (c.getAllAppenders().hasMoreElements()) return true;
+//            }
+//        }
+//        return false;
+//    }
     
 }

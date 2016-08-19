@@ -26,7 +26,6 @@ public class FastClasspathUtils
     {
         extractors = new LinkedHashSet<>();
         mappers = new LinkedHashSet<>();
-        bootables = new LinkedHashSet<>();
         mixins = new LinkedHashSet<>();
         FastClasspathScanner scanner = new FastClasspathScanner("org")  
             .matchSubclassesOf(AbstractValueExtractorFactory.class, new SubclassMatchProcessor<AbstractValueExtractorFactory>() 
@@ -34,7 +33,7 @@ public class FastClasspathUtils
                 @Override
                 public void processMatch(Class<? extends AbstractValueExtractorFactory> matchingClass) 
                 {
-                    logger.debug("Subclass of AbstractValueExtractorFactory: " + matchingClass);
+//                    logger.debug("Subclass of AbstractValueExtractorFactory: " + matchingClass);
                     extractors.add(matchingClass);
                 }
             })
@@ -43,17 +42,8 @@ public class FastClasspathUtils
                 @Override
                 public void processMatch(Class<? extends AbstractValueMappingFactory> matchingClass) 
                 {
-                    logger.debug("Subclass of AbstractValueMappingFactory: " + matchingClass);
+//                    logger.debug("Subclass of AbstractValueMappingFactory: " + matchingClass);
                     mappers.add(matchingClass);
-                }
-            })
-            .matchSubclassesOf(BootableMain.class, new SubclassMatchProcessor<BootableMain>() 
-            {
-                @Override
-                public void processMatch(Class<? extends BootableMain> matchingClass) 
-                {
-                    logger.debug("Subclass of Boot: " + matchingClass);
-                    bootables.add(matchingClass);
                 }
             })
             .matchClassesImplementing(Mixin.class, new InterfaceMatchProcessor<Mixin>() 
@@ -61,14 +51,13 @@ public class FastClasspathUtils
                 @Override
                 public void processMatch(Class<? extends Mixin> matchingClass) 
                 {
-                    logger.debug("Subclass of Mixin: " + matchingClass);
+//                    logger.debug("Subclass of Mixin: " + matchingClass);
                     mixins.add(matchingClass);
                 }
             });
         scanner.scan();
 
     }
-        
 
     public static Set<Class<? extends AbstractValueExtractorFactory>> getExtractorFactoryClasses()
     {
@@ -87,16 +76,7 @@ public class FastClasspathUtils
         }
         return mappers;
     }
-    
-    public static Set<Class<? extends BootableMain>> getBootableMainClasses()
-    {
-        if (bootables == null)
-        {
-            getMatchingClasses();
-        }
-        return bootables;
-    }
-    
+
     public static Set<Class<? extends Mixin>> getMixinClasses()
     {
         if (mixins == null)
@@ -106,5 +86,27 @@ public class FastClasspathUtils
         return mixins;
     }
 
+    private static void getMatchingBootableClasses()
+    {
+        bootables = new LinkedHashSet<>();
+        FastClasspathScanner scanner = new FastClasspathScanner("org")  
+            .matchSubclassesOf(BootableMain.class, new SubclassMatchProcessor<BootableMain>() 
+            {
+                @Override
+                public void processMatch(Class<? extends BootableMain> matchingClass) 
+                {
+                    bootables.add(matchingClass);
+                }
+            });
+        scanner.scan();
+    }
 
+    public static Set<Class<? extends BootableMain>> getBootableMainClasses()
+    {
+        if (bootables == null)
+        {
+            getMatchingBootableClasses();
+        }
+        return bootables;
+    }
 }
