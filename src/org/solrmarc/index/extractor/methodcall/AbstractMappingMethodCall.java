@@ -1,7 +1,5 @@
 package org.solrmarc.index.extractor.methodcall;
 
-import java.util.Collection;
-
 public abstract class AbstractMappingMethodCall<T>
 {
     private final String objectName;

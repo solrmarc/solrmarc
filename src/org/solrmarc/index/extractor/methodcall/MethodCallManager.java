@@ -93,7 +93,7 @@ public class MethodCallManager
         }
     }
 
-    private void add(Object mixin, Class clazz, boolean addMethodsAsDefault)
+    private void add(Object mixin, Class<?> clazz, boolean addMethodsAsDefault)
     {
         classes.add(clazz);
         Method hasPerRecordInit = null;
@@ -186,7 +186,7 @@ public class MethodCallManager
      *            the object which should be added.
      * @return previous added parent class or null, if none was added before.
      */
-    private Class getAddedParentClass(Object mixin)
+    private Class<?> getAddedParentClass(Object mixin)
     {
         Class<?> mixinClass = mixin.getClass().getSuperclass();
         while (mixinClass != null)

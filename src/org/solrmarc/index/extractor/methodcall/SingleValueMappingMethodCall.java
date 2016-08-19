@@ -1,7 +1,6 @@
 package org.solrmarc.index.extractor.methodcall;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 
 public class SingleValueMappingMethodCall extends AbstractMappingMethodCall<String>
 {

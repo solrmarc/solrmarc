@@ -3,11 +3,8 @@ package org.solrmarc.index.extractor.methodcall;
 import java.util.Collection;
 import java.util.Collections;
 
-//import playground.solrmarc.index.extractor.AbstractSingleValueExtractor;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
-import org.solrmarc.index.indexer.IndexerSpecException;
-
 
 public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor
 {

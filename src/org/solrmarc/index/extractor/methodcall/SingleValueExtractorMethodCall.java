@@ -2,9 +2,6 @@ package org.solrmarc.index.extractor.methodcall;
 
 import java.lang.reflect.Method;
 
-import org.solrmarc.index.indexer.IndexerSpecException;
-
-
 public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<String>
 {
     private final Object mixin;
@@ -37,7 +34,7 @@ public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<
     {
         perRecordInit.invoke(mixin, record);
     }
-    
+
     @Override
     public String invoke(final Object[] parameters) throws Exception
     {

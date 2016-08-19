@@ -5,7 +5,6 @@ import org.solrmarc.index.utils.StringReader;
 import org.solrmarc.tools.Utils;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 public class MethodCallContext
 {
@@ -105,17 +104,17 @@ public class MethodCallContext
         }
     }
 
-    protected static Class[] getExtractorParameterTypes(final String[] parameters)
+    protected static Class<?>[] getExtractorParameterTypes(final String[] parameters)
     {
-        final Class[] parameterTypes = new Class[parameters.length + 1];
+        final Class<?>[] parameterTypes = new Class[parameters.length + 1];
         parameterTypes[0] = Record.class;
         Arrays.fill(parameterTypes, 1, parameters.length + 1, String.class);
         return parameterTypes;
     }
 
-    protected static Class[] getMappingParameterTypes(final String[] parameters)
+    protected static Class<?>[] getMappingParameterTypes(final String[] parameters)
     {
-        final Class[] parameterTypes = new Class[parameters.length + 1];
+        final Class<?>[] parameterTypes = new Class[parameters.length + 1];
         parameterTypes[0] = Object.class;
         Arrays.fill(parameterTypes, 1, parameters.length + 1, String.class);
         return parameterTypes;

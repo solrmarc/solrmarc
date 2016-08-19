@@ -1,6 +1,5 @@
 package org.solrmarc.index.extractor.methodcall;
 
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -40,6 +39,7 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
             {
                 // can't call no-args constructor, check whether class extends org.solrmarc.index.SolrIndexer
                 // for backwards compatibility sake.
+                @SuppressWarnings("deprecation")
                 Class<?> solrIndexerClass = org.solrmarc.index.SolrIndexer.class;
                 if (solrIndexerClass.isAssignableFrom(aClass))
                 {
@@ -138,6 +138,7 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
             List<AbstractExtractorMethodCall<?>> matchesOtherContextParmWildCard = methodCallManager.getLoadedExtractorMixinsMatches(null, context.getMethodName(), -1);
             if (matchesOtherContextParmWildCard.size() == 1)
             {
+                @SuppressWarnings("unused")
                 AbstractExtractorMethodCall<?> match = matchesOtherContextParmWildCard.iterator().next();
                 throw new IndexerSpecException("Specified method with name: " + context.getMethodName() + " not found.  Closest match is: \n"
                         + methodCallManager.loadedExtractorMixinsToString(matchesOtherContextParmWildCard));
