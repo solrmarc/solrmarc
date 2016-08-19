@@ -4,20 +4,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.SolrMarcIndexerException;
 import org.solrmarc.tools.StringNaturalCompare;
 
 
 public class MultiValueCollector //implements AbstractValueCollector<Collection<String>>
 {
     boolean isUnique = false;
-
+    boolean deleteRecordIfEmpty = false;
     Comparator<String> sortComparator = null;
     enum eFirstVal { ALL, FIRST, NOTFIRST };
     public static eFirstVal fromString(String str)
@@ -139,6 +139,13 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
                 result = Collections.list(Collections.enumeration(result)).subList(1,  result.size());
             }
         }
+        if (deleteRecordIfEmpty)
+        {
+            if (result.size() == 0)
+            {
+                throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
+            }
+        }
         return(result);
     }
     
@@ -179,4 +186,10 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
         this.first = fromString(firstStr);
         return(this);
     }
+
+    public void setDeleteRecordIfEmpty()
+    {
+        this.deleteRecordIfEmpty = true;
+    }
+    
 }

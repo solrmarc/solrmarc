@@ -8,10 +8,10 @@ import org.apache.solr.common.SolrInputField;
 import org.marc4j.MarcError;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
-import org.solrmarc.driver.Indexer.eErrorHandleVal;
 import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.SolrMarcIndexerException;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.solr.SolrProxy;
@@ -35,6 +35,7 @@ public class Indexer
     protected SolrProxy solrProxy;
     public EnumSet<eErrorHandleVal> errHandle = EnumSet.noneOf(eErrorHandleVal.class);
     protected final BlockingQueue<RecordAndDoc> errQ;
+    protected final BlockingQueue<RecordAndDoc> delQ;
     protected boolean shuttingDown = false;
     protected boolean isShutDown = false;
 
@@ -48,6 +49,7 @@ public class Indexer
         this.indexers = indexers;
         this.solrProxy = solrProxy;
         errQ = new LinkedBlockingQueue<RecordAndDoc>();
+        delQ = new LinkedBlockingQueue<RecordAndDoc>();
     }
 
     public boolean isSet(eErrorHandleVal val)
@@ -75,6 +77,27 @@ public class Indexer
             cnts[0]++;
             RecordAndDoc recDoc = indexToSolrDoc(record);
             cnts[1]++;
+            if (recDoc.getSolrMarcIndexerException() != null)
+            {
+                SolrMarcIndexerException smie = recDoc.getSolrMarcIndexerException();
+                String recCtrlNum = recDoc.rec.getControlNumber();
+                String idMessage = smie.getMessage();
+                if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
+                {
+                    logger.info("Ignored record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                }
+                else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
+                {            
+                    logger.info("Deleted record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                    delQ.add(recDoc);
+                }
+                else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
+                {
+                    logger.info("Serious Error flagged in record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                    logger.info("Terminating indexing.");
+                    break;
+                }
+            }
             if (recDoc.getErrLvl() != eErrorSeverity.NONE) 
             {
                 if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS) && !isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
@@ -106,7 +129,7 @@ public class Indexer
                 singleRecordSolrError(recDoc, sse, errQ);
             }
         }
-
+        
         if (shuttingDown)
         {
             endProcessing();
@@ -202,6 +225,10 @@ public class Indexer
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + wrappedE.getMessage());
                 recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
             }
+            catch (SolrMarcIndexerException e)
+            {
+                recDoc.setSolrMarcIndexerException(e);
+            }
             catch (IndexerSpecException e)
             {
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
@@ -266,6 +293,20 @@ public class Indexer
 
     public void endProcessing()
     {
+        for (RecordAndDoc recDoc : delQ)
+        {
+            String recCtrlNum = recDoc.rec.getControlNumber();
+            logger.info("Deleting record " + (recCtrlNum != null ? recCtrlNum : ""));
+            try
+            {
+                solrProxy.delete(recCtrlNum);
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
         try
         {
             logger.info("Commiting updates to Solr");

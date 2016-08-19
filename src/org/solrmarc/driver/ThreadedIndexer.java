@@ -2,20 +2,18 @@ package org.solrmarc.driver;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
+import org.solrmarc.index.indexer.SolrMarcIndexerException;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.solr.SolrProxy;
 
@@ -39,7 +37,7 @@ public class ThreadedIndexer extends Indexer
         docQ = new ArrayBlockingQueue<RecordAndDoc>(buffersize);
         doneReading = false;
 //        solrExecutor = Executors.newSingleThreadExecutor();
-        solrExecutor = Executors.newFixedThreadPool(3);
+        solrExecutor = Executors.newFixedThreadPool(4);
         this.buffersize = buffersize;
     }
 
@@ -120,6 +118,28 @@ public class ThreadedIndexer extends Indexer
                         if (rec == null) 
                             continue;
                         RecordAndDoc recDoc = indexToSolrDoc(rec);
+                        if (recDoc.getSolrMarcIndexerException() != null)
+                        {
+                            SolrMarcIndexerException smie = recDoc.getSolrMarcIndexerException();
+                            String recCtrlNum = recDoc.rec.getControlNumber();
+                            String idMessage = smie.getMessage();
+                            if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
+                            {
+                                logger.info("Ignored record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                            }
+                            else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
+                            {            
+                                logger.info("Deleted record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                                delQ.add(recDoc);
+                            }
+                            else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
+                            {
+                                logger.info("Serious Error flagged in record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                                logger.info("Terminating indexing.");
+                                Thread.currentThread().interrupt();
+                                continue;
+                            }
+                        }
                         if (recDoc.getErrLvl() != eErrorSeverity.NONE) 
                         {
                             if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS) && !isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
@@ -191,18 +211,21 @@ public class ThreadedIndexer extends Indexer
                     }
                     cnts[1] -= discardedDocs.size();
                 }
-                logger.warn("Indexer Thread finished: shuttingDown solr ExecutorService slowly");
-                solrExecutor.shutdown();
-                try
+                else
                 {
-                    logger.warn("Indexer Thread finished: awaiting termination");
-                    boolean terminated = solrExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
-                    logger.warn("Indexer Thread finished: all terminated : " + terminated);
-                }
-                catch (InterruptedException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    logger.debug("Indexer Thread finished: shuttingDown solr ExecutorService slowly");
+                    solrExecutor.shutdown();
+                    try
+                    {
+                        logger.debug("Indexer Thread finished: awaiting termination");
+                        boolean terminated = solrExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+                        logger.debug("Indexer Thread finished: all terminated : " + terminated);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
             }
         };

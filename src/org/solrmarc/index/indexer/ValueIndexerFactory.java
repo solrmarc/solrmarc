@@ -45,7 +45,7 @@ public class ValueIndexerFactory
     private List<IndexerSpecException> perRecordExceptions;
     private FullConditionalParser parser = null;    
     private Properties localMappingProperties = null;
-    private static String dirContainingJavaSource = null;
+    private static List<String> dirsContainingJavaSource = new ArrayList<String>();
     private static String homeDirStrs[] = null;
     private final Pattern specPattern = Pattern.compile("([-A-Za-z_0-9, \\t]*)([:=]|([+]=))(.*)");
     boolean debug_parse = false;
@@ -271,7 +271,7 @@ public class ValueIndexerFactory
                         indexerList.add(valueIndexer);
                         valueIndexerMap.put(solrFieldName, indexerList);
                     }
-                    for (IndexerSpecException ise  : parser.getErrors())
+                    for (IndexerSpecException ise  : FullConditionalParser.getErrors())
                     {
                         ise.setSolrFieldAndSpec(solrFieldName, mappingDefinition);
                         validationExceptions.add(ise);
@@ -288,7 +288,7 @@ public class ValueIndexerFactory
 
     public MultiValueIndexer createValueIndexer(String fieldNames, String indexSpec)
     {
-        String fullSpec = fieldNames + " = " + indexSpec;
+//        String fullSpec = fieldNames + " = " + indexSpec;
         if (parser == null) 
         {
             try
@@ -636,7 +636,8 @@ public class ValueIndexerFactory
     
     private boolean isACollectorConfiguration(String string)
     {
-        if (string.equals("unique") || string.equals("first") || string.equals("sort") || string.equals("notunique") || string.equals("notfirst") || string.equals("all"))
+        if (string.equals("unique") || string.equals("first") || string.equals("sort") || string.equals("notunique") || 
+            string.equals("notfirst") || string.equals("all")  || string.equals("DeleteRecordIfFieldEmpty"))
             return(true);
         return(false);
     }
@@ -682,6 +683,10 @@ public class ValueIndexerFactory
                 {
                     collector.setSortComparator(mapParts[1], mapParts[2]);
                 }
+                else if (mapParts[0].equals("DeleteRecordIfFieldEmpty"))
+                {
+                    collector.setDeleteRecordIfEmpty();
+                }
             }
         }
         return collector;
@@ -714,12 +719,12 @@ public class ValueIndexerFactory
         // + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
     }
 
-    public static String getDirContainingJavaSource()
+    public static List<String> getDirsContainingJavaSource()
     {
-        return dirContainingJavaSource;
+        return dirsContainingJavaSource;
     }
     
-    public static void setDirContainingJavaSource(String[] homeDirStrs)
+    public static void setDirsContainingJavaSource(String[] homeDirStrs)
     {
         for (String dirStr : homeDirStrs)
         {
@@ -729,11 +734,11 @@ public class ValueIndexerFactory
             if (dirIndexJava.exists() && dirIndexJavaSrc.exists())
             {
                 logger.info("Using directory: "+ dirIndexJava.getAbsolutePath() + " as location of java sources");
-                dirContainingJavaSource = dir.getAbsolutePath();
+                dirsContainingJavaSource.add(dir.getAbsolutePath());
             }
         }
     }
-    
+
     public static String[] getHomeDirs()
     {
         return(homeDirStrs);
@@ -742,6 +747,6 @@ public class ValueIndexerFactory
     public static void setHomeDirs(String[] homeDirStrs)
     {
         ValueIndexerFactory.homeDirStrs = homeDirStrs;
-        setDirContainingJavaSource(homeDirStrs);
+        setDirsContainingJavaSource(homeDirStrs);
     }
 }

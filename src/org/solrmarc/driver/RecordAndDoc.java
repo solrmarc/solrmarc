@@ -7,12 +7,14 @@ import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcError;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
+import org.solrmarc.index.indexer.SolrMarcIndexerException;
 
 public class RecordAndDoc
 {
     final Record rec;
     SolrInputDocument doc;
     eErrorSeverity errLvl;
+    SolrMarcIndexerException smie;
     public EnumSet<eErrorLocationVal> errLocs = EnumSet.noneOf(eErrorLocationVal.class);
     
     public enum eErrorLocationVal
@@ -59,6 +61,19 @@ public class RecordAndDoc
         this.doc = null;
         this.errLocs = rec.hasErrors() ? EnumSet.of(eErrorLocationVal.MARC_ERROR) : EnumSet.noneOf(eErrorLocationVal.class);
         this.errLvl = rec.hasErrors() ? errLvlForMarcError(rec.getErrors()) : eErrorSeverity.NONE;
+    }
+
+    public SolrMarcIndexerException getSolrMarcIndexerException()
+    {
+        return smie;
+    }
+
+    public void setSolrMarcIndexerException(SolrMarcIndexerException smie)
+    {
+        if (this.smie == null || this.smie.getLevel() < smie.getLevel())
+        {
+            this.smie = smie;
+        }
     }
 
     private static eErrorSeverity errLvlForMarcError(List<MarcError> errors)

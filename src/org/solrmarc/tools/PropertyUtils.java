@@ -8,18 +8,15 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 public class PropertyUtils
 {
     protected static final Logger logger = Logger.getLogger(PropertyUtils.class);
-    private final static String TRANS_MAP_DIR = "translation_maps";
-    private final static String SCRIPTS_DIR = "index_scripts";
+//    private final static String TRANS_MAP_DIR = "translation_maps";
+//    private final static String SCRIPTS_DIR = "index_scripts";
 
     /**
      * Default Constructor It's private, so it can't be instantiated by other
@@ -247,10 +244,12 @@ public class PropertyUtils
         boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
         String lookedIn = "";
         String fullPathName = null;
+        int numFound = 0;
+        File propertyFileToReturn = null;
+        int pathCnt = propertyPaths.length - 1;
         if (propertyPaths != null)
         {
-            File propertyFile = new File(propertyFileName);
-            int pathCnt = 0;
+            File propertyFile = new File(propertyPaths[pathCnt], propertyFileName);
             do
             {
                 if (propertyFile.exists() && propertyFile.isFile() && propertyFile.canRead())
@@ -268,51 +267,42 @@ public class PropertyUtils
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                    if (showName)
-                        logger.info("Opening file: " + propertyFile.getAbsolutePath());
+                    if (propertyFileToReturn == null) 
+                    {
+                        propertyFileToReturn = propertyFile;
+                    }
                     else
-                        logger.debug("Opening file: " + propertyFile.getAbsolutePath());
-                    break; // we found it!
+                    {
+                        logger.debug("Skipped opening file: " + propertyFile.getAbsolutePath());
+                    }
+                    numFound++;
                 }
                 else
                 {
                     logger.debug("looked for file: " + propertyFile.getAbsolutePath());
                 }
                 if (verbose) lookedIn = lookedIn + propertyFile.getAbsolutePath() + "\n";
-                if (propertyPaths != null && pathCnt < propertyPaths.length)
+                pathCnt--;
+                if (propertyPaths != null && pathCnt >= 0)
                 {
                     propertyFile = new File(propertyPaths[pathCnt], propertyFileName);
                 }
-                pathCnt++;
-            } while (propertyPaths != null && pathCnt <= propertyPaths.length);
+            } while (propertyPaths != null && pathCnt >= 0);
         }
-        // if we didn't find it as a file, look for it as a URL
-        String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
-        if (verbose) errmsg = errmsg + "\n Looked in: " + lookedIn;
-//        if (fullPathName == null)
-//        {
-//            PropertyUtils utilObj = new PropertyUtils();
-//            URL url = utilObj.getClass().getClassLoader().getResource(propertyFileName);
-//            if (url == null) url = utilObj.getClass().getResource("/" + propertyFileName);
-//            if (url == null)
-//            {
-//                logger.error(errmsg);
-//                throw new IllegalArgumentException(errmsg);
-//            }
-//            if (showName)
-//                logger.info("Opening resource via URL: " + url.toString());
-//            else
-//                logger.debug("Opening resource via URL: " + url.toString());
-//
-//            /*
-//             * if (url == null) url =
-//             * utilObj.getClass().getClassLoader().getResource(propertyPath +
-//             * "/" + propertyFileName); if (url == null) url =
-//             * utilObj.getClass().getResource("/" + propertyPath + "/" +
-//             * propertyFileName);
-//             */
-//            fullPathName = url.toExternalForm();
-//        }
+        if (numFound == 0)
+        {
+            String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
+            logger.error(errmsg);
+            throw new IllegalArgumentException(errmsg);
+        }
+        else if (numFound == 1)
+        {
+            logger.debug("Opening file: " + propertyFileToReturn.getAbsolutePath());
+        }
+        else if (numFound > 1)
+        {
+            logger.info("Opening file (instead of "+(numFound-1)+ " other options): " + propertyFileToReturn.getAbsolutePath());
+        }
         return (fullPathName);
     }
 
@@ -338,50 +328,6 @@ public class PropertyUtils
 
         return sb.toString();
     }
-
-    private static void addToPropertySearchPath(String pathToAdd, ArrayList<String> propertySearchPath, Set<String> propertySearchSet)
-    {
-        if (!propertySearchSet.contains(pathToAdd))
-        {
-            propertySearchPath.add(pathToAdd);
-            propertySearchPath.add(pathToAdd + File.separator + TRANS_MAP_DIR);
-            propertySearchPath.add(pathToAdd + File.separator + SCRIPTS_DIR);
-            propertySearchSet.add(pathToAdd);
-        }
-    }
-
-//    public static String[] makePropertySearchPath(String solrmarcPath, String siteSpecificPath, String configFilePath, String homeDir)
-//    {
-//        ArrayList<String> propertySearchPath = new ArrayList<String>();
-//        Set<String> propertySearchSet = new HashSet<String>();
-//        if (siteSpecificPath != null)
-//        {
-//            String sitePaths[] = siteSpecificPath.split("[|]");
-//            for (String site : sitePaths)
-//            {
-//                addToPropertySearchPath(site, propertySearchPath, propertySearchSet);
-//            }
-//
-//        }
-//        if (solrmarcPath != null)
-//        {
-//            String smPaths[] = solrmarcPath.split("[|]");
-//            for (String path : smPaths)
-//            {
-//                addToPropertySearchPath(path, propertySearchPath, propertySearchSet);
-//            }
-//
-//        }
-//        if (configFilePath != null)
-//        {
-//            addToPropertySearchPath(configFilePath, propertySearchPath, propertySearchSet);
-//        }
-//        if (homeDir != null)
-//        {
-//            addToPropertySearchPath(homeDir, propertySearchPath, propertySearchSet);
-//        }
-//        return (propertySearchPath.toArray(new String[0]));
-//    }
 
     public static File findFirstExistingFile(String[] homeDirStrs, String indexSpec)
     {

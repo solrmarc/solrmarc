@@ -360,8 +360,10 @@ public class Boot
     private static File getDirToStartFrom(String[] homeDirStrs, File dir)
     {
         if (homeDirStrs == null) return(dir);
-        for (String homeDirStr : homeDirStrs)
+        // traverse list in reverse order so later entries override earlier ones.
+        for (int i = homeDirStrs.length -1 ; i >= 0; i--)
         {
+            String homeDirStr = homeDirStrs[i];
             File dirSolrJ = new File(homeDirStr, dir.getPath());
             if (dirSolrJ.exists())
             {

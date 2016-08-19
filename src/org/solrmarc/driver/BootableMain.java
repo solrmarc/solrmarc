@@ -2,8 +2,10 @@ package org.solrmarc.driver;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -82,7 +84,20 @@ public class BootableMain
         }
         if (options.has("dir"))
         {
-            homeDirStrs = (options.valueOf(homeDirs) + "|" + Boot.getDefaultHomeDir()).split("[|]");
+            File defDir = new File(Boot.getDefaultHomeDir());
+            List<String> homeDirList = new ArrayList<>();
+            boolean hasDefDir = false;
+            for (String dir :  (options.valueOf(homeDirs).replaceAll("[,;]", "|").split("[|]")))
+            {
+                File dirAsFile = new File(dir);
+                if (dirAsFile.getAbsolutePath().equals(defDir.getAbsolutePath()))
+                {
+                    hasDefDir = true;
+                }
+                homeDirList.add(dirAsFile.getAbsolutePath());
+            }
+            if (!hasDefDir)  homeDirList.add(0, defDir.getAbsolutePath());
+            homeDirStrs = homeDirList.toArray(new String[0]);
         }
         else 
         {
@@ -112,7 +127,7 @@ public class BootableMain
         try { 
             if (options.has("locallib"))
             {
-                addnlLibDirStrs = options.valueOf(addnlLibDirs).split("[|]");
+                addnlLibDirStrs = options.valueOf(addnlLibDirs).split("[,;|]");
                 Boot.extendClasspathWithLocalJarDirs(homeDirStrs, addnlLibDirStrs);
             }
         }
@@ -147,14 +162,14 @@ public class BootableMain
      */
     private static boolean isLog4jConfigured()
     {
-        Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+        Enumeration<?> appenders = LogManager.getRootLogger().getAllAppenders();
         if (appenders.hasMoreElements())
         {
             return true;
         }
         else
         {
-            Enumeration loggers = LogManager.getCurrentLoggers();
+            Enumeration<?> loggers = LogManager.getCurrentLoggers();
             while (loggers.hasMoreElements())
             {
                 Logger c = (Logger) loggers.nextElement();

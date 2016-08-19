@@ -21,38 +21,38 @@ import java.util.regex.Pattern;
 public class JavaValueExtractorUtils
 {
     private final static Logger logger = Logger.getLogger(JavaValueExtractorUtils.class);
-    private final static List<File> sourceFiles = new ArrayList<>();
     private final static Map<File, String> packageNamesForFile = new LinkedHashMap<>();
     private final static Pattern packageFinder = Pattern.compile("package[ \t]+(([a-z_][a-z0-9_]*[.])*[a-z_][a-z0-9_]*)[ \t]*;.*");
+    private static Map<String,List<File>> sourceFilesMap = new LinkedHashMap<String, List<File>>();
 
-    protected static void clean()
-    {
-        logger.debug("Clean...");
-        deleteFolder(new File(getBinDirectory()));
-    }
-
-    private static void deleteFolder(File folder)
-    {
-        final File[] files = folder.listFiles();
-        if (files != null)
-        {
-            for (File file : files)
-            {
-                if (file.isDirectory())
-                {
-                    deleteFolder(file);
-                }
-                else if (!file.delete())
-                {
-                    throw new RuntimeException("Couldn't delete file " + file.getAbsolutePath());
-                }
-            }
-        }
-        if (!folder.delete())
-        {
-            throw new RuntimeException("Couldn't delete file " + folder.getAbsolutePath());
-        }
-    }
+////    protected static void clean()
+////    {
+////        logger.debug("Clean...");
+////        deleteFolder(new File(getBinDirectory()));
+////    }
+////
+//    private static void deleteFolder(File folder)
+//    {
+//        final File[] files = folder.listFiles();
+//        if (files != null)
+//        {
+//            for (File file : files)
+//            {
+//                if (file.isDirectory())
+//                {
+//                    deleteFolder(file);
+//                }
+//                else if (!file.delete())
+//                {
+//                    throw new RuntimeException("Couldn't delete file " + file.getAbsolutePath());
+//                }
+//            }
+//        }
+//        if (!folder.delete())
+//        {
+//            throw new RuntimeException("Couldn't delete file " + folder.getAbsolutePath());
+//        }
+//    }
 
     /**
      * Compiles java sources if they have changed.
@@ -62,66 +62,64 @@ public class JavaValueExtractorUtils
      */
     protected static boolean compileSources() throws IOException
     {
-        createDirectories();
-        final List<File> sourceFiles = getChangedSourceFiles();
-        if (sourceFiles.isEmpty())
-        {
-            return false;
-        }
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        boolean compiledSome = false;
         if (compiler == null)
         {
             logger.warn("Java environment at JAVA_HOME = "+System.getProperty("java.home")+ " does not have a Java compiler.");
-            logger.warn("Any custom mixin routines in "+getSrcDirectory()+ " will not be compiled and will not be available.");
-            return false;
+            logger.warn("Any custom mixin routines will not be compiled and will not be available.");
+            return compiledSome;
         }
-        List<File> classpath = new  ArrayList<>();
-        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-        logger.debug("Classpath for compiling java files:");
-        for (URL url : sysLoader.getURLs())
+        for (String homeDirectory : ValueIndexerFactory.getDirsContainingJavaSource())
         {
-            classpath.add(new File(url.getFile()));
-            logger.debug("    " + url.getFile());
-        }
-        final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, Charset.forName("UTF-8"));
-        fileManager.setLocation(StandardLocation.SOURCE_PATH, Collections.singleton(new File(getSrcDirectory())));
-        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(getBinDirectory())));
-        fileManager.setLocation(StandardLocation.CLASS_PATH, classpath);
-
-        final DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
-        final Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjectsFromFiles(sourceFiles);
-        final Iterable<String> options = Collections.singletonList("-g");
-        final JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticCollector, options, null, units);
-
-        logger.trace("Compile java files:\n" + sourceFiles.toString().replaceAll(",", ",\n"));
-        
-        if (!task.call())
-        {
-            StringBuilder buffer = new StringBuilder();
-            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnosticCollector.getDiagnostics())
+            String srcDirectory = homeDirectory + File.separator + "index_java" + File.separator + "src";
+            String binDirectory = homeDirectory + File.separator + "index_java" + File.separator + "bin";
+            createBinDirectory(binDirectory);            
+            final List<File> sourceFiles = getChangedSourceFiles(srcDirectory, binDirectory);
+            if (sourceFiles.isEmpty())
             {
-                buffer.append(diagnostic.toString()).append('\n');
+                continue;
             }
-            throw new RuntimeException('\n' + buffer.toString() + "\nCompiling java sources failed!");
+            compiledSome = true;
+            List<File> classpath = new  ArrayList<>();
+            URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+            logger.debug("Classpath for compiling java files:");
+            for (URL url : sysLoader.getURLs())
+            {
+                classpath.add(new File(url.getFile()));
+                logger.debug("    " + url.getFile());
+            }
+            final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, Charset.forName("UTF-8"));
+            fileManager.setLocation(StandardLocation.SOURCE_PATH, Collections.singleton(new File(srcDirectory)));
+            fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(binDirectory)));
+            fileManager.setLocation(StandardLocation.CLASS_PATH, classpath);
+    
+            final DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
+            final Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjectsFromFiles(sourceFiles);
+            final Iterable<String> options = Collections.singletonList("-g");
+            final JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticCollector, options, null, units);
+    
+            logger.trace("Compile java files:\n" + sourceFiles.toString().replaceAll(",", ",\n"));
+            
+            if (!task.call())
+            {
+                StringBuilder buffer = new StringBuilder();
+                for (Diagnostic<? extends JavaFileObject> diagnostic : diagnosticCollector.getDiagnostics())
+                {
+                    buffer.append(diagnostic.toString()).append('\n');
+                }
+                throw new RuntimeException('\n' + buffer.toString() + "\nCompiling java sources failed!");
+            }
+            logger.trace("... done");
+            fileManager.close();
         }
-        logger.trace("... done");
-        fileManager.close();
-
         return true;
     }
 
-    private static void createDirectories()
+    private static void createBinDirectory(String binDirectoryStr)
     {
-        final File srcDirectory = new File(getSrcDirectory());
-        final File binDirectory = new File(getBinDirectory());
+        final File binDirectory = new File(binDirectoryStr);
 
-        if (!srcDirectory.exists())
-        {
-            if (!srcDirectory.mkdirs())
-            {
-                throw new RuntimeException("Couldn't create source directory: " + srcDirectory.getAbsolutePath());
-            }
-        }
         if (!binDirectory.exists())
         {
             if (!binDirectory.mkdirs())
@@ -131,19 +129,19 @@ public class JavaValueExtractorUtils
         }
     }
 
-    private static String getBinDirectory()
-    {
-        return (ValueIndexerFactory.getDirContainingJavaSource() + File.separator + "index_java" + File.separator + "bin");
-    }
-
-    private static String getSrcDirectory()
-    {
-        return (ValueIndexerFactory.getDirContainingJavaSource() + File.separator + "index_java" + File.separator + "src");
-    }
+//    private static String getBinDirectory()
+//    {
+//        return (ValueIndexerFactory.getDirContainingJavaSource() + File.separator + "index_java" + File.separator + "bin");
+//    }
+//
+//    private static String getSrcDirectory(String homeDirectory)
+//    {
+//        return (homeDirectory + File.separator + "index_java" + File.separator + "src");
+//    }
 
     protected static Class<?>[] getClasses()
     {
-        final List<String> classNames = getClassNames();
+        final Set<String> classNames = getClassNames();
         final List<Class<?>> classList = new ArrayList<Class<?>>(classNames.size());
         final ClassLoader classLoader = getClassLoader();
         for (String className : classNames)
@@ -164,33 +162,46 @@ public class JavaValueExtractorUtils
 
     private static ClassLoader getClassLoader()
     {
-        try
+        ArrayList<URL> listURL = new ArrayList<URL>();
+        for (String homeDirectory : ValueIndexerFactory.getDirsContainingJavaSource())
         {
-            final URL url = new File(getBinDirectory()).toURI().toURL();
-            return new URLClassLoader(new URL[] { url });
-//            return Boot.extendClasspathWithClassDir(new File(getBinDirectory()));
+            String binDirectory = homeDirectory + File.separator + "index_java" + File.separator + "bin";
+            try {
+                URL url = new File(binDirectory).toURI().toURL();
+                // Insert each subsequent URL at the front of the list so later directories are searched first.
+                listURL.add(0, url);
+            }
+            catch (MalformedURLException e)
+            {
+                throw new RuntimeException(e);
+            }
         }
-        catch (MalformedURLException e)
-        {
-            throw new RuntimeException(e);
-        }
+        URL[] URLs = listURL.toArray(new URL[0]);
+        return new URLClassLoader(URLs);
     }
 
-    private static List<String> getClassNames()
+    private static Set<String> getClassNames()
     {
-        final List<File> sourceFiles = getSourceFiles();
-        final List<String> classNames = new ArrayList<>();
-        for (final File sourceFile : sourceFiles)
+        final Set<String> classNames = new LinkedHashSet<>();
+
+        for (String homeDirectory : ValueIndexerFactory.getDirsContainingJavaSource())
         {
-            classNames.add(getClassNameForSourceFile(sourceFile));
+            String srcDirectory = homeDirectory + File.separator + "index_java" + File.separator + "src";
+            String binDirectory = homeDirectory + File.separator + "index_java" + File.separator + "bin";
+
+            List<File> sourceFiles = getSourceFiles(srcDirectory);
+            for (final File sourceFile : sourceFiles)
+            {
+                classNames.add(getClassNameForSourceFile(sourceFile, srcDirectory, binDirectory));
+            }
         }
         return classNames;
     }
 
-    private static String getClassNameForSourceFile(final File sourceFile)
+    private static String getClassNameForSourceFile(final File sourceFile, String srcDirectory, String binDirectory)
     {
         final String sourcePath = sourceFile.getPath();
-        final int pathOffset = getSrcDirectory().length() + (getSrcDirectory().endsWith("/") ? 0 : 1);
+        final int pathOffset = srcDirectory.length() + (srcDirectory.endsWith("/") ? 0 : 1);
         final String classPath = sourcePath.substring(pathOffset, sourcePath.length() - 5);
         String className = classPath.replace(File.separator, ".");
         if (!className.contains("."))
@@ -202,19 +213,19 @@ public class JavaValueExtractorUtils
         return(className);
     }
     
-    private static String getClassFileForSourceFile(final File sourceFile)
+    private static String getClassFileForSourceFile(final File sourceFile, String srcDirectory, String binDirectory)
     {
         final String sourcePath = sourceFile.getPath();
-        final int pathOffset = getSrcDirectory().length() + (getSrcDirectory().endsWith("/") ? 0 : 1);
+        final int pathOffset = srcDirectory.length() + (srcDirectory.endsWith("/") ? 0 : 1);
         final String classPath = sourcePath.substring(pathOffset, sourcePath.length() - 5);
-        String classFile = classPath.replace(File.separator, ".");
+        String classFile = classPath;
         if (!classPath.contains(File.separator))
         {
             // find package in source file
             final String packageName = getPackageName(sourceFile);
             classFile = packageName.replace(".", File.separator) + classFile;
         }
-        return(getBinDirectory() + File.separator + classFile + ".class");
+        return(binDirectory + File.separator + classFile + ".class");
     }
 
     private static String getPackageName(File sourceFile)
@@ -256,13 +267,13 @@ public class JavaValueExtractorUtils
         return packageName;
     }
 
-    private static List<File> getChangedSourceFiles()
+    private static List<File> getChangedSourceFiles(String srcDirectory, String binDirectory)
     {
-        final List<File> sourceFiles = getSourceFiles();
+        final List<File> sourceFiles = getSourceFiles(srcDirectory);
         final List<File> changedSourceFiles = new ArrayList<>();
         for (final File sourceFile : sourceFiles)
         {
-            if (hasChanged(sourceFile))
+            if (hasChanged(sourceFile, srcDirectory, binDirectory))
             {
                 changedSourceFiles.add(sourceFile);
             }
@@ -270,28 +281,33 @@ public class JavaValueExtractorUtils
         return changedSourceFiles;
     }
 
-    private static List<File> getSourceFiles()
+    private static List<File> getSourceFiles(String srcDirectory)
     {
-        if (sourceFiles.isEmpty())
+        List<File> sourceFiles;
+        if (sourceFilesMap.containsKey(srcDirectory))
         {
-            final Queue<File> directories = new LinkedList<>();
-            directories.add(new File(getSrcDirectory()));
-            while (!directories.isEmpty())
+            sourceFiles = sourceFilesMap.get(srcDirectory);
+            return sourceFiles;
+        }
+        sourceFiles = new ArrayList<File>();
+        final Queue<File> directories = new LinkedList<>();
+        directories.add(new File(srcDirectory));
+        while (!directories.isEmpty())
+        {
+            final File directory = directories.poll();
+            for (File file : listFiles(directory))
             {
-                final File directory = directories.poll();
-                for (File file : listFiles(directory))
+                if (file.isDirectory())
                 {
-                    if (file.isDirectory())
-                    {
-                        directories.add(file);
-                    }
-                    else if (file.isFile() && file.getName().endsWith(".java"))
-                    {
-                        sourceFiles.add(file);
-                    }
+                    directories.add(file);
+                }
+                else if (file.isFile() && file.getName().endsWith(".java"))
+                {
+                    sourceFiles.add(file);
                 }
             }
         }
+        sourceFilesMap.put(srcDirectory, sourceFiles);
         return sourceFiles;
     }
 
@@ -305,11 +321,10 @@ public class JavaValueExtractorUtils
         return fileList != null ? fileList : new File[0];
     }
 
-    private static boolean hasChanged(File sourceFile)
+    private static boolean hasChanged(File sourceFile, String srcDirectory, String binDirectory)
     {
         final String sourcePath = sourceFile.getPath();
-        final String targetPath = getClassFileForSourceFile(new File(sourcePath));
-        //getBinDirectory() + sourcePath.substring(getSrcDirectory().length(), sourcePath.length() - 5) + ".class";
+        final String targetPath = getClassFileForSourceFile(new File(sourcePath), srcDirectory, binDirectory);
         final File targetFile = new File(targetPath);
         return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();
     }
