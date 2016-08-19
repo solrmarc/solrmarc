@@ -44,6 +44,7 @@ import org.apache.log4j.Logger;
  * @version $Id: MarcFilteredReader.java 1718 2013-11-08 21:35:12Z rh9ec@virginia.edu $
  *
  */
+@SuppressWarnings("deprecation")
 public class MarcFilteredReader implements MarcReader
 {
     String includeRecordIfFieldPresent = null;
@@ -176,7 +177,7 @@ public class MarcFilteredReader implements MarcReader
             }
             if (rec != null && includeRecordIfFieldPresent != null)
             {
-                Set<String> fields = SolrIndexer.instance().getFieldList(rec, includeRecordIfFieldPresent);
+                Set<String> fields = SolrIndexer.getFieldList(rec, includeRecordIfFieldPresent);
                 if (fields.size() != 0)
                 {
                     if (includeRecordIfFieldContains == null || Utils.setItemContains(fields, includeRecordIfFieldContains))
@@ -188,7 +189,7 @@ public class MarcFilteredReader implements MarcReader
            
             if (rec != null && includeRecordIfFieldMissing != null)
             {
-                Set<String> fields = SolrIndexer.instance().getFieldList(rec, includeRecordIfFieldMissing);
+                Set<String> fields = SolrIndexer.getFieldList(rec, includeRecordIfFieldMissing);
                 if ((includeRecordIfFieldDoesntContain == null && fields.size() == 0) ||
                     (includeRecordIfFieldDoesntContain != null && !Utils.setItemContains(fields, includeRecordIfFieldDoesntContain)))
                 {

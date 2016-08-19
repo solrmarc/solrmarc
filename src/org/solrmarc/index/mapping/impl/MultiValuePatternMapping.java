@@ -4,7 +4,6 @@ package org.solrmarc.index.mapping.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 
 import org.solrmarc.index.extractor.impl.patternMapping.PatternMapping;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;

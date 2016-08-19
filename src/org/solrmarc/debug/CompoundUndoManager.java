@@ -15,7 +15,11 @@ import javax.swing.undo.*;
 public class CompoundUndoManager extends UndoManager
 	implements UndoableEditListener, DocumentListener
 {
-	private UndoManager undoManager;
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 4418890504436288446L;
+    private UndoManager undoManager;
 	private CompoundEdit compoundEdit;
 	private JTextComponent textComponent;
 	private UndoAction undoAction;
@@ -186,7 +190,12 @@ public class CompoundUndoManager extends UndoManager
 
 	class MyCompoundEdit extends CompoundEdit
 	{
-		public boolean isInProgress()
+		/**
+         * 
+         */
+        private static final long serialVersionUID = 4988240353630290406L;
+
+        public boolean isInProgress()
 		{
 			//  in order for the canUndo() and canRedo() methods to work
 			//  assume that the compound edit is never in progress
@@ -214,7 +223,12 @@ public class CompoundUndoManager extends UndoManager
 	 */
 	class UndoAction extends AbstractAction
 	{
-		public UndoAction()
+		/**
+         * 
+         */
+        private static final long serialVersionUID = 3755896176417375970L;
+
+        public UndoAction()
 		{
 			putValue( Action.NAME, "Undo" );
 			putValue( Action.SHORT_DESCRIPTION, getValue(Action.NAME) );
@@ -247,7 +261,12 @@ public class CompoundUndoManager extends UndoManager
 	 */
 	class RedoAction extends AbstractAction
 	{
-		public RedoAction()
+		/**
+         * 
+         */
+        private static final long serialVersionUID = -3275708654104430189L;
+
+        public RedoAction()
 		{
 			putValue( Action.NAME, "Redo" );
 			putValue( Action.SHORT_DESCRIPTION, getValue(Action.NAME) );

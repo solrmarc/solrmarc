@@ -24,9 +24,6 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
-import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -901,7 +898,6 @@ public final class Utils
      * subfield data from the field, place it in a single string (individual
      * subfield data separated by spaces) and add the string to the result set.
      */
-    @SuppressWarnings("unchecked")
     public static final Set<String> getAllSubfields(final Record record, String[] tags)
     {
         Set<String> result = new LinkedHashSet<>();
@@ -961,11 +957,10 @@ public final class Utils
      * returns all values of subfield strings of a particular code contained in
      * the data field
      */
-    @SuppressWarnings("unchecked")
     public static final List<String> getSubfieldStrings(DataField df, char code)
     {
         List<Subfield> listSubcode = df.getSubfields(code);
-        List<String> vals = new ArrayList(listSubcode.size());
+        List<String> vals = new ArrayList<>(listSubcode.size());
         for (Subfield s : listSubcode)
         {
             vals.add(s.getData());

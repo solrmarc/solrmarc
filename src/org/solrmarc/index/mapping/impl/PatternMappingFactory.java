@@ -19,27 +19,9 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
         return (mappingConfiguration.startsWith("map") || mappingConfiguration.startsWith("filter"));
     }
 
-    // @Override
-    // public AbstractSingleValueMapping createSingleValueMapping(String
-    // mappingConfiguration)
-    // {
-    //// final String mappingName = mappingConfiguration.substring(4,
-    // mappingConfiguration.length() - 1);
-    //// List<PatternMapping> patternMappings =
-    // PatternMappingValueExtractorFactory.getPatternMappingsForName(mappingName);
-    // List<PatternMapping> patternMappings =
-    // pattermMappingsFromString(mappingConfiguration.substring(4,
-    // mappingConfiguration.length() - 1));
-    // return new SingleValuePatternMapping(patternMappings);
-    // }
-
     @Override
     public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration)
     {
-        // final String mappingName = mappingConfiguration.substring(4,
-        // mappingConfiguration.length() - 1);
-        // List<PatternMapping> patternMappings =
-        // PatternMappingValueExtractorFactory.getPatternMappingsForName(mappingName);
         int parenLoc = mappingConfiguration.indexOf("(");
         return getMultiValuePattermMappingsFromString( mappingConfiguration.substring(parenLoc + 1, mappingConfiguration.length() - 1));
     }
@@ -47,7 +29,6 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
     @Override
     public AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
     {
-        List<PatternMapping> patternMappings;
         if (mapParts.length > 2)
         {
             return(getMultiValuePattermMappingsFromStrings(mapParts, 1));
@@ -56,7 +37,6 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
         {
             return(getMultiValuePattermMappingsFromString(mapParts[1]));
         }
-     //   return new MultiValuePatternMapping(patternMappings, isFilter);
     }
 
     public static MultiValuePatternMapping getMultiValuePattermMappingsFromString(String mapSpec)

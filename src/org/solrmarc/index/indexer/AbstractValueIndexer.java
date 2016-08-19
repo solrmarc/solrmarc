@@ -4,7 +4,6 @@ package org.solrmarc.index.indexer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import org.marc4j.marc.Record;
 import org.solrmarc.index.collector.MultiValueCollector;

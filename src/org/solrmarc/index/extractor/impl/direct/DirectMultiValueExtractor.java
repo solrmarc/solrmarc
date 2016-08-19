@@ -7,7 +7,6 @@ import org.solrmarc.index.extractor.formatter.FieldFormatterDecorator;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import org.solrmarc.index.indexer.IndexerSpecException;
-import org.solrmarc.index.specification.AbstractSpecificationFactory;
 import org.solrmarc.index.specification.Specification;
 
 import java.util.Collection;

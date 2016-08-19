@@ -23,12 +23,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("deprecation")
 public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
 {
     // TODO: Use dynamic paths
     private final static Logger logger = Logger.getLogger(ScriptValueExtractorFactory.class);
     // TODO: Use SolrIndexer instead of Object.
-    private final static Object SOLR_INDEXER = null;
     private final static Map<String, Interpreter> INTERPRETERS = new HashMap<>();
     private static Map<String, BshMethod> methods = new HashMap<>();
 

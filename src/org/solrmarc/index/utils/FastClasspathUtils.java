@@ -1,7 +1,6 @@
 package org.solrmarc.index.utils;
 
 import org.apache.log4j.Logger;
-import org.solrmarc.driver.Boot;
 import org.solrmarc.driver.BootableMain;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import org.solrmarc.index.extractor.impl.custom.Mixin;

@@ -1,19 +1,13 @@
 package org.solrmarc.index.mapping.impl;
 
 import org.apache.log4j.Logger;
-import org.solrmarc.index.extractor.impl.patternMapping.PatternMapping;
-import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.solrmarc.tools.PropertyUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 

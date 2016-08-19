@@ -3,7 +3,6 @@ package org.solrmarc.index.mapping.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.solrmarc.index.extractor.methodcall.MultiValueMappingMethodCall;
 import org.solrmarc.index.extractor.methodcall.SingleValueMappingMethodCall;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 
