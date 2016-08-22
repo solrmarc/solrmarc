@@ -13,9 +13,9 @@ import org.apache.log4j.Logger;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
-import org.solrmarc.index.indexer.SolrMarcIndexerException;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.solr.SolrProxy;
+import org.solrmarc.tools.SolrMarcIndexerException;
 
 public class ThreadedIndexer extends Indexer
 {   

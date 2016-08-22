@@ -11,11 +11,11 @@ import org.marc4j.marc.Record;
 import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
-import org.solrmarc.index.indexer.SolrMarcIndexerException;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
+import org.solrmarc.tools.SolrMarcIndexerException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
