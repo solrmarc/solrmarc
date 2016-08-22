@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.solrmarc.index.indexer.IndexerSpecException;
-import org.solrmarc.index.indexer.SolrMarcIndexerException;
+import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.StringNaturalCompare;
 
 

@@ -7,7 +7,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcError;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
-import org.solrmarc.index.indexer.SolrMarcIndexerException;
+import org.solrmarc.tools.SolrMarcIndexerException;
 
 public class RecordAndDoc
 {
