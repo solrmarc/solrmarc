@@ -1,4 +1,4 @@
-package org.solrmarc.index.indexer;
+package org.solrmarc.tools;
 
 /**
  * Exception handler for Solrmarc
