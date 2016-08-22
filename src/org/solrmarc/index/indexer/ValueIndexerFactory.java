@@ -48,7 +48,7 @@ public class ValueIndexerFactory
     private static List<String> dirsContainingJavaSource = new ArrayList<String>();
     private static String homeDirStrs[] = null;
     private final Pattern specPattern = Pattern.compile("([-A-Za-z_0-9, \\t]*)([:=]|([+]=))(.*)");
-    boolean debug_parse = false;
+    boolean debug_parse = true;
     private boolean defaultUniqueVal = true;
     private final Pattern defaultUniquePattern = Pattern.compile("default.unique[ ]*[;=][ ]*[\"]?(true|false)[\"]?");
 
@@ -414,6 +414,11 @@ public class ValueIndexerFactory
             final MultiValueCollector collector = createMultiValueCollector(mapSpecs);
             return new MultiValueIndexer(fieldnames, singleValueExtractor, mappings, collector);
         }
+        else if (extractor == null)
+        {
+            throw new IllegalArgumentException(
+                    "Extractor is null, most likely there was an error parsing the index specification: "+ origSpec);
+        } 
         else
         {
             throw new IllegalArgumentException(

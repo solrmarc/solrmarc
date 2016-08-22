@@ -93,7 +93,8 @@ public class IndexDriver extends BootableMain
         }
         catch (SolrRuntimeException sre)
         {
-            logger.error("Error connecting to solr at URL "+solrURL, sre);
+            logger.error("Error connecting to solr at URL "+solrURL + " : " + sre.getMessage());
+            logger.debug("", sre);
 //            logger.error("Normally this should exit.  For testing purposes continuing and writing out solr records insetad.");
             logger.error("Exiting...");
             System.exit(6);

@@ -34,7 +34,11 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
     @Override
     public Collection<String> invoke(final Object[] parameters) throws Exception
     {
-        return (Collection<String>) method.invoke(parameters, interpreter);
+        Object result = method.invoke(parameters, interpreter);
+        if (result instanceof Collection)  
+            return((Collection<String>)result);
+        else 
+            return(null);
     }
 
     @Override

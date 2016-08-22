@@ -40,9 +40,9 @@ public class BootableMain
         readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("marcreader.properties");
         configSpecs = parser.acceptsAll(Arrays.asList( "c", "config"), "index specification file to use").withRequiredArg();
         homeDirs = parser.accepts("dir", "directory to look in for scripts, mixins, and translation maps").withRequiredArg().ofType( String.class );
-        addnlLibDirs = parser.accepts("locallib", "directory to look in for additional jars and libraries").withRequiredArg().ofType( String.class );
+        addnlLibDirs = parser.accepts("lib_local", "directory to look in for additional jars and libraries").withRequiredArg().defaultsTo("lib_local");
         solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
-        solrjClass = parser.accepts("solrjClassName", "Classname of class to use for talking to solr").withRequiredArg().ofType( String.class ).defaultsTo("");
+        solrjClass = parser.accepts("solrjClassName", "Classname of class to use for talking to solr").withRequiredArg();
         errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
         errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
         errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
@@ -124,9 +124,9 @@ public class BootableMain
         
         // Now add local lib directories
         try { 
-            if (options.has("locallib"))
+            if (addnlLibDirs.value(options)!= null)
             {
-                addnlLibDirStrs = options.valueOf(addnlLibDirs).split("[,;|]");
+                addnlLibDirStrs = addnlLibDirs.value(options).split("[,;|]");
                 Boot.extendClasspathWithLocalJarDirs(homeDirStrs, addnlLibDirStrs);
             }
         }

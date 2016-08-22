@@ -247,9 +247,25 @@ public class PropertyUtils
         int numFound = 0;
         File propertyFileToReturn = null;
         int pathCnt = propertyPaths.length - 1;
-        if (propertyPaths != null)
+        // Check for Absolute path
+        File propertyFile = new File(propertyFileName);
+        if (propertyFile.isAbsolute() && propertyFile.exists() && propertyFile.isFile() && propertyFile.canRead())
         {
-            File propertyFile = new File(propertyPaths[pathCnt], propertyFileName);
+            numFound = 1;
+            propertyFileToReturn = propertyFile;
+            try
+            {
+                fullPathName = propertyFile.toURI().toURL().toExternalForm();
+            }
+            catch (MalformedURLException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        else if (propertyPaths != null && propertyPaths.length != 0)
+        {
+            propertyFile = new File(propertyPaths[pathCnt], propertyFileName);
             do
             {
                 if (propertyFile.exists() && propertyFile.isFile() && propertyFile.canRead())

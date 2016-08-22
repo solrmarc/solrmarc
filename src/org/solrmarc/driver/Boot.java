@@ -216,7 +216,7 @@ public class Boot
         File libPath = new File(homeDir, "lib");
         try
         {
-            extendClasspathWithLibJarDir(libPath);
+            extendClasspathWithLibJarDir(libPath, "marc4j.*[.]jar");
         }
         catch (RuntimeException ise)
         {
@@ -290,7 +290,7 @@ public class Boot
             if (file.getName().matches(patternToLoad))
             {
                 extendClasspathWithJar(sysLoader, file);
-                if (file.getName().matches(specialMatch))
+                if (specialMatch != null && file.getName().matches(specialMatch))
                 {
                     foundSpecial = true;
                 }
@@ -324,10 +324,10 @@ public class Boot
         extendClasspathWithDirOfClasses(sysLoader, dir);
     }
     
-    public static boolean extendClasspathWithLibJarDir(File dir)
+    public static boolean extendClasspathWithLibJarDir(File dir, String patternForSpecial)
     {
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-        boolean foundIt = extendClasspathWithJarDir(sysLoader, dir, ".*[.]jar", "marc4j.*[.]jar");
+        boolean foundIt = extendClasspathWithJarDir(sysLoader, dir, ".*[.]jar", patternForSpecial);
         return(foundIt);
     }
     
@@ -379,6 +379,7 @@ public class Boot
     {
         for (String libdirname : addnlLibDirStrs)
         {
+            boolean found = false;
             File libDir = new File(libdirname);
             if (!libDir.isAbsolute())
             {
@@ -387,13 +388,16 @@ public class Boot
                     libDir = new File(homeDir, libdirname);
                     if (libDir.exists() && libDir.isDirectory())
                     {
-                        //found match
+                        found = true;
                         break;
                     }
                 }
             }
-            extendClasspathWithLibJarDir(libDir);
-            extendClasspathWithDirOfClasses(libDir);
+            if (found)
+            {
+                extendClasspathWithLibJarDir(libDir, null);
+                extendClasspathWithDirOfClasses(libDir);
+            }
         }
     }
 }

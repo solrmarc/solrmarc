@@ -83,7 +83,7 @@ identifier = [A-Za-z0-9][A-Z_a-z0-9./\\]*[A-Za-z0-9]
 nonquotedstring = [^,() \\\"]*
 fullrecord = "xml"|"raw"|"json"|"json2"|"text"|"FullRecordAs"[A-Za-z0-9]*
 datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
-%state STRING CONDITIONAL SUBFIELDSPEC CUSTOMSPEC CUSTOMMETHOD CUSTOMPARAM MAPSPEC CONSTANT 
+%state STRING CONDITIONAL SUBFIELDSPEC CUSTOMSPEC SCRIPTSPEC CUSTOMMETHOD CUSTOMPARAM MAPSPEC CONSTANT 
 
 %%
 <YYINITIAL>{
@@ -95,7 +95,7 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 "?"                     { yybegin(CONDITIONAL);  return symbol("?",FullSym.QUESTION); }
 ","                     { yybegin(MAPSPEC);      return symbol(",", FullSym.COMMA); }
 {white_space}           { /* ignore */ }
-"script"                { yybegin(CUSTOMSPEC);   return symbol("SCRIPT", FullSym.SCRIPT, yytext() ); }
+"script"                { yybegin(SCRIPTSPEC);   return symbol("SCRIPT", FullSym.SCRIPT, yytext() ); }
 "custom"                { yybegin(CUSTOMSPEC);   return symbol("CUSTOM", FullSym.CUSTOM, yytext() ); }
 "java"                  { yybegin(CUSTOMSPEC);   return symbol("JAVA", FullSym.JAVA, yytext() ); }
 {fullrecord}            { yybegin(MAPSPEC);      return symbol("FULLRECORD", FullSym.FULLRECORD, yytext()); }
@@ -115,6 +115,14 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 ")"                     { return symbol(")",FullSym.RPAREN); }
 ","                     { yybegin(CUSTOMMETHOD); return symbol(",", FullSym.COMMA); }
 {identifier}			{ return symbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
+{white_space}           { /* ignore */ }
+}
+
+<SCRIPTSPEC>{
+"("                     { return symbol("(",FullSym.LPAREN); }
+")"                     { return symbol(")",FullSym.RPAREN); }
+","                     { yybegin(CUSTOMMETHOD); return symbol(",", FullSym.COMMA); }
+{nonquotedstring}		{ return stringIdentifierOrNumber(yytext());  }
 {white_space}           { /* ignore */ }
 }
 

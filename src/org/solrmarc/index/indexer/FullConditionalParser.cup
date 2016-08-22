@@ -29,7 +29,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 import org.solrmarc.index.specification.*;
 
 parser code {:
-    private final static Logger logger = Logger.getLogger(ValueIndexerFactory.class);
+    private final static Logger logger = Logger.getLogger(FullConditionalParser.class);
 
     static FullConditionalScanner scanner;
     static boolean parser_debug;
@@ -182,6 +182,10 @@ parser code {:
         my_report_expected_token_ids();
     }
 
+    public void  debug_message(java.lang.String mess)
+    {
+        logger.debug(mess);
+    }
 :}
 
 /* define how to connect to the scanner! */
