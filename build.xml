@@ -18,6 +18,9 @@
 
     <import file="${buildtools.path}/parser_tasks.xml" optional="true" />
 
+	<tstamp>
+	    <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
 
     <target name="init">
         <!-- Create the time stamp -->
@@ -27,15 +30,6 @@
     </target>
 
     <target name="precompile" description="run jflex and cup to generate javafiles for parser and scanner" >
-<!--		<jflex file="${src}/org/solrmarc/index/specification/conditional/Scanner.lex" verbose="true" 
-			   outdir="${src}/org/solrmarc/index/specification/conditional" nobak="true" />
-    	
-        <cup srcfile="${src}/org/solrmarc/index/specification/conditional/ConditionalParser.cup"
-             destdir="${src}"
-             package="org.solrmarc.index.specification.conditional"
-       	 	 symbols="sym"
-             parser="ConditionalParser"
-        />  -->
 		<jflex file="${src}/org/solrmarc/index/indexer/FullScanner.lex" verbose="true" 
 			   outdir="${src}/org/solrmarc/index/indexer/" nobak="true" />
     	
@@ -85,7 +79,7 @@
         <jar destfile="${dist}/${custom.jar.name}.jar">
         	<manifest>
         	    <attribute name="Main-Class" value="org.solrmarc.driver.Boot"/>
-        <!--		<attribute name="Class-Path" value="${manifest.classpath}" />  -->
+    		    <attribute name="Built-Date" value="${TODAY}"/>
             </manifest>
    <!--      	<fileset dir="${basedir}" includes="log4j.properties" /> -->
         	<fileset dir="${build}" includes="**/*.class" />
