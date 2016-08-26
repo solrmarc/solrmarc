@@ -397,7 +397,7 @@ public class ValueIndexerFactory
                 mappings = createMultiValueMappings(origSpec, mapSpecs, indexOfJoin);
             else 
                 mappings = new ArrayList<AbstractMultiValueMapping>();
-            final MultiValueCollector collector = createMultiValueCollector(mapSpecs);
+            final MultiValueCollector collector = createMultiValueCollector(mapSpecs, true);
 
             return new MultiValueIndexer(fieldnames, multiValueExtractor, mappings, collector);
         }
@@ -654,11 +654,11 @@ public class ValueIndexerFactory
         collector.setUnique(this.defaultUniqueVal);
         return(collector);
     }
-    
-    public MultiValueCollector createMultiValueCollector(List<List<String>> mapSpecs)
+ 
+    public MultiValueCollector createMultiValueCollector(List<List<String>> mapSpecs, boolean setDefaultValForUnique)
     {
         MultiValueCollector collector = new MultiValueCollector();
-        collector.setUnique(this.defaultUniqueVal);
+        if (setDefaultValForUnique)  collector.setUnique(this.defaultUniqueVal);
         for (List<String> mapSpec : mapSpecs)
         {
             String mapParts[] = mapSpec.toArray(new String[0]);
@@ -696,6 +696,11 @@ public class ValueIndexerFactory
             }
         }
         return collector;
+    }
+    
+    public MultiValueCollector createMultiValueCollector(List<List<String>> mapSpecs)
+    {
+        return(createMultiValueCollector(mapSpecs, false));
     }
 
     // currently used by SolrIndexer methods that provide backwards-compatibility 
