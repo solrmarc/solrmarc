@@ -230,7 +230,15 @@ public class Boot
         }
         catch (ClassNotFoundException e)
         {
-            logger.fatal("Fatal error: Unable to find marc4j Record class, probably missing many others as well." + e.getMessage());
+            try { 
+                logger = Logger.getLogger(Boot.class);
+                org.apache.log4j.BasicConfigurator.configure();
+                logger.fatal("Fatal error: Unable to find marc4j Record class, probably missing many others as well.  " + e.getMessage());
+            }
+            catch (Exception e1)
+            {
+                System.err.println("Fatal error: Unable to find marc4j Record class, probably missing many others as well.");
+            }
             System.exit(11);
         }
     }
@@ -361,8 +369,8 @@ public class Boot
     private static File getDirToStartFrom(String[] homeDirStrs, File dir)
     {
         if (homeDirStrs == null) return(dir);
-        // traverse list in reverse order so later entries override earlier ones.
-        for (int i = homeDirStrs.length -1 ; i >= 0; i--)
+        // traverse list in stated order so earlier entries will be found and used before later ones.
+        for (int i = 0 ; i < homeDirStrs.length; i++)
         {
             String homeDirStr = homeDirStrs[i];
             File dirSolrJ = new File(homeDirStr, dir.getPath());

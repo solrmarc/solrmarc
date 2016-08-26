@@ -55,6 +55,7 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
             String mapEntry[] = mapParts[i].split("[ ]*=>[ ]*", 2);
             if (mapEntry.length == 2)
             {
+                mapEntry[0] = mapEntry[0].replaceAll("\\\\(.)", "$1");
                 try
                 {
                     pm.add(new PatternMapping(mapEntry[0], mapEntry[1], i));

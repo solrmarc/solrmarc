@@ -34,7 +34,7 @@ public class BootableMain
     OptionSpec<String> files;
     OptionSet options = null;
 
-    public void processArgs(String args[])
+    public void processArgs(String args[], boolean failOnZeroArgs)
     {
         OptionParser parser = new OptionParser(  );
         readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("marcreader.properties");
@@ -70,7 +70,7 @@ public class BootableMain
             }
             System.exit(1);
         }
-        if (args.length == 0 || options.has("help")) 
+        if ((failOnZeroArgs && args.length == 0) || options.has("help")) 
         {
             try
             {
@@ -95,7 +95,7 @@ public class BootableMain
                 }
                 homeDirList.add(dirAsFile.getAbsolutePath());
             }
-            if (!hasDefDir)  homeDirList.add(0, defDir.getAbsolutePath());
+            if (!hasDefDir)  homeDirList.add(defDir.getAbsolutePath());
             homeDirStrs = homeDirList.toArray(new String[0]);
         }
         else 

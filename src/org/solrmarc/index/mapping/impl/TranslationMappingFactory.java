@@ -73,7 +73,7 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
         Properties mappings = new Properties();
         for (String key : translationMapping.stringPropertyNames())
         {
-            if (key.startsWith(mappingPrefix))
+            if (key.startsWith(mappingPrefix+"."))
             {
                 String value = translationMapping.getProperty(key);
 //                if (value.equals("null"))

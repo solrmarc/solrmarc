@@ -112,7 +112,7 @@ public class SolrMarcDebug extends BootableMain
      */
     public SolrMarcDebug(String args[])
     {
-        super.processArgs(args);
+        super.processArgs(args, false);
         initialize();
     }
     

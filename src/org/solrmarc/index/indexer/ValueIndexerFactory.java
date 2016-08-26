@@ -227,6 +227,7 @@ public class ValueIndexerFactory
             if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map.")) 
             {
                 final String[] specParts = singleSpec.split("[ ]?[:=][ ]?", 2);
+                specParts[1] = specParts[1].replaceAll("\\\\(.)", "$1");
                 localMappingProperties.put(specParts[0].trim(), specParts[1].trim());
             }
         }
@@ -570,7 +571,7 @@ public class ValueIndexerFactory
     
     private boolean isAValueMappingConfiguration(final String configuration)
     {
-        if (configuration.matches("[A-Z0-9a-z_]+[.]properties([(][A-Za-z0-9]*[)])?") || 
+        if (configuration.matches(".+[.]properties([(][A-Za-z0-9]*[)])?") || 
                 configuration.matches("[(]this[)][.]properties([(][A-Za-z0-9]*[)])?") || 
                 configuration.startsWith("map") || 
                 configuration.startsWith("filter") || 

@@ -130,8 +130,8 @@ public class JavaValueExtractorUtils
             String binDirectory = homeDirectory + File.separator + "index_java" + File.separator + "bin";
             try {
                 URL url = new File(binDirectory).toURI().toURL();
-                // Insert each subsequent URL at the front of the list so later directories are searched first.
-                listURL.add(0, url);
+                // Insert each subsequent URL at the back of the list so earlier directories are searched first.
+                listURL.add(url);
             }
             catch (MalformedURLException e)
             {

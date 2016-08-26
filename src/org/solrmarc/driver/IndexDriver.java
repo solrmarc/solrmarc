@@ -55,7 +55,7 @@ public class IndexDriver extends BootableMain
     
     public void execute()
     {
-        processArgs(args);
+        processArgs(args, true);
         initializeFromOptions();
 
         List<String> inputFiles = options.valuesOf(files);
@@ -157,6 +157,7 @@ public class IndexDriver extends BootableMain
         
         indexers = indexerFactory.createValueIndexers(specFiles);
         boolean includeErrors = (readerProps.getProperty("marc.include_errors", "false").equals("true"));
+        boolean returnErrors = (readerProps.getProperty("marc.return_errors", "false").equals("true"));
         indexer = null;
         // System.err.println("Reading and compiling index specification: "+ indexSpecification);
         if (multiThreaded)
@@ -164,7 +165,10 @@ public class IndexDriver extends BootableMain
         else 
             indexer = new Indexer(indexers, solrProxy);
         
-        indexer.setErr(Indexer.eErrorHandleVal.RETURN_ERROR_RECORDS);
+        if (returnErrors)
+        {
+            indexer.setErr(Indexer.eErrorHandleVal.RETURN_ERROR_RECORDS);
+        }
         if (includeErrors)
         {
             indexer.setErr(Indexer.eErrorHandleVal.INDEX_ERROR_RECORDS);
@@ -249,13 +253,22 @@ public class IndexDriver extends BootableMain
         int[][] errTypeCnt = new int[][]{{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
         for (final RecordAndDoc entry : errQ)
         {
-            if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      errTypeCnt[0][entry.getErrLvl().ordinal()] ++;
-            if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  
+            if (!entry.errLocs.isEmpty())      
             {
                 logger.debug("Error Rec id = "+ entry.rec.getControlNumber());
+            }
+            if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      
+            {
+                errTypeCnt[0][entry.getErrLvl().ordinal()] ++;
+            }
+            if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  
+            {
                 errTypeCnt[1][entry.getErrLvl().ordinal()] ++;
             }
-            if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))      errTypeCnt[2][entry.getErrLvl().ordinal()] ++;
+            if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))
+            {
+                errTypeCnt[2][entry.getErrLvl().ordinal()] ++;
+            }
         }
         showErrReport("MARC", errTypeCnt[0]);
         showErrReport("Index", errTypeCnt[1]);

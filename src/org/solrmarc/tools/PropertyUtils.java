@@ -238,15 +238,9 @@ public class PropertyUtils
     public static String getPropertyFileAbsoluteURL(String[] propertyPaths, String propertyFileName, boolean showName,
             String inputSource[])
     {
-        // InputStream in = null;
-        // look for properties file in paths
-        String verboseStr = System.getProperty("marc.test.verbose");
-        boolean verbose = (verboseStr != null && verboseStr.equalsIgnoreCase("true"));
-        String lookedIn = "";
-        String fullPathName = null;
-        int numFound = 0;
         File propertyFileToReturn = null;
-        int pathCnt = propertyPaths.length - 1;
+        String fullPathNameToReturn = null;
+        int numFound = 0;
         // Check for Absolute path
         File propertyFile = new File(propertyFileName);
         if (propertyFile.isAbsolute() && propertyFile.exists() && propertyFile.isFile() && propertyFile.canRead())
@@ -255,7 +249,7 @@ public class PropertyUtils
             propertyFileToReturn = propertyFile;
             try
             {
-                fullPathName = propertyFile.toURI().toURL().toExternalForm();
+                fullPathNameToReturn = propertyFile.toURI().toURL().toExternalForm();
             }
             catch (MalformedURLException e)
             {
@@ -265,23 +259,14 @@ public class PropertyUtils
         }
         else if (propertyPaths != null && propertyPaths.length != 0)
         {
-            propertyFile = new File(propertyPaths[pathCnt], propertyFileName);
-            do
+            for (String pathPrefix : propertyPaths) 
             {
+                propertyFile = new File(pathPrefix, propertyFileName);
                 if (propertyFile.exists() && propertyFile.isFile() && propertyFile.canRead())
                 {
-                    try
+                    if (inputSource != null && inputSource.length >= 1)
                     {
-                        fullPathName = propertyFile.toURI().toURL().toExternalForm();
-                        if (inputSource != null && inputSource.length >= 1)
-                        {
-                            inputSource[0] = propertyFile.getAbsolutePath();
-                        }
-                    }
-                    catch (MalformedURLException e)
-                    {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        inputSource[0] = propertyFile.getAbsolutePath();
                     }
                     if (propertyFileToReturn == null) 
                     {
@@ -297,13 +282,19 @@ public class PropertyUtils
                 {
                     logger.debug("looked for file: " + propertyFile.getAbsolutePath());
                 }
-                if (verbose) lookedIn = lookedIn + propertyFile.getAbsolutePath() + "\n";
-                pathCnt--;
-                if (propertyPaths != null && pathCnt >= 0)
-                {
-                    propertyFile = new File(propertyPaths[pathCnt], propertyFileName);
-                }
-            } while (propertyPaths != null && pathCnt >= 0);
+            }
+        }
+        if (propertyFileToReturn != null)
+        {
+            try
+            {
+                fullPathNameToReturn = propertyFileToReturn.toURI().toURL().toExternalForm();
+            }
+            catch (MalformedURLException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
         if (numFound == 0)
         {
@@ -319,7 +310,7 @@ public class PropertyUtils
         {
             logger.info("Opening file (instead of "+(numFound-1)+ " other options): " + propertyFileToReturn.getAbsolutePath());
         }
-        return (fullPathName);
+        return (fullPathNameToReturn);
     }
 
     /**

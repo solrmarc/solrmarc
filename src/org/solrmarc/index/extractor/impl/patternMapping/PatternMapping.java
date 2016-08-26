@@ -17,12 +17,14 @@ public class PatternMapping
      * Pattern#matcher(String).
      */
     private final Matcher inputMatcher;
+//    private final String inputString;
     private final String outputPattern;
     private final int orderIndex;
 
     public PatternMapping(final String inputPattern, final String outputPattern, final int orderIndex)
     {
         Pattern tmp = Pattern.compile(inputPattern);
+//         this.inputString = inputPattern;
         this.inputMatcher = tmp.matcher("");
         this.outputPattern = outputPattern;
         this.orderIndex = orderIndex;
@@ -76,7 +78,8 @@ public class PatternMapping
 
     public boolean canHandle(final String value)
     {
-        return inputMatcher.reset(value).find();
+        final boolean result = inputMatcher.reset(value).find();
+        return (result);
     }
 
     /**

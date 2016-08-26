@@ -210,19 +210,39 @@ public class Indexer
                     }
                 }
             }
+            catch (OutOfMemoryError oome)
+            {
+                logger.error("OOMError in record: "+ recDoc.rec.getControlNumber());
+                logger.error("while processing index specification: "+ indexer.getSpecLabel());
+                logger.error("number of per record exceptions: " + ((ValueIndexerFactory.instance().getPerRecordErrors() != null) ? ValueIndexerFactory.instance().getPerRecordErrors().size() : 0));
+                inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + oome.getMessage());
+                errLvl = eErrorSeverity.FATAL;
+                recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
+            }
             catch (InvocationTargetException ioe)
             {
+                logger.debug("Exception in record: "+ recDoc.rec.getControlNumber());
+                logger.debug("while processing index specification: "+ indexer.getSpecLabel());
                 Throwable wrapped = ioe.getTargetException();
-                Exception wrappedE = (wrapped instanceof Exception) ? (Exception)wrapped : null;
-                if (wrappedE != null && wrappedE instanceof IndexerSpecException)
+               // Exception wrappedE = (wrapped instanceof Exception) ? (Exception)wrapped : null;
+                if (wrapped != null && wrapped instanceof IndexerSpecException)
                 {
-                    errLvl = eErrorSeverity.max(errLvl, ((IndexerSpecException)wrappedE).getErrLvl());
+                    errLvl = eErrorSeverity.max(errLvl, ((IndexerSpecException)wrapped).getErrLvl());
+                }
+                else if (wrapped != null && wrapped instanceof OutOfMemoryError)
+                {
+                    logger.error("OOMError in record: "+ recDoc.rec.getControlNumber());
+                    logger.error("while processing index specification: "+ indexer.getSpecLabel());
+                    logger.error("number of per record exceptions: " + ((ValueIndexerFactory.instance().getPerRecordErrors() != null) ? ValueIndexerFactory.instance().getPerRecordErrors().size() : 0));
+                    inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + wrapped.getMessage());
+                    errLvl = eErrorSeverity.FATAL;
+                    recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
                 }
                 else
                 {
                     errLvl = eErrorSeverity.ERROR;
                 }
-                inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + wrappedE.getMessage());
+                inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + wrapped.getMessage());
                 recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
             }
             catch (SolrMarcIndexerException e)
@@ -231,12 +251,16 @@ public class Indexer
             }
             catch (IndexerSpecException e)
             {
+                logger.debug("Exception in record: "+ recDoc.rec.getControlNumber());
+                logger.debug("while processing index specification: "+ indexer.getSpecLabel());
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
                 errLvl = eErrorSeverity.max(errLvl, e.getErrLvl());
                 recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
             }
             catch (Exception e)
             {
+                logger.debug("Exception in record: "+ recDoc.rec.getControlNumber());
+                logger.debug("while processing index specification: "+ indexer.getSpecLabel());
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
                 errLvl = eErrorSeverity.ERROR;
                 recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
