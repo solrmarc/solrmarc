@@ -94,9 +94,9 @@ public abstract class AbstractValueIndexer<T>
             values = mapping.map(values);
         }
         if (values instanceof Collection) 
-            result.addAll((Collection<String>)values);
+            result.addAll(collector.collect((Collection<String>)values));
         else if (values instanceof String)
-            result.add((String)values);
+            result.addAll(collector.collect(Collections.singletonList((String)values)));
     }
 
     public Collection<String> getSolrFieldNames()
