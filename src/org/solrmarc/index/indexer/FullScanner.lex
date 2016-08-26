@@ -80,7 +80,7 @@ IntLiteral = 0 | [1-9][0-9]*
 new_line = \r|\n|\r\n
 white_space = {new_line} | [ \t\f]
 identifier = [A-Za-z0-9][A-Z_a-z0-9./\\]*[A-Za-z0-9]
-nonquotedstring = [^,() \\\"]*
+nonquotedstring = [^,() \\\"]+
 fullrecord = "xml"|"raw"|"json"|"json2"|"text"|"FullRecordAs"[A-Za-z0-9]*
 datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 %state STRING CONDITIONAL SUBFIELDSPEC CUSTOMSPEC SCRIPTSPEC CUSTOMMETHOD CUSTOMPARAM MAPSPEC CONSTANT 
@@ -145,7 +145,7 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 <MAPSPEC>{
 ","                     { return symbol(",", FullSym.COMMA); }
 "custom_map"            { return symbol("CUSTOM_MAP", FullSym.CUSTOM_MAP, yytext()); }
-{identifier}            { return symbol("IDENTIFIER", FullSym.IDENTIFIER, yytext()); }
+{nonquotedstring}		{ return stringIdentifierOrNumber(yytext()); }
 "("                     { yybegin(CUSTOMPARAM); return symbol("(",FullSym.LPAREN); }
 ")"                     { return symbol(")",FullSym.RPAREN); }
 {white_space}           { /* ignore */ }
