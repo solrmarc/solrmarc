@@ -4,6 +4,7 @@ package org.solrmarc.index.indexer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.marc4j.marc.Record;
 import org.solrmarc.index.collector.MultiValueCollector;
@@ -18,6 +19,7 @@ public abstract class AbstractValueIndexer<T>
     protected final AbstractValueMapping<T>[] mappings;
     protected final MultiValueCollector collector;
     private String specLabel;
+    protected AtomicLong totalElapsedTime;
  //   private List<String> parseErrors;
 
     public AbstractValueIndexer(final String solrFieldNames, final AbstractValueExtractor<T> extractor,
@@ -27,6 +29,7 @@ public abstract class AbstractValueIndexer<T>
         this.extractor = extractor;
         this.mappings = mappings;
         this.collector = collector;
+        totalElapsedTime = new AtomicLong(0);
     }
 
     public AbstractValueIndexer(final Collection<String> solrFieldNames, final AbstractValueExtractor<T> extractor,
@@ -36,6 +39,7 @@ public abstract class AbstractValueIndexer<T>
         this.extractor = extractor;
         this.mappings = mappings;
         this.collector = collector;
+        totalElapsedTime = new AtomicLong(0);
     }
 
     public AbstractValueIndexer(final Collection<String> solrFieldNames, final AbstractValueExtractor<T> extractor,
@@ -47,6 +51,7 @@ public abstract class AbstractValueIndexer<T>
         AbstractValueMapping<T>[] tmp = new AbstractValueMapping[mappings.size()];
         this.mappings = mappings.toArray(tmp);
         this.collector = collector;
+        totalElapsedTime = new AtomicLong(0);
     }
     
     public String getSpecLabel()
@@ -62,6 +67,7 @@ public abstract class AbstractValueIndexer<T>
     @SuppressWarnings("unchecked")
     public Collection<String> getFieldData(Record record) throws Exception
     {
+        long start = System.nanoTime();
         if (extractor == null) return Collections.emptyList();
         T values = extractor.extract(record);
         if (values == null)
@@ -77,12 +83,15 @@ public abstract class AbstractValueIndexer<T>
             result = collector.collect((Collection<String>)values);
         else if (values instanceof String)
             result = collector.collect(Collections.singletonList((String)values));
+        long end = System.nanoTime();
+        totalElapsedTime.addAndGet(end - start);
         return (result);
     }
    
     @SuppressWarnings("unchecked")
     public void getFieldData(Record record, Collection<String> result) throws Exception
     {
+        long start = System.nanoTime();
         if (extractor == null) return;
         T values = extractor.extract(record);
         if (values == null)
@@ -97,6 +106,14 @@ public abstract class AbstractValueIndexer<T>
             result.addAll(collector.collect((Collection<String>)values));
         else if (values instanceof String)
             result.addAll(collector.collect(Collections.singletonList((String)values)));
+        long end = System.nanoTime();
+        totalElapsedTime.addAndGet(end - start);
+    }
+
+    
+    public Long getTotalElapsedTime()
+    {
+        return totalElapsedTime.get();
     }
 
     public Collection<String> getSolrFieldNames()

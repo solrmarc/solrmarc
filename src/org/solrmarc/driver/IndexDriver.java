@@ -227,14 +227,14 @@ public class IndexDriver extends BootableMain
                 Runtime.getRuntime().removeShutdownHook(shutdownHook);
             indexer.endProcessing();
         }
-        reportResultsAndTime(startTime, endTime);
+        reportResultsAndTime(startTime, endTime, indexer);
         if (indexer.errQ.size() > 0)
         {
             handleRecordErrors();
         }
     }
 
-    private void reportResultsAndTime(long startTime, long endTime)
+    private void reportResultsAndTime(long startTime, long endTime, Indexer indexer)
     {
         logger.info(""+numIndexed[0]+ " records read");
         logger.info(""+numIndexed[1]+ " records indexed  and ");
@@ -245,6 +245,7 @@ public class IndexDriver extends BootableMain
         String minutesStr = ((minutes > 0) ? ""+minutes+" minute"+((minutes != 1)?"s ":" ") : "");
         String secondsStr = ""+seconds+"."+hundredthsStr+" seconds";
         logger.info(""+numIndexed[2]+ " records sent to Solr in "+ minutesStr + secondsStr);
+        indexer.reportPerMethodTime();
     }
 
     private void handleRecordErrors()

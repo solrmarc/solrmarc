@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class Indexer
 {
@@ -340,6 +341,27 @@ public class Indexer
         {
         }
         this.isShutDown = true;
+    }
+
+    private static long time(long time, TimeUnit unit)
+    {
+        return unit.convert(time, TimeUnit.NANOSECONDS);
+    }
+
+    public void reportPerMethodTime()
+    {
+        logger.info("Elapsed time per indexing method:");
+        for (final AbstractValueIndexer<?> indexer : indexers)
+        {
+            long elaspedTime = indexer.getTotalElapsedTime();
+            long minutes = time(elaspedTime, TimeUnit.MINUTES);
+            long seconds = time(elaspedTime, TimeUnit.SECONDS);
+            long millis = time(elaspedTime, TimeUnit.MILLISECONDS);
+            millis -= seconds * 1000;
+            seconds -= minutes * 60;
+            String elapsedStr = String.format("%d min, %d.%03d sec", minutes, seconds, millis);
+            logger.info(elapsedStr + "  ---" + indexer.getSolrFieldNames().toString() + ":" + indexer.getSpecLabel());
+        }
     }
 
 }

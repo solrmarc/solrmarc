@@ -60,6 +60,7 @@ public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
     @Override
     public Collection<String> getFieldData(Record record) throws Exception
     {
+        long start = System.nanoTime();
         Collection<String> values;
         if (extractor == null)
         {
@@ -81,6 +82,8 @@ public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
             }
         }
         Collection<String> result = collector.collect(values);
+        long end = System.nanoTime();
+        totalElapsedTime.addAndGet(end - start);
         return (result);
     }
 }
