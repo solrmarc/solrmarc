@@ -28,7 +28,6 @@ import javax.xml.transform.stream.StreamResult;
 public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtractor
 {
     private final static String spaces = "                                          ";
-    private final StringBuilder sb = new StringBuilder();
 
     public FullRecordAsXMLValueExtractor()
     {
@@ -38,11 +37,6 @@ public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtrac
     @Override
     public String extract(final Record record) throws UnsupportedEncodingException
     {
-        sb.setLength(0);
-//        writer = makeNewWriter(new StreamResult(strWriter));
-//        writer.write(record);
-//        writer.close();
-//        writer = null;
         return toXMLString(record, false);
     }
 
@@ -66,6 +60,7 @@ public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtrac
 
     public String toXMLString(Record record, boolean indent) 
     {
+        StringBuilder sb = new StringBuilder();
         startDocument(sb);
         startElement(sb, COLLECTION, indent, 0, new Tag("xmlns","http://www.loc.gov/MARC21/slim"));
         startElement(sb, RECORD, indent, 2);
