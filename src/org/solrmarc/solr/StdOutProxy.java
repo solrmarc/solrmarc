@@ -30,7 +30,7 @@ public class StdOutProxy extends SolrProxy
             {
                 for (Object val : values)
                 {
-                    output.print(id + " : " + fieldName + " = " + val.toString() + "\n");
+                    output.print(id + " : " + fieldName + " = " + ((val != null) ? val.toString() : "[null]") + "\n");
                 }
             }
         }
