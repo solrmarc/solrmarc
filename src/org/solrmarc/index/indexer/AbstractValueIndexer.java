@@ -12,7 +12,7 @@ import org.solrmarc.index.extractor.AbstractValueExtractor;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMapping;
 
-public abstract class AbstractValueIndexer<T>
+public abstract class AbstractValueIndexer<T> implements Cloneable
 {
     private Collection<String> solrFieldNames;
     protected final AbstractValueExtractor<T> extractor;
@@ -53,6 +53,16 @@ public abstract class AbstractValueIndexer<T>
         this.collector = collector;
         totalElapsedTime = new AtomicLong(0);
     }
+    
+//    private AbstractValueIndexer(AbstractValueIndexer<?> toClone)
+//    {
+//        
+//    }
+//    
+//    public AbstractValueIndexer<?> clone()
+//    {
+//        return(new AbstractValueIndexer(this));
+//    }
     
     public String getSpecLabel()
     {
