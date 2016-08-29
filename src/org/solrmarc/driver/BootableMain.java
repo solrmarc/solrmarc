@@ -143,13 +143,14 @@ public class BootableMain
 
     private void initLogging(String[] homeDirs)
     {
-        LogManager.resetConfiguration();
         for (String dir : homeDirs)
         {
             File log4jProps = new File(dir, "log4j.properties");
             if (log4jProps.exists())
             {
+                LogManager.resetConfiguration();
                 PropertyConfigurator.configure(log4jProps.getAbsolutePath());
+                return;
             }
         }
     }
