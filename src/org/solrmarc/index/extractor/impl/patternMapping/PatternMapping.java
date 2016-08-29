@@ -92,13 +92,15 @@ public class PatternMapping
      */
     public String map(final String value)
     {
+        String result = outputPattern;
         if (outputPattern.contains("$"))
         {
-            return inputMatcher.replaceAll(outputPattern);
+            for (int group = inputMatcher.groupCount(); group > 0 ; group--)
+            {
+                final String pattern = java.util.regex.Matcher.quoteReplacement("$"+group);
+                result = result.replaceAll(pattern, inputMatcher.group(group));
+            }
         }
-        else
-        {
-            return outputPattern;
-        }
+        return(result);
     }
 }
