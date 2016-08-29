@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -64,8 +65,6 @@ public class IndexDriver extends BootableMain
         
         this.processInput();
     }
-    
-    
 
     public void initializeFromOptions()
     {
@@ -120,7 +119,6 @@ public class IndexDriver extends BootableMain
             logger.error("Exiting...");
             System.exit(5);
         }
-
     }
 
     public void configureReaderProps(String propertyFileURLStr) throws FileNotFoundException, IOException 
@@ -215,8 +213,16 @@ public class IndexDriver extends BootableMain
         long startTime = System.currentTimeMillis();
         long endTime = startTime;
         
-        numIndexed = indexer.indexToSolr(reader);
-        
+        try { 
+            numIndexed = indexer.indexToSolr(reader);
+        }
+        catch (Exception e)
+        {
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            logger.fatal("ERROR: Error while invoking indexToSolr");
+            logger.fatal(e.getMessage());
+        }
+
         endTime = System.currentTimeMillis();
         
         if (!indexer.isShutDown()) 
@@ -245,7 +251,9 @@ public class IndexDriver extends BootableMain
         String minutesStr = ((minutes > 0) ? ""+minutes+" minute"+((minutes != 1)?"s ":" ") : "");
         String secondsStr = ""+seconds+"."+hundredthsStr+" seconds";
         logger.info(""+numIndexed[2]+ " records sent to Solr in "+ minutesStr + secondsStr);
-        indexer.reportPerMethodTime();
+        boolean perMethodReport = Boolean.parseBoolean(System.getProperty("solrmarc.method.report", "false"));
+        if (perMethodReport)
+            indexer.reportPerMethodTime();
     }
 
     private void handleRecordErrors()
@@ -400,6 +408,7 @@ public class IndexDriver extends BootableMain
     {
         public void run()
         {
+            setName("Eclipse-Shutdown-Simulator-Thread");
             System.out.println("You're using Eclipse; click in this console and " +
                             "press ENTER to call System.exit() and run the shutdown routine.");
             while (true) 
