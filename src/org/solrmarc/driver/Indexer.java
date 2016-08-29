@@ -19,6 +19,7 @@ import org.solrmarc.tools.SolrMarcIndexerException;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -28,7 +29,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class Indexer
+public class Indexer implements Cloneable
 {
     private final static Logger logger = Logger.getLogger(Indexer.class);
     
@@ -53,6 +54,24 @@ public class Indexer
         delQ = new LinkedBlockingQueue<RecordAndDoc>();
     }
 
+//    private Indexer(Indexer toClone)
+//    {
+//        this.indexers = new ArrayList<AbstractValueIndexer<?>>();
+//        for (AbstractValueIndexer<?> indexer : toClone.indexers)
+//        {
+//            this.indexers.add(indexer.clone());
+//        }
+//        this.solrProxy = solrProxy;
+//        errQ = new LinkedBlockingQueue<RecordAndDoc>();
+//        delQ = new LinkedBlockingQueue<RecordAndDoc>();
+//    }
+//
+//    public Indexer clone()
+//    {
+//        Indexer clone = new Indexer();
+//        
+//    }
+    
     public boolean isSet(eErrorHandleVal val)
     {
         return(errHandle.contains(val));
@@ -128,6 +147,10 @@ public class Indexer
             catch (SolrRuntimeException sse)
             {
                 singleRecordSolrError(recDoc, sse, errQ);
+            }
+            catch (Exception e)
+            {
+                singleRecordSolrError(recDoc, e, errQ);
             }
         }
         
@@ -297,6 +320,10 @@ public class Indexer
             InvocationTargetException cause = (InvocationTargetException)e1.getCause();
             Throwable target = cause.getTargetException();
             logger.error(target.getMessage());
+        }
+        else 
+        {
+            logger.error(e1);
         }
         if (errQ != null)
         {
