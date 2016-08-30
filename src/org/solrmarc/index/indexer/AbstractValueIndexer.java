@@ -12,11 +12,13 @@ import org.solrmarc.index.extractor.AbstractValueExtractor;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMapping;
 
-public abstract class AbstractValueIndexer<T> implements Cloneable
+import com.rits.cloning.Cloner;
+
+public abstract class AbstractValueIndexer<T>
 {
     private Collection<String> solrFieldNames;
     protected final AbstractValueExtractor<T> extractor;
-    protected final AbstractValueMapping<T>[] mappings;
+    protected AbstractValueMapping<T>[] mappings;
     protected final MultiValueCollector collector;
     private String specLabel;
     protected AtomicLong totalElapsedTime;
@@ -54,10 +56,14 @@ public abstract class AbstractValueIndexer<T> implements Cloneable
         totalElapsedTime = new AtomicLong(0);
     }
     
-//    private AbstractValueIndexer(AbstractValueIndexer<?> toClone)
-//    {
-//        
-//    }
+    protected AbstractValueIndexer(AbstractValueIndexer<T> toClone)
+    {
+        this.solrFieldNames = toClone.solrFieldNames;
+        this.extractor = Cloner.standard().deepClone(toClone.extractor);
+        this.collector = toClone.collector;
+        this.totalElapsedTime = toClone.totalElapsedTime;
+        this.specLabel = toClone.specLabel;
+    }
 //    
 //    public AbstractValueIndexer<?> clone()
 //    {

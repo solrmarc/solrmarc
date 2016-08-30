@@ -14,6 +14,8 @@ import org.solrmarc.index.extractor.MultiValueWrapperSingleValueExtractor;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMapping;
 
+import com.rits.cloning.Cloner;
+
 public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
 {
     public MultiValueIndexer(final String solrFieldName, final AbstractMultiValueExtractor extractor,
@@ -57,6 +59,21 @@ public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
         super(fieldnames, new MultiValueWrapperSingleValueExtractor(extractor), mappings, collector);
     }
 
+    private MultiValueIndexer(MultiValueIndexer toClone)
+    {       
+        super(toClone);
+        this.mappings = new AbstractMultiValueMapping[toClone.mappings.length];
+        for (int i = 0; i < toClone.mappings.length; i++)
+        {
+            this.mappings[i] = Cloner.standard().deepClone(toClone.mappings[i]);
+        }
+    }
+  
+    public MultiValueIndexer clone()
+    {
+      return(new MultiValueIndexer(this));
+    }
+  
     @Override
     public Collection<String> getFieldData(Record record) throws Exception
     {

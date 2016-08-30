@@ -24,5 +24,4 @@ public abstract class AbstractMultiValueExtractor implements AbstractValueExtrac
     protected void extract(Collection<String> result, Record record) throws Exception
     {
     }
-
 }

@@ -29,7 +29,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class Indexer implements Cloneable
+public class Indexer 
 {
     private final static Logger logger = Logger.getLogger(Indexer.class);
     

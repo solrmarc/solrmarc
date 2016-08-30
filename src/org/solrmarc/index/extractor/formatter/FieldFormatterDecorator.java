@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.marc4j.marc.VariableField;
 
-public class FieldFormatterDecorator implements FieldFormatter, Cloneable
+public class FieldFormatterDecorator implements FieldFormatter
 {
     private FieldFormatter toDecorate;
 
@@ -23,11 +23,6 @@ public class FieldFormatterDecorator implements FieldFormatter, Cloneable
     public void decorate(FieldFormatter decorate)
     {
         toDecorate = decorate;
-    }
-    
-    public FieldFormatterDecorator clone() throws CloneNotSupportedException
-    {
-        return (FieldFormatterDecorator)super.clone();
     }
     
     @Override
