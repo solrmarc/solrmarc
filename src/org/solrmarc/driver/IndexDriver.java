@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -41,28 +40,28 @@ public class IndexDriver extends BootableMain
     SolrProxy solrProxy;
     boolean verbose;
     int numIndexed[];
-    String [] args;
-    
+    String[] args;
+
     public static void main(String[] args)
     {
         IndexDriver driver = new IndexDriver(args);
         driver.execute();
     }
 
-    public IndexDriver(String [] args)
+    public IndexDriver(String[] args)
     {
         this.args = args;
     }
-    
+
     public void execute()
     {
         processArgs(args, true);
         initializeFromOptions();
 
         List<String> inputFiles = options.valuesOf(files);
-        logger.info("Opening input files: "+ Arrays.toString(inputFiles.toArray()));
+        logger.info("Opening input files: " + Arrays.toString(inputFiles.toArray()));
         this.configureReader(inputFiles);
-        
+
         this.processInput();
     }
 
@@ -71,7 +70,7 @@ public class IndexDriver extends BootableMain
         String inputSource[] = new String[1];
         String propertyFileAsURLStr = PropertyUtils.getPropertyFileAbsoluteURL(homeDirStrs, options.valueOf(readOpts), true, inputSource);
 
-        //File f1 = new File(options.valueOf(readOpts));
+        // File f1 = new File(options.valueOf(readOpts));
         try
         {
             configureReaderProps(propertyFileAsURLStr);
@@ -82,27 +81,26 @@ public class IndexDriver extends BootableMain
             logger.error("Exiting...");
             System.exit(1);
         }
-        
-     //   String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
+
+        // String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
         String solrJClassName = solrjClass.value(options);
         String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : options.has("null") ? "devnull" : "stdout";
         boolean multithread = options.has("solrURL") && !options.has("debug") ? true : false;
-        try {
+        try
+        {
             this.configureOutput(solrURL, solrJClassName);
         }
         catch (SolrRuntimeException sre)
         {
-            logger.error("Error connecting to solr at URL "+solrURL + " : " + sre.getMessage());
+            logger.error("Error connecting to solr at URL " + solrURL + " : " + sre.getMessage());
             logger.debug("", sre);
-//            logger.error("Normally this should exit.  For testing purposes continuing and writing out solr records insetad.");
             logger.error("Exiting...");
             System.exit(6);
-//            this.configureOutput("stdout", solrJClassName);
         }
         String specs = options.valueOf(configSpecs);
         try
         {
-            logger.info("Reading and compiling index specifications: "+ specs);
+            logger.info("Reading and compiling index specifications: " + specs);
             this.configureIndexer(specs, multithread);
         }
         catch (IOException | IllegalAccessException | InstantiationException e1)
@@ -121,7 +119,7 @@ public class IndexDriver extends BootableMain
         }
     }
 
-    public void configureReaderProps(String propertyFileURLStr) throws FileNotFoundException, IOException 
+    public void configureReaderProps(String propertyFileURLStr) throws FileNotFoundException, IOException
     {
         readerProps = new Properties();
         if (propertyFileURLStr != null)
@@ -129,18 +127,19 @@ public class IndexDriver extends BootableMain
             readerProps.load(PropertyUtils.getPropertyFileInputStream(propertyFileURLStr));
         }
     }
-    
-    public void configureReader(List<String> inputFilenames) 
+
+    public void configureReader(List<String> inputFilenames)
     {
         reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.getHomeDirs(), inputFilenames);
     }
-    
-    public void configureIndexer(String indexSpecifications, boolean multiThreaded) 
-                throws IllegalAccessException, InstantiationException, IOException
+
+    public void configureIndexer(String indexSpecifications, boolean multiThreaded)
+            throws IllegalAccessException, InstantiationException, IOException
     {
         // You must set the HomeDir before instantiating the ValueIndexerFactory
-        // since that directory is used as the location to look for java source files to compile and include
-        // If it is unspecified, the program looks in 
+        // since that directory is used as the location to look for java source
+        // files to compile and include
+        // If it is unspecified, the program looks in
         ValueIndexerFactory.setHomeDirs(homeDirStrs);
         indexerFactory = ValueIndexerFactory.instance();
         String[] indexSpecs = indexSpecifications.split("[ ]*,[ ]*");
@@ -152,17 +151,14 @@ public class IndexDriver extends BootableMain
             if (!specFile.isAbsolute()) specFile = PropertyUtils.findFirstExistingFile(homeDirStrs, indexSpec);
             specFiles[i++] = specFile;
         }
-        
+
         indexers = indexerFactory.createValueIndexers(specFiles);
-        boolean includeErrors = (readerProps.getProperty("marc.include_errors", "false").equals("true"));
-        boolean returnErrors = (readerProps.getProperty("marc.return_errors", "false").equals("true"));
+        boolean includeErrors = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "marc.include_errors", "false"));
+        boolean returnErrors = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "marc.return_errors", "false"));
         indexer = null;
-        // System.err.println("Reading and compiling index specification: "+ indexSpecification);
-        if (multiThreaded)
-            indexer = new ThreadedIndexer(indexers, solrProxy, 640);
-        else 
-            indexer = new Indexer(indexers, solrProxy);
-        
+        if (multiThreaded) indexer = new ThreadedIndexer(indexers, solrProxy, 640);
+        else               indexer = new Indexer(indexers, solrProxy);
+
         if (returnErrors)
         {
             indexer.setErr(Indexer.eErrorHandleVal.RETURN_ERROR_RECORDS);
@@ -172,7 +168,7 @@ public class IndexDriver extends BootableMain
             indexer.setErr(Indexer.eErrorHandleVal.INDEX_ERROR_RECORDS);
         }
     }
-    
+
     public void configureOutput(String solrURL, String solrJClassName)
     {
         if (solrURL.equals("stdout"))
@@ -192,18 +188,18 @@ public class IndexDriver extends BootableMain
         {
             solrProxy = new DevNullProxy();
         }
-        else 
+        else
         {
             solrProxy = SolrCoreLoader.loadRemoteSolrServer(solrURL, solrJClassName, true);
         }
     }
-    
+
     public void processInput()
     {
         String inEclipseStr = System.getProperty("runInEclipse");
         boolean inEclipse = "true".equalsIgnoreCase(inEclipseStr);
         Thread shutdownSimulator = null;
-        if (inEclipse) 
+        if (inEclipse)
         {
             shutdownSimulator = new ShutdownSimulator();
             shutdownSimulator.start();
@@ -212,8 +208,9 @@ public class IndexDriver extends BootableMain
         Runtime.getRuntime().addShutdownHook(shutdownHook);
         long startTime = System.currentTimeMillis();
         long endTime = startTime;
-        
-        try { 
+
+        try
+        {
             numIndexed = indexer.indexToSolr(reader);
         }
         catch (Exception e)
@@ -224,13 +221,11 @@ public class IndexDriver extends BootableMain
         }
 
         endTime = System.currentTimeMillis();
-        
-        if (!indexer.isShutDown()) 
+
+        if (!indexer.isShutDown())
         {
-            if (shutdownSimulator != null)
-                shutdownSimulator.interrupt();
-            if (!indexer.shuttingDown)  
-                Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            if (shutdownSimulator != null) shutdownSimulator.interrupt();
+            if (!indexer.shuttingDown) Runtime.getRuntime().removeShutdownHook(shutdownHook);
             indexer.endProcessing();
         }
         reportResultsAndTime(startTime, endTime, indexer);
@@ -242,18 +237,17 @@ public class IndexDriver extends BootableMain
 
     private void reportResultsAndTime(long startTime, long endTime, Indexer indexer)
     {
-        logger.info(""+numIndexed[0]+ " records read");
-        logger.info(""+numIndexed[1]+ " records indexed  and ");
+        logger.info("" + numIndexed[0] + " records read");
+        logger.info("" + numIndexed[1] + " records indexed  and ");
         long minutes = ((endTime - startTime) / 1000) / 60;
-        long seconds = (endTime - startTime) / 1000  - (minutes * 60);
-        long hundredths = (endTime - startTime) / 10  - (minutes * 6000) - (seconds * 100) + 100;
-        String hundredthsStr = (""+hundredths).substring(1);
-        String minutesStr = ((minutes > 0) ? ""+minutes+" minute"+((minutes != 1)?"s ":" ") : "");
-        String secondsStr = ""+seconds+"."+hundredthsStr+" seconds";
-        logger.info(""+numIndexed[2]+ " records sent to Solr in "+ minutesStr + secondsStr);
-        boolean perMethodReport = Boolean.parseBoolean(System.getProperty("solrmarc.method.report", "false"));
-        if (perMethodReport)
-            indexer.reportPerMethodTime();
+        long seconds = (endTime - startTime) / 1000 - (minutes * 60);
+        long hundredths = (endTime - startTime) / 10 - (minutes * 6000) - (seconds * 100) + 100;
+        String hundredthsStr = ("" + hundredths).substring(1);
+        String minutesStr = ((minutes > 0) ? "" + minutes + " minute" + ((minutes != 1) ? "s " : " ") : "");
+        String secondsStr = "" + seconds + "." + hundredthsStr + " seconds";
+        logger.info("" + numIndexed[2] + " records sent to Solr in " + minutesStr + secondsStr);
+        boolean perMethodReport = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "solrmarc.method.report", "false"));
+        if (perMethodReport) indexer.reportPerMethodTime();
     }
 
     private void handleRecordErrors()
@@ -262,21 +256,21 @@ public class IndexDriver extends BootableMain
         int[][] errTypeCnt = new int[][]{{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0}};
         for (final RecordAndDoc entry : errQ)
         {
-            if (!entry.errLocs.isEmpty())      
+            if (!entry.errLocs.isEmpty())
             {
-                logger.debug("Error Rec id = "+ entry.rec.getControlNumber());
+                logger.debug("Error Rec id = " + entry.rec.getControlNumber());
             }
-            if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))      
+            if (entry.errLocs.contains(eErrorLocationVal.MARC_ERROR))
             {
-                errTypeCnt[0][entry.getErrLvl().ordinal()] ++;
+                errTypeCnt[0][entry.getErrLvl().ordinal()]++;
             }
-            if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))  
+            if (entry.errLocs.contains(eErrorLocationVal.INDEXING_ERROR))
             {
-                errTypeCnt[1][entry.getErrLvl().ordinal()] ++;
+                errTypeCnt[1][entry.getErrLvl().ordinal()]++;
             }
             if (entry.errLocs.contains(eErrorLocationVal.SOLR_ERROR))
             {
-                errTypeCnt[2][entry.getErrLvl().ordinal()] ++;
+                errTypeCnt[2][entry.getErrLvl().ordinal()]++;
             }
         }
         showErrReport("MARC", errTypeCnt[0]);
@@ -288,9 +282,9 @@ public class IndexDriver extends BootableMain
     {
         for (int i = 0; i < errorLvlCnt.length; i++)
         {
-            if (errorLvlCnt[i] > 0) 
+            if (errorLvlCnt[i] > 0)
             {
-                logger.info( "" + errorLvlCnt[i] + " records have "+errLocStr+" errors of level: "+eErrorSeverity.values()[i].toString());
+                logger.info("" + errorLvlCnt[i] + " records have " + errLocStr + " errors of level: " + eErrorSeverity.values()[i].toString());
             }
         }
     }
@@ -315,7 +309,7 @@ public class IndexDriver extends BootableMain
         }
         return (text.toString());
     }
-    
+
     private void logTextForExceptions(List<IndexerSpecException> exceptions)
     {
         String lastSpec = "";
@@ -331,7 +325,7 @@ public class IndexDriver extends BootableMain
             logger.log(priority, e.getMessage());
             for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause())
             {
-                logger.log(priority, e.getSolrField()+" : "+cause.getMessage());
+                logger.log(priority, e.getSolrField() + " : " + cause.getMessage());
             }
         }
     }
@@ -339,39 +333,41 @@ public class IndexDriver extends BootableMain
     private Priority getPriorityForSeverity(eErrorSeverity level)
     {
         switch (level) {
-            case NONE:  return(Level.DEBUG);
-            case INFO:  return(Level.INFO);
-            case WARN:  return(Level.WARN);
-            case ERROR: return(Level.ERROR);
-            case FATAL: return(Level.FATAL);
+            case NONE:  return (Level.DEBUG);
+            case INFO:  return (Level.INFO);
+            case WARN:  return (Level.WARN);
+            case ERROR: return (Level.ERROR);
+            case FATAL: return (Level.FATAL);
         }
-        return(Level.DEBUG);
+        return (Level.DEBUG);
     }
 
-    
     /**
-     *  <h1>MyShutdownThread</h1>
-     *  This class implements a shutdown hook that is installed in the Java Runtime.  If a user attempts to terminate
-     *  the import process, this hook will signal the threads that are handling the import (via Thread.interrupt) and they 
-     *  will shutdown cleanly, and commit the changes to Solr before allowing the program to terminate.
+     * <h1>MyShutdownThread</h1> This class implements a shutdown hook that is
+     * installed in the Java Runtime. If a user attempts to terminate the import
+     * process, this hook will signal the threads that are handling the import
+     * (via Thread.interrupt) and they will shutdown cleanly, and commit the
+     * changes to Solr before allowing the program to terminate.
      * 
      * @author rh9ec
      *
      */
-    class MyShutdownThread extends Thread 
+    class MyShutdownThread extends Thread
     {
         private Indexer indexer;
+
         public MyShutdownThread(Indexer ind)
         {
             indexer = ind;
         }
-        
+
+        @Override
         public void run()
         {
-            //System.err.println("Starting Shutdown hook");
+            // System.err.println("Starting Shutdown hook");
             logger.info("Starting Shutdown hook");
-            
-            if (!indexer.isShutDown()) 
+
+            if (!indexer.isShutDown())
             {
                 logger.info("Stopping main indexer loop");
                 indexer.shutDown();
@@ -389,31 +385,35 @@ public class IndexDriver extends BootableMain
             logger.info("Finished Shutdown hook");
         }
     }
-    
+
     /**
-     *  <h1>ShutdownSimulator</h1>
-     *  A small class that is only useful for debugging purposes.  Specifically for debugging the shutdown hook.
-     *  The Eclipse Java Development Environment is unable to shutdown a process it is running in a way that the
-     *  shutdown hook is invoked, instead Eclipse merely summarily destroys the process, which is unhelpful.
-     *  <br/>
-     *  To enable this feature, you must define the system property "runInEclipse" as true, usually via the 
-     *  VM arguments panel on the Arguments tab in the debug configuration dialog.    -DrunInEclipse=true
-     *  Then when the program is running in Eclipse, you will need to click in the Console window, and press [ENTER]
-     *  to simulate a CTRL-C being sent to the program.
+     * <h1>ShutdownSimulator</h1> A small class that is only useful for
+     * debugging purposes. Specifically for debugging the shutdown hook. The
+     * Eclipse Java Development Environment is unable to shutdown a process it
+     * is running in a way that the shutdown hook is invoked, instead Eclipse
+     * merely summarily destroys the process, which is unhelpful. <br/>
+     * To enable this feature, you must define the system property
+     * "runInEclipse" as true, usually via the VM arguments panel on the
+     * Arguments tab in the debug configuration dialog. -DrunInEclipse=true Then
+     * when the program is running in Eclipse, you will need to click in the
+     * Console window, and press [ENTER] to simulate a CTRL-C being sent to the
+     * program.
      * 
      * @author rh9ec
      *
      */
     class ShutdownSimulator extends Thread
     {
+        @Override
         public void run()
         {
             setName("Eclipse-Shutdown-Simulator-Thread");
-            System.out.println("You're using Eclipse; click in this console and " +
-                            "press ENTER to call System.exit() and run the shutdown routine.");
-            while (true) 
+            System.out.println("You're using Eclipse; click in this console and "
+                    + "press ENTER to call System.exit() and run the shutdown routine.");
+            while (true)
             {
-                try {
+                try
+                {
                     if (System.in.available() > 0)
                     {
                         System.in.read();
@@ -423,8 +423,8 @@ public class IndexDriver extends BootableMain
                     {
                         sleep(2000);
                     }
-                } 
-                catch (IOException e) 
+                }
+                catch (IOException e)
                 {
                     break;
                 }
@@ -433,8 +433,7 @@ public class IndexDriver extends BootableMain
                     break;
                 }
             }
-            
+
         }
     }
-
 }
