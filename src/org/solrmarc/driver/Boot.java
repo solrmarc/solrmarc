@@ -82,14 +82,14 @@ public class Boot
         catch (IllegalAccessException | IllegalArgumentException e)
         {
             logger.fatal("ERROR: Unable to invoke main method in specified class: " + classname);
-            logger.fatal(e.getMessage());
+            logger.fatal(e);
             System.exit(2);
         }
         catch (InvocationTargetException e)
         {
             Throwable t = e.getTargetException();
             logger.fatal("ERROR: Error while invoking main method in specified class: " + classname);
-            logger.fatal(t.getMessage());
+            logger.fatal(t);
             System.exit(2);
         }
         catch (ClassNotFoundException e)

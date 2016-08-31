@@ -52,7 +52,7 @@ public class IndexerWorker implements Runnable
                         logger.info("Ignored record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
                     }
                     else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
-                    {            
+                    {
                         logger.info("Deleted record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
                         indexer.delQ.add(recDoc);
                     }
@@ -69,7 +69,7 @@ public class IndexerWorker implements Runnable
                     if (indexer.isSet(eErrorHandleVal.RETURN_ERROR_RECORDS) && !indexer.isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
                     {
                         indexer.errQ.add(recDoc);
-                    }               
+                    }
                     if (!indexer.isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
                     {
                         logger.debug("Skipping error record: " + recDoc.rec.getControlNumber());
@@ -98,5 +98,4 @@ public class IndexerWorker implements Runnable
             }
         }
     }
-
 }
