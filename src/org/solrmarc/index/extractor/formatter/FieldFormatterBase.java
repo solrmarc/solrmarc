@@ -14,9 +14,8 @@ import java.util.regex.Pattern;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.tools.DataUtil;
 import org.solrmarc.tools.Utils;
-
-
 
 public class FieldFormatterBase implements FieldFormatter
 {
@@ -313,7 +312,7 @@ public class FieldFormatterBase implements FieldFormatter
     {
         final String trimmed = trimData(data);
         final EnumSet<eCleanVal> cleanVal = getCleanVal();
-        String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? Utils.cleanData(trimmed) : trimmed;
+        String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? DataUtil.cleanData(trimmed) : trimmed;
         if (!cleanVal.contains(eCleanVal.STRIP_ACCCENTS) && !cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)
                 && !cleanVal.contains(eCleanVal.TO_LOWER) && !cleanVal.contains(eCleanVal.TO_UPPER)
                 && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_2))
@@ -403,7 +402,7 @@ public class FieldFormatterBase implements FieldFormatter
         if (joinVal == eJoinVal.SEPARATE)
         {
             if (buffer.length() == 0) return;
-            final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? Utils.cleanData(buffer.toString()) : buffer.toString();
+            final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? DataUtil.cleanData(buffer.toString()) : buffer.toString();
             if (field.length() > 0) result.add(field);
             buffer.setLength(0);
         }
@@ -422,7 +421,7 @@ public class FieldFormatterBase implements FieldFormatter
         if (joinVal == eJoinVal.JOIN)
         {
             if (buffer.length() == 0) return;
-            final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? Utils.cleanData(buffer.toString()) : buffer.toString();
+            final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? DataUtil.cleanData(buffer.toString()) : buffer.toString();
             if (field.length() > 0) result.add(field);
             buffer.setLength(0);
         }

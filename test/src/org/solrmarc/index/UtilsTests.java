@@ -3,7 +3,7 @@ package org.solrmarc.index;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.solrmarc.tools.Utils;
+import org.solrmarc.tools.DataUtil;
 
 public class UtilsTests
 {
@@ -11,8 +11,8 @@ public class UtilsTests
     @Test
     public void testCleanData()
     {
-        assertEquals(Utils.cleanData("[ microfilm] :"), "microfilm");
-        assertEquals(Utils.cleanData("Ray Parker Jr. :"), "Ray Parker Jr.");
+        assertEquals(DataUtil.cleanData("[ microfilm] :"), "microfilm");
+        assertEquals(DataUtil.cleanData("Ray Parker Jr. :"), "Ray Parker Jr.");
     }
 
 }

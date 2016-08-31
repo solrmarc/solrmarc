@@ -6,8 +6,6 @@ import org.apache.log4j.Logger;
 
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.Symbol;
-import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
-import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class VerboseSymbolFactory extends ComplexSymbolFactory
 {

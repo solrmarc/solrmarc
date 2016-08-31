@@ -19,6 +19,7 @@ import org.solrmarc.index.extractor.impl.custom.Mixin;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
+import org.solrmarc.tools.DataUtil;
 import org.solrmarc.tools.Utils;
 
 
@@ -346,7 +347,7 @@ public class SolrIndexer implements Mixin
         Set<String> newResult = new LinkedHashSet<String>();
         for (String s : result)
         {
-            newResult.add(Utils.cleanData(s));
+            newResult.add(DataUtil.cleanData(s));
         }
         return newResult;
     }
@@ -669,7 +670,7 @@ public class SolrIndexer implements Mixin
             }
         }
         if (buffer.length() > 0)
-            return(cleanIt ? Utils.cleanData(buffer.toString()) : buffer.toString());
+            return(cleanIt ? DataUtil.cleanData(buffer.toString()) : buffer.toString());
         else
             return(null);
     }
