@@ -2,7 +2,6 @@ package org.solrmarc.index.extractor.methodcall;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
 
 public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<String>
 {

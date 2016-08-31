@@ -1,7 +1,6 @@
 package org.solrmarc.driver;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -13,11 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.log4j.Logger;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
-import org.solrmarc.driver.Indexer.eErrorHandleVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
-import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.solr.SolrProxy;
-import org.solrmarc.tools.SolrMarcIndexerException;
 
 public class ThreadedIndexer extends Indexer
 {   

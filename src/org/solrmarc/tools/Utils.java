@@ -16,9 +16,6 @@ package org.solrmarc.tools;
  * limitations under the License.
  */
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.AsyncAppender;
-import org.apache.log4j.Logger;
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
@@ -109,24 +106,6 @@ public final class Utils
     public static String cleanData(String origStr)
     {
         return DataUtil.cleanData(origStr);
-    }
-    /**
-     * Call cleanData on an entire set of Strings has a side effect of deleting
-     * entries that are identical when they are cleaned.
-     * 
-     * @param values
-     *            - the set to clean
-     * @return Set<String> - the "same" set with all of its entries cleaned.
-     */
-    private static Set<String> cleanData(Set<String> values)
-    {
-        Set<String> result = new LinkedHashSet<>();
-        for (String entry : values)
-        {
-            String cleaned = cleanData(entry);
-            result.add(cleaned);
-        }
-        return (result);
     }
 
     /**
