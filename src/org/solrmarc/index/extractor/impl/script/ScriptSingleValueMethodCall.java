@@ -26,7 +26,14 @@ public class ScriptSingleValueMethodCall extends AbstractExtractorMethodCall<Str
                     + scriptFileName + "\nMethod: " + method.toString());
         }
     }
-
+    
+    private ScriptSingleValueMethodCall(ScriptSingleValueMethodCall toClone)
+    {
+        super(toClone.getObjectName(), toClone.method.getName(), false, toClone.getNumParameters());
+        this.interpreter = new Interpreter(toClone.interpreter);
+        this.method = toClone.method;        
+    }
+    
     @Override
     public String invoke(final Object[] parameters) throws Exception
     {
@@ -48,5 +55,17 @@ public class ScriptSingleValueMethodCall extends AbstractExtractorMethodCall<Str
     {
         // TODO Implement perRecordInit support in scripts.
         return false;
+    }
+
+    @Override
+    public boolean isThreadSafe()
+    {
+        return false;
+    }
+
+    @Override
+    public Object makeThreadSafeCopy()
+    {
+        return new ScriptSingleValueMethodCall(this);
     }
 }

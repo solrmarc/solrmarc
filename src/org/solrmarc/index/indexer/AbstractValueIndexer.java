@@ -1,6 +1,5 @@
 package org.solrmarc.index.indexer;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,8 +11,6 @@ import org.solrmarc.index.extractor.AbstractValueExtractor;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMapping;
 
-import com.rits.cloning.Cloner;
-
 public abstract class AbstractValueIndexer<T>
 {
     private Collection<String> solrFieldNames;
@@ -22,7 +19,6 @@ public abstract class AbstractValueIndexer<T>
     protected final MultiValueCollector collector;
     private String specLabel;
     protected AtomicLong totalElapsedTime;
- //   private List<String> parseErrors;
 
     public AbstractValueIndexer(final String solrFieldNames, final AbstractValueExtractor<T> extractor,
             final AbstractValueMapping<T>[] mappings, final MultiValueCollector collector)
@@ -55,21 +51,7 @@ public abstract class AbstractValueIndexer<T>
         this.collector = collector;
         totalElapsedTime = new AtomicLong(0);
     }
-    
-    protected AbstractValueIndexer(AbstractValueIndexer<T> toClone)
-    {
-        this.solrFieldNames = toClone.solrFieldNames;
-        this.extractor = Cloner.standard().deepClone(toClone.extractor);
-        this.collector = toClone.collector;
-        this.totalElapsedTime = toClone.totalElapsedTime;
-        this.specLabel = toClone.specLabel;
-    }
-//    
-//    public AbstractValueIndexer<?> clone()
-//    {
-//        return(new AbstractValueIndexer(this));
-//    }
-    
+
     public String getSpecLabel()
     {
         return specLabel;
@@ -103,7 +85,7 @@ public abstract class AbstractValueIndexer<T>
         totalElapsedTime.addAndGet(end - start);
         return (result);
     }
-   
+
     @SuppressWarnings("unchecked")
     public void getFieldData(Record record, Collection<String> result) throws Exception
     {
@@ -136,7 +118,7 @@ public abstract class AbstractValueIndexer<T>
     {
         return solrFieldNames;
     }
-    
+
     public void setSolrFieldNames(String solrFieldNames)
     {
         this.solrFieldNames = new ArrayList<String>();
@@ -148,7 +130,7 @@ public abstract class AbstractValueIndexer<T>
             for (String fName : fieldNames)
             {
                 this.solrFieldNames.add(fName);
-            }    
+            }
         }
     }
 

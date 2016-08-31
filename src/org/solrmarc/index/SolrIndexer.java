@@ -62,6 +62,11 @@ public class SolrIndexer implements Mixin
         return(theSolrIndexer);
     }
     
+    public boolean isThreadSafe()
+    {
+        return(true);
+    }
+    
     private AbstractValueIndexer<?> getOrCreateIndexerFullSpec(String fullSpec)
     {
         if (indexerCache.containsKey(fullSpec))

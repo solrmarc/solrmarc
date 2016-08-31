@@ -1,5 +1,6 @@
 package org.solrmarc.index.extractor.methodcall;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
@@ -8,6 +9,7 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
     private final Object mixin;
     private final Method method;
     private final Method perRecordInit;
+    //private final Method isThreadSafe;
 
     public MultiValueExtractorMethodCall(final Object mixin, final Method method, final Method perRecordInit, int numParameters)
     {
@@ -23,11 +25,19 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
                             + mixin.getClass().getName() + "\nMixin method: " + method.toString());
         }
     }
+    
+    private MultiValueExtractorMethodCall(MultiValueExtractorMethodCall toClone)
+    {
+        super(toClone.mixin.getClass().getName(), toClone.method.getName(), toClone.perRecordInit != null, toClone.getNumParameters());
+        this.mixin = AbstractMethodCallFactory.createObjectForSpecifiedClass(toClone.mixin.getClass());
+        this.method = toClone.method;
+        this.perRecordInit = toClone.perRecordInit;
+    }
 
     @Override 
     protected boolean perRecordInitCalled(Object[] record)
     {
-        return (MethodCallManager.instance().alreadyCalledFor(perRecordInit, record[0]));
+        return (MethodCallManager.instance().alreadyCalledFor(this.mixin, record[0]));
     }
     
     @Override
@@ -42,5 +52,28 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
     {
         return (Collection<String>) method.invoke(mixin, parameters);
     }
-    
+
+    @Override
+    public boolean isThreadSafe()
+    {
+        if (perRecordInit != null) return false;
+        try
+        {
+            Method isThreadSafe = mixin.getClass().getMethod("isThreadSafe");
+            if (isThreadSafe.getReturnType() != boolean.class)
+                return(false);
+            boolean isSafe = (boolean) isThreadSafe.invoke(mixin);
+            return(isSafe);
+        }
+        catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+        {
+            return(false);
+        }
+    }
+
+    @Override
+    public Object makeThreadSafeCopy()
+    {
+        return new MultiValueExtractorMethodCall(this);
+    }
 }

@@ -1,15 +1,18 @@
 package org.solrmarc.index.indexer;
 
 import org.apache.log4j.Logger;
+import org.marc4j.marc.Record;
 import org.solrmarc.index.collector.MultiValueCollector;
 import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
 import org.solrmarc.index.extractor.AbstractSingleValueExtractor;
 import org.solrmarc.index.extractor.AbstractValueExtractor;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
+import org.solrmarc.index.extractor.ExternalMethod;
 import org.solrmarc.index.extractor.formatter.FieldFormatterMapped;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
+import org.solrmarc.index.extractor.methodcall.MethodCallManager;
 import org.solrmarc.index.extractor.methodcall.StaticMarcTestRecords;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
@@ -26,6 +29,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -33,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -334,6 +339,37 @@ public class ValueIndexerFactory
         return(valueIndexer);
     }
     
+    public static AbstractValueIndexer<?> makeThreadSafeCopy(AbstractValueIndexer<?> toClone)
+    {
+        Collection<String> solrFieldNames = toClone.getSolrFieldNames();
+        String specLabel = toClone.getSpecLabel();
+        AbstractMultiValueExtractor extractor;
+        MultiValueCollector collector = toClone.collector;
+        AtomicLong totalElapsedTime = toClone.totalElapsedTime;
+        AbstractMultiValueMapping[] mappings = new AbstractMultiValueMapping[toClone.mappings.length];
+        for (int i = 0; i < toClone.mappings.length; i++)
+        {
+            if (toClone.mappings[i] instanceof ExternalMethod && !((ExternalMethod)toClone.mappings[i]).isThreadSafe())
+            {
+                mappings[i] = (AbstractMultiValueMapping)((ExternalMethod)toClone.mappings[i]).makeThreadSafeCopy();
+            }
+            else
+            {
+                mappings[i] = (AbstractMultiValueMapping)toClone.mappings[i];
+            }
+        }
+        if (toClone.extractor instanceof ExternalMethod && !((ExternalMethod)toClone.extractor).isThreadSafe())
+        {
+            extractor = (AbstractMultiValueExtractor)((ExternalMethod)toClone.extractor).makeThreadSafeCopy();
+        }
+        else 
+        {
+            extractor = (AbstractMultiValueExtractor)toClone.extractor;
+        }
+        MultiValueIndexer result = new MultiValueIndexer(solrFieldNames, extractor, mappings, collector, specLabel, totalElapsedTime);
+        return(result);
+    }
+
     private List<AbstractValueExtractorFactory> createExtractorFactories(
             final Set<Class<? extends AbstractValueExtractorFactory>> factoryClasses)
             throws IllegalAccessException, InstantiationException
@@ -760,4 +796,10 @@ public class ValueIndexerFactory
         ValueIndexerFactory.homeDirStrs = homeDirStrs;
         setDirsContainingJavaSource(homeDirStrs);
     }
+
+    public void doneWithRecord(Record record)
+    {
+        MethodCallManager.instance().doneWithRecord(record);
+    }
+
 }

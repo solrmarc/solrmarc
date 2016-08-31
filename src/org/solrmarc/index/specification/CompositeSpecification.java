@@ -14,9 +14,6 @@ import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import org.solrmarc.index.extractor.impl.direct.FieldMatch;
 import org.solrmarc.index.specification.conditional.Condition;
 
-import com.rits.cloning.Cloner;
-
-
 public class CompositeSpecification extends Specification
 {
     List<SingleSpecification> pieces = null;
@@ -140,7 +137,15 @@ public class CompositeSpecification extends Specification
     {
         for (SingleSpecification spec : pieces)
         {
-            spec.addFormatter(Cloner.standard().deepClone(fmt));
+            try
+            {
+                spec.addFormatter(fmt.clone());
+            }
+            catch (CloneNotSupportedException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }        
         }
     }
     

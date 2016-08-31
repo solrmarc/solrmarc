@@ -1,8 +1,9 @@
 package org.solrmarc.index.extractor.methodcall;
 
 import org.marc4j.marc.Record;
+import org.solrmarc.index.extractor.ExternalMethod;
 
-public abstract class AbstractExtractorMethodCall<T>
+public abstract class AbstractExtractorMethodCall<T> implements ExternalMethod
 {
     private final String objectName;
     private final String methodName;
@@ -56,5 +57,4 @@ public abstract class AbstractExtractorMethodCall<T>
     {
         return numParameters;
     }
-
 }

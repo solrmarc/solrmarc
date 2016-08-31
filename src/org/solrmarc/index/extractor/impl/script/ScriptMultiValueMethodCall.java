@@ -29,6 +29,13 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
                     + scriptFileName + "\nMethod: " + method.toString());
         }
     }
+ 
+    private ScriptMultiValueMethodCall(ScriptMultiValueMethodCall toClone)
+    {
+        super(toClone.getObjectName(), toClone.method.getName(), false, toClone.getNumParameters());
+        this.interpreter = new Interpreter(toClone.interpreter);
+        this.method = toClone.method;        
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -52,6 +59,18 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
     {
         // TODO Implement perRecordInit support in scripts.
         return false;
+    }
+
+    @Override
+    public boolean isThreadSafe()
+    {
+        return false;
+    }
+
+    @Override
+    public Object makeThreadSafeCopy()
+    {
+        return new ScriptMultiValueMethodCall(this);
     }
 
 }

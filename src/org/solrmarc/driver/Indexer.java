@@ -54,17 +54,18 @@ public class Indexer
         delQ = new LinkedBlockingQueue<RecordAndDoc>();
     }
 
-//    private Indexer(Indexer toClone)
-//    {
-//        this.indexers = new ArrayList<AbstractValueIndexer<?>>();
-//        for (AbstractValueIndexer<?> indexer : toClone.indexers)
-//        {
-//            this.indexers.add(indexer.clone());
-//        }
-//        this.solrProxy = solrProxy;
-//        errQ = new LinkedBlockingQueue<RecordAndDoc>();
-//        delQ = new LinkedBlockingQueue<RecordAndDoc>();
-//    }
+    protected Indexer(Indexer toClone)
+    {
+        indexers = new ArrayList<AbstractValueIndexer<?>>();
+        for (AbstractValueIndexer<?> indexer : toClone.indexers)
+        {
+            this.indexers.add(ValueIndexerFactory.makeThreadSafeCopy(indexer));
+        }
+        this.solrProxy = toClone.solrProxy;
+        this.errQ = toClone.errQ;
+        this.delQ = toClone.delQ;
+        this.errHandle = toClone.errHandle;
+    }
 //
 //    public Indexer clone()
 //    {
@@ -303,7 +304,7 @@ public class Indexer
         }
         recDoc.setDoc(combineDocWithErrors(inputDocs, isSet(eErrorHandleVal.INDEX_ERROR_RECORDS)));
         recDoc.setMaxErrLvl(errLvl);
-        
+        ValueIndexerFactory.instance().doneWithRecord(record);
         return recDoc;
     }
     

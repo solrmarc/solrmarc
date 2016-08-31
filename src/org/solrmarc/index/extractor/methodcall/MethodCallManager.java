@@ -5,13 +5,14 @@ import org.marc4j.marc.Record;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MethodCallManager
 {
     /* a static singleton manager */
     private static MethodCallManager theManager = new MethodCallManager();
 
-    private final Map<Method, String> perRecordInitMap = new HashMap<>();
+    private final Map<Object, String> perRecordInitMap = new ConcurrentHashMap<>();
     private final Map<String, AbstractExtractorMethodCall<?>> extractorMethodCalls = new HashMap<>();
     private final Map<String, AbstractMappingMethodCall<?>> mappingMethodCalls = new HashMap<>();
 
@@ -27,6 +28,20 @@ public class MethodCallManager
     {
     }
 
+    public void doneWithRecord(Record record)
+    {
+        String recId = record.getControlNumber();
+        synchronized (perRecordInitMap)
+        {
+             Iterator<String> deleteIterator = perRecordInitMap.values().iterator();
+             while (deleteIterator.hasNext())
+             {
+                 String value = deleteIterator.next();
+                 if (value.equals(recId)) deleteIterator.remove();
+             }
+        }
+    }
+    
     private boolean isPerRecordInitMethod(Method method)
     {
         final Class<?>[] parameterTypes = method.getParameterTypes();
@@ -333,7 +348,7 @@ public class MethodCallManager
 //        return(result);
 //    }
     
-    public final boolean alreadyCalledFor(Method perRecordInit, Object record)
+    public final boolean alreadyCalledFor(Object objectWithPerRecordInit, Object record)
     {
         String recId = "";
         if (record instanceof Record)
@@ -341,13 +356,17 @@ public class MethodCallManager
             Record rec = (Record)record;
             recId = rec.getControlNumber();
         }
-        final String result = perRecordInitMap.get(perRecordInit);
-        if (!result.equals(recId))
+        boolean returnValue = true;
+        synchronized (perRecordInitMap)
         {
-            perRecordInitMap.put(perRecordInit, recId);
-            return(false);
+            final String result = perRecordInitMap.get(objectWithPerRecordInit);
+            if (result == null || !result.equals(recId))
+            {
+                perRecordInitMap.put(objectWithPerRecordInit, recId);
+                returnValue = false;
+            }
         }
-        return(true);
+        return(returnValue);
     }
 
     

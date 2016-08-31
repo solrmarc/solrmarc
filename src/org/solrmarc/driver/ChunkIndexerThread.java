@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
@@ -41,10 +42,10 @@ public class ChunkIndexerThread implements Runnable
     String firstDocId = null;
     String lastDocId = null;
 
-    final int cnts[];
-        
+    final AtomicInteger cnts[];
+
     public ChunkIndexerThread(String threadName, Collection<RecordAndDoc> recordAndDocs,
-            BlockingQueue<RecordAndDoc> errQ, SolrProxy solrProxy, int[] cnts)
+            BlockingQueue<RecordAndDoc> errQ, SolrProxy solrProxy, AtomicInteger[] cnts)
     {
         this.threadName = threadName; 
         this.recordAndDocs = recordAndDocs;
@@ -83,9 +84,9 @@ public class ChunkIndexerThread implements Runnable
         try {
             // If all goes well, this is all we need. Add the docs, count the docs, and if desired return the docs with errors
             int cnt = solrProxy.addDocs(docs);
-            synchronized ( cnts ) { cnts[2] += cnt; }
+            cnts[2].addAndGet(cnt);
             logger.debug("Added chunk of "+cnt+ " documents -- starting with id : "+firstDocId);
-            
+
             if (errQ != null)
             {
                 for (RecordAndDoc recDoc : recordAndDocs)
@@ -100,7 +101,7 @@ public class ChunkIndexerThread implements Runnable
         catch (Exception e)
         {
             Iterator<RecordAndDoc> recDocI = recordAndDocs.iterator();
-            
+
             if (inChunk == 1)
             {
                 RecordAndDoc recDoc = recDocI.next();
@@ -131,19 +132,6 @@ public class ChunkIndexerThread implements Runnable
                     subChunk[i] = new ChunkIndexerThread("SolrUpdateOnError_"+id1+"_"+id2, newRecDoc, errQ, solrProxy, cnts);
                     subChunk[i].run();
                 }
-//                for (int i = 0; i < 4; i++)
-//                {
-//                    // Now wait for each of the 4 sub-chunks to finish.
-//                    try
-//                    {
-//                        subChunk[i].join();
-//                    }
-//                    catch (InterruptedException e1)
-//                    {
-//                        // TODO Auto-generated catch block
-//                        e1.printStackTrace();
-//                    }
-//                }
             }
             // less than 20 in the chunk resubmit records one-by-one
             else 
@@ -155,7 +143,6 @@ public class ChunkIndexerThread implements Runnable
                 {
                     RecordAndDoc recDoc = recDocI.next();
                     SolrInputDocument doc = recDoc.getDoc();
-                 //   Record rec = recDoc.getRec();
                     logger.debug("Adding single doc with id : "+ controlNumOrDefault(recDoc.getRec(), "RecCnt_" + (num1)));
                     try
                     {
@@ -173,7 +160,7 @@ public class ChunkIndexerThread implements Runnable
                         Indexer.singleRecordSolrError(recDoc, e1, errQ);
                     }
                 }
-                synchronized ( cnts ) { cnts[2] += num1; }
+                cnts[2].addAndGet(num1);
             }
         }
     }

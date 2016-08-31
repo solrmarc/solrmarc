@@ -5,8 +5,9 @@ import java.util.Collections;
 
 import org.marc4j.marc.Record;
 import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
+import org.solrmarc.index.extractor.ExternalMethod;
 
-public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor
+public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor implements ExternalMethod
 {
     private final AbstractExtractorMethodCall<String> methodCall;
     private final Object[] parameters;
@@ -27,6 +28,13 @@ public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor
         this.parameters = new Object[parameters.length + 1];
         System.arraycopy(parameters, 0, this.parameters, 1, parameters.length);
     }
+    
+    @SuppressWarnings("unchecked")
+    private MethodCallSingleValueExtractor(MethodCallSingleValueExtractor toClone)
+    {
+        this.methodCall = (AbstractExtractorMethodCall<String>) toClone.methodCall.makeThreadSafeCopy();
+        this.parameters = toClone.parameters;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -37,5 +45,17 @@ public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor
             return(Collections.EMPTY_LIST);
         else
             return(Collections.singletonList((String)result));
+    }
+
+    @Override
+    public boolean isThreadSafe()
+    {
+        return methodCall.isThreadSafe();
+    }
+
+    @Override
+    public Object makeThreadSafeCopy()
+    {
+        return new MethodCallSingleValueExtractor(this);
     }
 }
