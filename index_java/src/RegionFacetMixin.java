@@ -12,7 +12,7 @@ import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.index.SolrIndexerMixin;
-import org.solrmarc.tools.Utils;
+import org.solrmarc.tools.DataUtil;
 
 public class RegionFacetMixin extends SolrIndexerMixin
 {
@@ -120,7 +120,7 @@ public class RegionFacetMixin extends SolrIndexerMixin
                     }
                     if (prevWasZ)
                     {
-                        String data = Utils.cleanData(sf.getData());
+                        String data = DataUtil.cleanData(sf.getData());
                         if (data.equals("South America") || data.equals("Central America") || data.equals("United States"))
                         {
                             //part.insert(0, data+"#");
@@ -128,7 +128,7 @@ public class RegionFacetMixin extends SolrIndexerMixin
                         else
                         {
                             part.append("#");
-                            part.append(Utils.cleanData(sf.getData()));
+                            part.append(DataUtil.cleanData(sf.getData()));
                         }
                     }
                     else
@@ -137,7 +137,7 @@ public class RegionFacetMixin extends SolrIndexerMixin
                         {
                             hadPrevZ = true;
                         }
-                        part.append(Utils.cleanData(sf.getData()));
+                        part.append(DataUtil.cleanData(sf.getData()));
                     }
                     prevWasZ = true;
                     hadPrevZ = true;
@@ -170,7 +170,7 @@ public class RegionFacetMixin extends SolrIndexerMixin
         for (String fields650 : sub650z)
         {
             String parts[] = fields650.split("#");
-            parts[0] = Utils.cleanData(parts[0]);
+            parts[0] = DataUtil.cleanData(parts[0]);
             result.add(parts[0]);
             for (int i = 1; i < parts.length; i++)
             {
@@ -180,7 +180,7 @@ public class RegionFacetMixin extends SolrIndexerMixin
                     parts[0] = parts[1].replaceAll("((\\p{L}\\p{M}*|\\.|[- ])+(\\p{L}\\p{M}*|\\.))[ ]?\\(((\\p{L}\\p{M}*|\\.|[- ])+).*", "$1, $4");
                     i = 2;  
                 }
-                parts[i] = Utils.cleanData(parts[i]);
+                parts[i] = DataUtil.cleanData(parts[i]);
                 String abbrev = getStateNameAbbrev(parts[0]);
                 if (abbrev != null)
                 {

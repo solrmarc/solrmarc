@@ -3,7 +3,6 @@ package org.solrmarc.mixin;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.DataField;
@@ -12,10 +11,8 @@ import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 
 import org.solrmarc.index.SolrIndexerMixin;
-import org.solrmarc.index.extractor.impl.custom.Mixin;
 import org.solrmarc.index.indexer.IndexerSpecException;
-
-import org.solrmarc.tools.Utils;
+import org.solrmarc.tools.DataUtil;
 
 public class DirectorMixin extends SolrIndexerMixin
 {
@@ -106,7 +103,7 @@ public class DirectorMixin extends SolrIndexerMixin
                         (ChkSubfield(df, 'e', "(co-|film )?[Dd]irect(or|er|ion|eur|ed by)[^a-z]*") ))
                 {
                     String name = df.getSubfield('a').getData();
-                    name = Utils.cleanData(name);
+                    name = DataUtil.cleanData(name);
                     name = name.replaceAll("([A-Z][^,]*),[ ]?(.*)", "$2 $1");
                     result.add(name);
                 }
@@ -543,7 +540,7 @@ public class DirectorMixin extends SolrIndexerMixin
         if (subpart.equalsIgnoreCase("Screenplay")) return(null);
         if (subpart.contains(":")|| subpart.replaceAll("[^ ]", "").length() > 5)
             return(null);
-        subpart = Utils.cleanData(subpart);
+        subpart = DataUtil.cleanData(subpart);
         if (subpart.length() == 0) return(null);
         return(subpart);
     }

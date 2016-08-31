@@ -12,7 +12,7 @@ import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.SolrIndexerMixin;
 import org.solrmarc.index.indexer.IndexerSpecException;
-import org.solrmarc.tools.Utils;
+import org.solrmarc.tools.DataUtil;
 
 
 public class VideoInfoMixin extends SolrIndexerMixin
@@ -258,7 +258,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
                 if (ChkSubfield(df, '4', "drt") || ChkSubfield(df, 'c', ".*director.*") || ChkSubfield(df, 'e', ".*direct.*"))
                 {
                     String name = df.getSubfield('a').getData();
-                    name = Utils.cleanData(name);
+                    name = DataUtil.cleanData(name);
                     name = name.replaceAll("([A-Z][^,]*),[ ]?(.*)", "$2 $1");
                     result.add(name);
                 }
@@ -695,7 +695,7 @@ public class VideoInfoMixin extends SolrIndexerMixin
         if (subpart.equalsIgnoreCase("Screenplay")) return(null);
         if (subpart.contains(":")|| subpart.replaceAll("[^ ]", "").length() > 5)
             return(null);
-        subpart = Utils.cleanData(subpart);
+        subpart = DataUtil.cleanData(subpart);
         if (subpart.length() == 0) return(null);
         return(subpart);
     }
