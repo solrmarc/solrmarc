@@ -16,21 +16,20 @@ public class PatternMapping
      * Matcher and using Matcher#reset(String) is 10% faster than using
      * Pattern#matcher(String).
      */
-    private final Matcher inputMatcher;
+    private final Pattern inputPattern;
 //    private final String inputString;
     private final String outputPattern;
     private final int orderIndex;
-
-    public PatternMapping(final String inputPattern, final String outputPattern, final int orderIndex)
+    
+    public PatternMapping(final String inputPatternStr, final String outputPattern, final int orderIndex)
     {
-        Pattern tmp = Pattern.compile(inputPattern);
-//         this.inputString = inputPattern;
-        this.inputMatcher = tmp.matcher("");
+        this.inputPattern = Pattern.compile(inputPatternStr);
         this.outputPattern = outputPattern;
         this.orderIndex = orderIndex;
-        // Test replacement at creation time to make group references match.
+        // Test replacement at creation time to make sure group references match.
         int index = outputPattern.indexOf('$');
         int groupMax = 0;
+        Matcher inputMatcher = inputPattern.matcher("");
         inputMatcher.replaceAll(outputPattern);
         int groupCnt = inputMatcher.groupCount();
         while (index >= 0)
@@ -51,9 +50,10 @@ public class PatternMapping
     {
         for (PatternMapping patternMapping : patternMappings)
         {
-            if (patternMapping.canHandle(value))
+            Matcher matcher = patternMapping.inputPattern.matcher(value);
+            if (matcher.find())
             {
-                value = patternMapping.map(value);
+                value = patternMapping.map(matcher);
             }
         }
         return value;
@@ -63,9 +63,10 @@ public class PatternMapping
     {
         for (PatternMapping patternMapping : patternMappings)
         {
-            if (patternMapping.canHandle(value))
+            Matcher matcher = patternMapping.inputPattern.matcher(value);
+            if (matcher.find())
             {
-                final String mappedValue = patternMapping.map(value);
+                final String mappedValue = patternMapping.map(matcher);
                 if (mappedValue.length() != 0) values.add(mappedValue);
             }
         }
@@ -76,11 +77,11 @@ public class PatternMapping
         return orderIndex;
     }
 
-    public boolean canHandle(final String value)
-    {
-        final boolean result = inputMatcher.reset(value).find();
-        return (result);
-    }
+//    public boolean canHandle(final String value)
+//    {
+//        final boolean result = inputMatcher.reset(value).find();
+//        return (result);
+//    }
 
     /**
      * PatternMapping#canHandle(String) has to be called before. Otherwise the
@@ -90,7 +91,7 @@ public class PatternMapping
      *            the value to be mapped.
      * @return the mapped value.
      */
-    public String map(final String value)
+    public String map(final Matcher inputMatcher)
     {
         String result = outputPattern;
         if (outputPattern.contains("$"))
