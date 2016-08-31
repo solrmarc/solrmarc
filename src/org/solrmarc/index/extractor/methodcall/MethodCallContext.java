@@ -2,7 +2,7 @@ package org.solrmarc.index.extractor.methodcall;
 
 import org.marc4j.marc.Record;
 import org.solrmarc.index.utils.StringReader;
-import org.solrmarc.tools.Utils;
+import org.solrmarc.tools.DataUtil;
 
 import java.util.Arrays;
 
@@ -138,7 +138,7 @@ public class MethodCallContext
         String[] parameters = parametersString.split("\\s*(?<=[^\\\\]),\\s*");
         for (int i = 0; i < parameters.length; i++)
         {
-            parameters[i] = Utils.cleanData(parameters[i]).replaceAll("^\"(.*)\"$", "$1");
+            parameters[i] = DataUtil.cleanData(parameters[i]).replaceAll("^\"(.*)\"$", "$1");
         }
         return parameters;
     }
