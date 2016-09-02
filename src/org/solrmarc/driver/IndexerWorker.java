@@ -19,6 +19,7 @@ public class IndexerWorker implements Runnable
     private Indexer indexer;
     private MarcReaderThread readerThread;
     private int threadCount;
+    private boolean doneWorking = false;
     
     public IndexerWorker(MarcReaderThread readerThread, BlockingQueue<Record> readQ, BlockingQueue<RecordAndDoc> docQ, Indexer indexer, AtomicInteger cnts[], int threadCount)
     {
@@ -28,6 +29,12 @@ public class IndexerWorker implements Runnable
         this.indexer = indexer;
         this.cnts = cnts;
         this.threadCount = threadCount;
+        this.doneWorking = false;
+    }
+
+    public boolean isDoneWorking()
+    {
+        return doneWorking;
     }
 
     @Override 
@@ -107,5 +114,6 @@ public class IndexerWorker implements Runnable
                 Thread.currentThread().interrupt();
             }
         }
+        doneWorking = true;
     }
 }

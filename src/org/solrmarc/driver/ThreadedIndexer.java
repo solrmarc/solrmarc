@@ -87,9 +87,9 @@ public class ThreadedIndexer extends Indexer
         // the readQ and building the solr index document, this thread will await the docQ being filled
         // and when it is full, it will lock the queue, copy all the documents to a separate buffer
         // and create a ChunkIndexerWorker to manage sending those records to Solr.
-        while (!done())
+        while (!done(workers))
         {
-            if (docQ.remainingCapacity() == 0 || indexerThreadsAreDone())
+            if (docQ.remainingCapacity() == 0 || indexerThreadsAreDone(workers))
             {
                 final ArrayList<RecordAndDoc> chunk = new ArrayList<RecordAndDoc>(docQ.size());
                 synchronized (docQ)
@@ -157,14 +157,20 @@ public class ThreadedIndexer extends Indexer
         return(intCnts);
     }
 
-    private boolean indexerThreadsAreDone()
+    private boolean indexerThreadsAreDone(IndexerWorker[] workers)
     {
-        return readerThread.isDoneReading() && readQ.isEmpty() ;
+        for (IndexerWorker worker : workers)
+        {
+            if (!worker.isDoneWorking()) return(false);
+        }
+        return(true);
     }
 
-    private boolean done()
+    private boolean done(IndexerWorker[] workers)
     {
-        return (readerThread.isDoneReading() && readQ.isEmpty() && docQ.isEmpty());
+        if (!readerThread.isDoneReading() || !readQ.isEmpty()) return(false);
+        if (!docQ.isEmpty()) return(false);
+        return indexerThreadsAreDone(workers);
     }
 
 }
