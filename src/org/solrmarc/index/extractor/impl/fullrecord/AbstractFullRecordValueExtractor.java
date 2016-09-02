@@ -14,9 +14,6 @@ import java.io.UnsupportedEncodingException;
  */
 public abstract class AbstractFullRecordValueExtractor extends AbstractSingleValueExtractor
 {
-    protected MarcWriter writer;
-    private final ByteArrayOutputStream outputStream;
-
     /**
      * @param writer
      *            a marc writer which writes to outputStream.
@@ -25,14 +22,13 @@ public abstract class AbstractFullRecordValueExtractor extends AbstractSingleVal
      */
     public AbstractFullRecordValueExtractor()
     {
-        this.outputStream = new ByteArrayOutputStream();
     }
 
     @Override
     public String extract(final Record record) throws UnsupportedEncodingException
     {
-        outputStream.reset();
-        writer = makeNewWriter(outputStream);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        MarcWriter writer = makeNewWriter(outputStream);
         writer.write(record);
         writer.close();
         writer = null;
