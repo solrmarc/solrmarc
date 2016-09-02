@@ -2,13 +2,11 @@ package org.solrmarc.index.indexer;
 
 import java_cup.runtime.*;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import org.solrmarc.index.collector.MultiValueCollector;
 import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
 import org.solrmarc.index.extractor.AbstractSingleValueExtractor;
 import org.solrmarc.index.extractor.AbstractValueExtractor;
@@ -18,14 +16,11 @@ import org.solrmarc.index.extractor.impl.constant.ConstantMultiValueExtractor;
 import org.solrmarc.index.extractor.impl.date.DateValueExtractorFactory;
 import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
 import org.solrmarc.index.extractor.impl.fullrecord.FullRecordValueExtractorFactory;
-import org.solrmarc.index.mapping.AbstractMultiValueMapping;
-import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.solrmarc.index.specification.conditional.*;
 import org.solrmarc.index.utils.StringReader;
 import org.solrmarc.tools.Utils;
 
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
-import java_cup.runtime.ComplexSymbolFactory.Location;
 import org.solrmarc.index.specification.*;
 
 parser code {:
@@ -39,26 +34,22 @@ parser code {:
     static String cacheOfStrToParse;
     static String cacheOfSolrField;
     private ValueIndexerFactory valueIndexerFactory = null;
-    private List<AbstractValueMappingFactory> mappingFactories = null;
-    private List<AbstractValueExtractorFactory> extractorFactories = null;
-    
+
     public static void setParserDebug(boolean b) { parser_debug = b; } 
     public static boolean shouldParserDebug()    { return(parser_debug); }
     public FullConditionalParser(boolean debug) throws IllegalAccessException, InstantiationException 
     { 
         super(debug ? new VerboseSymbolFactory() : new ComplexSymbolFactory());
         parser_debug = debug;
-        this.scanner = new FullConditionalScanner((ComplexSymbolFactory)getSymbolFactory());
-        this.setScanner(this.scanner);
+        scanner = new FullConditionalScanner((ComplexSymbolFactory)getSymbolFactory());
+        this.setScanner(scanner);
     }
-    
-    public void setFactories(ValueIndexerFactory vif, List<AbstractValueExtractorFactory> extractorFactories, List<AbstractValueMappingFactory> mappingFactories)
+
+    public void setFactories(ValueIndexerFactory vif)
     {
         this.valueIndexerFactory = vif;
-        this.extractorFactories = extractorFactories;
-        this.mappingFactories = mappingFactories;  
     }
-    
+
     public MultiValueIndexer parse(String solrFields, String strToParse, boolean debug)
     {
         cacheOfSolrField = solrFields;
@@ -106,7 +97,7 @@ parser code {:
         specParts[0] = type;
         specParts[1] = classOrScriptName;
         System.arraycopy(methodPlusParams.toArray(new String[0]), 0, specParts, 2, methodPlusParams.size());
-        for (final AbstractValueExtractorFactory factory : extractorFactories)
+        for (final AbstractValueExtractorFactory factory : ValueIndexerFactory.instance().getExtractorFactories())
         {
             if (factory.canHandle("CUP Parser", specParts[0]))
             {
