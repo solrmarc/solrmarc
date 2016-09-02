@@ -48,8 +48,8 @@ public class IndexerWorker implements Runnable
                 if (rec == null) 
                     continue;
 //                System.out.println(rec.getControlNumber() + " :  read in thread "+ threadCount);
-                long id = Long.parseLong(rec.getControlNumber().substring(1))* 100 + threadCount;
-                rec.setId((long)id);
+//                long id = Long.parseLong(rec.getControlNumber().substring(1))* 100 + threadCount;
+//                rec.setId((long)id);
                 RecordAndDoc recDoc = indexer.indexToSolrDoc(rec);
                 if (recDoc.getSolrMarcIndexerException() != null)
                 {
