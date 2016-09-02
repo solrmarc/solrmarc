@@ -12,20 +12,20 @@ import org.apache.log4j.Logger;
 
 public class SolrCoreLoader
 {
-    public static Logger logger = Logger.getLogger(SolrCoreLoader.class); 
+    public static Logger logger = Logger.getLogger(SolrCoreLoader.class);
 
-    public final static String[] defaultSolrJClassnames = 
-        { "org.apache.solr.client.solrj.impl.HttpSolrClient", 
-          "org.apache.solr.client.solrj.impl.HttpSolrServer",
-          "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer" } ;
-    
-    public static SolrProxy loadRemoteSolrServer(String solrHostUpdateURL, String fullClassName, boolean useBinaryRequestHandler) 
+    public final static String[] defaultSolrJClassnames = { 
+            "org.apache.solr.client.solrj.impl.HttpSolrClient", 
+            "org.apache.solr.client.solrj.impl.HttpSolrServer", 
+            "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer" };
+
+    public static SolrProxy loadRemoteSolrServer(String solrHostUpdateURL, String fullClassName, boolean useBinaryRequestHandler)
     {
         Object httpsolrserver;
         SolrProxy solrProxy = null;
         // if it has /update on the end, remove it
         String urlString = solrHostUpdateURL.replaceAll("[/\\\\]update$", "");
-        URL pingURL; 
+        URL pingURL;
         try
         {
             pingURL = new URL(urlString + "/admin/ping");
@@ -34,7 +34,7 @@ public class SolrCoreLoader
         {
             throw new SolrRuntimeException("Malformed URL for solr server " + urlString, e2);
         }
-        
+
         // Check that a Solr server is running and available at the provided URL
         boolean statusOK = false;
         BufferedReader pingStream = null;
@@ -55,30 +55,34 @@ public class SolrCoreLoader
         {
             throw new SolrRuntimeException("Error connecting to solr server for ping " + urlString, e1);
         }
-        finally {
-            if (pingStream != null) try { pingStream.close(); } catch (IOException e){}
+        finally
+        {
+            if (pingStream != null) { try { pingStream.close(); } catch (IOException e){} }
         }
         if (!statusOK)
         {
             throw new SolrRuntimeException("Solr reports not OK " + urlString);
         }
-        try {
+        try
+        {
             Class<?> httpsolrserverClass = null;
             if (fullClassName != null && fullClassName.length() > 0)
             {
                 httpsolrserverClass = Class.forName(fullClassName);
             }
-            else 
-            {   
+            else
+            {
                 for (String classname : defaultSolrJClassnames)
                 {
-                    try {
+                    try
+                    {
                         httpsolrserverClass = Class.forName(classname);
+                        logger.debug("Found Solrj class " + classname);
                         break;
                     }
                     catch (ClassNotFoundException e)
                     {
-                        logger.debug("Didn't find class "+ classname);
+                        logger.debug("Didn't find class " + classname);
                     }
                 }
                 if (httpsolrserverClass == null)
@@ -91,13 +95,13 @@ public class SolrCoreLoader
             Class<?> superclass = httpsolrserver.getClass().getSuperclass();
             if (superclass.getName().endsWith(".SolrServer"))
             {
-                solrProxy = new SolrServerProxy(httpsolrserver); 
-                return(solrProxy);
+                solrProxy = new SolrServerProxy(httpsolrserver);
+                return (solrProxy);
             }
             if (superclass.getName().endsWith(".SolrClient"))
             {
-                solrProxy = new SolrClientProxy(httpsolrserver); 
-                return(solrProxy);
+                solrProxy = new SolrClientProxy(httpsolrserver);
+                return (solrProxy);
             }
         }
         catch (ClassNotFoundException e)
@@ -112,7 +116,7 @@ public class SolrCoreLoader
         {
             throw new SolrRuntimeException("Error finding solrj constructor with one String parameter", e);
         }
-        catch (InstantiationException | IllegalAccessException  | IllegalArgumentException | InvocationTargetException e)
+        catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
         {
             throw new SolrRuntimeException("Error invoking solrj constructor with one String parameter", e);
         }
