@@ -33,7 +33,8 @@ public class MethodCallSingleValueExtractor extends AbstractMultiValueExtractor 
     private MethodCallSingleValueExtractor(MethodCallSingleValueExtractor toClone)
     {
         this.methodCall = (AbstractExtractorMethodCall<String>) toClone.methodCall.makeThreadSafeCopy();
-        this.parameters = toClone.parameters;
+        this.parameters = new Object[toClone.parameters.length];
+        System.arraycopy(toClone.parameters, 0, this.parameters, 0, toClone.parameters.length);
     }
 
     @SuppressWarnings("unchecked")

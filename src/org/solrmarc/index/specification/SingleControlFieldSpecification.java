@@ -19,6 +19,11 @@ public class SingleControlFieldSpecification extends SingleSpecification
         this(tag, null);
     }
 
+    private SingleControlFieldSpecification(SingleControlFieldSpecification toClone)
+    {
+        super(toClone);
+    }
+
     @Override
     public void addConditional(Condition cond)
     {
@@ -40,23 +45,21 @@ public class SingleControlFieldSpecification extends SingleSpecification
     public void addFieldValues(Collection<String> result, VariableField vf) throws Exception
     {
         final String data;
-//        if (start == -1 && end == -1)
-//        {
-            data = ((ControlField) vf).getData();
-//        }
-//        else
-//        {
-//            data = ((ControlField) vf).getData().substring(start, end + 1);
-//        }
-        fmt.start();
-        fmt.addTag(vf);
+        data = ((ControlField) vf).getData();
+        StringBuilder sb = fmt.start();
+        fmt.addTag(sb, vf);
         Collection<String> prepped = fmt.prepData(vf, false, data);
         for (String val : prepped)
         {
-            fmt.addVal(val);
-            fmt.addAfterSubfield(result);
+            fmt.addVal(sb, val);
+            fmt.addAfterSubfield(sb, result);
         }
-        fmt.addAfterField(result);
+        fmt.addAfterField(sb, result);
     }
-
+    
+    @Override
+    public Object makeThreadSafeCopy()
+    {
+        return new SingleControlFieldSpecification(this);
+    }
 }

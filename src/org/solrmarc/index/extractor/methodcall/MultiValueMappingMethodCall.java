@@ -27,7 +27,7 @@ public class MultiValueMappingMethodCall extends AbstractMappingMethodCall<Colle
     private MultiValueMappingMethodCall(MultiValueMappingMethodCall toClone)
     {
         super(toClone.getObjectName(), toClone.getMethodName());
-        this.mixin = AbstractMethodCallFactory.createObjectForSpecifiedClass(toClone.mixin.getClass());
+        this.mixin = AbstractMethodCallFactory.createThreadLocalObjectForSpecifiedClass(toClone.mixin.getClass());
         this.method = toClone.method;        
     }
 

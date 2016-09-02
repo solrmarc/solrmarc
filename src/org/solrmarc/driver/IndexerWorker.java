@@ -16,7 +16,7 @@ public class IndexerWorker implements Runnable
     private AtomicInteger cnts[];
     private final BlockingQueue<Record> readQ;
     private final BlockingQueue<RecordAndDoc> docQ;
-    private final Indexer indexer;
+    private Indexer indexer;
     private MarcReaderThread readerThread;
     private int threadCount;
     
@@ -25,7 +25,7 @@ public class IndexerWorker implements Runnable
         this.readerThread = readerThread;
         this.readQ = readQ;
         this.docQ = docQ;
-        this.indexer = (threadCount == 0) ? indexer : new Indexer(indexer);
+        this.indexer = indexer;
         this.cnts = cnts;
         this.threadCount = threadCount;
     }
@@ -33,6 +33,12 @@ public class IndexerWorker implements Runnable
     @Override 
     public void run()
     {
+        // if this isn't the first Indexer Worker Thread make a thread safe instance duplicate of the indexer
+        // this primarily means making a new instance object for each External Method class
+        if (threadCount > 0)
+        {
+            indexer = (threadCount == 0) ? indexer : indexer.makeThreadSafeCopy();
+        }
         Thread.currentThread().setName("RecordIndexer-Thread-"+threadCount);
         while ((! readerThread.isDoneReading() || !readQ.isEmpty()) && !readerThread.isInterrupted() && !Thread.currentThread().isInterrupted() )
         {
@@ -41,6 +47,9 @@ public class IndexerWorker implements Runnable
                 Record rec = readQ.poll(10, TimeUnit.MILLISECONDS);
                 if (rec == null) 
                     continue;
+//                System.out.println(rec.getControlNumber() + " :  read in thread "+ threadCount);
+                long id = Long.parseLong(rec.getControlNumber().substring(1))* 100 + threadCount;
+                rec.setId((long)id);
                 RecordAndDoc recDoc = indexer.indexToSolrDoc(rec);
                 if (recDoc.getSolrMarcIndexerException() != null)
                 {
@@ -81,6 +90,7 @@ public class IndexerWorker implements Runnable
                 {
                     try {
                         synchronized (docQ) { docQ.wait(); }
+
                         offerWorked = docQ.offer(recDoc);
                     }
                     catch (InterruptedException ie)

@@ -22,7 +22,8 @@ public class MethodCallMultiValueMapping extends AbstractMultiValueMapping imple
     private MethodCallMultiValueMapping(MethodCallMultiValueMapping toClone)
     {
         this.methodCall = (MultiValueMappingMethodCall) toClone.methodCall.makeThreadSafeCopy();
-        this.parameters = toClone.parameters;
+        this.parameters = new Object[toClone.parameters.length];
+        System.arraycopy(toClone.parameters, 0, this.parameters, 0, toClone.parameters.length);
     }
 
     @Override

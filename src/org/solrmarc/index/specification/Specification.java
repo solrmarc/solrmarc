@@ -7,15 +7,16 @@ import java.util.List;
 
 import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.index.extractor.ExternalMethod;
 import org.solrmarc.index.extractor.formatter.FieldFormatter;
-import org.solrmarc.index.extractor.formatter.FieldFormatterDecorator;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import org.solrmarc.index.extractor.impl.direct.FieldMatch;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.specification.conditional.Condition;
 
 
-public abstract class Specification
+public abstract class Specification implements ExternalMethod
 {
     abstract public void addConditional(Condition cond);
 
@@ -58,20 +59,19 @@ public abstract class Specification
         this.specLabel = specLabel;
     }
 
-    public abstract void addFormatter(FieldFormatterDecorator fmt);
-   
     public abstract void setFormatter(FieldFormatter fmt);
 
     public abstract void addCleanVal(eCleanVal cleanVal);
 
     public abstract void setCleanVal(EnumSet<eCleanVal> of);
-   
+
     public abstract void setJoinVal(eJoinVal cleanVal);
-    
+
     public abstract void setSubstring(int offset, int endOffset);
 
     public abstract void setSeparator(String string);
 
     public abstract void setFormatPatterns(String[] mapParts);
-    
+
+    public abstract void addMap(AbstractMultiValueMapping valueMapping);
 }

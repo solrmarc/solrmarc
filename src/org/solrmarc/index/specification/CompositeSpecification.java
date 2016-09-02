@@ -8,10 +8,10 @@ import java.util.List;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.extractor.formatter.FieldFormatter;
-import org.solrmarc.index.extractor.formatter.FieldFormatterDecorator;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import org.solrmarc.index.extractor.impl.direct.FieldMatch;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.specification.conditional.Condition;
 
 public class CompositeSpecification extends Specification
@@ -29,6 +29,18 @@ public class CompositeSpecification extends Specification
     public CompositeSpecification(Specification spec)
     {
         addSpec(spec);
+    }
+
+    private CompositeSpecification(CompositeSpecification toClone)
+    {
+        this.pieces = new ArrayList<SingleSpecification>(toClone.pieces.size());
+        for (SingleSpecification spec : toClone.pieces)
+        {
+            this.pieces.add((SingleSpecification)((spec.isThreadSafe()) ? spec : spec.makeThreadSafeCopy()));
+        }
+        this.tagsUsed = toClone.tagsUsed;
+        this.tags = toClone.tags;
+        this.duplicateTags = toClone.duplicateTags;
     }
 
     @Override
@@ -132,20 +144,21 @@ public class CompositeSpecification extends Specification
         }
     }
 
-    @Override
-    public void addFormatter(FieldFormatterDecorator fmt)
+//    @Override
+//    public void addFormatter(FieldFormatterDecorator fmt)
+//    {
+//        for (SingleSpecification spec : pieces)
+//        {
+//            spec.addFormatter((FieldFormatterDecorator)fmt.makeThreadSafeCopy());
+//        }
+//    }
+//    
+    @Override 
+    public void addMap(AbstractMultiValueMapping valueMapping)
     {
         for (SingleSpecification spec : pieces)
         {
-            try
-            {
-                spec.addFormatter(fmt.clone());
-            }
-            catch (CloneNotSupportedException e)
-            {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }        
+            spec.addMap(valueMapping);
         }
     }
     
@@ -204,6 +217,22 @@ public class CompositeSpecification extends Specification
         {
             spec.setFormatPatterns( mapParts);
         }
+    }
+
+    @Override
+    public boolean isThreadSafe()
+    {
+        for (SingleSpecification spec : pieces)
+        {
+            if (!spec.isThreadSafe()) return(false);
+        }
+        return(true);
+    }
+
+    @Override
+    public Object makeThreadSafeCopy()
+    {
+        return new CompositeSpecification(this);
     }
 
 }

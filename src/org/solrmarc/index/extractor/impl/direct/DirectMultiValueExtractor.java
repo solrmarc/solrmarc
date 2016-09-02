@@ -3,27 +3,31 @@ package org.solrmarc.index.extractor.impl.direct;
 
 import org.marc4j.marc.Record;
 import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
-import org.solrmarc.index.extractor.formatter.FieldFormatterDecorator;
+import org.solrmarc.index.extractor.ExternalMethod;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.specification.Specification;
 
 import java.util.Collection;
 import java.util.EnumSet;
 
-public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
+public class DirectMultiValueExtractor extends AbstractMultiValueExtractor implements ExternalMethod
 {
     private Specification fieldsAndSubfieldSpec;
 
-//    public DirectMultiValueExtractor(final String fieldsAndSubfields)
-//    {
-//        fieldsAndSubfieldSpec = AbstractSpecificationFactory.createSpecification(fieldsAndSubfields);
-//    }
-//
     public DirectMultiValueExtractor(Specification fieldSpec)
     {
         fieldsAndSubfieldSpec = fieldSpec;
+    }
+    
+    private DirectMultiValueExtractor(DirectMultiValueExtractor toClone)
+    {
+        if (toClone.fieldsAndSubfieldSpec.isThreadSafe())
+            fieldsAndSubfieldSpec = toClone.fieldsAndSubfieldSpec;
+        else
+            fieldsAndSubfieldSpec = (Specification)toClone.fieldsAndSubfieldSpec.makeThreadSafeCopy();
     }
 
     public Specification getFieldsAndSubfieldSpec()
@@ -36,11 +40,11 @@ public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
         this.fieldsAndSubfieldSpec = fieldsAndSubfieldSpec;
     }
 
-    public void addFormatter(FieldFormatterDecorator fmt)
+    public void addMap(AbstractMultiValueMapping valueMapping)
     {
-        this.fieldsAndSubfieldSpec.addFormatter(fmt);
+        fieldsAndSubfieldSpec.addMap(valueMapping);
     }
-    
+
     public final Collection<FieldMatch> getFieldMatches(final Record record)
     {
         Collection<FieldMatch> result = fieldsAndSubfieldSpec.getFieldMatches(record);
@@ -105,5 +109,15 @@ public class DirectMultiValueExtractor extends AbstractMultiValueExtractor
         fieldsAndSubfieldSpec.setFormatPatterns(mapParts);
     }
 
+    @Override
+    public boolean isThreadSafe()
+    {
+        return fieldsAndSubfieldSpec.isThreadSafe();
+    }
 
+    @Override
+    public Object makeThreadSafeCopy()
+    {
+        return new DirectMultiValueExtractor(this);
+    }
 }

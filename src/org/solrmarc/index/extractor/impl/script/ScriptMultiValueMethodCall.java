@@ -33,7 +33,7 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
     private ScriptMultiValueMethodCall(ScriptMultiValueMethodCall toClone)
     {
         super(toClone.getObjectName(), toClone.method.getName(), false, toClone.getNumParameters());
-        this.interpreter = new Interpreter(toClone.interpreter);
+        this.interpreter = toClone.interpreter;
         this.method = toClone.method;        
     }
 
@@ -41,7 +41,11 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
     @Override
     public Collection<String> invoke(final Object[] parameters) throws Exception
     {
-        Object result = method.invoke(parameters, interpreter);
+        Object result;
+        synchronized(interpreter)
+        {
+            result = method.invoke(parameters, interpreter);
+        }
         if (result instanceof Collection)  
             return((Collection<String>)result);
         else 
@@ -53,7 +57,7 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
     {
         // TODO Implement perRecordInit support in scripts.
     }
-    
+
     @Override
     protected boolean perRecordInitCalled(Object[] record)
     {

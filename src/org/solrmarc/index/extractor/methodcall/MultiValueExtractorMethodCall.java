@@ -17,7 +17,7 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
         this.mixin = mixin;
         this.method = method;
         this.perRecordInit = perRecordInit;
-        
+
         if (!Collection.class.isAssignableFrom(this.method.getReturnType()))
         {
             throw new IllegalArgumentException(
@@ -25,11 +25,11 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
                             + mixin.getClass().getName() + "\nMixin method: " + method.toString());
         }
     }
-    
+
     private MultiValueExtractorMethodCall(MultiValueExtractorMethodCall toClone)
     {
         super(toClone.mixin.getClass().getName(), toClone.method.getName(), toClone.perRecordInit != null, toClone.getNumParameters());
-        this.mixin = AbstractMethodCallFactory.createObjectForSpecifiedClass(toClone.mixin.getClass());
+        this.mixin = AbstractMethodCallFactory.createThreadLocalObjectForSpecifiedClass(toClone.mixin.getClass());
         this.method = toClone.method;
         this.perRecordInit = toClone.perRecordInit;
     }
@@ -39,7 +39,7 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
     {
         return (MethodCallManager.instance().alreadyCalledFor(this.mixin, record[0]));
     }
-    
+
     @Override
     public void invokePerRecordInit(final Object[] record) throws Exception
     {

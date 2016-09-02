@@ -26,8 +26,8 @@ public class SingleValueMappingMethodCall extends AbstractMappingMethodCall<Stri
     private SingleValueMappingMethodCall(SingleValueMappingMethodCall toClone)
     {
         super(toClone.getObjectName(), toClone.getMethodName());
-        this.mixin = AbstractMethodCallFactory.createObjectForSpecifiedClass(toClone.mixin.getClass());
-        this.method = toClone.method;        
+        this.mixin = AbstractMethodCallFactory.createThreadLocalObjectForSpecifiedClass(toClone.mixin.getClass());
+        this.method = toClone.method;
     }
 
     @Override

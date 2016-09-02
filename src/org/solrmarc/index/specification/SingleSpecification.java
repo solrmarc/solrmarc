@@ -6,9 +6,9 @@ import java.util.EnumSet;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.extractor.formatter.FieldFormatter;
 import org.solrmarc.index.extractor.formatter.FieldFormatterBase;
-import org.solrmarc.index.extractor.formatter.FieldFormatterDecorator;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.specification.conditional.Condition;
 
 
@@ -28,6 +28,18 @@ public abstract class SingleSpecification extends Specification
         tags = new String[1];
         tags[0] = tag;
         fmt = new FieldFormatterBase(true);
+    }
+
+    protected SingleSpecification(SingleSpecification toClone)
+    {
+        this.tag = toClone.tag;
+        this.cond = toClone.cond;
+        this.tags = new String[1];
+        tags[0] = toClone.tag;
+        if (toClone.fmt.isThreadSafe())
+            this.fmt = toClone.fmt;
+        else
+            this.fmt = (FieldFormatter)toClone.fmt.makeThreadSafeCopy();
     }
 
     @Override
@@ -66,12 +78,11 @@ public abstract class SingleSpecification extends Specification
     abstract public void addFieldValues(Collection<String> result, VariableField vf) throws Exception;
 
     @Override 
-    public void addFormatter(FieldFormatterDecorator newFmt)
+    public void addMap(AbstractMultiValueMapping valueMapping)
     {
-        newFmt.decorate(this.fmt);
-        this.fmt = newFmt;
+        if (fmt != null) fmt.addMap(valueMapping);
     }
-    
+
     @Override
     public void setFormatter(FieldFormatter fmt)
     {
@@ -108,5 +119,9 @@ public abstract class SingleSpecification extends Specification
         fmt.setSfCodeFmt(mapParts);
     }
 
-
+    @Override
+    public boolean isThreadSafe()
+    {
+        return(fmt.isThreadSafe());
+    }
 }

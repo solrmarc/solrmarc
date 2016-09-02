@@ -21,17 +21,13 @@ public class SingleLinkedDataFieldSpecification extends SingleDataFieldSpecifica
         this(tag, subfields, null);
     }
 
-//    @Override
-//    protected SingleLinkedDataFieldSpecification getMatchingSpec(String tag, VariableField f)
-//    {
-//        String stag = this.lnkTag;
-//        if (tag.equals("880") && ((DataField) f).getSubfield('6') != null
-//                && ((DataField) f).getSubfield('6').getData().startsWith(stag))
-//        {
-//            return (this);
-//        }
-//        return null;
-//    }
+    private SingleLinkedDataFieldSpecification(SingleLinkedDataFieldSpecification toClone)
+    {
+        super(toClone);
+        this.lnkTag = toClone.lnkTag;
+        tags[0] = "880";
+    }
+
     @Override
     protected boolean specMatches(String tag, VariableField f)
     {
@@ -42,6 +38,12 @@ public class SingleLinkedDataFieldSpecification extends SingleDataFieldSpecifica
             return (true);
         }
         return false;
+    }
+
+    @Override
+    public Object makeThreadSafeCopy()
+    {
+        return new SingleLinkedDataFieldSpecification(this);
     }
 
 }

@@ -3,7 +3,9 @@ package org.solrmarc.index.extractor.methodcall;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.solrmarc.index.extractor.AbstractValueExtractor;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
@@ -30,18 +32,43 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
     {
         for (final Class<?> aClass : classes)
         {
-            Object instance = createObjectForSpecifiedClass(aClass);
+            Object instance = createThreadLocalObjectForSpecifiedClass(aClass);
             if (instance != null)
                 methodCallManager.add(instance);
        }
     }
 
-    static public Object createObjectForSpecifiedClass(Class<?> aClass)
+    /* 
+     *  Warning here there be Dragons! 
+     *  
+     * This Map and the subsequent method creates object instances for potentially non-thread-safe 
+     * externally loaded objects containing custom methods.  Each indexing Thread will have a separate instance of  
+     * of the object to avoid the problem of ensuring the external methods are thread safe. 
+     * 
+     */
+    
+    private final static ThreadLocal<Map<Class<?>, Object>> threadLocalObjectMap = 
+            new ThreadLocal<Map<Class<?>, Object>>() 
+        {
+            @Override 
+            protected Map<Class<?>, Object> initialValue() 
+            {
+                return new LinkedHashMap<>();
+            }
+        };
+        
+    static public Object createThreadLocalObjectForSpecifiedClass(Class<?> aClass)
     {
+        Map<Class<?>, Object> instanceMap = threadLocalObjectMap.get();
+        if (instanceMap.containsKey(aClass))
+        {
+            return(instanceMap.get(aClass));
+        }
+        Object toReturn;
         try
         {
             Constructor<?> ctor = aClass.getConstructor();
-            return(ctor.newInstance());
+            toReturn = ctor.newInstance();
         }
         catch (NoSuchMethodException | SecurityException e)
         {
@@ -56,7 +83,7 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
                     Constructor<?> ctor2 = aClass.getConstructor(String.class, String[].class);
                     // the placeholder stub implementation for org.solrmarc.index.SolrIndexer 
                     // doesn't look at use the parameters that the Constructor requires, so fake values are used
-                    return(ctor2.newInstance("", ValueIndexerFactory.getHomeDirs()));
+                    toReturn = ctor2.newInstance("", ValueIndexerFactory.getHomeDirs());
                 }
                 catch (NoSuchMethodException  | SecurityException e1)
                 {
@@ -72,13 +99,15 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
                  /* dynamically loaded class that has no default constructor, but also is not a legacy class that extends SolrIndexer, 
                   * therefore don't look for custom extractor methods or custom mapping methods in the class
                   */
-                return(null);
+                toReturn = null;
             }
         }
         catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
         {
             throw new RuntimeException(e);
         }
+        instanceMap.put(aClass, toReturn);
+        return(toReturn);
     }
     
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, MethodCallContext context)

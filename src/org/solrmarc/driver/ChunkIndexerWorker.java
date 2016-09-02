@@ -31,9 +31,9 @@ import org.solrmarc.solr.SolrProxy;
  *
  */
 
-public class ChunkIndexerThread implements Runnable
+public class ChunkIndexerWorker implements Runnable
 {
-    private final static Logger logger = Logger.getLogger(ChunkIndexerThread.class);
+    private final static Logger logger = Logger.getLogger(ChunkIndexerWorker.class);
     final String threadName;
     final Collection<SolrInputDocument> docs;
     final Collection<RecordAndDoc> recordAndDocs;
@@ -44,7 +44,7 @@ public class ChunkIndexerThread implements Runnable
 
     final AtomicInteger cnts[];
 
-    public ChunkIndexerThread(String threadName, Collection<RecordAndDoc> recordAndDocs,
+    public ChunkIndexerWorker(String threadName, Collection<RecordAndDoc> recordAndDocs,
             BlockingQueue<RecordAndDoc> errQ, SolrProxy solrProxy, AtomicInteger[] cnts)
     {
         this.threadName = threadName; 
@@ -129,7 +129,7 @@ public class ChunkIndexerThread implements Runnable
                         }
                     }
                     // Split the chunk into 4 sub-chunks, and start a ChunkIndexerThread for each of them.
-                    subChunk[i] = new ChunkIndexerThread("SolrUpdateOnError_"+id1+"_"+id2, newRecDoc, errQ, solrProxy, cnts);
+                    subChunk[i] = new ChunkIndexerWorker("SolrUpdateOnError_"+id1+"_"+id2, newRecDoc, errQ, solrProxy, cnts);
                     subChunk[i].run();
                 }
             }

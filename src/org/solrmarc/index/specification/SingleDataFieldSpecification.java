@@ -12,19 +12,10 @@ import org.solrmarc.index.extractor.formatter.FieldFormatterBase;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import org.solrmarc.index.specification.conditional.Condition;
 
-//import playground.solrmarc.index.fieldmatch.FieldFormatterJoin;
-//import playground.solrmarc.index.fieldmatch.FieldFormatterSimple;
-
 public class SingleDataFieldSpecification extends SingleSpecification
 {
-//    static FieldFormatter SINGLE_FMT = new FieldFormatterSimple(new FieldFormatterBase(true));
-//    static FieldFormatter JOIN_FMT = new FieldFormatterJoin(new FieldFormatterBase(true));
-
     String subfields;
     Pattern subfieldPattern;
-//    public final String separator = null;
-    public final boolean cleanAll = true;
-    public final boolean cleanEnd = true;
 
     public SingleDataFieldSpecification(String tag, String subfields, Condition cond, FieldFormatter fmt)
     {
@@ -32,7 +23,6 @@ public class SingleDataFieldSpecification extends SingleSpecification
         this.subfields = subfields;
         subfieldPattern = makePattern(subfields);
         this.fmt = fmt;
-        // if (subfield)
     }
 
     public SingleDataFieldSpecification(String tag, String subfields, Condition cond)
@@ -49,6 +39,14 @@ public class SingleDataFieldSpecification extends SingleSpecification
     public SingleDataFieldSpecification(String tag, String subfields)
     {
         this(tag, subfields, null);
+    }
+
+    protected SingleDataFieldSpecification(SingleDataFieldSpecification toClone)
+    {
+        super(toClone.tag, toClone.cond);
+        this.subfields = toClone.subfields;
+        this.subfieldPattern = toClone.subfieldPattern;
+        this.fmt = (FieldFormatter) (toClone.fmt.isThreadSafe() ? toClone.fmt : toClone.fmt.makeThreadSafeCopy());
     }
 
     private final static Pattern makePattern(String subfields)
@@ -72,9 +70,9 @@ public class SingleDataFieldSpecification extends SingleSpecification
     public void addFieldValues(Collection<String> result, VariableField vf) throws Exception
     {
         DataField df = (DataField) vf;
-        fmt.start();
-        fmt.addTag(df);
-        fmt.addIndicators(df);
+        StringBuilder sb = fmt.start();
+        fmt.addTag(sb, df);
+        fmt.addIndicators(sb, df);
         int cnt = 0;
         for (Subfield subfield : df.getSubfields())
         {
@@ -82,19 +80,25 @@ public class SingleDataFieldSpecification extends SingleSpecification
             Matcher matcher = subfieldPattern.matcher(codeStr);
             if (matcher.matches())
             {
-                fmt.addSeparator(cnt);
-                fmt.addCode(codeStr);
+                fmt.addSeparator(sb,cnt);
+                fmt.addCode(sb,codeStr);
                 Collection<String> prepped = fmt.prepData(vf, (subfield.getCode() == 'a'), subfield.getData());
                 for (String val : prepped)
                 {
                     val = fmt.handleSubFieldFormat(codeStr, val);
-                    fmt.addVal(val);
-                    fmt.addAfterSubfield(result);
+                    fmt.addVal(sb, val);
+                    fmt.addAfterSubfield(sb, result);
                 }
                 cnt++;
             }
         }
-        fmt.addAfterField(result);
+        fmt.addAfterField(sb, result);
+    }
+
+    @Override
+    public Object makeThreadSafeCopy()
+    {
+        return new SingleDataFieldSpecification(this);
     }
 
 }

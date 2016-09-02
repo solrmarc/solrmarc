@@ -20,6 +20,7 @@ public class ThreadedIndexer extends Indexer
     private final static Logger logger = Logger.getLogger(ThreadedIndexer.class);
     private final BlockingQueue<Record> readQ;
     private final BlockingQueue<RecordAndDoc> docQ;
+    private final int numThreadIndexers;
     MarcReaderThread readerThread;
     ExecutorService indexerExecutor;
     ExecutorService solrExecutor;
@@ -34,7 +35,19 @@ public class ThreadedIndexer extends Indexer
         readQ = new ArrayBlockingQueue<Record>(buffersize);
         docQ = new ArrayBlockingQueue<RecordAndDoc>(buffersize);
        // indexerExecutor = Executors.newSingleThreadExecutor();
-        indexerExecutor = Executors.newFixedThreadPool(2);
+        int num = 1;
+        try {
+            num = Integer.parseInt(System.getProperty("solrmarc.indexer.threadcount", "1"));
+        }
+        catch (NumberFormatException nfe)
+        {
+            num = 1;
+        }
+        finally 
+        {
+            numThreadIndexers = num;
+        }
+        indexerExecutor = Executors.newFixedThreadPool(numThreadIndexers);
         solrExecutor = Executors.newFixedThreadPool(4);
         this.buffersize = buffersize;
     }
@@ -61,10 +74,19 @@ public class ThreadedIndexer extends Indexer
         readerThread = new MarcReaderThread(reader, readQ, cnts);      
         readerThread.start();
 
-        IndexerWorker worker1 = new IndexerWorker(readerThread, readQ, docQ, this, cnts, 0);
-//        IndexerWorker worker2 = new IndexerWorker(readerThread, readQ, docQ, this, cnts, 1);
-        indexerExecutor.execute(worker1);
-//        indexerExecutor.execute(worker2);
+        IndexerWorker[] workers = new IndexerWorker[numThreadIndexers];
+        for (int i = 0; i < numThreadIndexers; i++)
+        {
+            workers[i] = new IndexerWorker(readerThread, readQ, docQ, this, cnts, i);
+        }
+        for (int i = 0; i < numThreadIndexers; i++)
+        {
+            indexerExecutor.execute(workers[i]);
+        }
+        // while the (one or more) IndexerWorker threads are chugging along taking records from 
+        // the readQ and building the solr index document, this thread will await the docQ being filled
+        // and when it is full, it will lock the queue, copy all the documents to a separate buffer
+        // and create a ChunkIndexerWorker to manage sending those records to Solr.
         while (!done())
         {
             if (docQ.remainingCapacity() == 0 || indexerThreadsAreDone())
@@ -87,7 +109,7 @@ public class ThreadedIndexer extends Indexer
                     threadName = "Anonymous";
                 }
                 final BlockingQueue<RecordAndDoc> errQVal = (this.isSet(eErrorHandleVal.RETURN_ERROR_RECORDS)) ? this.errQ : null;
-                Runnable runnableChunk = new ChunkIndexerThread(threadName, chunk, errQVal, this.solrProxy, cnts); 
+                Runnable runnableChunk = new ChunkIndexerWorker(threadName, chunk, errQVal, this.solrProxy, cnts); 
                 logger.debug("Starting IndexerThread: "+ threadName);
                 solrExecutor.execute(runnableChunk);
             }
@@ -113,7 +135,7 @@ public class ThreadedIndexer extends Indexer
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
         solrExecutor.shutdown();
         try {
             solrExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
@@ -124,24 +146,6 @@ public class ThreadedIndexer extends Indexer
             e.printStackTrace();
         }
 
-//        try {
-//            indexerThread.join();
-//        }
-//        catch (InterruptedException ie)
-//        {
-//            readerThread.interrupt();
-//            indexerThread.interrupt();
-//            while (indexerThread.isAlive())
-//            {
-//                try {
-//                    indexerThread.join();
-//                }
-//                catch (InterruptedException ie2)
-//                {
-//                    // Its already dying, so go ahead and wait.
-//                }
-//            }
-//        }
         if (shuttingDown)
         {
             this.endProcessing();

@@ -16,8 +16,8 @@ import org.solrmarc.index.utils.StringReader;
 import org.solrmarc.tools.PropertyUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,19 +47,14 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
         { 
             paths[i] = (ValueIndexerFactory.getHomeDirs())[i] + File.separator + "index_scripts";
         }
-        InputStream script = PropertyUtils.getPropertyFileInputStream(paths, scriptFileName);
-        String scriptContents;
+        String[] inputSource = new String[1];
+        InputStream script = PropertyUtils.getPropertyFileInputStream(paths, scriptFileName, false, inputSource);
         try
         {
-            scriptContents = PropertyUtils.readStreamIntoString(script);
-            bsh.eval(scriptContents);
-            bsh.set("indexer", SolrIndexer.instance());
             bsh.setOut(System.out);
             bsh.setErr(System.err);
-        }
-        catch (IOException e)
-        {
-            throw new IllegalArgumentException("Unable to read script: " + scriptFileName, e);
+            bsh.eval(new InputStreamReader(script), bsh.getNameSpace(), inputSource[0]);
+            bsh.set("indexer", SolrIndexer.instance());
         }
         catch (EvalError e)
         {

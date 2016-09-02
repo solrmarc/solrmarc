@@ -26,22 +26,26 @@ public class ScriptSingleValueMethodCall extends AbstractExtractorMethodCall<Str
                     + scriptFileName + "\nMethod: " + method.toString());
         }
     }
-    
+
     private ScriptSingleValueMethodCall(ScriptSingleValueMethodCall toClone)
     {
         super(toClone.getObjectName(), toClone.method.getName(), false, toClone.getNumParameters());
-        this.interpreter = new Interpreter(toClone.interpreter);
+        this.interpreter = toClone.interpreter;
         this.method = toClone.method;        
     }
-    
+
     @Override
     public String invoke(final Object[] parameters) throws Exception
     {
-       Object result = method.invoke(parameters, interpreter);
-       if (result instanceof String)  
-           return((String)result);
-       else 
-           return(null);
+        Object result;
+        synchronized(interpreter)
+        {
+            result = method.invoke(parameters, interpreter);
+        }
+        if (result instanceof String)  
+            return((String)result);
+        else 
+            return(null);
     }
 
     @Override

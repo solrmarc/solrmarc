@@ -1,6 +1,5 @@
 package org.solrmarc.driver;
 
-
 import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -29,10 +28,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class Indexer 
+public class Indexer
 {
     private final static Logger logger = Logger.getLogger(Indexer.class);
-    
+
     protected final List<AbstractValueIndexer<?>> indexers;
     protected SolrProxy solrProxy;
     public EnumSet<eErrorHandleVal> errHandle = EnumSet.noneOf(eErrorHandleVal.class);
@@ -45,7 +44,7 @@ public class Indexer
     {
         RETURN_ERROR_RECORDS, INDEX_ERROR_RECORDS;
     };
-    
+
     public Indexer(final List<AbstractValueIndexer<?>> indexers, final SolrProxy solrProxy)
     {
         this.indexers = indexers;
@@ -54,7 +53,7 @@ public class Indexer
         delQ = new LinkedBlockingQueue<RecordAndDoc>();
     }
 
-    protected Indexer(Indexer toClone)
+    private Indexer(Indexer toClone)
     {
         indexers = new ArrayList<AbstractValueIndexer<?>>();
         for (AbstractValueIndexer<?> indexer : toClone.indexers)
@@ -66,28 +65,30 @@ public class Indexer
         this.delQ = toClone.delQ;
         this.errHandle = toClone.errHandle;
     }
-//
-//    public Indexer clone()
-//    {
-//        Indexer clone = new Indexer();
-//        
-//    }
-    
+
+    public Indexer makeThreadSafeCopy()
+    {
+        return (new Indexer(this));
+    }
+
     public boolean isSet(eErrorHandleVal val)
     {
-        return(errHandle.contains(val));
+        return (errHandle.contains(val));
     }
-    
+
     public void setErr(eErrorHandleVal val)
     {
         errHandle.add(val);
     }
-        
+
     /**
-     * indexToSolr  - Reads in a MARC Record, produces SolrInputDocument for it, sends that document to solr
-     *                This is the single threaded version that does each of those action sequentially
+     * indexToSolr - Reads in a MARC Record, produces SolrInputDocument for it,
+     * sends that document to solr This is the single threaded version that does
+     * each of those action sequentially
+     * 
      * @param reader
-     * @return array containing number of records read, number of records indexed, and number of records sent to solr 
+     * @return array containing number of records read, number of records
+     *         indexed, and number of records sent to solr
      */
     public int[] indexToSolr(final MarcReader reader)
     {
@@ -108,7 +109,7 @@ public class Indexer
                     logger.info("Ignored record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
                 }
                 else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
-                {            
+                {
                     logger.info("Deleted record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
                     delQ.add(recDoc);
                 }
@@ -119,29 +120,29 @@ public class Indexer
                     break;
                 }
             }
-            if (recDoc.getErrLvl() != eErrorSeverity.NONE) 
+            if (recDoc.getErrLvl() != eErrorSeverity.NONE)
             {
                 if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS) && !isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
                 {
                     errQ.add(recDoc);
-                }  
+                }
                 if (!isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
                 {
                     logger.debug("Skipping error record: " + recDoc.rec.getControlNumber());
                     continue;
                 }
             }
-            try { 
+            try {
                 if (recDoc.getDoc() != null)
                 {
                     solrProxy.addDoc(recDoc.getDoc());
                     cnts[2]++;
-                    if (recDoc.getErrLvl() != eErrorSeverity.NONE && isSet(eErrorHandleVal.RETURN_ERROR_RECORDS)) 
+                    if (recDoc.getErrLvl() != eErrorSeverity.NONE && isSet(eErrorHandleVal.RETURN_ERROR_RECORDS))
                     {
                         if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS))
                         {
                             errQ.add(recDoc);
-                        }   
+                        }
                     }
                 }
             }
@@ -154,21 +155,13 @@ public class Indexer
                 singleRecordSolrError(recDoc, e, errQ);
             }
         }
-        
+
         if (shuttingDown)
         {
             endProcessing();
         }
-        return(cnts);
+        return (cnts);
     }
-    
-//    protected EnumSet<eErrorLocationVal> getErrLocVals(SolrInputDocument[] documentParts)
-//    {
-//        EnumSet<eErrorLocationVal> eLocVals = EnumSet.noneOf(eErrorLocationVal.class);
-//        if (!documentParts[2].isEmpty()) eLocVals.add(eErrorLocationVal.INDEXING_ERROR);
-//        if (!documentParts[1].isEmpty()) eLocVals.add(eErrorLocationVal.MARC_ERROR);
-//        return eLocVals;
-//    }
 
     protected SolrInputDocument combineDocWithErrors(SolrInputDocument[] documentParts, boolean includeErrors)
     {
@@ -193,11 +186,11 @@ public class Indexer
                 errLvl = eErrorSeverity.max(errLvl, e.getErrLvl());
                 for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause())
                 {
-                    document.addField("marc_error", e.getSolrField()+ " : " + cause.getMessage());
+                    document.addField("marc_error", e.getSolrField() + " : " + cause.getMessage());
                 }
             }
         }
-        return(errLvl);
+        return (errLvl);
     }
 
     private void addMarcErrorsToMap(SolrInputDocument document, List<MarcError> errors)
@@ -207,17 +200,17 @@ public class Indexer
             document.addField("marc_error", err.toString());
         }
     }
-    
-    protected RecordAndDoc indexToSolrDoc(final Record record) 
+
+    protected RecordAndDoc indexToSolrDoc(final Record record)
     {
-        Map<String,SolrInputField> emptyMap = new LinkedHashMap<>();
-        SolrInputDocument[] inputDocs = new SolrInputDocument[]{ new SolrInputDocument(emptyMap), new SolrInputDocument(emptyMap), new SolrInputDocument(emptyMap) } ;
+        Map<String, SolrInputField> emptyMap = new LinkedHashMap<>();
+        SolrInputDocument[] inputDocs = new SolrInputDocument[] { new SolrInputDocument(emptyMap), new SolrInputDocument(emptyMap), new SolrInputDocument(emptyMap) };
         RecordAndDoc recDoc = new RecordAndDoc(record);
         eErrorSeverity errLvl = eErrorSeverity.NONE;
         ValueIndexerFactory.instance().clearPerRecordErrors();
         for (final AbstractValueIndexer<?> indexer : indexers)
         {
-            try { 
+            try {
                 final Collection<String> data = indexer.getFieldData(record);
 
                 for (String fieldName : indexer.getSolrFieldNames())
@@ -230,35 +223,40 @@ public class Indexer
                     {
                         for (String dataVal : data)
                         {
-                            inputDocs[0].addField(fieldName, dataVal, 1.0f );
+                            inputDocs[0].addField(fieldName, dataVal, 1.0f);
                         }
                     }
                 }
             }
             catch (OutOfMemoryError oome)
             {
-                logger.error("OOMError in record: "+ recDoc.rec.getControlNumber());
-                logger.error("while processing index specification: "+ indexer.getSpecLabel());
-                logger.error("number of per record exceptions: " + ((ValueIndexerFactory.instance().getPerRecordErrors() != null) ? ValueIndexerFactory.instance().getPerRecordErrors().size() : 0));
+                logger.error("OOMError in record: " + recDoc.rec.getControlNumber());
+                logger.error("while processing index specification: " + indexer.getSpecLabel());
+                logger.error("number of per record exceptions: "
+                        + ((ValueIndexerFactory.instance().getPerRecordErrors() != null)
+                                ? ValueIndexerFactory.instance().getPerRecordErrors().size() : 0));
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + oome.getMessage());
                 errLvl = eErrorSeverity.FATAL;
                 recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
             }
             catch (InvocationTargetException ioe)
             {
-                logger.debug("Exception in record: "+ recDoc.rec.getControlNumber());
-                logger.debug("while processing index specification: "+ indexer.getSpecLabel());
+                logger.debug("Exception in record: " + recDoc.rec.getControlNumber());
+                logger.debug("while processing index specification: " + indexer.getSpecLabel());
                 Throwable wrapped = ioe.getTargetException();
-               // Exception wrappedE = (wrapped instanceof Exception) ? (Exception)wrapped : null;
+                // Exception wrappedE = (wrapped instanceof Exception) ?
+                // (Exception)wrapped : null;
                 if (wrapped != null && wrapped instanceof IndexerSpecException)
                 {
-                    errLvl = eErrorSeverity.max(errLvl, ((IndexerSpecException)wrapped).getErrLvl());
+                    errLvl = eErrorSeverity.max(errLvl, ((IndexerSpecException) wrapped).getErrLvl());
                 }
                 else if (wrapped != null && wrapped instanceof OutOfMemoryError)
                 {
-                    logger.error("OOMError in record: "+ recDoc.rec.getControlNumber());
-                    logger.error("while processing index specification: "+ indexer.getSpecLabel());
-                    logger.error("number of per record exceptions: " + ((ValueIndexerFactory.instance().getPerRecordErrors() != null) ? ValueIndexerFactory.instance().getPerRecordErrors().size() : 0));
+                    logger.error("OOMError in record: " + recDoc.rec.getControlNumber());
+                    logger.error("while processing index specification: " + indexer.getSpecLabel());
+                    logger.error("number of per record exceptions: "
+                            + ((ValueIndexerFactory.instance().getPerRecordErrors() != null)
+                                    ? ValueIndexerFactory.instance().getPerRecordErrors().size() : 0));
                     inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + wrapped.getMessage());
                     errLvl = eErrorSeverity.FATAL;
                     recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
@@ -276,28 +274,28 @@ public class Indexer
             }
             catch (IndexerSpecException e)
             {
-                logger.debug("Exception in record: "+ recDoc.rec.getControlNumber());
-                logger.debug("while processing index specification: "+ indexer.getSpecLabel());
+                logger.debug("Exception in record: " + recDoc.rec.getControlNumber());
+                logger.debug("while processing index specification: " + indexer.getSpecLabel());
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
                 errLvl = eErrorSeverity.max(errLvl, e.getErrLvl());
                 recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
             }
             catch (Exception e)
             {
-                logger.debug("Exception in record: "+ recDoc.rec.getControlNumber());
-                logger.debug("while processing index specification: "+ indexer.getSpecLabel());
+                logger.debug("Exception in record: " + recDoc.rec.getControlNumber());
+                logger.debug("while processing index specification: " + indexer.getSpecLabel());
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
                 errLvl = eErrorSeverity.ERROR;
                 recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
             }
         }
-        if (record.hasErrors() )
+        if (record.hasErrors())
         {
             addMarcErrorsToMap(inputDocs[1], record.getErrors());
             recDoc.addErrLoc(eErrorLocationVal.MARC_ERROR);
         }
         List<IndexerSpecException> perRecordExceptions = ValueIndexerFactory.instance().getPerRecordErrors();
-        if (perRecordExceptions != null) 
+        if (perRecordExceptions != null)
         {
             errLvl = addExceptionsToMap(inputDocs[2], perRecordExceptions, errLvl);
             recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
@@ -307,22 +305,22 @@ public class Indexer
         ValueIndexerFactory.instance().doneWithRecord(record);
         return recDoc;
     }
-    
+
     public static void singleRecordSolrError(RecordAndDoc recDoc, Exception e1, BlockingQueue<RecordAndDoc> errQ)
     {
-        logger.error("Failed on single doc with id : "+ recDoc.getRec().getControlNumber());
+        logger.error("Failed on single doc with id : " + recDoc.getRec().getControlNumber());
         if (e1 instanceof SolrRuntimeException && e1.getCause() instanceof SolrException)
         {
-            SolrException cause = (SolrException)e1.getCause();
+            SolrException cause = (SolrException) e1.getCause();
             logger.error(cause.getMessage());
         }
         else if (e1 instanceof SolrRuntimeException && e1.getCause() instanceof InvocationTargetException)
         {
-            InvocationTargetException cause = (InvocationTargetException)e1.getCause();
+            InvocationTargetException cause = (InvocationTargetException) e1.getCause();
             Throwable target = cause.getTargetException();
             logger.error(target.getMessage());
         }
-        else 
+        else
         {
             logger.error(e1);
         }

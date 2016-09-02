@@ -19,22 +19,25 @@ public class StdOutProxy extends SolrProxy
     
     public int addDoc(SolrInputDocument inputDoc)
     {
-        ArrayList<String> fNames = new ArrayList<String>();
-        fNames.addAll(inputDoc.getFieldNames());
-        Collections.sort(fNames);
-        String id = inputDoc.getFieldValue("id").toString();
-        for (String fieldName : fNames)
+        synchronized (output)
         {
-            Collection<Object> values = inputDoc.getFieldValues(fieldName);
-            if (values != null) 
+            ArrayList<String> fNames = new ArrayList<String>();
+            fNames.addAll(inputDoc.getFieldNames());
+            Collections.sort(fNames);
+            String id = inputDoc.getFieldValue("id").toString();
+            for (String fieldName : fNames)
             {
-                for (Object val : values)
+                Collection<Object> values = inputDoc.getFieldValues(fieldName);
+                if (values != null) 
                 {
-                    output.print(id + " : " + fieldName + " = " + ((val != null) ? val.toString() : "[null]") + "\n");
+                    for (Object val : values)
+                    {
+                        output.print(id + " : " + fieldName + " = " + ((val != null) ? val.toString() : "[null]") + "\n");
+                    }
                 }
             }
+            return(1);
         }
-        return(1);
     }
     
     @Override

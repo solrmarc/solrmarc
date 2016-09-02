@@ -24,7 +24,8 @@ public class MethodCallSingleValueMapping extends AbstractMultiValueMapping impl
     private MethodCallSingleValueMapping(MethodCallSingleValueMapping toClone)
     {
         this.methodCall = (SingleValueMappingMethodCall) toClone.methodCall.makeThreadSafeCopy();
-        this.parameters = toClone.parameters;
+        this.parameters = new Object[toClone.parameters.length];
+        System.arraycopy(toClone.parameters, 0, this.parameters, 0, toClone.parameters.length);
     }
 
     @Override

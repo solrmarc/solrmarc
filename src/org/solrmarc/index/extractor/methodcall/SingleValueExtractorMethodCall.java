@@ -23,11 +23,11 @@ public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<
                             + mixin.getClass().getName() + "\nMixin method: " + method.toString());
         }
     }
-    
+
     private SingleValueExtractorMethodCall(SingleValueExtractorMethodCall toClone)
     {
         super(toClone.mixin.getClass().getName(), toClone.method.getName(), toClone.perRecordInit != null, toClone.getNumParameters());
-        this.mixin = AbstractMethodCallFactory.createObjectForSpecifiedClass(toClone.mixin.getClass());
+        this.mixin = AbstractMethodCallFactory.createThreadLocalObjectForSpecifiedClass(toClone.mixin.getClass());
         this.method = toClone.method;
         this.perRecordInit = toClone.perRecordInit;
     }
