@@ -2,18 +2,19 @@ package org.solrmarc.index.extractor.formatter;
 
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.index.extractor.ExternalMethod;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.tools.DataUtil;
 import org.solrmarc.tools.Utils;
 
@@ -22,14 +23,12 @@ public class FieldFormatterBase implements FieldFormatter
     String indicatorFmt = null;
     Map<String, String> sfCodeMap = null;
     String separator = null;
-    
-    boolean unique = false;
+    List<AbstractMultiValueMapping> maps = null;
+//    boolean unique = false;
     eJoinVal joinVal = eJoinVal.SEPARATE;
     int trimStart = -1;
     int trimEnd = -1;
     EnumSet<eCleanVal> cleanVal = EnumSet.noneOf(eCleanVal.class);
- //   protected static StringBuilder buffer = new StringBuilder();
- //   protected static List<String> emptyList = Collections.emptyList();
 
     String fieldTagFmt = null;
 
@@ -45,6 +44,32 @@ public class FieldFormatterBase implements FieldFormatter
     public FieldFormatterBase(EnumSet<eCleanVal> cleanVal)
     {
         this.cleanVal = cleanVal;
+    }
+
+    public FieldFormatterBase(FieldFormatterBase toClone)
+    {
+        this.indicatorFmt = toClone.indicatorFmt;
+        this.sfCodeMap = toClone.sfCodeMap;
+        this.separator = toClone.separator;
+        this.joinVal = toClone.joinVal;
+        this.trimStart = toClone.trimStart;
+        this.trimEnd = toClone.trimEnd;
+        this.cleanVal = toClone.cleanVal;
+        if (toClone.maps != null)
+        {
+            if (this.maps == null) this.maps = new LinkedList<>();
+            for (AbstractMultiValueMapping map : toClone.maps)
+            {
+                if (map instanceof ExternalMethod && !((ExternalMethod)map).isThreadSafe())
+                {
+                    this.maps.add((AbstractMultiValueMapping) ((ExternalMethod)map).makeThreadSafeCopy());
+                }
+                else
+                {
+                    this.maps.add(map);
+                }
+            }
+        }
     }
 
     /*
@@ -216,6 +241,14 @@ public class FieldFormatterBase implements FieldFormatter
         return(this);
     }
 
+    @Override
+    public FieldFormatter addMap(AbstractMultiValueMapping valueMapping)
+    {
+        if (maps == null) maps = new LinkedList<>();
+        maps.add(valueMapping);
+        return(this);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -223,10 +256,10 @@ public class FieldFormatterBase implements FieldFormatter
      * StringBuilder)
      */
     @Override
-    public Collection<String> start()
+    public StringBuilder start()
     {
-        buffer.setLength(0);
-        return (makeResult());
+        return new StringBuilder();
+//        return (makeResult());
     }
 
     /*
@@ -237,11 +270,11 @@ public class FieldFormatterBase implements FieldFormatter
      * marc.VariableField, java.lang.StringBuilder)
      */
     @Override
-    public void addTag(VariableField df)
+    public void addTag(StringBuilder sb, VariableField df)
     {
         if (fieldTagFmt != null)
         {
-            buffer.append(fieldTagFmt.contains("%tag") ? fieldTagFmt.replaceAll("%tag", df.getTag()) : df.getTag());
+            sb.append(fieldTagFmt.contains("%tag") ? fieldTagFmt.replaceAll("%tag", df.getTag()) : df.getTag());
         }
     }
 
@@ -253,13 +286,13 @@ public class FieldFormatterBase implements FieldFormatter
      * marc4j.marc.VariableField, java.lang.StringBuilder)
      */
     @Override
-    public void addIndicators(VariableField df)
+    public void addIndicators(StringBuilder sb, VariableField df)
     {
         if (indicatorFmt != null && df instanceof DataField)
         {
             String result = indicatorFmt.replaceAll("%1", "" + ((DataField) df).getIndicator1()).replaceAll("%2",
                     "" + ((DataField) df).getIndicator1());
-            buffer.append(result);
+            sb.append(result);
         }
     }
 
@@ -271,7 +304,7 @@ public class FieldFormatterBase implements FieldFormatter
      * String, java.lang.StringBuilder)
      */
     @Override
-    public void addCode(String codeStr)
+    public void addCode(StringBuilder sb, String codeStr)
     {
 //        if (sfCodeFmt != null)
 //        {
@@ -280,9 +313,15 @@ public class FieldFormatterBase implements FieldFormatter
     }
 
     @Override
-    public Collection<String> handleMapping(Collection<String> cleaned)
+    public Collection<String> handleMapping(Collection<String> cleaned) throws Exception
     {
-        return (cleaned);
+        if (maps == null) return (cleaned);
+        Collection<String> mapped = cleaned;
+        for (AbstractMultiValueMapping map : maps)
+        {
+            mapped = map.map(mapped); 
+        }
+        return(mapped);
     }
 
     @Override
@@ -368,9 +407,9 @@ public class FieldFormatterBase implements FieldFormatter
      * String, java.lang.StringBuilder)
      */
     @Override
-    public void addVal(String data)
+    public void addVal(StringBuilder sb, String data)
     {
-        buffer.append(data);
+        sb.append(data);
     }
 
     /*
@@ -381,11 +420,11 @@ public class FieldFormatterBase implements FieldFormatter
      * java.lang.StringBuilder)
      */
     @Override
-    public void addSeparator(int cnt)
+    public void addSeparator(StringBuilder sb, int cnt)
     {
         if (getSeparator() != null)
         {
-            if (cnt != 0) buffer.append(getSeparator());
+            if (cnt != 0) sb.append(getSeparator());
         }
     }
 
@@ -397,14 +436,14 @@ public class FieldFormatterBase implements FieldFormatter
      * .util.Collection, java.lang.StringBuilder)
      */
     @Override
-    public void addAfterSubfield(Collection<String> result)
+    public void addAfterSubfield(StringBuilder sb, Collection<String> result)
     {
         if (joinVal == eJoinVal.SEPARATE)
         {
-            if (buffer.length() == 0) return;
-            final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? DataUtil.cleanData(buffer.toString()) : buffer.toString();
+            if (sb.length() == 0) return;
+            final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? DataUtil.cleanData(sb.toString()) : sb.toString();
             if (field.length() > 0) result.add(field);
-            buffer.setLength(0);
+            sb.setLength(0);
         }
     }
 
@@ -416,39 +455,61 @@ public class FieldFormatterBase implements FieldFormatter
      * util.Collection, java.lang.StringBuilder)
      */
     @Override
-    public void addAfterField(Collection<String> result)
+    public void addAfterField(StringBuilder sb, Collection<String> result)
     {
         if (joinVal == eJoinVal.JOIN)
         {
-            if (buffer.length() == 0) return;
-            final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? DataUtil.cleanData(buffer.toString()) : buffer.toString();
+            if (sb.length() == 0) return;
+            final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? DataUtil.cleanData(sb.toString()) : sb.toString();
             if (field.length() > 0) result.add(field);
-            buffer.setLength(0);
+            sb.setLength(0);
         }
     }
 
-    @Override
-    public Collection<String> makeResult()
-    {
-        Collection<String> result;
-        if (unique)
-        {
-            result = new LinkedHashSet<String>();
-        }
-        else
-        {
-            result = new ArrayList<String>();
-        }
-        return result;
-    }
+//    @Override
+//    public Collection<String> makeResult()
+//    {
+//        Collection<String> result;
+//        if (unique)
+//        {
+//            result = new LinkedHashSet<String>();
+//        }
+//        else
+//        {
+//            result = new ArrayList<String>();
+//        }
+//        return result;
+//    }
 
     @Override
-    public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data)
+    public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data) throws Exception
     {
         final String cleaned = cleanData(vf, isSubfieldA, data);
-        final List<String> cleanedDataAsList = (cleaned == null || cleaned.length() == 0) ? emptyList : Collections.singletonList(cleaned);
+        @SuppressWarnings("unchecked")
+        final List<String> cleanedDataAsList = (cleaned == null || cleaned.length() == 0) ? Collections.EMPTY_LIST : Collections.singletonList(cleaned);
         Collection<String> result = handleMapping(cleanedDataAsList);
         return (result);
     }
+
+    @Override
+    public boolean isThreadSafe()
+    {
+        if (maps == null) return(true);
+        for (AbstractMultiValueMapping map : maps)
+        {
+            if (map instanceof ExternalMethod && !((ExternalMethod)map).isThreadSafe())
+            {
+                return(false);
+            }
+        }
+        return(true);
+    }
+
+    @Override
+    public Object makeThreadSafeCopy()
+    {
+        return new FieldFormatterBase(this);
+    }
+
 
 }
