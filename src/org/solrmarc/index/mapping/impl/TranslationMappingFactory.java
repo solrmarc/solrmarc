@@ -44,28 +44,16 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
             translationMappingFiles.put(translationMappingFileName + "(" + subMappingName + ")", properties);
             return properties;
         }
-//        try
-//        {
-            String[] filenameOpened = new String[]{null};
-            properties = PropertyUtils.loadProperties(ValueIndexerFactory.getHomeDirs(), "translation_maps" + File.separator + translationMappingFileName, filenameOpened);
-            logger.debug("Load translation map: "+ translationMappingFileName+ " from file : " +filenameOpened[0]);
-         //   File file = new File(".");
-         //   logger.debug("current Directory = " + file.getAbsolutePath());
-//            String filename = ValueIndexerFactory.getHomeDirs() + "/translation_maps/" + translationMappingFileName;
-//            FileInputStream inputStream = new FileInputStream(filename);
-//            properties.load(inputStream);
-            translationMappingFiles.put(translationMappingFileName + "(null)", properties);
-            if (subMappingName != null)
-            {
-                properties = getSubTranslationMapping(properties, subMappingName);
-                translationMappingFiles.put(translationMappingFileName + "(" + subMappingName + ")", properties);
-            }
-            return properties;
-//        }
-//        catch (IOException e)
-//        {
-//            throw new IndexerSpecException(e, "Cant find translation map: " +translationMappingFileName);
-//        }
+        String[] filenameOpened = new String[]{null};
+        properties = PropertyUtils.loadProperties(ValueIndexerFactory.instance().getHomeDirs(), "translation_maps" + File.separator + translationMappingFileName, filenameOpened);
+        logger.debug("Load translation map: "+ translationMappingFileName+ " from file : " +filenameOpened[0]);
+        translationMappingFiles.put(translationMappingFileName + "(null)", properties);
+        if (subMappingName != null)
+        {
+            properties = getSubTranslationMapping(properties, subMappingName);
+            translationMappingFiles.put(translationMappingFileName + "(" + subMappingName + ")", properties);
+        }
+        return properties;
     }
     
     private Properties getSubTranslationMapping(Properties translationMapping, String mappingPrefix)

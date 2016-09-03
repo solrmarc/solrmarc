@@ -53,7 +53,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
             if (addnlShadowedIds == null)
             {
                 addnlShadowedIds = new LinkedHashMap<String, String>();
-                InputStream addnlIdsStream = PropertyUtils.getPropertyFileInputStream(ValueIndexerFactory.getHomeDirs(), "extra_data" + File.separator + addnlShadowedFilename);
+                InputStream addnlIdsStream = PropertyUtils.getPropertyFileInputStream(ValueIndexerFactory.instance().getHomeDirs(), "extra_data" + File.separator + addnlShadowedFilename);
                 BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
                 String line;
                 try
@@ -86,7 +86,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
                 InputStream addnlIdsStream = null;
                 try
                 {
-                    addnlIdsStream = PropertyUtils.getPropertyFileInputStream(ValueIndexerFactory.getHomeDirs(), "extra_data" + File.separator + boundWithsFilename);
+                    addnlIdsStream = PropertyUtils.getPropertyFileInputStream(ValueIndexerFactory.instance().getHomeDirs(), "extra_data" + File.separator + boundWithsFilename);
                     BufferedReader addnlIdsReader = new BufferedReader(new InputStreamReader(addnlIdsStream));
                     String line;
                     while ((line = addnlIdsReader.readLine()) != null)

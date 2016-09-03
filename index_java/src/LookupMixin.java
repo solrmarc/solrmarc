@@ -29,7 +29,7 @@ public class LookupMixin implements Mixin
             try
             {
                 resultMap = new LinkedHashMap<>();
-                InputStream dateFirstAddedStream = PropertyUtils.getPropertyFileInputStream(ValueIndexerFactory.getHomeDirs(), filename);
+                InputStream dateFirstAddedStream = PropertyUtils.getPropertyFileInputStream(ValueIndexerFactory.instance().getHomeDirs(), filename);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(dateFirstAddedStream));
                 String line;
                 while ((line = reader.readLine())!= null)

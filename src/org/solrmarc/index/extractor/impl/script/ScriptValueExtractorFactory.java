@@ -42,10 +42,10 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
         logger.debug("Load bean shell script: " + scriptFileName);
         bsh = new Interpreter();
         bsh.setClassLoader(this.getClass().getClassLoader());
-        String paths[] = new String[ValueIndexerFactory.getHomeDirs().length];
+        String paths[] = new String[ValueIndexerFactory.instance().getHomeDirs().length];
         for (int i = 0 ; i < paths.length; i++)
         { 
-            paths[i] = (ValueIndexerFactory.getHomeDirs())[i] + File.separator + "index_scripts";
+            paths[i] = (ValueIndexerFactory.instance().getHomeDirs())[i] + File.separator + "index_scripts";
         }
         String[] inputSource = new String[1];
         InputStream script = PropertyUtils.getPropertyFileInputStream(paths, scriptFileName, false, inputSource);

@@ -121,12 +121,12 @@ public class SolrMarcDebug extends BootableMain
      */
     private void initialize()
     {
-        // You must set the HomeDir before instantiating the ValueIndexerFactory
-        // since that directory is used as the location to look for java source files to compile and include
-        // If it is unspecified, the program looks in 
-        ValueIndexerFactory.setHomeDirs(homeDirStrs);
+//        // You must set the HomeDir before instantiating the ValueIndexerFactory
+//        // since that directory is used as the location to look for java source files to compile and include
+//        // If it is unspecified, the program looks in 
+//        ValueIndexerFactory.setHomeDirs(homeDirStrs);
 
-        indexerFactory = ValueIndexerFactory.instance();
+        indexerFactory = ValueIndexerFactory.initialize(homeDirStrs);
 
         recordMap = new LinkedHashMap<String, Record>();
 
@@ -361,7 +361,7 @@ public class SolrMarcDebug extends BootableMain
                 String firstId = null;
                 try
                 {
-                    reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.getHomeDirs(), new FileInputStream(f));
+                    reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), new FileInputStream(f));
                     while (reader.hasNext())
                     {
                         Record record = reader.next();

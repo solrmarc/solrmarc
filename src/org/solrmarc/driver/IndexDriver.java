@@ -130,18 +130,18 @@ public class IndexDriver extends BootableMain
 
     public void configureReader(List<String> inputFilenames)
     {
-        reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.getHomeDirs(), inputFilenames);
+        reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), inputFilenames);
     }
 
     public void configureIndexer(String indexSpecifications, boolean multiThreaded)
             throws IllegalAccessException, InstantiationException, IOException
     {
-        // You must set the HomeDir before instantiating the ValueIndexerFactory
-        // since that directory is used as the location to look for java source
-        // files to compile and include
-        // If it is unspecified, the program looks in
-        ValueIndexerFactory.setHomeDirs(homeDirStrs);
-        indexerFactory = ValueIndexerFactory.instance();
+//        // You must set the HomeDir before instantiating the ValueIndexerFactory
+//        // since that directory is used as the location to look for java source
+//        // files to compile and include
+//        // If it is unspecified, the program looks in
+//        ValueIndexerFactory.setHomeDirs();
+        indexerFactory = ValueIndexerFactory.initialize(homeDirStrs);
         String[] indexSpecs = indexSpecifications.split("[ ]*,[ ]*");
         File[] specFiles = new File[indexSpecs.length];
         int i = 0;

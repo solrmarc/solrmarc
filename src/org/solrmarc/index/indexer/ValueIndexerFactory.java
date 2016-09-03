@@ -11,6 +11,7 @@ import org.solrmarc.index.extractor.ExternalMethod;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
+import org.solrmarc.index.extractor.impl.java.JavaValueExtractorUtils;
 import org.solrmarc.index.extractor.methodcall.MethodCallManager;
 import org.solrmarc.index.extractor.methodcall.StaticMarcTestRecords;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
@@ -42,20 +43,19 @@ import java.util.regex.Pattern;
 public class ValueIndexerFactory
 {
     private final static Logger logger = Logger.getLogger(ValueIndexerFactory.class);
-    private final List<AbstractValueExtractorFactory> extractorFactories;
-    private final List<AbstractValueMappingFactory> mappingFactories;
+    private List<AbstractValueExtractorFactory> extractorFactories;
+    private List<AbstractValueMappingFactory> mappingFactories;
     private List<IndexerSpecException> validationExceptions;
     private ThreadLocal<List<IndexerSpecException>> perRecordExceptions;
 
     private FullConditionalParser parser = null;
     private Properties localMappingProperties = null;
-    private static List<String> dirsContainingJavaSource = new ArrayList<String>();
-    private static String homeDirStrs[] = null;
+    private JavaValueExtractorUtils compileTool = null;
+    private String homeDirStrs[] = null;
     private final Pattern specPattern = Pattern.compile("([-A-Za-z_0-9, \\t]*)([:=]|([+]=))(.*)");
     boolean debug_parse = true;
     private boolean defaultUniqueVal = true;
     private final Pattern defaultUniquePattern = Pattern.compile("default.unique[ ]*[;=][ ]*[\"]?(true|false)[\"]?");
-
     /**
      * The next three functions make the ValueIndexerFactory implement the
      * Singleton pattern To create of use a Factory do:
@@ -63,14 +63,29 @@ public class ValueIndexerFactory
      */
     private static ValueIndexerFactory theFactory = null;
 
-    public static ValueIndexerFactory instance()
+    public static ValueIndexerFactory initialize(String homeDirStrs[])
     {
-        if (theFactory == null) theFactory = new ValueIndexerFactory();
+        theFactory = new ValueIndexerFactory(homeDirStrs);
+        try
+        {
+            theFactory.extractorFactories = theFactory.createExtractorFactories(FastClasspathUtils.getExtractorFactoryClasses());
+            theFactory.mappingFactories = theFactory.createMappingFactories(FastClasspathUtils.getMappingFactoryClasses());
+        }
+        catch (IllegalAccessException | InstantiationException e)
+        {
+            throw new IndexerSpecException(e, "Error creating extractor or mapping factories");
+        }
         return (theFactory);
     }
 
-    private ValueIndexerFactory()
+    public static ValueIndexerFactory instance()
     {
+        return (theFactory);
+    }
+
+    private ValueIndexerFactory(String homeDirStrs[])
+    {
+        this.homeDirStrs = homeDirStrs;
         validationExceptions = new ArrayList<IndexerSpecException>();
         // perRecordExceptions list changed to be a ThreadLocal list so that each thread can save
         // the exceptions found while indexing a given record without interfering with other indexing threads.
@@ -82,16 +97,27 @@ public class ValueIndexerFactory
                 return new ArrayList<>();
             }
         };
-
-        try
+        List<String> dirsJavaSourceList = new ArrayList<String>();
+        String[] dirsJavaSource;
+        for (String dirStr : homeDirStrs)
         {
-            this.extractorFactories = createExtractorFactories(FastClasspathUtils.getExtractorFactoryClasses());
-            this.mappingFactories = createMappingFactories(FastClasspathUtils.getMappingFactoryClasses());
+            File dir = new File(dirStr);
+            File dirIndexJava = new File(dirStr, "index_java");
+            File dirIndexJavaSrc = new File(dirIndexJava, "src");
+            if (dirIndexJava.exists() && dirIndexJavaSrc.exists())
+            {
+                logger.info("Using directory: " + dirIndexJava.getAbsolutePath() + " as location of java sources");
+                dirsJavaSourceList.add(dir.getAbsolutePath());
+            }
         }
-        catch (IllegalAccessException | InstantiationException e)
-        {
-            throw new IndexerSpecException(e, "Error creating extractor or mapping factories");
-        }
+        dirsJavaSource =  dirsJavaSourceList.toArray(new String[0]);
+        compileTool = new JavaValueExtractorUtils(dirsJavaSource);
+        compileTool.compileSources();
+    }
+    
+    public Class<?>[] getCompiledClasses()
+    {
+        return compileTool.getClasses();
     }
 
     /**
@@ -760,40 +786,28 @@ public class ValueIndexerFactory
         throw new IndexerSpecException("Could not handle map descriptor: " + Utils.join(mapParts, " "));
     }
 
-    public static List<String> getDirsContainingJavaSource()
-    {
-        return dirsContainingJavaSource;
-    }
-
-    public static void setDirsContainingJavaSource(String[] homeDirStrs)
-    {
-        for (String dirStr : homeDirStrs)
-        {
-            File dir = new File(dirStr);
-            File dirIndexJava = new File(dirStr, "index_java");
-            File dirIndexJavaSrc = new File(dirIndexJava, "src");
-            if (dirIndexJava.exists() && dirIndexJavaSrc.exists())
-            {
-                logger.info("Using directory: " + dirIndexJava.getAbsolutePath() + " as location of java sources");
-                dirsContainingJavaSource.add(dir.getAbsolutePath());
-            }
-        }
-    }
-
-    public static String[] getHomeDirs()
+//    public static String[] getDirsContainingJavaSource()
+//    {
+//        return dirsContainingJavaSource;
+//    }
+//
+//    public static void setDirsContainingJavaSource(String[] homeDirStrs)
+//    {
+//    }
+//
+    public String[] getHomeDirs()
     {
         return (homeDirStrs);
     }
 
-    public static void setHomeDirs(String[] homeDirStrs)
-    {
-        ValueIndexerFactory.homeDirStrs = homeDirStrs;
-        setDirsContainingJavaSource(homeDirStrs);
-    }
+//    public static void setHomeDirs(String[] homeDirStrs)
+//    {
+//        ValueIndexerFactory.homeDirStrs = homeDirStrs;
+//        setDirsContainingJavaSource(homeDirStrs);
+//    }
 
     public void doneWithRecord(Record record)
     {
         MethodCallManager.instance().doneWithRecord(record);
     }
-
 }
