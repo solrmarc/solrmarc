@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -65,6 +66,9 @@ public class ValueIndexerFactory
 
     public static ValueIndexerFactory initialize(String homeDirStrs[])
     {
+        if (theFactory != null && Arrays.equals(homeDirStrs, theFactory.homeDirStrs))
+            return(theFactory);
+        
         theFactory = new ValueIndexerFactory(homeDirStrs);
         try
         {
