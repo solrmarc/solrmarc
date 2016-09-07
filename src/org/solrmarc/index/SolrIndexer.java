@@ -1,260 +1,52 @@
 package org.solrmarc.index;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.marc4j.marc.DataField;
 import org.marc4j.marc.Record;
-import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.extractor.impl.custom.Mixin;
-import org.solrmarc.index.indexer.AbstractValueIndexer;
-import org.solrmarc.index.indexer.ValueIndexerFactory;
-import org.solrmarc.index.mapping.AbstractMultiValueMapping;
-import org.solrmarc.tools.DataUtil;
-import org.solrmarc.tools.Utils;
 
-
-/**
- * class SolrIndexer
- * 
- * This class exists solely for backwards compatibility purposes.  The intention is that if a previous custom function
- * was being used, one that provides the same functionality can be found here.  Furthermore if there were any helper functions
- * that could have been used to create your own custom indexing functions those helper functions should be found here as well.
- * 
- * In most cases the methods found here are merely shims to translate the desired method to use the newer functionality that 
- * is now available.
- * 
- * 
- * @author rh9ec
- *
- */
-
-
-@Deprecated 
+@SuppressWarnings("deprecation")
 public class SolrIndexer implements Mixin
 {
-    private Map<String, AbstractValueIndexer<?>> indexerCache = new HashMap<String, AbstractValueIndexer<?>>(); 
+    public static SolrIndexerShim instance()
+    {
+        return SolrIndexerShim.instance();
+    }
     
-    /** map of translation maps.  keys are names of translation maps; 
-     *  values are the translation maps (hence, it's a map of maps) */
-    private Map<String, Object> transMapMap = new HashMap<String, Object>(); 
-   
-    public  SolrIndexer() 
-    { /* private constructor */ }
-   
     public  SolrIndexer(final String propertiesMapFile, final String[] propertyDirs) 
     { /* Backwards compatibility constructor, the parameters are all ignored */ }
-    
-    static SolrIndexer theSolrIndexer = null;
-    
-    public static SolrIndexer instance()
-    {
-        if (theSolrIndexer == null) theSolrIndexer = new SolrIndexer();
-        return(theSolrIndexer);
-    }
-    
-    private AbstractValueIndexer<?> getOrCreateIndexerFullSpec(String fullSpec)
-    {
-        if (indexerCache.containsKey(fullSpec))
-        {
-            return(indexerCache.get(fullSpec));
-        }
-        else
-        {
-            AbstractValueIndexer<?> indexer = ValueIndexerFactory.instance().createValueIndexer("", fullSpec);
-            indexerCache.put(fullSpec, indexer);
-            return(indexer);
-        }
-    }
-    
-    private AbstractValueIndexer<?> getOrCreateIndexerMapped(String tagStr, String map)
-    {
-        String key = (map == null) ? tagStr : tagStr + ", " +  map;
-        return getOrCreateIndexerFullSpec(key);
-    }
-    
-    private AbstractValueIndexer<?> getOrCreateIndexer(String tagStr, String separator)
-    {
-        String key = (separator == null) ? tagStr : tagStr + ", join(\""+separator+"\")";
-        return getOrCreateIndexerFullSpec(key);
-    }
-    
-    private AbstractValueIndexer<?> getOrCreateIndexer(String tagStr, int start, int end)
-    {
-        String key = (start == -1 && end == -1) ? tagStr : tagStr + "[" + start + "-" + end + "]";
-        return getOrCreateIndexerFullSpec(key);
-    }
-    
-    /**
-     * Get <code>Collection</code> of Strings as indicated by tagStr. For each field 
-     * spec in the tagStr that is NOT about bytes (i.e. not a 008[7-12] type fieldspec),  
-     * the result string is the concatenation of all the specific subfields.
-     * 
-     * @param record -
-     *            the marc record object
-     * @param tagStr
-     *            string containing which field(s)/subfield(s) to use. This is a
-     *            series of: marc "tag" string (3 chars identifying a marc
-     *            field, e.g. 245) optionally followed by characters identifying
-     *            which subfields to use. Separator of colon indicates a
-     *            separate value, rather than concatenation. 008[5-7] denotes
-     *            bytes 5-7 of the 008 field (0 based counting) 100[a-cf-z]
-     *            denotes the bracket pattern is a regular expression indicating
-     *            which subfields to include. Note: if the characters in the
-     *            brackets are digits, it will be interpreted as particular
-     *            bytes, NOT a pattern. 100abcd denotes subfields a, b, c, d are
-     *            desired.
-     * @param collector
-     *            object in which to collect the data from the fields described by
-     *            <code>tagStr</code>. A <code>Set</code> will automatically de-dupe
-     *            values, a <code>List</code> will allow values to repeat. 
-     * @throws Exception 
-     */
-    private void getFieldListCollector(Record record, AbstractValueIndexer<?> indexer,  Collection<String> collector)
-    {
-        try
-        {
-            indexer.getFieldData(record, collector);
-        }
-        catch (Exception e)
-        {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-    
+
     public void getFieldListCollector(Record record, String tagStr, String mapStr,  Collection<String> collector)
     {
-        AbstractValueIndexer<?> indexer = getOrCreateIndexerMapped(tagStr, mapStr);
-        getFieldListCollector(record, indexer, collector);
+        SolrIndexerShim.instance().getFieldListCollector(record, tagStr, mapStr, collector);
     }
-
     
-    /**
-     * Get Set of Strings as indicated by tagStr. For each field spec in the
-     * tagStr that is NOT about bytes (i.e. not a 008[7-12] type fieldspec), the
-     * result string is the concatenation of all the specific subfields.
-     * 
-     * @param record -
-     *            the marc record object
-     * @param tagStr
-     *            string containing which field(s)/subfield(s) to use. This is a
-     *            series of: marc "tag" string (3 chars identifying a marc
-     *            field, e.g. 245) optionally followed by characters identifying
-     *            which subfields to use. Separator of colon indicates a
-     *            separate value, rather than concatenation. 008[5-7] denotes
-     *            bytes 5-7 of the 008 field (0 based counting) 100[a-cf-z]
-     *            denotes the bracket pattern is a regular expression indicating
-     *            which subfields to include. Note: if the characters in the
-     *            brackets are digits, it will be interpreted as particular
-     *            bytes, NOT a pattern. 100abcd denotes subfields a, b, c, d are
-     *            desired.
-     * @return the contents of the indicated marc field(s)/subfield(s), as a set
-     *         of Strings.
-     * @throws Exception 
-     */
-//    public Set<String> getFieldList(Record record, String tagStr)
-//    {
-//        Set<String> result = new LinkedHashSet<String>();
-//        getFieldListCollector(record, tagStr, null, result);
-//        return result;
-//    }
-    
-    public static Set<String> getFieldList(Record record, String tagStr)
+    public Set<String> getFieldList(Record record, String tagStr)
     {
-        Set<String> result = new LinkedHashSet<String>();
-        instance().getFieldListCollector(record, tagStr, null, result);
-        return result;
+        return SolrIndexerShim.instance().getFieldList(record, tagStr);
     }
    
     public Set<String> getMappedFieldList(Record record, String tagStr, String mapStr)
     {
-        Set<String> result = new LinkedHashSet<String>();
-        getFieldListCollector(record, tagStr, mapStr, result);
-        return result;
+        return SolrIndexerShim.instance().getMappedFieldList(record, tagStr, mapStr);
     }
 
-    /**
-     * Get <code>List</code> of Strings as indicated by tagStr. For each field spec in the
-     * tagStr that is NOT about bytes (i.e. not a 008[7-12] type fieldspec), the
-     * result string is the concatenation of all the specific subfields.
-     * 
-     * @param record -
-     *            the marc record object
-     * @param tagStr
-     *            string containing which field(s)/subfield(s) to use. This is a
-     *            series of: marc "tag" string (3 chars identifying a marc
-     *            field, e.g. 245) optionally followed by characters identifying
-     *            which subfields to use. Separator of colon indicates a
-     *            separate value, rather than concatenation. 008[5-7] denotes
-     *            bytes 5-7 of the 008 field (0 based counting) 100[a-cf-z]
-     *            denotes the bracket pattern is a regular expression indicating
-     *            which subfields to include. Note: if the characters in the
-     *            brackets are digits, it will be interpreted as particular
-     *            bytes, NOT a pattern. 100abcd denotes subfields a, b, c, d are
-     *            desired.
-     * @return the contents of the indicated marc field(s)/subfield(s).
-     * @throws Exception 
-     */
     public List<String> getFieldListAsList(Record record, String tagStr) 
     {
-        List<String> result = new ArrayList<String>();
-        getFieldListCollector(record, tagStr, null, result);
-        return result;
+        return SolrIndexerShim.instance().getFieldListAsList(record, tagStr);
     }
 
-    /**
-     * Get the first value specified by the tagStr
-     * @param record - the marc record object
-     * @param tagStr string containing which field(s)/subfield(s) to use. This 
-     *  is a series of: marc "tag" string (3 chars identifying a marc field, 
-     *  e.g. 245) optionally followed by characters identifying which subfields 
-     *  to use.
-     * @return first value of the indicated marc field(s)/subfield(s) as a string
-     * @throws Exception 
-     */
     public String getFirstFieldVal(Record record, String tagStr) 
     {
-        Set<String> result = getFieldList(record, tagStr);
-        Iterator<String> iter = result.iterator();
-        if (iter.hasNext())
-            return iter.next();
-        else
-            return null;
+        return SolrIndexerShim.instance().getFirstFieldVal(record, tagStr);
     }
 
-    /**
-     * Get the first field value, which is mapped to another value. If there is
-     * no mapping for the value, use the mapping for the empty key, if it
-     * exists, o.w., use the mapping for the __DEFAULT key, if it exists.
-     * @param record - the marc record object
-     * @param mapName - name of translation map to use to xform values
-     * @param tagStr - which field(s)/subfield(s) to use
-     * @return first value as a string
-     */
     public String getFirstFieldVal(Record record, String mapName, String tagStr)
     {
-        Set<String> result = getMappedFieldList(record, tagStr, mapName);
-        Iterator<String> iter = result.iterator();
-        return (iter.hasNext())? iter.next() : null;
-    }
-
-    public boolean isControlField(String fieldTag)
-    {
-        if (fieldTag.matches("00[0-9]"))
-        {
-            return (true);
-        }
-        return (false);
+        return SolrIndexerShim.instance().getFirstFieldVal(record, mapName, tagStr);
     }
 
     /**
@@ -272,9 +64,7 @@ public class SolrIndexer implements Mixin
     public void getSubfieldDataCollector(Record record, String fldTag, String subfldsStr, 
                                                 String separator, Collection<String> collector)
     {
-        AbstractValueIndexer<?> indexer = getOrCreateIndexer(fldTag+subfldsStr, separator);
-        getFieldListCollector(record, indexer, collector);
-        return;
+        SolrIndexerShim.instance().getSubfieldDataCollector(record, fldTag, subfldsStr, separator, collector);
     }
 
     /**
@@ -291,9 +81,7 @@ public class SolrIndexer implements Mixin
     public void getSubfieldDataCollector(Record record, String fldTag, String subfldStr, 
                        int beginIx, int endIx, Collection<String> collector)
     {
-        AbstractValueIndexer<?> indexer = getOrCreateIndexer(fldTag+subfldStr, beginIx, endIx);
-        getFieldListCollector(record, indexer, collector);
-        return;
+        SolrIndexerShim.instance().getSubfieldDataCollector(record, fldTag, subfldStr, beginIx, endIx, collector);
     }
     
     /**
@@ -310,9 +98,7 @@ public class SolrIndexer implements Mixin
      */
     public Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldsStr, String separator)
     {
-        Set<String> result = new LinkedHashSet<String>();
-        getSubfieldDataCollector(record, fldTag, subfldsStr, separator, result);
-        return result;
+        return SolrIndexerShim.instance().getSubfieldDataAsSet(record, fldTag, subfldsStr, separator);
     }
     
     /**
@@ -327,9 +113,7 @@ public class SolrIndexer implements Mixin
      */
     public Set<String> getSubfieldDataAsSet(Record record, String fldTag, String subfldStr, int beginIx, int endIx)
     {
-        Set<String> result = new LinkedHashSet<String>();
-        getSubfieldDataCollector(record, fldTag, subfldStr, beginIx, endIx, result);
-        return result;
+        return SolrIndexerShim.instance().getSubfieldDataAsSet(record, fldTag, subfldStr, beginIx, endIx);
     }
 
     /**
@@ -343,13 +127,7 @@ public class SolrIndexer implements Mixin
      */
     public Set<String> removeTrailingPunct(Record record, String fieldSpec)
     {
-        Set<String> result = getFieldList(record, fieldSpec);
-        Set<String> newResult = new LinkedHashSet<String>();
-        for (String s : result)
-        {
-            newResult.add(DataUtil.cleanData(s));
-        }
-        return newResult;
+        return SolrIndexerShim.instance().removeTrailingPunct(record, fieldSpec);
     }
 
     /**
@@ -361,27 +139,17 @@ public class SolrIndexer implements Mixin
     
     public String getPublicationDate(final Record record)
     {
-        List<String> result = new ArrayList<String>();
-        AbstractValueIndexer<?> indexer = getOrCreateIndexerFullSpec("008[7-10]:008[11-14]:260c:264c?(ind2=1||ind2=4),clean, first, " +
-                    "map(\"(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2\",\".*[^0-9].*=>\")");
-        getFieldListCollector(record, indexer, result);
-        return (result.size() == 0) ? "" : result.iterator().next();
+        return SolrIndexerShim.instance().getPublicationDate(record);
     }
 
     public Set<String> getFullTextUrls(Record record)
     {
-        Set<String> result = new LinkedHashSet<String>();
-        AbstractValueIndexer<?> indexer = getOrCreateIndexer("{856uz3}?((ind1 = 4 || (ind1 = 7 & $x startsWith \"http\")) && (ind2 = 0 || (ind2 = 1 )))", "||");
-        getFieldListCollector(record, indexer, result);
-        return result;
+        return SolrIndexerShim.instance().getFullTextUrls(record);
     }
 
     public Set<String> getSupplUrls(Record record)
     {
-        Set<String> result = new LinkedHashSet<String>();
-        AbstractValueIndexer<?> indexer = getOrCreateIndexer("{856uz3}?((ind1 = 4 || (ind1 = 7 & $x startsWith \"http\")) && (ind2 = 2 || (ind2 = 1)))", "||");
-        getFieldListCollector(record, indexer, result);
-        return result;
+        return SolrIndexerShim.instance().getSupplUrls(record);
     }
 
     /**
@@ -401,10 +169,7 @@ public class SolrIndexer implements Mixin
      */
     public Set<String> getAllSubfields(final Record record, String fieldSpec, String separator)
     {
-        Set<String> result = new LinkedHashSet<String>();
-        AbstractValueIndexer<?> indexer = getOrCreateIndexer(fieldSpec, separator);
-        getFieldListCollector(record, indexer, result);
-        return result;
+        return SolrIndexerShim.instance().getAllSubfields(record, fieldSpec, separator);
     }
   
     /**
@@ -424,12 +189,7 @@ public class SolrIndexer implements Mixin
      */
     public Set<String> getAllAlphaSubfields(final Record record, String fieldSpec, String firstAllJoin)
     {
-        Set<String> result = new LinkedHashSet<String>();
-        String [] pieces = fieldSpec.split(":");
-        String fieldSpecWithAll = Utils.join(pieces, "[a-z]:") + "[a-z]" + ", " + firstAllJoin;
-        AbstractValueIndexer<?> indexer = getOrCreateIndexerFullSpec(fieldSpecWithAll);
-        getFieldListCollector(record, indexer, result);
-        return result;
+        return SolrIndexerShim.instance().getAllAlphaSubfields(record, fieldSpec, firstAllJoin);
     }
   
     /**
@@ -449,10 +209,7 @@ public class SolrIndexer implements Mixin
      */
     public List<String> getAllSubfieldsAsList(final Record record, String fieldSpec, String separator)
     {
-        List<String> result = new ArrayList<String>();
-        AbstractValueIndexer<?> indexer = getOrCreateIndexer(fieldSpec, separator);
-        getFieldListCollector(record, indexer, result);
-        return result;
+        return SolrIndexerShim.instance().getAllSubfieldsAsList(record, fieldSpec, separator);
     }
 
     /**
@@ -473,29 +230,7 @@ public class SolrIndexer implements Mixin
      */
     public String getAllSearchableFields(final Record record, String lowerBoundStr, String upperBoundStr)
     {
-        StringBuffer buffer = new StringBuffer("");
-        int lowerBound = localParseInt(lowerBoundStr, 100);
-        int upperBound = localParseInt(upperBoundStr, 900);
-
-        List<DataField> fields = record.getDataFields();
-        for (DataField field : fields)
-        {
-            // Get all fields starting with the 100 and ending with the 839
-            // This will ignore any "code" fields and only use textual fields
-            int tag = localParseInt(field.getTag(), -1);
-            if ((tag >= lowerBound) && (tag < upperBound))
-            {
-                // Loop through subfields
-                List<Subfield> subfields = field.getSubfields();
-                for (Subfield subfield : subfields)
-                {
-                    if (buffer.length() > 0)
-                        buffer.append(" ");
-                    buffer.append(subfield.getData());
-                }
-            }
-        }
-        return buffer.toString();
+        return SolrIndexerShim.instance().getAllSearchableFields(record, lowerBoundStr, upperBoundStr);
     }
 
     /**
@@ -516,31 +251,7 @@ public class SolrIndexer implements Mixin
      */
     public Set<String> getAllSearchableFieldsAsSet(final Record record, String lowerBoundStr, String upperBoundStr)
     {
-        Set<String> result = new LinkedHashSet<String>();
-        int lowerBound = localParseInt(lowerBoundStr, 100);
-        int upperBound = localParseInt(upperBoundStr, 900);
-
-        List<DataField> fields = record.getDataFields();
-        for (DataField field : fields)
-        {
-            // Get all fields starting with the 100 and ending with the 839
-            // This will ignore any "code" fields and only use textual fields
-            int tag = localParseInt(field.getTag(), -1);
-            if ((tag >= lowerBound) && (tag < upperBound))
-            {
-                // Loop through subfields
-                StringBuffer buffer = new StringBuffer("");
-                List<Subfield> subfields = field.getSubfields();
-                for (Subfield subfield : subfields)
-                {
-                    if (buffer.length() > 0)
-                        buffer.append(" ");
-                    buffer.append(subfield.getData());
-                }
-                result.add(buffer.toString());
-            }
-        }
-        return result;
+        return SolrIndexerShim.instance().getAllSearchableFieldsAsSet(record, lowerBoundStr, upperBoundStr);
     }
     
     /**
@@ -551,47 +262,16 @@ public class SolrIndexer implements Mixin
      *         and with non-filing characters omitted. Null returned if no
      *         title can be found. 
      * 
-     * @see SolrIndexer#getTitle
+     * @see SolrIndexerShim#getTitle
      */
     public String getSortableTitle(Record record)
     {
-        List<String> result = new ArrayList<String>();
-        AbstractValueIndexer<?> indexer = getOrCreateIndexerFullSpec("245abk,titleSortLower,first");
-        getFieldListCollector(record, indexer, result);
-        return (result.size() == 0) ? "" : result.iterator().next();
-    }
-
-    
-    /**
-     * return an int for the passed string
-     * @param str
-     * @param defValue - default value, if string doesn't parse into int
-     */
-    private int localParseInt(String str, int defValue)
-    {
-        int value = defValue;
-        try
-        {
-            value = Integer.parseInt(str);
-        }
-        catch (NumberFormatException nfe)
-        {
-            // provided value is not valid numeric string
-            // Ignoring it and moving happily on.
-        }
-        return (value);
+        return SolrIndexerShim.instance().getSortableTitle(record);
     }
 
     public List<VariableField> getFieldSetMatchingTagList(Record record, String tagList)
     {
-        String tags[] = tagList.split(":");
-        for (int i = 0; i < tags.length; i++)
-        {
-            String tag = tags[i].substring(0, 3);
-            if (tag == "LNK") tag = tags[i].substring(0, 6);
-            tags[i] = tag;
-        }
-        return(record.getVariableFields(tags));
+        return SolrIndexerShim.instance().getFieldSetMatchingTagList(record, tagList);
     }
     
     /**
@@ -605,17 +285,12 @@ public class SolrIndexer implements Mixin
      */
     public String loadTranslationMap(String translationMapSpec) 
     {
-        if (findMap(translationMapSpec) == null)
-        {
-            AbstractMultiValueMapping map = ValueIndexerFactory.instance().createMultiValueMapping(translationMapSpec);
-            transMapMap.put(translationMapSpec, map);
-        }
-        return(translationMapSpec);
+        return SolrIndexerShim.instance().loadTranslationMap(translationMapSpec);
     }
     
     public String loadTranslationMap(String ignore, String translationMapSpec) 
     {
-        return(loadTranslationMap(translationMapSpec));
+        return SolrIndexerShim.instance().loadTranslationMap(ignore, translationMapSpec);
     }
     
     /**
@@ -625,55 +300,21 @@ public class SolrIndexer implements Mixin
      */
     public Object findMap(String mapName)
     {
-        if (transMapMap.containsKey(mapName))
-            return(transMapMap.get(mapName));
-
-        return null;
+        return SolrIndexerShim.instance().loadTranslationMap(mapName);
     }
 
     public Collection<String> remap(Collection<String> valuesToMap, Object translationMap, boolean b) throws Exception
     {
-        if (translationMap instanceof AbstractMultiValueMapping)
-        {
-            AbstractMultiValueMapping map = (AbstractMultiValueMapping) translationMap;
-            return(map.map(valuesToMap));
-        }
-        return null;
+        return SolrIndexerShim.instance().remap(valuesToMap, translationMap, b);
     }
     
     public String remap(String valueToMap, Object translationMap, boolean b) throws Exception
     {
-        if (translationMap instanceof AbstractMultiValueMapping)
-        {
-            AbstractMultiValueMapping map = (AbstractMultiValueMapping) translationMap;
-            return(map.mapSingle(valueToMap));
-        }
-        return null;
+        return SolrIndexerShim.instance().remap(valueToMap, translationMap, b);
     }
 
     public String getDataFromVariableField(VariableField vf, String subfldTags, String separator, boolean cleanIt)
     {
-        if (subfldTags.length() > 1 && !subfldTags.startsWith("["))
-            subfldTags = '[' + subfldTags + ']';
-        Pattern subfieldPattern = Pattern.compile(subfldTags.length() == 0 ? "." : subfldTags);
-        DataField marcField = (DataField) vf;
-        StringBuffer buffer = new StringBuffer("");
-        List<Subfield> subfields = marcField.getSubfields();
-        for (Subfield subfield : subfields)
-        {
-            Matcher matcher = subfieldPattern.matcher("" + subfield.getCode());
-            if (matcher.matches())
-            {
-                if (buffer.length() > 0)
-                    buffer.append(separator != null ? separator : " ");
-                buffer.append(subfield.getData().trim());
-            }
-        }
-        if (buffer.length() > 0)
-            return(cleanIt ? DataUtil.cleanData(buffer.toString()) : buffer.toString());
-        else
-            return(null);
+        return SolrIndexerShim.instance().getDataFromVariableField(vf, subfldTags, separator, cleanIt);
     }
-
-
 }

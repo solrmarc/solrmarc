@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("deprecation")
 public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
 {
     // TODO: Use dynamic paths

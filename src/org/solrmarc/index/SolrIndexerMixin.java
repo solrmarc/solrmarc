@@ -19,7 +19,7 @@ import org.solrmarc.index.indexer.ValueIndexerFactory;
 public class SolrIndexerMixin implements Mixin
 {
     @SuppressWarnings("deprecation")
-    protected static SolrIndexer indexer = SolrIndexer.instance();
+    protected static SolrIndexerShim indexer = SolrIndexerShim.instance();
 
     public void addError(IndexerSpecException error)
     {

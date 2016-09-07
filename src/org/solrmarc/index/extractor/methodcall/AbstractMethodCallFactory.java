@@ -47,8 +47,7 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
      * 
      */
     
-    private final static ThreadLocal<Map<Class<?>, Object>> threadLocalObjectMap = 
-            new ThreadLocal<Map<Class<?>, Object>>() 
+    private final static ThreadLocal<Map<Class<?>, Object>> threadLocalObjectMap = new ThreadLocal<Map<Class<?>, Object>>() 
         {
             @Override 
             protected Map<Class<?>, Object> initialValue() 
@@ -74,7 +73,6 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
         {
             // can't call no-args constructor, check whether class extends org.solrmarc.index.SolrIndexer
             // for backwards compatibility sake.
-            @SuppressWarnings("deprecation")
             Class<?> solrIndexerClass = org.solrmarc.index.SolrIndexer.class;
             if (solrIndexerClass.isAssignableFrom(aClass))
             {
