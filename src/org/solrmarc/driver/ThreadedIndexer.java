@@ -135,6 +135,7 @@ public class ThreadedIndexer extends Indexer
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        logger.info("Done with all indexing, finishing writing records to solr");
 
         solrExecutor.shutdown();
         try {
@@ -145,6 +146,7 @@ public class ThreadedIndexer extends Indexer
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        logger.info("Done writing records to solr");
 
         if (shuttingDown)
         {

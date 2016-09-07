@@ -790,25 +790,10 @@ public class ValueIndexerFactory
         throw new IndexerSpecException("Could not handle map descriptor: " + Utils.join(mapParts, " "));
     }
 
-//    public static String[] getDirsContainingJavaSource()
-//    {
-//        return dirsContainingJavaSource;
-//    }
-//
-//    public static void setDirsContainingJavaSource(String[] homeDirStrs)
-//    {
-//    }
-//
     public String[] getHomeDirs()
     {
         return (homeDirStrs);
     }
-
-//    public static void setHomeDirs(String[] homeDirStrs)
-//    {
-//        ValueIndexerFactory.homeDirStrs = homeDirStrs;
-//        setDirsContainingJavaSource(homeDirStrs);
-//    }
 
     public void doneWithRecord(Record record)
     {
