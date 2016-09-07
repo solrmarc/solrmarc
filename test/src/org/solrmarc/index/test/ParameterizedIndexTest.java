@@ -1,17 +1,12 @@
 package org.solrmarc.index.test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.Assert.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import  org.hamcrest.Matchers;
-import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +22,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
+import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.MultiValueIndexer;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.marc.MarcReaderFactory;
@@ -35,18 +31,21 @@ import org.solrmarc.tools.PropertyUtils;
 @RunWith(Parameterized.class)
 public class ParameterizedIndexTest
 {
+    static int cnt = 0;
     String testNumber;
     String config;
     String recordFilename;
     String indexSpec;
     String expectedValue;
     Pattern parameterParse = Pattern.compile("([^(]*)([(][^)]*[)])");
+    Pattern indexSpecParse = Pattern.compile("(([^,]*[.]properties)([ ]*,[ ]*(.*[.]properties))*)[(]([^)]*)[)]");
+    Pattern singleSpecParse = Pattern.compile("(([-A-Za-z0-9_]*)[ ]*=[ ]*)?(.*)");
     static String dataDirectory;
     static String dataFile;
     
-    public ParameterizedIndexTest(String testNumber, String config, String recordFilename, String indexSpec, String expectedValue)
+    public ParameterizedIndexTest(String config, String recordFilename, String indexSpec, String expectedValue)
     {
-        this.testNumber = testNumber;
+        this.testNumber = ""+(cnt++);
         this.config = config;
         this.recordFilename = recordFilename;
         this.indexSpec = indexSpec;
@@ -84,7 +83,7 @@ public class ParameterizedIndexTest
 
         Record record = getRecord(vif, readerProps, recordFilename);
 
-        MultiValueIndexer indexer = vif.createValueIndexer("test_"+testNumber, indexSpec);
+        MultiValueIndexer indexer = createIndexer(vif, indexSpec);
         
         Collection<String> result = indexer.getFieldData(record);
         
@@ -98,10 +97,69 @@ public class ParameterizedIndexTest
             expected = expectedValue.split("[|]");
         else
             expected = new String[0];
-        assertThat(result, containsInAnyOrder(expected));
+        if (ordered) 
+            assertThat(result, contains(expected));
+        else 
+            assertThat(result, containsInAnyOrder(expected));
         System.out.println("Test " + testNumber + " : " + config + " : " + recordFilename + " : " + indexSpec + " --> " + expectedValue);
     }
 
+
+    private MultiValueIndexer createIndexer(ValueIndexerFactory vif, String indexSpec)
+    {
+        MultiValueIndexer indexer = null;
+        Matcher indexSpecMatcher = indexSpecParse.matcher(indexSpec);
+        if (indexSpecMatcher.matches())
+        {
+            String indexSpecFile = indexSpecMatcher.group(1);
+            String specName = indexSpecMatcher.group(5);
+            String[] indexSpecs = indexSpecFile.split("[ ]*,[ ]*");
+            File[] specFiles = new File[indexSpecs.length];
+            int i = 0;
+            for (String ixSpec : indexSpecs)
+            {
+                File specFile = new File(indexSpec);
+                if (!specFile.isAbsolute()) specFile = PropertyUtils.findFirstExistingFile(vif.getHomeDirs(), ixSpec);
+                specFiles[i++] = specFile;
+            }
+            try
+            {
+                List<AbstractValueIndexer<?>> indexers = vif.createValueIndexers(specFiles);
+                for (AbstractValueIndexer<?> ix : indexers)
+                {
+                    for (String fn : ix.getSolrFieldNames())
+                    {
+                        if (fn.equals(specName))
+                        {
+                            indexer = (MultiValueIndexer) ix;
+                        }
+                    }
+                }
+            }
+            catch (IllegalAccessException | InstantiationException | IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return(indexer);
+        }
+        else // its a single spec
+        {
+            Matcher singleSpecMatcher = singleSpecParse.matcher(indexSpec);
+            if (singleSpecMatcher.matches())
+            {
+                String indexname = singleSpecMatcher.group(2);
+                String fullSpec = singleSpecMatcher.group(3);
+                if (indexname == null || indexname.length() == 0)
+                {
+                    indexname = "test_"+testNumber;
+                }
+                indexer = vif.createValueIndexer(indexname, fullSpec);
+                return(indexer);
+            }
+        }
+        return(null);
+    }
 
     private Properties setReaderProperties(ValueIndexerFactory vif, String config) throws IOException
     {
@@ -112,7 +170,7 @@ public class ParameterizedIndexTest
         {
             configFile = "marcreader.properties";
         }
-        else if (config.matches("[-A-Za-z0-9_]*[ ]*=.*"))
+        else if (config.matches("[-A-Za-z0-9_.]*[ ]*=.*"))
         {
             configFile = "marcreader.properties";
             configAdditionStr = config;
@@ -158,7 +216,8 @@ public class ParameterizedIndexTest
             recordFilename = recParts[0];
             recordToLookAt = recParts[1];
         }
-        MarcReader reader = MarcReaderFactory.instance().makeReader(readerProps, vif.getHomeDirs(), dataDirectory+File.separator+recordFilename);
+        String fullPath = dataDirectory + File.separator + "records" + File.separator + recordFilename;
+        MarcReader reader = MarcReaderFactory.instance().makeReader(readerProps, vif.getHomeDirs(), fullPath);
 
         Record record = null;
         while (reader.hasNext())
@@ -188,34 +247,63 @@ public class ParameterizedIndexTest
         dataDirectory = System.getProperty("test.data.path");
         dataFile = System.getProperty("test.data.file");
         List<String[]> result = new LinkedList<String[]>();
-        String testdata0[] = new String[] 
+        String[] testdata = new String[] 
                 {
-                    "0",
                     "",
                     "specTestRecs.mrc(u8)",
-                    "001, first",
+                    "id = 001, first",
                     "u8"
                 };
-        result.add(testdata0);
-        String testdata[] = new String[] 
+        result.add(testdata);
+        testdata = new String[] 
                 {
-                    "1",
                     "",
                     "1156470.mrc",
                     "035a, map(\"[(][Oo][Cc][Oo][Ll][Cc][)][^0-9]*[0]*([0-9]+)=>$1\",\"ocm[0]*([0-9]+)[ ]*[0-9]*=>$1\",\"ocn[0]*([0-9]+).*=>$1\", \"on[0]*([0-9]+).*=>$1\")",
                     "12275114"
                 };
         result.add(testdata);
-        String testdata1[] = new String[] 
+        testdata = new String[] 
                 {
-                    "2",
+                    "",
+                    "1156470.mrc",
+                    "oclc_pattern_map_test.properties(oclc_num)",
+                    "12275114"
+                };
+        result.add(testdata);
+        testdata = new String[] 
+                {
+                    "",
+                    "1156470.mrc",
+                    "oclc_p_num = 035a, oclc_num_pattern_map.properties(oclc_num)",
+                    "12275114"
+                };
+        result.add(testdata);
+        testdata = new String[] 
+                {
                     "",
                     "specTestRecs.xml",
                     "subject_facet =600[a-z]:610[a-z]:611[a-z]:630[a-z]:650[a-z]:651[a-z]:655[a-z]:690[a-z], join (\" -- \"), cleanEnd, unique",
                     "Translating and interpreting -- Soviet Union -- History|Russian literature -- Translations from foreign languages -- History and criticism"
 
                 };
-        result.add(testdata1);
+        result.add(testdata);
+        testdata = new String[] 
+                {
+                    "",
+                    "title_k.mrc",
+                    "custom, getSortableTitle",
+                    "morton hoffman papers"
+                };
+        result.add(testdata);
+        testdata = new String[] 
+                {
+                    "marc.permissive=true,marc.to_utf_8=true,marc.unicode_normalize=C", 
+                    "u4.mrc(u4)", 
+                    "245a", 
+                    "The princes of Hà-tiên (1682-1867) /"
+                };
+        result.add(testdata);
         return(result);
         /*
         String fullIndexTestFilename = dataDirectory + File.separator + dataFile;
