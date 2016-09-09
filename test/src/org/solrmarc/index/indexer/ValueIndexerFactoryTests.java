@@ -1,6 +1,5 @@
 package org.solrmarc.index.indexer;
 
-
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,16 +8,14 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.MultiValueIndexer;
-import org.solrmarc.index.indexer.ValueIndexerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -46,15 +43,15 @@ public class ValueIndexerFactoryTests
     @Test
     public void testEmptyConfiguration() throws IllegalAccessException, InstantiationException
     {
-        final Properties configs = new Properties();
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(new String[0]);
+        String[] configSpecs = { };
+        final List<AbstractValueIndexer<?>> valueIndexers = CreateIndexerUtil.createIndexers(configSpecs);
         assertEquals(0, valueIndexers.size());
     }
 
     @Test
     public void testConstantIndexer() throws Exception
     {
-        final AbstractValueIndexer<?> valueIndexer = createIndexer("constant", "\"Test constant\"");
+        final AbstractValueIndexer<?> valueIndexer = CreateIndexerUtil.createIndexer("constant", "\"Test constant\"");
 
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
@@ -65,7 +62,7 @@ public class ValueIndexerFactoryTests
     @Test
     public void testFullRecordIndexer() throws Exception
     {
-        final AbstractValueIndexer<?> valueIndexer = createIndexer("fullRecord", "text");
+        final AbstractValueIndexer<?> valueIndexer = CreateIndexerUtil.createIndexer("fullRecord", "text");
 
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
@@ -78,27 +75,29 @@ public class ValueIndexerFactoryTests
     @Test
     public void testFieldSpecDataFieldIndexer() throws Exception
     {
-        final AbstractValueIndexer<?> valueIndexer = createIndexer("title_fields", "245abnp");
+        final AbstractValueIndexer<?> valueIndexer = CreateIndexerUtil.createIndexer("title_fields", "245abnp, clean");
 
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("title_fields", indexer.getSolrFieldNames().iterator().next());
-        @SuppressWarnings("unused")
-        Object title = indexer.getFieldData(testRecord);
+        Collection<String> result = indexer.getFieldData(testRecord);
+        assertEquals(1, result.size());
+        String value = result.iterator().next();
+        assertEquals("Lascaux en Périgord noir : environnement, art pariétal et conservation", value);
         
     }
     
     @Test
     public void testFieldSpecControlFieldIndexer() throws Exception
     {
-        final AbstractValueIndexer<?> valueIndexer = createIndexer("id", "001");
+        final AbstractValueIndexer<?> valueIndexer = CreateIndexerUtil.createIndexer("id", "001");
 
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("id", indexer.getSolrFieldNames().iterator().next());
-        @SuppressWarnings("unused")
-        Object id = indexer.getFieldData(testRecord);
-        
+        Collection<String> result = indexer.getFieldData(testRecord);
+        assertEquals(1, result.size());
+        assertEquals("u233", result.iterator().next()); 
     }
     
     
@@ -106,7 +105,7 @@ public class ValueIndexerFactoryTests
     @Test
     public void testFieldSpecMultiFieldIndexer() throws Exception
     {
-        final AbstractValueIndexer<?> valueIndexer = createIndexer("language_facet", "008[35-37]:041a:041d, language_map.properties, unique");
+        final AbstractValueIndexer<?> valueIndexer = CreateIndexerUtil.createIndexer("language_facet", "008[35-37]:041a:041d, language_map.properties, unique");
 
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
@@ -119,7 +118,7 @@ public class ValueIndexerFactoryTests
     @Test
     public void testMixinIndexer() throws Exception
     {
-        final AbstractValueIndexer<?> valueIndexer = createIndexer("mixin", "custom, testMixinMethod");
+        final AbstractValueIndexer<?> valueIndexer = CreateIndexerUtil.createIndexer("mixin", "custom, testMixinMethod");
 
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
@@ -136,7 +135,7 @@ public class ValueIndexerFactoryTests
         "constant = \"Test constant\"",
         "fullRecord = xml" };
 
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
+        final List<AbstractValueIndexer<?>> valueIndexers = CreateIndexerUtil.createIndexers(configs);
         assertEquals(3, valueIndexers.size());
 
         for (final AbstractValueIndexer<?> valueIndexer : valueIndexers)
@@ -149,34 +148,22 @@ public class ValueIndexerFactoryTests
     @Test
     public void testJavaIndexerInheritanceParent() throws Exception
     {
-        final AbstractValueIndexer<?> valueIndexer = createIndexer("javacall", "java, testMethod");
+        final AbstractValueIndexer<?> valueIndexer = CreateIndexerUtil.createIndexer("javacall", "java, testMethod");
 
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
-        assertEquals("constant", indexer.getSolrFieldNames().iterator().next());
+        assertEquals("javacall", indexer.getSolrFieldNames().iterator().next());
         assertEquals("<null>", indexer.getFieldData(null).iterator().next());
     }
 
     @Test
     public void testJavaIndexerInheritanceChild() throws Exception
     {
-        final AbstractValueIndexer<?> valueIndexer = createIndexer("javachildcall", "java(ChildMixin), testMethod");
+        final AbstractValueIndexer<?> valueIndexer = CreateIndexerUtil.createIndexer("javachildcall", "java(ChildMixin), testMethod");
 
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
-        assertEquals("constant", indexer.getSolrFieldNames().iterator().next());
+        assertEquals("javachildcall", indexer.getSolrFieldNames().iterator().next());
         assertEquals("Overwritten in ChildMixin", indexer.getFieldData(null).iterator().next());
-    }
-
-    private AbstractValueIndexer<?> createIndexer(String fieldNames, String indexSpec) throws IllegalAccessException, InstantiationException
-    {
-        final ValueIndexerFactory factory = ValueIndexerFactory.initialize(new String[]{System.getProperty("test.data.dir")});
-        return factory.createValueIndexer(fieldNames, indexSpec);
-    }
-
-    private List<AbstractValueIndexer<?>> createIndexers(String[] configs) throws IllegalAccessException, InstantiationException
-    {
-        final ValueIndexerFactory factory = ValueIndexerFactory.initialize(new String[]{System.getProperty("test.data.dir")});
-        return factory.createValueIndexers(configs);
     }
 }

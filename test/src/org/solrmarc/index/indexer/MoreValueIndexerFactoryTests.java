@@ -9,7 +9,6 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.MultiValueIndexer;
-import org.solrmarc.index.indexer.ValueIndexerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -34,12 +33,10 @@ public class MoreValueIndexerFactoryTests
     @Before
     public void setup() throws FileNotFoundException
     {
-        
         InputStream input = new BufferedInputStream(new FileInputStream(inputfilename));
         MarcReader reader = new MarcPermissiveStreamReader(input, true, true);
         testRecord = reader.next();
         testRecord.setId(1L);
-
     }    
     
     //  "LNK245ab"
@@ -49,7 +46,7 @@ public class MoreValueIndexerFactoryTests
         final Properties configs = new Properties();
         configs.put("linked_title_facet", "LNK245ab, join( : ), cleanEach");
 
-        final AbstractValueIndexer<?> valueIndexer = createIndexer("linked_title_facet", "LNK245ab, join( : ), cleanEach");
+        final AbstractValueIndexer<?> valueIndexer = CreateIndexerUtil.createIndexer("linked_title_facet", "LNK245ab, join( : ), cleanEach");
 
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
@@ -57,12 +54,5 @@ public class MoreValueIndexerFactoryTests
         @SuppressWarnings("unused")
         Object linked_title_facet = indexer.getFieldData(testRecord);
         
-    }
-
-
-    private AbstractValueIndexer<?> createIndexer(String fieldNames, String indexSpec) throws IllegalAccessException, InstantiationException
-    {
-        final ValueIndexerFactory factory = ValueIndexerFactory.initialize(new String[]{System.getProperty("test.data.dir")});
-        return factory.createValueIndexer(fieldNames, indexSpec);
     }
 }

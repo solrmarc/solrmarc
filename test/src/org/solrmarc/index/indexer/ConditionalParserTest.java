@@ -12,28 +12,26 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 
 // org.solrmarc.index.collector.FieldMatchCollector;
-import org.solrmarc.index.extractor.formatter.FieldFormatter;
-import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
-import org.solrmarc.index.extractor.formatter.FieldFormatterBase;
-//import org.solrmarc.index.extractor.FieldFormatterJoin;
-import org.solrmarc.index.extractor.formatter.FieldFormatterPatternMapped;
-import org.solrmarc.index.extractor.formatter.FieldFormatterTranslationMapped;
-import org.solrmarc.index.extractor.impl.direct.FieldMatch;
-import org.solrmarc.index.specification.Specification;
-import org.solrmarc.index.specification.conditional.ConditionalParser;
+//import org.solrmarc.index.extractor.formatter.FieldFormatter;
+//import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
+//import org.solrmarc.index.extractor.formatter.FieldFormatterBase;
+////import org.solrmarc.index.extractor.FieldFormatterJoin;
+//import org.solrmarc.index.extractor.formatter.FieldFormatterPatternMapped;
+//import org.solrmarc.index.extractor.formatter.FieldFormatterTranslationMapped;
+//import org.solrmarc.index.extractor.impl.direct.FieldMatch;
+//import org.solrmarc.index.specification.Specification;
+//import org.solrmarc.index.specification.conditional.ConditionalParser;
 
 
 public class ConditionalParserTest
 {
-
+/*
     static
     {
         PropertyConfigurator.configure(new File("log4j.properties").getAbsolutePath());
     }
 
-    /**
-     * @param args
-     */
+    
     static boolean do_debug_parse = true;
     static ConditionalParser parser = null;
     
@@ -131,5 +129,5 @@ public class ConditionalParserTest
             }
         }
     }
-
+*/
 }

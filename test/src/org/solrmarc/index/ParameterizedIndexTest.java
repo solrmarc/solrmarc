@@ -1,4 +1,4 @@
-package org.solrmarc.index.test;
+package org.solrmarc.index;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -52,19 +52,6 @@ public class ParameterizedIndexTest
         this.expectedValue = expectedValue;
     }
     
-    private void initLogging(String[] homeDirs)
-    {
-        for (String dir : homeDirs)
-        {
-            File log4jProps = new File(dir, "log4j.properties");
-            if (log4jProps.exists())
-            {
-                LogManager.resetConfiguration();
-                PropertyConfigurator.configure(log4jProps.getAbsolutePath());
-                return;
-            }
-        }
-    }
     
     @Test
     /**
@@ -78,7 +65,7 @@ public class ParameterizedIndexTest
     {
         boolean ordered = false;
         ValueIndexerFactory vif = ValueIndexerFactory.initialize(new String[]{dataDirectory});
-        initLogging(vif.getHomeDirs());
+
         Properties readerProps = setReaderProperties(vif, config);
 
         Record record = getRecord(vif, readerProps, recordFilename);
@@ -301,7 +288,7 @@ public class ParameterizedIndexTest
                     "marc.permissive=true,marc.to_utf_8=true,marc.unicode_normalize=C", 
                     "u4.mrc(u4)", 
                     "245a", 
-                    "The princes of Hà-tiên (1682-1867) /"
+                    "The princes of HÃ -tiÃªn (1682-1867) /"
                 };
         result.add(testdata);
         return(result);
