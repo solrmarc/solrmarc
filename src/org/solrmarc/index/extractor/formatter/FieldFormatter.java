@@ -22,7 +22,7 @@ public interface FieldFormatter extends ExternalMethod
 
     public enum eCleanVal
     {
-        CLEAN_END, CLEAN_EACH, STRIP_ALL_PUNCT, STRIP_ACCCENTS, TO_UPPER, TO_LOWER, STRIP_INDICATOR_2;
+        CLEAN_END, CLEAN_EACH, STRIP_ALL_PUNCT, STRIP_ACCCENTS, TO_UPPER, TO_LOWER, STRIP_INDICATOR_2, UNTRIMMED;
     };
 
     public abstract String getFieldTagFmt();

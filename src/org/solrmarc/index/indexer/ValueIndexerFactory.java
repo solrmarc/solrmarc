@@ -502,7 +502,8 @@ public class ValueIndexerFactory
         if (str.equals("join") || str.equals("separate") || str.equals("format") || str.equals("substring") || 
             str.equals("cleanEach") || str.equals("cleanEnd") || str.equals("clean") || str.equals("stripAccent") || 
             str.equals("stripPunct") || str.equals("stripInd2") || str.equals("toUpper") || str.equals("toLower") || 
-            str.equals("toUpper") || str.equals("toLower") || str.equals("titleSortUpper") || str.equals("titleSortLower")) return (true);
+            str.equals("toUpper") || str.equals("toLower") || str.equals("titleSortUpper") || str.equals("titleSortLower") ||
+            str.equals("untrimmed")) return (true);
         return (false);
     }
 
@@ -563,6 +564,10 @@ public class ValueIndexerFactory
             else if (mapParts[0].equals("cleanEach"))
             {
                 multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);
+            }
+            else if (mapParts[0].equals("untrimmed"))
+            {
+                multiValueExtractor.addCleanVal(eCleanVal.UNTRIMMED);
             }
             else if (mapParts[0].equals("cleanEnd"))
             {

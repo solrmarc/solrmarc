@@ -26,8 +26,8 @@ public class FieldFormatterBase implements FieldFormatter
     List<AbstractMultiValueMapping> maps = null;
 //    boolean unique = false;
     eJoinVal joinVal = eJoinVal.SEPARATE;
-    int trimStart = -1;
-    int trimEnd = -1;
+    int substringStart = -1;
+    int substringEnd = -1;
     EnumSet<eCleanVal> cleanVal = EnumSet.noneOf(eCleanVal.class);
 
     String fieldTagFmt = null;
@@ -52,8 +52,8 @@ public class FieldFormatterBase implements FieldFormatter
         this.sfCodeMap = toClone.sfCodeMap;
         this.separator = toClone.separator;
         this.joinVal = toClone.joinVal;
-        this.trimStart = toClone.trimStart;
-        this.trimEnd = toClone.trimEnd;
+        this.substringStart = toClone.substringStart;
+        this.substringEnd = toClone.substringEnd;
         this.cleanVal = toClone.cleanVal;
         if (toClone.maps != null)
         {
@@ -236,8 +236,8 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public FieldFormatter setSubstring(int offset, int endOffset)
     {
-        this.trimStart = offset;
-        this.trimEnd = endOffset;
+        this.substringStart = offset;
+        this.substringEnd = endOffset;
         return(this);
     }
 
@@ -333,11 +333,11 @@ public class FieldFormatterBase implements FieldFormatter
         return(value);
     }
 
-    private final String trimData(final String data)
+    private final String getSubstring(final String data)
     {
         try
         {
-            return (trimStart == -1 && trimEnd == -1) ? data : data.substring(trimStart, trimEnd + 1);
+            return (substringStart == -1 && substringEnd == -1) ? data : data.substring(substringStart, substringEnd + 1);
         }
         catch (IndexOutOfBoundsException ioobe)
         {
@@ -349,8 +349,9 @@ public class FieldFormatterBase implements FieldFormatter
     
     public String cleanData(VariableField vf, boolean isSubfieldA, String data)
     {
-        final String trimmed = trimData(data);
         final EnumSet<eCleanVal> cleanVal = getCleanVal();
+        final String trimmed = cleanVal.contains(eCleanVal.UNTRIMMED) ? getSubstring(data) : getSubstring(data).trim();
+
         String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? DataUtil.cleanData(trimmed) : trimmed;
         if (!cleanVal.contains(eCleanVal.STRIP_ACCCENTS) && !cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)
                 && !cleanVal.contains(eCleanVal.TO_LOWER) && !cleanVal.contains(eCleanVal.TO_UPPER)
