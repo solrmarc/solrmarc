@@ -11,11 +11,14 @@ import org.solrmarc.index.extractor.impl.custom.Mixin;
 @SuppressWarnings("deprecation")
 public class SolrIndexer implements Mixin
 {
-    public static SolrIndexerShim instance()
+    private static SolrIndexer fakeInstanceToMakeScriptsWork = new SolrIndexer();  
+    public static SolrIndexer instance()
     {
-        return SolrIndexerShim.instance();
+        return fakeInstanceToMakeScriptsWork;
     }
-    
+    private  SolrIndexer() 
+    { /* Do-Nothing constructor, for fake Instance To Make Scripts Work */ }
+   
     public  SolrIndexer(final String propertiesMapFile, final String[] propertyDirs) 
     { /* Backwards compatibility constructor, the parameters are all ignored */ }
 

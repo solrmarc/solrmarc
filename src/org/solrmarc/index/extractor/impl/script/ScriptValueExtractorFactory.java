@@ -16,6 +16,7 @@ import org.solrmarc.index.utils.StringReader;
 import org.solrmarc.tools.PropertyUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
@@ -58,6 +59,13 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
         catch (EvalError e)
         {
             throw new IllegalArgumentException("Unable to evaluate script: " + scriptFileName, e);
+        }
+        try
+        {
+            script.close();
+        }
+        catch (IOException e)
+        {
         }
         INTERPRETERS.put(scriptFileName, bsh);
         return bsh;
