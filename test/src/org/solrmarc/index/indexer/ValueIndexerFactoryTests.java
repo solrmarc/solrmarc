@@ -37,32 +37,26 @@ public class ValueIndexerFactoryTests
     @Before
     public void setup() throws FileNotFoundException
     {
-        
         InputStream input = new BufferedInputStream(new FileInputStream(inputfilename));
         MarcReader reader = new MarcPermissiveStreamReader(input, true, true);
         testRecord = reader.next();
         testRecord.setId(1L);
-
     }
 
     @Test
     public void testEmptyConfiguration() throws IllegalAccessException, InstantiationException
     {
         final Properties configs = new Properties();
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
+        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(new String[0]);
         assertEquals(0, valueIndexers.size());
     }
 
     @Test
     public void testConstantIndexer() throws Exception
     {
-        final Properties configs = new Properties();
-        configs.put("constant", "\"Test constant\"");
+        final AbstractValueIndexer<?> valueIndexer = createIndexer("constant", "\"Test constant\"");
 
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
-        assertEquals(1, valueIndexers.size());
-
-        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("constant", indexer.getSolrFieldNames().iterator().next());
         assertEquals("Test constant", indexer.getFieldData(null).iterator().next());
@@ -71,13 +65,9 @@ public class ValueIndexerFactoryTests
     @Test
     public void testFullRecordIndexer() throws Exception
     {
-        final Properties configs = new Properties();
-        configs.put("fullRecord", "text");
+        final AbstractValueIndexer<?> valueIndexer = createIndexer("fullRecord", "text");
 
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
-        assertEquals(1, valueIndexers.size());
-
-        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("fullRecord", indexer.getSolrFieldNames().iterator().next());
         @SuppressWarnings("unused")
@@ -88,13 +78,9 @@ public class ValueIndexerFactoryTests
     @Test
     public void testFieldSpecDataFieldIndexer() throws Exception
     {
-        final Properties configs = new Properties();
-        configs.put("title_fields", "245abnp");
+        final AbstractValueIndexer<?> valueIndexer = createIndexer("title_fields", "245abnp");
 
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
-        assertEquals(1, valueIndexers.size());
-
-        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("title_fields", indexer.getSolrFieldNames().iterator().next());
         @SuppressWarnings("unused")
@@ -105,13 +91,9 @@ public class ValueIndexerFactoryTests
     @Test
     public void testFieldSpecControlFieldIndexer() throws Exception
     {
-        final Properties configs = new Properties();
-        configs.put("id", "001");
+        final AbstractValueIndexer<?> valueIndexer = createIndexer("id", "001");
 
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
-        assertEquals(1, valueIndexers.size());
-
-        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("id", indexer.getSolrFieldNames().iterator().next());
         @SuppressWarnings("unused")
@@ -124,13 +106,9 @@ public class ValueIndexerFactoryTests
     @Test
     public void testFieldSpecMultiFieldIndexer() throws Exception
     {
-        final Properties configs = new Properties();
-        configs.put("language_facet", "008[35-37]:041a:041d, language_map.properties, unique");
+        final AbstractValueIndexer<?> valueIndexer = createIndexer("language_facet", "008[35-37]:041a:041d, language_map.properties, unique");
 
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
-        assertEquals(1, valueIndexers.size());
-
-        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("language_facet", indexer.getSolrFieldNames().iterator().next());
         @SuppressWarnings("unused")
@@ -141,13 +119,9 @@ public class ValueIndexerFactoryTests
     @Test
     public void testMixinIndexer() throws Exception
     {
-        final Properties configs = new Properties();
-        configs.put("mixin", "custom, testMixinMethod");
+        final AbstractValueIndexer<?> valueIndexer = createIndexer("mixin", "custom, testMixinMethod");
 
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
-        assertEquals(1, valueIndexers.size());
-
-        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("mixin", indexer.getSolrFieldNames().iterator().next());
         assertEquals("<null>", indexer.getFieldData(null).iterator().next());
@@ -157,10 +131,10 @@ public class ValueIndexerFactoryTests
     @Test(expected = NullPointerException.class)
     public void testManyIndexers() throws Exception
     {
-        final Properties configs = new Properties();
-        configs.put("mixin", "custom, testMixinMethod");
-        configs.put("constant", "\"Test constant\"");
-        configs.put("fullRecord", "xml");
+        String[] configs = {
+        "mixin = custom, testMixinMethod",
+        "constant = \"Test constant\"",
+        "fullRecord = xml" };
 
         final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
         assertEquals(3, valueIndexers.size());
@@ -175,13 +149,9 @@ public class ValueIndexerFactoryTests
     @Test
     public void testJavaIndexerInheritanceParent() throws Exception
     {
-        final Properties configs = new Properties();
-        configs.put("constant", "java, testMethod");
+        final AbstractValueIndexer<?> valueIndexer = createIndexer("javacall", "java, testMethod");
 
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
-        assertEquals(1, valueIndexers.size());
-
-        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("constant", indexer.getSolrFieldNames().iterator().next());
         assertEquals("<null>", indexer.getFieldData(null).iterator().next());
@@ -190,21 +160,23 @@ public class ValueIndexerFactoryTests
     @Test
     public void testJavaIndexerInheritanceChild() throws Exception
     {
-        final Properties configs = new Properties();
-        configs.put("constant", "java(ChildMixin), testMethod");
+        final AbstractValueIndexer<?> valueIndexer = createIndexer("javachildcall", "java(ChildMixin), testMethod");
 
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
-        assertEquals(1, valueIndexers.size());
-
-        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("constant", indexer.getSolrFieldNames().iterator().next());
         assertEquals("Overwritten in ChildMixin", indexer.getFieldData(null).iterator().next());
     }
 
-    private List<AbstractValueIndexer<?>> createIndexers(Properties configs) throws IllegalAccessException, InstantiationException
+    private AbstractValueIndexer<?> createIndexer(String fieldNames, String indexSpec) throws IllegalAccessException, InstantiationException
     {
-        final ValueIndexerFactory factory = ValueIndexerFactory.instance();
+        final ValueIndexerFactory factory = ValueIndexerFactory.initialize(new String[]{System.getProperty("test.data.dir")});
+        return factory.createValueIndexer(fieldNames, indexSpec);
+    }
+
+    private List<AbstractValueIndexer<?>> createIndexers(String[] configs) throws IllegalAccessException, InstantiationException
+    {
+        final ValueIndexerFactory factory = ValueIndexerFactory.initialize(new String[]{System.getProperty("test.data.dir")});
         return factory.createValueIndexers(configs);
     }
 }

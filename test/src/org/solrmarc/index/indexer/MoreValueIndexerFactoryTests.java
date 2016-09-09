@@ -9,19 +9,16 @@ import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.MultiValueIndexer;
-import org.solrmarc.index.indexer.ValueIndexerStringReaderFactory;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 
 public class MoreValueIndexerFactoryTests
@@ -52,10 +49,9 @@ public class MoreValueIndexerFactoryTests
         final Properties configs = new Properties();
         configs.put("linked_title_facet", "LNK245ab, join( : ), cleanEach");
 
-        final List<AbstractValueIndexer<?>> valueIndexers = createIndexers(configs);
-        assertEquals(1, valueIndexers.size());
+        final AbstractValueIndexer<?> valueIndexer = createIndexer("linked_title_facet", "LNK245ab, join( : ), cleanEach");
 
-        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexers.get(0);
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("linked_title_facet", indexer.getSolrFieldNames().iterator().next());
         @SuppressWarnings("unused")
@@ -64,9 +60,9 @@ public class MoreValueIndexerFactoryTests
     }
 
 
-    private List<AbstractValueIndexer<?>> createIndexers(Properties configs) throws IllegalAccessException, InstantiationException
+    private AbstractValueIndexer<?> createIndexer(String fieldNames, String indexSpec) throws IllegalAccessException, InstantiationException
     {
-        final ValueIndexerStringReaderFactory factory = ValueIndexerStringReaderFactory.instance();
-        return factory.createValueIndexers(configs);
+        final ValueIndexerFactory factory = ValueIndexerFactory.initialize(new String[]{System.getProperty("test.data.dir")});
+        return factory.createValueIndexer(fieldNames, indexSpec);
     }
 }

@@ -4,9 +4,10 @@
     </description>
     <!-- set global properties for this build -->
     <property name="src" location="src"/>
-    <property name="src.tests" location="test"/>
+    <property name="src.tests" location="test/src"/>
+    <property name="test" location="test"/>
     <property name="build" location="build"/>
-    <property name="build.tests" location="out/test"/>
+    <property name="build.tests" location="test/build"/>
     <property name="dist" location="dist"/>
     <property name="lib" location="lib"/>
     <property name="distlib" location="dist/lib"/>
@@ -130,16 +131,70 @@
     	</copy>
     </target>
 
-    <target name="test">
-        <junit printsummary="yes" haltonfailure="false">
-            <classpath>
-                <fileset dir="lib">
+    <target name="test-compile"  description="compile the source of tests">
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac target="1.7" source="1.7" srcdir="${src.tests}" destdir="${build.tests}" debug="true" debuglevel="lines,vars,source" >
+            <classpath >
+                 <fileset dir="dist">
+                     <include name="solrmarc_core.jar"/>
+                 </fileset>
+             </classpath>
+            <classpath >
+                 <fileset dir="dist/lib">
+                     <include name="**/*.jar"/>
+                 </fileset>
+             </classpath>
+            <classpath >
+                <fileset dir="lib-solrj">
                     <include name="**/*.jar"/>
                 </fileset>
+            </classpath>
+            <classpath >
+                <fileset dir="test/lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+            <classpath >
+                <fileset dir="test/local_lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+        <jar destfile="${test}/${custom.jar.name}_tests.jar">
+            <manifest>
+                <attribute name="Built-Date" value="${TODAY}"/>
+            </manifest>
+   <!--         <fileset dir="${basedir}" includes="log4j.properties" /> -->
+            <fileset dir="${test}/build" includes="**/*.class" />
+        </jar>
+
+    </target>
+
+
+	<target name="test" depends="test-compile">
+        <junit printsummary="yes" haltonfailure="false">
+            <classpath>
+                <fileset dir="${dist}">
+                    <include name="solrmarc_core.jar"/>
+                </fileset>
+                <fileset dir="${dist}/lib">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${dist}">
+                    <include name="solrmarc_core.jar"/>
+                </fileset>
+                <fileset dir="${test}/lib">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${test}">
+                    <include name="${custom.jar.name}_tests.jar"/>
+                </fileset>
+            	
                 <pathelement location="${build}"/>
                 <pathelement location="${build.tests}"/>
                 <pathelement path="${java.class.path}"/>
             </classpath>
+            <sysproperty key="test.data.dir" path="${test.data.dir}" />
 
             <formatter type="plain"/>
 
