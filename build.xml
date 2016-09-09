@@ -160,7 +160,7 @@
                 </fileset>
             </classpath>
         </javac>
-        <jar destfile="${test}/${custom.jar.name}_tests.jar">
+        <jar destfile="${test}/build/${custom.jar.name}_tests.jar">
             <manifest>
                 <attribute name="Built-Date" value="${TODAY}"/>
             </manifest>
@@ -186,8 +186,11 @@
                 <fileset dir="${test}/lib">
                     <include name="*.jar"/>
                 </fileset>
-                <fileset dir="${test}">
+                <fileset dir="${test}/build">
                     <include name="${custom.jar.name}_tests.jar"/>
+                </fileset>
+                <fileset dir="lib-solrj">
+                    <include name="*.jar"/>
                 </fileset>
             	
                 <pathelement location="${build}"/>
