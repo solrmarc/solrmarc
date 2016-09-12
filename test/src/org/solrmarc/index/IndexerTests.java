@@ -1,7 +1,6 @@
 package org.solrmarc.index;
 
 
-import org.apache.log4j.PropertyConfigurator;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +15,7 @@ import org.solrmarc.index.extractor.impl.constant.ConstantMultiValueExtractor;
 import org.solrmarc.index.extractor.impl.patternMapping.PatternMapping;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.MultiValueIndexer;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.impl.MultiValuePatternMapping;
 import org.solrmarc.index.mapping.impl.MultiValueTranslationMapping;
@@ -39,19 +39,19 @@ public class IndexerTests
             new MultiValueTranslationMapping(translationMappingProperties)
     };
     private final AbstractMultiValueMapping[] patternMapping = new AbstractMultiValueMapping[]{
-            new MultiValuePatternMapping(Collections.singletonList(new PatternMapping("[A-Z]", "X", 0)))
+            new MultiValuePatternMapping(Collections.singletonList(new PatternMapping("[A-Z]", "X", 0)), true, false, false)
     };
     private final AbstractMultiValueMapping[] translationAndPatternMapping = new AbstractMultiValueMapping[]{
             new MultiValueTranslationMapping(translationMappingProperties),
-            new MultiValuePatternMapping(Collections.singletonList(new PatternMapping("[A-Z]", "X", 0)))
+            new MultiValuePatternMapping(Collections.singletonList(new PatternMapping("(FOO)", "Foo $1", 0)))
     };
     private final AbstractMultiValueMapping[] noMappings = new AbstractMultiValueMapping[0];
     private final MultiValueCollector singleCollector = new MultiValueCollector();
     private final ConstantMultiValueExtractor constantExtractor = new ConstantMultiValueExtractor("Foo Bar");
-
+    private static ValueIndexerFactory factory;
     static
     {
-        PropertyConfigurator.configure(new File("log4j.properties").getAbsolutePath());
+        factory = ValueIndexerFactory.initialize(new String[]{System.getProperty("test.data.dir", "test/data")});
     }
 
     @Before
@@ -67,7 +67,7 @@ public class IndexerTests
     @Test
     public void testNoMappings() throws Exception
     {
-        final MultiValueIndexer valueIndexer = new MultiValueIndexer("testField", constantExtractor, noMappings, singleCollector);
+        final MultiValueIndexer valueIndexer = factory.createValueIndexer("testField", "\"Foo Bar\"");
         final SolrProxy proxy = Mockito.mock(SolrProxy.class);
         final Indexer indexer = new Indexer(Collections.<AbstractValueIndexer<?>>singletonList(valueIndexer), proxy);
 
@@ -75,7 +75,8 @@ public class IndexerTests
 
         List<SolrInputDocument> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
-        assertEquals(Collections.singletonMap("testField", "Foo Bar"), documents.get(0));
+        SolrInputDocument document = documents.get(0);
+        assertEquals("Foo Bar", document.getField("testField").getValue().toString());
     }
 
     @Test
@@ -89,7 +90,8 @@ public class IndexerTests
 
         List<SolrInputDocument> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
-        assertEquals(Collections.singletonMap("testField", "BAR FOO"), documents.get(0));
+        SolrInputDocument document = documents.get(0);
+        assertEquals("BAR FOO", document.getField("testField").getValue().toString());
     }
 
     @Test
@@ -103,7 +105,8 @@ public class IndexerTests
 
         List<SolrInputDocument> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
-        assertEquals(Collections.singletonMap("testField", "Xoo Xar"), documents.get(0));
+        SolrInputDocument document = documents.get(0);
+        assertEquals("Xoo Xar", document.getField("testField").getValue().toString());
     }
 
     @Test
@@ -117,7 +120,8 @@ public class IndexerTests
 
         List<SolrInputDocument> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
-        assertEquals(Collections.singletonMap("testField", "XXX XXX"), documents.get(0));
+        SolrInputDocument document = documents.get(0);
+        assertEquals("Foo FOO", document.getField("testField").getValue().toString());
     }
 
     @Test

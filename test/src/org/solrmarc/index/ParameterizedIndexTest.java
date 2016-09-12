@@ -5,8 +5,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +47,11 @@ public class ParameterizedIndexTest
     Pattern singleSpecParse = Pattern.compile("(([-A-Za-z0-9_]*)[ ]*=[ ]*)?(.*)");
     static String dataDirectory;
     static String dataFile;
+    private static ValueIndexerFactory factory;
+    static
+    {
+        factory = ValueIndexerFactory.initialize(new String[]{System.getProperty("test.data.dir", "test/data")});
+    }
     
     public ParameterizedIndexTest(String config, String recordFilename, String indexSpec, String expectedValue)
     {
@@ -64,13 +74,12 @@ public class ParameterizedIndexTest
     public void verifyIndexingResults() throws Exception 
     {
         boolean ordered = false;
-        ValueIndexerFactory vif = ValueIndexerFactory.initialize(new String[]{dataDirectory});
 
-        Properties readerProps = setReaderProperties(vif, config);
+        Properties readerProps = setReaderProperties(factory, config);
 
-        Record record = getRecord(vif, readerProps, recordFilename);
+        Record record = getRecord(factory, readerProps, recordFilename);
 
-        MultiValueIndexer indexer = createIndexer(vif, indexSpec);
+        MultiValueIndexer indexer = createIndexer(factory, indexSpec);
         
         Collection<String> result = indexer.getFieldData(record);
         
@@ -92,7 +101,7 @@ public class ParameterizedIndexTest
     }
 
 
-    private MultiValueIndexer createIndexer(ValueIndexerFactory vif, String indexSpec)
+    private MultiValueIndexer createIndexer(ValueIndexerFactory factory, String indexSpec)
     {
         MultiValueIndexer indexer = null;
         Matcher indexSpecMatcher = indexSpecParse.matcher(indexSpec);
@@ -106,12 +115,12 @@ public class ParameterizedIndexTest
             for (String ixSpec : indexSpecs)
             {
                 File specFile = new File(indexSpec);
-                if (!specFile.isAbsolute()) specFile = PropertyUtils.findFirstExistingFile(vif.getHomeDirs(), ixSpec);
+                if (!specFile.isAbsolute()) specFile = PropertyUtils.findFirstExistingFile(factory.getHomeDirs(), ixSpec);
                 specFiles[i++] = specFile;
             }
             try
             {
-                List<AbstractValueIndexer<?>> indexers = vif.createValueIndexers(specFiles);
+                List<AbstractValueIndexer<?>> indexers = factory.createValueIndexers(specFiles);
                 for (AbstractValueIndexer<?> ix : indexers)
                 {
                     for (String fn : ix.getSolrFieldNames())
@@ -141,14 +150,14 @@ public class ParameterizedIndexTest
                 {
                     indexname = "test_"+testNumber;
                 }
-                indexer = vif.createValueIndexer(indexname, fullSpec);
+                indexer = factory.createValueIndexer(indexname, fullSpec);
                 return(indexer);
             }
         }
         return(null);
     }
 
-    private Properties setReaderProperties(ValueIndexerFactory vif, String config) throws IOException
+    private Properties setReaderProperties(ValueIndexerFactory factory, String config) throws IOException
     {
         Matcher configMatcher = parameterParse.matcher(config);
         String configFile;
@@ -179,7 +188,7 @@ public class ParameterizedIndexTest
         String[] configAdditions = configAdditionStr.split(",");
         
         Properties readerProps = new Properties();
-        String propertyFileAsURLStr = PropertyUtils.getPropertyFileAbsoluteURL(vif.getHomeDirs(), configFile, false, null);
+        String propertyFileAsURLStr = PropertyUtils.getPropertyFileAbsoluteURL(factory.getHomeDirs(), configFile, false, null);
 
         readerProps.load(PropertyUtils.getPropertyFileInputStream(propertyFileAsURLStr));
         
@@ -194,7 +203,7 @@ public class ParameterizedIndexTest
         return readerProps;
     }
     
-    private Record getRecord(ValueIndexerFactory vif, Properties readerProps, String recordFilename)
+    private Record getRecord(ValueIndexerFactory factory, Properties readerProps, String recordFilename)
     {
         String recordToLookAt = null;  // null means just get the first record from the named file
         if (recordFilename.matches("[^(]*[(][^)]*[)]"))
@@ -204,7 +213,7 @@ public class ParameterizedIndexTest
             recordToLookAt = recParts[1];
         }
         String fullPath = dataDirectory + File.separator + "records" + File.separator + recordFilename;
-        MarcReader reader = MarcReaderFactory.instance().makeReader(readerProps, vif.getHomeDirs(), fullPath);
+        MarcReader reader = MarcReaderFactory.instance().makeReader(readerProps, factory.getHomeDirs(), fullPath);
 
         Record record = null;
         while (reader.hasNext())
@@ -229,18 +238,68 @@ public class ParameterizedIndexTest
      *     it[3] = name of solr field to be checked in resulting solr doc
      *     it[4] = value expected in solr field
      */
-    public static Collection<String[]> indexValues() throws Exception
+    public static Collection<String[]> indexValues()
     {
-        dataDirectory = System.getProperty("test.data.path");
-        dataFile = System.getProperty("test.data.file");
+        dataDirectory = System.getProperty("test.data.dir", "test/data");
+        dataFile = System.getProperty("test.data.file",  "indextest.txt");
+        String fullIndexTestFilename = dataDirectory + File.separator + dataFile;
+        File file = new File(fullIndexTestFilename);
         List<String[]> result = new LinkedList<String[]>();
-        String[] testdata = new String[] 
+        BufferedReader rIn = null;
+        try
+        {
+            rIn = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+        }
+        catch (UnsupportedEncodingException e)
+        {
+        }
+        catch (FileNotFoundException e)
+        {
+            dataFile = null;
+        }
+        if (dataFile != null)
+        {
+            try {
+                String line;
+                int testNumber = 0;
+                String[] testdata = new String[]{"","","",""};
+                while (( line = rIn.readLine()) != null)
                 {
-                    "",
-                    "specTestRecs.mrc(u8)",
-                    "id = 001, first",
-                    "u8"
-                };
+                	if (line.startsWith("#") || line.trim().length() == 0) continue;
+                	String split[];
+                    if (line.startsWith("readerProps:"))
+                    {
+                        testdata[0] = line.substring("readerProps:".length()).trim();
+                    }
+                    else if (line.startsWith("record:"))
+                    {
+                        testdata[1] = line.substring("record:".length()).trim();
+                    }
+                    else if (line.startsWith("indexSpec:"))
+                    {
+                        testdata[2] = line.substring("indexSpec:".length()).trim();
+                    }
+                    else if (line.startsWith("expect:"))
+                    {
+                        testdata[3] = line.substring("expect:".length()).trim();
+                        result.add(testdata);
+                        testdata = new String[]{"","","",""};
+                    }
+                }
+                rIn.close();
+            }
+            catch(IOException ioe)
+            {}
+            
+            return(result);
+        }
+        String[] testdata = new String[] 
+            {
+                "",
+                "specTestRecs.mrc(u8)",
+                "id = 001, first",
+                "u8"
+            };
         result.add(testdata);
         testdata = new String[] 
                 {
@@ -288,60 +347,21 @@ public class ParameterizedIndexTest
                     "marc.permissive=true,marc.to_utf_8=true,marc.unicode_normalize=C", 
                     "u4.mrc(u4)", 
                     "245a", 
-                    "The princes of Hà-tiên (1682-1867) /"
+                 //   "The princes of Hà-tiên (1682-1867) /"
+                    "The princes of H\u00E0-ti\u00EAn (1682-1867) /"
                 };
         result.add(testdata);
-        return(result);
-        /*
-        String fullIndexTestFilename = dataDirectory + File.separator + dataFile;
-        File file = new File(fullIndexTestFilename);
-        BufferedReader rIn = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-        String line;
-        List<String[]> result = new LinkedList<String[]>();
-        int testNumber = 0;
-        while (( line = rIn.readLine()) != null)
-        {
-        	if (line.startsWith("#") || line.trim().length() == 0) continue;
-        	String split[];
-        	if (line.matches(".*[(]rec.?[,].*[)].?,.*"))
-        	{
-        	    split = new String[4];
-        	    String smallSplit[] = line.split(", ?",3);
-        	    split[0] = smallSplit[0];
-        	    split[1] = smallSplit[1];
-        	    int index = smallSplit[2].indexOf("),");
-        	    if (index != -1)
-        	    {
-                    split[2] = smallSplit[2].substring(0, index+1);
-                    split[3] = smallSplit[2].substring(index+2).trim();
-        	    }
-        	}
-        	else if (line.matches(".*[,][ ]*'.*[,].*['],.*"))
-            {
-                split = new String[4];
-                String smallSplit[] = line.split(", ?",3);
-                split[0] = smallSplit[0];
-                split[1] = smallSplit[1];
-                int index = smallSplit[2].indexOf("',");
-                if (index != -1)
+        testdata = new String[] 
                 {
-                    split[2] = smallSplit[2].substring(0, index+1);
-                    split[3] = smallSplit[2].substring(index+2).trim();
-                }
-            }
-            else
-                split = line.split(", ", 4);
-            if (split.length == 4) 
-            {
-                String testParms[] = new String[5];
-                System.arraycopy(split, 0, testParms, 1, 4);
-                testParms[0] = "" + testNumber;
-                testNumber++;
-                result.add(testParms);
-            }
-        }
-        rIn.close();
+                    "marc.permissive=true,marc.to_utf_8=true,marc.unicode_normalize=false", 
+                    "u4.mrc(u4)", 
+                    "245a", 
+                 //   "The princes of Hà-tiên (1682-1867) /"
+                    "The princes of Ha\u0300-tie\u0302n (1682-1867) /"
+                };
+        
+        result.add(testdata);
         return(result);
-    */
+
     }
 }

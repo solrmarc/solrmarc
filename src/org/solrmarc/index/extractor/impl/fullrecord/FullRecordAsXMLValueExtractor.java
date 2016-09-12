@@ -47,7 +47,7 @@ public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtrac
     protected static final String RECORD = "record";
     protected static final String LEADER = "leader";
 
-    private class Tag 
+    private static class Tag 
     {
         final String name;
         final String value;
@@ -58,7 +58,7 @@ public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtrac
         }
     }
 
-    public String toXMLString(Record record, boolean indent) 
+    public static String toXMLString(Record record, boolean indent) 
     {
         StringBuilder sb = new StringBuilder();
         startDocument(sb);
@@ -95,23 +95,23 @@ public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtrac
     }
 
     
-    private void indent(StringBuilder sb, int i)
+    private static void indent(StringBuilder sb, int i)
     {
         // TODO Auto-generated method stub
         
     }
 
-    private void startDocument(StringBuilder sb)
+    private static void startDocument(StringBuilder sb)
     {
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");        
     }
 
-    private String getDataElement(String data)
+    private static String getDataElement(String data)
     {
         return data.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
-    private void startElement(StringBuilder sb, String qname, boolean indent, int indentCnt, Tag ... tags )
+    private static void startElement(StringBuilder sb, String qname, boolean indent, int indentCnt, Tag ... tags )
     {
         if (indent) sb.append("\n").append(spaces.substring(0, indentCnt));
         sb.append("<").append(qname);
@@ -122,12 +122,12 @@ public class FullRecordAsXMLValueExtractor extends AbstractFullRecordValueExtrac
         sb.append(">");      
     }
     
-    private void endElement(StringBuilder sb, String qname, boolean indent, int indentCnt)
+    private static void endElement(StringBuilder sb, String qname, boolean indent, int indentCnt)
     {
         sb.append("</").append(qname).append(">");      
     }
 
-    private void endElement(StringBuilder sb, String qname)
+    private static void endElement(StringBuilder sb, String qname)
     {
         endElement(sb, qname, false, 0);     
     }

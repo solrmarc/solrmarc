@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.solrmarc.index.indexer.IndexerSpecException;
 
 import joptsimple.OptionException;
@@ -136,24 +134,8 @@ public class BootableMain
             logger.error("Exiting...");
             System.exit(10);
         }
-
-        initLogging(homeDirStrs);
-
     }
 
-    private void initLogging(String[] homeDirs)
-    {
-        for (String dir : homeDirs)
-        {
-            File log4jProps = new File(dir, "log4j.properties");
-            if (log4jProps.exists())
-            {
-                LogManager.resetConfiguration();
-                PropertyConfigurator.configure(log4jProps.getAbsolutePath());
-                return;
-            }
-        }
-    }
 
 //    /**
 //     * Returns true if it appears that log4j have been previously configured. This code

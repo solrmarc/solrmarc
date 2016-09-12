@@ -1,7 +1,6 @@
 package org.solrmarc.index.indexer;
 
 
-import org.apache.log4j.PropertyConfigurator;
 import org.junit.Before;
 import org.junit.Test;
 import org.marc4j.MarcPermissiveStreamReader;
@@ -24,10 +23,10 @@ public class MoreValueIndexerFactoryTests
 {
     private Record testRecord;
     private final static String inputfilename="./records/u5278992.mrc";
-
+    private static ValueIndexerFactory factory;
     static
     {
-        PropertyConfigurator.configure(new File("log4j.properties").getAbsolutePath());
+        factory = ValueIndexerFactory.initialize(new String[]{System.getProperty("test.data.dir", "test/data")});
     }
 
     @Before
@@ -46,7 +45,7 @@ public class MoreValueIndexerFactoryTests
         final Properties configs = new Properties();
         configs.put("linked_title_facet", "LNK245ab, join( : ), cleanEach");
 
-        final AbstractValueIndexer<?> valueIndexer = CreateIndexerUtil.createIndexer("linked_title_facet", "LNK245ab, join( : ), cleanEach");
+        final AbstractValueIndexer<?> valueIndexer = factory.createValueIndexer("linked_title_facet", "LNK245ab, join( : ), cleanEach");
 
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
