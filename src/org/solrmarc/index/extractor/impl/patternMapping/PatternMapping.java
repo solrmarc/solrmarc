@@ -59,6 +59,19 @@ public class PatternMapping
         return value;
     }
 
+    public static String filterSingleValue(final List<PatternMapping> patternMappings, String value)
+    {
+        for (PatternMapping patternMapping : patternMappings)
+        {
+            Matcher matcher = patternMapping.inputPattern.matcher(value);
+            if (matcher.find())
+            {
+                value = patternMapping.filter(matcher);
+            }
+        }
+        return value;
+    }
+
     public static void mapValues(final List<PatternMapping> patternMappings, String value, Collection<String> values)
     {
         for (PatternMapping patternMapping : patternMappings)
@@ -67,6 +80,19 @@ public class PatternMapping
             if (matcher.find())
             {
                 final String mappedValue = patternMapping.map(matcher);
+                if (mappedValue.length() != 0) values.add(mappedValue);
+            }
+        }
+    }
+    
+    public static void filterValues(final List<PatternMapping> patternMappings, String value, Collection<String> values)
+    {
+        for (PatternMapping patternMapping : patternMappings)
+        {
+            Matcher matcher = patternMapping.inputPattern.matcher(value);
+            if (matcher.find())
+            {
+                final String mappedValue = patternMapping.filter(matcher);
                 if (mappedValue.length() != 0) values.add(mappedValue);
             }
         }
@@ -103,5 +129,17 @@ public class PatternMapping
             }
         }
         return(result);
+    }
+    /**
+     * PatternMapping#canHandle(String) has to be called before. Otherwise the
+     * result will not be correct!
+     *
+     * @param value
+     *            the value to be mapped.
+     * @return the mapped value.
+     */
+    public String filter(final Matcher inputMatcher)
+    {
+        return inputMatcher.replaceAll(outputPattern);
     }
 }

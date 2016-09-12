@@ -11,12 +11,14 @@ import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 public class MultiValuePatternMapping extends AbstractMultiValueMapping
 {
     private final List<PatternMapping> patternMappings;
+    private final boolean filter;
     private final boolean applyAll;
     private final boolean keepRaw; 
     
-    public MultiValuePatternMapping(List<PatternMapping> patternMappings, boolean applyAll, boolean keepRaw)
+    public MultiValuePatternMapping(List<PatternMapping> patternMappings, boolean filter, boolean applyAll, boolean keepRaw)
     {
         this.patternMappings = patternMappings;
+        this.filter = filter;
         this.applyAll = applyAll;
         this.keepRaw = keepRaw;
     }
@@ -24,6 +26,7 @@ public class MultiValuePatternMapping extends AbstractMultiValueMapping
     public MultiValuePatternMapping(List<PatternMapping> patternMappings)
     {
         this.patternMappings = patternMappings;
+        this.filter = false;
         this.applyAll = false;
         this.keepRaw = false;
     }
@@ -32,7 +35,25 @@ public class MultiValuePatternMapping extends AbstractMultiValueMapping
     public Collection<String> map(final Collection<String> values)
     {
         List<String> mappedValues = new ArrayList<>(values.size());
-        if (applyAll)
+        if (filter)
+        {
+            if (applyAll)
+            {
+                for (String value : values)
+                {
+                    value = PatternMapping.filterSingleValue(patternMappings, value);
+                    if (value != null && value.length() > 0) mappedValues.add(value);
+                }
+            }
+            else
+            {
+                for (String value : values)
+                {
+                    PatternMapping.filterValues(patternMappings, value, mappedValues);
+                }
+            }
+        }
+        else if (applyAll)
         {
             for (String value : values)
             {
