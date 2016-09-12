@@ -1,6 +1,8 @@
 package org.solrmarc.index.indexer;
 
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.collector.MultiValueCollector;
 import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
@@ -68,7 +70,8 @@ public class ValueIndexerFactory
     {
         if (theFactory != null && Arrays.equals(homeDirStrs, theFactory.homeDirStrs))
             return(theFactory);
-        
+
+        initLogging(homeDirStrs);
         theFactory = new ValueIndexerFactory(homeDirStrs);
         try
         {
@@ -118,7 +121,22 @@ public class ValueIndexerFactory
         compileTool = new JavaValueExtractorUtils(dirsJavaSource);
         compileTool.compileSources();
     }
-    
+
+    private static void initLogging(String[] homeDirs)
+    {
+        for (String dir : homeDirs)
+        {
+            File log4jProps = new File(dir, "log4j.properties");
+            if (log4jProps.exists())
+            {
+                LogManager.resetConfiguration();
+                PropertyConfigurator.configure(log4jProps.getAbsolutePath());
+                return;
+            }
+        }
+    }
+
+
     public Class<?>[] getCompiledClasses()
     {
         return compileTool.getClasses();
