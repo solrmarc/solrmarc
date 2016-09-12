@@ -198,6 +198,7 @@
                 <pathelement path="${java.class.path}"/>
             </classpath>
             <sysproperty key="test.data.dir" path="${test.data.dir}" />
+            <sysproperty key="log4j.debug" value="true" />
 
             <formatter type="plain"/>
 
