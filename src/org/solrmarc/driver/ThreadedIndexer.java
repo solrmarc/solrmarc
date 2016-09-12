@@ -21,9 +21,11 @@ public class ThreadedIndexer extends Indexer
     private final BlockingQueue<Record> readQ;
     private final BlockingQueue<RecordAndDoc> docQ;
     private final int numThreadIndexers;
-    MarcReaderThread readerThread;
+    MarcReaderThread readerThread = null;
+    Thread thisThread = null;
     ExecutorService indexerExecutor;
     ExecutorService solrExecutor;
+    IndexerWorker[] workers = null;
    
     boolean doneReading = false;
     final int buffersize; 
@@ -61,20 +63,29 @@ public class ThreadedIndexer extends Indexer
     @Override
     public void shutDown()
     {
+        logger.warn("ThreadedIndexer ShutDown Called!");
         shuttingDown = true;
-        readerThread.interrupt();
-        indexerExecutor.shutdownNow();
-        solrExecutor.shutdownNow();
+        if (readerThread != null) readerThread.interrupt();
+        if (workers != null) 
+        {
+            for (IndexerWorker worker : workers)
+            {
+                worker.setInterrupted();
+            }
+        }
+        thisThread.interrupt();
+        logger.warn("ThreadedIndexer ShutDown Exits");
     }
 
     @Override
     public int[] indexToSolr(final MarcReader reader) 
     {
+        thisThread = Thread.currentThread();
         cnts[0].set(0); cnts[1].set(0); cnts[2].set(0);
         readerThread = new MarcReaderThread(reader, readQ, cnts);      
         readerThread.start();
 
-        IndexerWorker[] workers = new IndexerWorker[numThreadIndexers];
+        workers = new IndexerWorker[numThreadIndexers];
         for (int i = 0; i < numThreadIndexers; i++)
         {
             workers[i] = new IndexerWorker(readerThread, readQ, docQ, this, cnts, i);
@@ -89,7 +100,12 @@ public class ThreadedIndexer extends Indexer
         // and create a ChunkIndexerWorker to manage sending those records to Solr.
         while (!done(workers))
         {
-            if (docQ.remainingCapacity() == 0 || indexerThreadsAreDone(workers))
+            if (shuttingDown)
+            {
+                logger.warn("ThreadedIndexer at top of loop, shutting down");
+            }
+            if (docQ.remainingCapacity() == 0 || indexerThreadsAreDone(workers) || 
+                (shuttingDown && docQ.size() > 0))
             {
                 final ArrayList<RecordAndDoc> chunk = new ArrayList<RecordAndDoc>(docQ.size());
                 synchronized (docQ)
@@ -97,21 +113,28 @@ public class ThreadedIndexer extends Indexer
                     docQ.drainTo(chunk);
                     docQ.notifyAll();
                 }
-                RecordAndDoc firstDoc = chunk.get(0);
-                String threadName = null;
-                try {
-                    String firstID = firstDoc.getRec().getControlNumber();
-                    String lastID = chunk.get(chunk.size()-1).getRec().getControlNumber();
-                    threadName = "SolrUpdate-"+firstID+"-"+lastID;
-                }
-                catch (Exception e)
+                if (chunk.size() > 0)
                 {
-                    threadName = "Anonymous";
+                    RecordAndDoc firstDoc = chunk.get(0);
+                    String threadName = null;
+                    try {
+                        String firstID = firstDoc.getRec().getControlNumber();
+                        String lastID = chunk.get(chunk.size()-1).getRec().getControlNumber();
+                        threadName = "SolrUpdate-"+firstID+"-"+lastID;
+                    }
+                    catch (Exception e)
+                    {
+                        threadName = "Anonymous";
+                    }
+                    final BlockingQueue<RecordAndDoc> errQVal = (this.isSet(eErrorHandleVal.RETURN_ERROR_RECORDS)) ? this.errQ : null;
+                    Runnable runnableChunk = new ChunkIndexerWorker(threadName, chunk, errQVal, this.solrProxy, cnts); 
+                    logger.debug("Starting IndexerThread: "+ threadName);
+                    solrExecutor.execute(runnableChunk);
                 }
-                final BlockingQueue<RecordAndDoc> errQVal = (this.isSet(eErrorHandleVal.RETURN_ERROR_RECORDS)) ? this.errQ : null;
-                Runnable runnableChunk = new ChunkIndexerWorker(threadName, chunk, errQVal, this.solrProxy, cnts); 
-                logger.debug("Starting IndexerThread: "+ threadName);
-                solrExecutor.execute(runnableChunk);
+            }
+            else if (shuttingDown && docQ.size() == 0)
+            {
+                break;
             }
             else 
             {
@@ -121,12 +144,21 @@ public class ThreadedIndexer extends Indexer
                 }
                 catch (InterruptedException e)
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    logger.warn("ThreadedIndexer Interrupted!");
                 }
             }
         }
-        indexerExecutor.shutdown();
+        logger.warn("ThreadedIndexer exited main while loop");
+
+        if (Thread.interrupted() || shuttingDown)
+        {
+            indexerExecutor.shutdownNow();
+        }
+        else
+        {
+            indexerExecutor.shutdown();
+        }
+    
         try {
             indexerExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
         }
@@ -138,20 +170,27 @@ public class ThreadedIndexer extends Indexer
         logger.info("Done with all indexing, finishing writing records to solr");
 
         solrExecutor.shutdown();
-        try {
-            solrExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
-        }
-        catch (InterruptedException e)
+        boolean done = false;
+        while (done == false)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            try {
+                done = solrExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+            }
+            catch (InterruptedException e)
+            {
+            }
         }
         logger.info("Done writing records to solr");
 
-        if (shuttingDown)
-        {
-            this.endProcessing();
-        }
+//        if (shuttingDown)
+//        {
+//            this.endProcessing();
+//        }
+        return(getCounts());
+    }
+    
+    public int[] getCounts()
+    {
         int intCnts[] = new int[3];
         intCnts[0] = cnts[0].get();
         intCnts[1] = cnts[1].get();

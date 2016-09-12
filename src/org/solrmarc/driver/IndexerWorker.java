@@ -20,6 +20,7 @@ public class IndexerWorker implements Runnable
     private MarcReaderThread readerThread;
     private int threadCount;
     private boolean doneWorking = false;
+    private boolean interrupted = false;
     
     public IndexerWorker(MarcReaderThread readerThread, BlockingQueue<Record> readQ, BlockingQueue<RecordAndDoc> docQ, Indexer indexer, AtomicInteger cnts[], int threadCount)
     {
@@ -37,6 +38,16 @@ public class IndexerWorker implements Runnable
         return doneWorking;
     }
 
+    public void setInterrupted()
+    {
+        interrupted = true;
+    }
+
+    public boolean isInterrupted()
+    {
+        return(interrupted);
+    }
+
     @Override 
     public void run()
     {
@@ -47,7 +58,7 @@ public class IndexerWorker implements Runnable
             indexer = (threadCount == 0) ? indexer : indexer.makeThreadSafeCopy();
         }
         Thread.currentThread().setName("RecordIndexer-Thread-"+threadCount);
-        while ((! readerThread.isDoneReading() || !readQ.isEmpty()) && !readerThread.isInterrupted() && !Thread.currentThread().isInterrupted() )
+        while ((! readerThread.isDoneReading() || !readQ.isEmpty()) && !readerThread.isInterrupted() && !isInterrupted() )
         {
             try
             {
@@ -57,7 +68,11 @@ public class IndexerWorker implements Runnable
 //                System.out.println(rec.getControlNumber() + " :  read in thread "+ threadCount);
 //                long id = Long.parseLong(rec.getControlNumber().substring(1))* 100 + threadCount;
 //                rec.setId((long)id);
+                if (isInterrupted()) 
+                    break;
                 RecordAndDoc recDoc = indexer.indexToSolrDoc(rec);
+                if (isInterrupted()) 
+                    break;
                 if (recDoc.getSolrMarcIndexerException() != null)
                 {
                     SolrMarcIndexerException smie = recDoc.getSolrMarcIndexerException();
@@ -92,6 +107,8 @@ public class IndexerWorker implements Runnable
                         continue;
                     }
                 }
+                if (isInterrupted()) 
+                    break;
                 boolean offerWorked = docQ.offer(recDoc);
                 while (!offerWorked) 
                 {
@@ -111,6 +128,7 @@ public class IndexerWorker implements Runnable
             catch (InterruptedException e)
             {
                 logger.warn("Interrupted while waiting for a record to appear in the read queue.");
+                interrupted = true;
                 Thread.currentThread().interrupt();
             }
         }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.marc4j.MarcReader;
@@ -41,6 +42,8 @@ public class IndexDriver extends BootableMain
     boolean verbose;
     int numIndexed[];
     String[] args;
+    long startTime;
+    Thread shutdownSimulator = null;
 
     public static void main(String[] args)
     {
@@ -198,15 +201,11 @@ public class IndexDriver extends BootableMain
     {
         String inEclipseStr = System.getProperty("runInEclipse");
         boolean inEclipse = "true".equalsIgnoreCase(inEclipseStr);
-        Thread shutdownSimulator = null;
-        if (inEclipse)
-        {
-            shutdownSimulator = new ShutdownSimulator();
+            shutdownSimulator = new ShutdownSimulator(inEclipse);
             shutdownSimulator.start();
-        }
-        Thread shutdownHook = new MyShutdownThread(indexer);
+        Thread shutdownHook = new MyShutdownThread(indexer, shutdownSimulator);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
-        long startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
         long endTime = startTime;
 
         try
@@ -215,27 +214,39 @@ public class IndexDriver extends BootableMain
         }
         catch (Exception e)
         {
-            Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            if (!indexer.shuttingDown) Runtime.getRuntime().removeShutdownHook(shutdownHook);
             logger.fatal("ERROR: Error while invoking indexToSolr");
-            logger.fatal(e.getMessage());
+            logger.fatal(e);
         }
 
         endTime = System.currentTimeMillis();
 
-        if (!indexer.isShutDown())
-        {
-            if (shutdownSimulator != null) shutdownSimulator.interrupt();
-            if (!indexer.shuttingDown) Runtime.getRuntime().removeShutdownHook(shutdownHook);
-            indexer.endProcessing();
-        }
-        reportResultsAndTime(startTime, endTime, indexer);
-        if (indexer.errQ.size() > 0)
+        if (!indexer.shuttingDown) Runtime.getRuntime().removeShutdownHook(shutdownHook);
+        indexer.endProcessing();
+
+        boolean perMethodReport = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "solrmarc.method.report", "false"));
+        reportResultsAndTime(numIndexed, startTime, endTime, indexer, (indexer.shuttingDown) ? false : perMethodReport);
+        if (! indexer.shuttingDown && indexer.errQ.size() > 0)
         {
             handleRecordErrors();
         }
+
+        if (!indexer.shuttingDown && shutdownSimulator != null) shutdownSimulator.interrupt();
+        indexer.setIsShutDown();
+        if (indexer.shuttingDown)
+        {
+            try
+            {
+                Thread.sleep(5000);
+            }
+            catch (InterruptedException ie)
+            {
+                endTime = startTime;
+            }
+        }
     }
 
-    private void reportResultsAndTime(long startTime, long endTime, Indexer indexer)
+    private void reportResultsAndTime(int[] numIndexed, long startTime, long endTime, Indexer indexer, boolean perMethodReport)
     {
         logger.info("" + numIndexed[0] + " records read");
         logger.info("" + numIndexed[1] + " records indexed  and ");
@@ -246,7 +257,6 @@ public class IndexDriver extends BootableMain
         String minutesStr = ((minutes > 0) ? "" + minutes + " minute" + ((minutes != 1) ? "s " : " ") : "");
         String secondsStr = "" + seconds + "." + hundredthsStr + " seconds";
         logger.info("" + numIndexed[2] + " records sent to Solr in " + minutesStr + secondsStr);
-        boolean perMethodReport = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "solrmarc.method.report", "false"));
         if (perMethodReport) indexer.reportPerMethodTime();
     }
 
@@ -355,10 +365,12 @@ public class IndexDriver extends BootableMain
     class MyShutdownThread extends Thread
     {
         private Indexer indexer;
+        private Thread killItToDie;
 
-        public MyShutdownThread(Indexer ind)
+        public MyShutdownThread(Indexer ind, Thread shutdownSimulator)
         {
             indexer = ind;
+            killItToDie = shutdownSimulator;
         }
 
         @Override
@@ -382,7 +394,20 @@ public class IndexDriver extends BootableMain
                 {
                 }
             }
+//            int[] counts = indexer.getCounts();
+//            long endTime = System.currentTimeMillis();
+//            reportResultsAndTime(counts, startTime, endTime, indexer, false);
             logger.info("Finished Shutdown hook");
+            LogManager.shutdown();
+            try
+            {
+                sleep(1000);
+            }
+            catch (InterruptedException e)
+            {
+                indexer = null;
+            }
+            killItToDie.interrupt();
         }
     }
 
@@ -404,17 +429,25 @@ public class IndexDriver extends BootableMain
      */
     class ShutdownSimulator extends Thread
     {
+        boolean inEclipse; 
+        public ShutdownSimulator(boolean inEclipse)
+        {
+            this.inEclipse = inEclipse;
+        }
         @Override
         public void run()
         {
             setName("Eclipse-Shutdown-Simulator-Thread");
-            System.out.println("You're using Eclipse; click in this console and "
+            if (inEclipse)
+            {
+                System.out.println("You're using Eclipse; click in this console and "
                     + "press ENTER to call System.exit() and run the shutdown routine.");
+            }
             while (true)
             {
                 try
                 {
-                    if (System.in.available() > 0)
+                    if (inEclipse && System.in.available() > 0)
                     {
                         System.in.read();
                         System.exit(0);

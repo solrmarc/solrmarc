@@ -43,6 +43,7 @@ public class MarcReaderThread extends Thread
                 catch (InterruptedException e)
                 {
                     Thread.currentThread().interrupt();
+                    break;
                 }
             }
         }

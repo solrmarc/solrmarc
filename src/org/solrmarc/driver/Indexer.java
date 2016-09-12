@@ -39,6 +39,8 @@ public class Indexer
     protected final BlockingQueue<RecordAndDoc> delQ;
     protected boolean shuttingDown = false;
     protected boolean isShutDown = false;
+    private int cnts[] = new int[] { 0, 0, 0 };
+
 
     public enum eErrorHandleVal
     {
@@ -92,7 +94,7 @@ public class Indexer
      */
     public int[] indexToSolr(final MarcReader reader)
     {
-        int cnts[] = new int[] { 0, 0, 0 };
+        cnts[0] = cnts[1] = cnts[2] = 0;
         while (reader.hasNext() && !shuttingDown)
         {
             final Record record = reader.next();
@@ -241,28 +243,31 @@ public class Indexer
             }
             catch (InvocationTargetException ioe)
             {
-                logger.debug("Exception in record: " + recDoc.rec.getControlNumber());
-                logger.debug("while processing index specification: " + indexer.getSpecLabel());
                 Throwable wrapped = ioe.getTargetException();
                 // Exception wrappedE = (wrapped instanceof Exception) ?
                 // (Exception)wrapped : null;
                 if (wrapped != null && wrapped instanceof IndexerSpecException)
                 {
+                    logger.debug("Exception in record: " + recDoc.rec.getControlNumber());
+                    logger.debug("while processing index specification: " + indexer.getSpecLabel());
                     errLvl = eErrorSeverity.max(errLvl, ((IndexerSpecException) wrapped).getErrLvl());
                 }
                 else if (wrapped != null && wrapped instanceof OutOfMemoryError)
                 {
                     logger.error("OOMError in record: " + recDoc.rec.getControlNumber());
                     logger.error("while processing index specification: " + indexer.getSpecLabel());
-                    logger.error("number of per record exceptions: "
-                            + ((ValueIndexerFactory.instance().getPerRecordErrors() != null)
-                                    ? ValueIndexerFactory.instance().getPerRecordErrors().size() : 0));
                     inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + wrapped.getMessage());
                     errLvl = eErrorSeverity.FATAL;
                     recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
                 }
                 else
                 {
+                    logger.warn("Exception in record: " + recDoc.rec.getControlNumber());
+                    logger.warn("while processing index specification: " + indexer.getSpecLabel());
+                    if (wrapped != null)
+                    {
+                        logger.warn(wrapped); 
+                    }
                     errLvl = eErrorSeverity.ERROR;
                 }
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + wrapped.getMessage());
@@ -337,6 +342,11 @@ public class Indexer
         return isShutDown;
     }
 
+    public void setIsShutDown()
+    {
+        isShutDown = true;
+    }
+
     public void shutDown()
     {
         shuttingDown = true;
@@ -366,7 +376,6 @@ public class Indexer
         catch (IOException e)
         {
         }
-        this.isShutDown = true;
     }
 
     private static long time(long time, TimeUnit unit)
@@ -388,6 +397,11 @@ public class Indexer
             String elapsedStr = String.format("%d min, %d.%03d sec", minutes, seconds, millis);
             logger.info(elapsedStr + "  ---" + indexer.getSolrFieldNames().toString() + ":" + indexer.getSpecLabel());
         }
+    }
+
+    public int[] getCounts()
+    {
+       return(cnts);
     }
 
 }
