@@ -266,7 +266,7 @@ public class Indexer
                     logger.debug("while processing index specification: " + indexer.getSpecLabel());
                     if (wrapped != null)
                     {
-                        logger.warn(wrapped); 
+                        logger.debug(wrapped); 
                     }
                     errLvl = eErrorSeverity.ERROR;
                 }
