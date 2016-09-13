@@ -303,7 +303,7 @@ public class SolrIndexer implements Mixin
      */
     public Object findMap(String mapName)
     {
-        return SolrIndexerShim.instance().loadTranslationMap(mapName);
+        return SolrIndexerShim.instance().findMap(mapName);
     }
 
     public Collection<String> remap(Collection<String> valuesToMap, Object translationMap, boolean b) throws Exception

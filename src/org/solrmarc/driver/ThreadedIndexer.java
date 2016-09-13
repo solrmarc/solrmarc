@@ -148,7 +148,10 @@ public class ThreadedIndexer extends Indexer
                 }
             }
         }
-        logger.warn("ThreadedIndexer exited main while loop");
+        if (shuttingDown)
+        {
+            logger.warn("ThreadedIndexer exited main while loop");
+        }
 
         if (Thread.interrupted() || shuttingDown)
         {

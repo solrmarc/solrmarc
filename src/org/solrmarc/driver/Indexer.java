@@ -260,7 +260,17 @@ public class Indexer
                     errLvl = eErrorSeverity.FATAL;
                     recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
                 }
-                else
+                else if (wrapped != null && wrapped instanceof IllegalArgumentException)
+                {
+                    logger.debug("Exception in record: " + recDoc.rec.getControlNumber());
+                    logger.debug("while processing index specification: " + indexer.getSpecLabel());
+                    if (wrapped != null)
+                    {
+                        logger.warn(wrapped); 
+                    }
+                    errLvl = eErrorSeverity.ERROR;
+                }
+                else 
                 {
                     logger.warn("Exception in record: " + recDoc.rec.getControlNumber());
                     logger.warn("while processing index specification: " + indexer.getSpecLabel());

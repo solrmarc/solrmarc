@@ -59,6 +59,7 @@ public class IndexDriver extends BootableMain
     public void execute()
     {
         processArgs(args, true);
+        indexerFactory = ValueIndexerFactory.initialize(homeDirStrs);
         initializeFromOptions();
 
         List<String> inputFiles = options.valuesOf(files);
@@ -144,7 +145,6 @@ public class IndexDriver extends BootableMain
 //        // files to compile and include
 //        // If it is unspecified, the program looks in
 //        ValueIndexerFactory.setHomeDirs();
-        indexerFactory = ValueIndexerFactory.initialize(homeDirStrs);
         String[] indexSpecs = indexSpecifications.split("[ ]*,[ ]*");
         File[] specFiles = new File[indexSpecs.length];
         int i = 0;
