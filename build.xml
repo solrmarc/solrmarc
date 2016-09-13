@@ -1,8 +1,9 @@
-<project name="MyProject" default="compile" basedir=".">
+<project name="SolrMarc" default="jar" basedir=".">
     <description>
-        simple example build file
+         A total rewrite of the SolrMarc project
     </description>
     <!-- set global properties for this build -->
+	<property file="build.properties" />
     <property name="src" location="src"/>
     <property name="src.tests" location="test/src"/>
     <property name="test" location="test"/>
@@ -30,7 +31,8 @@
         <mkdir dir="${build}"/>
     </target>
 
-    <target name="precompile" description="run jflex and cup to generate javafiles for parser and scanner" >
+    <target name="precompile" unless="precompile.already.run"
+	        description="run jflex and cup to generate javafiles for parser and scanner" >
 		<jflex file="${src}/org/solrmarc/index/indexer/FullScanner.lex" verbose="true" 
 			   outdir="${src}/org/solrmarc/index/indexer/" nobak="true" />
     	
@@ -40,9 +42,10 @@
         	 symbols="FullSym"
              parser="FullConditionalParser"
         />
+        <property name="precompile.already.run" value="true" />
 	</target>
 
-    <target name="compile" depends="init,precompile"
+    <target name="compile" depends="init,precompile"  unless="compile.already.run"
             description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
         <javac target="1.7" source="1.7" srcdir="${src}" destdir="${build}" debug="true" debuglevel="lines,vars,source" >
@@ -57,10 +60,11 @@
                 </fileset>
             </classpath>
         </javac>
+        <property name="compile.already.run" value="true" />
     </target>
 
     <target name="jar" depends="compile" unless="jar.already.run"
-            description="Build custom jar file containing custom code and log4j.properties" >
+            description="Build custom jar file containing custom code" >
         <mkdir dir="${dist}" />
        
         <path id="libjarfiles" >
@@ -77,16 +81,17 @@
     	    </classpath>
     	</manifestclasspath> -->
     	
-        <jar destfile="${dist}/${custom.jar.name}.jar">
+        <jar destfile="${dist}/${custom.jar.name}_${version}.jar">
         	<manifest>
         	    <attribute name="Main-Class" value="org.solrmarc.driver.Boot"/>
+    		    <attribute name="Version" value="${version}"/>
     		    <attribute name="Built-Date" value="${TODAY}"/>
             </manifest>
    <!--      	<fileset dir="${basedir}" includes="log4j.properties" /> -->
         	<fileset dir="${build}" includes="**/*.class" />
         </jar>
         <echo message="jar built" />
-        <property name="build.already.run" value="true" />
+        <property name="jar.already.run" value="true" />
     </target>
 	
     <target name="deploy" depends="jar" unless="jar.already.run"
@@ -136,7 +141,7 @@
         <javac target="1.7" source="1.7" srcdir="${src.tests}" destdir="${build.tests}" debug="true" debuglevel="lines,vars,source" >
             <classpath >
                  <fileset dir="dist">
-                     <include name="solrmarc_core.jar"/>
+                     <include name="${custom.jar.name}_${version}.jar"/>
                  </fileset>
              </classpath>
             <classpath >
@@ -155,7 +160,7 @@
                 </fileset>
             </classpath>
             <classpath >
-                <fileset dir="test/local_lib">
+                <fileset dir="test/data/local_lib">
                     <include name="**/*.jar"/>
                 </fileset>
             </classpath>
@@ -175,13 +180,10 @@
         <junit printsummary="yes" haltonfailure="false">
             <classpath>
                 <fileset dir="${dist}">
-                    <include name="solrmarc_core.jar"/>
+                    <include name="${custom.jar.name}_${version}.jar"/>
                 </fileset>
                 <fileset dir="${dist}/lib">
                     <include name="*.jar"/>
-                </fileset>
-                <fileset dir="${dist}">
-                    <include name="solrmarc_core.jar"/>
                 </fileset>
                 <fileset dir="${test}/lib">
                     <include name="*.jar"/>
@@ -197,14 +199,15 @@
                 <pathelement location="${build.tests}"/>
                 <pathelement path="${java.class.path}"/>
             </classpath>
-            <sysproperty key="test.data.dir" path="${test.data.dir}" />
-            <sysproperty key="log4j.debug" value="true" />
+            <sysproperty key="test.data.dir" path="${test}/data" />
+            <sysproperty key="log4j.debug" value="false" />
 
             <formatter type="plain"/>
 
             <batchtest fork="yes" todir="${reports.tests}">
                 <fileset dir="${src.tests}">
                     <include name="**/*Test*.java"/>
+                	<exclude name="**/ConditionalParserTest.java" />
                 </fileset>
             </batchtest>
         </junit>

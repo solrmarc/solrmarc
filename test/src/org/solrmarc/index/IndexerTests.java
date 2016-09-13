@@ -21,13 +21,11 @@ import org.solrmarc.index.mapping.impl.MultiValuePatternMapping;
 import org.solrmarc.index.mapping.impl.MultiValueTranslationMapping;
 import org.solrmarc.solr.SolrProxy;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.verify;
 
 
@@ -45,7 +43,6 @@ public class IndexerTests
             new MultiValueTranslationMapping(translationMappingProperties),
             new MultiValuePatternMapping(Collections.singletonList(new PatternMapping("(FOO)", "Foo $1", 0)))
     };
-    private final AbstractMultiValueMapping[] noMappings = new AbstractMultiValueMapping[0];
     private final MultiValueCollector singleCollector = new MultiValueCollector();
     private final ConstantMultiValueExtractor constantExtractor = new ConstantMultiValueExtractor("Foo Bar");
     private static ValueIndexerFactory factory;

@@ -19,8 +19,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -261,12 +259,10 @@ public class ParameterizedIndexTest
         {
             try {
                 String line;
-                int testNumber = 0;
                 String[] testdata = new String[]{"","","",""};
                 while (( line = rIn.readLine()) != null)
                 {
                 	if (line.startsWith("#") || line.trim().length() == 0) continue;
-                	String split[];
                     if (line.startsWith("readerProps:"))
                     {
                         testdata[0] = line.substring("readerProps:".length()).trim();

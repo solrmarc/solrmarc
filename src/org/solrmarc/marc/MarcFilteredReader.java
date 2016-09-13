@@ -44,7 +44,6 @@ import org.apache.log4j.Logger;
  * @version $Id: MarcFilteredReader.java 1718 2013-11-08 21:35:12Z rh9ec@virginia.edu $
  *
  */
-@SuppressWarnings("deprecation")
 public class MarcFilteredReader implements MarcReader
 {
     String includeRecordIfFieldPresent = null;

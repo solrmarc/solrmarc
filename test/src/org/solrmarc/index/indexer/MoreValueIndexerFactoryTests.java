@@ -10,7 +10,6 @@ import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.MultiValueIndexer;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
