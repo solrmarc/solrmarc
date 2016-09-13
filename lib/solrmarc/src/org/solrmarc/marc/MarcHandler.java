@@ -56,6 +56,7 @@ public abstract class MarcHandler {
 	
 	public void init(String args[])
 	{
+      sychronized(MarcHandler.class) {
         String configProperties = GetDefaultConfig.getConfigName("config.properties");
 
         List<String> addnlArgList = new ArrayList<String>();
@@ -126,6 +127,7 @@ public abstract class MarcHandler {
         {
             loadIndexer(indexerName, indexerProps); 
         }
+      }  
 	}
 		
     /** 
