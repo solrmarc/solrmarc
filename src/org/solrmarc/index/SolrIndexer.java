@@ -11,16 +11,50 @@ import org.solrmarc.index.extractor.impl.custom.Mixin;
 @SuppressWarnings("deprecation")
 public class SolrIndexer implements Mixin
 {
-    private static SolrIndexer fakeInstanceToMakeScriptsWork = new SolrIndexer();  
+    private static ThreadLocal<SolrIndexer[]> indexerCache = 
+            new ThreadLocal<SolrIndexer[]>()
+            {
+                @Override
+                protected SolrIndexer[] initialValue()
+                {
+                    return new SolrIndexer[1];
+                }
+            };
+            
+    private static SolrIndexer theDefaultBaseIndexer = null; 
+    private static SolrIndexer theDefaultIndexer = null; 
+
     public static SolrIndexer instance()
     {
-        return fakeInstanceToMakeScriptsWork;
+        SolrIndexer result = indexerCache.get()[0];
+        if (result == null) 
+        {
+            result = theDefaultIndexer;
+            if (result != null) indexerCache.get()[0] = result;
+        }
+        if (result == null)
+        {
+            result = theDefaultBaseIndexer;
+        }
+        return(result);
     }
-    private  SolrIndexer() 
-    { /* Do-Nothing constructor, for fake Instance To Make Scripts Work */ }
-   
+    
+    public  SolrIndexer() 
+    { 
+        SolrIndexer[] perThreadCache = indexerCache.get();
+        if (perThreadCache[0] == null) 
+        {
+            perThreadCache[0] = this;
+        }
+        if (theDefaultBaseIndexer == null) theDefaultBaseIndexer = this;
+    }
+    
     public  SolrIndexer(final String propertiesMapFile, final String[] propertyDirs) 
-    { /* Backwards compatibility constructor, the parameters are all ignored */ }
+    { 
+        SolrIndexer[] perThreadCache = indexerCache.get();
+        perThreadCache[0] = this;
+        if (theDefaultIndexer == null) theDefaultIndexer = this;
+    }
 
     public void getFieldListCollector(Record record, String tagStr, String mapStr,  Collection<String> collector)
     {
