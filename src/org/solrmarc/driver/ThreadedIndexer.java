@@ -21,6 +21,7 @@ public class ThreadedIndexer extends Indexer
     private final BlockingQueue<Record> readQ;
     private final BlockingQueue<RecordAndDoc> docQ;
     private final int numThreadIndexers;
+    private final int numSolrjWorkers;
     MarcReaderThread readerThread = null;
     Thread thisThread = null;
     ExecutorService indexerExecutor;
@@ -49,8 +50,20 @@ public class ThreadedIndexer extends Indexer
         {
             numThreadIndexers = num;
         }
+        num = 4;
+        try {
+            num = Integer.parseInt(System.getProperty("solrmarc.solrj.threadcount", "4"));
+        }
+        catch (NumberFormatException nfe)
+        {
+            num = 4;
+        }
+        finally 
+        {
+            numSolrjWorkers = num;
+        }
         indexerExecutor = Executors.newFixedThreadPool(numThreadIndexers);
-        solrExecutor = Executors.newFixedThreadPool(4);
+        solrExecutor = Executors.newFixedThreadPool(numSolrjWorkers);
         this.buffersize = buffersize;
     }
 
