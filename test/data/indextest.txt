@@ -43,3 +43,23 @@ record: u4.mrc(u4)
 indexSpec: 245a
 #The princes of Ha\u0300-tie\u0302n (1682-1867) /
 expect: The princes of Hà-tiên (1682-1867) /
+
+#test reading XML file with initial BOM
+record: specTestRecs_withBOM.xml(u55)
+indexSpec: id = 001, first
+expect: u55
+
+#test reading XML file with no prolog
+record: specTestRecs_no_Prolog.xml(u10489)
+indexSpec: id = 001, first
+expect: u10489
+
+#test reading single record Koha XML file without <collection> 
+record: 1474920681_KOHA_LFL_5.xml
+indexSpec: id = 245a
+expect: Cinema and architecture : from historical to digital /
+
+#test reading single record Koha XML file without <collection> that starts with a comment
+record: 1474920681_KOHA_LFL_6_with_comment.xml
+indexSpec: id = 245a, cleanEnd
+expect: Cinema and architecture : from historical to digital

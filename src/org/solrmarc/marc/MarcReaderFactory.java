@@ -149,7 +149,7 @@ public class MarcReaderFactory {
             is = new BufferedInputStream(input);
         }
         is.mark(20);
-        byte[] buffer = new byte[5];
+        byte[] buffer = new byte[15];
         @SuppressWarnings("unused")
         int numRead;
         try { 
@@ -165,9 +165,13 @@ public class MarcReaderFactory {
         inputTypeXML = false;
         inputTypeBinary = false;
         inputTypeJSON = false;
-        if (filestart.equalsIgnoreCase("<?xml"))         inputTypeXML = true;
-        else if (filestart.startsWith("{"))             inputTypeJSON = true;              
-        else if (filestart.matches("\\d\\d\\d\\d\\d"))  inputTypeBinary = true;              
+        if (filestart.substring(0,  5).equalsIgnoreCase("<?xml"))            inputTypeXML = true;
+        else if (filestart.startsWith("{"))                                  inputTypeJSON = true;              
+        else if (filestart.substring(0,  5).matches("\\d\\d\\d\\d\\d"))      inputTypeBinary = true;              
+        else if (filestart.contains("<?xml") || filestart.contains("<?XML")) inputTypeXML = true;
+        else if (filestart.contains("<collection"))                          inputTypeXML = true;
+        else if (filestart.contains("<record"))                              inputTypeXML = true;
+        else if (filestart.contains("<!--"))                                 inputTypeXML = true;
         
         if (inputTypeXML)
         {
@@ -190,7 +194,7 @@ public class MarcReaderFactory {
         else
         {
             logger.error("Fatal error: Unable to determine type of inputfile");
-            throw new IllegalArgumentException("Fatal error: Unable to determine type of inputfile");
+            throw new IllegalArgumentException("Fatal error: Unable to determine type of inputfile.  File starts with: "+ filestart);
         }
         
         // Add Combine Record reader if requested
