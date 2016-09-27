@@ -38,7 +38,7 @@ public class MultiValueTranslationMapping extends AbstractMultiValueMapping
         List<String> mappedValues = new ArrayList<>(values.size());
         for (String value : values)
         {
-            final String translation = translationMapping.getProperty(value, defaultValue);
+            final String translation = (value == null) ? defaultValue : translationMapping.getProperty(value, defaultValue);
             if (translation != null && !translation.equals("null"))
             {
                 if (translation.contains("|"))
