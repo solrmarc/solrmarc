@@ -3,10 +3,8 @@
 This project is based on code written by Oliver Obenland, (See https://github.com/oobenland/SolrMarc-Indexer-Tests)  
 The key design improvement Oliver created is to essentially compile the indexing specification once, and then apply 
 that "compiled" version to each of the records that need indexing.    I have taken his code and added handling of 
-the basic field specification of SolrMarc   (such as:    title_display = 245abnp  )  The code is now to a proof-of-concept
-phase that can handle many of those sort of specification strings, and can even support some extensions to those
-specifications.   At present, part of the processing of the indexing specifications is performed via a parser specification
-(CUP and JFlex) which should make defining and handling more complex specifications simpler.
+the basic field specification of SolrMarc   (such as:    title_display = 245abnp  )  via a parser specification
+(CUP and JFlex) which makes defining and handling more complex specifications simpler.   The code has been released and is ready for use.   This entire repository will be migrated to be the master branch of the solrmarc project.
 
 Included with this project is a Swing-based interactive interface that could eventually be used to develop, modify, extend
 and debug a set of indexing specifications, but for now it can be used to see how some of the new features will work.
