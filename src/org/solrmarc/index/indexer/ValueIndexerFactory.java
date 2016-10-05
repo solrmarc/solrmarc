@@ -68,6 +68,7 @@ public class ValueIndexerFactory
 
     public static ValueIndexerFactory initialize(String homeDirStrs[])
     {
+        if (homeDirStrs == null) { homeDirStrs = new String[] { "." }; }
         if (theFactory != null && Arrays.equals(homeDirStrs, theFactory.homeDirStrs))
             return(theFactory);
 
