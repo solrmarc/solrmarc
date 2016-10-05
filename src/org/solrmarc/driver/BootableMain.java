@@ -20,17 +20,17 @@ public class BootableMain
 
     protected String homeDirStrs[];
     protected String addnlLibDirStrs[];
-    OptionSpec<String> readOpts;
-    OptionSpec<String> configSpecs;
-    OptionSpec<String> homeDirs;
-    OptionSpec<String> addnlLibDirs;
-    OptionSpec<File> solrjDir;
-    OptionSpec<String> solrjClass;
-    OptionSpec<File> errorMarcErrOutFile;
-    OptionSpec<File> errorIndexErrOutFile;
-    OptionSpec<File> errorSolrErrOutFile;
-    OptionSpec<String> files;
-    OptionSet options = null;
+    protected OptionSpec<String> readOpts;
+    protected OptionSpec<String> configSpecs;
+    protected OptionSpec<String> homeDirs;
+    protected OptionSpec<String> addnlLibDirs;
+    protected OptionSpec<File> solrjDir;
+    protected OptionSpec<String> solrjClass;
+    protected OptionSpec<File> errorMarcErrOutFile;
+    protected OptionSpec<File> errorIndexErrOutFile;
+    protected OptionSpec<File> errorSolrErrOutFile;
+    protected OptionSpec<String> files;
+    protected OptionSet options = null;
 
     public void processArgs(String args[], boolean failOnZeroArgs)
     {
@@ -100,7 +100,8 @@ public class BootableMain
         {
             homeDirStrs = new String[]{ Boot.getDefaultHomeDir() };
         }
-        
+        System.setProperty("solrmarc.home.dir", homeDirStrs[0]);
+
         File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File("lib-solrj"));
         
         try { 

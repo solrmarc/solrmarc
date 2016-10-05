@@ -37,6 +37,7 @@ import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.marc.MarcReaderFactory;
+import org.solrmarc.tools.PropertyUtils;
 
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -52,6 +53,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import javax.swing.JSeparator;
 
 public class SolrMarcDebug extends BootableMain
 {
@@ -72,6 +74,8 @@ public class SolrMarcDebug extends BootableMain
     HashMap<Object, Action> actions;
     String previousConfigText = "";
     List<AbstractValueIndexer<?>> indexers = null;
+    Properties readerProps = new Properties();
+
     /**
      * Launch the application.
      */
@@ -125,8 +129,23 @@ public class SolrMarcDebug extends BootableMain
 //        // since that directory is used as the location to look for java source files to compile and include
 //        // If it is unspecified, the program looks in 
 //        ValueIndexerFactory.setHomeDirs(homeDirStrs);
-
         indexerFactory = ValueIndexerFactory.initialize(homeDirStrs);
+        String inputSource[] = new String[1];
+        String propertyFileAsURLStr = PropertyUtils.getPropertyFileAbsoluteURL(homeDirStrs, options.valueOf(readOpts), true, inputSource);
+        try
+        {
+            readerProps.load(PropertyUtils.getPropertyFileInputStream(propertyFileAsURLStr));
+        }
+        catch (FileNotFoundException e2)
+        {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+        }
+        catch (IOException e2)
+        {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+        }
 
         recordMap = new LinkedHashMap<String, Record>();
 
@@ -137,7 +156,7 @@ public class SolrMarcDebug extends BootableMain
 
 
         frmSolrmarcIndexSpecification.getContentPane().setLayout(
-                new MigLayout("", "[512px,grow][512px,grow]", "[361.00px,grow][::35.00px][141.00px,grow][grow]"));
+                new MigLayout("", "[512px,grow][][512px,grow]", "[361.00px,grow][::35.00px][141.00px,grow][][100.00px, grow]"));
 
         JScrollPane scrollPane = new JScrollPane();
         frmSolrmarcIndexSpecification.getContentPane().add(scrollPane, "cell 0 0,grow");
@@ -149,7 +168,7 @@ public class SolrMarcDebug extends BootableMain
         scrollPane.setViewportView(recordPane);
 
         JPanel panel_1 = new JPanel();
-        frmSolrmarcIndexSpecification.getContentPane().add(panel_1, "cell 0 1 2 1,grow");
+        frmSolrmarcIndexSpecification.getContentPane().add(panel_1, "cell 0 1 3 1,grow");
         panel_1.setLayout(new MigLayout("", "[grow][][]", "[][grow][]"));
 
         marcIdentifier = new JComboBox<String>();
@@ -196,7 +215,7 @@ public class SolrMarcDebug extends BootableMain
         btnNextRecord.setMnemonic('>');
 
         JScrollPane scrollPane_1 = new JScrollPane();
-        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_1, "cell 0 2 2 1,grow");
+        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_1, "cell 0 2 3 1,grow");
 
         configPane = new JTextPane();
         currFont = configPane.getFont();
@@ -207,16 +226,19 @@ public class SolrMarcDebug extends BootableMain
         configPane.getDocument().addUndoableEditListener(undo);
         
         JScrollPane scrollPane_2 = new JScrollPane();
-        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_2, "cell 1 0,grow");
+        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_2, "cell 2 0,grow");
 
         outputPane = new JTextPane();
         currFont = outputPane.getFont();
         outputPane.setFont(new Font("Courier New", currFont.getStyle(), currFont.getSize()));
         outputPane.setEditable(false);
         scrollPane_2.setViewportView(outputPane);
+        
+        JSeparator separator_1 = new JSeparator();
+        frmSolrmarcIndexSpecification.getContentPane().add(separator_1, "cell 0 3 3 1");
 
         JScrollPane scrollPane_3 = new JScrollPane();
-        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_3, "cell 0 3 2 1,grow");
+        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_3, "cell 0 4 3 1,grow");
 
         errorPane = new JTextPane();
         currFont = errorPane.getFont();
@@ -325,22 +347,6 @@ public class SolrMarcDebug extends BootableMain
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                File f1 = new File(homeDirStrs[0],  "resources/marcreader.properties");
-                Properties readerProps = new Properties();
-                try
-                {
-                    readerProps.load(new FileInputStream(f1));
-                }
-                catch (FileNotFoundException e2)
-                {
-                    // TODO Auto-generated catch block
-                    e2.printStackTrace();
-                }
-                catch (IOException e2)
-                {
-                    // TODO Auto-generated catch block
-                    e2.printStackTrace();
-                }
                 
                 // File f = new File("resources/specTestRecs.mrc");
                 File f = null; // new File("resources/testSpec.properties");
