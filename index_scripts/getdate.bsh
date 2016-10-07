@@ -23,6 +23,7 @@ private final static Pattern FOUR_DIGIT_PATTERN_OTHER_4 = Pattern.compile("i.e. 
 private final static Pattern BC_DATE_PATTERN = Pattern.compile("[0-9]+ [Bb][.]?[Cc][.]?");
 private final static Pattern FOUR_DIGIT_PATTERN = Pattern.compile("\\d{4,4}");
 protected static Logger logger = Logger.getLogger("beanshell.getDate.bsh");
+public SolrIndexer indexer = null;
 
 
 /**
@@ -112,7 +113,7 @@ public String cleanDate(String date)
  */
 public String getDate(Record record)
 {
-    Set result = SolrIndexer.getFieldList(record, "260c");
+    Set result = indexer.getFieldList(record, "260c");
     String date = org.solrmarc.tools.Utils.join(result, ", ");
     if (date == null || date.length() == 0)
         return (null);
