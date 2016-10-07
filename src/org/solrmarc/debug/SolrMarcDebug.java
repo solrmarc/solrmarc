@@ -33,6 +33,8 @@ import org.marc4j.MarcError;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.driver.BootableMain;
+import org.solrmarc.driver.Indexer;
+import org.solrmarc.driver.ThreadedIndexer;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
@@ -47,6 +49,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -54,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import javax.swing.JSeparator;
+import java.awt.event.InputEvent;
 
 public class SolrMarcDebug extends BootableMain
 {
@@ -75,7 +79,7 @@ public class SolrMarcDebug extends BootableMain
     String previousConfigText = "";
     List<AbstractValueIndexer<?>> indexers = null;
     Properties readerProps = new Properties();
-
+    static int[] fontSizeArray = { 8, 10, 12, 14, 18, 22, 28, 36, 42 };
     /**
      * Launch the application.
      */
@@ -156,95 +160,111 @@ public class SolrMarcDebug extends BootableMain
 
 
         frmSolrmarcIndexSpecification.getContentPane().setLayout(
-                new MigLayout("", "[512px,grow][][512px,grow]", "[361.00px,grow][::35.00px][141.00px,grow][][100.00px, grow]"));
+                new MigLayout("", "[512px,grow][][512px,grow]", "[42.00][361.00px,grow][::-2.00px][141.00px,grow][][100.00px,grow]"));
+        
+                JPanel panel_1 = new JPanel();
+                frmSolrmarcIndexSpecification.getContentPane().add(panel_1, "cell 0 0 3 1,grow");
+                panel_1.setLayout(new MigLayout("", "[grow][][][]", "[][grow][]"));
+                
+                marcIdentifier = new JComboBox<String>();
+                        
+                panel_1.add(marcIdentifier, "flowx,cell 0 0,grow");
+                
+                JButton btnNextRecord = new JButton("Next >");
+                btnNextRecord.addActionListener(new ActionListener()
+                {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        int index = marcIdentifier.getSelectedIndex();
+                        int cnt = marcIdentifier.getItemCount();
+                        if (index >= 0 && index < cnt - 1) marcIdentifier.setSelectedIndex(index + 1);
+                    }
+                });
+        
+                JButton btnApply = new JButton("Apply");
+                btnApply.addActionListener(new ActionListener()
+                {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        int index = marcIdentifier.getSelectedIndex();
+                        marcIdentifier.setSelectedIndex(index);
+                    }
+                });
+                panel_1.add(btnApply, "cell 1 0");
+                
+                JButton btnPrevRecord = new JButton("< Prev");
+                btnPrevRecord.addActionListener(new ActionListener()
+                {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        int index = marcIdentifier.getSelectedIndex();
+                        if (index > 0) marcIdentifier.setSelectedIndex(index - 1);
+                    }
+                });
+                panel_1.add(btnPrevRecord, "cell 2 0,alignx left");
+                btnPrevRecord.setMnemonic('<');
+                panel_1.add(btnNextRecord, "cell 3 0");
+                btnNextRecord.setMnemonic('>');
+                
+                        
+                marcIdentifier.addActionListener(new ActionListener()
+                {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        @SuppressWarnings("unchecked")
+                        JComboBox<String> source = ((JComboBox<String>) e.getSource());
+                        Object selected = source.getSelectedItem();
+                        if (selected != null)
+                        {
+                            String fKey = selected.toString();
+                            Record rec = recordMap.get(fKey);
+                            recordPane.setText(rec.toString());
+                            recordPane.setCaretPosition(0);
+                            // String fieldNameStr = fieldName.getText();
+                            processRecordToOutput(rec);
+                        }
+                    }
+        
+                });
 
         JScrollPane scrollPane = new JScrollPane();
-        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane, "cell 0 0,grow");
+        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane, "cell 0 1,grow");
 
         recordPane = new JTextPane();
-        Font currFont = recordPane.getFont();
-        recordPane.setFont(new Font("Courier New", currFont.getStyle(), currFont.getSize()));
         recordPane.setEditable(false);
         scrollPane.setViewportView(recordPane);
 
-        JPanel panel_1 = new JPanel();
-        frmSolrmarcIndexSpecification.getContentPane().add(panel_1, "cell 0 1 3 1,grow");
-        panel_1.setLayout(new MigLayout("", "[grow][][]", "[][grow][]"));
-
-        marcIdentifier = new JComboBox<String>();
-
-        JButton btnPrevRecord = new JButton("< Prev");
-        btnPrevRecord.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                int index = marcIdentifier.getSelectedIndex();
-                if (index > 0) marcIdentifier.setSelectedIndex(index - 1);
-            }
-        });
-        panel_1.add(btnPrevRecord, "flowx,cell 0 0,alignx left");
-        btnPrevRecord.setMnemonic('<');
-
-        panel_1.add(marcIdentifier, "flowx,cell 0 0,grow");
-
-        JButton btnNextRecord = new JButton("Next >");
-        btnNextRecord.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                int index = marcIdentifier.getSelectedIndex();
-                int cnt = marcIdentifier.getItemCount();
-                if (index >= 0 && index < cnt - 1) marcIdentifier.setSelectedIndex(index + 1);
-            }
-        });
-
-        JButton btnApply = new JButton("Apply");
-        btnApply.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                int index = marcIdentifier.getSelectedIndex();
-                marcIdentifier.setSelectedIndex(index);
-            }
-        });
-        panel_1.add(btnApply, "cell 1 0");
-        panel_1.add(btnNextRecord, "cell 2 0");
-        btnNextRecord.setMnemonic('>');
-
         JScrollPane scrollPane_1 = new JScrollPane();
-        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_1, "cell 0 2 3 1,grow");
+        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_1, "cell 0 3 3 1,grow");
 
         configPane = new JTextPane();
-        currFont = configPane.getFont();
-        configPane.setFont(new Font("Courier New", currFont.getStyle(), currFont.getSize()));
         scrollPane_1.setViewportView(configPane);
        // configPane.getDocument().
         undo = new CompoundUndoManager(configPane);
         configPane.getDocument().addUndoableEditListener(undo);
         
         JScrollPane scrollPane_2 = new JScrollPane();
-        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_2, "cell 2 0,grow");
+        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_2, "cell 2 1,grow");
 
         outputPane = new JTextPane();
-        currFont = outputPane.getFont();
-        outputPane.setFont(new Font("Courier New", currFont.getStyle(), currFont.getSize()));
         outputPane.setEditable(false);
         scrollPane_2.setViewportView(outputPane);
         
         JSeparator separator_1 = new JSeparator();
-        frmSolrmarcIndexSpecification.getContentPane().add(separator_1, "cell 0 3 3 1");
+        frmSolrmarcIndexSpecification.getContentPane().add(separator_1, "cell 0 4 3 1");
 
         JScrollPane scrollPane_3 = new JScrollPane();
-        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_3, "cell 0 4 3 1,grow");
+        frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_3, "cell 0 5 3 1,grow");
 
         errorPane = new JTextPane();
-        currFont = errorPane.getFont();
-        errorPane.setFont(new Font("Courier New", currFont.getStyle(), currFont.getSize()));
         errorPane.setEditable(false);
         scrollPane_3.setViewportView(errorPane);
+
+        setFontSize(getCurFontSize());
 
         //Set up the menu bar.
         actions=createActionTable(configPane);
@@ -263,27 +283,33 @@ public class SolrMarcDebug extends BootableMain
 
         JMenu mnEdit = createEditMenu();
         menuBar.add(mnEdit);
-
         
-        marcIdentifier.addActionListener(new ActionListener()
+        JMenu mnViewMenu = new JMenu("View");
+        menuBar.add(mnViewMenu);
+        
+        JMenuItem mntmFontPlus = new JMenuItem("Increase Fontsize");
+        mntmFontPlus.setEnabled(true);
+        mntmFontPlus.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, InputEvent.CTRL_MASK));
+        mnViewMenu.add(mntmFontPlus);
+        mntmFontPlus.addActionListener(new ActionListener()
         {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                @SuppressWarnings("unchecked")
-                JComboBox<String> source = ((JComboBox<String>) e.getSource());
-                Object selected = source.getSelectedItem();
-                if (selected != null)
-                {
-                    String fKey = selected.toString();
-                    Record rec = recordMap.get(fKey);
-                    recordPane.setText(rec.toString());
-                    recordPane.setCaretPosition(0);
-                    // String fieldNameStr = fieldName.getText();
-                    processRecordToOutput(rec);
-                }
+                increaseFontSize();
             }
-
+        });
+        
+        JMenuItem mntmFontMinus = new JMenuItem("Decrease Fontsize");
+        mntmFontMinus.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, InputEvent.CTRL_MASK));
+        mnViewMenu.add(mntmFontMinus);
+        mntmFontMinus.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                decreaseFontSize();
+            }
         });
 
         mntmOpenConfig.addActionListener(new ActionListener()
@@ -292,7 +318,7 @@ public class SolrMarcDebug extends BootableMain
             public void actionPerformed(ActionEvent e)
             {
                 File f = null; // new File("resources/testSpec.properties");
-                JFileChooser chooser = new JFileChooser(homeDirStrs[0] + File.separator + "resources");
+                JFileChooser chooser = new JFileChooser(homeDirStrs[0]);
                 FileNameExtensionFilter filter = new FileNameExtensionFilter("Index Property Files", "properties");
                 chooser.setFileFilter(filter);
                 int returnVal = chooser.showOpenDialog(frmSolrmarcIndexSpecification);
@@ -304,41 +330,7 @@ public class SolrMarcDebug extends BootableMain
                 {
                     return;
                 }
-
-                FileReader reader = null;
-                try
-                {
-                    configPane.read(new FileReader(f), null);
-                    configPane.getDocument().addUndoableEditListener(undo);
-                    undo.discardAllEdits();
-                    undoAction.setEnabled(false);
-                    redoAction.setEnabled(false);
-                }
-                catch (FileNotFoundException e1)
-                {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-                catch (IOException e1)
-                {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-                finally
-                {
-                    if (reader != null)
-                    {
-                        try
-                        {
-                            reader.close();
-                        }
-                        catch (IOException e1)
-                        {
-                            // TODO Auto-generated catch block
-                            e1.printStackTrace();
-                        }
-                    }
-                }
+                openSpecifiedConfig(f, true);
             }
         });
 
@@ -350,7 +342,7 @@ public class SolrMarcDebug extends BootableMain
                 
                 // File f = new File("resources/specTestRecs.mrc");
                 File f = null; // new File("resources/testSpec.properties");
-                JFileChooser chooser = new JFileChooser(homeDirStrs[0] + File.separator + "resources");
+                JFileChooser chooser = new JFileChooser(homeDirStrs[0]);
                 FileNameExtensionFilter filter = new FileNameExtensionFilter("MARC Record Files", "mrc", "xml");
                 chooser.setFileFilter(filter);
                 int returnVal = chooser.showOpenDialog(frmSolrmarcIndexSpecification);
@@ -362,39 +354,164 @@ public class SolrMarcDebug extends BootableMain
                 {
                     return;
                 }
+                openSpecifiedMarcFile(f, true);
+            }
+        });
+        
+        // read command line arguments to initialize windows 
+        String specs = options.valueOf(configSpecs);
+        if (specs != null)  configureIndexer(specs);
+        
+        List<String> inputFiles = options.valuesOf(files);
+        boolean first = true;
+        for (String inputFile : inputFiles)
+        {
+            File marcFile = new File(inputFile);
+            openSpecifiedMarcFile(marcFile, first);
+            first = false;
+        }
+    }
+    
+    public void configureIndexer(String indexSpecifications)
+    {
+        String[] indexSpecs = indexSpecifications.split("[ ]*,[ ]*");
+        File[] specFiles = new File[indexSpecs.length];
+        int i = 0;
+        // currently only reads the first one specified!
+        for (String indexSpec : indexSpecs)
+        {
+            File specFile = new File(indexSpec);
+            if (!specFile.isAbsolute()) specFile = PropertyUtils.findFirstExistingFile(homeDirStrs, indexSpec);
+            specFiles[i++] = specFile;
+            break;   // if there is more than one, ignore the rest!
+        }
 
-                MarcReader reader;
-                String firstId = null;
+        if (specFiles.length > 0 && specFiles[0].exists() && specFiles[0].canRead())
+            openSpecifiedConfig(specFiles[0], true);
+    }
+
+    private int getCurFontSize()
+    {
+        Font currFont = recordPane.getFont();
+        int fontSize = currFont.getSize();
+        return(fontSize);
+    }
+
+    private void increaseFontSize()
+    {
+        int fontSize = getCurFontSize();
+        int fontSizeIndex = getFontSizeIndex(fontSizeArray, fontSize);
+        if (fontSizeIndex < fontSizeArray.length-2) 
+        {
+            fontSizeIndex++; 
+            setFontSize(fontSizeArray[fontSizeIndex]);
+        }
+    }
+    
+    private void decreaseFontSize()
+    {
+        int fontSize = getCurFontSize();
+        int fontSizeIndex = getFontSizeIndex(fontSizeArray, fontSize);
+        if (fontSizeIndex > 0) 
+        {
+            fontSizeIndex--; 
+            setFontSize(fontSizeArray[fontSizeIndex]);
+        }
+    }
+
+    private int getFontSizeIndex(int[] fontSizeArray, int fontSize)
+    {
+        for (int i = 0; i < fontSizeArray.length; i++)
+        {
+            if (fontSize >= fontSizeArray[i] && (i < fontSizeArray.length-1 ? fontSize < fontSizeArray[i+1] : true))
+                return(i);
+        }
+        return(1);
+    }
+
+    private void setFontSize(int fontSize)
+    {
+        
+        Font currFont = recordPane.getFont();
+        recordPane.setFont(new Font("Courier New", currFont.getStyle(), fontSize));
+        currFont = configPane.getFont();
+        configPane.setFont(new Font("Courier New", currFont.getStyle(), fontSize));
+        currFont = outputPane.getFont();
+        outputPane.setFont(new Font("Courier New", currFont.getStyle(), fontSize));
+        currFont = errorPane.getFont();
+        errorPane.setFont(new Font("Courier New", currFont.getStyle(), fontSize));
+    }
+    
+    private void openSpecifiedConfig(File f, boolean clear)
+    {
+        FileReader reader = null;
+        try
+        {
+            configPane.read(new FileReader(f), null);
+            configPane.getDocument().addUndoableEditListener(undo);
+            undo.discardAllEdits();
+            undoAction.setEnabled(false);
+            redoAction.setEnabled(false);
+        }
+        catch (FileNotFoundException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        catch (IOException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        finally
+        {
+            if (reader != null)
+            {
                 try
                 {
-                    reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), new FileInputStream(f));
-                    while (reader.hasNext())
-                    {
-                        Record record = reader.next();
-                        String id = record.getControlNumber();
-                        if (firstId == null) firstId = id;
-                        if (!recordMap.containsKey(id))
-                        {
-                            recordMap.put(id, record);
-                            marcIdentifier.addItem(id);
-                        }
-                        else
-                        {
-                            recordMap.put(id, record);
-                        }
-                    }
-                    marcIdentifier.setSelectedItem(firstId);
+                    reader.close();
                 }
-                catch (FileNotFoundException e1)
+                catch (IOException e1)
                 {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
             }
-        });
-
+        }
     }
-    
+
+    private void openSpecifiedMarcFile(File marcFile, boolean pointToFirst)
+    {
+        MarcReader reader;
+        String firstId = null;
+        try
+        {
+            reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), new FileInputStream(marcFile));
+            while (reader.hasNext())
+            {
+                Record record = reader.next();
+                String id = record.getControlNumber();
+                if (pointToFirst && firstId == null) firstId = id;
+                if (!recordMap.containsKey(id))
+                {
+                    recordMap.put(id, record);
+                    marcIdentifier.addItem(id);
+                }
+                else
+                {
+                    recordMap.put(id, record);
+                }
+            }
+            if (pointToFirst) marcIdentifier.setSelectedItem(firstId);
+        }
+        catch (FileNotFoundException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
+
+
     //Create the edit menu.
     protected JMenu createEditMenu() {
         JMenu menu = new JMenu("Edit");
@@ -630,7 +747,7 @@ public class SolrMarcDebug extends BootableMain
             // TODO Auto-generated catch block
             e1.printStackTrace();
         }
-
+        outputPane.setCaretPosition(0);
     }
 
     private String getTextForMarcErrorsAndExceptions(Record rec, List<IndexerSpecException> exceptions)
