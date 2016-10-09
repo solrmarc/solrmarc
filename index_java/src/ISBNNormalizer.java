@@ -39,7 +39,8 @@ public class ISBNNormalizer implements Mixin {
     	Collection<String> result = Set.class.isAssignableFrom(isbnList.getClass()) ? new LinkedHashSet<String>() : new ArrayList<String>();
 		boolean get13 = (output.equals("13") || output.equals("both"));
 		boolean get10 = (output.equals("10") || output.equals("both"));
-    	for (String isbn : isbnList)
+    	if (!get13 && !get10) throw new IllegalArgumentException("Warning: method only accepts values \"10\" \"13\"  or \"both\"");
+		for (String isbn : isbnList)
     	{
 			if (get13)
 			{
