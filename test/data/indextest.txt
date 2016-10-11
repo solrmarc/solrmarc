@@ -1,0 +1,65 @@
+record: specTestRecs.mrc(u8)
+indexSpec: id = 001, first
+expect: u8
+
+
+record: 1156470.mrc
+indexSpec: 035a, map("[(][Oo][Cc][Oo][Ll][Cc][)][^0-9]*[0]*([0-9]+)=>$1","ocm[0]*([0-9]+)[ ]*[0-9]*=>$1","ocn[0]*([0-9]+).*=>$1", "on[0]*([0-9]+).*=>$1")
+expect: 12275114
+
+
+# test loading a indexspec that references a pattern map defined in the same properties file
+record: 1156470.mrc
+indexSpec: oclc_pattern_map_test.properties(oclc_num)
+expect: 12275114
+
+
+record: 1156470.mrc
+indexSpec: oclc_p_num = 035a, oclc_num_pattern_map.properties(oclc_num)
+expect: 12275114
+
+
+record: specTestRecs.xml
+indexSpec: subject_facet =600[a-z]:610[a-z]:611[a-z]:630[a-z]:650[a-z]:651[a-z]:655[a-z]:690[a-z], join (" -- "), cleanEnd, unique
+expect: Translating and interpreting -- Soviet Union -- History|Russian literature -- Translations from foreign languages -- History and criticism
+
+
+record: title_k.mrc
+indexSpec: custom, getSortableTitle
+expect: morton hoffman papers
+
+
+# test with unicode normalization turned on
+readerProps: marc.permissive=true, marc.to_utf_8=true, marc.unicode_normalize=C 
+record: u4.mrc(u4) 
+indexSpec: 245a 
+#The princes of H\u00E0-ti\u00EAn (1682-1867) /
+expect: The princes of Hà-tiên (1682-1867) /
+
+
+# same test with unicode normalization turned off
+readerProps: marc.permissive=true, marc.to_utf_8=true, marc.unicode_normalize=false 
+record: u4.mrc(u4)
+indexSpec: 245a
+#The princes of Ha\u0300-tie\u0302n (1682-1867) /
+expect: The princes of Hà-tiên (1682-1867) /
+
+#test reading XML file with initial BOM
+record: specTestRecs_withBOM.xml(u55)
+indexSpec: id = 001, first
+expect: u55
+
+#test reading XML file with no prolog
+record: specTestRecs_no_Prolog.xml(u10489)
+indexSpec: id = 001, first
+expect: u10489
+
+#test reading single record Koha XML file without <collection> 
+record: 1474920681_KOHA_LFL_5.xml
+indexSpec: id = 245a
+expect: Cinema and architecture : from historical to digital /
+
+#test reading single record Koha XML file without <collection> that starts with a comment
+record: 1474920681_KOHA_LFL_6_with_comment.xml
+indexSpec: id = 245a, cleanEnd
+expect: Cinema and architecture : from historical to digital

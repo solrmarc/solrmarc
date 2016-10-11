@@ -1,0 +1,14 @@
+/SolrMarc-Indexer-Tests/
+/bin/
+/build/
+/logs/
+/unused/
+/out/
+/.settings/
+*.log
+/dist/
+/solrmarc3.out
+/dist - Copy/
+/lib-solrj-4.7.0/
+/lib-solrj-6.1.0/
+/tmp/
