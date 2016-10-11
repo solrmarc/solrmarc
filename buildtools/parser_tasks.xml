@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<project>    
+    <taskdef name="jflex" classname="jflex.anttask.JFlexTask"  onerror="report" > 
+        <classpath>
+            <pathelement path="${buildtools.path}/jflextask.jar" />
+            <pathelement path="${buildtools.path}/jflex-1.6.0.jar" />
+        </classpath>
+    </taskdef>
+    <taskdef name="cup" classname="java_cup.anttask.CUPTask"  onerror="report" > 
+        <classpath>
+            <pathelement path="${buildtools.path}/java-cup-11b.jar" />
+        </classpath>
+    </taskdef>
+</project>

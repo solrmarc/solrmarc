@@ -1,7 +1,0 @@
-<solr persistent="true" sharedLib="lib">
-  <cores adminPath="/admin/multicore">
-    <core name="biblio" instanceDir="biblio"/>
-    <core name="authority" instanceDir="authority"/>
-    <core name="stats" instanceDir="stats"/>
-  </cores>
-</solr>
