@@ -5,6 +5,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.marc4j.MarcError;
+import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
@@ -95,9 +96,27 @@ public class Indexer
     public int[] indexToSolr(final MarcReader reader)
     {
         cnts[0] = cnts[1] = cnts[2] = 0;
-        while (reader.hasNext() && !shuttingDown)
+        while (!shuttingDown)
         {
-            final Record record = reader.next();
+            Record record = null;
+            try {
+                if (reader.hasNext())
+                    record = reader.next();
+                else 
+                    break;
+            }
+            catch (MarcException me)
+            {
+                logger.error("Unrecoverable Error in MARC record data", me);
+                if (Boolean.parseBoolean(System.getProperty("solrmarc.terminate.on.marc.exception", "true")))
+                    break;
+                else 
+                {
+                    logger.warn("Trying to continue after MARC record data error");
+                    continue;
+                }
+            }
+
             cnts[0]++;
             RecordAndDoc recDoc = indexToSolrDoc(record);
             cnts[1]++;

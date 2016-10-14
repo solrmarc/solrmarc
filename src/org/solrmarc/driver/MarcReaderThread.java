@@ -6,6 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
+import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 
@@ -29,9 +30,26 @@ public class MarcReaderThread extends Thread
     public void run()
     {
         Record record = null;
-        while (reader.hasNext() && !Thread.currentThread().isInterrupted())
+        while (!Thread.currentThread().isInterrupted())
         {
-            record = reader.next();
+            try {
+                if (reader.hasNext())
+                    record = reader.next();
+                else 
+                    break;
+            }
+            catch (MarcException me)
+            {
+                logger.error("Unrecoverable Error in MARC record data", me);
+                if (Boolean.parseBoolean(System.getProperty("solrmarc.terminate.on.marc.exception", "true")))
+                    break;
+                else 
+                {
+                    logger.warn("Trying to continue after MARC record data error");
+                    continue;
+                }
+            }
+
             cnts[0].incrementAndGet();
             while (readQ.offer(record) == false)
             {
