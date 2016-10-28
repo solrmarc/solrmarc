@@ -29,7 +29,7 @@ public class JavaValueExtractorUtils
     {
         this.dirsContainingJavaSource = dirsContainingJavaSource;
     }
-    
+
     /**
      * Compiles java sources if they have changed.
      * @param homeDirStrs 
@@ -47,11 +47,12 @@ public class JavaValueExtractorUtils
             logger.warn("Any custom mixin routines will not be compiled and will not be available.");
             return compiledSome;
         }
-        for (String homeDirectory : dirsContainingJavaSource)
+        for (int i = dirsContainingJavaSource.length - 1; i >= 0; i--)
         {
+            String homeDirectory = dirsContainingJavaSource[i];
             String srcDirectory = homeDirectory + File.separator + "index_java" + File.separator + "src";
             String binDirectory = homeDirectory + File.separator + "index_java" + File.separator + "bin";
-            createBinDirectory(binDirectory);            
+            createBinDirectory(binDirectory);
             final List<File> sourceFiles = getChangedSourceFiles(srcDirectory, binDirectory);
             if (sourceFiles.isEmpty())
             {
@@ -66,19 +67,32 @@ public class JavaValueExtractorUtils
                 classpath.add(new File(url.getFile()));
                 logger.debug("    " + url.getFile());
             }
+            // Now add in dynamically compiled java classes from less local index_java directories 
+            for (int j = dirsContainingJavaSource.length - 1; j > i; j--)
+            {
+                try
+                {
+                    String otherBinDirectory = dirsContainingJavaSource[j] + File.separator + "index_java" + File.separator + "bin";
+                    URL url = new File(otherBinDirectory).toURI().toURL();
+                    classpath.add(new File(url.getFile()));
+                }
+                catch (MalformedURLException e)
+                {
+                }
+            }
             try {
                 final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, Charset.forName("UTF-8"));
                 fileManager.setLocation(StandardLocation.SOURCE_PATH, Collections.singleton(new File(srcDirectory)));
                 fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singleton(new File(binDirectory)));
                 fileManager.setLocation(StandardLocation.CLASS_PATH, classpath);
-        
+
                 final DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
                 final Iterable<? extends JavaFileObject> units = fileManager.getJavaFileObjectsFromFiles(sourceFiles);
                 final Iterable<String> options = Collections.singletonList("-g");
                 final JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticCollector, options, null, units);
-        
+
                 logger.trace("Compile java files:\n" + sourceFiles.toString().replaceAll(",", ",\n"));
-                
+
                 if (!task.call())
                 {
                     StringBuilder buffer = new StringBuilder();
@@ -185,7 +199,7 @@ public class JavaValueExtractorUtils
         }
         return(className);
     }
-    
+
     private String getClassFileForSourceFile(final File sourceFile, String srcDirectory, String binDirectory)
     {
         final String sourcePath = sourceFile.getPath();
