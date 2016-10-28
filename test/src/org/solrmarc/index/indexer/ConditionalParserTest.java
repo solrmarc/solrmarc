@@ -46,6 +46,16 @@ public class ConditionalParserTest
 
     public static void main(String args[])
     {
+    
+    subject_test = {600[a-z]:610[a-z]:611[a-z]:630[a-z]:650[a-z]:651[a-z]:655[a-z]:690[a-z]}?(ind2!=7|(ind2 = 7&$2~"fast|lcsh|tgn|aat")):520a, join (" -- "), clean
+    date_test = 008[7-10]:008[11-14]:260c:264c?(ind2=1),map("(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2",".*[^0-9].*=>")
+    title_test = 245[^ch], join(" : "), titleSortLower
+    oclc_test = 035a?($a ~ "[(]OCoLC[)][0-9]+"), map(".*[(]OCoLC[)]([0-9]*)=>$1")
+    library_test = 999m, library_map.properties
+    scores_test = 000[6]?([6] ~ "[cdj]"), map("[cd]=>Scores||[j]=>Recordings||[cdj]=>Recordings and/or Scores")
+
+    
+    
 //        TranslationMapFactory.theMaps.setPropertyFilePaths(new String[]{"C:/Development/GoogleCodeSVNBranch2.0/dist", "C:/Development/GoogleCodeSVNBranch2.0/dist/translation_maps", "C:/Development/GoogleCodeSVNBranch2.0/dist/scripts"});
 //      System.out.println("Mapped: "+fm.toString("", null, false, false, "datemap:{\"(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2\", \".*[^0-9].*=>\"}"));
 //      System.out.println(fm.toString(" ", null, false, true, "oclcnum:{\".*\\(OCoLC\\)(.*)=>$1\"}"));
