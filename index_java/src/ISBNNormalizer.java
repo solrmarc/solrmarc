@@ -44,21 +44,19 @@ public class ISBNNormalizer implements Mixin {
     	{
 			if (get13)
 			{
-	    		String isbn13 = normalize(isbn);
+	    		String isbn13 = normalize_13(isbn);
 	    		if (isbn13 != null) result.add(isbn13);
 	    	}
 			if (get10)
 			{
 		        try {
-		        	String isbn10 = extract_isbn10(isbn);
+		        	String isbn10 = normalize_10(isbn);
 		        	if (isbn10 != null) result.add(isbn10);
 		        }
 		        catch (IllegalArgumentException e) {
-	                
 	            }
 	    	}
     	}
-    	
     	return(result);
     }
 
@@ -71,12 +69,29 @@ public class ISBNNormalizer implements Mixin {
      * @return an ISBN13
      * @throws IllegalArgumentException
      */
-    public static String normalize(String isbnstring) throws IllegalArgumentException {
+    public static String normalize_13(String isbnstring) throws IllegalArgumentException {
         // First look for a 13,then a 10
         try {
             return extract_isbn13(isbnstring);
         } catch (IllegalArgumentException e) {
             return isbn10_to_13(extract_isbn10(isbnstring));
+        }
+    }
+
+    /**
+     * Try to extract an ISBN from the string. 13s are returned as-is,
+     * 10s are turned into an isbn13 and returned. Otherwise throw IllegalArgumentException
+     *
+     * @param isbnstring The string that may contain an ISBN
+     * @return an ISBN13
+     * @throws IllegalArgumentException
+     */
+    public static String normalize_10(String isbnstring) throws IllegalArgumentException {
+        // First look for a 10,then a 13
+        try {
+            return extract_isbn10(isbnstring);
+        } catch (IllegalArgumentException e) {
+            return isbn13_to_10(extract_isbn13(isbnstring));
         }
     }
 
@@ -141,7 +156,31 @@ public class ISBNNormalizer implements Mixin {
         } else {
             return longisbn + check.toString();
         }
+    }
 
+    /**
+     * Turn an already-extracted ISBN13 into an ISBN10
+     *
+     * @param isbn13 -- just the raw digits of an ISBN13
+     * @return the equivalent ISBN10 (if possible)
+     */
+
+    public static String isbn13_to_10(String isbn13) {
+        if (!isbn13.substring(0,3).equals("978"))
+            throw new IllegalArgumentException("13-digit ISBN '" + isbn13 + "' doesn't start with 978, cannot make a valid 10-digit ISBN for it.");
+        String shortisbn = isbn13.substring(3, 12);
+
+        int[] multVect = { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+        int sum = 0; 
+
+        for (int i = 0; i < 9; i++) {
+            int digit = new Integer(shortisbn.substring(i, i + 1));
+            sum += multVect[i] * digit;
+        }
+        int val = 11 - (sum % 11);
+        char checkDigit = (char)((val == 11) ? '0' : (val == 10) ? 'X' : (char)val + '0');
+        String result = shortisbn + checkDigit;
+        return(result);
     }
 
 }
