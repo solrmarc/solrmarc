@@ -46,7 +46,7 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
      * of the object to avoid the problem of ensuring the external methods are thread safe. 
      * 
      */
-    
+
     private final static ThreadLocal<Map<Class<?>, Object>> threadLocalObjectMap = new ThreadLocal<Map<Class<?>, Object>>() 
         {
             @Override 
@@ -55,7 +55,7 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
                 return new LinkedHashMap<>();
             }
         };
-        
+
     static public Object createThreadLocalObjectForSpecifiedClass(Class<?> aClass)
     {
         Map<Class<?>, Object> instanceMap = threadLocalObjectMap.get();
@@ -107,27 +107,40 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
         instanceMap.put(aClass, toReturn);
         return(toReturn);
     }
-    
+
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, MethodCallContext context)
     {
         final AbstractExtractorMethodCall<?> methodCall = methodCallManager.getExtractorMethodCallForContext(context);
-        if (methodCall instanceof MultiValueExtractorMethodCall)
+        if (methodCall != null)
         {
-            return new MethodCallMultiValueExtractor((MultiValueExtractorMethodCall) methodCall,
-                    context.getParameters());
+            return createExtractorForMethodCall(methodCall, context);
         }
-        else if (methodCall instanceof SingleValueExtractorMethodCall)
-        {
-            return new MethodCallSingleValueExtractor((SingleValueExtractorMethodCall) methodCall,
-                    context.getParameters());
-        }
+        // most of the rest of this method is figuring out how to describe what went wrong to the user.
         else if (methodCall == null && context.getObjectName() == null)
         {
             List<AbstractExtractorMethodCall<?>> matches = methodCallManager.getLoadedExtractorMixinsMatches(null, context.getMethodName(), context.getParameterTypes().length);
             if (matches.size() > 1)
             {
+                // This finds instances where a superclass and a subclass both implement the same method, and automatically selects the subclass implementation.
+                // Note that if the subclass doesn't implement a particular method, it will still be listed as an available method for the subclass, 
+                // and it will be called on the subclass object, which will then pass the call to the superclass implementation.
+                if (matches.size() == 2)
+                {
+                    Class<?> class0 = matches.get(0).getObjectClass();
+                    Class<?> class1 = matches.get(1).getObjectClass();
+                    if (!class0.equals(class1) && class0.isAssignableFrom(class1)) // class0 is superclass of class1
+                    {
+                        AbstractExtractorMethodCall<?> derivedMethodCall = matches.get(1);
+                        return createExtractorForMethodCall(derivedMethodCall, context);
+                    }
+                    else if (!class0.equals(class1) && class1.isAssignableFrom(class0))  // class1 is superclass of class0
+                    {
+                        AbstractExtractorMethodCall<?> derivedMethodCall = matches.get(0);
+                        return createExtractorForMethodCall(derivedMethodCall, context);
+                    }
+                }
                 throw new IndexerSpecException("Multiple methods with name: " + context.getMethodName() + " you must specify the class of the method you intend to use.  Known methods are: \n"
-                        + methodCallManager.loadedExtractorMixinsToString(matches));
+                    + methodCallManager.loadedExtractorMixinsToString(matches));
             }
             else if (matches.size() == 0)
             {
@@ -197,13 +210,26 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
         }
     }
 
+    private AbstractValueExtractor<?> createExtractorForMethodCall(AbstractExtractorMethodCall<?> methodCall, MethodCallContext context)
+    {
+        if (methodCall instanceof MultiValueExtractorMethodCall)
+        {
+            return new MethodCallMultiValueExtractor((MultiValueExtractorMethodCall) methodCall, context.getParameters());
+        }
+        else if (methodCall instanceof SingleValueExtractorMethodCall)
+        {
+            return new MethodCallSingleValueExtractor((SingleValueExtractorMethodCall) methodCall, context.getParameters());
+        }
+        return(null);
+    }
+
     @Override
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration)
     {
         MethodCallContext context = MethodCallContext.parseContextFromExtractorSpecification(mappingConfiguration);
         return createExtractor(solrFieldName, context);
     }
-    
+
     @Override
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final String[] parts)
     {

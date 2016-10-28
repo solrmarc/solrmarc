@@ -72,4 +72,10 @@ public class ScriptSingleValueMethodCall extends AbstractExtractorMethodCall<Str
     {
         return new ScriptSingleValueMethodCall(this);
     }
+
+    @Override
+    public Class<?> getObjectClass()
+    {
+        return null;
+    }
 }

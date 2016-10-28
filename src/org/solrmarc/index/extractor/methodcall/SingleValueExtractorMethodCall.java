@@ -74,4 +74,9 @@ public class SingleValueExtractorMethodCall extends AbstractExtractorMethodCall<
         return new SingleValueExtractorMethodCall(this);
     }
 
+    @Override
+    public Class<?> getObjectClass()
+    {
+        return(mixin.getClass());
+    }
 }

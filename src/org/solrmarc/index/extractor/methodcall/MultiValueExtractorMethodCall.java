@@ -76,4 +76,10 @@ public class MultiValueExtractorMethodCall extends AbstractExtractorMethodCall<C
     {
         return new MultiValueExtractorMethodCall(this);
     }
+
+    @Override
+    public Class<?> getObjectClass()
+    {
+        return(mixin.getClass());
+    }
 }

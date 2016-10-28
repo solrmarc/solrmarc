@@ -77,4 +77,9 @@ public class ScriptMultiValueMethodCall extends AbstractExtractorMethodCall<Coll
         return new ScriptMultiValueMethodCall(this);
     }
 
+    @Override
+    public Class<?> getObjectClass()
+    {
+        return null;
+    }
 }

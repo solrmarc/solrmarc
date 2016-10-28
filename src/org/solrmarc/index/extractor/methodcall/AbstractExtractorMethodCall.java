@@ -48,6 +48,8 @@ public abstract class AbstractExtractorMethodCall<T> implements ExternalMethod
         return objectName;
     }
 
+    public abstract Class<?> getObjectClass();
+
     public String getMethodName()
     {
         return methodName;
