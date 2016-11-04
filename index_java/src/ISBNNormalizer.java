@@ -33,31 +33,31 @@ public class ISBNNormalizer implements Mixin {
     {
         return(filterISBN(isbnList, "13"));
     }
-    
+
     public static Collection<String> filterISBN(Collection <String> isbnList, String output)
     {
-    	Collection<String> result = Set.class.isAssignableFrom(isbnList.getClass()) ? new LinkedHashSet<String>() : new ArrayList<String>();
-		boolean get13 = (output.equals("13") || output.equals("both"));
-		boolean get10 = (output.equals("10") || output.equals("both"));
-    	if (!get13 && !get10) throw new IllegalArgumentException("Warning: method only accepts values \"10\" \"13\"  or \"both\"");
-		for (String isbn : isbnList)
-    	{
-			if (get13)
-			{
-	    		String isbn13 = normalize_13(isbn);
-	    		if (isbn13 != null) result.add(isbn13);
-	    	}
-			if (get10)
-			{
-		        try {
-		        	String isbn10 = normalize_10(isbn);
-		        	if (isbn10 != null) result.add(isbn10);
-		        }
-		        catch (IllegalArgumentException e) {
-	            }
-	    	}
-    	}
-    	return(result);
+        Collection<String> result = Set.class.isAssignableFrom(isbnList.getClass()) ? new LinkedHashSet<String>() : new ArrayList<String>();
+        boolean get13 = (output.equals("13") || output.equals("both"));
+        boolean get10 = (output.equals("10") || output.equals("both"));
+        if (!get13 && !get10) throw new IllegalArgumentException("Warning: method only accepts values \"10\" \"13\"  or \"both\"");
+        for (String isbn : isbnList)
+        {
+            if (get13)
+            {
+                String isbn13 = normalize_13(isbn);
+                if (isbn13 != null) result.add(isbn13);
+            }
+            if (get10)
+            {
+                try {
+                    String isbn10 = normalize_10(isbn);
+                    if (isbn10 != null) result.add(isbn10);
+                }
+                catch (IllegalArgumentException e) {
+                }
+            }
+        }
+        return(result);
     }
 
 
