@@ -39,10 +39,10 @@ public class DirectorMixin extends SolrIndexerMixin
     {
         ControlField cf008 = (ControlField)record.getVariableField("008");
         List<VariableField> cf007 = record.find("007","^v");
-    	boolean isVideo = ((cf008 != null && cf008.getData().charAt(33) == 'v') || cf007.size() > 0) && 
+    	boolean isVideo = ((cf008 != null && cf008.getData().length() > 33 && cf008.getData().charAt(33) == 'v') || cf007.size() > 0) && 
     	                   record.getLeader().getTypeOfRecord() == 'g';
     	Set<String> result = new LinkedHashSet<String>();
-    	
+
     	DataField f245 = ((DataField)record.getVariableField("245"));
         if (isVideo)
         {
@@ -77,23 +77,23 @@ public class DirectorMixin extends SolrIndexerMixin
                 String subtitle = f245 != null ? f245.getSubfieldsAsString("b") : null;
                 if (subtitle != null && (subtitle.contains("direct") || subtitle.contains("Direct")))
                 {
-                    
+
                     addError(new IndexerSpecException("Director information erroneously included in the 245b subtitle field"));
                     Set<String> directors = getVideoDirectorsFromTextField(subtitle, false);
                     result.addAll(directors);
                 }
-                
+
                 String medium = f245 != null ? f245.getSubfieldsAsString("h") : null;
                 if (medium != null && (medium.contains("direct") || medium.contains("Direct")))
                 {
-                    
+
                     addError(new IndexerSpecException("Director information erroneously included in the 245h medium field"));
                     Set<String> directors = getVideoDirectorsFromTextField(medium, false);
                     result.addAll(directors);
                 }
 
             }
-            
+
             List<VariableField> personalNames = record.getVariableFields("700");
             for (VariableField vf : personalNames)
             {
@@ -111,7 +111,7 @@ public class DirectorMixin extends SolrIndexerMixin
         }
         return(result);
     }
-    
+
     private boolean ChkSubfield(DataField df, char c, String pattern)
     {
         List<Subfield> sfs = df.getSubfields(c);
@@ -193,7 +193,7 @@ public class DirectorMixin extends SolrIndexerMixin
         }
 
         // Now split the string into subparts separated by ;  (or -- or  : )
-        
+
         for (int loop = 0; loop < 5; loop++)
         {
             if (loop == 3)
@@ -224,7 +224,7 @@ public class DirectorMixin extends SolrIndexerMixin
                     {
                         part = part.replaceAll("\"[^\",]*?\"", "XXX");
                     }
-                    
+
                     // Try to split apart "brothers" ie.  the Hughes Brothers  becomes  Albert Hughes and Allen Hughes
                     if (part.matches(".*(the )?[A-Z][^ ]* [Bb]rothers.*"))
                     {
@@ -308,7 +308,7 @@ public class DirectorMixin extends SolrIndexerMixin
                         part = part.replaceFirst("[,]?[ ]?director", "");
                         part = part.replaceAll("([,][ ]?|[ ]?&[ ]?)", "|");
                         part = part.replaceAll("[#]", ",");
-    
+
                         String commaparts[] = part.split("[|]+");
                         for (String subpart : commaparts)
                         {
