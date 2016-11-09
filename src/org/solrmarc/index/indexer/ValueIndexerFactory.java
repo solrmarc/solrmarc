@@ -19,6 +19,7 @@ import org.solrmarc.index.extractor.methodcall.StaticMarcTestRecords;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.solrmarc.index.utils.FastClasspathUtils;
+import org.solrmarc.tools.PropertyUtils;
 //import org.solrmarc.index.utils.ReflectionUtils;
 import org.solrmarc.tools.Utils;
 
@@ -376,22 +377,26 @@ public class ValueIndexerFactory
         // files
         if (valueIndexer != null)
         {
-            try
+            boolean testFileMethod = Boolean.parseBoolean(System.getProperty("solrmarc.indexer.test.fire.method", "false"));            
+            if (testFileMethod) 
             {
-                logger.trace("Test firing spec: " + indexSpec);
-                valueIndexer.getFieldData(StaticMarcTestRecords.testRecord[0]);
-            }
-            catch (InvocationTargetException ite)
-            {
-                throw new IndexerSpecException(ite.getTargetException(), "Error on test invocation of custom method: " + indexSpec);
-            }
-            catch (TargetError e)
-            {
-                throw new IndexerSpecException(e.getTarget(), "Error on test invocation of custom method: " + indexSpec);
-            }
-            catch (Exception e)
-            {
-                throw new IndexerSpecException(e, "Error on test invocation of custom method: " + indexSpec);
+                try
+                {
+                    logger.trace("Test firing spec: " + indexSpec);
+                    valueIndexer.getFieldData(StaticMarcTestRecords.testRecord[0]);
+                }
+                catch (InvocationTargetException ite)
+                {
+                    throw new IndexerSpecException(ite.getTargetException(), "Error on test invocation of custom method: " + indexSpec);
+                }
+                catch (TargetError e)
+                {
+                    throw new IndexerSpecException(e.getTarget(), "Error on test invocation of custom method: " + indexSpec);
+                }
+                catch (Exception e)
+                {
+                    throw new IndexerSpecException(e, "Error on test invocation of custom method: " + indexSpec);
+                }
             }
         }
         return (valueIndexer);
