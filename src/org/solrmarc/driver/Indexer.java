@@ -385,10 +385,14 @@ public class Indexer
 
     public void endProcessing()
     {
+        if (delQ.size() > 0) 
+        {
+            logger.info("Deleting "+delQ.size()+ " records ");
+        }
         for (String recCtrlNum : delQ)
         {
           //  String recCtrlNum = recDoc.rec.getControlNumber();
-            logger.info("Deleting record " + (recCtrlNum != null ? recCtrlNum : ""));
+            logger.debug("Deleting record " + (recCtrlNum != null ? recCtrlNum : ""));
             try
             {
                 solrProxy.delete(recCtrlNum);
