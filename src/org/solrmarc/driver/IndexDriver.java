@@ -82,8 +82,11 @@ public class IndexDriver extends BootableMain
             try
             {
                 delReader = new BufferedReader(new FileReader(deleteFile));
-                String line = delReader.readLine();
-                indexer.delQ.add(line.trim());                
+                String line;
+                while ((line = delReader.readLine() ) != null)
+                {
+                    indexer.delQ.add(line.trim());
+                }
                 delReader.close();
             }
             catch (FileNotFoundException e)
