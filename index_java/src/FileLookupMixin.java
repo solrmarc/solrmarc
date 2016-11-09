@@ -24,22 +24,22 @@ public class FileLookupMixin implements Mixin
     public String getFromFileBy001(Record record, String filename, String defaultValue)
     {
         Map<String, String> lookupMap = getLookupMap(filename);
-        
+
         String id = record.getControlNumber();
-        String result = resultMap.containsKey(id) ? resultMap.get(id) : defaultValue;
+        String result = lookupMap.containsKey(id) ? lookupMap.get(id) : defaultValue;
         return (result);
     }
 
-    public Collection<String> getFromFileByKey(Collection<String> values, String filename, String defaultValue)
+    public Collection<String> getFromFileByKey(Collection<String> keys, String filename, String defaultValue)
     {
         Map<String, String> lookupMap = getLookupMap(filename);
-        Collection<String> result = new ArrayList<String>(values.size());
+        Collection<String> result = new ArrayList<String>(keys.size());
 
-        for (String value : values)
+        for (String key : keys)
         {
-            if (lookupMap.containsKey(id))
+            if (lookupMap.containsKey(key))
             {
-                result.add(lookupMap.get(id));
+                result.add(lookupMap.get(key));
             }
         }
         if (result.isEmpty() && defaultValue.length() > 0)
@@ -51,15 +51,17 @@ public class FileLookupMixin implements Mixin
 
     private Map<String, String> getLookupMap(String filename)
     {
+        Map<String, String> lookupMap;
         if (!textfileMaps.containsKey(filename))
         {
-            resultMap = loadTextFileIntoMap(filename);
+            lookupMap = loadTextFileIntoMap(filename);
         }
         else
         {
-            resultMap = textfileMaps.get(filename);
-            if (resultMap == null) throw new IndexerSpecException("Map not loaded, lookup fails " + filename);
+            lookupMap = textfileMaps.get(filename);
+            if (lookupMap == null) throw new IndexerSpecException("Map not loaded, lookup fails " + filename);
         }
+        return(lookupMap);
     }
 
     private Map<String, String> loadTextFileIntoMap(String filename)
