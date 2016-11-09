@@ -16,7 +16,7 @@ public class RecordAndDoc
     eErrorSeverity errLvl;
     SolrMarcIndexerException smie;
     public EnumSet<eErrorLocationVal> errLocs = EnumSet.noneOf(eErrorLocationVal.class);
-    
+
     public enum eErrorLocationVal
     {
         MARC_ERROR, INDEXING_ERROR, SOLR_ERROR;
@@ -30,7 +30,7 @@ public class RecordAndDoc
         this.errLocs = errLocs;
         this.errLvl = errLvl;        
     }
-    
+
     public RecordAndDoc(Record rec, SolrInputDocument doc, eErrorLocationVal errLoc, eErrorSeverity errLvl)
     {
         this.rec = rec;
@@ -38,7 +38,7 @@ public class RecordAndDoc
         this.errLocs = EnumSet.of(errLoc);
         this.errLvl = errLvl;        
     }
-    
+
     public RecordAndDoc(Record rec, SolrInputDocument[] docs, EnumSet<eErrorLocationVal> errLocs, eErrorSeverity errLvl)
     {
         this.rec = rec;
@@ -46,7 +46,7 @@ public class RecordAndDoc
         this.errLocs = errLocs;
         this.errLvl = errLvl;        
     }
-    
+
     public RecordAndDoc(Record rec, SolrInputDocument[] docs, eErrorLocationVal errLoc, eErrorSeverity errLvl)
     {
         this.rec = rec;
@@ -118,7 +118,7 @@ public class RecordAndDoc
     {
         this.errLvl = eErrorSeverity.max(this.errLvl, errLvl);
     }
-    
+
     public eErrorSeverity getErrLvl()
     {
         return errLvl;
@@ -133,7 +133,4 @@ public class RecordAndDoc
     {
         this.doc = doc;
     }
-
-    
-    
 }

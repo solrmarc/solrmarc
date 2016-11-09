@@ -33,8 +33,6 @@ import org.marc4j.MarcError;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 import org.solrmarc.driver.BootableMain;
-import org.solrmarc.driver.Indexer;
-import org.solrmarc.driver.ThreadedIndexer;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
@@ -49,7 +47,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -103,18 +100,6 @@ public class SolrMarcDebug extends BootableMain
         });
     }
 
-//    static ConditionalParser parser = null;
-//    static boolean do_debug_parse = true;
-
-//    public static Specification buildSpecificationFromString(String conditional)
-//    {
-////        if (parser == null) parser = new ConditionalParser(do_debug_parse);
-//        Specification result = null;
-//        result = parser.parse(conditional, do_debug_parse);
-//        result.setSpecLabel(conditional);
-//        return (result);
-//    }
-
     /**
      * Create the application.
      */
@@ -123,16 +108,12 @@ public class SolrMarcDebug extends BootableMain
         super.processArgs(args, false);
         initialize();
     }
-    
+
     /**
      * Initialize the contents of the frame.
      */
     private void initialize()
     {
-//        // You must set the HomeDir before instantiating the ValueIndexerFactory
-//        // since that directory is used as the location to look for java source files to compile and include
-//        // If it is unspecified, the program looks in 
-//        ValueIndexerFactory.setHomeDirs(homeDirStrs);
         indexerFactory = ValueIndexerFactory.initialize(homeDirStrs);
         String inputSource[] = new String[1];
         String propertyFileAsURLStr = PropertyUtils.getPropertyFileAbsoluteURL(homeDirStrs, options.valueOf(readOpts), true, inputSource);
@@ -161,15 +142,15 @@ public class SolrMarcDebug extends BootableMain
 
         frmSolrmarcIndexSpecification.getContentPane().setLayout(
                 new MigLayout("", "[512px,grow][][512px,grow]", "[42.00][361.00px,grow][::-2.00px][141.00px,grow][][100.00px,grow]"));
-        
+
                 JPanel panel_1 = new JPanel();
                 frmSolrmarcIndexSpecification.getContentPane().add(panel_1, "cell 0 0 3 1,grow");
                 panel_1.setLayout(new MigLayout("", "[grow][][][]", "[][grow][]"));
-                
+
                 marcIdentifier = new JComboBox<String>();
-                        
+
                 panel_1.add(marcIdentifier, "flowx,cell 0 0,grow");
-                
+
                 JButton btnNextRecord = new JButton("Next >");
                 btnNextRecord.addActionListener(new ActionListener()
                 {
@@ -181,7 +162,7 @@ public class SolrMarcDebug extends BootableMain
                         if (index >= 0 && index < cnt - 1) marcIdentifier.setSelectedIndex(index + 1);
                     }
                 });
-        
+
                 JButton btnApply = new JButton("Apply");
                 btnApply.addActionListener(new ActionListener()
                 {
@@ -193,7 +174,7 @@ public class SolrMarcDebug extends BootableMain
                     }
                 });
                 panel_1.add(btnApply, "cell 1 0");
-                
+
                 JButton btnPrevRecord = new JButton("< Prev");
                 btnPrevRecord.addActionListener(new ActionListener()
                 {
@@ -208,8 +189,8 @@ public class SolrMarcDebug extends BootableMain
                 btnPrevRecord.setMnemonic('<');
                 panel_1.add(btnNextRecord, "cell 3 0");
                 btnNextRecord.setMnemonic('>');
-                
-                        
+
+
                 marcIdentifier.addActionListener(new ActionListener()
                 {
                     @Override
@@ -228,7 +209,7 @@ public class SolrMarcDebug extends BootableMain
                             processRecordToOutput(rec);
                         }
                     }
-        
+
                 });
 
         JScrollPane scrollPane = new JScrollPane();
@@ -246,14 +227,14 @@ public class SolrMarcDebug extends BootableMain
        // configPane.getDocument().
         undo = new CompoundUndoManager(configPane);
         configPane.getDocument().addUndoableEditListener(undo);
-        
+
         JScrollPane scrollPane_2 = new JScrollPane();
         frmSolrmarcIndexSpecification.getContentPane().add(scrollPane_2, "cell 2 1,grow");
 
         outputPane = new JTextPane();
         outputPane.setEditable(false);
         scrollPane_2.setViewportView(outputPane);
-        
+
         JSeparator separator_1 = new JSeparator();
         frmSolrmarcIndexSpecification.getContentPane().add(separator_1, "cell 0 4 3 1");
 
@@ -268,7 +249,7 @@ public class SolrMarcDebug extends BootableMain
 
         //Set up the menu bar.
         actions=createActionTable(configPane);
-        
+
         JMenuBar menuBar = new JMenuBar();
         frmSolrmarcIndexSpecification.setJMenuBar(menuBar);
 
@@ -283,10 +264,10 @@ public class SolrMarcDebug extends BootableMain
 
         JMenu mnEdit = createEditMenu();
         menuBar.add(mnEdit);
-        
+
         JMenu mnViewMenu = new JMenu("View");
         menuBar.add(mnViewMenu);
-        
+
         JMenuItem mntmFontPlus = new JMenuItem("Increase Fontsize");
         mntmFontPlus.setEnabled(true);
         mntmFontPlus.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, InputEvent.CTRL_MASK));
@@ -299,7 +280,7 @@ public class SolrMarcDebug extends BootableMain
                 increaseFontSize();
             }
         });
-        
+
         JMenuItem mntmFontMinus = new JMenuItem("Decrease Fontsize");
         mntmFontMinus.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, InputEvent.CTRL_MASK));
         mnViewMenu.add(mntmFontMinus);
@@ -339,7 +320,7 @@ public class SolrMarcDebug extends BootableMain
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                
+
                 // File f = new File("resources/specTestRecs.mrc");
                 File f = null; // new File("resources/testSpec.properties");
                 JFileChooser chooser = new JFileChooser(homeDirStrs[0]);
@@ -357,11 +338,11 @@ public class SolrMarcDebug extends BootableMain
                 openSpecifiedMarcFile(f, true);
             }
         });
-        
+
         // read command line arguments to initialize windows 
         String specs = options.valueOf(configSpecs);
         if (specs != null)  configureIndexer(specs);
-        
+
         List<String> inputFiles = options.valuesOf(files);
         boolean first = true;
         for (String inputFile : inputFiles)
@@ -371,7 +352,7 @@ public class SolrMarcDebug extends BootableMain
             first = false;
         }
     }
-    
+
     public void configureIndexer(String indexSpecifications)
     {
         String[] indexSpecs = indexSpecifications.split("[ ]*,[ ]*");
@@ -407,7 +388,7 @@ public class SolrMarcDebug extends BootableMain
             setFontSize(fontSizeArray[fontSizeIndex]);
         }
     }
-    
+
     private void decreaseFontSize()
     {
         int fontSize = getCurFontSize();
@@ -431,7 +412,7 @@ public class SolrMarcDebug extends BootableMain
 
     private void setFontSize(int fontSize)
     {
-        
+
         Font currFont = recordPane.getFont();
         recordPane.setFont(new Font("Courier New", currFont.getStyle(), fontSize));
         currFont = configPane.getFont();
@@ -441,7 +422,7 @@ public class SolrMarcDebug extends BootableMain
         currFont = errorPane.getFont();
         errorPane.setFont(new Font("Courier New", currFont.getStyle(), fontSize));
     }
-    
+
     private void openSpecifiedConfig(File f, boolean clear)
     {
         FileReader reader = null;
@@ -560,58 +541,8 @@ public class SolrMarcDebug extends BootableMain
     }
 
 
-    // private Collection<String> processRecord(Record rec)
-    // {
-    // String solrFieldName = fieldName.getText();
-    // String fieldSpecStr = fieldSpec.getText();
-    // String formatSpecStr = formatSpec.getText();
-    // if (fieldSpecStr.length() == 0 || formatSpecStr.length() == 0)
-    // return(null);
-    //
-    // MultiValueIndexer indexer =
-    // (MultiValueIndexer)indexerFactory.createValueIndexer(solrFieldName,
-    // fieldSpecStr);
-    // //MultiValueFieldMatchCollector fmc = new
-    // MultiValueFieldMatchCollector();
-    // Collection<String> result = null;
-    // try {
-    // result = indexer.getFieldData(rec);
-    // }
-    // catch (Exception e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    //// if (formatSpecStr.contains("unique"))
-    //// {
-    //// result = new LinkedHashSet<String>();
-    //// }
-    //// else
-    //// {
-    //// result = new ArrayList<String>();
-    //// }
-    //// theSpec.setFormatter(new FieldFormatterJoin(new
-    // FieldFormatterBase(true), " -- "));
-    //// theSpec.setFormatter(new FieldFormatterPatternMapped(new
-    // FieldFormatterBase(true),
-    // "(^|.*[^0-9])((20|1[5-9])[0-9][0-9])([^0-9]|$)=>$2||.*[^0-9].*=>"));
-    //// Collection<FieldMatch> values = theSpec.getFieldMatches(rec);
-    //// for (FieldMatch fm : values)
-    //// {
-    //// SingleSpecification spec = fm.getSpec();
-    //// VariableField vf = fm.getVf();
-    //// spec.addFieldValues(result, vf);
-    //// }
-    // return(result);
-    // }
-
     private void processRecordToOutput(Record rec)
     {
-        // String solrFieldName = fieldName.getText();
-        // String fieldSpecStr = fieldSpec.getText();
-        // String formatSpecStr = formatSpec.getText();
-        // if (fieldSpecStr.length() == 0 || formatSpecStr.length() == 0)
-        // return(null);
-        
         String currentConfigText = configPane.getText();
         if (! currentConfigText.equals(previousConfigText) || indexers == null)
         {
@@ -641,7 +572,7 @@ public class SolrMarcDebug extends BootableMain
         attributesErr.addAttribute(StyleConstants.CharacterConstants.Italic, Boolean.FALSE);
         attributesErr.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.RED);
         Document doc = outputPane.getDocument();
-        
+
         for (AbstractValueIndexer<?> indexer : indexers)
         {
             Collection<String> fieldNameList = indexer.getSolrFieldNames();
@@ -719,23 +650,6 @@ public class SolrMarcDebug extends BootableMain
                     e1.printStackTrace();
                 }
             }
-//
-//            if (rec.hasErrors())
-//            {
-//                for (MarcError error : rec.getErrors())
-//                {
-//                    try
-//                    {
-//                        doc.insertString(doc.getLength(), "marc_error : "+error.toString()+"\n", attributesErr);
-//                    }
-//                    catch (BadLocationException e)
-//                    {
-//                        // TODO Auto-generated catch block
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-
         }
         List<IndexerSpecException> perRecordExceptions = indexerFactory.getPerRecordErrors();
         try
@@ -753,7 +667,6 @@ public class SolrMarcDebug extends BootableMain
     private String getTextForMarcErrorsAndExceptions(Record rec, List<IndexerSpecException> exceptions)
     {
         StringBuilder text = new StringBuilder();
-//        String lastSpec = "";
         if (rec.hasErrors())
         {
             for (MarcError err : rec.getErrors())
@@ -766,12 +679,7 @@ public class SolrMarcDebug extends BootableMain
             for (IndexerSpecException e : exceptions)
             {
                 if (e.getSolrField() == null) e.setSolrFieldAndSpec("marc_error", null);
-//                String specMessage = e.getSpecMessage();
-//                if (!specMessage.equals(lastSpec))
-//                {
-//                    text.append(specMessage);
-//                }
-//                lastSpec = specMessage;
+
                 text.append(e.getMessage()).append("\n");
                 for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause())
                 {
