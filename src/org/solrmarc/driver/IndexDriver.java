@@ -1,7 +1,9 @@
 package org.solrmarc.driver;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -65,8 +67,36 @@ public class IndexDriver extends BootableMain
         List<String> inputFiles = options.valuesOf(files);
         logger.info("Opening input files: " + Arrays.toString(inputFiles.toArray()));
         this.configureReader(inputFiles);
+        if (deleteRecordByIdFile.value(options) != null)
+            this.processDeletes();
 
         this.processInput();
+    }
+
+    private void processDeletes()
+    {
+        File deleteFile = deleteRecordByIdFile.value(options);
+        if (deleteFile.exists() && deleteFile.canRead())
+        {
+            BufferedReader delReader;
+            try
+            {
+                delReader = new BufferedReader(new FileReader(deleteFile));
+                String line = delReader.readLine();
+                indexer.delQ.add(line.trim());                
+                delReader.close();
+            }
+            catch (FileNotFoundException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } 
     }
 
     public void initializeFromOptions()

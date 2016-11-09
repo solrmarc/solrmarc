@@ -26,6 +26,7 @@ public class BootableMain
     protected OptionSpec<String> addnlLibDirs;
     protected OptionSpec<File> solrjDir;
     protected OptionSpec<String> solrjClass;
+    protected OptionSpec<File> deleteRecordByIdFile;
     protected OptionSpec<File> errorMarcErrOutFile;
     protected OptionSpec<File> errorIndexErrOutFile;
     protected OptionSpec<File> errorSolrErrOutFile;
@@ -44,6 +45,7 @@ public class BootableMain
         errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
         errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
         errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
+        deleteRecordByIdFile = parser.accepts("del", "File to read list of document ids that are to be deleted").withRequiredArg().ofType( File.class );
         parser.accepts("debug", "non-multithreaded debug mode");
         parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
         parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format");//.availableUnless("sorlURL");
