@@ -37,7 +37,7 @@ public class Indexer
     protected SolrProxy solrProxy;
     public EnumSet<eErrorHandleVal> errHandle = EnumSet.noneOf(eErrorHandleVal.class);
     protected final BlockingQueue<RecordAndDoc> errQ;
-    protected final BlockingQueue<RecordAndDoc> delQ;
+    protected final BlockingQueue<String> delQ;
     protected boolean shuttingDown = false;
     protected boolean isShutDown = false;
     private int cnts[] = new int[] { 0, 0, 0 };
@@ -53,7 +53,7 @@ public class Indexer
         this.indexers = indexers;
         this.solrProxy = solrProxy;
         errQ = new LinkedBlockingQueue<RecordAndDoc>();
-        delQ = new LinkedBlockingQueue<RecordAndDoc>();
+        delQ = new LinkedBlockingQueue<String>();
     }
 
     private Indexer(Indexer toClone)
@@ -119,20 +119,21 @@ public class Indexer
 
             cnts[0]++;
             RecordAndDoc recDoc = indexToSolrDoc(record);
-            cnts[1]++;
             if (recDoc.getSolrMarcIndexerException() != null)
             {
                 SolrMarcIndexerException smie = recDoc.getSolrMarcIndexerException();
                 String recCtrlNum = recDoc.rec.getControlNumber();
-                String idMessage = smie.getMessage();
+                String idMessage = smie.getMessage() != null ? smie.getMessage() : "";
                 if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
                 {
-                    logger.info("Ignored record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                    logger.info("Record will be Ignored " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                    continue;
                 }
                 else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
                 {
-                    logger.info("Deleted record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
-                    delQ.add(recDoc);
+                    logger.info("Record will be Deleted " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                    delQ.add(recCtrlNum);
+                    continue;
                 }
                 else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
                 {
@@ -153,6 +154,7 @@ public class Indexer
                     continue;
                 }
             }
+            cnts[1]++;
             try {
                 if (recDoc.getDoc() != null)
                 {
@@ -383,9 +385,9 @@ public class Indexer
 
     public void endProcessing()
     {
-        for (RecordAndDoc recDoc : delQ)
+        for (String recCtrlNum : delQ)
         {
-            String recCtrlNum = recDoc.rec.getControlNumber();
+          //  String recCtrlNum = recDoc.rec.getControlNumber();
             logger.info("Deleting record " + (recCtrlNum != null ? recCtrlNum : ""));
             try
             {

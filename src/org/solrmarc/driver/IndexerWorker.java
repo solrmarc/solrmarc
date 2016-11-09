@@ -77,15 +77,17 @@ public class IndexerWorker implements Runnable
                 {
                     SolrMarcIndexerException smie = recDoc.getSolrMarcIndexerException();
                     String recCtrlNum = recDoc.rec.getControlNumber();
-                    String idMessage = smie.getMessage();
+                    String idMessage = smie.getMessage() != null ? smie.getMessage() : "";
                     if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
                     {
-                        logger.info("Ignored record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                        logger.info("Record will be Ignored " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                        continue;
                     }
                     else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
                     {
-                        logger.info("Deleted record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
-                        indexer.delQ.add(recDoc);
+                        logger.info("Record will be Deleted " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                        indexer.delQ.add(recCtrlNum);
+                        continue;
                     }
                     else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
                     {

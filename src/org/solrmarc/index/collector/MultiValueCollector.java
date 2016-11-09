@@ -94,7 +94,7 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
 
     public Collection<String> collect(final Collection<String> values)
     {
-        if ((!isUnique || values instanceof Set<?> ) && sortComparator == null && first == eFirstVal.ALL) 
+        if ((!isUnique || values instanceof Set<?> ) && sortComparator == null && first == eFirstVal.ALL && deleteRecordIfEmpty == false) 
             return values;
         Collection<String> result;
         if (isUnique)
@@ -122,6 +122,10 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
         }
         if (result == null || result.isEmpty())
         {
+            if (deleteRecordIfEmpty)
+            {
+                throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
+            }
             return (result);
         }
         else if (first == eFirstVal.FIRST)
