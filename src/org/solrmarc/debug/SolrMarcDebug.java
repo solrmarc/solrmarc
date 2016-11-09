@@ -115,6 +115,7 @@ public class SolrMarcDebug extends BootableMain
     private void initialize()
     {
         indexerFactory = ValueIndexerFactory.initialize(homeDirStrs);
+        System.setProperty("solrmarc.indexer.test.fire.method", "true");
         String inputSource[] = new String[1];
         String propertyFileAsURLStr = PropertyUtils.getPropertyFileAbsoluteURL(homeDirStrs, options.valueOf(readOpts), true, inputSource);
         try
