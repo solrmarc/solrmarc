@@ -23,19 +23,19 @@ import org.solrmarc.tools.Utils;
 public class GetFormatMixin extends SolrIndexerMixin
 {
   //  Set<String> errorsFound = null;
-    
+
 //    public void perRecordInit(Record record)
 //    {
 //        errorsFound = new LinkedHashSet<String>();
 //    }
-    
+
     public void addFormatError(String controlNum, String field, String subfield, eErrorSeverity severity, String message)
     {
         String separator = (field.length() > 0 && subfield.length() > 0) ? ":" : "";
         String errorStr = "GetFormatMixin "+ field + separator + subfield + " : "+message;
         ValueIndexerFactory.instance().addPerRecordError(new IndexerSpecException(severity, errorStr));
     }
-    
+
     private enum ProfileType
     {
         NoneDefined,
@@ -51,7 +51,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             return "ProfileType." + name();
         }
     };
-    
+
     private enum ContentType
     {
         NoneDefined,
@@ -134,7 +134,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
     }
 
-    
+
     private enum MediaType
     {
         ActivityCard,
@@ -292,7 +292,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             double sigmoid = 1 / ( 1 + Math.exp(-1 * (2.0 * (priority -0.5))));
             return(sigmoid);
-            
+
         }
         @Override public String toString()
         {
@@ -320,12 +320,12 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             double sigmoid = 1 / ( 1 + Math.exp(-1 * (2.0 * (priority -0.5))));
             return(sigmoid);
-            
+
         }
 
 
     };
-    
+
     private enum FormOfItem
     {
         Microfilm, 
@@ -342,7 +342,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             return "FormOfItem." + name();
         }
     }
-    
+
     private enum CombinedType
     {
         EBook,
@@ -383,7 +383,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( 't', ProfileType.Books);                   //  t - Manuscript language material
         }
     };
-    
+
     private static LinkedHashMap<Character, ProfileType> mainSubProfileMap = new LinkedHashMap<Character, ProfileType>() {
         {           
             put( 'a', ProfileType.Books);                   //  a - Monographic component part
@@ -396,7 +396,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( 's', ProfileType.Serial);                  //  s - Serial
         }
     };
-    
+
     private static LinkedHashMap<String, ContentType[]> field245hTypeMap = new LinkedHashMap<String, ContentType[]>() {
         {
             put ( "art original", new ContentType[]{ContentType.Art});
@@ -417,7 +417,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put ( "videocassette", new ContentType[]{ ContentType.Video });
         }
     };
-    
+
     private static LinkedHashMap<Character, ContentType> mainTypeMap = new LinkedHashMap<Character, ContentType>() {
         {
             put( 'a', ContentType.Book);                    //  a - Book
@@ -440,7 +440,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( 't', ContentType.Manuscript);              //  t - Manuscript language material
         }
     };
-    
+
     private static LinkedHashMap<Character, ContentType> mainSubTypeMap = new LinkedHashMap<Character, ContentType>() {
         {           
             put( 'a', ContentType.BookComponentPart);       //  a - Monographic component part
@@ -473,7 +473,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( ' ', ContentType.ComputerFile);                    //   - Anything else
         }
     };
-    
+
     private static LinkedHashMap<Character, ContentType> visualSubTypes = new LinkedHashMap<Character, ContentType>() {
         {
             put( 'a', ContentType.Art);                             // a - Art original   
@@ -497,7 +497,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( 'w', ContentType.Toy);                             // w - Toy
         }
     };
-    
+
     private static LinkedHashMap<Character, String> visualValidSubTypes = new LinkedHashMap<Character, String>() {
         {
             put( 'a', "kr");                                        // a - Art original   
@@ -536,7 +536,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( ' ', ContentType.Map);                             //   - Anything else
         }
     };
-    
+
     private static LinkedHashMap<Character, ContentType> serialsSubTypes = new LinkedHashMap<Character, ContentType>() {
         { 
             put( 'd', ContentType.Database );                       // d - updating database
@@ -548,7 +548,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( ' ', ContentType.Serial);                          //   - Anything else
         }
     };
-    
+
     private static LinkedHashMap<Character, ContentType> govDocTypes = new LinkedHashMap<Character, ContentType>() {
         { 
             put( 'a', ContentType.GovernmentDocumentOther );        // a - Autonomous or semi-autonomous component
@@ -563,7 +563,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( 'z', ContentType.GovernmentDocumentOther);         // z - Other
         }
     };
-    
+
     // used for mapping the 007 field(s)
     private static LinkedHashMap<String, MediaType> mediaTypeMap = new LinkedHashMap<String, MediaType>() {
         {
@@ -577,7 +577,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( "as", MediaType.MapSection);                   //  as - Section
             put( "ay", MediaType.MapView);                      //  ay - View
             put( "az", MediaType.MapOther);                     //  az - Other Map
-            
+
             put( "aa", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
             put( "ab", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
             put( "ac", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
@@ -591,7 +591,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( "av", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
             put( "aw", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
             put( "ax", MediaType.TypeObsolete);                 //  aa ab ac ah ai am an ao ap at av aw ax - Obsolete Map formats
-            
+
             // electronic resource
             put( "ca", MediaType.ComputerTapeCartridge);        // ca - Tape cartridge
             put( "cb", MediaType.ComputerChipCartridge);        // cb - Chip cartridge
@@ -607,7 +607,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( "cr", MediaType.Online);                       // cr - Remote
             put( "cu", MediaType.ComputerOther);                // cu - Unspecified
             put( "cz", MediaType.ComputerOther);                // cz - Other
-            
+
             // globe
             put( "da", MediaType.GlobeCelestial);				// da - Celestial globe
             put( "db", MediaType.GlobePlanetary);				// db - Planetary or lunar globe
@@ -616,7 +616,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( "de", MediaType.GlobeEarthMoon);				// de - Earth moon globe
             put( "du", MediaType.GlobeOther);                   // du - Unspecified
             put( "dz", MediaType.GlobeOther);                   // dz - Other
-            
+
             // tactile material
             put( "fa", MediaType.TactileMoon);				    // fa - Moon
             put( "fb", MediaType.Braille);                      // fb - Braille
@@ -710,7 +710,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( "td", MediaType.LooseLeaf);                    // td - Loose-leaf
             put( "tu", MediaType.TextOther);                    // tu - Unspecified
             put( "tz", MediaType.TextOther);                    // tz - Other
-            
+
             // video recording
              put( "v...a", MediaType.VideoBeta);                // vf--a - Beta (1/2 in., videocassette)
              put( "v...b", MediaType.VideoVHS);                 // vf--b - VHS (1/2 in., videocassette)
@@ -734,10 +734,10 @@ public class GetFormatMixin extends SolrIndexerMixin
              put( "v...?", null);                               // v---? - Obsolete type specification
              put( "v...u", MediaType.VideoOther);               // v---u - Unspecified         
     //       put( "v...z", MediaType.VideoOther);               // v---z - Other video type         // needs special handling
-                                         
+
         }
     };
-    
+
     // used for validating the form of a specific video item
     private static LinkedHashMap<String, Character> videoFormMap = new LinkedHashMap<String, Character>() {
         {
@@ -762,7 +762,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             put( "v...v", 'd');                                 // vd--v - DVD
         }
     };
-        
+
     /**
      * Return the content type and media types, plus electronic, for this record
      * 
@@ -793,7 +793,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
         return(formatsMapped);
     }
-    
+
     /**
      * Return the content type and media types, plus electronic, for this record
      * 
@@ -812,7 +812,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         if (isArchive(record)) formats.add(ControlType.Archive.toString());
         return(formats);
     }
-    
+
     private boolean recordIsMinimal(Record record)
     {
         ControlField field008 = ((ControlField)record.getVariableField("008"));
@@ -865,7 +865,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
         return(null);
     }
-    
+
     private boolean setContainsAt(List<VariableField> fields, int offset, String match, boolean ignoreCase)
     {
         for (VariableField vf : fields)
@@ -906,7 +906,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         String onlineAccordingTo = isOnlineFormatTypes(record);
         boolean hasFullLink = hasFullText(record);
         boolean hasSupplLink = hasSupplText(record);
-        
+
         // if so, and this is a book, add e-book as well
         if (onlineAccordingTo != null && !hasFullLink && !hasSupplLink)
         {
@@ -920,7 +920,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             addFormatError(record.getControlNumber(), "856", "", eErrorSeverity.WARN, "Record has valid 856 field, but is missing declarations of online");                
         }
-        
+
         // if so, and this is a book, add e-book as well
         if (formats.contains(ContentType.Book.toString()) && hasFullLink == true)
         {
@@ -933,7 +933,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
         return(formats);
     }
-    
+
     /**
      * Return the primary content type for this record
      * 
@@ -955,7 +955,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
         return primaryFormat;
     }
-    
+
     /**
      * Return the primary content type, plus electronic, for this record
      * 
@@ -971,9 +971,9 @@ public class GetFormatMixin extends SolrIndexerMixin
 
         String primaryType = getPrimaryContentType(record);
         format.add(primaryType);
-        
+
         format = addOnlineTypes(record, format, false);
-        
+
         return format;
     }
 
@@ -1035,6 +1035,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         for (VariableField field006v : fields006)
         {
             ControlField field006 = (ControlField)field006v;
+            if (field006.getData().length() == 0) continue;
             ProfileType profile = extractProfile(field006.getData(), "006");
             ContentType type = extractType(field006.getData(), "006");
             if (profile != ProfileType.NoneDefined)
@@ -1044,7 +1045,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
 
         // / DATA FIELDS ///
-        
+
         // thesis
         if (!record.getVariableFields("502").isEmpty())
         {
@@ -1054,7 +1055,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             {
                 // set the first (primary) type as thesis
                 contentTypes = addToTop(contentTypes, ContentType.Thesis.toString());
-    
+
                 // nix manuscript so we can distinguish actual manuscripts
                 contentTypes.remove(ContentType.Manuscript.toString());
             }
@@ -1082,7 +1083,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
         return contentTypes;
     }
-    
+
     private void getContentTypeFromFixedField(Set<String> contentTypesStr, Record record, ControlField field, ProfileType profile, ContentType defaultType, int offsetInField)
     {
         ContentType typeToAdd = null;
@@ -1206,7 +1207,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         }
 
     }
-    
+
     static String govDocLetters = "acfilmoz";
     private ContentType isGovDoc(ControlField field, Record record)
     {
@@ -1278,8 +1279,8 @@ public class GetFormatMixin extends SolrIndexerMixin
         return 00;
     }
 
-    
-    
+
+
     /**
      * Parse out media / carrier types from record
      * 
@@ -1317,7 +1318,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             // first, check to make sure this is a post-1981 007 by looking at
             // position 2, which should be undefined
             String field007Str = validate007Field(record, profileType, leaderType, field007);
-            
+
             if (field007Str == null) continue;
             char materialGeneral =  field007Str.charAt(0);
             String materialFirst =  "" + field007Str.charAt(0) + "?";
@@ -1431,7 +1432,7 @@ public class GetFormatMixin extends SolrIndexerMixin
         {
             formStr.add(mt.toString());
         }
-        
+
         String[] formatTags = { "008", "006" };
         List<VariableField> fieldsFormat = record.getVariableFields(formatTags);
 
@@ -1449,6 +1450,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             }
             else
             {
+                if (fieldFormat.getData().length() == 0) continue;
                 profile = extractProfile(fieldFormat.getData(), "006");
             }
 
@@ -1571,7 +1573,7 @@ public class GetFormatMixin extends SolrIndexerMixin
             possibleForms.put(key, value);
         }
     }
-    
+
     private MediaTypeHeuristic getMediaTypeHeuristically(Record record, ContentType leaderType)
     {
         LinkedHashMap<MediaType, MediaTypeHeuristic> possibleForms = new LinkedHashMap<MediaType, MediaTypeHeuristic>(); 
@@ -1884,7 +1886,7 @@ public class GetFormatMixin extends SolrIndexerMixin
 
         return(urls.size() != 0 ? true : false);
     }
-    
+
     /**
      * Shift (or add) element to the front of our list
      *
