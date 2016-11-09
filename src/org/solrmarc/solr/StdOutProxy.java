@@ -11,12 +11,12 @@ import org.apache.solr.common.SolrInputDocument;
 public class StdOutProxy extends SolrProxy
 {
     PrintStream output;
-    
+
     public StdOutProxy(PrintStream out)
     {
         this.output = out;
     }
-    
+
     public int addDoc(SolrInputDocument inputDoc)
     {
         synchronized (output)
@@ -24,7 +24,7 @@ public class StdOutProxy extends SolrProxy
             ArrayList<String> fNames = new ArrayList<String>();
             fNames.addAll(inputDoc.getFieldNames());
             Collections.sort(fNames);
-            String id = inputDoc.getFieldValue("id").toString();
+            String id = inputDoc.getFieldValue("id") != null ? inputDoc.getFieldValue("id").toString() : "<no id>";
             for (String fieldName : fNames)
             {
                 Collection<Object> values = inputDoc.getFieldValues(fieldName);
@@ -39,7 +39,7 @@ public class StdOutProxy extends SolrProxy
             return(1);
         }
     }
-    
+
     @Override
     public int addDocs(Collection<SolrInputDocument> docQ)
     {
@@ -55,7 +55,7 @@ public class StdOutProxy extends SolrProxy
     {
         return(null);
     }
-    
+
     public void commit(boolean optimize)
     {
         output.flush();
