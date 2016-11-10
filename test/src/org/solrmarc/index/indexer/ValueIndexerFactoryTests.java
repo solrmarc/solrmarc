@@ -22,7 +22,7 @@ import static org.junit.Assert.assertNotNull;
 public class ValueIndexerFactoryTests
 {
     private Record testRecord;
-    private final static String inputfilename="./records/u233.mrc";
+    private final static String inputfilename="./test/data/records/u233.mrc";
     private static ValueIndexerFactory factory;
     static
     {

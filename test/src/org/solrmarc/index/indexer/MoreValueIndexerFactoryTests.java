@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 public class MoreValueIndexerFactoryTests
 {
     private Record testRecord;
-    private final static String inputfilename="./records/u5278992.mrc";
+    private final static String inputfilename="./test/data/records/u5278992.mrc";
     private static ValueIndexerFactory factory;
     static
     {
