@@ -2,23 +2,11 @@
     <description>
          A total rewrite of the SolrMarc project
     </description>
-    <!-- set global properties for this build -->
+    <!-- load global properties for this build -->
 	<property file="build.properties" />
-    <property name="src" location="src"/>
-    <property name="src.tests" location="test/src"/>
-    <property name="test" location="test"/>
-    <property name="build" location="build"/>
-    <property name="build.tests" location="test/build"/>
-    <property name="dist" location="dist"/>
-    <property name="lib" location="lib"/>
-    <property name="distlib" location="dist/lib"/>
-    <property name="reports.tests" location="logs"/>
-    <property name="custom.jar.name" value="solrmarc_core"/>
-
+	
     <!-- import other ant scripts -->
-    <property name="buildtools.path" location="buildtools" />
-
-    <import file="${buildtools.path}/parser_tasks.xml" optional="true" />
+    <import file="${buildtools.dir}/parser_tasks.xml" optional="false" />
 
 	<tstamp>
 	    <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
@@ -28,16 +16,15 @@
         <!-- Create the time stamp -->
         <tstamp/>
         <!-- Create the build directory structure used by compile -->
-        <mkdir dir="${build}"/>
+        <mkdir dir="${build.dir}"/>
     </target>
 
-    <target name="precompile" unless="precompile.already.run"
-	        description="run jflex and cup to generate javafiles for parser and scanner" >
-		<jflex file="${src}/org/solrmarc/index/indexer/FullScanner.lex" verbose="true" 
-			   outdir="${src}/org/solrmarc/index/indexer/" nobak="true" />
+    <target name="precompile" unless="precompile.already.run"  description="run jflex and cup to generate javafiles for parser and scanner" >
+		<jflex file="${src.dir}/org/solrmarc/index/indexer/FullScanner.lex" verbose="true" 
+			   outdir="${src.dir}/org/solrmarc/index/indexer/" nobak="true" />
     	
-        <cup srcfile="${src}/org/solrmarc/index/indexer/FullConditionalParser.cup"
-             destdir="${src}"
+        <cup srcfile="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.cup"
+             destdir="${src.dir}"
              package="org.solrmarc.index.indexer"
         	 symbols="FullSym"
              parser="FullConditionalParser"
@@ -45,17 +32,16 @@
         <property name="precompile.already.run" value="true" />
 	</target>
 
-    <target name="compile" depends="init,precompile"  unless="compile.already.run"
-            description="compile the source">
+    <target name="compile" depends="init,precompile"  unless="compile.already.run"  description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
-        <javac target="1.7" source="1.7" srcdir="${src}" destdir="${build}" debug="true" debuglevel="lines,vars,source" >
+        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${src.dir}" destdir="${build.dir}" debug="true" debuglevel="lines,vars,source" >
             <classpath >
-                <fileset dir="lib">
+                <fileset dir="${lib.dir}">
                     <include name="**/*.jar"/>
                 </fileset>
             </classpath>
             <classpath >
-                <fileset dir="lib-solrj">
+                <fileset dir="${lib.solrj.dir}">
                     <include name="**/*.jar"/>
                 </fileset>
             </classpath>
@@ -63,158 +49,115 @@
         <property name="compile.already.run" value="true" />
     </target>
 
-    <target name="jar" depends="compile" unless="jar.already.run"
-            description="Build custom jar file containing custom code" >
-        <mkdir dir="${dist}" />
+    <target name="jar" depends="compile" unless="jar.already.run" description="Build custom jar file containing custom code" >
+        <mkdir dir="${dist.dir}" />
        
         <path id="libjarfiles" >
-             <fileset dir="${lib}" includes="*.jar" />
-         </path>
+            <fileset dir="${lib.dir}" includes="*.jar" />
+        </path>
 
-         <copy todir="${distlib}" flatten="true">
-           <path  refid="libjarfiles"/>
-         </copy> 
+        <copy todir="${dist.lib.dir}" flatten="true">
+            <path refid="libjarfiles"/>
+        </copy> 
          
- <!--   	<manifestclasspath property="manifest.classpath" jarfile="${dist}/${custom.jar.name}.jar">
-    	    <classpath>
-    	        <fileset dir="${distlib}" includes="*.jar"/>
-    	    </classpath>
-    	</manifestclasspath> -->
-    	
-        <jar destfile="${dist}/${custom.jar.name}_${version}.jar">
+        <jar destfile="${dist.dir}/${custom.jar.name}_${version}.jar">
         	<manifest>
         	    <attribute name="Main-Class" value="org.solrmarc.driver.Boot"/>
     		    <attribute name="Version" value="${version}"/>
     		    <attribute name="Built-Date" value="${TODAY}"/>
             </manifest>
-   <!--      	<fileset dir="${basedir}" includes="log4j.properties" /> -->
-        	<fileset dir="${build}" includes="**/*.class" />
+        	<fileset dir="${build.dir}" includes="**/*.class" />
         </jar>
         <echo message="jar built" />
         <property name="jar.already.run" value="true" />
     </target>
 	
-    <target name="deploy" depends="jar" unless="jar.already.run"
-            description="Build custom jar file containing custom code and log4j.properties" >
-        <mkdir dir="${dist}" />
-
-        <path id="solrjjarfiles" >
-            <fileset dir="lib-solrj" includes="*.jar" />
-        </path>
-
-        <copy todir="${dist}/lib-solrj" flatten="true">
-          <path  refid="solrjjarfiles"/>
-        </copy> 
-        
-        <mkdir dir="${dist}/index_java/" />
-        <copy todir="${dist}/index_java" >
-            <fileset dir="index_java" includes="src/**/*.java"/>
-        </copy> 
-        
-        <mkdir dir="${dist}/translation_maps" />
-        <copy todir="${dist}/translation_maps" >
-            <fileset dir="translation_maps" includes="*.properties"/>
-        </copy> 
-        
-        <mkdir dir="${dist}/index_scripts/" />
-        <copy todir="${dist}/index_scripts/" >
-            <fileset dir="index_scripts/" includes="*.bsh"/>
-        </copy> 
-       
-    	<mkdir dir="${dist}/extra_data" />
-        <copy todir="${dist}/extra_data" >
-            <fileset dir="extra_data" includes="*"/>
-        </copy> 
-        
-    	<mkdir dir="${dist}/resources" />
-        <copy todir="${dist}/resources" >
-            <fileset dir="resources" includes="*.properties"/>
-        </copy> 
-        
-    	<copy todir="../VuFind_Config" >
-    		<fileset dir="${dist}" includes="solrmarc_core.jar" />
-    	</copy>
-    </target>
-
-    <target name="test-compile"  description="compile the source of tests">
+    <target name="test-compile"  description="compile the source of tests" unless="test.already.compiled" >
         <!-- Compile the java code from ${src} into ${build} -->
-        <javac target="1.7" source="1.7" srcdir="${src.tests}" destdir="${build.tests}" debug="true" debuglevel="lines,vars,source" >
+        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${test.src.dir}" destdir="${test.build.dir}" debug="true" debuglevel="lines,vars,source" >
             <classpath >
-                 <fileset dir="dist">
-                     <include name="${custom.jar.name}_${version}.jar"/>
-                 </fileset>
-             </classpath>
-            <classpath >
-                 <fileset dir="dist/lib">
-                     <include name="**/*.jar"/>
-                 </fileset>
-             </classpath>
-            <classpath >
-                <fileset dir="lib-solrj">
+                <fileset dir="${dist.dir}">
+                    <include name="${custom.jar.name}_${version}.jar"/>
+                </fileset>
+                <fileset dir="${dist.lib.dir}">
                     <include name="**/*.jar"/>
                 </fileset>
-            </classpath>
-            <classpath >
-                <fileset dir="test/lib">
+                <fileset dir="${lib.solrj.dir}">
                     <include name="**/*.jar"/>
                 </fileset>
-            </classpath>
-            <classpath >
-                <fileset dir="test/data/local_lib">
+                <fileset dir="${test.dir}/lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+                <fileset dir="${test.dir}/data/lib_local">
                     <include name="**/*.jar"/>
                 </fileset>
             </classpath>
         </javac>
-        <jar destfile="${test}/build/${custom.jar.name}_tests.jar">
+        <jar destfile="${test.build.dir}/${custom.jar.name}_tests.jar">
             <manifest>
                 <attribute name="Built-Date" value="${TODAY}"/>
             </manifest>
-   <!--         <fileset dir="${basedir}" includes="log4j.properties" /> -->
-            <fileset dir="${test}/build" includes="**/*.class" />
+            <fileset dir="${test.build.dir}" includes="**/*.class" />
         </jar>
-
+        <property name="test.already.compiled" value="true" />
     </target>
 
-
-	<target name="test" depends="test-compile">
-        <junit printsummary="yes" haltonfailure="false">
+	<target name="test" depends="test-compile" unless="test.already.run">
+        <mkdir dir="${reports.tests}" />
+		<junit printsummary="yes" haltonfailure="false">
             <classpath>
-                <fileset dir="${dist}">
+                <fileset dir="${dist.dir}">
                     <include name="${custom.jar.name}_${version}.jar"/>
                 </fileset>
-                <fileset dir="${dist}/lib">
+                <fileset dir="${dist.dir}/lib">
                     <include name="*.jar"/>
                 </fileset>
-                <fileset dir="${test}/lib">
+                <fileset dir="${test.dir}/lib">
                     <include name="*.jar"/>
                 </fileset>
-                <fileset dir="${test}/build">
+                <fileset dir="${test.build.dir}">
                     <include name="${custom.jar.name}_tests.jar"/>
                 </fileset>
-                <fileset dir="lib-solrj">
+                <fileset dir="${lib.solrj.dir}">
                     <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${test.dir}/data/lib_local">
+                    <include name="**/*.jar"/>
                 </fileset>
             	
                 <pathelement location="${build}"/>
                 <pathelement location="${build.tests}"/>
                 <pathelement path="${java.class.path}"/>
             </classpath>
-            <sysproperty key="test.data.dir" path="${test}/data" />
+            <sysproperty key="test.data.dir" path="${test.dir}/data" />
             <sysproperty key="log4j.debug" value="false" />
 
             <formatter type="plain"/>
 
             <batchtest fork="yes" todir="${reports.tests}">
-                <fileset dir="${src.tests}">
+                <fileset dir="${test.src.dir}">
                     <include name="**/*Test*.java"/>
                 	<exclude name="**/ConditionalParserTest.java" />
                 </fileset>
             </batchtest>
         </junit>
+        <property name="test.already.run" value="true" />
     </target>
 
-    <target name="clean"
-            description="clean up">
+	<target name="package" depends="jar, test">
+		<echo message="Building required jars zip file" />
+		<zip file="${dist.dir}/required_jars_${version}.zip" >
+			<zipfileset dir="${dist.dir}/lib" prefix="lib" includes="*.jar" />
+	    </zip>
+		<echo message="Building simple install package zip file" />
+		<zip file="${dist.dir}/simple_install_package_${version}.zip" >
+			<zipfileset dir="${dist.dir}" prefix="" includes="${custom.jar.name}_${version}.jar" />
+			<zipfileset dir="${buildtools.dir}/install_template" prefix="" includes="**" />
+			<zipfileset dir="${dist.dir}/lib" prefix="lib" includes="*.jar" />
+	    </zip>
+	</target>
+
+    <target name="clean" description="clean up">
         <!-- Delete the ${build} and ${dist} directory trees -->
         <delete dir="${build}"/>
         <delete dir="${dist}"/>

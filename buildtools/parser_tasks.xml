@@ -2,13 +2,13 @@
 <project>    
     <taskdef name="jflex" classname="jflex.anttask.JFlexTask"  onerror="report" > 
         <classpath>
-            <pathelement path="${buildtools.path}/jflextask.jar" />
-            <pathelement path="${buildtools.path}/jflex-1.6.0.jar" />
+            <pathelement path="${buildtools.dir}/jflextask.jar" />
+            <pathelement path="${buildtools.dir}/jflex-1.6.0.jar" />
         </classpath>
     </taskdef>
     <taskdef name="cup" classname="java_cup.anttask.CUPTask"  onerror="report" > 
         <classpath>
-            <pathelement path="${buildtools.path}/java-cup-11b.jar" />
+            <pathelement path="${buildtools.dir}/java-cup-11b.jar" />
         </classpath>
     </taskdef>
 </project>
