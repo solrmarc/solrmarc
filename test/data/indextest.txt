@@ -63,3 +63,59 @@ expect: Cinema and architecture : from historical to digital /
 record: 1474920681_KOHA_LFL_6_with_comment.xml
 indexSpec: id = 245a, cleanEnd
 expect: Cinema and architecture : from historical to digital
+
+#Test running a bean shell script
+record: u399.mrc
+indexSpec: pubdategroup = script(PubDateGroups.bsh), getPubDateGroups
+expect: Last 50 years
+
+record: u55.mrc
+indexSpec: custom, getCallNumbersCleanedNewNo050(true)
+expect: PR4231.A43 1984 (13 volumes)
+
+record: u60.mrc
+indexSpec: custom, getCallNumbersCleanedNewNo050(true)
+expect: DP269.27.S67 H47 1982  V.1, V.2
+
+record: u60.mrc
+indexSpec: 999i
+expect: X000872036|X000872037
+
+record: u8738.mrc
+indexSpec: language_facet.properties(language_facet)
+expect: English|French (translated from)
+
+record: u392.mrc
+indexSpec: language_facet.properties(language_facet)
+expect: Russian|English (also in)
+
+#testing the interaction of stripInd2 and substring
+# the field value is : 245 13$aAn introduction to Vietnamese literature /
+record: u8738.mrc
+indexSpec: title_start = 245a, substring(0,5), stripInd2
+expect: intro
+
+#testing the interaction of stripInd2 and position based selection [num1, num2]
+# the field value is : 245 13$aAn introduction to Vietnamese literature /
+# note the position based selection operation extracts from num1 to num2
+# whereas the substring(num1, num2) extracts from num1 to num2-1
+record: u8738.mrc
+indexSpec: title_start = 245a[0-4], stripInd2
+expect: intro
+
+#testing the interaction of stripInd2, substring and separate
+# the field value is : 245 13$aAn introduction to Vietnamese literature /$cMaurice M. Durand and Nguyen Tran Huan
+record: u8738.mrc
+indexSpec: title_part3 = 245[ac], substring(0,5), separate, stripInd2
+expect: intro|Mauri
+
+#testing error correction of Russian record with erroneous subfield separator in the middle of a Cyrillic string
+record: u5278992.mrc
+indexSpec: pub = LNK260b, first, clean
+expect: ЭКсмо
+
+#testing error correction of Russian record with erroneous subfield separator in the middle of a Cyrillic string
+readerProps: marc.permissive=false, marc.to_utf_8=true 
+record: u5278992.mrc
+indexSpec: pub = LNK260b, first, clean
+expect: 
