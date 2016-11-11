@@ -11,6 +11,8 @@ import java.net.URL;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 
 public class PropertyUtils
 {
@@ -300,7 +302,7 @@ public class PropertyUtils
         {
             String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
             logger.error(errmsg);
-            throw new IllegalArgumentException(errmsg);
+            throw new IndexerSpecException(eErrorSeverity.FATAL, errmsg);
         }
         else if (numFound == 1)
         {
