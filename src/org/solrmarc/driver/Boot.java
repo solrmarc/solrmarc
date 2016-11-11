@@ -394,7 +394,7 @@ public class Boot
                 for (String homeDir : homeDirStrs)
                 {
                     libDir = new File(homeDir, libdirname);
-                    if (libDir.exists() && libDir.isDirectory())
+                    if (libDir.exists() && libDir.isDirectory() && libDir.listFiles().length > 0)
                     {
                         found = true;
                         break;
