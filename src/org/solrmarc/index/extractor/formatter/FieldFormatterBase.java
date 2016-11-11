@@ -337,20 +337,38 @@ public class FieldFormatterBase implements FieldFormatter
     {
         try
         {
-            return (substringStart == -1 && substringEnd == -1) ? data : data.substring(substringStart, substringEnd + 1);
+            if (substringStart != -1) 
+            {
+                if (substringEnd != -1) return data.substring(substringStart, substringEnd);
+                else                    return data.substring(substringStart); 
+            }
+            else
+            {
+                return(data);
+            }
         }
         catch (IndexOutOfBoundsException ioobe)
         {
             return("");
         }
     }
-    
+
     private static Pattern ACCENTS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-    
+
     public String cleanData(VariableField vf, boolean isSubfieldA, String data)
     {
         final EnumSet<eCleanVal> cleanVal = getCleanVal();
-        final String trimmed = cleanVal.contains(eCleanVal.UNTRIMMED) ? getSubstring(data) : getSubstring(data).trim();
+        int numToDel = 0;
+
+        String trimmed = data;
+        if (cleanVal.contains(eCleanVal.STRIP_INDICATOR_2) && isSubfieldA && vf instanceof DataField)
+        {
+            DataField df = (DataField) vf;
+            char ind2Val = df.getIndicator2();
+            numToDel = (ind2Val >= '0' && ind2Val <= '9') ? ind2Val - '0' : 0;
+            if (numToDel > 0) trimmed = trimmed.substring(numToDel);
+        }
+        trimmed = cleanVal.contains(eCleanVal.UNTRIMMED) ? getSubstring(trimmed) : getSubstring(trimmed).trim();
 
         String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? DataUtil.cleanData(trimmed) : trimmed;
         if (!cleanVal.contains(eCleanVal.STRIP_ACCCENTS) && !cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)
@@ -391,14 +409,6 @@ public class FieldFormatterBase implements FieldFormatter
         {
             str = str.toUpperCase();
         }
-        int numToDel = 0;
-        if (cleanVal.contains(eCleanVal.STRIP_INDICATOR_2) && isSubfieldA && vf instanceof DataField)
-        {
-            DataField df = (DataField) vf;
-            char ind2Val = df.getIndicator2();
-            numToDel = (ind2Val >= '0' && ind2Val <= '9') ? ind2Val - '0' : 0;
-            if (numToDel > 0) str = str.substring(numToDel);
-        }
         return str;
     }
 
@@ -425,7 +435,7 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addSeparator(StringBuilder sb, int cnt)
     {
-        if (getSeparator() != null)
+        if (joinVal == eJoinVal.JOIN && getSeparator() != null)
         {
             if (cnt != 0) sb.append(getSeparator());
         }

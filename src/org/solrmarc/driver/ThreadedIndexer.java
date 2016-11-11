@@ -1,5 +1,6 @@
 package org.solrmarc.driver;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -16,9 +17,9 @@ import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.solr.SolrProxy;
 
 public class ThreadedIndexer extends Indexer
-{   
+{
     private final static Logger logger = Logger.getLogger(ThreadedIndexer.class);
-    private final BlockingQueue<Record> readQ;
+    private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ;
     private final BlockingQueue<RecordAndDoc> docQ;
     private final int numThreadIndexers;
     private final int numSolrjWorkers;
@@ -27,15 +28,15 @@ public class ThreadedIndexer extends Indexer
     ExecutorService indexerExecutor;
     ExecutorService solrExecutor;
     IndexerWorker[] workers = null;
-   
+
     boolean doneReading = false;
-    final int buffersize; 
+    final int buffersize;
     final AtomicInteger cnts[] = new AtomicInteger[]{ new AtomicInteger(0), new AtomicInteger(0), new AtomicInteger(0)} ;
-    
+
     public ThreadedIndexer(List<AbstractValueIndexer<?>> indexers, SolrProxy solrProxy, int buffersize)
     {
         super(indexers, solrProxy);
-        readQ = new ArrayBlockingQueue<Record>(buffersize);
+        readQ = new ArrayBlockingQueue<AbstractMap.SimpleEntry<Integer, Record>>(buffersize);
         docQ = new ArrayBlockingQueue<RecordAndDoc>(buffersize);
        // indexerExecutor = Executors.newSingleThreadExecutor();
         int num = 1;
@@ -46,7 +47,7 @@ public class ThreadedIndexer extends Indexer
         {
             num = 1;
         }
-        finally 
+        finally
         {
             numThreadIndexers = num;
         }
@@ -58,7 +59,7 @@ public class ThreadedIndexer extends Indexer
         {
             num = 4;
         }
-        finally 
+        finally
         {
             numSolrjWorkers = num;
         }
@@ -74,12 +75,13 @@ public class ThreadedIndexer extends Indexer
     }
 
     @Override
-    public void shutDown()
+    public void shutDown(boolean viaInterrupt)
     {
         logger.warn("ThreadedIndexer ShutDown Called!");
+        this.viaInterrupt = viaInterrupt;
         shuttingDown = true;
         if (readerThread != null) readerThread.interrupt();
-        if (workers != null) 
+        if (workers != null)
         {
             for (IndexerWorker worker : workers)
             {
@@ -91,11 +93,11 @@ public class ThreadedIndexer extends Indexer
     }
 
     @Override
-    public int[] indexToSolr(final MarcReader reader) 
+    public int[] indexToSolr(final MarcReader reader)
     {
         thisThread = Thread.currentThread();
         cnts[0].set(0); cnts[1].set(0); cnts[2].set(0);
-        readerThread = new MarcReaderThread(reader, readQ, cnts);      
+        readerThread = new MarcReaderThread(reader, readQ, cnts);
         readerThread.start();
 
         workers = new IndexerWorker[numThreadIndexers];
@@ -107,7 +109,7 @@ public class ThreadedIndexer extends Indexer
         {
             indexerExecutor.execute(workers[i]);
         }
-        // while the (one or more) IndexerWorker threads are chugging along taking records from 
+        // while the (one or more) IndexerWorker threads are chugging along taking records from
         // the readQ and building the solr index document, this thread will await the docQ being filled
         // and when it is full, it will lock the queue, copy all the documents to a separate buffer
         // and create a ChunkIndexerWorker to manage sending those records to Solr.
@@ -117,7 +119,7 @@ public class ThreadedIndexer extends Indexer
             {
                 logger.warn("ThreadedIndexer at top of loop, shutting down");
             }
-            if (docQ.remainingCapacity() == 0 || indexerThreadsAreDone(workers) || 
+            if (docQ.remainingCapacity() == 0 || indexerThreadsAreDone(workers) ||
                 (shuttingDown && docQ.size() > 0))
             {
                 final ArrayList<RecordAndDoc> chunk = new ArrayList<RecordAndDoc>(docQ.size());
@@ -140,7 +142,7 @@ public class ThreadedIndexer extends Indexer
                         threadName = "Anonymous";
                     }
                     final BlockingQueue<RecordAndDoc> errQVal = (this.isSet(eErrorHandleVal.RETURN_ERROR_RECORDS)) ? this.errQ : null;
-                    Runnable runnableChunk = new ChunkIndexerWorker(threadName, chunk, errQVal, this.solrProxy, cnts); 
+                    Runnable runnableChunk = new ChunkIndexerWorker(threadName, chunk, errQVal, this.solrProxy, cnts);
                     logger.debug("Starting IndexerThread: "+ threadName);
                     solrExecutor.execute(runnableChunk);
                 }
@@ -149,7 +151,7 @@ public class ThreadedIndexer extends Indexer
             {
                 break;
             }
-            else 
+            else
             {
                 try
                 {
@@ -174,7 +176,7 @@ public class ThreadedIndexer extends Indexer
         {
             indexerExecutor.shutdown();
         }
-    
+
         try {
             indexerExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
         }
@@ -204,7 +206,7 @@ public class ThreadedIndexer extends Indexer
 //        }
         return(getCounts());
     }
-    
+
     public int[] getCounts()
     {
         int intCnts[] = new int[3];
@@ -225,7 +227,7 @@ public class ThreadedIndexer extends Indexer
 
     private boolean done(IndexerWorker[] workers)
     {
-        if (!readerThread.isDoneReading() || !readQ.isEmpty()) return(false);
+        if (!readerThread.isDoneReading(shuttingDown) || !readQ.isEmpty()) return(false);
         if (!docQ.isEmpty()) return(false);
         return indexerThreadsAreDone(workers);
     }

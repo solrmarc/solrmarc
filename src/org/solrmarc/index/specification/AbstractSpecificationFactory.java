@@ -47,7 +47,7 @@ public class AbstractSpecificationFactory
             String endOffsetStr = position.replaceAll("\\[([0-9]+)(-)?([0-9]+)?\\]", "$3");
             int endOffset = offset;
             if (endOffsetStr != null && endOffsetStr.length() > 0) endOffset = Integer.parseInt(endOffsetStr);
-            spec.setSubstring(offset, endOffset);
+            spec.setSubstring(offset, endOffset+1);
         }
         catch (NumberFormatException nfe) { /* eat it */ }
         return(spec);

@@ -99,7 +99,7 @@ public class IndexDriver extends BootableMain
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        } 
+        }
     }
 
     public void initializeFromOptions()
@@ -180,6 +180,7 @@ public class IndexDriver extends BootableMain
         {
             File specFile = new File(indexSpec);
             if (!specFile.isAbsolute()) specFile = PropertyUtils.findFirstExistingFile(homeDirStrs, indexSpec);
+            logger.info("Opening index spec file: " + specFile);
             specFiles[i++] = specFile;
         }
 
@@ -242,26 +243,26 @@ public class IndexDriver extends BootableMain
         }
         catch (Exception e)
         {
-            if (!indexer.shuttingDown) Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            if (!indexer.viaInterrupt) Runtime.getRuntime().removeShutdownHook(shutdownHook);
             logger.fatal("ERROR: Error while invoking indexToSolr");
             logger.fatal(e);
         }
 
         endTime = System.currentTimeMillis();
 
-        if (!indexer.shuttingDown) Runtime.getRuntime().removeShutdownHook(shutdownHook);
+        if (!indexer.viaInterrupt) Runtime.getRuntime().removeShutdownHook(shutdownHook);
         indexer.endProcessing();
 
         boolean perMethodReport = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "solrmarc.method.report", "false"));
         reportResultsAndTime(numIndexed, startTime, endTime, indexer, (indexer.shuttingDown) ? false : perMethodReport);
-        if (! indexer.shuttingDown && indexer.errQ.size() > 0)
+        if (!indexer.viaInterrupt && indexer.errQ.size() > 0)
         {
             handleRecordErrors();
         }
 
-        if (!indexer.shuttingDown && shutdownSimulator != null) shutdownSimulator.interrupt();
+        if (!indexer.viaInterrupt && shutdownSimulator != null) shutdownSimulator.interrupt();
         indexer.setIsShutDown();
-        if (indexer.shuttingDown)
+        if (indexer.shuttingDown && indexer.viaInterrupt)
         {
             try
             {
@@ -386,7 +387,7 @@ public class IndexDriver extends BootableMain
      * process, this hook will signal the threads that are handling the import
      * (via Thread.interrupt) and they will shutdown cleanly, and commit the
      * changes to Solr before allowing the program to terminate.
-     * 
+     *
      * @author rh9ec
      *
      */
@@ -410,7 +411,7 @@ public class IndexDriver extends BootableMain
             if (!indexer.isShutDown())
             {
                 logger.info("Stopping main indexer loop");
-                indexer.shutDown();
+                indexer.shutDown(true);
             }
             while (!indexer.isShutDown())
             {
@@ -451,13 +452,13 @@ public class IndexDriver extends BootableMain
      * when the program is running in Eclipse, you will need to click in the
      * Console window, and press [ENTER] to simulate a CTRL-C being sent to the
      * program.
-     * 
+     *
      * @author rh9ec
      *
      */
     class ShutdownSimulator extends Thread
     {
-        boolean inEclipse; 
+        boolean inEclipse;
         public ShutdownSimulator(boolean inEclipse)
         {
             this.inEclipse = inEclipse;

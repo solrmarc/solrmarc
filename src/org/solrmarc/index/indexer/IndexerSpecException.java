@@ -5,16 +5,16 @@ public class IndexerSpecException extends RuntimeException
     public enum eErrorSeverity
     {
         NONE, INFO, WARN, ERROR, FATAL;
-       
+
         public static eErrorSeverity max(eErrorSeverity errLvl1, eErrorSeverity errLvl2)
         {
-            if (errLvl1.compareTo(errLvl2) > 0) 
+            if (errLvl1.compareTo(errLvl2) > 0)
                 return(errLvl1);
-            else 
+            else
                 return (errLvl2);
         }
     };
-    
+
     private static final long serialVersionUID = 1L;
 
 //    ErrorSpecification errMsgs;
@@ -28,27 +28,32 @@ public class IndexerSpecException extends RuntimeException
     {
         init(cause, solrField, spec, errLvl, message);
     }
-    
+
     private void init(Throwable cause, String solrField, String spec, eErrorSeverity errLvl, String message)
     {
         this.initCause(cause);
         this.solrField = solrField;
         this.spec = spec;
         this.message = message;
-        this.errLvl = errLvl;        
+        this.errLvl = errLvl;
     }
-    
+
     public IndexerSpecException(String solrField, String spec, eErrorSeverity errLvl, String message)
     {
         init(null, solrField, spec, errLvl, message);
     }
-    
+
+    public IndexerSpecException(String solrField, String spec, String message)
+    {
+        init(null, solrField, spec, eErrorSeverity.ERROR, message);
+    }
+
     public IndexerSpecException(String solrFieldAndSpec, eErrorSeverity errLvl, String message)
     {
         final String[] tmp = solrFieldAndSpec.split("[ ]*=[ ]*", 2);
         init(null, (tmp.length >= 1) ? tmp[0] : null, (tmp.length == 2) ? tmp[1] : null, errLvl, message);
     }
-    
+
     public IndexerSpecException(String solrFieldAndSpec, String message)
     {
         final String[] tmp = solrFieldAndSpec.split("[ ]*=[ ]*", 2);
@@ -59,12 +64,12 @@ public class IndexerSpecException extends RuntimeException
     {
         init(cause, null, null, errLvl, message);
     }
-    
+
     public IndexerSpecException(Throwable cause, String message)
     {
         init(cause, null, null, eErrorSeverity.ERROR, message);
     }
-    
+
     public IndexerSpecException(eErrorSeverity errLvl, String message)
     {
         init(null, null, null, errLvl, message);
@@ -85,12 +90,12 @@ public class IndexerSpecException extends RuntimeException
     {
         return message;
     }
-    
+
     public String getSolrField()
     {
         return solrField;
     }
-    
+
     public String getSpecMessage()
     {
         StringBuilder build = new StringBuilder();
@@ -100,7 +105,7 @@ public class IndexerSpecException extends RuntimeException
         }
         return(build.toString());
     }
-    
+
     @Override
     public String getMessage()
     {
@@ -130,6 +135,5 @@ public class IndexerSpecException extends RuntimeException
     public void setErrLvl(eErrorSeverity errLvl)
     {
         this.errLvl = errLvl;
-    }    
-    
+    }
 }

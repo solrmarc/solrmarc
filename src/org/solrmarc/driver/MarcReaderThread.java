@@ -1,5 +1,6 @@
 package org.solrmarc.driver;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
@@ -15,18 +16,18 @@ public class MarcReaderThread extends Thread
     private final static Logger logger = Logger.getLogger(MarcReaderThread.class);
     private AtomicInteger cnts[];
     private final MarcReader reader;
-    private final BlockingQueue<Record> readQ;
+    private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ;
     private boolean doneReading = false;
-    
-    public MarcReaderThread(final MarcReader reader, BlockingQueue<Record> readQ, AtomicInteger cnts[])
+
+    public MarcReaderThread(final MarcReader reader, BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ, AtomicInteger cnts[])
     {
         super("MarcReader-Thread");
         this.reader = reader;
         this.readQ = readQ;
         this.cnts = cnts;
     }
-    
-    @Override 
+
+    @Override
     public void run()
     {
         Record record = null;
@@ -35,7 +36,7 @@ public class MarcReaderThread extends Thread
             try {
                 if (reader.hasNext())
                     record = reader.next();
-                else 
+                else
                     break;
             }
             catch (MarcException me)
@@ -43,15 +44,14 @@ public class MarcReaderThread extends Thread
                 logger.error("Unrecoverable Error in MARC record data", me);
                 if (Boolean.parseBoolean(System.getProperty("solrmarc.terminate.on.marc.exception", "true")))
                     break;
-                else 
+                else
                 {
                     logger.warn("Trying to continue after MARC record data error");
                     continue;
                 }
             }
 
-            cnts[0].incrementAndGet();
-            while (readQ.offer(record) == false)
+            while (readQ.offer(new AbstractMap.SimpleEntry<Integer, Record>(cnts[0].get(), record)) == false)
             {
                 try
                 {
@@ -64,28 +64,38 @@ public class MarcReaderThread extends Thread
                     break;
                 }
             }
+            cnts[0].incrementAndGet();
         }
         if (Thread.currentThread().isInterrupted())
         {
-            Collection<Record> discardedRecords = new ArrayList<>();
-            readQ.drainTo(discardedRecords);
-            if (discardedRecords.size() > 0)
-            {
-                String id = discardedRecords.iterator().next().getControlNumber();
-                logger.warn("Reader Thread: discarding unprocessed records starting with record: "+ id);
-            }
-            else
-            {
-                String id = (record != null) ? record.getControlNumber() : "<none>";
-                logger.warn("Reader Thread Interrupted: last record processed was: "+ id);
-            }
-            cnts[0].addAndGet(-discardedRecords.size());
+            flushReadQueue(record);
         }
         doneReading = true;
     }
 
-    public boolean isDoneReading()
+    private void flushReadQueue(Record record)
     {
+        Collection<AbstractMap.SimpleEntry<Integer, Record>> discardedRecords = new ArrayList<>();
+        readQ.drainTo(discardedRecords);
+        if (discardedRecords.size() > 0)
+        {
+            String id = discardedRecords.iterator().next().getValue().getControlNumber();
+            logger.warn("Reader Thread: discarding unprocessed records starting with record: "+ id);
+        }
+        else
+        {
+            String id = (record != null) ? record.getControlNumber() : "<none>";
+            logger.warn("Reader Thread Interrupted: last record processed was: "+ id);
+        }
+        cnts[0].addAndGet(-discardedRecords.size());
+    }
+
+    public boolean isDoneReading(boolean shuttingDown)
+    {
+        if (shuttingDown && doneReading && readQ.size() > 0)
+        {
+            flushReadQueue(null);
+        }
         return doneReading;
     }
 }

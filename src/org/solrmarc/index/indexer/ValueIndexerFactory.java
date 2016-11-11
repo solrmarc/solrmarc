@@ -19,7 +19,6 @@ import org.solrmarc.index.extractor.methodcall.StaticMarcTestRecords;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.solrmarc.index.utils.FastClasspathUtils;
-import org.solrmarc.tools.PropertyUtils;
 //import org.solrmarc.index.utils.ReflectionUtils;
 import org.solrmarc.tools.Utils;
 
@@ -33,7 +32,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -146,7 +144,7 @@ public class ValueIndexerFactory
 
     /**
      * Return ALL of the exceptions encountered while processing indexing specification
-     * 
+     *
      * @return
      */
     public List<IndexerSpecException> getValidationExceptions()
@@ -156,7 +154,7 @@ public class ValueIndexerFactory
 
     /**
      * Return ALL of the exceptions encountered while processing indexing specification
-     * 
+     *
      * @return
      */
     public void addPerRecordError(IndexerSpecException error)
@@ -166,7 +164,7 @@ public class ValueIndexerFactory
 
     /**
      * Return the mapping factories loaded above for use in the CUP parser
-     * 
+     *
      * @return
      */
     final public List<AbstractValueMappingFactory> getMappingFactories()
@@ -176,7 +174,7 @@ public class ValueIndexerFactory
 
     /**
      * Return the extractor factories loaded above for use in the CUP parser
-     * 
+     *
      * @return
      */
     final public List<AbstractValueExtractorFactory> getExtractorFactories()
@@ -186,7 +184,7 @@ public class ValueIndexerFactory
 
     /**
      * Return ALL of the exceptions encountered while processing indexing specification
-     * 
+     *
      * @return
      */
     public List<IndexerSpecException> getPerRecordErrors()
@@ -377,8 +375,8 @@ public class ValueIndexerFactory
         // files
         if (valueIndexer != null)
         {
-            boolean testFileMethod = Boolean.parseBoolean(System.getProperty("solrmarc.indexer.test.fire.method", "false"));            
-            if (testFileMethod) 
+            boolean testFileMethod = Boolean.parseBoolean(System.getProperty("solrmarc.indexer.test.fire.method", "false"));
+            if (testFileMethod)
             {
                 try
                 {
@@ -404,7 +402,7 @@ public class ValueIndexerFactory
 
     public static AbstractValueIndexer<?> makeThreadSafeCopy(AbstractValueIndexer<?> toClone)
     {
-        Collection<String> solrFieldNames = toClone.getSolrFieldNames();
+        String solrFieldNamesStr = toClone.getSolrFieldNamesStr();
         String specLabel = toClone.getSpecLabel();
         AbstractMultiValueExtractor extractor;
         MultiValueCollector collector = toClone.collector;
@@ -429,7 +427,7 @@ public class ValueIndexerFactory
         {
             extractor = (AbstractMultiValueExtractor) toClone.extractor;
         }
-        MultiValueIndexer result = new MultiValueIndexer(solrFieldNames, extractor, mappings, collector, specLabel, totalElapsedTime);
+        MultiValueIndexer result = new MultiValueIndexer(solrFieldNamesStr, extractor, mappings, collector, specLabel, totalElapsedTime);
         return (result);
     }
 
@@ -480,7 +478,7 @@ public class ValueIndexerFactory
      *            indexer.
      * @return an indexer representing the indexer process for one solr field.
      */
-    public AbstractValueIndexer<?> makeMultiValueIndexer(String origSpec, List<String> fieldnames, AbstractValueExtractor<?> extractor, List<List<String>> mapSpecs)
+    public AbstractValueIndexer<?> makeMultiValueIndexer(String origSpec, String fieldnames, AbstractValueExtractor<?> extractor, List<List<String>> mapSpecs)
     {
         if (mapSpecs == null)
         {
@@ -523,15 +521,15 @@ public class ValueIndexerFactory
 
     boolean isADecoratorConfiguration(String str)
     {
-        if (str.equals("join") || str.equals("separate") || str.equals("format") || str.equals("substring") || 
-            str.equals("cleanEach") || str.equals("cleanEnd") || str.equals("clean") || str.equals("stripAccent") || 
-            str.equals("stripPunct") || str.equals("stripInd2") || str.equals("toUpper") || str.equals("toLower") || 
+        if (str.equals("join") || str.equals("separate") || str.equals("format") || str.equals("substring") ||
+            str.equals("cleanEach") || str.equals("cleanEnd") || str.equals("clean") || str.equals("stripAccent") ||
+            str.equals("stripPunct") || str.equals("stripInd2") || str.equals("toUpper") || str.equals("toLower") ||
             str.equals("toUpper") || str.equals("toLower") || str.equals("titleSortUpper") || str.equals("titleSortLower") ||
             str.equals("untrimmed")) return (true);
         return (false);
     }
 
-    private int decorateMultiValueExtractor(String origSpec, List<String> fieldnames, DirectMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs)
+    private int decorateMultiValueExtractor(String origSpec, String fieldnames, DirectMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs)
     {
         if (mapSpecs.size() == 0)
         {
@@ -576,12 +574,12 @@ public class ValueIndexerFactory
                     }
                     else
                     {
-                        multiValueExtractor.setSubstring(mapParts[1], mapParts[1]);
+                        multiValueExtractor.setSubstring(mapParts[1], "toEnd");
                     }
                 }
                 catch (IndexerSpecException ise)
                 {
-                    ise.setSolrFieldAndSpec(origSpec);
+                    ise.setSolrFieldAndSpec(fieldnames, origSpec);
                     validationExceptions.add(ise);
                 }
             }
@@ -647,14 +645,14 @@ public class ValueIndexerFactory
             }
             else if (isAValueMappingConfiguration(mapParts[0]) && joinIndex != -1)
             {
-                // post join map specification 
+                // post join map specification
                 //     mapping specs before "join" are applied before the join operation
                 //     mapping spec that are after "join" are applied to the joined output.
                 //     and are handled elsewhere.
             }
             else
             {
-                validationExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + Utils.join(mapParts, " ")));
+                validationExceptions.add(new IndexerSpecException(fieldnames, origSpec, "Illegal format specification: " + Utils.join(mapParts, " ")));
             }
             currentIndex++;
         }
@@ -664,7 +662,7 @@ public class ValueIndexerFactory
 
     private boolean isAValueMappingConfiguration(final String configuration)
     {
-        if (configuration.matches(".+[.]properties([(][A-Za-z0-9]*[)])?") || configuration.matches("[(]this[)][.]properties([(][A-Za-z0-9]*[)])?") || 
+        if (configuration.matches(".+[.]properties([(][A-Za-z0-9]*[)])?") || configuration.matches("[(]this[)][.]properties([(][A-Za-z0-9]*[)])?") ||
             configuration.startsWith("map") || configuration.startsWith("filter") || configuration.startsWith("custom_map"))
         {
             return (true);
@@ -733,7 +731,7 @@ public class ValueIndexerFactory
 
     private boolean isACollectorConfiguration(String string)
     {
-        if (string.equals("unique") || string.equals("first") || string.equals("sort") || string.equals("notunique") || 
+        if (string.equals("unique") || string.equals("first") || string.equals("sort") || string.equals("notunique") ||
             string.equals("notfirst") || string.equals("all") || string.equals("DeleteRecordIfFieldEmpty"))
             return (true);
         return (false);

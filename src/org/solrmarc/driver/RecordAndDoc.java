@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.solr.common.SolrInputDocument;
 import org.marc4j.MarcError;
 import org.marc4j.marc.Record;
+import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.tools.SolrMarcIndexerException;
 
@@ -15,6 +16,7 @@ public class RecordAndDoc
     SolrInputDocument doc;
     eErrorSeverity errLvl;
     SolrMarcIndexerException smie;
+    IndexerSpecException ise;
     public EnumSet<eErrorLocationVal> errLocs = EnumSet.noneOf(eErrorLocationVal.class);
 
     public enum eErrorLocationVal
@@ -73,6 +75,19 @@ public class RecordAndDoc
         if (this.smie == null || this.smie.getLevel() < smie.getLevel())
         {
             this.smie = smie;
+        }
+    }
+    
+    public IndexerSpecException getIndexerSpecException()
+    {
+        return ise;
+    }
+
+    public void setIndexerSpecException(IndexerSpecException ise)
+    {
+        if (this.ise == null || this.ise.getErrLvl().compareTo(ise.getErrLvl()) < 0)
+        {
+            this.ise = ise;
         }
     }
 

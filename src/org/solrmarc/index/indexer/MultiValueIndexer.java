@@ -16,52 +16,72 @@ import org.solrmarc.index.mapping.AbstractValueMapping;
 
 public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
 {
-    public MultiValueIndexer(final String solrFieldName, final AbstractMultiValueExtractor extractor,
+    public MultiValueIndexer(final String solrFieldNamesStr, final AbstractMultiValueExtractor extractor,
             final AbstractValueMapping<Collection<String>>[] mappings,
             final MultiValueCollector collector)
     {
-        super(solrFieldName, extractor, mappings, collector);
+        super(solrFieldNamesStr, extractor, mappings, collector);
     }
 
-    public MultiValueIndexer(final String solrFieldName, final AbstractSingleValueExtractor extractor,
-            final AbstractValueMapping<Collection<String>>[] mappings,
-            final MultiValueCollector collector)
-    {
-        super(solrFieldName, new MultiValueWrapperSingleValueExtractor(extractor), mappings, collector);
-    }
-
-    public MultiValueIndexer(Collection<String> solrFieldNames, final AbstractMultiValueExtractor extractor,
-            final AbstractValueMapping<Collection<String>>[] mappings,
-            final MultiValueCollector collector)
-    {
-        super(solrFieldNames, extractor, mappings, collector);
-    }
-
-    public MultiValueIndexer(Collection<String> solrFieldNames, final AbstractMultiValueExtractor extractor,
+    public MultiValueIndexer(String solrFieldNamesStr, final AbstractMultiValueExtractor extractor,
             final Collection<AbstractMultiValueMapping> mappings,
             final MultiValueCollector collector)
     {
-        super(solrFieldNames, extractor, mappings, collector);
+        super(solrFieldNamesStr, extractor, mappings.toArray(new AbstractMultiValueMapping[0]), collector);
     }
 
-    public MultiValueIndexer(Collection<String> solrFieldNames, final AbstractSingleValueExtractor extractor,
+//    public MultiValueIndexer(final String solrFieldName, final AbstractSingleValueExtractor extractor,
+//            final AbstractValueMapping<Collection<String>>[] mappings,
+//            final MultiValueCollector collector)
+//    {
+//        super(solrFieldName, new MultiValueWrapperSingleValueExtractor(extractor), mappings, collector);
+//    }
+
+//    public MultiValueIndexer(Collection<String> solrFieldNames, final AbstractMultiValueExtractor extractor,
+//            final AbstractValueMapping<Collection<String>>[] mappings,
+//            final MultiValueCollector collector)
+//    {
+//        super(solrFieldNames, extractor, mappings, collector);
+//    }
+
+    public MultiValueIndexer(String solrFieldNamesStr, final AbstractSingleValueExtractor extractor,
             final AbstractValueMapping<Collection<String>>[] mappings,
             final MultiValueCollector collector)
     {
-        super(solrFieldNames, new MultiValueWrapperSingleValueExtractor(extractor), mappings, collector);
-    }
-    
-    public MultiValueIndexer(Collection<String> fieldnames, AbstractSingleValueExtractor extractor,
-            Collection<AbstractMultiValueMapping> mappings, MultiValueCollector collector)
-    {
-        super(fieldnames, new MultiValueWrapperSingleValueExtractor(extractor), mappings, collector);
+        super(solrFieldNamesStr, new MultiValueWrapperSingleValueExtractor(extractor), mappings, collector);
     }
 
+    public MultiValueIndexer(String solrFieldNamesStr, AbstractSingleValueExtractor extractor,
+            Collection<AbstractMultiValueMapping> mappings, MultiValueCollector collector)
+    {
+        super(solrFieldNamesStr, new MultiValueWrapperSingleValueExtractor(extractor), mappings.toArray(new AbstractMultiValueMapping[0]), collector);
+    }
+
+//    public MultiValueIndexer(Collection<String> solrFieldNames, final AbstractMultiValueExtractor extractor,
+//            final Collection<AbstractMultiValueMapping> mappings,
+//            final MultiValueCollector collector)
+//    {
+//        super(solrFieldNames, extractor, mappings, collector);
+//    }
+//
+//    public MultiValueIndexer(Collection<String> solrFieldNames, final AbstractSingleValueExtractor extractor,
+//            final AbstractValueMapping<Collection<String>>[] mappings,
+//            final MultiValueCollector collector)
+//    {
+//        super(solrFieldNames, new MultiValueWrapperSingleValueExtractor(extractor), mappings, collector);
+//    }
+//
+//    public MultiValueIndexer(Collection<String> fieldnames, AbstractSingleValueExtractor extractor,
+//            Collection<AbstractMultiValueMapping> mappings, MultiValueCollector collector)
+//    {
+//        super(fieldnames, new MultiValueWrapperSingleValueExtractor(extractor), mappings, collector);
+//    }
+
     // used for making a ThreadSafe copy of the indexer
-    public MultiValueIndexer(Collection<String> solrFieldNames, AbstractMultiValueExtractor extractor,
+    public MultiValueIndexer(String solrFieldNamesStr, AbstractMultiValueExtractor extractor,
             AbstractMultiValueMapping[] mappings, MultiValueCollector collector, String specLabel, AtomicLong totalElapsedTime)
     {
-        super(solrFieldNames, extractor, mappings, collector);
+        super(solrFieldNamesStr, extractor, mappings, collector);
         this.totalElapsedTime = totalElapsedTime;
         this.setSpecLabel(specLabel);
     }
@@ -75,7 +95,7 @@ public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
         {
             values = Collections.emptyList();
         }
-        else 
+        else
         {
             values = extractor.extract(record);
         }
@@ -85,7 +105,7 @@ public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
         }
         for (final AbstractValueMapping<Collection<String>> mapping : mappings)
         {
-            if (mapping != null) 
+            if (mapping != null)
             {
                 values = mapping.map(values);
             }

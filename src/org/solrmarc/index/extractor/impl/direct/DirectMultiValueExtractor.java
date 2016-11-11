@@ -90,18 +90,25 @@ public class DirectMultiValueExtractor extends AbstractMultiValueExtractor imple
         {
             throw new IndexerSpecException("Illegal substring specification: " + startStr);
         }
-        try {
-            end = Integer.parseInt(endStr);
-        }
-        catch (NumberFormatException nfe)
+        if (endStr.equals("toEnd"))
         {
-            throw new IndexerSpecException("Illegal substring specification: " + endStr);
+            fieldsAndSubfieldSpec.setSubstring(start, -1);
         }
-        if (start < 0 || end < 0 || start > end)
+        else 
         {
-            throw new IndexerSpecException("Illegal substring interval: " + start + " " + end);
+            try {
+                end = Integer.parseInt(endStr);
+            }
+            catch (NumberFormatException nfe)
+            {
+                throw new IndexerSpecException("Illegal substring specification: " + endStr);
+            }
+            if (start < 0 || end < 0 || start > end)
+            {
+                throw new IndexerSpecException("Illegal substring interval: " + start + " " + end);
+            }
+            fieldsAndSubfieldSpec.setSubstring(start, end);
         }
-        fieldsAndSubfieldSpec.setSubstring(start, end);
     }
 
     public void setFormatPatterns(String[] mapParts)

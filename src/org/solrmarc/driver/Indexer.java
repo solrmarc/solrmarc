@@ -39,6 +39,7 @@ public class Indexer
     protected final BlockingQueue<RecordAndDoc> errQ;
     protected final BlockingQueue<String> delQ;
     protected boolean shuttingDown = false;
+    protected boolean viaInterrupt = false;
     protected boolean isShutDown = false;
     private int cnts[] = new int[] { 0, 0, 0 };
 
@@ -88,7 +89,7 @@ public class Indexer
      * indexToSolr - Reads in a MARC Record, produces SolrInputDocument for it,
      * sends that document to solr This is the single threaded version that does
      * each of those action sequentially
-     * 
+     *
      * @param reader
      * @return array containing number of records read, number of records
      *         indexed, and number of records sent to solr
@@ -102,7 +103,7 @@ public class Indexer
             try {
                 if (reader.hasNext())
                     record = reader.next();
-                else 
+                else
                     break;
             }
             catch (MarcException me)
@@ -110,7 +111,7 @@ public class Indexer
                 logger.error("Unrecoverable Error in MARC record data", me);
                 if (Boolean.parseBoolean(System.getProperty("solrmarc.terminate.on.marc.exception", "true")))
                     break;
-                else 
+                else
                 {
                     logger.warn("Trying to continue after MARC record data error");
                     continue;
@@ -126,18 +127,18 @@ public class Indexer
                 String idMessage = smie.getMessage() != null ? smie.getMessage() : "";
                 if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
                 {
-                    logger.info("Record will be Ignored " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                    logger.info("Record will be Ignored " + (recCtrlNum != null ? recCtrlNum : "") + " " + idMessage + " (record count " + cnts[0] + ")");
                     continue;
                 }
                 else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
                 {
-                    logger.info("Record will be Deleted " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                    logger.info("Record will be Deleted " + (recCtrlNum != null ? recCtrlNum : "") + " " + idMessage + " (record count " + cnts[0] + ")");
                     delQ.add(recCtrlNum);
                     continue;
                 }
                 else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
                 {
-                    logger.info("Serious Error flagged in record " + (recCtrlNum != null ? recCtrlNum : "") + idMessage + " (record count " + cnts[0] + ")");
+                    logger.info("Serious Error flagged in record " + (recCtrlNum != null ? recCtrlNum : "") + " " + idMessage + " (record count " + cnts[0] + ")");
                     logger.info("Terminating indexing.");
                     break;
                 }
@@ -147,6 +148,16 @@ public class Indexer
                 if (isSet(eErrorHandleVal.RETURN_ERROR_RECORDS) && !isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
                 {
                     errQ.add(recDoc);
+                }
+                if (recDoc.getErrLvl() == eErrorSeverity.FATAL && recDoc.ise != null)
+                {
+                    String recCtrlNum = recDoc.rec.getControlNumber();
+                    String idMessage = recDoc.ise.getMessage() != null ? recDoc.ise.getMessage() : "";
+                    String indSpec = recDoc.ise.getSpecMessage() != null ? recDoc.ise.getSpecMessage() : "";
+                    logger.info("Fatal Error returned for record " + (recCtrlNum != null ? recCtrlNum : "") + " : " + idMessage + " (record count " + cnts[0] + ")");
+                    logger.info("Fatal Error from by index spec  " + (recCtrlNum != null ? recCtrlNum : "") + " : " + indSpec + " (record count " + cnts[0] + ")");
+                    logger.info("Terminating indexing.");
+                    break;
                 }
                 if (!isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
                 {
@@ -272,6 +283,8 @@ public class Indexer
                     logger.debug("Exception in record: " + recDoc.rec.getControlNumber());
                     logger.debug("while processing index specification: " + indexer.getSpecLabel());
                     errLvl = eErrorSeverity.max(errLvl, ((IndexerSpecException) wrapped).getErrLvl());
+                    ((IndexerSpecException)wrapped).setSolrFieldAndSpec(indexer.getSolrFieldNamesStr(), indexer.getSpecLabel());
+                    recDoc.setIndexerSpecException((IndexerSpecException)wrapped);
                 }
                 else if (wrapped != null && wrapped instanceof OutOfMemoryError)
                 {
@@ -287,17 +300,17 @@ public class Indexer
                     logger.debug("while processing index specification: " + indexer.getSpecLabel());
                     if (wrapped != null)
                     {
-                        logger.debug(wrapped); 
+                        logger.debug(wrapped);
                     }
                     errLvl = eErrorSeverity.ERROR;
                 }
-                else 
+                else
                 {
                     logger.warn("Exception in record: " + recDoc.rec.getControlNumber());
                     logger.warn("while processing index specification: " + indexer.getSpecLabel());
                     if (wrapped != null)
                     {
-                        logger.warn(wrapped); 
+                        logger.warn(wrapped);
                     }
                     errLvl = eErrorSeverity.ERROR;
                 }
@@ -378,14 +391,15 @@ public class Indexer
         isShutDown = true;
     }
 
-    public void shutDown()
+    public void shutDown(boolean viaInterrupt)
     {
+        this.viaInterrupt = viaInterrupt;
         shuttingDown = true;
     }
 
     public void endProcessing()
     {
-        if (delQ.size() > 0) 
+        if (delQ.size() > 0)
         {
             logger.info("Deleting "+delQ.size()+ " records ");
         }

@@ -35,10 +35,10 @@ parser code {:
     static String cacheOfSolrField;
     private ValueIndexerFactory valueIndexerFactory = null;
 
-    public static void setParserDebug(boolean b) { parser_debug = b; } 
+    public static void setParserDebug(boolean b) { parser_debug = b; }
     public static boolean shouldParserDebug()    { return(parser_debug); }
-    public FullConditionalParser(boolean debug) throws IllegalAccessException, InstantiationException 
-    { 
+    public FullConditionalParser(boolean debug) throws IllegalAccessException, InstantiationException
+    {
         super(debug ? new VerboseSymbolFactory() : new ComplexSymbolFactory());
         parser_debug = debug;
         scanner = new FullConditionalScanner((ComplexSymbolFactory)getSymbolFactory());
@@ -70,22 +70,22 @@ parser code {:
         catch (Exception e) {
             parser_errors.add(new IndexerSpecException(e, " "));
             //parser_errors.add(" Input Specification "+strToParse);
-        } 
+        }
         finally {
         }
-        if (parse_tree != null) 
+        if (parse_tree != null)
         {
             result = (MultiValueIndexer) parse_tree.value;
             if (result != null)
             {
-                result.setSolrFieldNames(solrFields);
+                result.setSolrFieldNamesStr(solrFields);
                 result.setSpecLabel(strToParse);
              //   result.setParseErrors(parser_errors);
             }
         }
-        return(result);     
+        return(result);
     }
-   
+
     public MultiValueIndexer parse(String solrFields, String strToParse)
     {
         return(parse(solrFields, strToParse, parser_debug));
@@ -109,17 +109,17 @@ parser code {:
 
     private AbstractMultiValueExtractor makeMultiValueExtractor(Object extractor)
     {
-        if (AbstractMultiValueExtractor.class.isAssignableFrom(extractor.getClass()))   
+        if (AbstractMultiValueExtractor.class.isAssignableFrom(extractor.getClass()))
         {
             return((AbstractMultiValueExtractor)extractor);
         }
-        else if (AbstractSingleValueExtractor.class.isAssignableFrom(extractor.getClass())) 
+        else if (AbstractSingleValueExtractor.class.isAssignableFrom(extractor.getClass()))
         {
             return(new MultiValueWrapperSingleValueExtractor((AbstractSingleValueExtractor)extractor));
         }
         return(null);
     }
-    
+
     public static final List<IndexerSpecException> getErrors()
     {
         if (scanner.getScannerErrors().size() == 0)
@@ -132,17 +132,17 @@ parser code {:
         }
         return(allErrors);
     }
-    
+
     public static final void addError(String errorMsg)
     {
         parser_errors.add(new IndexerSpecException(errorMsg));
     }
-    
+
     public static final void addError(IndexerSpecException exception)
     {
         parser_errors.add(exception);
     }
-    
+
     @Override
     public void report_error(String message, Object info)
     {
@@ -150,12 +150,12 @@ parser code {:
         if (info instanceof ComplexSymbol)
         {
             ComplexSymbol cs = (ComplexSymbol)info;
-            addError(message+" at input symbol \""+cs.getName()+"\" following symbol "+ top.getName() + 
+            addError(message+" at input symbol \""+cs.getName()+"\" following symbol "+ top.getName() +
                     " (with value of : "+ cacheOfStrToParse.substring(top.left, top.right) +" )");
             return;
         }
     }
-   
+
     protected void my_report_expected_token_ids()
     {
         List<Integer> ids = expected_token_ids();
@@ -166,7 +166,7 @@ parser code {:
         }
         addError("instead expected token classes are "+list.toString());
     }
-    
+
     public void syntax_error(Symbol cur_token)
     {
         report_error("Syntax error", cur_token);
@@ -184,10 +184,10 @@ parser code {:
 terminal String SCRIPT, CUSTOM, JAVA;
 terminal String FIELDNAME, FULLRECORD, DATE, IDENTIFIER, CUSTOM_MAP;
 terminal COMMA, COLON, LBRACE, RBRACE, QUESTION, AND, OR, NOT, LPAREN, RPAREN, EQU, NEQ, GT, LT, MATCH, CONTAINS;
-terminal String SUBFIELD, IND, FIELDSPEC, SUBFIELDSPEC, POSITION, QUOTEDSTR, CHAR, NUMBER;
- 
+terminal String SUBFIELD, IND, FIELDSPEC, SUBFIELDSPEC, CTRLFIELDSPEC, POSITION, QUOTEDSTR, CHAR, NUMBER;
+
 non terminal AbstractValueIndexer<?> index_spec;
-non terminal AbstractValueExtractor<?> extractor, custom_extractor; 
+non terminal AbstractValueExtractor<?> extractor, custom_extractor;
 non terminal List<List<String>> mapping_specs;
 non terminal List<String> mapping_spec;
 non terminal List<String> field_names, strings, method_plus_params, params, custom_map_spec;
@@ -203,47 +203,47 @@ precedence left OR;
 
 start with index_spec;
 
-index_spec ::= extractor:e COMMA mapping_specs:m                            {: RESULT = valueIndexerFactory.makeMultiValueIndexer(cacheOfStrToParse, new ArrayList<String>(), e, m); :}
-             | extractor:e                                                  {: RESULT = valueIndexerFactory.makeMultiValueIndexer(cacheOfStrToParse, new ArrayList<String>(), e, null); :}
-             ; 
-                           
+index_spec ::= extractor:e COMMA mapping_specs:m                            {: RESULT = valueIndexerFactory.makeMultiValueIndexer(cacheOfStrToParse, cacheOfSolrField, e, m); :}
+             | extractor:e                                                  {: RESULT = valueIndexerFactory.makeMultiValueIndexer(cacheOfStrToParse, cacheOfSolrField, e, null); :}
+             ;
+
 extractor ::= strings:l                                                     {: RESULT = new ConstantMultiValueExtractor(l); :}
-            | field_spec:fs                                                 {: RESULT = new DirectMultiValueExtractor(fs);  :} 
+            | field_spec:fs                                                 {: RESULT = new DirectMultiValueExtractor(fs);  :}
             | FULLRECORD:s                                                  {: RESULT = makeMultiValueExtractor(fullFactory.createExtractor("CUP Parser", new StringReader(s))); :}
             | DATE:s                                                        {: RESULT = dateFactory.createExtractor("CUP Parser", new StringReader(s)); :}
             | custom_extractor:e                                            {: RESULT = e; :}
             | error                                                         {: RESULT = null; :}
             ;
-            
+
 strings ::= strings:l OR QUOTEDSTR:s                                        {: RESULT = l; l.add(s); :}
           | QUOTEDSTR:s                                                     {: RESULT = new ArrayList<String>(); RESULT.add(s); :}
           ;
-          
-custom_extractor ::= CUSTOM:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_params:l  
-                                                                            {: RESULT = createCustomExtractor(t, m, l); :} 
+
+custom_extractor ::= CUSTOM:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_params:l
+                                                                            {: RESULT = createCustomExtractor(t, m, l); :}
                   |  JAVA:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_params:l
-                                                                            {: RESULT = createCustomExtractor(t, m, l); :} 
+                                                                            {: RESULT = createCustomExtractor(t, m, l); :}
                   |  SCRIPT:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_params:l
-                                                                            {: RESULT = createCustomExtractor(t, m, l); :} 
+                                                                            {: RESULT = createCustomExtractor(t, m, l); :}
                   |  SCRIPT:t LPAREN QUOTEDSTR:s RPAREN opt_comma method_plus_params:l
-                                                                            {: RESULT = createCustomExtractor(t, s, l); :} 
-                  |  CUSTOM:t COMMA method_plus_params:l  
-                                                                            {: RESULT = createCustomExtractor(t, null, l); :} 
+                                                                            {: RESULT = createCustomExtractor(t, s, l); :}
+                  |  CUSTOM:t COMMA method_plus_params:l
+                                                                            {: RESULT = createCustomExtractor(t, null, l); :}
                   |  JAVA:t COMMA method_plus_params:l
-                                                                            {: RESULT = createCustomExtractor(t, null, l); :} 
+                                                                            {: RESULT = createCustomExtractor(t, null, l); :}
                   ;
 
 mapping_specs ::= mapping_specs:l COMMA mapping_spec:m               		{: RESULT = l; if (m != null) { l.add(m);} :}
                |  mapping_spec:m                                        	{: RESULT = new ArrayList<List<String>>(); if (m != null) { RESULT.add(m);} :}
-               ;  
-               
+               ;
+
 mapping_spec  ::= method_plus_params:l               						{: RESULT = l; :}
                | custom_map_spec:l                                          {: RESULT = l; :}
-               ;  
+               ;
 
-custom_map_spec ::=  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 RPAREN 
+custom_map_spec ::=  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 RPAREN
                                                                             {: RESULT = new ArrayList<String>(); RESULT.add(s); RESULT.add(s1); RESULT.add(s2); :}
-                  |  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 LPAREN params:l RPAREN RPAREN 
+                  |  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 LPAREN params:l RPAREN RPAREN
                                                                             {: RESULT = l; RESULT.add(0, s); RESULT.add(1, s1); RESULT.add(2, s2); :}
 				  | error                                                   {: FullConditionalParser.addError("Malformed custom_map reference : Should be \ncustom_map(fully.qualified.class.Name method)\n or  custom_map(fully.qualified.class.Name method(parm1, parm2))"); :}
 
@@ -260,16 +260,16 @@ method_plus_params ::=  IDENTIFIER:s                                        {: R
 params   ::= params:l COMMA param:s                                         {: RESULT = l; l.add(s); :}
            | param:s                                                        {: RESULT = new ArrayList<String>(); RESULT.add(s); :}
            ;
-           
+
 param    ::= QUOTEDSTR:s                                                    {: RESULT = s; :}
            | IDENTIFIER:s                                                   {: RESULT = s; :}
            | NUMBER:s                                                       {: RESULT = s; :}
            ;
-                                      
+
 field_spec ::= field_spec:s COLON field_spec_part:s1						{: s.addSpec(s1); RESULT = s; :}
              | field_spec_part:s											{: RESULT = new CompositeSpecification(s); :}
              ;
-             
+
 field_spec_simple ::= field_spec_simple:s COLON field_spec_part_simple:s1	{: s.addSpec(s1); RESULT = s; :}
                     | field_spec_part_simple:s								{: RESULT = new CompositeSpecification(s); :}
                     ;
@@ -277,30 +277,31 @@ field_spec_simple ::= field_spec_simple:s COLON field_spec_part_simple:s1	{: s.a
 field_spec_part ::= LBRACE field_spec_simple:s RBRACE QUESTION expr:e 		{: s.addConditional(e); RESULT = s; :}
                   | field_spec_part_complex:s								{: RESULT = new CompositeSpecification(s); :}
                   ;
-                                    
+
 field_spec_part_complex ::= field_spec_part_simple:s QUESTION expr:e 	    {: RESULT = s; s.addConditional(e); :}
                           | field_spec_part_simple:s 						{: RESULT = s; :}
                           ;
-                          
-field_spec_part_simple ::= FIELDSPEC:f SUBFIELDSPEC:sf 						{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf); :} 
-                         | FIELDSPEC:f SUBFIELDSPEC:sf POSITION:p           {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf, p); :} 
-                         | FIELDSPEC:f POSITION:p                           {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, p); :} 
-                         | FIELDSPEC:f 										{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null); :} 
+
+field_spec_part_simple ::= FIELDSPEC:f SUBFIELDSPEC:sf 						{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf); :}
+                         | FIELDSPEC:f SUBFIELDSPEC:sf POSITION:p           {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf, p); :}
+                         | FIELDSPEC:f POSITION:p                           {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, p); :}
+                         | CTRLFIELDSPEC:f POSITION:p                       {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, p); :}
+                         | FIELDSPEC:f 										{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null); :}
                          ;
-                         
+
 expr ::= expr:e1 AND expr:e2 				{: RESULT = new ConditionComposite(e1, e2, FullSym.AND);  :}
-       | expr:e1 OR expr:e2					{: RESULT = new ConditionComposite(e1, e2, FullSym.OR);  :} 
+       | expr:e1 OR expr:e2					{: RESULT = new ConditionComposite(e1, e2, FullSym.OR);  :}
        | NOT expr:e							{: RESULT = new ConditionComposite(e, null, FullSym.NOT); :}
        | LPAREN expr:e RPAREN 				{: RESULT = e; :}
        | expr_part:e						{: RESULT = e; :}
        ;
-       
-expr_part ::= SUBFIELD:s1 op:i value:s2		                {: RESULT = new ConditionSubfield(s1, s2, ((int)i)); :} 
-            | IND:s1 op:i value:s2			                {: RESULT = new ConditionIndicator(s1, s2, ((int)i)); :} 
-            | POSITION:s1 op:i value:s2		                {: RESULT = new ConditionPosition(s1, s2, ((int)i)); :} 
-            | FIELDSPEC:s1 SUBFIELD:s2 op:i value:s3		{: RESULT = new ConditionSubfield(s1, s2, s3, ((int)i)); :} 
-            | FIELDSPEC:s1 IND:s2 op:i value:s3			    {: RESULT = new ConditionIndicator(s1, s2, s3, ((int)i)); :} 
-            | FIELDSPEC:s1 POSITION:s2 op:i value:s3		{: RESULT = new ConditionPosition(s1, s2, s3, ((int)i)); :} 
+
+expr_part ::= SUBFIELD:s1 op:i value:s2		                {: RESULT = new ConditionSubfield(s1, s2, ((int)i)); :}
+            | IND:s1 op:i value:s2			                {: RESULT = new ConditionIndicator(s1, s2, ((int)i)); :}
+            | POSITION:s1 op:i value:s2		                {: RESULT = new ConditionPosition(s1, s2, ((int)i)); :}
+            | FIELDSPEC:s1 SUBFIELD:s2 op:i value:s3		{: RESULT = new ConditionSubfield(s1, s2, s3, ((int)i)); :}
+            | FIELDSPEC:s1 IND:s2 op:i value:s3			    {: RESULT = new ConditionIndicator(s1, s2, s3, ((int)i)); :}
+            | FIELDSPEC:s1 POSITION:s2 op:i value:s3		{: RESULT = new ConditionPosition(s1, s2, s3, ((int)i)); :}
             ;
 op ::= EQU 									{: RESULT = new Integer(FullSym.EQU); :}
      | NEQ 									{: RESULT = new Integer(FullSym.NEQ); :}
@@ -309,10 +310,9 @@ op ::= EQU 									{: RESULT = new Integer(FullSym.EQU); :}
      | LT                                   {: RESULT = new Integer(FullSym.LT); :}
      | GT                                   {: RESULT = new Integer(FullSym.GT); :}
      ;
-     
-value ::= QUOTEDSTR:s						{: RESULT = s; :} 
+
+value ::= QUOTEDSTR:s						{: RESULT = s; :}
         | CHAR:s							{: RESULT = s; :}
-        | NUMBER:s							{: RESULT = s; :} 
+        | NUMBER:s							{: RESULT = s; :}
         ;
-  
- 
+

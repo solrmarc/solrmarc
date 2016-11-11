@@ -16,7 +16,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 %char
 %{
     int save_zzLexicalState;
-    
+
     List<String> scanner_errors = null;
     StringBuilder string = new StringBuilder();
     public FullConditionalScanner(ComplexSymbolFactory sf)
@@ -25,26 +25,26 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 		this.sf = sf;
 		scanner_errors = new ArrayList<String>();
     }
-    
+
     ComplexSymbolFactory sf;
-    
+
     public void startParse(String strToParse)
     {
         yyreset(new StringReader(strToParse));
         scanner_errors = new ArrayList<String>();
     }
-    
-    private void error(String message) 
+
+    private void error(String message)
     {
         scanner_errors.add(message);
     }
-    
+
     public List<String> getScannerErrors()
     {
     	return(scanner_errors);
     }
-    
-    private Symbol symbol(String name, int sym) 
+
+    private Symbol symbol(String name, int sym)
     {
         return sf.newSymbol(name, sym, new Location(yyline+1, yycolumn+1, yychar), new Location(yyline+1, yycolumn+yylength(), yychar+yylength()));
     }
@@ -58,7 +58,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
     Pattern number = Pattern.compile("[0-9]*");
     Pattern identifier = Pattern.compile("[A-Za-z0-9][A-Z_a-z0-9./\\\\]*[A-Za-z0-9]");
-    
+
     private Symbol stringIdentifierOrNumber(String value)
     {
         if (number.matcher(value).matches())
@@ -68,7 +68,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
         else
             return symbol("QUOTEDSTR",FullSym.QUOTEDSTR, value);
     }
-      
+
 %}
 
 %eofval{
@@ -82,13 +82,14 @@ identifier = [A-Za-z0-9][A-Z_a-z0-9./\\]*[A-Za-z0-9]
 nonquotedstring = [^,() \\\"]+
 fullrecord = "xml"|"raw"|"json"|"json2"|"text"|"FullRecordAs"[A-Za-z0-9]*
 datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
-%state STRING CONDITIONAL SUBFIELDSPEC CUSTOMSPEC SCRIPTSPEC CUSTOMMETHOD CUSTOMPARAM MAPSPEC CONSTANT 
+%state STRING CONDITIONAL CONDITIONAL2 SUBFIELDSPEC SUBCTRLFIELDSPEC CUSTOMSPEC SCRIPTSPEC CUSTOMMETHOD CUSTOMPARAM MAPSPEC CONSTANT
 
 %%
 <YYINITIAL>{
 [{]						{ return symbol("{",FullSym.LBRACE); }
-[0-9][0-9][0-9]   		{ yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());  }
-"LNK"[0-9][0-9][0-9]    { yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());  }
+00[0-9]   				{ yybegin(SUBCTRLFIELDSPEC); return symbol("CTRLFIELDSPEC",FullSym.FIELDSPEC, yytext());  }
+([1-9][0-9]|0[1-9])[0-9]   		 { yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());  }
+"LNK"([1-9][0-9]|0[1-9])[0-9]    { yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());  }
 [A-Z][A-Z][A-Z]   		{ yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext()); }
 ":"						{ yybegin(YYINITIAL);    return symbol(":",FullSym.COLON);  }
 "?"                     { yybegin(CONDITIONAL);  return symbol("?",FullSym.QUESTION); }
@@ -150,9 +151,7 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 {white_space}           { /* ignore */ }
 }
 
-<SUBFIELDSPEC>{
-"[""^"?[a-z][-a-z0-9]*"]"   { return symbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
-[a-z][a-z0-9]*              { return symbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
+<SUBCTRLFIELDSPEC>{
 "["[0-9]+(-[0-9]+)?"]"      { return symbol("POSITION", FullSym.POSITION, yytext()); }
 {white_space}               { /* ignore */ }
 ":"						    { yybegin(YYINITIAL);   return symbol(":",FullSym.COLON);  }
@@ -161,42 +160,56 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 [?]				  		    { yybegin(CONDITIONAL); return symbol("?",FullSym.QUESTION);  }
 }
 
+<SUBFIELDSPEC>{
+"[""^"?[a-z][-a-z0-9]*"]"   { yybegin(SUBCTRLFIELDSPEC); return symbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
+[a-z][a-z0-9]*              { yybegin(SUBCTRLFIELDSPEC); return symbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
+{white_space}               { /* ignore */ }
+":"						    { yybegin(YYINITIAL);   return symbol(":",FullSym.COLON);  }
+","				            { yybegin(MAPSPEC);  return symbol(",", FullSym.COMMA);  }
+[}]				            { yybegin(YYINITIAL);   return symbol("}",FullSym.RBRACE);  }
+[?]				  		    { yybegin(CONDITIONAL); return symbol("?",FullSym.QUESTION);  }
+}
+
 <CONDITIONAL>{
-/* keywords */
 [0][0][0-9]				  { return symbol("FIELDSPEC", FullSym.FIELDSPEC, yytext()); }
+([1-9][0-9]|0[1-9])[0-9]			  { return symbol("FIELDSPEC", FullSym.FIELDSPEC, yytext()); }
 "$"[a-z0-9A-Z]            { return symbol("SUBFIELD",FullSym.SUBFIELD, yytext().substring(1,2)); }
 "ind"[12]                 { return symbol("IND",FullSym.IND, yytext().substring(3,4)); }
 "ind"[03-9]               { error("Illegal indicator specification <"+ yytext()+">"); }
 "["[0-9]+(-[0-9]+)?"]"    { return symbol("POSITION", FullSym.POSITION, yytext()); }
 
-/* literals */
-{IntLiteral}              { return symbol("NUMBER",FullSym.NUMBER, yytext()); }
-
-/* separators */
-  \"              { string.setLength(0); save_zzLexicalState = CONDITIONAL; yybegin(STRING); }
 
 ":"	              { yybegin(YYINITIAL);  return symbol(":", FullSym.COLON);  }
 [}]				  { yybegin(YYINITIAL);  return symbol("}", FullSym.RBRACE);  }
 ","               { yybegin(MAPSPEC);  return symbol(",", FullSym.COMMA);  }
 "("               { return symbol("(",FullSym.LPAREN); }
 ")"               { return symbol(")",FullSym.RPAREN); }
-"=="|"="          { return symbol("EQU",FullSym.EQU ); }
-"!="              { return symbol("NEQ",FullSym.NEQ); }
-"~"|"matches"     { return symbol("MATCH",FullSym.MATCH); }
-"contains"        { return symbol("CONTAINS",FullSym.CONTAINS); }
-"<"|"startsWith"  { return symbol("LE",FullSym.LT); }
-">"|"endsWith"    { return symbol("GT",FullSym.GT); }
+"=="|"="          { yybegin(CONDITIONAL2);  return symbol("EQU",FullSym.EQU ); }
+"!="              { yybegin(CONDITIONAL2);  return symbol("NEQ",FullSym.NEQ); }
+"~"|"matches"     { yybegin(CONDITIONAL2);  return symbol("MATCH",FullSym.MATCH); }
+"contains"        { yybegin(CONDITIONAL2);  return symbol("CONTAINS",FullSym.CONTAINS); }
+"<"|"startsWith"  { yybegin(CONDITIONAL2);  return symbol("LE",FullSym.LT); }
+">"|"endsWith"    { yybegin(CONDITIONAL2);  return symbol("GT",FullSym.GT); }
 "&&"|"&"          { return symbol("AND",FullSym.AND); }
 "||"|"|"          { return symbol("OR",FullSym.OR); }
 "!"               { return symbol("NOT",FullSym.NOT); }
-'[^\\]'           { return symbol("CHAR",FullSym.CHAR, yytext().substring(1, 2)); } 
-'\\.'             { return symbol("CHAR",FullSym.CHAR, yytext().substring(1, 3)); } 
 {white_space}     { /* ignore */ }
 
 }
 
+<CONDITIONAL2>{
+/* literals */
+{IntLiteral}      { yybegin(CONDITIONAL);  return symbol("NUMBER",FullSym.NUMBER, yytext()); }
+'\\.'             { yybegin(CONDITIONAL);  return symbol("CHAR",FullSym.CHAR, yytext().substring(1, 3)); }
+
+/* separators */
+\"                { string.setLength(0); save_zzLexicalState = CONDITIONAL; yybegin(STRING); }
+'[^\\]'           { yybegin(CONDITIONAL);  return symbol("CHAR",FullSym.CHAR, yytext().substring(1, 2)); }
+{white_space}     { /* ignore */ }
+}
+
 <STRING> {
-  \"                             { yybegin(save_zzLexicalState); 
+  \"                             { yybegin(save_zzLexicalState);
                                    return symbol("QUOTEDSTR",FullSym.QUOTEDSTR,string.toString()); }
   [^\n\r\"\\]+                   { string.append( yytext() ); }
   \\t                            { string.append('\t'); }
@@ -215,13 +228,15 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 		    		switch (yystate() ) {
 		    			case YYINITIAL:    scannerStateStr = "startspec";    break;
 		    			case STRING:       scannerStateStr = "string";       break;
-		    			case CONDITIONAL:  scannerStateStr = "conditional";  break; 
+		    			case CONDITIONAL:  scannerStateStr = "conditional";  break;
+		    			case CONDITIONAL2:  scannerStateStr = "conditional2";  break;
 		    			case SUBFIELDSPEC: scannerStateStr = "subfield";     break;
+		    			case SUBCTRLFIELDSPEC: scannerStateStr = "subctrlfield";     break;
 		    			case CUSTOMSPEC:   scannerStateStr = "customspec";   break;
 		    			case CUSTOMMETHOD: scannerStateStr = "custommethod"; break;
 		    			case CUSTOMPARAM:  scannerStateStr = "customparam";  break;
 		    			case MAPSPEC:      scannerStateStr = "mapspec";      break;
-		    			default:           scannerStateStr = "unknown";      break; 
+		    			default:           scannerStateStr = "unknown";      break;
 		    		}
 		    		error("Error: Illegal character <"+ yytext()+">  found in scanner state "+ scannerStateStr);
                   }
