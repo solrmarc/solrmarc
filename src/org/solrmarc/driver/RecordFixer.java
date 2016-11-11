@@ -173,9 +173,6 @@ public class RecordFixer extends BootableMain
 
     public void processInput()
     {
-        startTime = System.currentTimeMillis();
-        long endTime = startTime;
-
         while (true)
         {
             Record record = null;
@@ -204,10 +201,9 @@ public class RecordFixer extends BootableMain
             writer.write(record);
         }
 
-        endTime = System.currentTimeMillis();
         writer.close();
     }
-    
+
     private void reportMarcErrors(Record record, List<MarcError> errors)
     {
         String id = record.getControlNumber();
