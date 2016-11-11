@@ -12,7 +12,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -50,7 +52,7 @@ public class ParameterizedIndexTest
     {
         factory = ValueIndexerFactory.initialize(new String[]{System.getProperty("test.data.dir", "test/data")});
     }
-    
+
     public ParameterizedIndexTest(String config, String recordFilename, String indexSpec, String expectedValue)
     {
         this.testNumber = ""+(cnt++);
@@ -59,8 +61,8 @@ public class ParameterizedIndexTest
         this.indexSpec = indexSpec;
         this.expectedValue = expectedValue;
     }
-    
-    
+
+
     @Test
     /**
      * for each line specified in the test file 
@@ -77,10 +79,19 @@ public class ParameterizedIndexTest
 
         Record record = getRecord(factory, readerProps, recordFilename);
 
-        MultiValueIndexer indexer = createIndexer(factory, indexSpec);
-        
-        Collection<String> result = indexer.getFieldData(record);
-        
+        Collection<MultiValueIndexer> indexers = createIndexer(factory, indexSpec);
+
+        Collection<String> result;
+
+        if (indexers.size() == 1)  result = indexers.iterator().next().getFieldData(record);
+        else
+        {
+            result = new ArrayList<String>();
+            for (MultiValueIndexer indexer : indexers)
+            {
+                result.addAll(indexer.getFieldData(record));
+            }
+        }
         String expected[];
         if (expectedValue.startsWith("*ordered*"))
         {
@@ -99,9 +110,10 @@ public class ParameterizedIndexTest
     }
 
 
-    private MultiValueIndexer createIndexer(ValueIndexerFactory factory, String indexSpec)
+    private Collection<MultiValueIndexer> createIndexer(ValueIndexerFactory factory, String indexSpec)
     {
         MultiValueIndexer indexer = null;
+        Collection<MultiValueIndexer> multiResult = new ArrayList<MultiValueIndexer>();
         Matcher indexSpecMatcher = indexSpecParse.matcher(indexSpec);
         if (indexSpecMatcher.matches())
         {
@@ -126,6 +138,7 @@ public class ParameterizedIndexTest
                         if (fn.equals(specName))
                         {
                             indexer = (MultiValueIndexer) ix;
+                            multiResult.add(indexer);
                         }
                     }
                 }
@@ -135,7 +148,7 @@ public class ParameterizedIndexTest
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            return(indexer);
+            return(multiResult);
         }
         else // its a single spec
         {
@@ -149,7 +162,7 @@ public class ParameterizedIndexTest
                     indexname = "test_"+testNumber;
                 }
                 indexer = factory.createValueIndexer(indexname, fullSpec);
-                return(indexer);
+                return(Collections.singletonList(indexer));
             }
         }
         return(null);
@@ -184,12 +197,12 @@ public class ParameterizedIndexTest
         }
         if (configAdditionStr == null) configAdditionStr = "";
         String[] configAdditions = configAdditionStr.split(",");
-        
+
         Properties readerProps = new Properties();
         String propertyFileAsURLStr = PropertyUtils.getPropertyFileAbsoluteURL(factory.getHomeDirs(), configFile, false, null);
 
         readerProps.load(PropertyUtils.getPropertyFileInputStream(propertyFileAsURLStr));
-        
+
         for (String configAddition : configAdditions)
         {
             String[] propParts = configAddition.split("=");
@@ -200,7 +213,7 @@ public class ParameterizedIndexTest
         }
         return readerProps;
     }
-    
+
     private Record getRecord(ValueIndexerFactory factory, Properties readerProps, String recordFilename)
     {
         String recordToLookAt = null;  // null means just get the first record from the named file
@@ -286,7 +299,7 @@ public class ParameterizedIndexTest
             }
             catch(IOException ioe)
             {}
-            
+
             return(result);
         }
         String[] testdata = new String[] 
@@ -355,7 +368,7 @@ public class ParameterizedIndexTest
                  //   "The princes of Hà-tiên (1682-1867) /"
                     "The princes of Ha\u0300-tie\u0302n (1682-1867) /"
                 };
-        
+
         result.add(testdata);
         return(result);
 

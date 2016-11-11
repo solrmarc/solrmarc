@@ -17,6 +17,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 
 
 public class ValueIndexerFactoryTests
@@ -67,7 +69,6 @@ public class ValueIndexerFactoryTests
         assertEquals("fullRecord", indexer.getSolrFieldNames().iterator().next());
         @SuppressWarnings("unused")
         String xml = indexer.getFieldData(testRecord).iterator().next().toString();
-        
     }
 
     @Test
@@ -82,9 +83,8 @@ public class ValueIndexerFactoryTests
         assertEquals(1, result.size());
         String value = result.iterator().next();
         assertEquals("Lascaux en Périgord noir : environnement, art pariétal et conservation", value);
-        
     }
-    
+
     @Test
     public void testFieldSpecControlFieldIndexer() throws Exception
     {
@@ -97,8 +97,7 @@ public class ValueIndexerFactoryTests
         assertEquals(1, result.size());
         assertEquals("u233", result.iterator().next()); 
     }
-    
-    
+
     //  "008[35-37]:041a:041d"
     @Test
     public void testFieldSpecMultiFieldIndexer() throws Exception
@@ -108,9 +107,9 @@ public class ValueIndexerFactoryTests
         final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
         assertEquals(1, indexer.getSolrFieldNames().size());
         assertEquals("language_facet", indexer.getSolrFieldNames().iterator().next());
-        @SuppressWarnings("unused")
-        Object id = indexer.getFieldData(testRecord);
-        
+        Collection<String> result = indexer.getFieldData(testRecord);
+        String[] expected = new String[] { "French", "English", "German", "Spanish" };
+        assertThat(result, containsInAnyOrder(expected));
     }
 
     @Test
@@ -124,7 +123,6 @@ public class ValueIndexerFactoryTests
         assertEquals("<null>", indexer.getFieldData(null).iterator().next());
     }
 
-    
     @Test(expected = NullPointerException.class)
     public void testManyIndexers() throws Exception
     {
