@@ -19,6 +19,10 @@ import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.utils.FastClasspathUtils;
 //import org.solrmarc.index.utils.ReflectionUtils;
 
+/**
+ * @author rh9ec
+ *
+ */
 public class Boot
 {
     public static Logger logger;
@@ -30,6 +34,9 @@ public class Boot
         logger = Logger.getLogger(Boot.class);
     }
 
+    /**
+     * @param args
+     */
     public static void main(String[] args)
     {
         org.apache.log4j.BasicConfigurator.configure();
@@ -46,11 +53,11 @@ public class Boot
                 classname = "org.solrmarc.driver.ConfigDriver";
                 otherArgs = args;
             }
-            else 
+            else
             {
                 otherArgs = new String[args.length - 1];
                 System.arraycopy(args, 1, otherArgs, 0, args.length - 1);
-            
+
                 try
                 {
                     classname = classnamefromArg(args[0]);
@@ -66,6 +73,10 @@ public class Boot
         }
     }
 
+    /**
+     * @param classname
+     * @param otherArgs
+     */
     protected static void invokeMain(String classname, String[] otherArgs)
     {
         try
@@ -173,11 +184,19 @@ public class Boot
         }
     }
 
+    /**
+     *   Find the location of where this class is running from
+     *   When run normally this would be the main solrmarc jar
+     *   when run from classdirs in eclipse, is is the project location
+     *
+     *   @return  String - location of where this class is running from.  Used
+     *                      as default search location for local configuration
+     *                      files (As a side effect, sets System Property
+     *                      solrmarc.jar.dir to this same value so it can be
+     *                      referenced in log4j.properties)
+     */
     public static String getDefaultHomeDir()
     {
-        // Find the location of where this class is running from. 
-        // When run normally this would be the main solrmarc jar.
-        // when run from classdirs in eclipse, is is the project location.
         CodeSource codeSource = Boot.class.getProtectionDomain().getCodeSource();
         String jarDir;
         File jarFile = null;
@@ -205,14 +224,16 @@ public class Boot
     }
 
     /**
-     * @param args
+     * Finds directory "lib" relative to the defaultHomeDir and loads all of
+     * the jar files in that directory dynamically.  If it doesn't find a jar
+     * named marc4j*.jar it will log a fatal error and exit the program.
      */
     public static void addLibDirJarstoClassPath()
     {
         String homePath = getDefaultHomeDir();
         File homeDir = new File(homePath);
-    //    extendClasspathWithDirOfClasses(homeDir);
-        // Now find the sub-directory "lib" as a sibling of the execution location. 
+
+        // Now find the sub-directory "lib" as a sibling of the execution location.
         File libPath = new File(homeDir, "lib");
         try
         {
@@ -230,7 +251,7 @@ public class Boot
         }
         catch (ClassNotFoundException e)
         {
-            try { 
+            try {
                 logger = Logger.getLogger(Boot.class);
                 org.apache.log4j.BasicConfigurator.configure();
                 logger.fatal("Fatal error: Unable to find marc4j Record class, probably missing many others as well.  " + e.getMessage());
@@ -331,19 +352,21 @@ public class Boot
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         extendClasspathWithDirOfClasses(sysLoader, dir);
     }
-    
+
     public static boolean extendClasspathWithLibJarDir(File dir, String patternForSpecial)
     {
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         boolean foundIt = extendClasspathWithJarDir(sysLoader, dir, ".*[.]jar", patternForSpecial);
         return(foundIt);
     }
-    
+
     /**
-     *  given a directory add all of the jars there to the classpath.
-     *  If none of those jars has a name containing "solrj"  then look in the parent directory of the provided directory
-     *  for a jar with a name containing "solrj"
-     * @param homeDirStrs 
+     *  Given a directory, add all of the jars there to the classpath.
+     *  If none of those jars has a name containing "solrj"  then look
+     *  in the parent directory of the provided directory for a jar with
+     *  a name containing "solrj"
+     *
+     * @param homeDirStrs
      * @param dir
      */
     public static void extendClasspathWithSolJJarDir(String[] homeDirStrs, File dir)
@@ -359,7 +382,7 @@ public class Boot
             parentDir = dirWithJars.getParentFile();
             foundSolrj = extendClasspathWithJarDir(sysLoader, parentDir, ".*solrj.*[.]jar", ".*solrj.*[.]jar");
         }
-        
+
         if (!foundSolrj)
         {
             throw new IndexerSpecException("Unable to find a solrj jar file in directory: "+ dir.getAbsolutePath() + ((parentDir != null) ? "( or "+parentDir.getAbsolutePath()+ ")": ""));
