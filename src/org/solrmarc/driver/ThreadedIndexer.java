@@ -93,11 +93,24 @@ public class ThreadedIndexer extends Indexer
     }
 
     @Override
+    public void resetCnts()
+    {
+        cnts[0].set(0); cnts[1].set(0); cnts[2].set(0);
+    }
+
+    @Override
+    public void incrementCnt(int cntNum)
+    {
+        cnts[cntNum].incrementAndGet();
+    }
+
+
+    @Override
     public int[] indexToSolr(final MarcReader reader)
     {
         thisThread = Thread.currentThread();
-        cnts[0].set(0); cnts[1].set(0); cnts[2].set(0);
-        readerThread = new MarcReaderThread(reader, readQ, cnts);
+        resetCnts();
+        readerThread = new MarcReaderThread(reader, this, readQ, cnts);
         readerThread.start();
 
         workers = new IndexerWorker[numThreadIndexers];
@@ -142,7 +155,7 @@ public class ThreadedIndexer extends Indexer
                         threadName = "Anonymous";
                     }
                     final BlockingQueue<RecordAndDoc> errQVal = (this.isSet(eErrorHandleVal.RETURN_ERROR_RECORDS)) ? this.errQ : null;
-                    Runnable runnableChunk = new ChunkIndexerWorker(threadName, chunk, errQVal, this.solrProxy, cnts);
+                    Runnable runnableChunk = new ChunkIndexerWorker(threadName, chunk, errQVal, this, cnts);
                     logger.debug("Starting IndexerThread: "+ threadName);
                     solrExecutor.execute(runnableChunk);
                 }
@@ -207,6 +220,7 @@ public class ThreadedIndexer extends Indexer
         return(getCounts());
     }
 
+    @Override
     public int[] getCounts()
     {
         int intCnts[] = new int[3];

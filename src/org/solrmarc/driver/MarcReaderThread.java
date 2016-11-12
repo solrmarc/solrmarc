@@ -16,13 +16,15 @@ public class MarcReaderThread extends Thread
     private final static Logger logger = Logger.getLogger(MarcReaderThread.class);
     private AtomicInteger cnts[];
     private final MarcReader reader;
+    private final Indexer indexer;
     private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ;
     private boolean doneReading = false;
 
-    public MarcReaderThread(final MarcReader reader, BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ, AtomicInteger cnts[])
+    public MarcReaderThread(final MarcReader reader, final Indexer indexer, BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ, AtomicInteger cnts[])
     {
         super("MarcReader-Thread");
         this.reader = reader;
+        this.indexer = indexer;
         this.readQ = readQ;
         this.cnts = cnts;
     }
@@ -33,24 +35,8 @@ public class MarcReaderThread extends Thread
         Record record = null;
         while (!Thread.currentThread().isInterrupted())
         {
-            try {
-                if (reader.hasNext())
-                    record = reader.next();
-                else
-                    break;
-            }
-            catch (MarcException me)
-            {
-                logger.error("Unrecoverable Error in MARC record data", me);
-                if (Boolean.parseBoolean(System.getProperty("solrmarc.terminate.on.marc.exception", "true")))
-                    break;
-                else
-                {
-                    logger.warn("Trying to continue after MARC record data error");
-                    continue;
-                }
-            }
-
+            record = indexer.getRecord(reader);
+            if (record == null) break;
             while (readQ.offer(new AbstractMap.SimpleEntry<Integer, Record>(cnts[0].get(), record)) == false)
             {
                 try
@@ -64,7 +50,6 @@ public class MarcReaderThread extends Thread
                     break;
                 }
             }
-            cnts[0].incrementAndGet();
         }
         if (Thread.currentThread().isInterrupted())
         {

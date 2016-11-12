@@ -66,61 +66,23 @@ public class IndexerWorker implements Runnable
                 AbstractMap.SimpleEntry<Integer, Record> pair = readQ.poll(10, TimeUnit.MILLISECONDS);
                 if (pair == null)  continue;
                 int count = pair.getKey();
-                Record rec = pair.getValue();
+                Record record = pair.getValue();
 
 //                System.out.println(rec.getControlNumber() + " :  read in thread "+ threadCount);
 //                long id = Long.parseLong(rec.getControlNumber().substring(1))* 100 + threadCount;
 //                rec.setId((long)id);
                 if (isInterrupted())  break;
-                RecordAndDoc recDoc = indexer.indexToSolrDoc(rec);
-                if (isInterrupted())  break;
-                if (recDoc.getSolrMarcIndexerException() != null)
-                {
-                    SolrMarcIndexerException smie = recDoc.getSolrMarcIndexerException();
-                    String recCtrlNum = recDoc.rec.getControlNumber();
-                    String idMessage = smie.getMessage() != null ? smie.getMessage() : "";
-                    if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
-                    {
-                        logger.info("Record will be Ignored " + (recCtrlNum != null ? recCtrlNum : "") + " " + idMessage + " (record count " + count + ")");
-                        continue;
-                    }
-                    else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
-                    {
-                        logger.info("Record will be Deleted " + (recCtrlNum != null ? recCtrlNum : "") + " " + idMessage + " (record count " + count + ")");
-                        indexer.delQ.add(recCtrlNum);
-                        continue;
-                    }
-                    else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
-                    {
-                        logger.info("Serious Error flagged in record " + (recCtrlNum != null ? recCtrlNum : "") + " " + idMessage + " (record count " + count + ")");
-                        logger.info("Terminating indexing.");
-                        indexer.shutDown(false);
-                        break;
-                    }
+                RecordAndDoc recDoc = null;
+                try {
+                    recDoc = indexer.getIndexDoc(record, count);
                 }
-                if (recDoc.getErrLvl() != eErrorSeverity.NONE)
+                catch (SolrMarcIndexerException smie)
                 {
-                    if (indexer.isSet(eErrorHandleVal.RETURN_ERROR_RECORDS) && !indexer.isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
-                    {
-                        indexer.errQ.add(recDoc);
-                    }
-                    if (recDoc.getErrLvl() == eErrorSeverity.FATAL && recDoc.ise != null)
-                    {
-                        String recCtrlNum = recDoc.rec.getControlNumber();
-                        String idMessage = recDoc.ise.getMessage() != null ? recDoc.ise.getMessage() : "";
-                        String indSpec = recDoc.ise.getSpecMessage() != null ? recDoc.ise.getSpecMessage() : "";
-                        logger.info("Fatal Error returned for record " + (recCtrlNum != null ? recCtrlNum : "") + " : " + idMessage + " (record count " + count + ")");
-                        logger.info("Fatal Error from by index spec  " + (recCtrlNum != null ? recCtrlNum : "") + " : " + indSpec + " (record count " + count + ")");
-                        logger.info("Terminating indexing.");
-                        indexer.shutDown(false);
-                        break;
-                    }
-                    if (!indexer.isSet(eErrorHandleVal.INDEX_ERROR_RECORDS))
-                    {
-                        logger.debug("Skipping error record: " + recDoc.rec.getControlNumber());
-                        continue;
-                    }
+                    indexer.shutDown(false);
+                    break;
                 }
+                if (recDoc == null) continue;
+
                 if (isInterrupted())  break;
                 boolean offerWorked = docQ.offer(recDoc);
                 while (!offerWorked)
@@ -136,7 +98,6 @@ public class IndexerWorker implements Runnable
                         break;
                     }
                 }
-                if (offerWorked) cnts[1].incrementAndGet();
             }
             catch (InterruptedException e)
             {
