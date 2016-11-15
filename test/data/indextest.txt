@@ -1,101 +1,104 @@
+# 0 
 record: specTestRecs.mrc(u8)
 indexSpec: id = 001, first
 expect: u8
 
-
+# 1
 record: 1156470.mrc
 indexSpec: 035a, map("[(][Oo][Cc][Oo][Ll][Cc][)][^0-9]*[0]*([0-9]+)=>$1","ocm[0]*([0-9]+)[ ]*[0-9]*=>$1","ocn[0]*([0-9]+).*=>$1", "on[0]*([0-9]+).*=>$1")
 expect: 12275114
 
-
-# test loading a indexspec that references a pattern map defined in the same properties file
+# 2  test loading a indexspec that references a pattern map defined in the same properties file
 record: 1156470.mrc
 indexSpec: oclc_pattern_map_test.properties(oclc_num)
 expect: 12275114
 
-
+# 3 
 record: 1156470.mrc
 indexSpec: oclc_p_num = 035a, oclc_num_pattern_map.properties(oclc_num)
 expect: 12275114
 
-
+# 4
 record: specTestRecs.xml
 indexSpec: subject_facet =600[a-z]:610[a-z]:611[a-z]:630[a-z]:650[a-z]:651[a-z]:655[a-z]:690[a-z], join (" -- "), cleanEnd, unique
 expect: Translating and interpreting -- Soviet Union -- History|Russian literature -- Translations from foreign languages -- History and criticism
 
-
+# 5
 record: title_k.mrc
 indexSpec: custom, getSortableTitle
 expect: morton hoffman papers
 
-
-# test with unicode normalization turned on
+# 6  test with unicode normalization turned on
 readerProps: marc.permissive=true, marc.to_utf_8=true, marc.unicode_normalize=C 
 record: u4.mrc(u4) 
 indexSpec: 245a 
 #The princes of H\u00E0-ti\u00EAn (1682-1867) /
 expect: The princes of Hà-tiên (1682-1867) /
 
-
-# same test with unicode normalization turned off
+# 7  same test with unicode normalization turned off
 readerProps: marc.permissive=true, marc.to_utf_8=true, marc.unicode_normalize=false 
 record: u4.mrc(u4)
 indexSpec: 245a
 #The princes of Ha\u0300-tie\u0302n (1682-1867) /
 expect: The princes of Hà-tiên (1682-1867) /
 
-#test reading XML file with initial BOM
+# 8  test reading XML file with initial BOM
 record: specTestRecs_withBOM.xml(u55)
 indexSpec: id = 001, first
 expect: u55
 
-#test reading XML file with no prolog
+# 9  test reading XML file with no prolog
 record: specTestRecs_no_Prolog.xml(u10489)
 indexSpec: id = 001, first
 expect: u10489
 
-#test reading single record Koha XML file without <collection> 
+#10  test reading single record Koha XML file without <collection> 
 record: 1474920681_KOHA_LFL_5.xml
 indexSpec: id = 245a
 expect: Cinema and architecture : from historical to digital /
 
-#test reading single record Koha XML file without <collection> that starts with a comment
+#11  test reading single record Koha XML file without <collection> that starts with a comment
 record: 1474920681_KOHA_LFL_6_with_comment.xml
 indexSpec: id = 245a, cleanEnd
 expect: Cinema and architecture : from historical to digital
 
-#Test running a bean shell script
+#12  Test running a bean shell script
 record: u399.mrc
 indexSpec: pubdategroup = script(PubDateGroups.bsh), getPubDateGroups
 expect: Last 50 years
 
+#13
 record: u55.mrc
 indexSpec: custom, getCallNumbersCleanedNewNo050(true)
 expect: PR4231.A43 1984 (13 volumes)
 
+#14
 record: u60.mrc
 indexSpec: custom, getCallNumbersCleanedNewNo050(true)
 expect: DP269.27.S67 H47 1982  V.1, V.2
 
+#15
 record: u60.mrc
 indexSpec: 999i
 expect: X000872036|X000872037
 
+#16
 record: u8738.mrc
 indexSpec: language_facet.properties(language_facet)
 expect: English|French (translated from)
 
+#17
 record: u392.mrc
 indexSpec: language_facet.properties(language_facet)
 expect: Russian|English (also in)
 
-#testing the interaction of stripInd2 and substring
+#18  testing the interaction of stripInd2 and substring
 # the field value is : 245 13$aAn introduction to Vietnamese literature /
 record: u8738.mrc
 indexSpec: title_start = 245a, substring(0,5), stripInd2
 expect: intro
 
-#testing the interaction of stripInd2 and position based selection [num1, num2]
+#19  testing the interaction of stripInd2 and position based selection [num1, num2]
 # the field value is : 245 13$aAn introduction to Vietnamese literature /
 # note the position based selection operation extracts from num1 to num2
 # whereas the substring(num1, num2) extracts from num1 to num2-1
@@ -103,19 +106,57 @@ record: u8738.mrc
 indexSpec: title_start = 245a[0-4], stripInd2
 expect: intro
 
-#testing the interaction of stripInd2, substring and separate
+#20  testing the interaction of stripInd2, substring and separate
 # the field value is : 245 13$aAn introduction to Vietnamese literature /$cMaurice M. Durand and Nguyen Tran Huan
 record: u8738.mrc
 indexSpec: title_part3 = 245[ac], substring(0,5), separate, stripInd2
 expect: intro|Mauri
 
-#testing error correction of Russian record with erroneous subfield separator in the middle of a Cyrillic string
+#21  testing error correction of Russian record with erroneous subfield separator in the middle of a Cyrillic string
 record: u5278992.mrc
 indexSpec: pub = LNK260b, first, clean
 expect: ЭКсмо
 
-#testing error correction of Russian record with erroneous subfield separator in the middle of a Cyrillic string
+#22  testing error correction of Russian record with erroneous subfield separator in the middle of a Cyrillic string
 readerProps: marc.permissive=false, marc.to_utf_8=true 
 record: u5278992.mrc
 indexSpec: pub = LNK260b, first, clean
 expect: 
+
+#23  testing stripInd2 on a record where the ind2 is 4 and the 245a field is "Job :" if steps are performed in the wrong
+# the index method will throw a index out of bounds exception, but it shouldn't
+record: datos-20161010-ajob.mrc
+indexSpec: title = 245a, clean, stripInd2
+expect: 
+
+#24  testing stripInd2 on a record where the ind2 is 4 and the 245a field is "Job :" if steps are performed in the wrong
+# the index method will throw a index out of bounds exception, but it shouldn't
+record: datos-20161010-ajob.mrc
+indexSpec: title = 245a,  stripInd2
+expect: :
+
+#25  testing numeric subfields in specifications
+record: datos-20161010-ajob.mrc
+indexSpec: 9522
+expect: DEWEY
+
+#26  testing numeric subfields in specifications
+record: datos-20161010-ajob.mrc
+indexSpec: 952[2]
+expect: DEWEY
+
+#27 testing ctrl fields
+record: u5278992.mrc
+indexSpec: 008[35-37]
+expect: rus
+
+#28 testing author with bad relator code
+record: kan1222221.mrc
+indexSpec: author_added_entry_text = 710abcdeq4
+expect: 3DD Group (Firm),$4dst|Kanopy (Firm),$4dst
+
+#29 testing author with bad relator code using MarcFilteredReader edit specification 
+readerProps: marc.reader.remap=video_recs_map.properties
+record: kan1222221.mrc
+indexSpec: author_added_entry_text = 710abcdeq4
+expect: 3DD Group (Firm)|Kanopy (Firm)
