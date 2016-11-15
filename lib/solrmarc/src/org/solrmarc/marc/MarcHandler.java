@@ -37,6 +37,7 @@ public abstract class MarcHandler {
 	protected boolean showConfig = false;
 	protected boolean showInputFile = false;
 	protected String unicodeNormalize = null;
+	protected Object lock = new Object();
 	
 	private String solrmarcPath;
 	private String siteSpecificPath;
@@ -56,7 +57,6 @@ public abstract class MarcHandler {
 	
 	public void init(String args[])
 	{
-      sychronized(MarcHandler.class) {
         String configProperties = GetDefaultConfig.getConfigName("config.properties");
 
         List<String> addnlArgList = new ArrayList<String>();
@@ -127,7 +127,6 @@ public abstract class MarcHandler {
         {
             loadIndexer(indexerName, indexerProps); 
         }
-      }  
 	}
 		
     /** 
