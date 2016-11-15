@@ -38,7 +38,6 @@ public class ThreadedIndexer extends Indexer
         super(indexers, solrProxy);
         readQ = new ArrayBlockingQueue<AbstractMap.SimpleEntry<Integer, Record>>(buffersize);
         docQ = new ArrayBlockingQueue<RecordAndDoc>(buffersize);
-       // indexerExecutor = Executors.newSingleThreadExecutor();
         int num = 1;
         try {
             num = Integer.parseInt(System.getProperty("solrmarc.indexer.threadcount", "1"));
@@ -104,6 +103,11 @@ public class ThreadedIndexer extends Indexer
         cnts[cntNum].incrementAndGet();
     }
 
+    @Override
+    public void addToCnt(int cntNum, int amount)
+    {
+        cnts[cntNum].addAndGet(amount);
+    }
 
     @Override
     public int[] indexToSolr(final MarcReader reader)
@@ -116,7 +120,7 @@ public class ThreadedIndexer extends Indexer
         workers = new IndexerWorker[numThreadIndexers];
         for (int i = 0; i < numThreadIndexers; i++)
         {
-            workers[i] = new IndexerWorker(readerThread, readQ, docQ, this, cnts, i);
+            workers[i] = new IndexerWorker(readerThread, readQ, docQ, this, i);
         }
         for (int i = 0; i < numThreadIndexers; i++)
         {
@@ -155,7 +159,7 @@ public class ThreadedIndexer extends Indexer
                         threadName = "Anonymous";
                     }
                     final BlockingQueue<RecordAndDoc> errQVal = (this.isSet(eErrorHandleVal.RETURN_ERROR_RECORDS)) ? this.errQ : null;
-                    Runnable runnableChunk = new ChunkIndexerWorker(threadName, chunk, errQVal, this, cnts);
+                    Runnable runnableChunk = new ChunkIndexerWorker(threadName, chunk, errQVal, this);
                     logger.debug("Starting IndexerThread: "+ threadName);
                     solrExecutor.execute(runnableChunk);
                 }

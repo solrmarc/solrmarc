@@ -159,6 +159,11 @@ public class Indexer
         cnts[cntNum]++;
     }
 
+    public void addToCnt(int cntNum, int amount)
+    {
+        cnts[cntNum] += amount;
+    }
+
     public int[] getCounts()
     {
         return(cnts);

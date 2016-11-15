@@ -3,18 +3,14 @@ package org.solrmarc.driver;
 import java.util.AbstractMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.marc4j.marc.Record;
-import org.solrmarc.driver.Indexer.eErrorHandleVal;
-import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.tools.SolrMarcIndexerException;
 
 public class IndexerWorker implements Runnable
 {
     private final static Logger logger = Logger.getLogger(IndexerWorker.class);
-    private AtomicInteger cnts[];
     private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ;
     private final BlockingQueue<RecordAndDoc> docQ;
     private Indexer indexer;
@@ -23,13 +19,12 @@ public class IndexerWorker implements Runnable
     private boolean doneWorking = false;
     private boolean interrupted = false;
 
-    public IndexerWorker(MarcReaderThread readerThread, BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ, BlockingQueue<RecordAndDoc> docQ, Indexer indexer, AtomicInteger cnts[], int threadCount)
+    public IndexerWorker(MarcReaderThread readerThread, BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ, BlockingQueue<RecordAndDoc> docQ, Indexer indexer, int threadCount)
     {
         this.readerThread = readerThread;
         this.readQ = readQ;
         this.docQ = docQ;
         this.indexer = indexer;
-        this.cnts = cnts;
         this.threadCount = threadCount;
         this.doneWorking = false;
     }

@@ -42,15 +42,12 @@ public class ChunkIndexerWorker implements Runnable
     String firstDocId = null;
     String lastDocId = null;
 
-    final AtomicInteger cnts[];
-
     public ChunkIndexerWorker(String threadName, Collection<RecordAndDoc> recordAndDocs,
-            BlockingQueue<RecordAndDoc> errQ, Indexer indexer, AtomicInteger[] cnts)
+            BlockingQueue<RecordAndDoc> errQ, Indexer indexer)
     {
         this.threadName = threadName;
         this.recordAndDocs = recordAndDocs;
         this.docs = buildDocList(recordAndDocs);
-        this.cnts = cnts;
         this.errQ = errQ;
         this.indexer = indexer;
     }
@@ -84,7 +81,7 @@ public class ChunkIndexerWorker implements Runnable
         try {
             // If all goes well, this is all we need. Add the docs, count the docs, and if desired return the docs with errors
             int cnt = indexer.solrProxy.addDocs(docs);
-            cnts[2].addAndGet(cnt);
+            indexer.addToCnt(2, cnt);
             logger.debug("Added chunk of "+cnt+ " documents -- starting with id : "+firstDocId);
 
             if (errQ != null)
@@ -129,7 +126,7 @@ public class ChunkIndexerWorker implements Runnable
                         }
                     }
                     // Split the chunk into 4 sub-chunks, and start a ChunkIndexerThread for each of them.
-                    subChunk[i] = new ChunkIndexerWorker("SolrUpdateOnError_"+id1+"_"+id2, newRecDoc, errQ, indexer, cnts);
+                    subChunk[i] = new ChunkIndexerWorker("SolrUpdateOnError_"+id1+"_"+id2, newRecDoc, errQ, indexer);
                     subChunk[i].run();
                 }
             }

@@ -7,7 +7,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
-import org.marc4j.MarcException;
 import org.marc4j.MarcReader;
 import org.marc4j.marc.Record;
 
