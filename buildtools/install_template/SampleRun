@@ -1,0 +1,3 @@
+
+
+java -jar solrmarc_core_${version}.jar IndexDriver -config index.properties -url http://solr.machine.name:port/solr/core marc_record.mrc
