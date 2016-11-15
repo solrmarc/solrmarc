@@ -286,6 +286,7 @@ field_spec_part_simple ::= FIELDSPEC:f SUBFIELDSPEC:sf 						{: RESULT = Abstrac
                          | FIELDSPEC:f SUBFIELDSPEC:sf POSITION:p           {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, sf, p); :}
                          | FIELDSPEC:f POSITION:p                           {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, p); :}
                          | CTRLFIELDSPEC:f POSITION:p                       {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null, p); :}
+                         | CTRLFIELDSPEC:f                                  {: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null); :}
                          | FIELDSPEC:f 										{: RESULT = AbstractSpecificationFactory.makeSingleSpecification(f, null); :}
                          ;
 

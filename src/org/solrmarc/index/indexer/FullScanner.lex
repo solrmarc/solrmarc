@@ -87,7 +87,7 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 %%
 <YYINITIAL>{
 [{]						{ return symbol("{",FullSym.LBRACE); }
-00[0-9]   				{ yybegin(SUBCTRLFIELDSPEC); return symbol("CTRLFIELDSPEC",FullSym.FIELDSPEC, yytext());  }
+00[0-9]   				{ yybegin(SUBCTRLFIELDSPEC); return symbol("CTRLFIELDSPEC",FullSym.CTRLFIELDSPEC, yytext());  }
 ([1-9][0-9]|0[1-9])[0-9]   		 { yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());  }
 "LNK"([1-9][0-9]|0[1-9])[0-9]    { yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext());  }
 [A-Z][A-Z][A-Z]   		{ yybegin(SUBFIELDSPEC); return symbol("FIELDSPEC",FullSym.FIELDSPEC, yytext()); }
@@ -162,7 +162,7 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 
 <SUBFIELDSPEC>{
 "[""^"?[a-z][-a-z0-9]*"]"   { yybegin(SUBCTRLFIELDSPEC); return symbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
-[a-z][a-z0-9]*              { yybegin(SUBCTRLFIELDSPEC); return symbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
+[a-z0-9][a-z0-9]*           { yybegin(SUBCTRLFIELDSPEC); return symbol("SUBFIELDSPEC",FullSym.SUBFIELDSPEC, yytext()); }
 {white_space}               { /* ignore */ }
 ":"						    { yybegin(YYINITIAL);   return symbol(":",FullSym.COLON);  }
 ","				            { yybegin(MAPSPEC);  return symbol(",", FullSym.COMMA);  }
@@ -172,7 +172,7 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 
 <CONDITIONAL>{
 [0][0][0-9]				  { return symbol("FIELDSPEC", FullSym.FIELDSPEC, yytext()); }
-([1-9][0-9]|0[1-9])[0-9]			  { return symbol("FIELDSPEC", FullSym.FIELDSPEC, yytext()); }
+([1-9][0-9]|0[1-9])[0-9]  { return symbol("FIELDSPEC", FullSym.FIELDSPEC, yytext()); }
 "$"[a-z0-9A-Z]            { return symbol("SUBFIELD",FullSym.SUBFIELD, yytext().substring(1,2)); }
 "ind"[12]                 { return symbol("IND",FullSym.IND, yytext().substring(3,4)); }
 "ind"[03-9]               { error("Illegal indicator specification <"+ yytext()+">"); }
