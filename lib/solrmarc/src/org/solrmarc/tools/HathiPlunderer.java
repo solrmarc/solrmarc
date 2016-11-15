@@ -37,7 +37,7 @@ public class HathiPlunderer extends InputStream
     private static BufferedReader in;
     private int fetchCount = 0;
     private static int numInBuf = 0;
-    private static String urlBase = "http://catalog.hathitrust.org/api/volumes/full/json/";
+    private static String urlBase = "https://catalog.hathitrust.org/api/volumes/full/json/";
     private static String fetchOne = null;
 
     private int chunkSize = 20;
@@ -326,15 +326,33 @@ public class HathiPlunderer extends InputStream
             int read = 0;
             int bufSize = 512;
             byte[] buffer = new byte[bufSize];
+
+            boolean badMojo = false;
             while(true)
             {
                 read = bis.read(buffer);
-                if (buffer[0] == 10 && buffer[1] == 10 && buffer[2] == 60 && buffer[3] == 98)
+                if (read != -1 && (badMojo || (buffer[0] == 10 && buffer[1] == 10 && buffer[2] == 60 && buffer[3] == 98)))
                 {
                     String bufStr = new String(buffer);
                     if (bufStr.contains("Fatal error</b>"))
                     {
                         return(-1);
+                    }
+                    else if (bufStr.contains("{\"recordnumber:"))
+                    {
+                        int offset = bufStr.indexOf("{\"recordnumber:");
+                        os.write(buffer, offset, read-offset);
+                        badMojo = false;
+                        continue;
+                    }
+                    else if (numToFetch > 1)
+                    {
+                        return(-1);
+                    }
+                    else if (numToFetch == 1)
+                    {
+                        badMojo = true;
+                        continue;
                     }
                 }
                 if(read==-1)
