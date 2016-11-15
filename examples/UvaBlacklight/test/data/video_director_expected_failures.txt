@@ -1,0 +1,111 @@
+#
+# Extraneous comma between first and last name catching this causes many false positives
+#
+!~Diederik d'Ailly		Produced and Directed by Diederik, d'Ailly, Written by Katherine Gilday.
+
+
+#
+# the pattern "ein file von Namepart Namepart"   is similar to the  a film by Namepart Namepart  pattern but they both cause false positives
+#
+!Dani Levy		A First Run Features presentation ; Y Filme Directors Pool ; X Filme Creative Pool ; in co-produktion mit WDR, BR, ARTE ; ein film von Dani Levy ; produzent, Stefan Arndt ; buch und regie, Dani Levy. 
+
+
+#
+# the pattern "a film by Namepart Namepart"  isn't used, and the other instance of the director's name has bad capitalization
+#
+??Sanders		a film by Terry Sanders ; written, produced and directed by terry Sanders ; narrated by Robert MacNeil.
+
+
+#
+# misspelled word "photgraphy" causes an additional director to be returned (Eduard Tisse)
+#
+!Sergei Eisenstein|Dimitri Vasiliev		Directors, Sergei Eisenstein, Dimitri Vasiliev ; screenplay, Pyotr Pavlenko, Sergei Eisenstein ; director of photgraphy, Eduard Tissé ; musical score, Sergei Prokofiev.
+Sergei Eisenstein|Dimitri Vasiliev		Directors, Sergei Eisenstein, Dimitri Vasiliev ; screenplay, Pyotr Pavlenko, Sergei Eisenstein ; director of photography, Eduard Tissé ; musical score, Sergei Prokofiev.
+
+
+#
+# period (.) after first name Jayaraaj causes it to stop looking.
+#
+!??Jayaraaj. K.		Sri Sravanthi Movies ; producer, 'Sravanthi' Ravikishore ; story, screenplay and direction, Jayaraaj. K.
+
+
+#
+# the comma separated movie name between the word "director" and the director's name(s) causes the failure.
+#  in other records the movie name was surrounded by parentheses in which case the routine succeeds. 
+#
+!Edwin S. Porter|James Watson|Melville Webber|Charles Vidor		Director, Dream of a rarebit fiend, Edwin S. Porter; drawings, Salome, Aubrey Beardsley ; directors, fall of the house of Usher, James Watson, Melville Webber ; director, the bridge, Charles Vidor ; directors, Lot in Sodom, James Watson, Melville Webber.
+Edwin S. Porter|James Watson|Melville Webber|Charles Vidor		Director, (Dream of a Rarebit Fiend), Edwin S. Porter; drawings, (Salome), Aubrey Beardsley ; directors, (Fall of the House of Usher), James Watson, Melville Webber ; director, (The Bridge), Charles Vidor ; directors, (Lot in Sodom), James Watson, Melville Webber.
+
+
+#
+# semi-colon after first director causes it to miss the second director
+#
+!Elaine Prater Hodges|??Ellen Wooters		Directors, Elaine Prater Hodges ; Ellen Wooters ; producer/writer, Elaine Prater Hodges ; narrator, Jane Moore ; researchers, Elaine Prater Hodges, Susan Jacobson.
+
+
+#
+# Another instance of bad capitalization causing confusion
+#
+!??george Lucas		Producer, Francis Ford Coppola ; co-producer, Gary Kurtz ; director, george Lucas ; writers, George Lucas, Gloria Katz, Willard Huyck.
+
+
+#
+# Another instance of bad capitalization causing confusion
+#
+!??rossana Horsley		Director, rossana Horsley; series producer, Richard Keefe.
+
+
+#
+# Another instance of bad capitalization causing confusion
+#
+!Rea Tajiri|??Noel shaw|??Sokhi Wagner		Rea Tajiri Productions ; written & directed by Rea Tajiri with Noel shaw & Sokhi Wagner.
+
+
+#
+# the comma instead of a semi-colon after the devil's daughter, causes the routine to miss the director  Arthur Leonard
+#
+!Fred Olen Ray|Arthur Leonard|Leo C. Popkin|Richard C. Kahn|Howard Bretherton		Retromedia Entertainment presents ; written by Ken Reid, produced by Kimberly A. Ray, directed by Fred Olen Ray ; [presented by] Sack Amusement Enterprises, produced and directed by Arthur Leonard, written by George W. Terwilliger (The devil's daughter), [presented by] Million Dollar Productions, produced by Clifford Sanforth, written by Walter Cooper and Lewis Sherman, directed by Leo C. Popkin (Gang war) ; [presented by] Hollywood Productions ; written and directed by Richard C. Kahn (The bronze buckaroo) ; [presented by] Monogram Pictures Corp. ; screenplay and original story by Edmund Kelso ; directed by Howard Bretherton ; produced by Lindsley Parsons (Up in the air).
+Fred Olen Ray|Arthur Leonard|Leo C. Popkin|Richard C. Kahn|Howard Bretherton		Retromedia Entertainment presents ; written by Ken Reid, produced by Kimberly A. Ray, directed by Fred Olen Ray ; [presented by] Sack Amusement Enterprises, produced and directed by Arthur Leonard, written by George W. Terwilliger (The devil's daughter); [presented by] Million Dollar Productions, produced by Clifford Sanforth, written by Walter Cooper and Lewis Sherman, directed by Leo C. Popkin (Gang war) ; [presented by] Hollywood Productions ; written and directed by Richard C. Kahn (The bronze buckaroo) ; [presented by] Monogram Pictures Corp. ; screenplay and original story by Edmund Kelso ; directed by Howard Bretherton ; produced by Lindsley Parsons (Up in the air).
+
+
+#
+#  the pattern "a film by" Name "in collaboration with" Name  causes a false positive here.
+#
+!??|Gennadi Bogdanov		a film by the Mime Center, Berlin in collaboration with Gennadi Bogdanov ; concept and text, Jörg Bochow ; consultant and principle performer, Gennadi Bogdanov.
+
+
+#
+# the extraneous space cause the director's name to not be found.
+#
+!??Harry K ümel		Gemini/Maya ; produced by Henry Lange, Paul Collet ; directed by Harry K ümel ; screenplay, Pierre Drouot, Jean Ferry, Harry Kümel.
+
+
+#
+# misspelled word "phtography" causes an additional director to be returned (Eduard Tisse)
+#
+!Allen Hughes|Albert Hughes		Directors, the Hughes brothers ; executive producers, Amy Robinson, Thomas M. Hammel, Allen Hughes, Albert Hughes ; producers, Don Murphy, Jane Hamsher ; screenplay, Terry Hayes, Rafael Yglesias ; director of phtography, Peter Deming ; editors, George Bowers, Dan Lebental ; music, Trevor Jones.
+Allen Hughes|Albert Hughes		Directors, the Hughes brothers ; executive producers, Amy Robinson, Thomas M. Hammel, Allen Hughes, Albert Hughes ; producers, Don Murphy, Jane Hamsher ; screenplay, Terry Hayes, Rafael Yglesias ; director of photography, Peter Deming ; editors, George Bowers, Dan Lebental ; music, Trevor Jones.
+
+
+#
+# semi-colon after word director causes it to miss the director's name
+#
+??		Writer and director; D. Vertov.
+
+
+#
+# semi-colon after word director causes it to miss the director's name
+#
+??		Producer, director ; Don Thompson.
+
+
+#
+# semi-colon after word director causes it to miss the director's name
+#
+??		Director; Lawrence Kasdan ; producers, Lawrence Kasdan, Charles Okun, Michael Grillo ; screenplay, Frank Galati, Lawrence Kasdan; music; John Williams.
+
+
+#
+# semi-colon after word director causes it to miss the directors' name
+#
+??		Director/producer/writer; Amanda C. Pope, John Louis Field; producer; KPBS Public Broadcasting, San Diego.
