@@ -15,7 +15,6 @@ import org.solrmarc.tools.PropertyUtils;
 public class MarcReaderFactory {
 
 	protected boolean verbose = false;
-//	protected ErrorHandler errors = null;
 
     /** The full class name of SolrIndexer or the subclass to be used */
 	//protected Properties configProps;
@@ -29,24 +28,20 @@ public class MarcReaderFactory {
     protected String combineConsecutiveRecordsFields = null;
 	protected String unicodeNormalize = null;
 
-//    private String solrmarcPath;
-//    private String siteSpecificPath;
-//    protected String homeDir = ".";
-
     // Initialize logging category
     static Logger logger = Logger.getLogger(MarcReaderFactory.class.getName());
-	    
+
 	private MarcReaderFactory()
 	{
 	}
-	
+
 	static MarcReaderFactory theFactory = new MarcReaderFactory();
-	
+
 	public static MarcReaderFactory instance()
 	{
 	    return(theFactory);
 	}
-	
+
     public MarcReader makeReader(Properties config, String[] searchDirectories, String ... inputFilenames)
     {
         if (inputFilenames.length == 0)
@@ -65,7 +60,7 @@ public class MarcReaderFactory {
         }
         return(new MarcMultiplexReader(readers, Arrays.asList(inputFilenames)));
     }
-    
+
     public MarcReader makeReader(Properties config, String[] searchDirectories, List<String> inputFilenames)
     {
         if (inputFilenames.size() == 0)
@@ -84,15 +79,15 @@ public class MarcReaderFactory {
         }
         return(new MarcMultiplexReader(readers, inputFilenames));
     }
-    
+
 	public MarcReader makeReader(Properties config, String[] searchDirectories, String inputFilename)
     {
-        InputStream is; 
+        InputStream is;
         if (inputFilename.equals("-") || inputFilename.equals("stdin"))
         {
             is = new BufferedInputStream(System.in);
         }
-        else 
+        else
         {
             try
             {
@@ -106,25 +101,20 @@ public class MarcReaderFactory {
         }
         return(makeReader(config, searchDirectories, is));
     }
-	
+
 	public MarcReader makeReader(Properties config, String[] searchDirectories, InputStream input)
 	{
-        MarcReader reader; 
+        MarcReader reader;
         setMarc4JProperties(config);
-//        solrmarcPath = PropertyUtils.getProperty(config, "solrmarc.path");
-//        solrmarcPath = normalizePathsProperty(homeDir, solrmarcPath, config);
-//
-//        siteSpecificPath = PropertyUtils.getProperty(config, "solrmarc.site.path");
-//        siteSpecificPath = normalizePathsProperty(homeDir, siteSpecificPath, config);
-        
+
         combineConsecutiveRecordsFields = PropertyUtils.getProperty(config, "marc.combine_records");
-        if (combineConsecutiveRecordsFields != null && combineConsecutiveRecordsFields.length() == 0) 
+        if (combineConsecutiveRecordsFields != null && combineConsecutiveRecordsFields.length() == 0)
             combineConsecutiveRecordsFields = null;
-        
+
         permissiveReader = Boolean.parseBoolean(PropertyUtils.getProperty(config, "marc.permissive"));
         if (PropertyUtils.getProperty(config, "marc.default_encoding") != null)
         {
-            defaultEncoding = PropertyUtils.getProperty(config, "marc.default_encoding").trim();    
+            defaultEncoding = PropertyUtils.getProperty(config, "marc.default_encoding").trim();
         }
         else
         {
@@ -134,11 +124,11 @@ public class MarcReaderFactory {
         includeErrors = Boolean.parseBoolean(PropertyUtils.getProperty(config, "marc.include_errors"));
         to_utf_8 = Boolean.parseBoolean(PropertyUtils.getProperty(config, "marc.to_utf_8"));
         unicodeNormalize = PropertyUtils.getProperty(config, "marc.unicode_normalize");
-        if (unicodeNormalize != null) 
+        if (unicodeNormalize != null)
         {
             unicodeNormalize = handleUnicodeNormalizeParm(unicodeNormalize);
         }
-        
+
         InputStream is;
         if (input.markSupported())
         {
@@ -152,7 +142,7 @@ public class MarcReaderFactory {
         byte[] buffer = new byte[15];
         @SuppressWarnings("unused")
         int numRead;
-        try { 
+        try {
             numRead = is.read(buffer);
             is.reset();
         }
@@ -166,13 +156,13 @@ public class MarcReaderFactory {
         inputTypeBinary = false;
         inputTypeJSON = false;
         if (filestart.substring(0,  5).equalsIgnoreCase("<?xml"))            inputTypeXML = true;
-        else if (filestart.startsWith("{"))                                  inputTypeJSON = true;              
-        else if (filestart.substring(0,  5).matches("\\d\\d\\d\\d\\d"))      inputTypeBinary = true;              
+        else if (filestart.startsWith("{"))                                  inputTypeJSON = true;
+        else if (filestart.substring(0,  5).matches("\\d\\d\\d\\d\\d"))      inputTypeBinary = true;
         else if (filestart.contains("<?xml") || filestart.contains("<?XML")) inputTypeXML = true;
         else if (filestart.contains("<collection"))                          inputTypeXML = true;
         else if (filestart.contains("<record"))                              inputTypeXML = true;
         else if (filestart.contains("<!--"))                                 inputTypeXML = true;
-        
+
         if (inputTypeXML)
         {
             to_utf_8 = true;
@@ -196,16 +186,16 @@ public class MarcReaderFactory {
             logger.error("Fatal error: Unable to determine type of inputfile");
             throw new IllegalArgumentException("Fatal error: Unable to determine type of inputfile.  File starts with: "+ filestart);
         }
-        
+
         // Add Combine Record reader if requested
-        
+
         if (reader != null && combineConsecutiveRecordsFields != null)
         {
             String combineLeftField = PropertyUtils.getProperty(config, "marc.combine_records.left_field");
             String combineRightField = PropertyUtils.getProperty(config, "marc.combine_records.right_field");
             reader = new MarcCombiningReader(reader, combineConsecutiveRecordsFields, combineLeftField, combineRightField);
         }
-        
+
         // Add FilteredReader if requested
 
         String marcIncludeIfPresent = PropertyUtils.getProperty(config, "marc.include_if_present");
@@ -230,7 +220,7 @@ public class MarcReaderFactory {
                 reader = new MarcFilteredReader(reader, marcIncludeIfPresent, marcIncludeIfMissing, marcDeleteSubfields);
             }
         }
-        // Do translating last so that if we are Filtering as well as translating, we don't expend the 
+        // Do translating last so that if we are Filtering as well as translating, we don't expend the
         // effort to translate records, which may then be filtered out and discarded.
         if (reader != null && to_utf_8 && unicodeNormalize != null)
         {
@@ -240,7 +230,7 @@ public class MarcReaderFactory {
         return reader;
 
 	}
-	 
+
 	private void setMarc4JProperties(Properties configProps)
     {
         for (String prop : configProps.stringPropertyNames())
@@ -256,10 +246,9 @@ public class MarcReaderFactory {
             }
 
         }
-        
     }
 
-    // We only get here if the parm (unicodeNormalize2) is not null compare it against 
+    // We only get here if the parm (unicodeNormalize2) is not null compare it against
 	// the valid values and return the correct value to use as the parm
 	private String handleUnicodeNormalizeParm(String parm)
     {
@@ -280,7 +269,7 @@ public class MarcReaderFactory {
         {
             parm = "KD";
         }
-        else 
+        else
         {
             parm = null;
         }
