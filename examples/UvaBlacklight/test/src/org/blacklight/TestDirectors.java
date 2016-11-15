@@ -1,17 +1,13 @@
 package org.blacklight;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -25,6 +21,27 @@ public class TestDirectors
     @Test
     public void testDirectorsFuzzyMatch()
     {
+        String testDataParentPath = System.getProperty("test.data.path");
+        if (testDataParentPath == null)
+            fail("property test.data.path must be defined for the tests to run");
+        File testData = new File(testDataParentPath, "video_director_expected_correct.txt");
+        runDirectorTestWithDataFile(testData);
+        System.out.println("Test testDirectorsFuzzyMatch is successful");        
+    }
+    
+    @Test
+    public void testDirectorsWithErrors()
+    {
+        String testDataParentPath = System.getProperty("test.data.path");
+        if (testDataParentPath == null)
+            fail("property test.data.path must be defined for the tests to run");
+        File testData = new File(testDataParentPath, "video_director_expected_failures.txt");
+        runDirectorTestWithDataFile(testData);
+        System.out.println("Test testDirectorsWithErrors is successful");        
+    }
+    
+    private void runDirectorTestWithDataFile(File testInputFile)
+    {
         int numberToFind = 0;
         int numberFoundCorrect = 0;
         int numberNotFound = 0;
@@ -35,15 +52,12 @@ public class TestDirectors
         int numLinesImperfect = 0;
         Set<String> extraNames = new LinkedHashSet<String>();
         Set<String> missedNames = new LinkedHashSet<String>();
-        String testDataParentPath = System.getProperty("test.data.path");
-        if (testDataParentPath == null)
-            fail("property test.data.path must be defined for the tests to run");
         String verboseStr = System.getProperty("solrmarc.test.verbose", "false");
         boolean verbose = verboseStr.equalsIgnoreCase("true");
         BufferedReader in = null;
         try
         {
-            in = new BufferedReader(new InputStreamReader(new FileInputStream(new File(testDataParentPath, "video_director_test.txt")),"UTF8"));
+            in = new BufferedReader(new InputStreamReader(new FileInputStream(testInputFile), "UTF-8"));
         }
         catch (FileNotFoundException e1)
         {
@@ -55,26 +69,6 @@ public class TestDirectors
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-//        PrintWriter out1 = null;
-//        PrintWriter out2 = null;
-//        if (verbose)
-//        {
-//            try
-//            {
-//                out1 = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File("video_director_test_out1.txt")),"UTF8"));
-//                out2 = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File("video_director_test_out2.txt")),"UTF8"));
-//            }
-//            catch (UnsupportedEncodingException e1)
-//            {
-//                // TODO Auto-generated catch block
-//                e1.printStackTrace();
-//            }
-//            catch (FileNotFoundException e1)
-//            {
-//                // TODO Auto-generated catch block
-//                e1.printStackTrace();
-//            }
-//        }
         String line;
         try {
             while ((line = in.readLine()) != null)
@@ -174,7 +168,6 @@ public class TestDirectors
         if (verbose) System.out.println(numberExtra +" extra additional directors, were found");
         if (verbose) showNameList(extraNames);
         if (verbose) System.out.println(numberIffy +" may have been due to data errors");
-        System.out.println("Test testDirectorsFuzzyMatch is successful");        
     }
     
     static void showNameList(Set<String> list)

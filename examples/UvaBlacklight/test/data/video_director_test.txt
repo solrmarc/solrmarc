@@ -677,7 +677,7 @@ Frédéric Auburtin|Gérard Depardieu|Gurinder Chadha|Sylvain Chomet|Joel Coe
 --		The hand: director of photography, Christopher Doyle ; music, Peer Rabin ; editor and production designer, William Chang Suk Ping.
 Tristán Ulloa|David Ulloa		Directed by: Tristán Ulloa, David Ulloa; novel by Santiago Roncagliolo.
 Wong|Kar-Wai		Block 2 Pictures, Paradis Films present a Jet Tone Films production ; directed by Wong, Kar-Wai.
-??Peter Bogdanovich		Paramount Pictures ; The Directors Company presents a Peter Bogdanovich production ; producer, Peter Bogdanovich ; screenplay writer, Alvin Sargent ; director, Peter Bogdanovich.
+Peter Bogdanovich		Paramount Pictures ; The Directors Company presents a Peter Bogdanovich production ; producer, Peter Bogdanovich ; screenplay writer, Alvin Sargent ; director, Peter Bogdanovich.
 Saïd Bakhtaoui|Thibaut d'Oiron		a film by Saïd Bakhtaoui ; Transparences Productions ; directed by Saïd Bakhtaoui, Thibaut d'Oiron.
 Melvin van Peebles		written, produced, directed by Melvin van Peebles ; a Yeah production.
 Melvin van Peebles		Writer, composer, producer, and director, Melvin van Peebles ; Director of photography, Bob Maxwell ; cinematographers, Bob Maxwell, Jos*e Garc*ia ; music performed by Earth, Wind and Fire.
@@ -695,7 +695,7 @@ Richard Lester		Directory of photography, David Watkin ; editor, John Victor Smi
 Guillermo del Toro		Revolution Studios presents a Lawrence Gordon/Lloyd Levin production in association with Dark Horse Entertainment, a film by Guillermo del Toro ; produced by Lawrence Gordon, Mike Richardson, Lloyd Levin ; screen story by Guillermo del Toro, Peter Briggs ; screenplay by Guillermo del Toro ; directed by Guillermo del Toro.
 Lia Sargent		Director of photography, Hisao Shirai ; music, Tsuneo Imahori ; English version: director, Lia Sargent.
 Satoshi Nishimura		directed by Satoshi Nishimura ; produced by Victor Company of Japan ; English version produced by Pioneer Entertainment (USA) L.P.
-Tat<U+00ca>£i<U+00cd>Łana Lioznova		Director, Tat<U+00ca>£i<U+00cd>Łana Lioznova; screenplay, Anna Rodionova, Tat<U+00ca>£i<U+00cd>Łana Lioznova; music, Maksim Dunaevskii<U+00cc><U+0086>.
+Tatʹi͡ana Lioznova		Director, Tatʹi͡ana Lioznova; screenplay, Anna Rodionova, Tatʹi͡ana Lioznova; music, Maksim Dunaevskiĭ. 
 M. Night Shyamalan		Touchstone Pictures present a Blinding Edge Pictures/Kennedy/Marshall production ; producers, Frank Marshall, Sam Mercer, M. Night Shyamalan ; written and directed by M. Night Shyamalan.
 --		Art director, Joe the Artist ; editor, Stela Georgieva, Julie Bob Lombardi ; music, Steve Horowitz, Michael Parrish, Doug Ray.
 Eric "Bibo" Bergeron|Don Paul		Directors, Eric "Bibo" Bergeron, Don Paul ; producers, Bonne Radford, Brooke Breton ; writers, Ted Elliott, Terry Rossio ; music, Elton John ; lyrics, Tim Rice.
