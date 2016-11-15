@@ -945,7 +945,7 @@ public class BlacklightIndexer extends SolrIndexer
                     {
                         if (valueArr[i].length() > 0) 
                         {
-                            sb.append(sep+valueArr[i]);
+                            sb.append(sep).append(valueArr[i]);
                             sep = ",";
                         }
                     }
@@ -1255,7 +1255,7 @@ public class BlacklightIndexer extends SolrIndexer
                     {
                         if (valueArr[i].length() > 0) 
                         {
-                            sb.append(sep+valueArr[i]);
+                            sb.append(sep).append(valueArr[i]);
                             sep = ",";
                         }
                     }
@@ -2852,7 +2852,7 @@ public class BlacklightIndexer extends SolrIndexer
         }
         if (alt.length() != 0)
         {
-            result.append(" ("+alt+")");
+            result.append(" (").append(alt).append(")");
         }
         String year = null;
         StringBuffer date = new StringBuffer();
@@ -2971,7 +2971,7 @@ public class BlacklightIndexer extends SolrIndexer
         }
         if (alt.length() != 0)
         {
-            result.append(" ("+alt+")");
+            result.append(" (").append(alt).append(")");
         }
         StringBuffer date1 = new StringBuffer();
         StringBuffer date2 = new StringBuffer();
@@ -3183,7 +3183,7 @@ public class BlacklightIndexer extends SolrIndexer
                     firstSubfld = false;
                 }
                 // eliminate ascii punctuation marks from sorting as well
-                result.append(data.replaceAll("( |-)+", " ").replaceAll("\\p{Punct}", "").trim() + ' ');
+                result.append(data.replaceAll("( |-)+", " ").replaceAll("\\p{Punct}", "").trim()).append(' ');
             }
         }
         return result;
