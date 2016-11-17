@@ -160,3 +160,13 @@ readerProps: marc.reader.remap=video_recs_map.properties
 record: kan1222221.mrc
 indexSpec: author_added_entry_text = 710abcdeq4
 expect: 3DD Group (Firm)|Kanopy (Firm)
+
+#30 test non-filing characters in title in greek record.
+record: greek_non-filing_tests.mrc
+indexSpec: 245ab, stripInd2, join(" ")
+expect: δοκιμαστικός τίτλος
+
+#31 test non-filing characters in title in greek record.
+record: greek_non-filing_tests.mrc
+indexSpec: 245ab, titleSortLower, join(" ")
+expect: δοκιμαστικος τιτλος

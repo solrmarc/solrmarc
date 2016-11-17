@@ -398,7 +398,7 @@ public class FieldFormatterBase implements FieldFormatter
             }
             if (replaced) str = folded.toString();
         }
-        if (cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)) str = str.replaceAll("[^A-Za-z0-9]+", " ");
+        if (cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)) str = str.replaceAll("( |\\p{Punct})+", " ");
         if (!cleanVal.contains(eCleanVal.UNTRIMMED))  str = str.trim();
 
         if (cleanVal.contains(eCleanVal.TO_LOWER))
