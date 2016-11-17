@@ -31,13 +31,14 @@ public class ThreadedIndexer extends Indexer
 
     boolean doneReading = false;
     final int buffersize;
-    final AtomicInteger cnts[] = new AtomicInteger[]{ new AtomicInteger(0), new AtomicInteger(0), new AtomicInteger(0)} ;
+    final AtomicInteger cnts[];
 
     public ThreadedIndexer(List<AbstractValueIndexer<?>> indexers, SolrProxy solrProxy, int buffersize)
     {
         super(indexers, solrProxy);
         readQ = new ArrayBlockingQueue<AbstractMap.SimpleEntry<Integer, Record>>(buffersize);
         docQ = new ArrayBlockingQueue<RecordAndDoc>(buffersize);
+        cnts = new AtomicInteger[]{ new AtomicInteger(0), new AtomicInteger(0), new AtomicInteger(0)};
         int num = 1;
         try {
             num = Integer.parseInt(System.getProperty("solrmarc.indexer.threadcount", "1"));
@@ -67,10 +68,21 @@ public class ThreadedIndexer extends Indexer
         this.buffersize = buffersize;
     }
 
-    @Override
-    public boolean isShutDown()
+    private ThreadedIndexer(ThreadedIndexer toClone)
     {
-        return isShutDown;
+        super(toClone);
+        readQ = toClone.readQ;
+        docQ = toClone.docQ;
+        cnts = toClone.cnts;
+        buffersize = toClone.buffersize;
+        numThreadIndexers = toClone.numThreadIndexers;
+        numSolrjWorkers = toClone.numSolrjWorkers;
+    }
+
+    @Override
+    public Indexer makeThreadSafeCopy()
+    {
+        return (new ThreadedIndexer(this));
     }
 
     @Override

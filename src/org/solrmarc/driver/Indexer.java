@@ -57,7 +57,7 @@ public class Indexer
         delQ = new LinkedBlockingQueue<String>();
     }
 
-    private Indexer(Indexer toClone)
+    protected Indexer(Indexer toClone)
     {
         indexers = new ArrayList<AbstractValueIndexer<?>>();
         for (AbstractValueIndexer<?> indexer : toClone.indexers)

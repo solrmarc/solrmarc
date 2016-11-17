@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.apache.solr.common.SolrInputDocument;
@@ -41,6 +40,7 @@ public class ChunkIndexerWorker implements Runnable
     final BlockingQueue<RecordAndDoc> errQ;
     String firstDocId = null;
     String lastDocId = null;
+    boolean trackProgress = false;
 
     public ChunkIndexerWorker(String threadName, Collection<RecordAndDoc> recordAndDocs,
             BlockingQueue<RecordAndDoc> errQ, Indexer indexer)
@@ -50,6 +50,7 @@ public class ChunkIndexerWorker implements Runnable
         this.docs = buildDocList(recordAndDocs);
         this.errQ = errQ;
         this.indexer = indexer;
+        this.trackProgress = Boolean.parseBoolean(System.getProperty("solrmarc.track.solr.progress", "false"));
     }
 
     private Collection<SolrInputDocument> buildDocList(final Collection<RecordAndDoc> recordAndDocs)
@@ -83,6 +84,10 @@ public class ChunkIndexerWorker implements Runnable
             int cnt = indexer.solrProxy.addDocs(docs);
             indexer.addToCnt(2, cnt);
             logger.debug("Added chunk of "+cnt+ " documents -- starting with id : "+firstDocId);
+            if (trackProgress || logger.isDebugEnabled())
+            {
+                logger.info("Total sent so far: " + indexer.getCounts()[2]);
+            }
 
             if (errQ != null)
             {
