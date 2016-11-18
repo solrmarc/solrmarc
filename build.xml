@@ -34,7 +34,8 @@
 
     <target name="compile" depends="init,precompile"  unless="compile.already.run"  description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
-        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${src.dir}" destdir="${build.dir}" debug="true" debuglevel="lines,vars,source" >
+        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${src.dir}" destdir="${build.dir}" 
+        	   debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
             <classpath >
                 <fileset dir="${lib.dir}">
                     <include name="**/*.jar"/>
@@ -75,7 +76,8 @@
     <target name="test-compile"  depends="jar" description="compile the source of tests" unless="test.already.compiled" >
         <!-- Compile the java code from ${src} into ${build} -->
         <mkdir dir="${test.build.dir}" />
-        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${test.src.dir}" destdir="${test.build.dir}" debug="true" debuglevel="lines,vars,source" >
+        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${test.src.dir}" destdir="${test.build.dir}" 
+        	   debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
             <classpath >
                 <fileset dir="${dist.dir}">
                     <include name="${custom.jar.name}_${version}.jar"/>
@@ -160,12 +162,13 @@
 
     <target name="clean" description="clean up">
         <!-- Delete the ${build} and ${dist} directory trees -->
-        <delete dir="${build.dir}"/>
-        <delete dir="${dist.dir}"/>
-        <delete dir="${test.build.dir}" />
-        <delete dir="${reports.tests}" />
-    	<delete file="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.java" />
-    	<delete file="${src.dir}/org/solrmarc/index/indexer/FullConditionalScanner.java" />
-    	<delete file="${src.dir}/org/solrmarc/index/indexer/FullSym.java" />
+        <delete dir="${build.dir}" failonerror="false" />
+        <delete dir="${dist.dir}" failonerror="false" />
+        <delete dir="${test.build.dir}"  failonerror="false" />
+        <delete dir="${test.dir}/data/index_java/bin" failonerror="false"  />
+        <delete dir="${reports.tests}"  failonerror="false" />
+    	<delete file="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.java"  failonerror="false" />
+    	<delete file="${src.dir}/org/solrmarc/index/indexer/FullConditionalScanner.java"  failonerror="false" />
+    	<delete file="${src.dir}/org/solrmarc/index/indexer/FullSym.java"  failonerror="false" />
     </target>
 </project>
