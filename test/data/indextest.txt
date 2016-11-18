@@ -170,3 +170,8 @@ expect: δοκιμαστικός τίτλος
 record: greek_non-filing_tests.mrc
 indexSpec: 245ab, titleSortLower, join(" ")
 expect: δοκιμαστικος τιτλος
+
+#32 test sorted results
+record: demoRecs.mrc(u6867336)
+indexSpec: 650a, sort(str, asc)
+expected:*ordered*Battles|Families|Northmen|Vikings
