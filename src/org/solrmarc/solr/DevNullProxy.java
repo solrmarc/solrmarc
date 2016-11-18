@@ -1,6 +1,9 @@
 package org.solrmarc.solr;
 
 import java.util.Collection;
+
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 
 public class DevNullProxy extends SolrProxy
@@ -34,5 +37,11 @@ public class DevNullProxy extends SolrProxy
     @Override
     public void delete(String id)
     {
+    }
+
+    @Override
+    public QueryResponse query(SolrQuery params)
+    {
+        return null;
     }
 }

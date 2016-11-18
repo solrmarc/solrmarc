@@ -175,3 +175,9 @@ expect: δοκιμαστικος τιτλος
 record: demoRecs.mrc(u6867336)
 indexSpec: 650a, sort(str, asc)
 expected:*ordered*Battles|Families|Northmen|Vikings
+
+#33 test ordered results
+record: demoRecs.mrc(u6867336)
+indexSpec: 650a
+expected:*ordered*Vikings|Families|Northmen|Battles
+
