@@ -7,8 +7,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
@@ -29,6 +31,8 @@ import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
 import org.solrmarc.solr.StdOutProxy;
 import org.solrmarc.tools.PropertyUtils;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 public class IndexDriver extends BootableMain
 {
@@ -156,12 +160,33 @@ public class IndexDriver extends BootableMain
         }
     }
 
+    final static String [] solrmarcPropertyStrings = {
+            "solrmarc.indexer.chunksize",
+            "solrmarc.indexer.threadcount",
+            "solrmarc.solrj.threadcount",
+            "solrmarc.track.solr.progress",
+            "solrmarc.terminate.on.marc.exception",
+            "solrmarc.output.redirect",
+            "solrmarc.indexer.test.fire.method",
+            "solrmarc.method.report",
+    };
+
     public void configureReaderProps(String propertyFileURLStr) throws FileNotFoundException, IOException
     {
+        List<String> propertyStringsToCopy = Arrays.asList(solrmarcPropertyStrings);        
         readerProps = new Properties();
         if (propertyFileURLStr != null)
         {
             readerProps.load(PropertyUtils.getPropertyFileInputStream(propertyFileURLStr));
+            Enumeration<?> iter = readerProps.propertyNames();
+            while (iter.hasMoreElements())
+            {
+                String propertyName = iter.nextElement().toString();
+                if (propertyName.startsWith("solrmarc.") && propertyStringsToCopy.contains(propertyName) && System.getProperty(propertyName) == null)
+                {
+                    System.setProperty(propertyName, readerProps.getProperty(propertyName));
+                }
+            }
         }
     }
 
@@ -187,8 +212,9 @@ public class IndexDriver extends BootableMain
         indexers = indexerFactory.createValueIndexers(specFiles);
         boolean includeErrors = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "marc.include_errors", "false"));
         boolean returnErrors = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "marc.return_errors", "false"));
+        int chunkSize = Integer.parseInt(System.getProperty("solrmarc.indexer.chunksize", "640"));
         indexer = null;
-        if (multiThreaded) indexer = new ThreadedIndexer(indexers, solrProxy, 640);
+        if (multiThreaded) indexer = new ThreadedIndexer(indexers, solrProxy, chunkSize);
         else               indexer = new Indexer(indexers, solrProxy);
 
         if (returnErrors)
@@ -230,7 +256,11 @@ public class IndexDriver extends BootableMain
     {
         String inEclipseStr = System.getProperty("runInEclipse");
         boolean inEclipse = "true".equalsIgnoreCase(inEclipseStr);
-            shutdownSimulator = new ShutdownSimulator(inEclipse);
+        String systemClassPath = System.getProperty("java.class.path");
+        if (!systemClassPath.contains("solrmarc_core_"))  
+            inEclipse = true;
+
+        shutdownSimulator = new ShutdownSimulator(inEclipse);
             shutdownSimulator.start();
         Thread shutdownHook = new MyShutdownThread(indexer, shutdownSimulator);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
