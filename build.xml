@@ -4,7 +4,7 @@
     </description>
     <!-- load global properties for this build -->
 	<property file="build.properties" />
-	
+
     <!-- import other ant scripts -->
     <import file="${buildtools.dir}/parser_tasks.xml" optional="false" />
 
@@ -20,9 +20,9 @@
     </target>
 
     <target name="precompile" unless="precompile.already.run"  description="run jflex and cup to generate javafiles for parser and scanner" >
-		<jflex file="${src.dir}/org/solrmarc/index/indexer/FullScanner.lex" verbose="true" 
+		<jflex file="${src.dir}/org/solrmarc/index/indexer/FullScanner.lex" verbose="true"
 			   outdir="${src.dir}/org/solrmarc/index/indexer/" nobak="true" />
-    	
+
         <cup srcfile="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.cup"
              destdir="${src.dir}"
              package="org.solrmarc.index.indexer"
@@ -51,15 +51,15 @@
 
     <target name="jar" depends="compile" unless="jar.already.run" description="Build custom jar file containing custom code" >
         <mkdir dir="${dist.dir}" />
-       
+
         <path id="libjarfiles" >
             <fileset dir="${lib.dir}" includes="*.jar" />
         </path>
 
         <copy todir="${dist.lib.dir}" flatten="true">
             <path refid="libjarfiles"/>
-        </copy> 
-         
+        </copy>
+
         <jar destfile="${dist.dir}/${custom.jar.name}_${version}.jar">
         	<manifest>
         	    <attribute name="Main-Class" value="org.solrmarc.driver.Boot"/>
@@ -71,9 +71,10 @@
         <echo message="jar built" />
         <property name="jar.already.run" value="true" />
     </target>
-	
-    <target name="test-compile"  description="compile the source of tests" unless="test.already.compiled" >
+
+    <target name="test-compile"  depends="jar" description="compile the source of tests" unless="test.already.compiled" >
         <!-- Compile the java code from ${src} into ${build} -->
+        <mkdir dir="${test.build.dir}" />
         <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${test.src.dir}" destdir="${test.build.dir}" debug="true" debuglevel="lines,vars,source" >
             <classpath >
                 <fileset dir="${dist.dir}">
@@ -124,7 +125,7 @@
                 <fileset dir="${test.dir}/data/lib_local">
                     <include name="**/*.jar"/>
                 </fileset>
-            	
+
                 <pathelement location="${build}"/>
                 <pathelement location="${build.tests}"/>
                 <pathelement path="${java.class.path}"/>
@@ -159,7 +160,12 @@
 
     <target name="clean" description="clean up">
         <!-- Delete the ${build} and ${dist} directory trees -->
-        <delete dir="${build}"/>
-        <delete dir="${dist}"/>
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete dir="${test.build.dir}" />
+        <delete dir="${reports.tests}" />
+    	<delete file="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.java" />
+    	<delete file="${src.dir}/org/solrmarc/index/indexer/FullConditionalScanner.java" />
+    	<delete file="${src.dir}/org/solrmarc/index/indexer/FullSym.java" />
     </target>
 </project>
