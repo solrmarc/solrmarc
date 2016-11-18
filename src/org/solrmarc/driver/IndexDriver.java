@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -31,8 +30,6 @@ import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
 import org.solrmarc.solr.StdOutProxy;
 import org.solrmarc.tools.PropertyUtils;
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 public class IndexDriver extends BootableMain
 {
@@ -173,7 +170,7 @@ public class IndexDriver extends BootableMain
 
     public void configureReaderProps(String propertyFileURLStr) throws FileNotFoundException, IOException
     {
-        List<String> propertyStringsToCopy = Arrays.asList(solrmarcPropertyStrings);        
+        List<String> propertyStringsToCopy = Arrays.asList(solrmarcPropertyStrings);
         readerProps = new Properties();
         if (propertyFileURLStr != null)
         {
@@ -257,7 +254,7 @@ public class IndexDriver extends BootableMain
         String inEclipseStr = System.getProperty("runInEclipse");
         boolean inEclipse = "true".equalsIgnoreCase(inEclipseStr);
         String systemClassPath = System.getProperty("java.class.path");
-        if (!systemClassPath.contains("solrmarc_core_"))  
+        if (!systemClassPath.contains("solrmarc_core_"))
             inEclipse = true;
 
         shutdownSimulator = new ShutdownSimulator(inEclipse);
