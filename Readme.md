@@ -1,46 +1,18 @@
 # Overview
 
-This branch is a complete re-write of the SolrMarc program, it will soon become the master branch for the repo.  The code is based on code written by Oliver Obenland, (See https://github.com/oobenland/SolrMarc-Indexer-Tests)  
+SolrMarc is designed to read MARC records and to extract data from those records to build an Apache Solr index. It relies on the library [Marc4j](https://github.com/marc4j/marc4j) for reading MARC records and then uses a user-provided indexing specification to determine what fields are to be created for the Solr input document, and where that data should be extracted from, lastly it uses the SolrJ library for sending the Solr input documents to the Solr index. 
+
+As of version 3.0 the program has been completely re-written, based on code written by Oliver Obenland, (See https://github.com/oobenland/SolrMarc-Indexer-Tests)  
 The key design improvement Oliver created is to essentially compile the indexing specification once, and then apply 
 that "compiled" version to each of the records that need indexing.    I have taken his code and added handling of 
-the basic field specification of SolrMarc   (such as:    title_display = 245abnp  )  via a parser specification
-(CUP and JFlex) which makes defining and handling more complex specifications simpler.   The code has been released and is ready for use.   This entire repository will be migrated to be the master branch of the solrmarc project.
+the basic field specification of SolrMarc   (such as:    `title_display = 245abnp`  )  via a parser specification
+(CUP and JFlex) which makes defining and handling more complex specifications simpler.   
+
+The goal of the design is a program which operates much the same as the earlier versions of SolrMarc, including being able to process index specifications that worked with previous versions and produce substantially the same Solr records. But with the further goals of operating much faster and supporting a richer superset of features in the index specification language.
 
 Included with this project is a Swing-based interactive interface that could eventually be used to develop, modify, extend
 and debug a set of indexing specifications, but for now it can be used to see how some of the new features will work.
 
+A more in-depth description of the differences in this new version can be found in the [Wiki](https://github.com/solrmarc/solrmarc/wiki), as well as information on how to install the program, how to create an index specification, how to run the program with that specification.
 
-This project contains the implementation of an idea how to improve SolrMarc by improving
-performance, extendability and stability.
-
-## Description as provided by Oliver Obenland
-
-The indexer is divided in a compile time and a runtime. The compile time is for loading configurations and 
-translate/compile them to small indexer tasks with minimal functionality. The runtime loads records from input files,
-uses the small indexer tasks to extract data and send the data to Solr.
-
-## Compile time
-
-This is mainly made out of factories. Each Factory is for one type of import configuration of the indexer properties 
-(e.g marc.properties or marc_local.properties). Such a factory parses the configuration and creates a small indexer task.
-A factory is not a singleton but only one instance of this factory will be used, so each factory can build a cache or 
-share information between indexer tasks. After the all configurations are compiled to tasks the factories will not 
-be needed anymore and will be collected by the Garbage Collector. A task is not allowed to own an instance of its factory.
-Every single bit of calculation which can be done by the factory is a good bit of calculation. Everything which can be
-preprocessed should be done by the factory, not by the indexer task.
-
-
-## Runtime
-
-At this point only the indexer task exists. No factories, no properties, no unnecessary processing.
-The input file gets read and for each record all indexer tasks will be called to create a new document.
-
-# Indexer task
-
-A task is represented by the AbstractValueIndexer class and is a composition of three parts.
-
-- Extractor: reads data from a record
-- Mapping: translates the data by e.g mapping one value to another or by using a regex to extract a value.
-- Collector: transforms the data by e.g joining multiple strings to one string or by splitting a string in parts.
-
-Each indexer task will generate the data of one solr field.
+Additionally there is some information there about the code and design of the program for those that might be interested in contributing to the project. 
