@@ -3,10 +3,8 @@ package org.solrmarc.solr;
 import java.io.IOException;
 import java.util.Collection;
 
-import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -97,19 +95,6 @@ public class SolrServerProxy extends SolrProxy
         try
         {
             solrserver.deleteById(id);
-        }
-        catch (SolrServerException e)
-        {
-            throw(new SolrRuntimeException("SolrserverException", e));
-        }
-    }
-
-    @Override
-    public QueryResponse query(SolrQuery params) throws IOException
-    {
-        try
-        {
-            return solrserver.query(params);
         }
         catch (SolrServerException e)
         {
