@@ -179,5 +179,10 @@ expected:*ordered*Battles|Families|Northmen|Vikings
 #33 test ordered results
 record: demoRecs.mrc(u6867336)
 indexSpec: 650a
-expected:*ordered*Vikings|Families|Northmen|Battles
+expect:*ordered*Vikings|Families|Northmen|Battles
+
+#34 test constant indexer
+record: specTestRecs.mrc(u8)
+indexSpec: constantVal = "First"|"second"|"third", notfirst
+expect: second|third
 

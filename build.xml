@@ -7,7 +7,18 @@
 
     <!-- import other ant scripts -->
     <import file="${buildtools.dir}/parser_tasks.xml" optional="false" />
+	
+	<property name="cobertura.dir" value="test/lib/cobertura-2.1.1" />
 
+	<path id="cobertura.classpath">
+	    <fileset dir="${cobertura.dir}">
+	        <include name="cobertura-2.1.1.jar" />
+	        <include name="lib/**/*.jar" />
+	    </fileset>
+	</path>
+
+	<taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+	
 	<tstamp>
 	    <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
 	</tstamp>
@@ -78,7 +89,7 @@
         <mkdir dir="${test.build.dir}" />
         <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${test.src.dir}" destdir="${test.build.dir}" 
         	   debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
-            <classpath >
+            <classpath id="test.classpath">
                 <fileset dir="${dist.dir}">
                     <include name="${custom.jar.name}_${version}.jar"/>
                 </fileset>
@@ -147,6 +158,85 @@
         <property name="test.already.run" value="true" />
     </target>
 
+	<target name="coverage-instrument" unless="already.instrumented"  >
+        <property name="instrumented.dir" value="test/data/instrument" />
+        <property name="cobertura.datafile" value="${test.dir}/data/cobertura.ser" />
+        <mkdir dir="${instrumented.dir}" />
+        <delete file="${cobertura.datafile}" />
+		
+        <property name="cobertura.jar.dir"  location="${test.dir}/lib/cobertura-2.1.1/" />
+        <path id="cobertura.classpath">
+            <fileset dir="${cobertura.jar.dir}" includes="**/*.jar" />
+            <fileset dir="${lib.dir}" includes="**/*.jar" />
+        </path>
+        <cobertura-instrument todir="${instrumented.dir}" datafile="${cobertura.datafile}">
+            <ignore regex="org.apache.log4j.*|ch.qos.logback.*" />
+            <fileset dir="${build.dir}">
+                <include name="**/*.class" />
+            </fileset>
+        	<auxClasspath path="${lib.dir}/marc4j-2.7.2.jar;${lib.dir}/java-cup-11b-runtime.jar" />
+        </cobertura-instrument>
+		<property name="already.instrumented" value="true" />
+	</target>
+	
+	<target name="coverage" depends="coverage-instrument" >
+        <!-- <property name="testcase" value="org.solrmarc.index.UtilsTests" /> -->
+		<junit fork="yes" dir="${basedir}" failureProperty="test.failed">
+		    <!--
+		        Specify the name of the coverage data file to use.
+		        The value specified below is the default.
+		    -->
+		    <sysproperty key="net.sourceforge.cobertura.datafile" file="${cobertura.datafile}" />
+
+		    <!--
+		        Note the classpath order: instrumented classes are before the
+		        original (uninstrumented) classes.  This is important.-->
+		    
+		    <classpath location="${instrumented.dir}" />
+		    <classpath location="${build.dir}" />
+            <classpath>
+        <!--        <fileset dir="${instrumented.dir}" />
+                <fileset dir="${dist.dir}">
+                    <include name="${custom.jar.name}_${version}.jar"/>
+                </fileset> -->
+            	<fileset dir="${test.dir}/lib">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${test.build.dir}">
+                    <include name="${custom.jar.name}_tests.jar"/>
+                </fileset>
+                <fileset dir="${lib.solrj.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+                <pathelement location="${build}"/>
+                <pathelement location="${build.tests}"/>
+                <pathelement path="${java.class.path}"/>
+            </classpath>
+
+		    <!--
+		        The instrumented classes reference classes used by the
+		        Cobertura runtime, so Cobertura and its dependencies
+		        must be on your classpath.
+		    -->
+		    <classpath refid="cobertura.classpath" />
+            <sysproperty key="test.data.dir" path="${test.dir}/data" />
+            <sysproperty key="log4j.debug" value="false" />
+			
+		    <formatter type="xml" />
+		    <test name="${testcase}" todir="${reports.tests}" if="testcase" />
+		    <batchtest todir="${reports.tests}" unless="testcase">
+		        <fileset dir="${test.src.dir}">
+		            <include name="**/*Test*.java" />
+                    <exclude name="**/ConditionalParserTest.java" />
+		        </fileset>
+		    </batchtest>
+		</junit>
+		
+        <cobertura-report format="html" destdir="${reports.tests}" srcdir="${src.dir}" datafile="${cobertura.datafile}"/>
+        <cobertura-report format="xml" destdir="${reports.tests}" srcdir="${src.dir}" datafile="${cobertura.datafile}"/> 
+ 
+	</target>
+	
 	<target name="package" depends="jar, test">
 		<echo message="Building required jars zip file" />
 		<zip file="${dist.dir}/required_jars_${version}.zip" >
