@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.collector.MultiValueCollector;
 import org.solrmarc.index.extractor.AbstractValueExtractor;
-//import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMapping;
 
 public abstract class AbstractValueIndexer<T>
@@ -30,28 +29,6 @@ public abstract class AbstractValueIndexer<T>
         this.collector = collector;
         totalElapsedTime = new AtomicLong(0);
     }
-
-//    public AbstractValueIndexer(final Collection<String> solrFieldNames, final AbstractValueExtractor<T> extractor,
-//            final AbstractValueMapping<T>[] mappings, final MultiValueCollector collector)
-//    {
-//        setSolrFieldNames(solrFieldNames);
-//        this.extractor = extractor;
-//        this.mappings = mappings;
-//        this.collector = collector;
-//        totalElapsedTime = new AtomicLong(0);
-//    }
-
-//    public AbstractValueIndexer(final Collection<String> solrFieldNames, final AbstractValueExtractor<T> extractor,
-//            final Collection<AbstractMultiValueMapping> mappings, final MultiValueCollector collector)
-//    {
-//        setSolrFieldNames(solrFieldNames);
-//        this.extractor = extractor;
-//        @SuppressWarnings("unchecked")
-//        AbstractValueMapping<T>[] tmp = new AbstractValueMapping[mappings.size()];
-//        this.mappings = mappings.toArray(tmp);
-//        this.collector = collector;
-//        totalElapsedTime = new AtomicLong(0);
-//    }
 
     public String getSpecLabel()
     {
@@ -145,10 +122,4 @@ public abstract class AbstractValueIndexer<T>
         }
         return(result);
     }
-
-//    public void setSolrFieldNames(Collection<String> solrFieldNames)
-//    {
-//        this.solrFieldNames = new ArrayList<String>();
-//        this.solrFieldNames.addAll(solrFieldNames);
-//    }
 }
