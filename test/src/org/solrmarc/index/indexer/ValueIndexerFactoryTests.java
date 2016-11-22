@@ -24,7 +24,9 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 public class ValueIndexerFactoryTests
 {
     private Record testRecord;
+    private Record testRecord2;
     private final static String inputfilename="./test/data/records/u233.mrc";
+    private final static String inputfilename2="./test/data/records/u5278992.mrc";
     private static ValueIndexerFactory factory;
     static
     {
@@ -38,6 +40,10 @@ public class ValueIndexerFactoryTests
         MarcReader reader = new MarcPermissiveStreamReader(input, true, true);
         testRecord = reader.next();
         testRecord.setId(1L);
+        input = new BufferedInputStream(new FileInputStream(inputfilename2));
+        reader = new MarcPermissiveStreamReader(input, true, true);
+        testRecord2 = reader.next();
+        testRecord2.setId(1L);
     }
 
     @Test
@@ -69,6 +75,19 @@ public class ValueIndexerFactoryTests
         assertEquals("fullRecord", indexer.getSolrFieldNames().iterator().next());
         @SuppressWarnings("unused")
         String xml = indexer.getFieldData(testRecord).iterator().next().toString();
+    }
+
+    @Test
+    public void testDateIndexedIndexer() throws Exception
+    {
+        final AbstractValueIndexer<?> valueIndexer = factory.createValueIndexer("dateIndexed", "dateRecordIndexed");
+
+        final MultiValueIndexer indexer = (MultiValueIndexer) valueIndexer;
+        assertEquals(1, indexer.getSolrFieldNames().size());
+        assertEquals("dateIndexed", indexer.getSolrFieldNames().iterator().next());
+        String indexed = indexer.getFieldData(testRecord).iterator().next().toString();
+        String indexed2 = indexer.getFieldData(testRecord2).iterator().next().toString();
+        assertEquals(indexed, indexed2);
     }
 
     @Test

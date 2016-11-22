@@ -159,7 +159,7 @@
     </target>
 
 	<target name="coverage-instrument" unless="already.instrumented"  >
-        <property name="instrumented.dir" value="test/data/instrument" />
+        <property name="instrumented.dir" value="test/instrument" />
         <property name="cobertura.datafile" value="${test.dir}/data/cobertura.ser" />
         <mkdir dir="${instrumented.dir}" />
         <delete file="${cobertura.datafile}" />
@@ -169,7 +169,7 @@
             <fileset dir="${cobertura.jar.dir}" includes="**/*.jar" />
             <fileset dir="${lib.dir}" includes="**/*.jar" />
         </path>
-        <cobertura-instrument todir="${instrumented.dir}" datafile="${cobertura.datafile}">
+        <cobertura-instrument todir="${instrumented.dir}" datafile="${cobertura.datafile}" ignoreTrivial="true" >
             <ignore regex="org.apache.log4j.*|ch.qos.logback.*" />
             <fileset dir="${build.dir}">
                 <include name="**/*.class" />
@@ -195,10 +195,6 @@
 		    <classpath location="${instrumented.dir}" />
 		    <classpath location="${build.dir}" />
             <classpath>
-        <!--        <fileset dir="${instrumented.dir}" />
-                <fileset dir="${dist.dir}">
-                    <include name="${custom.jar.name}_${version}.jar"/>
-                </fileset> -->
             	<fileset dir="${test.dir}/lib">
                     <include name="*.jar"/>
                 </fileset>
@@ -232,8 +228,9 @@
 		    </batchtest>
 		</junit>
 		
-        <cobertura-report format="html" destdir="${reports.tests}" srcdir="${src.dir}" datafile="${cobertura.datafile}"/>
-        <cobertura-report format="xml" destdir="${reports.tests}" srcdir="${src.dir}" datafile="${cobertura.datafile}"/> 
+        <mkdir dir="${reports.tests}/coverage" />
+		<cobertura-report format="html" destdir="${reports.tests}/coverage" srcdir="${src.dir}" datafile="${cobertura.datafile}"/>
+        <cobertura-report format="xml" destdir="${reports.tests}/coverage" srcdir="${src.dir}" datafile="${cobertura.datafile}"/> 
  
 	</target>
 	
