@@ -2,24 +2,13 @@ package org.solrmarc.index.extractor.impl.patternMapping;
 
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 import org.solrmarc.index.extractor.AbstractValueExtractor;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
-import org.solrmarc.index.utils.StringReader;
 
 public class PatternMappingValueExtractorFactory extends AbstractValueExtractorFactory
 {
     private static final Map<String, List<PatternMapping>> PATTERN_MAPPINGS = new HashMap<>();
-    private static final Pattern MAPPING_SPLITTING_PATTERN = Pattern.compile("=>");
-    private static final Comparator<PatternMapping> PATTERN_MAPPING_COMPARATOR = new Comparator<PatternMapping>()
-    {
-        @Override
-        public int compare(final PatternMapping o1, final PatternMapping o2)
-        {
-            return Integer.compare(o1.getOrderIndex(), o2.getOrderIndex());
-        }
-    };
 
     public static List<PatternMapping> getPatternMappingsForName(String name)
     {
@@ -50,40 +39,10 @@ public class PatternMappingValueExtractorFactory extends AbstractValueExtractorF
         return true;
     }
 
-    private void addPatternMapping(final String name, final PatternMapping mapping)
-    {
-        List<PatternMapping> mappings = getPatternMappingsForName(name);
-        mappings.add(mapping);
-        Collections.sort(mappings, PATTERN_MAPPING_COMPARATOR);
-    }
-
-    @Override
-    public AbstractValueExtractor<?> createExtractor(final String solrFieldName,
-            final StringReader mappingConfiguration)
-    {
-        final String patterns = mappingConfiguration.readAll();
-        final String[] split = MAPPING_SPLITTING_PATTERN.split(patterns, 2);
-        if (split.length != 2)
-        {
-            throw new IllegalArgumentException(
-                    "A pattern impl has to have two patterns divided by '=>'. " + solrFieldName + " = " + patterns);
-        }
-        final int index = solrFieldName.indexOf(".pattern_");
-        final String patternName = solrFieldName.substring(0, index);
-        final int patternIndex = Integer
-                .parseInt(solrFieldName.substring(index + ".pattern_".length(), solrFieldName.length()));
-        final PatternMapping patternMapping = new PatternMapping(split[0], split[1], patternIndex);
-        addPatternMapping(patternName, patternMapping);
-
-        // A pattern impl doesn't extract something, so no impl will be created.
-        return null;
-    }
-
     @Override
     public AbstractValueExtractor<?> createExtractor(String solrFieldName, String[] parts)
     {
         // TODO Auto-generated method stub
         return null;
     }
-
 }

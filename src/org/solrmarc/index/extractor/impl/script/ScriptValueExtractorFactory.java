@@ -12,7 +12,6 @@ import org.solrmarc.index.extractor.methodcall.MethodCallContext;
 import org.solrmarc.index.extractor.methodcall.MethodCallMultiValueExtractor;
 import org.solrmarc.index.extractor.methodcall.MethodCallSingleValueExtractor;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
-import org.solrmarc.index.utils.StringReader;
 import org.solrmarc.tools.PropertyUtils;
 
 import java.io.File;
@@ -118,13 +117,6 @@ public class ScriptValueExtractorFactory extends AbstractValueExtractorFactory
             return new MethodCallSingleValueExtractor(
                     new ScriptSingleValueMethodCall(interpreter, method, scriptFileName, context.getParameters().length), context.getParameters());
         }
-    }
-
-    @Override
-    public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration)
-    {
-        MethodCallContext context = MethodCallContext.parseContextFromExtractorSpecification(mappingConfiguration);
-        return(createExtractor(solrFieldName, context));
     }
 
     @Override

@@ -11,7 +11,6 @@ import org.solrmarc.index.extractor.AbstractValueExtractor;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
-import org.solrmarc.index.utils.StringReader;
 
 public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFactory
 {
@@ -221,13 +220,6 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
             return new MethodCallSingleValueExtractor((SingleValueExtractorMethodCall) methodCall, context.getParameters());
         }
         return(null);
-    }
-
-    @Override
-    public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration)
-    {
-        MethodCallContext context = MethodCallContext.parseContextFromExtractorSpecification(mappingConfiguration);
-        return createExtractor(solrFieldName, context);
     }
 
     @Override

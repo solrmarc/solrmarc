@@ -17,7 +17,6 @@ import org.solrmarc.index.extractor.impl.date.DateValueExtractorFactory;
 import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
 import org.solrmarc.index.extractor.impl.fullrecord.FullRecordValueExtractorFactory;
 import org.solrmarc.index.specification.conditional.*;
-import org.solrmarc.index.utils.StringReader;
 import org.solrmarc.tools.Utils;
 
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
@@ -209,8 +208,8 @@ index_spec ::= extractor:e COMMA mapping_specs:m                            {: R
 
 extractor ::= strings:l                                                     {: RESULT = new ConstantMultiValueExtractor(l); :}
             | field_spec:fs                                                 {: RESULT = new DirectMultiValueExtractor(fs);  :}
-            | FULLRECORD:s                                                  {: RESULT = makeMultiValueExtractor(fullFactory.createExtractor("CUP Parser", new StringReader(s))); :}
-            | DATE:s                                                        {: RESULT = dateFactory.createExtractor("CUP Parser", new StringReader(s)); :}
+            | FULLRECORD:s                                                  {: RESULT = makeMultiValueExtractor(fullFactory.createExtractor("CUP Parser", s)); :}
+            | DATE:s                                                        {: RESULT = dateFactory.createExtractor("CUP Parser", s); :}
             | custom_extractor:e                                            {: RESULT = e; :}
             | error                                                         {: RESULT = null; :}
             ;

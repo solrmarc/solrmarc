@@ -2,12 +2,10 @@ package org.solrmarc.index.extractor.impl.date;
 
 import org.solrmarc.index.extractor.AbstractValueExtractor;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
-import org.solrmarc.index.utils.StringReader;
 
 
 public class DateValueExtractorFactory extends AbstractValueExtractorFactory
 {
-
     @Override
     public boolean canHandle(final String solrFieldName, final String mappingConfiguration)
     {
@@ -19,25 +17,19 @@ public class DateValueExtractorFactory extends AbstractValueExtractorFactory
 
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final String mapping)
     {
-        if (mapping.startsWith("dateRecordIndexed".toLowerCase()) || mapping.startsWith("index_date".toLowerCase()))
+        if (mapping.toLowerCase().startsWith("daterecordindexed") || mapping.toLowerCase().startsWith("index_date"))
         {
             return new DateRecordIndexedValueExtractor();
         }
-        else if (mapping.startsWith("date".toLowerCase()) || mapping.startsWith("dateOfPublication".toLowerCase()))
+        else if (mapping.toLowerCase().startsWith("date") || mapping.toLowerCase().startsWith("dateOfPublication"))
         {
             return new DateOfPublicationValueExtractor();
         }
-         
+
         throw new IllegalArgumentException("Unknown impl configuration: " + solrFieldName + " = " + mapping);
 
     }
-    @Override
-    public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final StringReader mappingConfiguration)
-    {
-        final String mapping = mappingConfiguration.readAll().toLowerCase();
-        return createExtractor(solrFieldName, mapping);
 
-    }
     @Override
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final String[] parts)
     {

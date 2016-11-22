@@ -1,8 +1,8 @@
 package org.solrmarc.index.indexer;
 
+import java.io.StringReader;
 import java.util.List;
 import java.util.ArrayList;
-import org.solrmarc.index.utils.StringReader;
 import java.util.regex.Pattern;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.Symbol;

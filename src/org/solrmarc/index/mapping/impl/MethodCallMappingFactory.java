@@ -11,7 +11,6 @@ import org.solrmarc.index.extractor.methodcall.SingleValueMappingMethodCall;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
-import org.solrmarc.index.utils.StringReader;
 
 public class MethodCallMappingFactory extends AbstractValueMappingFactory
 {
@@ -69,8 +68,8 @@ public class MethodCallMappingFactory extends AbstractValueMappingFactory
     @Override
     public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration)
     {
-        MethodCallContext context = MethodCallContext.parseContextFromMappingSpecification(new StringReader(mappingConfiguration));
-        return createMultiValueMapping(context);
+        // method unused, but must be present
+        return null;
     }
 
     @Override
