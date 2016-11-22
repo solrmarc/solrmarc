@@ -4,5 +4,13 @@
 *.log
 /dist*/
 /tmp/
+/test/data/*.ser
+/test/instrument/
+/test/build/
+/test/data/index_java/bin
+
+/src/**/FullSym.java
+/src/**/FullConditionalScanner.java
+/src/**/FullConditionalParser.java
 
 /lib-solrj-5.5.0/
