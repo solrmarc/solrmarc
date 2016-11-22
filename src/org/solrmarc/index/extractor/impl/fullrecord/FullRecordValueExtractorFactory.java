@@ -17,23 +17,24 @@ public class FullRecordValueExtractorFactory extends AbstractValueExtractorFacto
 
     public AbstractValueExtractor<?> createExtractor(final String solrFieldName, final String mapping)
     {
-        if (mapping.startsWith("raw") || mapping.startsWith("FullRecordAsMARC".toLowerCase()))
+        String mappingLC = mapping.toLowerCase();
+        if (mappingLC.startsWith("raw") || mappingLC.startsWith("FullRecordAsMARC".toLowerCase()))
         {
             return new FullRecordAsMarcValueExtractor();
         }
-        else if (mapping.startsWith("xml") || mapping.startsWith("FullRecordAsXML".toLowerCase()))
+        else if (mappingLC.startsWith("xml") || mappingLC.startsWith("FullRecordAsXML".toLowerCase()))
         {
             return new FullRecordAsXMLValueExtractor();
         }
-        else if (mapping.startsWith("json2") || mapping.startsWith("FullRecordAsJSON2".toLowerCase()))
+        else if (mappingLC.startsWith("json2") || mappingLC.startsWith("FullRecordAsJSON2".toLowerCase()))
         {
             return new FullRecordAsJSON2ValueExtractor();
         }
-        else if (mapping.startsWith("json") || mapping.startsWith("FullRecordAsJSON".toLowerCase()))
+        else if (mappingLC.startsWith("json") || mappingLC.startsWith("FullRecordAsJSON".toLowerCase()))
         {
             return new FullRecordAsJSONValueExtractor();
         }
-        else if (mapping.startsWith("text") || mapping.startsWith("FullRecordAsText".toLowerCase()))
+        else if (mappingLC.startsWith("text") || mappingLC.startsWith("FullRecordAsText".toLowerCase()))
         {
             return new FullRecordAsTextValueExtractor();
         }
