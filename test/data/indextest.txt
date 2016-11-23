@@ -179,7 +179,7 @@ expect: δοκιμαστικος τιτλος
 #33 test sorted results
 record: demoRecs.mrc(u6867336)
 indexSpec: 650a, sort(str, asc)
-expected:*ordered*Battles|Families|Northmen|Vikings
+expect:*ordered*Battles|Families|Northmen|Vikings
 
 #34 test ordered results
 record: demoRecs.mrc(u6867336)
@@ -191,4 +191,22 @@ record: specTestRecs.mrc(u8)
 indexSpec: constantVal = "First"|"second"|"third", notfirst
 expect: second|third
 
+#36 test numeric sort
+record: demoRecs.mrc
+indexSpec: isbn_text = 020a,  custom_map(org.solrmarc.mixin.ISBNNormalizer,  filterISBN(10)), unique, sort(num, asc)
+expect:*ordered*0877663343|0877663637
 
+#37 test string sort and custom_map
+record: demoRecs.mrc(u907)
+indexSpec: lc = 050ab:999a ? ($w = "LC"), clean, join(" "), custom_map(org.solrmarc.callnum.CallNumberMixin,  LCCallNumberShelfKey), sort(str, desc)
+expect:*ordered*TD 3898 S59 41984|TD 3812 S63 41984
+
+#38 test inline map
+record: specTestRecs.mrc(u333)
+indexSpec: music_facet = 999a[0-1] ?($a matches "M.*" & $w = "LC"), map("ML=> Music Literature","MT=>Music Theory","M2=>Monuments of Music","M3=>Composers' Collected Works","M.=>Printed Music"), first
+expect: Monuments of Music
+
+#30 test inline map using single string
+record: specTestRecs.mrc(u333)
+indexSpec: scores_test = 000[6]?([6] ~ "[cdj]"), map("[cd]=>Scores||[j]=>Recordings||[cdj]=>Recordings and/or Scores")
+expect: Scores|Recordings and/or Scores
