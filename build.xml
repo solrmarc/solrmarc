@@ -7,8 +7,8 @@
 
     <!-- import other ant scripts -->
     <import file="${buildtools.dir}/parser_tasks.xml" optional="false" />
-	
-	<property name="cobertura.dir" value="test/lib/cobertura-2.1.1" />
+
+	<property name="cobertura.dir" value="${test.dir}/lib/cobertura-2.1.1" />
 
 	<path id="cobertura.classpath">
 	    <fileset dir="${cobertura.dir}">
@@ -18,7 +18,7 @@
 	</path>
 
 	<taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
-	
+
 	<tstamp>
 	    <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
 	</tstamp>
@@ -45,7 +45,7 @@
 
     <target name="compile" depends="init,precompile"  unless="compile.already.run"  description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
-        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${src.dir}" destdir="${build.dir}" 
+        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${src.dir}" destdir="${build.dir}"
         	   debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
             <classpath >
                 <fileset dir="${lib.dir}">
@@ -87,7 +87,7 @@
     <target name="test-compile"  depends="jar" description="compile the source of tests" unless="test.already.compiled" >
         <!-- Compile the java code from ${src} into ${build} -->
         <mkdir dir="${test.build.dir}" />
-        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${test.src.dir}" destdir="${test.build.dir}" 
+        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${test.src.dir}" destdir="${test.build.dir}"
         	   debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
             <classpath id="test.classpath">
                 <fileset dir="${dist.dir}">
@@ -163,7 +163,7 @@
         <property name="cobertura.datafile" value="${test.dir}/data/cobertura.ser" />
         <mkdir dir="${instrumented.dir}" />
         <delete file="${cobertura.datafile}" />
-		
+
         <property name="cobertura.jar.dir"  location="${test.dir}/lib/cobertura-2.1.1/" />
         <path id="cobertura.classpath">
             <fileset dir="${cobertura.jar.dir}" includes="**/*.jar" />
@@ -178,8 +178,8 @@
         </cobertura-instrument>
 		<property name="already.instrumented" value="true" />
 	</target>
-	
-	<target name="coverage" depends="coverage-instrument" >
+
+	<target name="coverage-junit" depends="coverage-instrument" >
         <!-- <property name="testcase" value="org.solrmarc.index.UtilsTests" /> -->
 		<junit fork="yes" dir="${basedir}" failureProperty="test.failed">
 		    <!--
@@ -191,7 +191,7 @@
 		    <!--
 		        Note the classpath order: instrumented classes are before the
 		        original (uninstrumented) classes.  This is important.-->
-		    
+
 		    <classpath location="${instrumented.dir}" />
 		    <classpath location="${build.dir}" />
             <classpath>
@@ -217,7 +217,7 @@
 		    <classpath refid="cobertura.classpath" />
             <sysproperty key="test.data.dir" path="${test.dir}/data" />
             <sysproperty key="log4j.debug" value="false" />
-			
+
 		    <formatter type="xml" />
 		    <test name="${testcase}" todir="${reports.tests}" if="testcase" />
 		    <batchtest todir="${reports.tests}" unless="testcase">
@@ -227,22 +227,75 @@
 		        </fileset>
 		    </batchtest>
 		</junit>
-		
-        <mkdir dir="${reports.tests}/coverage" />
-		<cobertura-report format="html" destdir="${reports.tests}/coverage" srcdir="${src.dir}" datafile="${cobertura.datafile}"/>
-        <cobertura-report format="xml" destdir="${reports.tests}/coverage" srcdir="${src.dir}" datafile="${cobertura.datafile}"/> 
- 
 	</target>
+
+	<!-- this test runs SolrMarc in single threaded mode on a largeish input file, writing the output to a file.
+	     it then runs SolrMarc in multi-threaded mode on the same input, writing the output to a different file.
+	     next it sorts the two files, and compares the results, if the results are not equal, there is a problem 
+	     somewhere in the program. -->
 	
+	<target name="coverage-main" depends="coverage-instrument" >
+        <echo message="Run SolrMarc in Single-threaded mode" />
+		<java classname="org.solrmarc.driver.Boot" fork="yes" output="${reports.tests}/output.singlethread.txt" error="${reports.tests}/stderr.singlethread.txt" >
+            <classpath location="${instrumented.dir}" />
+            <classpath location="${build.dir}" />
+            <classpath refid="cobertura.classpath" />
+            <sysproperty key="net.sourceforge.cobertura.datafile" file="${cobertura.datafile}" />
+            <arg line="IndexDriver -dir ${test.dir}/data -c blacklight_index.properties -debug -u stdout ${test.dir}/data/records/uva_001-200.mrc ${test.dir}/data/records/specTestRecs.xml "/>
+       <!--     <arg line="IndexDriver -dir ${test.dir}/data -c blacklight_index.properties -debug -u stdout ${test.dir}/data/records/u60.mrc "/> -->
+        </java>
+        <echo message="Run SolrMarc in Multi-threaded mode" />
+        <java classname="org.solrmarc.driver.Boot" fork="yes" output="${reports.tests}/output.multithread.txt" error="${reports.tests}/stderr.multithread.txt" >
+            <classpath location="${instrumented.dir}" />
+            <classpath location="${build.dir}" />
+            <classpath refid="cobertura.classpath" />
+            <sysproperty key="net.sourceforge.cobertura.datafile" file="${cobertura.datafile}" />
+            <sysproperty key="solrmarc.indexer.threadcount" value="4" />
+            <sysproperty key="solrmarc.indexer.chunksize" value="50" />
+           <arg line="IndexDriver -dir ${test.dir}/data -c blacklight_index.properties -u stdout ${test.dir}/data/records/uva_001-200.mrc ${test.dir}/data/records/specTestRecs.xml" />
+       <!--     <arg line="IndexDriver -dir ${test.dir}/data -c blacklight_index.properties -u stdout ${test.dir}/data/records/u60.mrc" /> -->
+        </java>
+        <echo message="Sort the output files" />
+	    <copy file="${reports.tests}/output.singlethread.txt" tofile="${reports.tests}/output.singlethread.sort.txt">
+          <filterchain>
+          	<sortfilter/>
+          </filterchain>
+        </copy>
+        <copy file="${reports.tests}/output.multithread.txt" tofile="${reports.tests}/output.multithread.sort.txt">
+          <filterchain>
+            <sortfilter/>
+          </filterchain>
+        </copy>
+		<condition property="multithreadworked" value="true" else="false">
+		    <filesmatch file1="${reports.tests}/output.singlethread.sort.txt"
+		                file2="${reports.tests}/output.multithread.sort.txt"/>
+		</condition>
+		<echo message="multithread = ${multithreadworked}" />
+	</target>
+
+    <target name="coverage" depends="coverage-instrument,coverage-junit,coverage-main" >
+        <mkdir dir="${reports.tests}/coverage" />
+        <cobertura-report format="html" destdir="${reports.tests}/coverage" srcdir="${src.dir}" datafile="${cobertura.datafile}"/>
+        <cobertura-report format="xml" destdir="${reports.tests}/coverage" srcdir="${src.dir}" datafile="${cobertura.datafile}"/>
+	</target>
+
 	<target name="package" depends="jar, test">
 		<echo message="Building required jars zip file" />
+        <delete file="${dist.dir}/required_jars_${version}.zip" />
+        <delete file="${dist.dir}/simple_install_package_${version}.zip" />
 		<zip file="${dist.dir}/required_jars_${version}.zip" >
 			<zipfileset dir="${dist.dir}/lib" prefix="lib" includes="*.jar" />
 	    </zip>
 		<echo message="Building simple install package zip file" />
+        <copy file="${buildtools.dir}/install_template/how_to_run.txt" tofile="${dist.dir}/how_to_run.txt" overwrite="true" >
+            <filterchain>
+                <expandproperties/>
+            </filterchain> 
+        </copy>
 		<zip file="${dist.dir}/simple_install_package_${version}.zip" >
 			<zipfileset dir="${dist.dir}" prefix="" includes="${custom.jar.name}_${version}.jar" />
-			<zipfileset dir="${buildtools.dir}/install_template" prefix="" includes="**" />
+            <zipfileset dir="${buildtools.dir}/install_template" prefix="" includes="**" excludes="how_to_run.txt"/>
+            <zipfileset dir="${dist.dir}"  prefix="" includes="how_to_run.txt" />
 			<zipfileset dir="${dist.dir}/lib" prefix="lib" includes="*.jar" />
 	    </zip>
 	</target>
