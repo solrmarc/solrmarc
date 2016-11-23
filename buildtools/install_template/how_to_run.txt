@@ -1,0 +1,43 @@
+
+# how to run    
+#    will read the file   marc_record.mrc  
+#    create index records based on the specification   index.properties
+#    and send the solr input documents to the solr indeax at URL  http://solr.machine.name:port/solr/core
+
+java -jar solrmarc_core_${version}.jar IndexDriver -config index.properties -url http://solr.machine.name:port/solr/core  marc_record.mrc
+
+
+# to index multiple marc record files.    
+#    will read the file   marc_record1.mrc  marc_record2.mrc   marc_record3.mrc   
+#    create index records based on the specification   index.properties
+#    and send the solr input documents to the solr indeax at URL  http://solr.machine.name:port/solr/core
+
+java -jar solrmarc_core_${version}.jar IndexDriver -config index.properties -url http://solr.machine.name:port/solr/core  marc_record1.mrc  marc_record2.mrc   marc_record3.mrc 
+
+
+# to print the generated index records in a human readable form
+#    will read the file   marc_record.mrc  
+#    create index records based on the specification   index.properties
+#    and send the solr input documents   stdout
+
+java -jar solrmarc_core_${version}.jar IndexDriver -config index.properties -url stdout  marc_record.mrc
+
+
+# to use an additional set of index specification to extend or override 
+#    will read the file   marc_record.mrc  
+#    create index records based on the two specifications   index.properties and  additional.properties
+#    and send the solr input documents to the solr indeax at URL  http://solr.machine.name:port/solr/core
+
+java -jar solrmarc_core_${version}.jar IndexDriver -config index.properties;additional.properties -url http://solr.machine.name:port/solr/core  marc_record.mrc
+
+
+# to have the one directory containing the solrmarc_core jar and the required libs, and another with the local configuration
+#    this will read the file   marc_record.mrc
+#    create index records based on the two specifications   index.properties and  additional.properties
+#    and send the solr input documents to the solr indeax at URL  http://solr.machine.name:port/solr/core
+#    note the marcreader.properties file, the two index specification files, and any translation maps or beanshell scripts or custom java methods
+#       referenced in those two specification files could be found in either directory1 or directory2
+
+java -jar /directory1/solrmarc_core_${version}.jar IndexDriver -dir /directory2 -config index.properties;additional.properties -url http://solr.machine.name:port/solr/core  marc_record.mrc
+             
+             
