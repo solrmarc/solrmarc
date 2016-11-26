@@ -1,43 +1,66 @@
-
-# how to run    
-#    will read the file   marc_record.mrc  
+#
+# How to Run
+#
+# Below are several example command lines showing how to run the new version of SolrMarc.
+# They show how to specify: 
+#    the location of the main solrmarc jar file (named solrmarc_core_${version}.jar  )
+#    the index specification configuration file
+#    the location of the solr index to send the created records to
+#    and the file of MARC records to process.
+#
+# Note all of the commands below expect that there will be a directory named  lib-solrj  that will contain all of the jar files 
+# that are necessary for communicating with Solr.   If you are using an older version of Solr (from version 1.3  to version 4.10)
+# you can use the set of jars included as one of the release files, and uncompress them to the lib-solrj directory.    
+# If you are using Solr 5.x  or  6.x  you can either copy the solrj jar files from that distribution to the lib-solrj directory OR
+# you can create links from the lib-solrj directory to the solrj dirs within the distribution, OR even simply reference the solrj 
+# directory of the Solr distribution with a command line argument (shown below in example 6)   
+#
+#
+# 1  The basic command to index a single file of MARC records.
+#    This command will read the file   marc_record.mrc  
 #    create index records based on the specification   index.properties
-#    and send the solr input documents to the solr indeax at URL  http://solr.machine.name:port/solr/core
+#    and send the solr input documents to the solr index at URL  http://solr.machine.name:port/solr/core
 
 java -jar solrmarc_core_${version}.jar IndexDriver -config index.properties -url http://solr.machine.name:port/solr/core  marc_record.mrc
 
 
-# to index multiple marc record files.    
-#    will read the file   marc_record1.mrc  marc_record2.mrc   marc_record3.mrc   
+# 2  To index multiple MARC record files.    
+#    This command will read the file   marc_record1.mrc  marc_record2.mrc   marc_record3.mrc   
 #    create index records based on the specification   index.properties
-#    and send the solr input documents to the solr indeax at URL  http://solr.machine.name:port/solr/core
+#    and send the solr input documents to the solr index at URL  http://solr.machine.name:port/solr/core
 
 java -jar solrmarc_core_${version}.jar IndexDriver -config index.properties -url http://solr.machine.name:port/solr/core  marc_record1.mrc  marc_record2.mrc   marc_record3.mrc 
 
 
-# to print the generated index records in a human readable form
-#    will read the file   marc_record.mrc  
+# 3  To print the generated index records in a human readable form for debugging purposes
+#    This command will read the file   marc_record.mrc  
 #    create index records based on the specification   index.properties
 #    and send the solr input documents   stdout
 
 java -jar solrmarc_core_${version}.jar IndexDriver -config index.properties -url stdout  marc_record.mrc
 
 
-# to use an additional set of index specification to extend or override 
-#    will read the file   marc_record.mrc  
+# 4  To use an additional set of index specification to extend or override those in index.properties
+#    This command will read the file   marc_record.mrc  
 #    create index records based on the two specifications   index.properties and  additional.properties
-#    and send the solr input documents to the solr indeax at URL  http://solr.machine.name:port/solr/core
+#    and send the solr input documents to the solr index at URL  http://solr.machine.name:port/solr/core
 
 java -jar solrmarc_core_${version}.jar IndexDriver -config index.properties;additional.properties -url http://solr.machine.name:port/solr/core  marc_record.mrc
 
 
-# to have the one directory containing the solrmarc_core jar and the required libs, and another with the local configuration
-#    this will read the file   marc_record.mrc
+# 5  To have one directory containing the solrmarc_core jar and its required libs, and another with the local configuration
+#    This command will read the file   marc_record.mrc
 #    create index records based on the two specifications   index.properties and  additional.properties
-#    and send the solr input documents to the solr indeax at URL  http://solr.machine.name:port/solr/core
-#    note the marcreader.properties file, the two index specification files, and any translation maps or beanshell scripts or custom java methods
-#       referenced in those two specification files could be found in either directory1 or directory2
+#    and send the solr input documents to the solr index at URL  http://solr.machine.name:port/solr/core
+#    Note the marcreader.properties file, the two index specification files, and any translation maps or beanshell scripts or custom java methods
+#       referenced in those two specification files could be found relative to either directory1 or directory2
 
 java -jar /directory1/solrmarc_core_${version}.jar IndexDriver -dir /directory2 -config index.properties;additional.properties -url http://solr.machine.name:port/solr/core  marc_record.mrc
-             
-             
+
+# 6  To use the solrj libraries found in the your installation of Solr (rather than looking in the lib-solrj directory)
+#    This command will read the file   marc_record.mrc  
+#    create index records based on the two specifications   index.properties and  additional.properties
+#    and send the solr input documents to the solr index at URL  http://solr.machine.name:port/solr/core
+
+java -jar solrmarc_core_${version}.jar IndexDriver -config index.properties -solrj /solr/install/dir/dist/solrj-lib -url http://solr.machine.name:port/solr/core  marc_record.mrc
+
