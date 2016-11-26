@@ -9,8 +9,8 @@
 /test/build/
 /test/data/index_java/bin
 
-/src/**/FullSym.java
-/src/**/FullConditionalScanner.java
-/src/**/FullConditionalParser.java
+/src/org/solrmarc/index/indexer/FullSym.java
+/src/org/solrmarc/index/indexer/FullConditionalScanner.java
+/src/org/solrmarc/index/indexer/FullConditionalParser.java
 
 /lib-solrj-5.5.0/
