@@ -292,12 +292,15 @@
                 <expandproperties/>
             </filterchain> 
         </copy>
-		<zip file="${dist.dir}/simple_install_package_${version}.zip" >
-			<zipfileset dir="${dist.dir}" prefix="" includes="${custom.jar.name}_${version}.jar" />
+        <zip file="${dist.dir}/simple_install_package_${version}.zip" >
+            <zipfileset dir="${dist.dir}" prefix="" includes="${custom.jar.name}_${version}.jar" />
             <zipfileset dir="${buildtools.dir}/install_template" prefix="" includes="**" excludes="how_to_run.txt"/>
             <zipfileset dir="${dist.dir}"  prefix="" includes="how_to_run.txt" />
-			<zipfileset dir="${dist.dir}/lib" prefix="lib" includes="*.jar" />
-	    </zip>
+            <zipfileset dir="${dist.dir}/lib" prefix="lib" includes="*.jar" />
+        </zip>
+        <zip file="${dist.dir}/solrj_1.3-4.10.zip" >
+            <zipfileset dir="${basedir}/lib-solrj" prefix="lib-solrj" includes="**" />
+        </zip>
 	</target>
 
     <target name="clean" description="clean up">
