@@ -13,7 +13,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -254,13 +258,52 @@ public class JavaValueExtractorUtils
         return packageName;
     }
 
+    private Date getCreateDateOfSolrMarcJar()
+    {
+        Class<?> clazz = JavaValueExtractorUtils.class;
+        String className = clazz.getSimpleName() + ".class";
+        String classPath = clazz.getResource(className).toString();
+        if (!classPath.startsWith("jar"))
+        {
+            // Class not from JAR
+            return null;
+        }
+        String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+        Manifest manifest;
+        try
+        {
+            manifest = new Manifest(new URL(manifestPath).openStream());
+        }
+        catch (IOException e)
+        {
+            return(null);
+        }
+        Attributes attr = manifest.getMainAttributes();
+        String value = attr.getValue("Built-Date");
+        if (value == null) 
+        {
+            return(null);
+        }
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+        try
+        {
+            Date dateBuilt = format.parse(value);
+            return(dateBuilt);
+        }
+        catch (ParseException e)
+        {
+            return(null);
+        }
+    }
+
     private List<File> getChangedSourceFiles(String srcDirectory, String binDirectory)
     {
         final List<File> sourceFiles = getSourceFiles(srcDirectory);
         final List<File> changedSourceFiles = new ArrayList<>();
+        Date dateJarBuilt = getCreateDateOfSolrMarcJar();
         for (final File sourceFile : sourceFiles)
         {
-            if (hasChanged(sourceFile, srcDirectory, binDirectory))
+            if (hasChanged(sourceFile, srcDirectory, binDirectory, dateJarBuilt))
             {
                 changedSourceFiles.add(sourceFile);
             }
@@ -308,11 +351,19 @@ public class JavaValueExtractorUtils
         return fileList != null ? fileList : new File[0];
     }
 
-    private boolean hasChanged(File sourceFile, String srcDirectory, String binDirectory)
+    private boolean hasChanged(File sourceFile, String srcDirectory, String binDirectory, Date dateJarBuilt)
     {
         final String sourcePath = sourceFile.getPath();
         final String targetPath = getClassFileForSourceFile(new File(sourcePath), srcDirectory, binDirectory);
         final File targetFile = new File(targetPath);
-        return !targetFile.exists() || targetFile.lastModified() < sourceFile.lastModified();
+        if (!targetFile.exists())  return (true);
+        Date targetDate = new Date(targetFile.lastModified());
+        Date sourceDate = new Date(sourceFile.lastModified());
+        if (targetDate.before(sourceDate)) return (true);
+        if (dateJarBuilt != null && targetDate.before(dateJarBuilt))
+        {
+            return(true);
+        }
+        return(false);
     }
 }

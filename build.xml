@@ -20,7 +20,7 @@
     <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
 
     <tstamp>
-        <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+        <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss Z" timezone="GMT" />
     </tstamp>
 
     <target name="init">
