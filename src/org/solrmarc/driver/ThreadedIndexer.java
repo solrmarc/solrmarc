@@ -1,6 +1,5 @@
 package org.solrmarc.driver;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -12,14 +11,24 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.marc4j.MarcReader;
-import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.solr.SolrProxy;
 
+/**
+ *  The multi-threaded, producer-consumer implementation of the Indexer class, AKA where the magic happens.
+ *  It creates a MarcReaderThread that reads records and places them in a queue
+ *  It creates (one or more) ThreadedIndexer objects that each take records from the read queue, creates the
+ *  SolrInputDocument for that record, and places the result in a document queue.  Then when enough SolrInputDocument
+ *  are in the document queue, this class will gather them up and hand them off to a ChunkIndexWorker that
+ *  will manage the sending of that chunk of records to Solr.
+ *
+ * @author rh9ec
+ *
+ */
 public class ThreadedIndexer extends Indexer
 {
     private final static Logger logger = Logger.getLogger(ThreadedIndexer.class);
-    private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ;
+    private final BlockingQueue<RecordAndCnt> readQ;
     private final BlockingQueue<RecordAndDoc> docQ;
     private final int numThreadIndexers;
     private final int numSolrjWorkers;
@@ -36,7 +45,7 @@ public class ThreadedIndexer extends Indexer
     public ThreadedIndexer(List<AbstractValueIndexer<?>> indexers, SolrProxy solrProxy, int buffersize)
     {
         super(indexers, solrProxy);
-        readQ = new ArrayBlockingQueue<AbstractMap.SimpleEntry<Integer, Record>>(buffersize);
+        readQ = new ArrayBlockingQueue<RecordAndCnt>(buffersize);
         docQ = new ArrayBlockingQueue<RecordAndDoc>(buffersize);
         cnts = new AtomicInteger[]{ new AtomicInteger(0), new AtomicInteger(0), new AtomicInteger(0)};
         int num = 1;
@@ -86,7 +95,7 @@ public class ThreadedIndexer extends Indexer
     }
 
     @Override
-    public void shutDown(boolean viaInterrupt)
+    void shutDown(boolean viaInterrupt)
     {
         logger.warn("ThreadedIndexer ShutDown Called!");
         this.viaInterrupt = viaInterrupt;
@@ -104,21 +113,21 @@ public class ThreadedIndexer extends Indexer
     }
 
     @Override
-    public void resetCnts()
+    void resetCnts()
     {
         cnts[0].set(0); cnts[1].set(0); cnts[2].set(0);
     }
 
     @Override
-    public void incrementCnt(int cntNum)
+    int incrementCnt(int cntNum)
     {
-        cnts[cntNum].incrementAndGet();
+        return(cnts[cntNum].incrementAndGet());
     }
 
     @Override
-    public void addToCnt(int cntNum, int amount)
+    int addToCnt(int cntNum, int amount)
     {
-        cnts[cntNum].addAndGet(amount);
+        return(cnts[cntNum].addAndGet(amount));
     }
 
     @Override
@@ -229,15 +238,11 @@ public class ThreadedIndexer extends Indexer
         }
         logger.info("Done writing records to solr");
 
-//        if (shuttingDown)
-//        {
-//            this.endProcessing();
-//        }
         return(getCounts());
     }
 
     @Override
-    public int[] getCounts()
+    int[] getCounts()
     {
         int intCnts[] = new int[3];
         intCnts[0] = cnts[0].get();
@@ -261,5 +266,4 @@ public class ThreadedIndexer extends Indexer
         if (!docQ.isEmpty()) return(false);
         return indexerThreadsAreDone(workers);
     }
-
 }

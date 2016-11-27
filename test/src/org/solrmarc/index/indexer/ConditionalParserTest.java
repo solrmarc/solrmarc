@@ -1,15 +1,5 @@
 package org.solrmarc.index.indexer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.Collection;
-import java.util.List;
-
-import org.apache.log4j.PropertyConfigurator;
-import org.marc4j.MarcPermissiveStreamReader;
-import org.marc4j.MarcReader;
-import org.marc4j.marc.Record;
 
 // org.solrmarc.index.collector.FieldMatchCollector;
 //import org.solrmarc.index.extractor.formatter.FieldFormatter;

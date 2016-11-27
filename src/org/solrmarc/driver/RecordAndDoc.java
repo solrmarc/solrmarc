@@ -10,6 +10,10 @@ import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.tools.SolrMarcIndexerException;
 
+/**
+ * @author rh9ec
+ *
+ */
 public class RecordAndDoc
 {
     final Record rec;
@@ -17,47 +21,19 @@ public class RecordAndDoc
     eErrorSeverity errLvl;
     SolrMarcIndexerException smie;
     IndexerSpecException ise;
-    public EnumSet<eErrorLocationVal> errLocs = EnumSet.noneOf(eErrorLocationVal.class);
+    EnumSet<eErrorLocationVal> errLocs = EnumSet.noneOf(eErrorLocationVal.class);
 
     public enum eErrorLocationVal
     {
         MARC_ERROR, INDEXING_ERROR, SOLR_ERROR;
     };
 
-
-    public RecordAndDoc(Record rec, SolrInputDocument doc, EnumSet<eErrorLocationVal> errLocs, eErrorSeverity errLvl)
-    {
-        this.rec = rec;
-        this.doc = doc;
-        this.errLocs = errLocs;
-        this.errLvl = errLvl;        
-    }
-
-    public RecordAndDoc(Record rec, SolrInputDocument doc, eErrorLocationVal errLoc, eErrorSeverity errLvl)
-    {
-        this.rec = rec;
-        this.doc = doc;
-        this.errLocs = EnumSet.of(errLoc);
-        this.errLvl = errLvl;        
-    }
-
-    public RecordAndDoc(Record rec, SolrInputDocument[] docs, EnumSet<eErrorLocationVal> errLocs, eErrorSeverity errLvl)
-    {
-        this.rec = rec;
-        this.doc = null;
-        this.errLocs = errLocs;
-        this.errLvl = errLvl;        
-    }
-
-    public RecordAndDoc(Record rec, SolrInputDocument[] docs, eErrorLocationVal errLoc, eErrorSeverity errLvl)
-    {
-        this.rec = rec;
-        this.doc = null;
-        this.errLocs = EnumSet.of(errLoc);
-        this.errLvl = errLvl;        
-    }
-
-    public RecordAndDoc(Record record)
+    /**
+     * Constructor for a RecordAndDoc object for which the Doc hasn't yet been created.
+     *
+     * @param record - The MARC record being processed.
+     */
+    RecordAndDoc(Record record)
     {
         this.rec = record;
         this.doc = null;
@@ -65,25 +41,30 @@ public class RecordAndDoc
         this.errLvl = rec.hasErrors() ? errLvlForMarcError(rec.getErrors()) : eErrorSeverity.NONE;
     }
 
-    public SolrMarcIndexerException getSolrMarcIndexerException()
+    /**
+     * Used in conjunction with the above constructor to set the Doc member once it has been created.
+     *
+     * @param doc - The created SolrInputDocument
+     */
+    void setDoc(SolrInputDocument doc)
+    {
+        this.doc = doc;
+    }
+
+    SolrMarcIndexerException getSolrMarcIndexerException()
     {
         return smie;
     }
 
-    public void setSolrMarcIndexerException(SolrMarcIndexerException smie)
+    void setSolrMarcIndexerException(SolrMarcIndexerException smie)
     {
         if (this.smie == null || this.smie.getLevel() < smie.getLevel())
         {
             this.smie = smie;
         }
     }
-    
-    public IndexerSpecException getIndexerSpecException()
-    {
-        return ise;
-    }
 
-    public void setIndexerSpecException(IndexerSpecException ise)
+    void setIndexerSpecException(IndexerSpecException ise)
     {
         if (this.ise == null || this.ise.getErrLvl().compareTo(ise.getErrLvl()) < 0)
         {
@@ -109,43 +90,28 @@ public class RecordAndDoc
         }
     }
 
-    public EnumSet<eErrorLocationVal> getErrLocs()
-    {
-        return errLocs;
-    }
-
-    public void setErrLocs(EnumSet<eErrorLocationVal> errLocs)
-    {
-        this.errLocs = errLocs;
-    }
-
-    public Record getRec()
+    Record getRec()
     {
         return rec;
     }
 
-    public SolrInputDocument getDoc()
+    SolrInputDocument getDoc()
     {
         return doc;
     }
 
-    public void setMaxErrLvl(eErrorSeverity errLvl)
+    void setMaxErrLvl(eErrorSeverity errLvl)
     {
         this.errLvl = eErrorSeverity.max(this.errLvl, errLvl);
     }
 
-    public eErrorSeverity getErrLvl()
+    eErrorSeverity getErrLvl()
     {
         return errLvl;
     }
 
-    public void addErrLoc(eErrorLocationVal solrError)
+    void addErrLoc(eErrorLocationVal solrError)
     {
         errLocs.add(solrError);
-    }
-
-    public void setDoc(SolrInputDocument doc)
-    {
-        this.doc = doc;
     }
 }

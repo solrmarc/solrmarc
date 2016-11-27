@@ -29,13 +29,21 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The single-threaded reference implementation of the indexing process.
+ * Reads a record, builds the SolrInputDocument, and sends it to the SolrProxy.
+ * The various methods that it uses to accomplish these tasks are used by the
+ * various multi-threaded classes.
+ *
+ * @author rh9ec
+ *
+ */
 public class Indexer
 {
     private final static Logger logger = Logger.getLogger(Indexer.class);
 
     protected final List<AbstractValueIndexer<?>> indexers;
     protected SolrProxy solrProxy;
-    public EnumSet<eErrorHandleVal> errHandle = EnumSet.noneOf(eErrorHandleVal.class);
     protected final BlockingQueue<RecordAndDoc> errQ;
     protected final BlockingQueue<String> delQ;
     protected boolean shuttingDown = false;
@@ -43,7 +51,7 @@ public class Indexer
     protected boolean isShutDown = false;
     private int cnts[] = new int[] { 0, 0, 0 };
 
-
+    EnumSet<eErrorHandleVal> errHandle = EnumSet.noneOf(eErrorHandleVal.class);
     public enum eErrorHandleVal
     {
         RETURN_ERROR_RECORDS, INDEX_ERROR_RECORDS;
@@ -70,17 +78,17 @@ public class Indexer
         this.errHandle = toClone.errHandle;
     }
 
-    public Indexer makeThreadSafeCopy()
+    protected Indexer makeThreadSafeCopy()
     {
         return (new Indexer(this));
     }
 
-    public boolean isSet(eErrorHandleVal val)
+    boolean isSet(eErrorHandleVal val)
     {
         return (errHandle.contains(val));
     }
 
-    public void setErr(eErrorHandleVal val)
+    void setErr(eErrorHandleVal val)
     {
         errHandle.add(val);
     }
@@ -99,12 +107,12 @@ public class Indexer
         resetCnts();
         while (!shuttingDown)
         {
-            Record record = getRecord(reader);
-            if (record == null) break;
+            RecordAndCnt recordAndCnt = getRecord(reader);
+            if (recordAndCnt == null) break;
 
             RecordAndDoc recDoc = null;
             try {
-                recDoc = getIndexDoc(record, cnts[0]);
+                recDoc = getIndexDoc(recordAndCnt.getRecord(), recordAndCnt.getCnt());
             }
             catch (SolrMarcIndexerException smie)
             {
@@ -123,7 +131,7 @@ public class Indexer
         return (cnts);
     }
 
-    public void indexSingleDocument(RecordAndDoc recDoc)
+    protected void indexSingleDocument(RecordAndDoc recDoc)
     {
         try {
             if (recDoc.getDoc() != null)
@@ -149,27 +157,28 @@ public class Indexer
         }
     }
 
-    public void resetCnts()
+    void resetCnts()
     {
         cnts[0] = cnts[1] = cnts[2] = 0;
     }
 
-    public void incrementCnt(int cntNum)
+    int incrementCnt(int cntNum)
     {
-        cnts[cntNum]++;
+        return(++cnts[cntNum]);
     }
 
-    public void addToCnt(int cntNum, int amount)
+    int addToCnt(int cntNum, int amount)
     {
         cnts[cntNum] += amount;
+        return(cnts[cntNum]);
     }
 
-    public int[] getCounts()
+    int[] getCounts()
     {
         return(cnts);
     }
 
-    public Record getRecord(MarcReader reader)
+    RecordAndCnt getRecord(MarcReader reader)
     {
         Record record = null;
         while (record == null)
@@ -192,11 +201,11 @@ public class Indexer
                 }
             }
         }
-        incrementCnt(0);
-        return(record);
+        int cnt = incrementCnt(0);
+        return (new RecordAndCnt(record, cnt));
     }
 
-    public RecordAndDoc getIndexDoc(Record record, int count)
+    RecordAndDoc getIndexDoc(Record record, int count)
     {
         RecordAndDoc recDoc = null;
         recDoc = indexToSolrDoc(record);
@@ -407,7 +416,7 @@ public class Indexer
         return recDoc;
     }
 
-    public void singleRecordSolrError(RecordAndDoc recDoc, Exception e1, BlockingQueue<RecordAndDoc> errQ)
+    protected void singleRecordSolrError(RecordAndDoc recDoc, Exception e1, BlockingQueue<RecordAndDoc> errQ)
     {
         logger.error("Failed on single doc with id : " + recDoc.getRec().getControlNumber());
         if (e1 instanceof SolrRuntimeException && e1.getCause() instanceof SolrException)
@@ -433,23 +442,23 @@ public class Indexer
         }
     }
 
-    public boolean isShutDown()
+    boolean isShutDown()
     {
         return isShutDown;
     }
 
-    public void setIsShutDown()
+    void setIsShutDown()
     {
         isShutDown = true;
     }
 
-    public void shutDown(boolean viaInterrupt)
+    void shutDown(boolean viaInterrupt)
     {
         this.viaInterrupt = viaInterrupt;
         shuttingDown = true;
     }
 
-    public void endProcessing()
+    void endProcessing()
     {
         if (delQ.size() > 0)
         {
@@ -484,7 +493,7 @@ public class Indexer
         return unit.convert(time, TimeUnit.NANOSECONDS);
     }
 
-    public void reportPerMethodTime()
+    void reportPerMethodTime()
     {
         logger.info("Elapsed time per indexing method:");
         for (final AbstractValueIndexer<?> indexer : indexers)

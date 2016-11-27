@@ -14,9 +14,19 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-public class BootableMain 
+/**
+ * This class is the common parent for top level executable programs included as a part of SolrMarc,
+ * most notably IndexDriver, and SolrMarcDebug.  Its purpose is to handle command-line arguments
+ * that are passed to any of those programs.  It relies on the external library joptsimple.
+ * https://pholser.github.io/jopt-simple/
+ *
+ * @author rh9ec
+ *
+ */
+
+public class BootableMain
 {
-    public final static Logger logger = Logger.getLogger(IndexDriver.class);
+    private final static Logger logger = Logger.getLogger(BootableMain.class);
 
     protected String homeDirStrs[];
     protected String addnlLibDirStrs[];
@@ -33,7 +43,17 @@ public class BootableMain
     protected OptionSpec<String> files;
     protected OptionSet options = null;
 
-    public void processArgs(String args[], boolean failOnZeroArgs)
+    /**
+     * Extract command line arguments and store them in various protected variables.
+     *
+     * @param args - the command line arguments passed to the Boot class, except for the first one
+     *                which specifies which main program is to be executed.
+     *
+     * @param failOnZeroArgs - true will cause the program to exit and print a help message
+     *                detailing the valid command-line arguments.  false will simply do nothing
+     *                and return.
+     */
+    protected void processArgs(String args[], boolean failOnZeroArgs)
     {
         OptionParser parser = new OptionParser(  );
         readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("marcreader.properties");
@@ -70,7 +90,7 @@ public class BootableMain
             }
             System.exit(1);
         }
-        if ((failOnZeroArgs && args.length == 0) || options.has("help")) 
+        if ((failOnZeroArgs && args.length == 0) || options.has("help"))
         {
             try
             {
@@ -98,16 +118,16 @@ public class BootableMain
             if (!hasDefDir)  homeDirList.add(defDir.getAbsolutePath());
             homeDirStrs = homeDirList.toArray(new String[0]);
         }
-        else 
+        else
         {
             homeDirStrs = new String[]{ Boot.getDefaultHomeDir() };
         }
         System.setProperty("solrmarc.home.dir", homeDirStrs[0]);
 
         File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File("lib-solrj"));
-        
-        try { 
-            if (solrJPath.isAbsolute()) 
+
+        try {
+            if (solrJPath.isAbsolute())
             {
                 Boot.extendClasspathWithSolJJarDir(null, solrJPath);
             }
@@ -122,9 +142,9 @@ public class BootableMain
             logger.error("Exiting...");
             System.exit(10);
         }
-        
+
         // Now add local lib directories
-        try { 
+        try {
             if (addnlLibDirs.value(options)!= null)
             {
                 addnlLibDirStrs = addnlLibDirs.value(options).split("[,;|]");
@@ -138,30 +158,4 @@ public class BootableMain
             System.exit(10);
         }
     }
-
-
-//    /**
-//     * Returns true if it appears that log4j have been previously configured. This code
-//     * checks to see if there are any appenders defined for log4j which is the
-//     * definitive way to tell if log4j is already initialized
-//     */
-//    private static boolean isLog4jConfigured()
-//    {
-//        Enumeration<?> appenders = LogManager.getRootLogger().getAllAppenders();
-//        if (appenders.hasMoreElements())
-//        {
-//            return true;
-//        }
-//        else
-//        {
-//            Enumeration<?> loggers = LogManager.getCurrentLoggers();
-//            while (loggers.hasMoreElements())
-//            {
-//                Logger c = (Logger) loggers.nextElement();
-//                if (c.getAllAppenders().hasMoreElements()) return true;
-//            }
-//        }
-//        return false;
-//    }
-    
 }

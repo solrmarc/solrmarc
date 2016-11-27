@@ -1,6 +1,5 @@
 package org.solrmarc.driver;
 
-import java.util.AbstractMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -11,7 +10,7 @@ import org.solrmarc.tools.SolrMarcIndexerException;
 public class IndexerWorker implements Runnable
 {
     private final static Logger logger = Logger.getLogger(IndexerWorker.class);
-    private final BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ;
+    private final BlockingQueue<RecordAndCnt> readQ;
     private final BlockingQueue<RecordAndDoc> docQ;
     private Indexer indexer;
     private MarcReaderThread readerThread;
@@ -19,7 +18,7 @@ public class IndexerWorker implements Runnable
     private boolean doneWorking = false;
     private boolean interrupted = false;
 
-    public IndexerWorker(MarcReaderThread readerThread, BlockingQueue<AbstractMap.SimpleEntry<Integer, Record>> readQ, BlockingQueue<RecordAndDoc> docQ, Indexer indexer, int threadCount)
+    public IndexerWorker(MarcReaderThread readerThread, BlockingQueue<RecordAndCnt> readQ, BlockingQueue<RecordAndDoc> docQ, Indexer indexer, int threadCount)
     {
         this.readerThread = readerThread;
         this.readQ = readQ;
@@ -58,14 +57,11 @@ public class IndexerWorker implements Runnable
         {
             try
             {
-                AbstractMap.SimpleEntry<Integer, Record> pair = readQ.poll(10, TimeUnit.MILLISECONDS);
-                if (pair == null)  continue;
-                int count = pair.getKey();
-                Record record = pair.getValue();
+                RecordAndCnt recordAndCnt = readQ.poll(10, TimeUnit.MILLISECONDS);
+                if (recordAndCnt == null)  continue;
+                int count = recordAndCnt.getCnt();
+                Record record = recordAndCnt.getRecord();
 
-//                System.out.println(rec.getControlNumber() + " :  read in thread "+ threadCount);
-//                long id = Long.parseLong(rec.getControlNumber().substring(1))* 100 + threadCount;
-//                rec.setId((long)id);
                 if (isInterrupted())  break;
                 RecordAndDoc recDoc = null;
                 try {

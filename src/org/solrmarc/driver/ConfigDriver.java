@@ -13,14 +13,14 @@ import org.solrmarc.tools.Utils;
 
 public class ConfigDriver extends BootableMain
 {
-    public final static Logger logger =  Logger.getLogger(ConfigDriver.class);   
+    private final static Logger logger =  Logger.getLogger(ConfigDriver.class);
 
     public static void main(String[] args)
     {
         String configProps = args[0];
         logger.debug("Using config " + configProps + " to initialize SolrMarc");
         // Some of the values in this file will be extracted and passed as command line arguments others will be
-        // extracted directly by the MarcReader configuration handler.  This is done by passing the same property file 
+        // extracted directly by the MarcReader configuration handler.  This is done by passing the same property file
         // to the MarcReader configurations handler, which will extract the fields it wants and ignore the rest.
         String homeDirStr = Boot.getDefaultHomeDir();
         File configFile = new File(configProps);
@@ -29,27 +29,27 @@ public class ConfigDriver extends BootableMain
             configFile = new File(homeDirStr, configProps);
         }
         Properties configProperties = PropertyUtils.loadProperties(new String[0], configFile.getAbsolutePath());
-        
+
         String marcreaderProperties = configFile.getAbsolutePath();
         String solrHosturl = PropertyUtils.getProperty(configProperties, "solr.hosturl");
         String solrIndexerProperties = PropertyUtils.getProperty(configProperties, "solr.indexer.properties");
         String solrmarcPath = PropertyUtils.getProperty(configProperties, "solrmarc.path");
-        
+
         // get the value from the property file AND the value from the command line
-        // Iff they are different, use those two values to replace the corename in the solr URL
+        // If they are different, use those two values to replace the corename in the solr URL
         String solrCore = configProperties.getProperty("solr.core.name");
         String systemSolrCore = PropertyUtils.getProperty(configProperties, "solr.core.name");
-        
+
         if (solrCore != null && systemSolrCore != null && !solrCore.equals(systemSolrCore) && solrHosturl.contains(solrCore))
         {
             logger.debug("Replacing corename " + solrCore + " with corename "+ systemSolrCore);
             solrHosturl = solrHosturl.replace(solrCore, systemSolrCore);
             logger.debug("New Solr URL is "+ solrHosturl);
         }
-        String dirArg[] = (solrmarcPath != null && !solrmarcPath.equals(".")) 
-                        ? new String[]{"-dir", solrmarcPath}  
+        String dirArg[] = (solrmarcPath != null && !solrmarcPath.equals("."))
+                        ? new String[]{"-dir", solrmarcPath}
                         : new String[0];
-        if (solrIndexerProperties == null) 
+        if (solrIndexerProperties == null)
         {
             logger.error("The provided old-style SolrMarc config.properties file doesn't define the value \"solr.indexer.properties\"");
             System.exit(1);
@@ -69,7 +69,7 @@ public class ConfigDriver extends BootableMain
         String effectiveCommandLine = "java -jar solrmarc_core.jar IndexDriver " + Utils.join(quoteIfHasSpace(driverArgs), " ");
         logger.info("Effective Command Line is:");
         logger.info("   " + effectiveCommandLine);
-        
+
         Boot.invokeMain("org.solrmarc.driver.IndexDriver", driverArgs.toArray(new String[0]));
 
     }

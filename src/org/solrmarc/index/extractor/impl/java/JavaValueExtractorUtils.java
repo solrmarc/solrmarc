@@ -15,7 +15,17 @@ import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -36,12 +46,12 @@ public class JavaValueExtractorUtils
 
     /**
      * Compiles java sources if they have changed.
-     * @param homeDirStrs 
+     * @param homeDirStrs
      *
      * @return true if one or more java sources were compiled, else false.
      * @throws IOException
      */
-    public boolean compileSources() 
+    public boolean compileSources()
     {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         boolean compiledSome = false;
@@ -71,7 +81,7 @@ public class JavaValueExtractorUtils
                 classpath.add(new File(url.getFile()));
                 logger.debug("    " + url.getFile());
             }
-            // Now add in dynamically compiled java classes from less local index_java directories 
+            // Now add in dynamically compiled java classes from less local index_java directories
             for (int j = dirsContainingJavaSource.length - 1; j > i; j--)
             {
                 try
@@ -280,7 +290,7 @@ public class JavaValueExtractorUtils
         }
         Attributes attr = manifest.getMainAttributes();
         String value = attr.getValue("Built-Date");
-        if (value == null) 
+        if (value == null)
         {
             return(null);
         }

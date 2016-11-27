@@ -25,7 +25,7 @@ import org.solrmarc.index.utils.FastClasspathUtils;
  */
 public class Boot
 {
-    public static Logger logger;
+    private static Logger logger;
 
     static
     {
@@ -228,7 +228,7 @@ public class Boot
      * the jar files in that directory dynamically.  If it doesn't find a jar
      * named marc4j*.jar it will log a fatal error and exit the program.
      */
-    public static void addLibDirJarstoClassPath()
+    private static void addLibDirJarstoClassPath()
     {
         String homePath = getDefaultHomeDir();
         File homeDir = new File(homePath);
@@ -264,7 +264,7 @@ public class Boot
         }
     }
 
-    public static void extendClasspathWithJar(URLClassLoader sysLoader, File jarfile)
+    private static void extendClasspathWithJar(URLClassLoader sysLoader, File jarfile)
     {
         URL urls[] = sysLoader.getURLs();
         URL ujar;
@@ -298,7 +298,7 @@ public class Boot
         }
     }
 
-    public static boolean extendClasspathWithJarDir(URLClassLoader sysLoader, File dir, String patternToLoad, String specialMatch)
+    private static boolean extendClasspathWithJarDir(URLClassLoader sysLoader, File dir, String patternToLoad, String specialMatch)
     {
         boolean foundSpecial = false;
         if (dir == null || !dir.isDirectory() || dir.listFiles().length == 0)
@@ -347,13 +347,13 @@ public class Boot
         }
     }
 
-    public static void extendClasspathWithDirOfClasses(File dir)
+    private static void extendClasspathWithDirOfClasses(File dir)
     {
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         extendClasspathWithDirOfClasses(sysLoader, dir);
     }
 
-    public static boolean extendClasspathWithLibJarDir(File dir, String patternForSpecial)
+    private static boolean extendClasspathWithLibJarDir(File dir, String patternForSpecial)
     {
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         boolean foundIt = extendClasspathWithJarDir(sysLoader, dir, ".*[.]jar", patternForSpecial);
@@ -369,7 +369,7 @@ public class Boot
      * @param homeDirStrs
      * @param dir
      */
-    public static void extendClasspathWithSolJJarDir(String[] homeDirStrs, File dir)
+    static void extendClasspathWithSolJJarDir(String[] homeDirStrs, File dir)
     {
         URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         boolean foundSolrj = false;
@@ -406,7 +406,7 @@ public class Boot
         return(dir);
     }
 
-    public static void extendClasspathWithLocalJarDirs(String[] homeDirStrs, String[] addnlLibDirStrs)
+    static void extendClasspathWithLocalJarDirs(String[] homeDirStrs, String[] addnlLibDirStrs)
     {
         for (String libdirname : addnlLibDirStrs)
         {

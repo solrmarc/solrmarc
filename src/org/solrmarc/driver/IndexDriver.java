@@ -31,34 +31,58 @@ import org.solrmarc.solr.SolrRuntimeException;
 import org.solrmarc.solr.StdOutProxy;
 import org.solrmarc.tools.PropertyUtils;
 
+/**
+ * Uses the command-line arguments to create a MarcReader, a collection of AbstractValueIndexer
+ * objects, and a SolrProxy object and then passes them to the Indexer class which loops through
+ * the MARC records, builds SolrInputDocuments and then sends them to Solr
+ *
+ * @author rh9ec
+ *
+ */
 public class IndexDriver extends BootableMain
 {
-    public final static Logger logger = Logger.getLogger(IndexDriver.class);
+    private final static Logger logger = Logger.getLogger(IndexDriver.class);
 
-    Properties readerProps;
-    ValueIndexerFactory indexerFactory = null;
+    private Properties readerProps;
+    private ValueIndexerFactory indexerFactory = null;
 
-    List<AbstractValueIndexer<?>> indexers;
-    Indexer indexer;
-    MarcReader reader;
-    SolrProxy solrProxy;
-    boolean verbose;
-    int numIndexed[];
-    String[] args;
-    long startTime;
-    Thread shutdownSimulator = null;
+    private List<AbstractValueIndexer<?>> indexers;
+    private Indexer indexer;
+    private MarcReader reader;
+    private SolrProxy solrProxy;
+    private int numIndexed[];
+    private String[] args;
+    private long startTime;
+    private Thread shutdownSimulator = null;
 
+    /**
+     * The main entry point of the SolrMarc indexing process. Typically called by the Boot class.
+     *
+     * @param args - The command-line arguments passed to the program
+     */
     public static void main(String[] args)
     {
         IndexDriver driver = new IndexDriver(args);
         driver.execute();
     }
 
+    /**
+     * Provided as an optional entry-point for the SolrMarc indexing process.  It merely stores the
+     * command-line arguments so then can be used by the method execute.
+     *
+     * @param args - The command-line arguments passed to the program
+     */
     public IndexDriver(String[] args)
     {
         this.args = args;
     }
 
+    /**
+     *  Creates a MarcReader, a collection of AbstractValueIndexer objects, and a SolrProxy object 
+     *  based on the values in the command-line arguments.  It creates a Indexer object
+     *  and calls processInput which passes the MarcReader to the Indexer object to index all of the 
+     *  MARC records.
+     */
     public void execute()
     {
         processArgs(args, true);
@@ -69,7 +93,9 @@ public class IndexDriver extends BootableMain
         logger.info("Opening input files: " + Arrays.toString(inputFiles.toArray()));
         this.configureReader(inputFiles);
         if (deleteRecordByIdFile.value(options) != null)
+        {
             this.processDeletes();
+        }
 
         this.processInput();
     }
@@ -103,12 +129,11 @@ public class IndexDriver extends BootableMain
         }
     }
 
-    public void initializeFromOptions()
+    private void initializeFromOptions()
     {
         String inputSource[] = new String[1];
         String propertyFileAsURLStr = PropertyUtils.getPropertyFileAbsoluteURL(homeDirStrs, options.valueOf(readOpts), true, inputSource);
 
-        // File f1 = new File(options.valueOf(readOpts));
         try
         {
             configureReaderProps(propertyFileAsURLStr);
@@ -120,7 +145,6 @@ public class IndexDriver extends BootableMain
             System.exit(1);
         }
 
-        // String solrURL = "http://libsvr40.lib.virginia.edu:8080/solrgis/nextgen";
         String solrJClassName = solrjClass.value(options);
         String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : options.has("null") ? "devnull" : "stdout";
         boolean multithread = options.has("solrURL") && !options.has("debug") ? true : false;
@@ -168,7 +192,7 @@ public class IndexDriver extends BootableMain
             "solrmarc.method.report",
     };
 
-    public void configureReaderProps(String propertyFileURLStr) throws FileNotFoundException, IOException
+    private void configureReaderProps(String propertyFileURLStr) throws FileNotFoundException, IOException
     {
         List<String> propertyStringsToCopy = Arrays.asList(solrmarcPropertyStrings);
         readerProps = new Properties();
@@ -187,12 +211,12 @@ public class IndexDriver extends BootableMain
         }
     }
 
-    public void configureReader(List<String> inputFilenames)
+    private void configureReader(List<String> inputFilenames)
     {
         reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), inputFilenames);
     }
 
-    public void configureIndexer(String indexSpecifications, boolean multiThreaded)
+    private void configureIndexer(String indexSpecifications, boolean multiThreaded)
             throws IllegalAccessException, InstantiationException, IOException
     {
         String[] indexSpecs = indexSpecifications.split("[ ]*,[ ]*");
@@ -224,7 +248,7 @@ public class IndexDriver extends BootableMain
         }
     }
 
-    public void configureOutput(String solrURL, String solrJClassName)
+    private void configureOutput(String solrURL, String solrJClassName)
     {
         if (solrURL.equals("stdout"))
         {
@@ -249,7 +273,7 @@ public class IndexDriver extends BootableMain
         }
     }
 
-    public void processInput()
+    private void processInput()
     {
         String inEclipseStr = System.getProperty("runInEclipse");
         boolean inEclipse = "true".equalsIgnoreCase(inEclipseStr);
@@ -450,9 +474,6 @@ public class IndexDriver extends BootableMain
                 {
                 }
             }
-//            int[] counts = indexer.getCounts();
-//            long endTime = System.currentTimeMillis();
-//            reportResultsAndTime(counts, startTime, endTime, indexer, false);
             logger.info("Finished Shutdown hook");
             LogManager.shutdown();
             try
