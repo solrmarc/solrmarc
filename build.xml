@@ -30,23 +30,60 @@
         <mkdir dir="${build.dir}"/>
     </target>
 
-    <target name="precompile" unless="precompile.already.run"  description="run jflex and cup to generate javafiles for parser and scanner" >
+    <target name="precompile" unless="precompile.already.run"  description="run jflex and cup to generate javafiles for parser and scanner"
+        depends="-precompile-flex,-precompile-cup" />
+
+    <!-- start private targets to help with the precompile step -->
+    <target name="-precompile-flex" unless="flex.uptodate"  depends="-precompile-flex-check" >
         <jflex file="${src.dir}/org/solrmarc/index/indexer/FullScanner.lex" verbose="true"
                outdir="${src.dir}/org/solrmarc/index/indexer/" nobak="true" />
+        <copy file="${src.dir}/org/solrmarc/index/indexer/FullConditionalScanner.java"
+              tofile="${src.dir}/org/solrmarc/index/indexer/FullConditionalScanner.java.new" >
+             <filterset begintoken="private boolean " endtoken=" = true;" recurse="no">
+                 <filter token="zzAtBOL"
+                         value="@SuppressWarnings(&quot;unused&quot;)&#10;  private boolean zzAtBOL = true;" />
+             </filterset>
+        </copy>
+        <move file="${src.dir}/org/solrmarc/index/indexer/FullConditionalScanner.java.new"
+              tofile="${src.dir}/org/solrmarc/index/indexer/FullConditionalScanner.java"/>
+    </target>
 
+    <target name="-precompile-flex-check" >
+        <uptodate property="flex.uptodate"
+                          srcfile="${src.dir}/org/solrmarc/index/indexer/FullScanner.lex"
+                          targetfile="${src.dir}/org/solrmarc/index/indexer/FullConditionalScanner.java"/>
+    </target>
+
+    <target name="-precompile-cup" unless="cup.uptodate"  depends="-precompile-cup-check" >
         <cup srcfile="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.cup"
              destdir="${src.dir}"
              package="org.solrmarc.index.indexer"
              symbols="FullSym"
              parser="FullConditionalParser"
         />
-        <property name="precompile.already.run" value="true" />
+        <copy file="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.java"
+               tofile="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.java.new" >
+             <filterset begintoken="({" endtoken="})" recurse="no">
+                 <filter token="&quot;rawtypes&quot;"
+                         value="({&quot;rawtypes&quot;, &quot;unused&quot;, &quot;unchecked&quot;, &quot;deprecation&quot;})" />
+                 <filter token="&quot;rawtypes&quot;, &quot;unchecked&quot;, &quot;unused&quot;" value="({})" />
+             </filterset>
+        </copy>
+        <move file="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.java.new"
+              tofile="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.java"/>
     </target>
+
+    <target name="-precompile-cup-check"  >
+        <uptodate property="cup.uptodate"
+                          srcfile="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.cup"
+                          targetfile="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.java"/>
+    </target>
+    <!-- end private targets to help with the precompile step -->
 
     <target name="compile" depends="init,precompile"  unless="compile.already.run"  description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
         <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${src.dir}" destdir="${build.dir}"
-               debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
+               debug="true" debuglevel="lines,vars,source" updatedProperty="javac_compiled_some" encoding="UTF-8" >
             <classpath >
                 <fileset dir="${lib.dir}">
                     <include name="**/*.jar"/>
@@ -116,7 +153,7 @@
         <property name="test.already.compiled" value="true" />
     </target>
 
-    <target name="test" depends="test-compile" unless="test.already.run">
+    <target name="test" depends="test-compile" unless="test.already.run" description="run junit tests" >
         <mkdir dir="${reports.tests}" />
         <junit printsummary="yes" haltonfailure="false">
             <classpath>
@@ -158,18 +195,41 @@
         <property name="test.already.run" value="true" />
     </target>
 
-    <target name="coverage-instrument" unless="already.instrumented"  >
-        <property name="instrumented.dir" value="test/instrument" />
+    <target name="-coverage-init" unless="already.instrumented"  >
+        <property name="instrumented.dir" value="${test.dir}/instrument" />
         <property name="cobertura.datafile" value="${test.dir}/data/cobertura.ser" />
+        <property name="tmp.cobertura.datafile" value="${instrumented.dir}/cobertura.ser" />
         <mkdir dir="${instrumented.dir}" />
         <delete file="${cobertura.datafile}" />
-
         <property name="cobertura.jar.dir"  location="${test.dir}/lib/cobertura-2.1.1/" />
         <path id="cobertura.classpath">
             <fileset dir="${cobertura.jar.dir}" includes="**/*.jar" />
             <fileset dir="${lib.dir}" includes="**/*.jar" />
         </path>
-        <cobertura-instrument todir="${instrumented.dir}" datafile="${cobertura.datafile}" ignoreTrivial="true" >
+    </target>
+
+    <target name="-coverage-instrument-check" unless="already.instrumented" depends="-coverage-init" >
+    	<condition property="already.instrumented" >
+    		<and>
+                <uptodate>
+                    <srcfiles dir="${basedir}" includes="build/**/*.class" >
+                        <exclude name="**/callnum/CallNumber.class" />
+                        <exclude name="**/custom/Mixin.class" />
+                        <exclude name="**/extractor/AbstractValueExtractor.class" />
+                        <exclude name="**/extractor/ExternalMethod.class" />
+                    	<exclude name="**/formatter/FieldFormatter.class" />
+                        <exclude name="**/mapping/AbstractValueMapping.class" />
+                    </srcfiles>
+                    <globmapper from="build/*" to="${instrumented.dir}/*" handledirsep="true"/>
+                </uptodate>
+    			<available file="${tmp.cobertura.datafile}" />
+    		</and>
+    	</condition>
+        <echo message="already.instrumented=${already.instrumented}" />
+    </target>
+
+    <target name="-coverage-instrument" unless="already.instrumented" depends="-coverage-instrument-check" >
+        <cobertura-instrument todir="${instrumented.dir}" datafile="${tmp.cobertura.datafile}" ignoreTrivial="true" >
             <ignore regex="org.apache.log4j.*|ch.qos.logback.*" />
             <fileset dir="${build.dir}">
                 <include name="**/*.class" />
@@ -179,7 +239,12 @@
         <property name="already.instrumented" value="true" />
     </target>
 
-    <target name="coverage-junit" depends="coverage-instrument" >
+	<target name="-coverage-init2" unless="already.coverage.init2" >
+	    <copy file="${tmp.cobertura.datafile}" tofile="${cobertura.datafile}" />
+        <property name="already.coverage.init2" value="true" />
+    </target>
+
+    <target name="-coverage-junit" depends="-coverage-instrument,-coverage-init2" >
         <!-- <property name="testcase" value="org.solrmarc.index.UtilsTests" /> -->
         <junit fork="yes" dir="${basedir}" failureProperty="test.failed">
             <!--
@@ -231,10 +296,10 @@
 
     <!-- this test runs SolrMarc in single threaded mode on a largeish input file, writing the output to a file.
          it then runs SolrMarc in multi-threaded mode on the same input, writing the output to a different file.
-         next it sorts the two files, and compares the results, if the results are not equal, there is a problem 
+         next it sorts the two files, and compares the results, if the results are not equal, there is a problem
          somewhere in the program. -->
-    
-    <target name="coverage-main" depends="coverage-instrument" >
+
+    <target name="-coverage-main" depends="-coverage-instrument,-coverage-init2" >
         <echo message="Run SolrMarc in Single-threaded mode" />
         <java classname="org.solrmarc.driver.Boot" fork="yes" output="${reports.tests}/output.singlethread.txt" error="${reports.tests}/stderr.singlethread.txt" >
             <classpath location="${instrumented.dir}" />
@@ -273,13 +338,14 @@
         <echo message="multithread = ${multithreadworked}" />
     </target>
 
-    <target name="coverage" depends="coverage-instrument,coverage-junit,coverage-main" >
+    <target name="coverage" depends="jar,-coverage-instrument,-coverage-junit,-coverage-main"
+            description="run tests to determine code coverage" >
         <mkdir dir="${reports.tests}/coverage" />
         <cobertura-report format="html" destdir="${reports.tests}/coverage" srcdir="${src.dir}" datafile="${cobertura.datafile}"/>
         <cobertura-report format="xml" destdir="${reports.tests}/coverage" srcdir="${src.dir}" datafile="${cobertura.datafile}"/>
     </target>
 
-    <target name="package" depends="jar, test">
+    <target name="package" depends="jar, test" description="create the build targets for a release" >
         <echo message="Building required jars zip file" />
         <delete file="${dist.dir}/required_jars_${version}.zip" />
         <delete file="${dist.dir}/simple_install_package_${version}.zip" />
@@ -290,7 +356,7 @@
         <copy file="${buildtools.dir}/install_template/how_to_run.txt" tofile="${dist.dir}/how_to_run.txt" overwrite="true" >
             <filterchain>
                 <expandproperties/>
-            </filterchain> 
+            </filterchain>
         </copy>
         <zip file="${dist.dir}/simple_install_package_${version}.zip" >
             <zipfileset dir="${dist.dir}" prefix="" includes="${custom.jar.name}_${version}.jar" />
