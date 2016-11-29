@@ -23,16 +23,21 @@ public class FileLookupMixin implements Mixin
 
     public String getFromFileBy001(Record record, String filename, String defaultValue)
     {
-        Map<String, String> lookupMap = getLookupMap(filename);
+        return getFromFileBy001(record, filename, "[\t]", defaultValue);
+    }
+
+    public String getFromFileBy001(Record record, String filename, String sepPattern, String defaultValue)
+    {
+        Map<String, String> lookupMap = getLookupMap(filename, sepPattern);
 
         String id = record.getControlNumber();
-        String result = lookupMap.containsKey(id) ? lookupMap.get(id) : defaultValue;
+        String result = lookupMap.containsKey(id) ? lookupMap.get(id) : defaultValue.length() > 0 ? defaultValue : null;
         return (result);
     }
 
-    public Collection<String> getFromFileByKey(Collection<String> keys, String filename, String defaultValue)
+    public Collection<String> mapFromFileByKey(Collection<String> keys, String filename, String sepPattern, String defaultValue)
     {
-        Map<String, String> lookupMap = getLookupMap(filename);
+        Map<String, String> lookupMap = getLookupMap(filename, sepPattern);
         Collection<String> result = new ArrayList<String>(keys.size());
 
         for (String key : keys)
@@ -49,22 +54,61 @@ public class FileLookupMixin implements Mixin
         return (result);
     }
 
-    private Map<String, String> getLookupMap(String filename)
+    public Collection<String> mapLookupSelect(Collection<String> values, String sepPattern, String select)
+    {
+        Collection<String> result = new ArrayList<String>(values.size());
+        int selValue = Integer.parseInt(select);
+        for (String value : values)
+        {
+            String[] split = value.split(sepPattern);
+            if (selValue >= 0 && selValue < split.length)
+            {
+                result.add(split[selValue]);
+            }
+        }
+        return (result);
+    }
+/*
+ *  date_received = custom, getFromFileBy001("extra_data/booklists_all_20161128.txt", "[|]", null), map("([^|]*)[|].*=>$1")
+    fund_code = custom, getFromFileBy001("extra_data/booklists_all_20161128.txt", "[|]", null), map("([^|]*)[|](.*)=>$2")
+
+    date_received = custom, getFromFileBy001("extra_data/booklists_all_20161128.txt", "[|]", null), custom_map(org.solrmarc.mixin.FileLookupMixin mapLookupSelect("[|]",0))
+    fund_code = custom, getFromFileBy001("extra_data/booklists_all_20161128.txt", "[|]", null), map("([^|]*)[|](.*)=>$2")
+
+    date_received = custom, getFromFileBy001("extra_data/booklists_all_20161128.txt", "[|]", null), custom_map(mapLookupSelect("[|]",0))
+    fund_code = custom, getFromFileBy001("extra_data/booklists_all_20161128.txt", "[|]", null), map("([^|]*)[|](.*)=>$2"), custom_map(mapLookupSplit(":"))
+*/
+    public Collection<String> mapLookupSplit(Collection<String> values, String sepPattern)
+    {
+        Collection<String> result = new ArrayList<String>(values.size());
+
+        for (String value : values)
+        {
+            String[] split = value.split(sepPattern);
+            for (String splitPart : split)
+            {
+                result.add(splitPart);
+            }
+        }
+        return (result);
+    }
+
+    private Map<String, String> getLookupMap(String filename, String sepPattern)
     {
         Map<String, String> lookupMap;
-        if (!textfileMaps.containsKey(filename))
+        if (!textfileMaps.containsKey(filename+sepPattern))
         {
-            lookupMap = loadTextFileIntoMap(filename);
+            lookupMap = loadTextFileIntoMap(filename, sepPattern);
         }
         else
         {
-            lookupMap = textfileMaps.get(filename);
+            lookupMap = textfileMaps.get(filename+sepPattern);
             if (lookupMap == null) throw new IndexerSpecException("Map not loaded, lookup fails " + filename);
         }
         return(lookupMap);
     }
 
-    private Map<String, String> loadTextFileIntoMap(String filename)
+    private Map<String, String> loadTextFileIntoMap(String filename, String sepPattern)
     {
         Map<String, String> resultMap;
         try
@@ -75,19 +119,22 @@ public class FileLookupMixin implements Mixin
             String line;
             while ((line = reader.readLine()) != null)
             {
-                String parts[] = line.split("[\t ]+", 2);
-                resultMap.put(parts[0], parts[1]);
+                String parts[] = line.split(sepPattern, 2);
+                if (parts.length == 2)
+                {
+                    resultMap.put(parts[0], parts[1]);
+                }
             }
-            textfileMaps.put(filename, resultMap);
+            textfileMaps.put(filename+sepPattern, resultMap);
         }
         catch (FileNotFoundException e)
         {
-            textfileMaps.put(filename, null);
+            textfileMaps.put(filename+sepPattern, null);
             throw new IndexerSpecException("Unable to open lookup file " + filename);
         }
         catch (IOException e)
         {
-            textfileMaps.put(filename, null);
+            textfileMaps.put(filename+sepPattern, null);
             throw new IndexerSpecException("Unable to read lookup file " + filename);
         }
         return(resultMap);
