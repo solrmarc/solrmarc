@@ -277,7 +277,25 @@ public class ValueIndexerFactory
         List<String> lines = new ArrayList<String>();
         BufferedReader reader = new BufferedReader(new FileReader(indexSpecFile));
         String line;
+        String saveLine = "";
+
         while ((line = reader.readLine()) != null)
+        {
+            if (saveLine.length() > 0 && line.matches("^[ \t].*"))
+            {
+                line = saveLine + line;
+                saveLine = "";
+            }
+            if (line.matches(".*,[ \t]*$"))
+            {
+                saveLine = line;
+            }
+            else
+            {
+                lines.add(line);
+            }
+        }
+        if (saveLine.length() > 0)
         {
             lines.add(line);
         }
@@ -662,10 +680,18 @@ public class ValueIndexerFactory
 
     private boolean isAValueMappingConfiguration(final String configuration)
     {
-        if (configuration.matches(".+[.]properties([(][A-Za-z0-9]*[)])?") || configuration.matches("[(]this[)][.]properties([(][A-Za-z0-9]*[)])?") ||
-            configuration.startsWith("map") || configuration.startsWith("filter") || configuration.startsWith("custom_map"))
+//      if (configuration.matches(".+[.]properties([(][A-Za-z0-9]*[)])?") || configuration.matches("[(]this[)][.]properties([(][A-Za-z0-9]*[)])?") ||
+//      configuration.startsWith("map") || configuration.startsWith("filter") || configuration.startsWith("custom_map") ||
+//      configuration.matches("([a-z]+[.])*(map|filter)[A-Za-z0-9]+"))
+//  {
+//      return (true);
+//  }
+        for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
         {
-            return (true);
+            if (mappingFactory.canHandle(configuration))
+            {
+                return true;
+            }
         }
         return (false);
     }

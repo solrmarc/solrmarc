@@ -549,6 +549,7 @@ public class SolrMarcDebug extends BootableMain
         {
             try
             {
+                currentConfigText = currentConfigText.replaceAll(",[ \t]*\n[ \t]+", ",");
                 indexers = indexerFactory.createValueIndexers(currentConfigText.split("\n"));
                 previousConfigText = currentConfigText;
             }
