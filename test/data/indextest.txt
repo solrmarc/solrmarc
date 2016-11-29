@@ -206,7 +206,57 @@ record: specTestRecs.mrc(u333)
 indexSpec: music_facet = 999a[0-1] ?($a matches "M.*" & $w = "LC"), map("ML=> Music Literature","MT=>Music Theory","M2=>Monuments of Music","M3=>Composers' Collected Works","M.=>Printed Music"), first
 expect: Monuments of Music
 
-#30 test inline map using single string
+#39 test inline map using single string
 record: specTestRecs.mrc(u333)
 indexSpec: scores_test = 000[6]?([6] ~ "[cdj]"), map("[cd]=>Scores||[j]=>Recordings||[cdj]=>Recordings and/or Scores")
 expect: Scores|Recordings and/or Scores
+
+#40 test different ways of specifying custom methods
+record: u399.mrc
+indexSpec: custom(org.solrmarc.mixin.MusicEra), getEra, music_maps.properties(composition_era)
+expect: 1970's|20th Century
+
+#41 test different ways of specifying custom methods
+record: u399.mrc
+indexSpec: custom, getEra, music_maps.properties(composition_era)
+expect: 1970's|20th Century
+
+#42 test different ways of specifying custom methods
+record: u399.mrc
+indexSpec: org.solrmarc.mixin.MusicEra::getEra, music_maps.properties(composition_era)
+expect: 1970's|20th Century
+
+#43 test different ways of specifying custom methods
+record: u399.mrc
+indexSpec: getEra, music_maps.properties(composition_era)
+expect: 1970's|20th Century
+
+#44 test different ways of specifying custom maps
+record: u6909669.mrc
+indexSpec: date_received = custom, getFromFileBy001("extra_data/booklists_all_20161128.txt", "[|]", null), custom_map(org.solrmarc.mixin.FileLookupMixin mapLookupSelect("[|]",0))
+expect: 20161116
+
+#45 test different ways of specifying custom maps
+record: u6909669.mrc
+indexSpec: date_received = org.solrmarc.mixin.FileLookupMixin::getFromFileBy001("extra_data/booklists_all_20161128.txt", "[|]", ""), org.solrmarc.mixin.FileLookupMixin::mapLookupSelect("[|]",0)
+expect: 20161116
+
+#46 test different ways of specifying custom maps
+record: u6909669.mrc
+indexSpec: date_received = getFromFileBy001("extra_data/booklists_all_20161128.txt", "[|]", ""), mapLookupSelect("[|]",0)
+expect: 20161116
+
+#47 test different ways of specifying custom maps
+record: u6909669.mrc
+indexSpec: fund_code = getFromFileBy001("extra_data/booklists_all_20161128.txt", "[|]", ""), mapLookupSelect("[|]", 1), mapLookupSplit(":")
+expect: TUNSTALL-RBT-ER00604|UL-PROCESS
+
+#48 test short form of custom map for filterISBN
+record: u6909669.mrc
+indexSpec: isbn = 020a, filterISBN(13), sort(num, asc)
+expect: *ordered*9781595585301|9781595588197
+
+#49 test new multi-line specification
+record: u6909669.mrc
+indexSpec: oclc_pattern_map_test.properties(fund_code)
+expect: *ordered*UL-PROCESS|TUNSTALL-RBT-ER00604

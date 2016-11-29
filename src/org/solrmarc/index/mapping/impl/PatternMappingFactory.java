@@ -16,7 +16,7 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
     @Override
     public boolean canHandle(String mappingConfiguration)
     {
-        return (mappingConfiguration.startsWith("map") || mappingConfiguration.startsWith("filter"));
+        return (mappingConfiguration.equals("map") || mappingConfiguration.equals("filter"));
     }
 
     @Override

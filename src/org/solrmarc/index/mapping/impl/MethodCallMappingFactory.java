@@ -2,6 +2,8 @@ package org.solrmarc.index.mapping.impl;
 
 
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.solrmarc.index.extractor.methodcall.AbstractMappingMethodCall;
 import org.solrmarc.index.extractor.methodcall.MethodCallContext;
@@ -15,6 +17,9 @@ import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 public class MethodCallMappingFactory extends AbstractValueMappingFactory
 {
     protected final MethodCallManager methodCallManager;
+
+    private final static Pattern mapShortcut1 = Pattern.compile("(map|filter)[A-Za-z0-9]+");
+    private final static Pattern mapShortcut2 = Pattern.compile("(([a-z]+[.])*[A-Z][A-Za-z0-9_]*)::((map|filter)[A-Za-z0-9]+)");
 
     public MethodCallMappingFactory()
     {
@@ -44,7 +49,9 @@ public class MethodCallMappingFactory extends AbstractValueMappingFactory
     @Override
     public boolean canHandle(String mappingConfiguration)
     {
-        return (mappingConfiguration.startsWith("custom_map"));
+        return (mappingConfiguration.startsWith("custom_map") || 
+                mapShortcut1.matcher(mappingConfiguration).matches() ||
+                mapShortcut2.matcher(mappingConfiguration).matches());
     }
 
     private AbstractMultiValueMapping createMultiValueMapping(MethodCallContext context)
@@ -75,8 +82,30 @@ public class MethodCallMappingFactory extends AbstractValueMappingFactory
     @Override
     public AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
     {
-        MethodCallContext context = MethodCallContext.parseContextFromMapParts(mapParts);
+        MethodCallContext context;
+        Matcher shortcut1 = mapShortcut1.matcher(mapParts[0]);
+        Matcher shortcut2 = mapShortcut2.matcher(mapParts[0]);
+        if (shortcut1.matches())
+        {
+            String[] extraParts = new String[mapParts.length+2];
+            extraParts[0] = "custom_map";
+            extraParts[1] = null;
+            System.arraycopy(mapParts, 0, extraParts, 2, mapParts.length);
+            context = MethodCallContext.parseContextFromMapParts(extraParts);
+        }
+        else if (shortcut2.matches())
+        {
+            String[] extraParts = new String[mapParts.length+2];
+            extraParts[0] = "custom_map";
+            extraParts[1] = shortcut2.group(1);
+            extraParts[2] = shortcut2.group(3);
+            System.arraycopy(mapParts, 1, extraParts, 3, mapParts.length-1);
+            context = MethodCallContext.parseContextFromMapParts(extraParts);
+        }
+        else
+        {
+            context = MethodCallContext.parseContextFromMapParts(mapParts);
+        }
         return createMultiValueMapping(context);
     }
-
 }

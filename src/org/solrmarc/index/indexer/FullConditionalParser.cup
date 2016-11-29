@@ -2,6 +2,8 @@ package org.solrmarc.index.indexer;
 
 import java_cup.runtime.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -92,7 +94,7 @@ parser code {:
 
     private AbstractValueExtractor<?> createCustomExtractor(String type, String classOrScriptName, List<String> methodPlusParams)
     {
-        String[] specParts =new String[methodPlusParams.size()+2];
+        String[] specParts = new String[methodPlusParams.size()+2];
         specParts[0] = type;
         specParts[1] = classOrScriptName;
         System.arraycopy(methodPlusParams.toArray(new String[0]), 0, specParts, 2, methodPlusParams.size());
@@ -104,6 +106,29 @@ parser code {:
             }
         }
         throw new IndexerSpecException("No indexer factory found for: " + Utils.join(specParts, " "));
+    }
+    
+    private AbstractValueExtractor<?> createCustomExtractorShortcut(String type, String classNameDotMethodName, List<String> methodParams)
+    {
+        final Pattern mapShortcut = Pattern.compile("(([a-z]+[.])*[A-Z][A-Za-z0-9_]*)::((get|extract)[A-Za-z0-9]+)");
+        Matcher classAndMethodMatcher = mapShortcut.matcher(classNameDotMethodName);
+        if (classAndMethodMatcher.matches())
+        {
+            String[] specParts = new String[methodParams.size()+3];
+            specParts[0] = type;
+            specParts[1] = classAndMethodMatcher.group(1);
+            specParts[2] = classAndMethodMatcher.group(3);
+            System.arraycopy(methodParams.toArray(new String[0]), 0, specParts, 3, methodParams.size());
+            for (final AbstractValueExtractorFactory factory : ValueIndexerFactory.instance().getExtractorFactories())
+            {
+                if (factory.canHandle("CUP Parser", specParts[0]))
+                {
+                    return factory.createExtractor("CUP Parser", specParts);
+                }
+            }
+            throw new IndexerSpecException("No indexer factory found for: " + Utils.join(specParts, " "));
+        }
+        throw new IndexerSpecException("Shortcut form of classname.methodName doesn't match regex: " + classNameDotMethodName);
     }
 
     private AbstractMultiValueExtractor makeMultiValueExtractor(Object extractor)
@@ -180,7 +205,7 @@ parser code {:
 
 /* define how to connect to the scanner! */
 
-terminal String SCRIPT, CUSTOM, JAVA;
+terminal String SCRIPT, CUSTOM, JAVA, CUSTOMIDENTIFIER, EXTCUSTOMIDENTIFIER;
 terminal String FIELDNAME, FULLRECORD, DATE, IDENTIFIER, CUSTOM_MAP;
 terminal COMMA, COLON, LBRACE, RBRACE, QUESTION, AND, OR, NOT, LPAREN, RPAREN, EQU, NEQ, GT, LT, MATCH, CONTAINS;
 terminal String SUBFIELD, IND, FIELDSPEC, SUBFIELDSPEC, CTRLFIELDSPEC, POSITION, QUOTEDSTR, CHAR, NUMBER;
@@ -226,10 +251,12 @@ custom_extractor ::= CUSTOM:t LPAREN IDENTIFIER:m RPAREN opt_comma method_plus_p
                                                                             {: RESULT = createCustomExtractor(t, m, l); :}
                   |  SCRIPT:t LPAREN QUOTEDSTR:s RPAREN opt_comma method_plus_params:l
                                                                             {: RESULT = createCustomExtractor(t, s, l); :}
-                  |  CUSTOM:t COMMA method_plus_params:l
-                                                                            {: RESULT = createCustomExtractor(t, null, l); :}
-                  |  JAVA:t COMMA method_plus_params:l
-                                                                            {: RESULT = createCustomExtractor(t, null, l); :}
+                  |  CUSTOM:t opt_comma method_plus_params:l                {: RESULT = createCustomExtractor(t, null, l); :}
+                  |  JAVA:t opt_comma method_plus_params:l                  {: RESULT = createCustomExtractor(t, null, l); :}
+                  |  CUSTOMIDENTIFIER:s                                     {: RESULT = createCustomExtractor("custom", null, Collections.singletonList(s)); :}
+                  |  CUSTOMIDENTIFIER:s LPAREN params:l RPAREN              {: l.add(0, s); RESULT = createCustomExtractor("custom", null, l); :}
+                  |  EXTCUSTOMIDENTIFIER:s                                  {: RESULT = createCustomExtractorShortcut("custom", s,  Collections.EMPTY_LIST); :}
+                  |  EXTCUSTOMIDENTIFIER:s LPAREN params:l RPAREN           {: RESULT = createCustomExtractorShortcut("custom", s, l); :}
                   ;
 
 mapping_specs ::= mapping_specs:l COMMA mapping_spec:m               		{: RESULT = l; if (m != null) { l.add(m);} :}
@@ -238,12 +265,17 @@ mapping_specs ::= mapping_specs:l COMMA mapping_spec:m               		{: RESULT
 
 mapping_spec  ::= method_plus_params:l               						{: RESULT = l; :}
                | custom_map_spec:l                                          {: RESULT = l; :}
+               | LPAREN params:l RPAREN                                     {: RESULT = l; RESULT.add(0, "(this).properties"); :}
                ;
 
 custom_map_spec ::=  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 RPAREN
                                                                             {: RESULT = new ArrayList<String>(); RESULT.add(s); RESULT.add(s1); RESULT.add(s2); :}
                   |  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 LPAREN params:l RPAREN RPAREN
                                                                             {: RESULT = l; RESULT.add(0, s); RESULT.add(1, s1); RESULT.add(2, s2); :}
+                  |  CUSTOM_MAP:s LPAREN IDENTIFIER:s2 RPAREN
+                                                                            {: RESULT = new ArrayList<String>(); RESULT.add(s); RESULT.add(null); RESULT.add(s2); :}
+                  |  CUSTOM_MAP:s LPAREN IDENTIFIER:s2 LPAREN params:l RPAREN RPAREN
+                                                                            {: RESULT = l; RESULT.add(0, s); RESULT.add(1, null); RESULT.add(2, s2); :}
 				  | error                                                   {: FullConditionalParser.addError("Malformed custom_map reference : Should be \ncustom_map(fully.qualified.class.Name method)\n or  custom_map(fully.qualified.class.Name method(parm1, parm2))"); :}
 
                   ;
@@ -253,7 +285,6 @@ method_plus_params ::=  IDENTIFIER:s                                        {: R
                     |   IDENTIFIER:s LPAREN params:l RPAREN                 {: RESULT = l; RESULT.add(0, s); :}
                     |   QUOTEDSTR:s                                         {: RESULT = Collections.singletonList(s); :}
                     |   QUOTEDSTR:s LPAREN params:l RPAREN                  {: RESULT = l; RESULT.add(0, s); :}
-                    |   LPAREN params:l RPAREN                              {: RESULT = l; RESULT.add(0, "(this).properties"); :}
                     ;
 
 params   ::= params:l COMMA param:s                                         {: RESULT = l; l.add(s); :}

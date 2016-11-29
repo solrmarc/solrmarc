@@ -79,6 +79,8 @@ IntLiteral = 0 | [1-9][0-9]*
 new_line = \r|\n|\r\n
 white_space = {new_line} | [ \t\f]
 identifier = [A-Za-z0-9][A-Z_a-z0-9./\\]*[A-Za-z0-9]
+custom_identifier = (get|extract)[A-Za-z0-9][A-Z_a-z0-9./\\]*[A-Za-z0-9]
+ext_custom_identifier = [a-z][a-zA-Z_.]*::{custom_identifier}
 nonquotedstring = [^,() \\\"]+
 fullrecord = "xml"|"raw"|"json"|"json2"|"text"|"FullRecordAs"[A-Za-z0-9]*
 datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
@@ -100,6 +102,8 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 "java"                  { yybegin(CUSTOMSPEC);   return symbol("JAVA", FullSym.JAVA, yytext() ); }
 {fullrecord}            { yybegin(MAPSPEC);      return symbol("FULLRECORD", FullSym.FULLRECORD, yytext()); }
 {datespec}              { yybegin(MAPSPEC);      return symbol("DATE", FullSym.DATE, yytext()); }
+{custom_identifier}     { yybegin(CUSTOMPARAM);   return symbol("CUSTOMIDENTIFIER", FullSym.CUSTOMIDENTIFIER, yytext() ); }
+{ext_custom_identifier} { yybegin(CUSTOMPARAM);   return symbol("CUSTOMIDENTIFIER", FullSym.EXTCUSTOMIDENTIFIER, yytext() ); }
 \"                      { save_zzLexicalState = CONSTANT; string.setLength(0); yybegin(STRING); }
 }
 
