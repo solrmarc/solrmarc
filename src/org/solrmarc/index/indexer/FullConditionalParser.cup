@@ -107,7 +107,7 @@ parser code {:
         }
         throw new IndexerSpecException("No indexer factory found for: " + Utils.join(specParts, " "));
     }
-    
+
     private AbstractValueExtractor<?> createCustomExtractorShortcut(String type, String classNameDotMethodName, List<String> methodParams)
     {
         final Pattern mapShortcut = Pattern.compile("(([a-z]+[.])*[A-Z][A-Za-z0-9_]*)::((get|extract)[A-Za-z0-9]+)");
