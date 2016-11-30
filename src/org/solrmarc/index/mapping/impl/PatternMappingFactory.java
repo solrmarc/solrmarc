@@ -23,7 +23,7 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
     public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration)
     {
         int parenLoc = mappingConfiguration.indexOf("(");
-        return getMultiValuePattermMappingsFromString( mappingConfiguration.substring(0, parenLoc), 
+        return getMultiValuePattermMappingsFromString( mappingConfiguration.substring(0, parenLoc),
                                                         mappingConfiguration.substring(parenLoc + 1, mappingConfiguration.length() - 1));
     }
 
@@ -45,13 +45,13 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
         final String mapParts[] = mapSpec.split("[|][|]");
         return getMultiValuePattermMappingsFromStrings(mapType, mapParts, 0);
     }
-    
+
     public static MultiValuePatternMapping getMultiValuePattermMappingsFromStrings(String mapType, String[] mapParts, int offset)
     {
         List<PatternMapping> pm = new ArrayList<PatternMapping>(mapParts.length);
-        boolean filter = false;
-        boolean matchAll = false;
-        boolean keepRaw = false;
+        boolean filter = (mapType.equals("filter")) ? true : false;
+        boolean matchAll = filter ? true : false;
+        boolean keepRaw = filter ? true : false;
         for (int i = offset; i < mapParts.length; i++)
         {
             String mapEntry[] = mapParts[i].split("[ ]*=>[ ]*", 2);
@@ -88,7 +88,7 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
         }
         return new MultiValuePatternMapping(pm, filter, matchAll, keepRaw);
     }
-    
+
     public static MultiValuePatternMapping pattermMappingsFromPatternProperties(Properties props)
     {
         List<PatternMapping> pm = new ArrayList<PatternMapping>(props.size());
