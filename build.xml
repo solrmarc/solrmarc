@@ -31,7 +31,10 @@
     </target>
 
     <target name="precompile" unless="precompile.already.run"  description="run jflex and cup to generate javafiles for parser and scanner"
-        depends="-precompile-flex,-precompile-cup" />
+        depends="-precompile-cup,-precompile-flex" >
+        <depend srcDir="${src.dir}" destDir="${build.dir}" closure="true" />
+    	<property name="precompile.already.run" value="true" />
+    </target>
 
     <!-- start private targets to help with the precompile step -->
     <target name="-precompile-flex" unless="flex.uptodate"  depends="-precompile-flex-check" >
@@ -83,7 +86,7 @@
     <target name="compile" depends="init,precompile"  unless="compile.already.run"  description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
         <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${src.dir}" destdir="${build.dir}"
-               debug="true" debuglevel="lines,vars,source" updatedProperty="javac_compiled_some" encoding="UTF-8" >
+        	includeantruntime="false" debug="true" debuglevel="lines,vars,source" updatedProperty="javac_compiled_some" encoding="UTF-8" >
             <classpath >
                 <fileset dir="${lib.dir}">
                     <include name="**/*.jar"/>
@@ -125,7 +128,7 @@
         <!-- Compile the java code from ${src} into ${build} -->
         <mkdir dir="${test.build.dir}" />
         <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${test.src.dir}" destdir="${test.build.dir}"
-               debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
+        	includeantruntime="false" debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
             <classpath id="test.classpath">
                 <fileset dir="${dist.dir}">
                     <include name="${custom.jar.name}_${version}.jar"/>
@@ -209,22 +212,22 @@
     </target>
 
     <target name="-coverage-instrument-check" unless="already.instrumented" depends="-coverage-init" >
-    	<condition property="already.instrumented" >
-    		<and>
+        <condition property="already.instrumented" >
+            <and>
                 <uptodate>
                     <srcfiles dir="${basedir}" includes="build/**/*.class" >
                         <exclude name="**/callnum/CallNumber.class" />
                         <exclude name="**/custom/Mixin.class" />
                         <exclude name="**/extractor/AbstractValueExtractor.class" />
                         <exclude name="**/extractor/ExternalMethod.class" />
-                    	<exclude name="**/formatter/FieldFormatter.class" />
+                        <exclude name="**/formatter/FieldFormatter.class" />
                         <exclude name="**/mapping/AbstractValueMapping.class" />
                     </srcfiles>
                     <globmapper from="build/*" to="${instrumented.dir}/*" handledirsep="true"/>
                 </uptodate>
-    			<available file="${tmp.cobertura.datafile}" />
-    		</and>
-    	</condition>
+                <available file="${tmp.cobertura.datafile}" />
+            </and>
+        </condition>
         <echo message="already.instrumented=${already.instrumented}" />
     </target>
 
@@ -239,8 +242,8 @@
         <property name="already.instrumented" value="true" />
     </target>
 
-	<target name="-coverage-init2" unless="already.coverage.init2" >
-	    <copy file="${tmp.cobertura.datafile}" tofile="${cobertura.datafile}" />
+    <target name="-coverage-init2" unless="already.coverage.init2" >
+        <copy file="${tmp.cobertura.datafile}" tofile="${cobertura.datafile}" />
         <property name="already.coverage.init2" value="true" />
     </target>
 
