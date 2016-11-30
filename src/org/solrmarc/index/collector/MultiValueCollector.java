@@ -19,7 +19,7 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
     boolean isUnique = false;
     boolean deleteRecordIfEmpty = false;
     Comparator<String> sortComparator = null;
-    enum eFirstVal { ALL, FIRST, NOTFIRST };
+    public enum eFirstVal { ALL, FIRST, NOTFIRST };
     public static eFirstVal fromString(String str)
     {
         if (str.equals("first")) return(eFirstVal.FIRST);
