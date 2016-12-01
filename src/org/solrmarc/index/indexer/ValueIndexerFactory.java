@@ -297,7 +297,7 @@ public class ValueIndexerFactory
         }
         if (saveLine.length() > 0)
         {
-            lines.add(line);
+            lines.add(saveLine);
         }
         createValueIndexers(lines.toArray(new String[0]), valueIndexerMap);
         reader.close();
