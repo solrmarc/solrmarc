@@ -260,3 +260,8 @@ expect: *ordered*9781595585301|9781595588197
 record: u6909669.mrc
 indexSpec: oclc_pattern_map_test.properties(fund_code)
 expect: *ordered*UL-PROCESS|TUNSTALL-RBT-ER00604
+
+#50
+record: u233.mrc
+indexSpec: tht = 500a, toLower,  filter("f=>ff","english=>eggrish","[,.]=>")  
+expect: ffrench eggrish german and spanish
