@@ -122,28 +122,39 @@
 
     <target name="-version2" unless="versionsuffix" >
         <get src="https://api.github.com/repos/solrmarc/solrmarc/compare/v${versionstr}...master" dest="${reports.tests}/git.commits.txt" />
-        <loadfile srcfile="${reports.tests}/git.commits.txt" property="versionsuffix" >
+   <!--     <copy file="${reports.tests}/git.commits.txt" tofile="${reports.tests}/git.commits.out.txt" overwrite="true" >
             <filterchain>
                 <tokenfilter>
-                    <replacestring from="," to=",${line.separator}" />
+                    <replacestring from="," to=", ${line.separator}" />
                 </tokenfilter>
                 <linecontains>
                    <contains value="total_commits"/>
                 </linecontains>
+            </filterchain>
+        </copy> -->
+        <loadfile srcfile="${reports.tests}/git.commits.txt" property="versionsuffix" >
+            <filterchain>
                 <tokenfilter>
-                     <replaceregex pattern=".*&quot;total_commits&quot;: *([1-9][0-9]*).*" replace="-SNAPSHOT-\1" />
+                    <replacestring from="," to=", ${line.separator}" />
                 </tokenfilter>
+                <linecontains>
+                   <contains value="total_commits"/>
+                </linecontains>
                 <striplinebreaks/>
+                <tokenfilter>
+                     <replaceregex pattern=".*&quot;total_commits&quot;:[ ]*([1-9][0-9]*).*" replace="-SNAPSHOT-\1" />
+                </tokenfilter>
             </filterchain>
         </loadfile>
         <echo message="versionsuffix = ${versionsuffix}" />
         <property name="versionsuffix" value="" />
         <echo message="versionsuffix = ${versionsuffix}" />
-    	<property name="version" value="${versionstr}${versionsuffix}" />
-        <echo message="version = ${version}" />
     </target>
 
-	<target name="version" unless="version" depends="-version1,-version2" description="Get the version number to use from github"/>
+	<target name="version" unless="version" depends="-version1,-version2" description="Get the version number to use from github" >
+	    <property name="version" value="${versionstr}${versionsuffix}" />
+	    <echo message="version = ${version}" />   
+	</target>
 
 	<target name="jar" depends="compile,version" unless="jar.already.run" description="Build custom jar file containing custom code" >
         <mkdir dir="${dist.dir}" />
@@ -423,6 +434,7 @@
         <delete dir="${test.build.dir}"  failonerror="false" />
         <delete dir="${test.dir}/data/index_java/bin" failonerror="false"  />
         <delete dir="${reports.tests}"  failonerror="false" />
+    	<delete dir="${instrumented.dir}"  failonerror="false" />
         <delete file="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.java"  failonerror="false" />
         <delete file="${src.dir}/org/solrmarc/index/indexer/FullConditionalScanner.java"  failonerror="false" />
         <delete file="${src.dir}/org/solrmarc/index/indexer/FullSym.java"  failonerror="false" />
