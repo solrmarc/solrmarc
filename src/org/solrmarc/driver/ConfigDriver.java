@@ -1,6 +1,9 @@
 package org.solrmarc.driver;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,17 +26,54 @@ public class ConfigDriver extends BootableMain
         // extracted directly by the MarcReader configuration handler.  This is done by passing the same property file
         // to the MarcReader configurations handler, which will extract the fields it wants and ignore the rest.
         String homeDirStr = Boot.getDefaultHomeDir();
+        String configDirStr = null;
         File configFile = new File(configProps);
-        if (!configFile.isAbsolute())
+        boolean configEqHomeDir = false;
+        if (configFile.exists())
+        {
+            configDirStr = configFile.getAbsoluteFile().getParentFile().getAbsolutePath();
+            configEqHomeDir = configDirStr.equals(homeDirStr);
+        }
+        else if (!configFile.isAbsolute())
         {
             configFile = new File(homeDirStr, configProps);
+            configEqHomeDir = true;
         }
+        
         Properties configProperties = PropertyUtils.loadProperties(new String[0], configFile.getAbsolutePath());
 
-        String marcreaderProperties = configFile.getAbsolutePath();
+        String marcreaderProperties = configFile.getName();
         String solrHosturl = PropertyUtils.getProperty(configProperties, "solr.hosturl");
         String solrIndexerProperties = PropertyUtils.getProperty(configProperties, "solr.indexer.properties");
         String solrmarcPath = PropertyUtils.getProperty(configProperties, "solrmarc.path");
+        if (configDirStr != null)
+        {
+            File localDir = new File(".");
+            String localDirStr;
+            try {
+                localDirStr = localDir.getCanonicalPath();
+            }
+            catch (IOException ioe)
+            {
+                localDirStr = localDir.getAbsolutePath();
+            }
+            Path pathAbsolute = Paths.get(configDirStr);
+            Path pathBase = Paths.get(localDirStr);
+            Path pathRelative = pathBase.relativize(pathAbsolute);
+            String dirParm = pathRelative.toString(); 
+            if (pathRelative.toString().length() == 0 && !configEqHomeDir)
+            {
+                dirParm = ".";
+            }
+            if (solrmarcPath == null || solrmarcPath.length() == 0 || (solrmarcPath.equals(".") && !configEqHomeDir ))
+            {
+                solrmarcPath = dirParm;
+            }
+            else
+            {
+                solrmarcPath = solrmarcPath + ";" + dirParm;
+            }
+        }
 
         // get the value from the property file AND the value from the command line
         // If they are different, use those two values to replace the corename in the solr URL
@@ -46,9 +86,9 @@ public class ConfigDriver extends BootableMain
             solrHosturl = solrHosturl.replace(solrCore, systemSolrCore);
             logger.debug("New Solr URL is "+ solrHosturl);
         }
-        String dirArg[] = (solrmarcPath != null && !solrmarcPath.equals("."))
-                        ? new String[]{"-dir", solrmarcPath}
-                        : new String[0];
+        String dirArg[] = (solrmarcPath == null || solrmarcPath.length() == 0  || (solrmarcPath.equals(".") && configEqHomeDir ))
+                        ? new String[0]
+                        : new String[]{"-dir", solrmarcPath};
         if (solrIndexerProperties == null)
         {
             logger.error("The provided old-style SolrMarc config.properties file doesn't define the value \"solr.indexer.properties\"");
