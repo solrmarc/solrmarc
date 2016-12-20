@@ -85,7 +85,6 @@ public class IndexerWorker implements Runnable
                 catch (InterruptedException ie)
                 {
                     Thread.currentThread().interrupt();
-                    break;
                 }
             }
             catch (InterruptedException e)
