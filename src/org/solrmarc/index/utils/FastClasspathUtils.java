@@ -27,7 +27,7 @@ public class FastClasspathUtils
         extractors = new LinkedHashSet<>();
         mappers = new LinkedHashSet<>();
         mixins = new LinkedHashSet<>();
-        FastClasspathScanner scanner = new FastClasspathScanner("org")  
+        FastClasspathScanner scanner = new FastClasspathScanner("org", "de")
             .matchSubclassesOf(AbstractValueExtractorFactory.class, new SubclassMatchProcessor<AbstractValueExtractorFactory>() 
             {
                 @Override
