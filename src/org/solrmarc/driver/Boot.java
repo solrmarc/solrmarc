@@ -399,7 +399,6 @@ public class Boot
             File dirSolrJ = new File(homeDirStr, dir.getPath());
             if (dirSolrJ.exists())
             {
-//                logger.info("Using directory: "+ dirSolrJ.getAbsolutePath() + " as location of solrj jars");
                 return(dirSolrJ);
             }
         }
