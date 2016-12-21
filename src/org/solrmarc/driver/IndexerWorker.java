@@ -58,7 +58,7 @@ public class IndexerWorker implements Runnable
         {
             try
             {
-                AbstractMap.SimpleEntry<Integer, Record> pair = readQ.poll(10, TimeUnit.MILLISECONDS);
+                AbstractMap.SimpleEntry<Integer, Record> pair = readQ.take();
                 if (pair == null)  continue;
                 int count = pair.getKey();
                 Record record = pair.getValue();

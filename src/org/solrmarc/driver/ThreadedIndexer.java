@@ -152,12 +152,7 @@ public class ThreadedIndexer extends Indexer
                 (shuttingDown && docQ.size() > 0))
             {
                 final ArrayList<RecordAndDoc> chunk = new ArrayList<RecordAndDoc>(docQ.size());
-                synchronized (docQ)
-                {
-                    docQ.drainTo(chunk);
-                    docQ.notifyAll();
-                }
-                if (chunk.size() > 0)
+                if (docQ.drainTo(chunk) > 0)
                 {
                     RecordAndDoc firstDoc = chunk.get(0);
                     String threadName = null;
