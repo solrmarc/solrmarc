@@ -36,18 +36,12 @@ public class MarcReaderThread extends Thread
         {
             record = indexer.getRecord(reader);
             if (record == null) break;
-            while (readQ.offer(new AbstractMap.SimpleEntry<Integer, Record>(cnts[0].get(), record)) == false)
+            try {
+                readQ.put(new AbstractMap.SimpleEntry<Integer, Record>(cnts[0].get(), record));
+            }
+            catch (InterruptedException e)
             {
-                try
-                {
-                    // queue is full, wait until it drains sowewhat
-                    Thread.sleep(10);
-                }
-                catch (InterruptedException e)
-                {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+                Thread.currentThread().interrupt();
             }
         }
         if (Thread.currentThread().isInterrupted())
