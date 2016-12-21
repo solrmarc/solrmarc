@@ -101,7 +101,8 @@
         <property name="compile.already.run" value="true" />
     </target>
 
-    <target name="-version1" unless="versionstr" >
+    <target name="-version1" unless="version" >
+        <mkdir dir="${reports.tests}" />
         <get src="https://api.github.com/repos/solrmarc/solrmarc/releases/latest" dest="${reports.tests}/git.release.txt" />
         <loadfile srcfile="${reports.tests}/git.release.txt" property="versionstr" >
             <filterchain>
@@ -120,7 +121,7 @@
         <echo message="versionstr = ${versionstr}" />
     </target>
 
-    <target name="-version2" unless="versionsuffix" >
+    <target name="-version2" unless="version" >
         <get src="https://api.github.com/repos/solrmarc/solrmarc/compare/v${versionstr}...master" dest="${reports.tests}/git.commits.txt" />
    <!--     <copy file="${reports.tests}/git.commits.txt" tofile="${reports.tests}/git.commits.out.txt" overwrite="true" >
             <filterchain>
@@ -254,7 +255,6 @@
     </target>
 
     <target name="-coverage-init" unless="already.instrumented"  >
-        <property name="instrumented.dir" value="${test.dir}/instrument" />
         <property name="cobertura.datafile" value="${test.dir}/data/cobertura.ser" />
         <property name="tmp.cobertura.datafile" value="${instrumented.dir}/cobertura.ser" />
         <mkdir dir="${instrumented.dir}" />
