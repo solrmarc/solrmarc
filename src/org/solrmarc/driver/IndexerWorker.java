@@ -57,7 +57,7 @@ public class IndexerWorker implements Runnable
         {
             try
             {
-                RecordAndCnt recordAndCnt = readQ.poll(10, TimeUnit.MILLISECONDS);
+                RecordAndCnt recordAndCnt = readQ.take();
                 if (recordAndCnt == null)  continue;
                 int count = recordAndCnt.getCnt();
                 Record record = recordAndCnt.getRecord();
@@ -75,19 +75,13 @@ public class IndexerWorker implements Runnable
                 if (recDoc == null) continue;
 
                 if (isInterrupted())  break;
-                boolean offerWorked = docQ.offer(recDoc);
-                while (!offerWorked)
+                try {
+                    docQ.put(recDoc);
+                }
+                catch (InterruptedException ie)
                 {
-                    try {
-                        synchronized (docQ) { docQ.wait(); }
-
-                        offerWorked = docQ.offer(recDoc);
-                    }
-                    catch (InterruptedException ie)
-                    {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
             catch (InterruptedException e)
