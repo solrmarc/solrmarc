@@ -33,7 +33,7 @@
     <target name="precompile" unless="precompile.already.run"  description="run jflex and cup to generate javafiles for parser and scanner"
         depends="-precompile-cup,-precompile-flex" >
         <depend srcDir="${src.dir}" destDir="${build.dir}" closure="true" />
-    	<property name="precompile.already.run" value="true" />
+        <property name="precompile.already.run" value="true" />
     </target>
 
     <!-- start private targets to help with the precompile step -->
@@ -86,7 +86,7 @@
     <target name="compile" depends="init,precompile"  unless="compile.already.run"  description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
         <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${src.dir}" destdir="${build.dir}"
-        	includeantruntime="false" debug="true" debuglevel="lines,vars,source" updatedProperty="javac_compiled_some" encoding="UTF-8" >
+            includeantruntime="false" debug="true" debuglevel="lines,vars,source" updatedProperty="javac_compiled_some" encoding="UTF-8" >
             <classpath >
                 <fileset dir="${lib.dir}">
                     <include name="**/*.jar"/>
@@ -151,12 +151,12 @@
         <echo message="versionsuffix = ${versionsuffix}" />
     </target>
 
-	<target name="version" unless="version" depends="-version1,-version2" description="Get the version number to use from github" >
-	    <property name="version" value="${versionstr}${versionsuffix}" />
-	    <echo message="version = ${version}" />   
-	</target>
+    <target name="version" unless="version" depends="-version1,-version2" description="Get the version number to use from github" >
+        <property name="version" value="${versionstr}${versionsuffix}" />
+        <echo message="version = ${version}" />
+    </target>
 
-	<target name="jar" depends="compile,version" unless="jar.already.run" description="Build custom jar file containing custom code" >
+    <target name="jar" depends="compile,version" unless="jar.already.run" description="Build custom jar file containing custom code" >
         <mkdir dir="${dist.dir}" />
 
         <path id="libjarfiles" >
@@ -183,7 +183,7 @@
         <!-- Compile the java code from ${src} into ${build} -->
         <mkdir dir="${test.build.dir}" />
         <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${test.src.dir}" destdir="${test.build.dir}"
-        	includeantruntime="false" debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
+            includeantruntime="false" debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
             <classpath id="test.classpath">
                 <fileset dir="${dist.dir}">
                     <include name="${custom.jar.name}_${version}.jar"/>
@@ -434,7 +434,7 @@
         <delete dir="${test.build.dir}"  failonerror="false" />
         <delete dir="${test.dir}/data/index_java/bin" failonerror="false"  />
         <delete dir="${reports.tests}"  failonerror="false" />
-    	<delete dir="${instrumented.dir}"  failonerror="false" />
+        <delete dir="${instrumented.dir}"  failonerror="false" />
         <delete file="${src.dir}/org/solrmarc/index/indexer/FullConditionalParser.java"  failonerror="false" />
         <delete file="${src.dir}/org/solrmarc/index/indexer/FullConditionalScanner.java"  failonerror="false" />
         <delete file="${src.dir}/org/solrmarc/index/indexer/FullSym.java"  failonerror="false" />
