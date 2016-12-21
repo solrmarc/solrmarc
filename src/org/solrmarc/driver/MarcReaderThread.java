@@ -32,19 +32,12 @@ public class MarcReaderThread extends Thread
         {
             recordAndCnt = indexer.getRecord(reader);
             if (recordAndCnt == null) break;
-            while (readQ.offer(recordAndCnt) == false)
-            {
-                try
-                {
-                    // queue is full, wait until it drains sowewhat
-                    Thread.sleep(10);
-                }
-                catch (InterruptedException e)
-                {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+            try {
+                readQ.put(recordAndCnt);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
+
         }
         if (Thread.currentThread().isInterrupted())
         {
