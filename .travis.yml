@@ -1,2 +1,2 @@
 language: java
-script: ant -Dversion="3.1" test
+script: ant -Dversion="travis_CI" test
