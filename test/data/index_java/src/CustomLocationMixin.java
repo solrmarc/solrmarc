@@ -19,11 +19,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.marc4j.marc.DataField;
+import org.marc4j.marc.MarcFactory;
 import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
-import org.marc4j.marc.impl.DataFieldImpl;
-import org.marc4j.marc.impl.SubfieldImpl;
 import org.solrmarc.callnum.CallNumUtils;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.index.SolrIndexerMixin;
@@ -116,6 +115,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
     };
 
     static LocationExtraData locationExtraData = new LocationExtraData();
+    final static MarcFactory factory = MarcFactory.newInstance();
 
     Set<String> combinedFormat = null;
     String publicationDate = null;
@@ -144,7 +144,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
      *            - The MARC record that is being indexed.
      * @throws Exception
      */
-    public void perRecordInit(Record record) throws Exception
+    public void perRecordInit(Record record)
     {
         String fieldSpec = "999awi';'";
         if (!locationExtraData.isInited())
@@ -165,7 +165,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
         publicationDate = null;
     }
 
-    private List<?> getTrimmedHoldingsList(Record record, String holdingsTag) throws Exception
+    private List<?> getTrimmedHoldingsList(Record record, String holdingsTag)
     {
         List<?> result = record.getVariableFields(holdingsTag);
         addBoundWithHoldings(record, result);
@@ -183,17 +183,17 @@ public class CustomLocationMixin extends SolrIndexerMixin
         if (boundWithStr != null)
         {
             String holdingsParts[] = boundWithStr.split("\\|");
-            DataField df = new DataFieldImpl();
-            df.addSubfield(new SubfieldImpl('a', holdingsParts[7]));
-            df.addSubfield(new SubfieldImpl('w', holdingsParts[6]));
-            df.addSubfield(new SubfieldImpl('i', holdingsParts[1]));
+            DataField df = factory.newDataField();
+            df.addSubfield(factory.newSubfield('a', holdingsParts[7]));
+            df.addSubfield(factory.newSubfield('w', holdingsParts[6]));
+            df.addSubfield(factory.newSubfield('i', holdingsParts[1]));
             if (!holdingsParts[2].equals(holdingsParts[3]))
             {
-                df.addSubfield(new SubfieldImpl('k', holdingsParts[2]));
+                df.addSubfield(factory.newSubfield('k', holdingsParts[2]));
             }
-            df.addSubfield(new SubfieldImpl('l', holdingsParts[3]));
-            df.addSubfield(new SubfieldImpl('m', holdingsParts[4]));
-            df.addSubfield(new SubfieldImpl('t', holdingsParts[5]));
+            df.addSubfield(factory.newSubfield('l', holdingsParts[3]));
+            df.addSubfield(factory.newSubfield('m', holdingsParts[4]));
+            df.addSubfield(factory.newSubfield('t', holdingsParts[5]));
             df.setId(new Long(2));
             df.setTag("999");
             df.setIndicator1(' ');
@@ -227,7 +227,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
         }
     }
 
-    private void removeLostHoldings(List<?> fields999) throws Exception
+    private void removeLostHoldings(List<?> fields999)
     {
         // String mapName = loadTranslationMap(null, "shadowed_location_map.properties");
         AbstractMultiValueMapping locationMap = ValueIndexerFactory.instance().createMultiValueMapping("shadowed_location_map.properties");
@@ -240,17 +240,29 @@ public class CustomLocationMixin extends SolrIndexerMixin
             Subfield homeLocation = df.getSubfield('l');
             if (currentLocation != null)
             {
-                if (locationMap.mapSingle(currentLocation.getData()).equals("HIDDEN"))
+                try
                 {
-                    iter.remove();
-                    continue;
+                    if (locationMap.mapSingle(currentLocation.getData()).equals("HIDDEN"))
+                    {
+                        iter.remove();
+                        continue;
+                    }
+                }
+                catch (Exception e)
+                {
                 }
             }
             if (homeLocation != null)
             {
-                if (locationMap.mapSingle(homeLocation.getData()).equals("HIDDEN"))
+                try
                 {
-                    iter.remove();
+                    if (locationMap.mapSingle(homeLocation.getData()).equals("HIDDEN"))
+                    {
+                        iter.remove();
+                    }
+                }
+                catch (Exception e)
+                {
                 }
             }
 

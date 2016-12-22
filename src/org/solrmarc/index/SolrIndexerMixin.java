@@ -1,5 +1,6 @@
 package org.solrmarc.index;
 
+import org.marc4j.marc.Record;
 import org.solrmarc.index.extractor.impl.custom.Mixin;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
@@ -26,7 +27,7 @@ public class SolrIndexerMixin implements Mixin
         ValueIndexerFactory.instance().addPerRecordError(error);
     }
 
-    public void perRecordInit()
+    public void perRecordInit(Record record) throws Exception
     {
     }
 }

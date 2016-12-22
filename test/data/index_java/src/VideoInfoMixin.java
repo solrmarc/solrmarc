@@ -22,7 +22,6 @@ public class VideoInfoMixin extends SolrIndexerMixin
     
     public void perRecordInit(Record record)
     {
-        super.perRecordInit();
         isVideo = (record.getLeader().getTypeOfRecord() == 'g');
     }
     
