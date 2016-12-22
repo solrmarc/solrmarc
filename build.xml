@@ -327,6 +327,9 @@
                 <fileset dir="${lib.solrj.dir}">
                     <include name="*.jar"/>
                 </fileset>
+                <fileset dir="${test.dir}/data/lib_local">
+                    <include name="**/*.jar"/>
+                </fileset>
                 <pathelement location="${build}"/>
                 <pathelement location="${build.tests}"/>
                 <pathelement path="${java.class.path}"/>
