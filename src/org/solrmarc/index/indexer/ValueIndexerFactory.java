@@ -638,13 +638,9 @@ public class ValueIndexerFactory
             {
                 multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
             }
-            else if (mapParts[0].equals("toUpper"))
+            else if (mapParts[0].equals("toTitleCase"))
             {
-                multiValueExtractor.addCleanVal(eCleanVal.TO_UPPER);
-            }
-            else if (mapParts[0].equals("toLower"))
-            {
-                multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
+                multiValueExtractor.addCleanVal(eCleanVal.TO_TITLECASE);
             }
             else if (mapParts[0].equals("titleSortUpper"))
             {

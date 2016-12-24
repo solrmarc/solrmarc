@@ -22,7 +22,7 @@ public interface FieldFormatter extends ExternalMethod
 
     public enum eCleanVal
     {
-        CLEAN_END, CLEAN_EACH, STRIP_ALL_PUNCT, STRIP_ACCCENTS, TO_UPPER, TO_LOWER, STRIP_INDICATOR_2, UNTRIMMED;
+        CLEAN_END, CLEAN_EACH, STRIP_ALL_PUNCT, STRIP_ACCCENTS, TO_UPPER, TO_LOWER, STRIP_INDICATOR_2, UNTRIMMED, TO_TITLECASE;
     };
 
     public abstract String getFieldTagFmt();
@@ -32,8 +32,6 @@ public interface FieldFormatter extends ExternalMethod
     public abstract String getIndicatorFmt();
 
     public abstract FieldFormatter setIndicatorFmt(String indicatorFmt);
-
-    public abstract String getSfCodeFmt(char sfCode);
 
     public abstract FieldFormatter setSfCodeFmt(String[] sfCodeFmt);
 
@@ -65,7 +63,7 @@ public interface FieldFormatter extends ExternalMethod
 
     public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data) throws Exception;
 
-    public abstract void addVal(StringBuilder sb, String data);
+    public abstract void addVal(StringBuilder sb, String sfcode, String data);
 
     public abstract void addSeparator(StringBuilder sb, int cnt);
 
@@ -79,5 +77,7 @@ public interface FieldFormatter extends ExternalMethod
 
     public abstract String handleSubFieldFormat(String sfCode, String mappedDataVal);
 
+    public abstract boolean hasFieldFormat();
 
+    public abstract String getFieldFormat();
 }

@@ -71,6 +71,10 @@ public class SingleDataFieldSpecification extends SingleSpecification
     {
         DataField df = (DataField) vf;
         StringBuilder sb = fmt.start();
+        if (fmt.hasFieldFormat())
+        {
+            sb.append(fmt.getFieldFormat());
+        } 
         fmt.addTag(sb, df);
         fmt.addIndicators(sb, df);
         int cnt = 0;
@@ -86,7 +90,7 @@ public class SingleDataFieldSpecification extends SingleSpecification
                 for (String val : prepped)
                 {
                     val = fmt.handleSubFieldFormat(codeStr, val);
-                    fmt.addVal(sb, val);
+                    fmt.addVal(sb, codeStr, val);
                     fmt.addAfterSubfield(sb, result);
                 }
                 cnt++;

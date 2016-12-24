@@ -51,7 +51,7 @@ public class SingleControlFieldSpecification extends SingleSpecification
         Collection<String> prepped = fmt.prepData(vf, false, data);
         for (String val : prepped)
         {
-            fmt.addVal(sb, val);
+            fmt.addVal(sb, null, val);
             fmt.addAfterSubfield(sb, result);
         }
         fmt.addAfterField(sb, result);

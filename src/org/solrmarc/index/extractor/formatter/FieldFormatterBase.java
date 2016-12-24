@@ -22,6 +22,7 @@ public class FieldFormatterBase implements FieldFormatter
 {
     String indicatorFmt = null;
     Map<String, String> sfCodeMap = null;
+    String fieldFormat = null;
     String separator = null;
     List<AbstractMultiValueMapping> maps = null;
 //    boolean unique = false;
@@ -123,20 +124,20 @@ public class FieldFormatterBase implements FieldFormatter
         return(this);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see playground.solrmarc.index.fieldmatch.FieldFormatter#getSfCodeFmt()
-     */
-    @Override
-    public String getSfCodeFmt(char sfCode)
-    {
-        if (sfCodeMap != null && sfCodeMap.containsKey(sfCode))
-        {
-            return(sfCodeMap.get(sfCode));
-        }
-        return(null);
-    }
+//    /*
+//     * (non-Javadoc)
+//     * 
+//     * @see playground.solrmarc.index.fieldmatch.FieldFormatter#getSfCodeFmt()
+//     */
+//    @Override
+//    public String getSfCodeFmt(char sfCode)
+//    {
+//        if (sfCodeMap != null && sfCodeMap.containsKey(sfCode))
+//        {
+//            return(sfCodeMap.get(sfCode));
+//        }
+//        return(null);
+//    }
 
     /*
      * (non-Javadoc)
@@ -152,9 +153,28 @@ public class FieldFormatterBase implements FieldFormatter
         for (String part : mapParts)
         {
             String[] pieces = part.split("=>", 2);
-            if (pieces.length == 2) sfCodeMap.put(pieces[0], pieces[1]);
+            if (pieces.length == 2 && pieces[0].length() == 1) 
+            {
+                sfCodeMap.put(pieces[0], pieces[1]);
+            }
+            else if (fieldFormat == null && !part.equals("format"))
+            {
+                fieldFormat = part;
+            }
         }
         return(this);
+    }
+
+    @Override
+    public String getFieldFormat()
+    {
+        return fieldFormat;
+    }
+
+    @Override
+    public boolean hasFieldFormat()
+    {
+        return (fieldFormat != null);
     }
 
     /*
@@ -170,7 +190,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#setSeparator(java.
      * lang.String)
@@ -184,7 +204,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see playground.solrmarc.index.fieldmatch.FieldFormatter#getCleanVal()
      */
     @Override
@@ -195,7 +215,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#setCleanVal(java.util
      * .EnumSet)
@@ -209,7 +229,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see playground.solrmarc.index.fieldmatch.FieldFormatter#addCleanVal(
      * playground.solrmarc.index.fieldmatch.FieldFormatterBase.eCleanVal)
      */
@@ -251,7 +271,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see playground.solrmarc.index.fieldmatch.FieldFormatter#start(java.lang.
      * StringBuilder)
      */
@@ -264,7 +284,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#addTag(org.marc4j.
      * marc.VariableField, java.lang.StringBuilder)
@@ -272,15 +292,28 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addTag(StringBuilder sb, VariableField df)
     {
-        if (fieldTagFmt != null)
+        if (fieldFormat != null && fieldFormat.contains("%tag"))
+        {
+            sbReplace(sb, "%tag", df.getTag());
+        }
+        else if (fieldTagFmt != null)
         {
             sb.append(fieldTagFmt.contains("%tag") ? fieldTagFmt.replaceAll("%tag", df.getTag()) : df.getTag());
         }
     }
 
+    private void sbReplace(StringBuilder sb, String pattern, String value)
+    {
+        int indexOf = sb.indexOf(pattern);
+        if (indexOf != -1)
+        {
+            sb.replace(indexOf, indexOf + pattern.length(), value);
+        }
+    }
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#addIndicators(org.
      * marc4j.marc.VariableField, java.lang.StringBuilder)
@@ -288,7 +321,12 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addIndicators(StringBuilder sb, VariableField df)
     {
-        if (indicatorFmt != null && df instanceof DataField)
+        if (fieldFormat != null && (fieldFormat.contains("%1") || fieldFormat.contains("%2")))
+        {
+            sbReplace(sb, "%1", ""+((DataField) df).getIndicator1());
+            sbReplace(sb, "%2", ""+((DataField) df).getIndicator2());
+        }
+        else if (indicatorFmt != null && df instanceof DataField)
         {
             String result = indicatorFmt.replaceAll("%1", "" + ((DataField) df).getIndicator1()).replaceAll("%2",
                     "" + ((DataField) df).getIndicator1());
@@ -298,7 +336,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#addCode(java.lang.
      * String, java.lang.StringBuilder)
@@ -319,7 +357,7 @@ public class FieldFormatterBase implements FieldFormatter
         Collection<String> mapped = cleaned;
         for (AbstractMultiValueMapping map : maps)
         {
-            mapped = map.map(mapped); 
+            mapped = map.map(mapped);
         }
         return(mapped);
     }
@@ -337,10 +375,10 @@ public class FieldFormatterBase implements FieldFormatter
     {
         try
         {
-            if (substringStart != -1) 
+            if (substringStart != -1)
             {
                 if (substringEnd != -1) return data.substring(substringStart, substringEnd);
-                else                    return data.substring(substringStart); 
+                else                    return data.substring(substringStart);
             }
             else
             {
@@ -373,7 +411,7 @@ public class FieldFormatterBase implements FieldFormatter
         String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? DataUtil.cleanData(trimmed) : trimmed;
         if (!cleanVal.contains(eCleanVal.STRIP_ACCCENTS) && !cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)
                 && !cleanVal.contains(eCleanVal.TO_LOWER) && !cleanVal.contains(eCleanVal.TO_UPPER)
-                && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_2))
+                && !cleanVal.contains(eCleanVal.TO_TITLECASE) && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_2))
         {
             return (str);
         }
@@ -409,25 +447,36 @@ public class FieldFormatterBase implements FieldFormatter
         {
             str = str.toUpperCase();
         }
+        else if (cleanVal.contains(eCleanVal.TO_TITLECASE))
+        {
+            str = DataUtil.toTitleCase(str);
+        }
         return str;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#addVal(java.lang.
      * String, java.lang.StringBuilder)
      */
     @Override
-    public void addVal(StringBuilder sb, String data)
+    public void addVal(StringBuilder sb, String sfcode, String data)
     {
-        sb.append(data);
+        if (fieldFormat != null && sfcode != null)
+        {
+            sbReplace(sb, "$"+sfcode, data);
+        }
+        else
+        {
+            sb.append(data);
+        }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#addSeparator(int,
      * java.lang.StringBuilder)
@@ -435,7 +484,11 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addSeparator(StringBuilder sb, int cnt)
     {
-        if (joinVal == eJoinVal.JOIN && getSeparator() != null)
+        if (fieldFormat != null)
+        {
+            // if formatting field ignore "separate"
+        }
+        else if (joinVal == eJoinVal.JOIN && getSeparator() != null)
         {
             if (cnt != 0) sb.append(getSeparator());
         }
@@ -443,7 +496,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#addAfterSubfield(java
      * .util.Collection, java.lang.StringBuilder)
@@ -451,7 +504,11 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addAfterSubfield(StringBuilder sb, Collection<String> result)
     {
-        if (joinVal == eJoinVal.SEPARATE)
+        if (fieldFormat != null)
+        {
+            // if formatting field ignore "separate"
+        }
+        else if (joinVal == eJoinVal.SEPARATE)
         {
             if (sb.length() == 0) return;
             final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? DataUtil.cleanData(sb.toString()) : sb.toString();
@@ -462,7 +519,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#addAfterField(java.
      * util.Collection, java.lang.StringBuilder)
@@ -470,7 +527,15 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addAfterField(StringBuilder sb, Collection<String> result)
     {
-        if (joinVal == eJoinVal.JOIN)
+        if (fieldFormat != null)
+        {
+            String fieldVal = sb.toString().replaceAll("\\$[a-z0-9]", "");
+            if (fieldVal.length() == 0) return;
+            final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? DataUtil.cleanData(fieldVal) : fieldVal;
+            if (field.length() > 0) result.add(field);
+            sb.setLength(0);
+        }
+        else if (joinVal == eJoinVal.JOIN)
         {
             if (sb.length() == 0) return;
             final String field = (this.getCleanVal().contains(eCleanVal.CLEAN_END)) ? DataUtil.cleanData(sb.toString()) : sb.toString();
