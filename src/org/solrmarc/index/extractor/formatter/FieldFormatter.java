@@ -42,9 +42,9 @@ public interface FieldFormatter extends ExternalMethod
     public abstract eJoinVal getJoinVal();
 
     public abstract FieldFormatter setJoinVal(eJoinVal joinVal);
-    
+
     public abstract FieldFormatter setSubstring(int offset, int endOffset);
- 
+
     public abstract EnumSet<eCleanVal> getCleanVal();
 
     public abstract FieldFormatter setCleanVal(EnumSet<eCleanVal> cleanVal);
