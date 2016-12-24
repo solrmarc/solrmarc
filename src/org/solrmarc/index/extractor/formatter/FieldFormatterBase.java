@@ -75,7 +75,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see playground.solrmarc.index.fieldmatch.FieldFormatter#getFieldTagFmt()
      */
     @Override
@@ -86,7 +86,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#setFieldTagFmt(java.
      * lang.String)
@@ -100,7 +100,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#getIndicatorFmt()
      */
@@ -112,7 +112,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#setIndicatorFmt(java.
      * lang.String)
@@ -126,7 +126,7 @@ public class FieldFormatterBase implements FieldFormatter
 
 //    /*
 //     * (non-Javadoc)
-//     * 
+//     *
 //     * @see playground.solrmarc.index.fieldmatch.FieldFormatter#getSfCodeFmt()
 //     */
 //    @Override
@@ -141,7 +141,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * playground.solrmarc.index.fieldmatch.FieldFormatter#setSfCodeFmt(java.
      * lang.String)
@@ -153,7 +153,7 @@ public class FieldFormatterBase implements FieldFormatter
         for (String part : mapParts)
         {
             String[] pieces = part.split("=>", 2);
-            if (pieces.length == 2 && pieces[0].length() == 1) 
+            if (pieces.length == 2 && pieces[0].length() == 1)
             {
                 sfCodeMap.put(pieces[0], pieces[1]);
             }
@@ -179,7 +179,7 @@ public class FieldFormatterBase implements FieldFormatter
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see playground.solrmarc.index.fieldmatch.FieldFormatter#getSeparator()
      */
     @Override
