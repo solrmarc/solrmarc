@@ -25,7 +25,7 @@ public class DataUtil
 
     /**
      * Cleans non-digits from a String
-     * 
+     *
      * @param date
      *            String to parse
      * @return Numeric part of date String (or null)
@@ -181,7 +181,7 @@ public class DataUtil
     /**
      * Call cleanData on an entire set of Strings has a side effect of deleting
      * entries that are identical when they are cleaned.
-     * 
+     *
      * @param values
      *            - the set to clean
      * @return Set<String> - the "same" set with all of its entries cleaned.
@@ -271,7 +271,7 @@ public class DataUtil
     /**
      * Remove the characters per the regular expression if they are at the end
      * of the string.
-     * 
+     *
      * @param origStr
      *            string to be cleaned
      * @param charsToReplaceRegEx
@@ -292,7 +292,7 @@ public class DataUtil
     /**
      * If there is a period at the end of the string, remove the period if it is
      * immediately preceded by the regular expression
-     * 
+     *
      * @param origStr
      *            the string to be cleaned
      * @param precedingCharsRegEx
@@ -343,26 +343,47 @@ public class DataUtil
 
         return result.trim();
     }
-    
+
     /**
-     * Change string to have initial Capital letters on all words and lower case 
+     * Change string to have initial Capital letters on all words and lower case
      * elsewhere.
      * @param s the string to change
-     * @return the Title Case Version Of The String
+     * @return The Title Case Version Of The String
      */
     public static String toTitleCase(String s)
     {
-        final String ACTIONABLE_DELIMITERS = " '-/"; // these cause the character following
-                                                      // to be capitalized
+        final String ACTIONABLE_DELIMITERS = " .-/"; // these cause the character following
+                                                     // to be capitalized
+        final String QUESTIONABLE_DELIMITERS = "'"; // these might cause the character following
+                                                    // to be capitalized
 
-        StringBuilder sb = new StringBuilder();
-        boolean capNext = true;
-
+        boolean hasNoLowerCase = true;
         for (char c : s.toCharArray())
         {
-            c = (capNext) ? Character.toUpperCase(c) : Character.toLowerCase(c);
-            sb.append(c);
-            capNext = (ACTIONABLE_DELIMITERS.indexOf((int) c) >= 0); // explicit cast not needed
+            if (Character.isLowerCase(c))  hasNoLowerCase = false;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        int countSinceActionable = 0;
+
+        char prevChar = ' ';
+        for (char c : s.toCharArray())
+        {
+            boolean cIsUpper = Character.isUpperCase(c);
+            boolean cIsLower = Character.isLowerCase(c);
+            boolean curActionable = (ACTIONABLE_DELIMITERS.indexOf(c) >= 0);
+            boolean prevActionable = (ACTIONABLE_DELIMITERS.indexOf(prevChar) >= 0);
+            boolean prevQuestionable = (QUESTIONABLE_DELIMITERS.indexOf(prevChar) >= 0);
+            boolean toUpper = false;
+            boolean toLower = false;
+            if (prevActionable && cIsLower)  toUpper = true;
+            else if (prevQuestionable && cIsLower && countSinceActionable <= 2) toUpper = true;
+            else if (hasNoLowerCase && cIsUpper && countSinceActionable >= 1) toLower = true;
+            countSinceActionable = (curActionable) ? 0 : countSinceActionable+1;
+
+            char newC = (toUpper) ? Character.toUpperCase(c) : (toLower) ? Character.toLowerCase(c) : c ;
+            sb.append(newC);
+            prevChar = c;
         }
         return sb.toString();
     }
