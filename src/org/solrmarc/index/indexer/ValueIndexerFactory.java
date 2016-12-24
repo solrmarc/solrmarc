@@ -543,7 +543,7 @@ public class ValueIndexerFactory
             str.equals("cleanEach") || str.equals("cleanEnd") || str.equals("clean") || str.equals("stripAccent") ||
             str.equals("stripPunct") || str.equals("stripInd2") || str.equals("toUpper") || str.equals("toLower") ||
             str.equals("toUpper") || str.equals("toLower") || str.equals("titleSortUpper") || str.equals("titleSortLower") ||
-            str.equals("untrimmed")) return (true);
+            str.equals("untrimmed") || str.equals("toTitleCase")) return (true);
         return (false);
     }
 
