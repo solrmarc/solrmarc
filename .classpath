@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="**/*.cup|**/*.lex" kind="src" path="src"/>
-	<classpathentry kind="src" path="test/src"/>
+	<classpathentry kind="src" output="test/build" path="test/src"/>
 	<classpathentry kind="lib" path="lib/bsh-2.0b5.jar"/>
 	<classpathentry kind="lib" path="lib/java-cup-11b-runtime.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
