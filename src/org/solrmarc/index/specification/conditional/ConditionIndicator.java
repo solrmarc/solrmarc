@@ -56,13 +56,13 @@ public class ConditionIndicator extends Condition
         final char indVal = (indicatorNum == 1) ? ((DataField) f).getIndicator1() : ((DataField) f).getIndicator2();
         switch (op) {
             case FullSym.EQU:
-                return (value.charAt(0) == indVal);
+                return (indVal == value.charAt(0));
             case FullSym.LT:
-                return (value.charAt(0) < indVal);
+                return (indVal < value.charAt(0));
             case FullSym.GT:
-                return (value.charAt(0) > indVal);
+                return (indVal > value.charAt(0));
             case FullSym.NEQ:
-                return (value.charAt(0) != indVal);
+                return (indVal != value.charAt(0));
             case FullSym.MATCH:
                 return (valuePattern.matcher("" + indVal).matches());
         }
