@@ -265,3 +265,13 @@ expect: *ordered*UL-PROCESS|TUNSTALL-RBT-ER00604
 record: u233.mrc
 indexSpec: tht = 500a, toLower,  filter("f=>ff","english=>eggrish","[,.]=>")  
 expect: ffrench eggrish german and spanish
+
+#51
+record: u399.mrc
+indexSpec: title_browse = 245ab?(ind2 > 0), stripInd2, clean
+expect: ship of death
+
+#52
+record: specTestRecs.mrc(u27)
+indexSpec: title_browse = 245ab?(ind2 > 0), stripInd2, clean
+expect:
