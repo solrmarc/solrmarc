@@ -275,3 +275,8 @@ expect: ship of death
 record: specTestRecs.mrc(u27)
 indexSpec: title_browse = 245ab?(ind2 > 0), stripInd2, clean
 expect:
+
+#53
+record: specTestRecs.mrc(testHebrew1)
+indexSpec: title_noc = custom, getAllAlphaExcept("245c:260b")
+expect: Optsyah poʼeṭit : 2 meshorerim /|Yerushalayim : 2006.
