@@ -399,7 +399,7 @@
         <echo message="multithread = ${multithreadworked}" />
     </target>
 
-    <target name="coverage" depends="jar,-coverage-instrument,-coverage-junit,-coverage-main"
+    <target name="coverage" depends="jar,test-compile,-coverage-instrument,-coverage-junit,-coverage-main"
             description="run tests to determine code coverage" >
         <mkdir dir="${reports.tests}/coverage" />
         <cobertura-report format="html" destdir="${reports.tests}/coverage" srcdir="${src.dir}" datafile="${cobertura.datafile}"/>
