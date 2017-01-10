@@ -1,7 +1,6 @@
 package org.solrmarc.driver;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.marc4j.marc.Record;
