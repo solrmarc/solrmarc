@@ -11,7 +11,7 @@ import org.solrmarc.index.extractor.impl.custom.Mixin;
 @SuppressWarnings("deprecation")
 public class SolrIndexer implements Mixin
 {
-    private static ThreadLocal<SolrIndexer[]> indexerCache = 
+    private static ThreadLocal<SolrIndexer[]> indexerCache =
             new ThreadLocal<SolrIndexer[]>()
             {
                 @Override
@@ -20,14 +20,14 @@ public class SolrIndexer implements Mixin
                     return new SolrIndexer[1];
                 }
             };
-            
-    private static SolrIndexer theDefaultBaseIndexer = null; 
-    private static SolrIndexer theDefaultIndexer = null; 
+
+    private static SolrIndexer theDefaultBaseIndexer = null;
+    private static SolrIndexer theDefaultIndexer = null;
 
     public static SolrIndexer instance()
     {
         SolrIndexer result = indexerCache.get()[0];
-        if (result == null) 
+        if (result == null)
         {
             result = theDefaultIndexer;
             if (result != null) indexerCache.get()[0] = result;
@@ -38,19 +38,19 @@ public class SolrIndexer implements Mixin
         }
         return(result);
     }
-    
-    public  SolrIndexer() 
-    { 
+
+    public  SolrIndexer()
+    {
         SolrIndexer[] perThreadCache = indexerCache.get();
-        if (perThreadCache[0] == null) 
+        if (perThreadCache[0] == null)
         {
             perThreadCache[0] = this;
         }
         if (theDefaultBaseIndexer == null) theDefaultBaseIndexer = this;
     }
-    
-    public  SolrIndexer(final String propertiesMapFile, final String[] propertyDirs) 
-    { 
+
+    public  SolrIndexer(final String propertiesMapFile, final String[] propertyDirs)
+    {
         SolrIndexer[] perThreadCache = indexerCache.get();
         perThreadCache[0] = this;
         if (theDefaultIndexer == null) theDefaultIndexer = this;
@@ -60,23 +60,23 @@ public class SolrIndexer implements Mixin
     {
         SolrIndexerShim.instance().getFieldListCollector(record, tagStr, mapStr, collector);
     }
-    
+
     public Set<String> getFieldList(Record record, String tagStr)
     {
         return SolrIndexerShim.instance().getFieldList(record, tagStr);
     }
-   
+
     public Set<String> getMappedFieldList(Record record, String tagStr, String mapStr)
     {
         return SolrIndexerShim.instance().getMappedFieldList(record, tagStr, mapStr);
     }
 
-    public List<String> getFieldListAsList(Record record, String tagStr) 
+    public List<String> getFieldListAsList(Record record, String tagStr)
     {
         return SolrIndexerShim.instance().getFieldListAsList(record, tagStr);
     }
 
-    public String getFirstFieldVal(Record record, String tagStr) 
+    public String getFirstFieldVal(Record record, String tagStr)
     {
         return SolrIndexerShim.instance().getFirstFieldVal(record, tagStr);
     }
@@ -89,46 +89,46 @@ public class SolrIndexer implements Mixin
     /**
      * Get the specified subfields from the specified MARC field, returned as a
      * set of strings to become lucene document field values
-     * 
+     *
      * @param record     the MARC record object
      * @param fldTag     the field name, e.g. 245
      * @param subfldsStr the string containing the desired subfields
-     * @param separator  the separator string to insert between subfield items (if null, a " " will be 
+     * @param separator  the separator string to insert between subfield items (if null, a " " will be
      *                   used)
-     * @param collector  an object to accumulate the data indicated by <code>fldTag</code> and 
+     * @param collector  an object to accumulate the data indicated by <code>fldTag</code> and
      *                   <code>subfldsStr</code>.
      */
-    public void getSubfieldDataCollector(Record record, String fldTag, String subfldsStr, 
+    public void getSubfieldDataCollector(Record record, String fldTag, String subfldsStr,
                                                 String separator, Collection<String> collector)
     {
         SolrIndexerShim.instance().getSubfieldDataCollector(record, fldTag, subfldsStr, separator, collector);
     }
 
     /**
-     * Get the specified substring of subfield values from the specified MARC 
+     * Get the specified substring of subfield values from the specified MARC
      * field, returned as  a set of strings to become lucene document field values
      * @param record - the marc record object
      * @param fldTag - the field name, e.g. 008
      * @param subfldStr - the string containing the desired subfields
      * @param beginIx - the beginning index of the substring of the subfield value
      * @param endIx - the ending index of the substring of the subfield value
-     * @param collector  an object to accumulate the data indicated by <code>fldTag</code> and 
+     * @param collector  an object to accumulate the data indicated by <code>fldTag</code> and
      *                   <code>subfldsStr</code>.
      */
-    public void getSubfieldDataCollector(Record record, String fldTag, String subfldStr, 
+    public void getSubfieldDataCollector(Record record, String fldTag, String subfldStr,
                        int beginIx, int endIx, Collection<String> collector)
     {
         SolrIndexerShim.instance().getSubfieldDataCollector(record, fldTag, subfldStr, beginIx, endIx, collector);
     }
-    
+
     /**
      * Get the specified subfields from the specified MARC field, returned as a
      * set of strings to become lucene document field values
-     * 
+     *
      * @param record     the marc record object
      * @param fldTag     the field name, e.g. 245
      * @param subfldsStr the string containing the desired subfields
-     * @param separator  the separator string to insert between subfield items 
+     * @param separator  the separator string to insert between subfield items
      *                   (if <code>null</code>, a " " will be used)
      * @return           a Set of String, where each string is the concatenated contents of all the
      *                   desired subfield values from a single instance of the <code>fldTag</code>
@@ -137,9 +137,9 @@ public class SolrIndexer implements Mixin
     {
         return SolrIndexerShim.instance().getSubfieldDataAsSet(record, fldTag, subfldsStr, separator);
     }
-    
+
     /**
-     * Get the specified substring of subfield values from the specified MARC 
+     * Get the specified substring of subfield values from the specified MARC
      * field, returned as  a set of strings to become lucene document field values
      * @param record    the marc record object
      * @param fldTag    the field name, e.g. 008
@@ -155,7 +155,7 @@ public class SolrIndexer implements Mixin
 
     /**
      * remove trailing punctuation (default trailing characters to be removed)
-     *    See org.solrmarc.tools.Utils.cleanData() for details on the 
+     *    See org.solrmarc.tools.Utils.cleanData() for details on the
      *     punctuation removal
      * @param record marc record object
      * @param fieldSpec - the field to have trailing punctuation removed
@@ -169,11 +169,11 @@ public class SolrIndexer implements Mixin
 
     /**
      * Stub more advanced version of getDate that looks in the 008 field as well as the 260c field
-     * this routine does some simple sanity checking to ensure that the date to return makes sense. 
+     * this routine does some simple sanity checking to ensure that the date to return makes sense.
      * @param record - the marc record object
      * @return 260c or 008[7-10] or 008[11-14], "cleaned" per org.solrmarc.tools.Utils.cleanDate()
      */
-    
+
     public String getPublicationDate(final Record record)
     {
         return SolrIndexerShim.instance().getPublicationDate(record);
@@ -193,7 +193,7 @@ public class SolrIndexer implements Mixin
      * extract all the subfields requested in requested marc fields. Each
      * instance of each marc field will be put in a separate result (but the
      * subfields will be concatenated into a single value for each marc field)
-     * 
+     *
      * @param record
      *            marc record object
      * @param fieldSpec -
@@ -208,12 +208,12 @@ public class SolrIndexer implements Mixin
     {
         return SolrIndexerShim.instance().getAllSubfields(record, fieldSpec, separator);
     }
-  
+
     /**
      * extract all the subfields requested in requested marc fields. Each
      * instance of each marc field will be put in a separate result (but the
      * subfields will be concatenated into a single value for each marc field)
-     * 
+     *
      * @param record
      *            marc record object
      * @param fieldSpec -
@@ -228,12 +228,32 @@ public class SolrIndexer implements Mixin
     {
         return SolrIndexerShim.instance().getAllAlphaSubfields(record, fieldSpec, firstAllJoin);
     }
-  
+
+    /**
+     * For each occurrence of a marc field in the fieldSpec list, extract the
+     * contents of all subfields except the ones specified, concatenate the
+     * subfield contents with a space separator and add the string to the result
+     * set.
+     *
+     * @param record -
+     *            the marc record
+     * @param fieldSpec -
+     *            the marc fields (e.g. 600:655) in which we will grab the
+     *            alphabetic subfield contents for the result set. The field may
+     *            not be a control field (must be 010 or greater)
+     * @return a set of strings, where each string is the concatenated values of
+     *         all the alphabetic subfields.
+     */
+    public Set<String> getAllAlphaExcept(final Record record, String fieldSpec)
+    {
+        return SolrIndexerShim.instance().getAllAlphaExcept(record, fieldSpec);
+    }
+
     /**
      * extract all the subfields requested in requested marc fields. Each
      * instance of each marc field will be put in a separate result (but the
      * subfields will be concatenated into a single value for each marc field)
-     * 
+     *
      * @param record
      *            marc record object
      * @param fieldSpec -
@@ -252,7 +272,7 @@ public class SolrIndexer implements Mixin
     /**
      * Loops through all datafields and creates a field for "all fields"
      * searching. Shameless stolen from Vufind Indexer Custom Code
-     * 
+     *
      * @param record
      *            marc record object
      * @param lowerBoundStr -
@@ -273,7 +293,7 @@ public class SolrIndexer implements Mixin
     /**
      * Loops through all datafields and creates a field for "all fields"
      * searching. Shameless stolen from Vufind Indexer Custom Code
-     * 
+     *
      * @param record
      *            marc record object
      * @param lowerBoundStr -
@@ -290,15 +310,15 @@ public class SolrIndexer implements Mixin
     {
         return SolrIndexerShim.instance().getAllSearchableFieldsAsSet(record, lowerBoundStr, upperBoundStr);
     }
-    
+
     /**
      * Get the title (245ab) from a record, without non-filing chars as
-     * specified in 245 2nd indicator, and lowercased. 
+     * specified in 245 2nd indicator, and lowercased.
      * @param record - the marc record object
      * @return 245a and 245b values concatenated, with trailing punct removed,
      *         and with non-filing characters omitted. Null returned if no
-     *         title can be found. 
-     * 
+     *         title can be found.
+     *
      * @see SolrIndexerShim#getTitle
      */
     public String getSortableTitle(Record record)
@@ -310,26 +330,26 @@ public class SolrIndexer implements Mixin
     {
         return SolrIndexerShim.instance().getFieldSetMatchingTagList(record, tagList);
     }
-    
+
     /**
-     * public interface callable from custom indexing scripts to 
+     * public interface callable from custom indexing scripts to
      * load the translation map into transMapMap
      * Simply implements a stub that calls the createMultiValueMapping method
-     * @param translationMapSpec the specification of a translation map - 
-     *   could be name of a _map.properties file, or some subset of entries in a 
+     * @param translationMapSpec the specification of a translation map -
+     *   could be name of a _map.properties file, or some subset of entries in a
      *   _map.properties file
      * @return the name of the translation map to be used in a subsequent call to FindMap
      */
-    public String loadTranslationMap(String translationMapSpec) 
+    public String loadTranslationMap(String translationMapSpec)
     {
         return SolrIndexerShim.instance().loadTranslationMap(translationMapSpec);
     }
-    
-    public String loadTranslationMap(String ignore, String translationMapSpec) 
+
+    public String loadTranslationMap(String ignore, String translationMapSpec)
     {
         return SolrIndexerShim.instance().loadTranslationMap(ignore, translationMapSpec);
     }
-    
+
     /**
      * Get the appropriate Map object from populated transMapMap
      * @param mapName the name of the translation map to find
@@ -344,7 +364,7 @@ public class SolrIndexer implements Mixin
     {
         return SolrIndexerShim.instance().remap(valuesToMap, translationMap, b);
     }
-    
+
     public String remap(String valueToMap, Object translationMap, boolean b) throws Exception
     {
         return SolrIndexerShim.instance().remap(valueToMap, translationMap, b);
