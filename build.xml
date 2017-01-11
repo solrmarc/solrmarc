@@ -287,12 +287,18 @@
     </target>
 
     <target name="-coverage-instrument" unless="already.instrumented" depends="-coverage-instrument-check" >
+        <pathconvert property="marcLib" >
+            <fileset dir="${lib.dir}" includes="marc4j-*.jar" />
+        </pathconvert>
+        <pathconvert property="javaCupLib" >
+            <fileset dir="${lib.dir}" includes="java-cup-*-runtime.jar" />
+        </pathconvert>
         <cobertura-instrument todir="${instrumented.dir}" datafile="${tmp.cobertura.datafile}" ignoreTrivial="true" >
             <ignore regex="org.apache.log4j.*|ch.qos.logback.*" />
             <fileset dir="${build.dir}">
                 <include name="**/*.class" />
             </fileset>
-            <auxClasspath path="${lib.dir}/marc4j-2.7.2.jar;${lib.dir}/java-cup-11b-runtime.jar" />
+            <auxClasspath path="${marcLib};${javaCupLib}" />
         </cobertura-instrument>
         <property name="already.instrumented" value="true" />
     </target>
