@@ -1,6 +1,7 @@
 package org.solrmarc.driver;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.marc4j.marc.Record;
@@ -56,7 +57,7 @@ public class IndexerWorker implements Runnable
         {
             try
             {
-                RecordAndCnt recordAndCnt = readQ.take();
+                RecordAndCnt recordAndCnt = readQ.poll(100, TimeUnit.MILLISECONDS);
                 if (recordAndCnt == null)  continue;
                 int count = recordAndCnt.getCnt();
                 Record record = recordAndCnt.getRecord();
