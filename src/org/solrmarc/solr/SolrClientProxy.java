@@ -121,10 +121,10 @@ public class SolrClientProxy extends SolrProxy
     }
 
     @Override
-    public void commit(boolean doOptimize) throws IOException
+    public void commit(boolean doOptimize)
     {
         try
-        {  
+        {
             if (doOptimize)
                 optimize.invoke(solrclient);
             else
@@ -145,7 +145,7 @@ public class SolrClientProxy extends SolrProxy
     }
 
     @Override
-    public void delete(String id) throws IOException
+    public void delete(String id)
     {
         try
         {
@@ -166,7 +166,7 @@ public class SolrClientProxy extends SolrProxy
     }
 
     @Override
-    public QueryResponse query(SolrQuery params) throws IOException
+    public QueryResponse query(SolrQuery params)
     {
         QueryResponse result = null;
         try

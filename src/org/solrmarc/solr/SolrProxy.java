@@ -38,13 +38,13 @@ public abstract class SolrProxy
      * @param id
      *            the unique identifier of the document to be deleted
      */
-    public abstract void delete(String id) throws IOException;
+    public abstract void delete(String id);
 
     /**
      * commit changes to the index
      */
-    public abstract void commit(boolean optimize) throws IOException;
+    public abstract void commit(boolean optimize);
 
-    public abstract QueryResponse query(SolrQuery params) throws IOException;
+    public abstract QueryResponse query(SolrQuery params);
 
 }

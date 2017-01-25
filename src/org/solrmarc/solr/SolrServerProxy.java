@@ -77,7 +77,7 @@ public class SolrServerProxy extends SolrProxy
         }
     }
 
-    public void commit(boolean optimize) throws IOException
+    public void commit(boolean optimize)
     {
         try
         {
@@ -90,9 +90,13 @@ public class SolrServerProxy extends SolrProxy
         {
             throw(new SolrRuntimeException("SolrserverException", e));
         }
+        catch (IOException e)
+        {
+            throw(new SolrRuntimeException("IOException", e));
+        }
     }
 
-    public void delete(String id) throws IOException
+    public void delete(String id)
     {
         try
         {
@@ -102,10 +106,14 @@ public class SolrServerProxy extends SolrProxy
         {
             throw(new SolrRuntimeException("SolrserverException", e));
         }
+        catch (IOException e)
+        {
+            throw(new SolrRuntimeException("IOException", e));
+        }
     }
 
     @Override
-    public QueryResponse query(SolrQuery params) throws IOException
+    public QueryResponse query(SolrQuery params)
     {
         try
         {
