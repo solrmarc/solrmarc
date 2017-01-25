@@ -472,7 +472,7 @@ public class Indexer
             {
                 solrProxy.delete(recCtrlNum);
             }
-            catch (IOException e)
+            catch (SolrRuntimeException e)
             {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -483,7 +483,7 @@ public class Indexer
             logger.info("Commiting updates to Solr");
             solrProxy.commit(false);
         }
-        catch (IOException e)
+        catch (SolrRuntimeException e)
         {
         }
     }
