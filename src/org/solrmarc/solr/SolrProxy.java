@@ -3,7 +3,9 @@ package org.solrmarc.solr;
 import java.io.IOException;
 import java.util.Collection;
 
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 
 public abstract class SolrProxy
@@ -25,7 +27,7 @@ public abstract class SolrProxy
      *            - map of field names and values to add to the document
      * @return a string representation of the document
      */
-    
+
     public abstract int addDoc(SolrInputDocument document);
 
     public abstract int addDocs(Collection<SolrInputDocument> docQ);
@@ -42,5 +44,7 @@ public abstract class SolrProxy
      * commit changes to the index
      */
     public abstract void commit(boolean optimize) throws IOException;
+
+    public abstract QueryResponse query(SolrQuery params) throws IOException;
 
 }

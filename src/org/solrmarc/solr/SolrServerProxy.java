@@ -3,8 +3,10 @@ package org.solrmarc.solr;
 import java.io.IOException;
 import java.util.Collection;
 
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -13,12 +15,12 @@ import org.apache.solr.common.util.NamedList;
 public class SolrServerProxy extends SolrProxy
 {
     final SolrServer solrserver;
-    
+
     public SolrServerProxy(SolrServer solrserver)
     {
         this.solrserver = solrserver;
     }
-    
+
     public SolrServerProxy(Object httpsolrserver)
     {
         this.solrserver = (SolrServer)httpsolrserver;
@@ -47,7 +49,7 @@ public class SolrServerProxy extends SolrProxy
             throw(new SolrRuntimeException("SolrserverException", e));
         }
     }
-    
+
     @Override
     public int addDocs(Collection<SolrInputDocument> docQ)
     {
@@ -78,7 +80,7 @@ public class SolrServerProxy extends SolrProxy
     public void commit(boolean optimize) throws IOException
     {
         try
-        {  
+        {
             if (optimize)
                 solrserver.optimize();
             else
@@ -95,6 +97,19 @@ public class SolrServerProxy extends SolrProxy
         try
         {
             solrserver.deleteById(id);
+        }
+        catch (SolrServerException e)
+        {
+            throw(new SolrRuntimeException("SolrserverException", e));
+        }
+    }
+
+    @Override
+    public QueryResponse query(SolrQuery params) throws IOException
+    {
+        try
+        {
+            return solrserver.query(params);
         }
         catch (SolrServerException e)
         {
