@@ -225,6 +225,23 @@ public class SolrIndexerShim
     }
 
     /**
+     * Get all field values specified by tagStr, joined as a single string.
+     * @param record - the marc record object
+     * @param tagStr string containing which field(s)/subfield(s) to use. This 
+     *  is a series of: marc "tag" string (3 chars identifying a marc field, 
+     *  e.g. 245) optionally followed by characters identifying which subfields 
+     *  to use.
+     * @param separator string separating values in the result string
+     * @return single string containing all values of the indicated marc
+     *         field(s)/subfield(s) concatenated with separator string
+     */
+    public String getFieldVals(Record record, String tagStr, String separator)
+    {
+        Set<String> result = getFieldList(record, tagStr);
+        return org.solrmarc.tools.Utils.join(result, separator);
+    }
+
+    /**
      * Get the first value specified by the tagStr
      * @param record - the marc record object
      * @param tagStr string containing which field(s)/subfield(s) to use. This

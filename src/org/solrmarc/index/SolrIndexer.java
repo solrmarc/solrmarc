@@ -76,6 +76,11 @@ public class SolrIndexer implements Mixin
         return SolrIndexerShim.instance().getFieldListAsList(record, tagStr);
     }
 
+    public String getFieldVals(Record record, String tagStr, String separator)
+    {
+        return SolrIndexerShim.instance().getFieldVals(record, tagStr, separator);
+    }
+
     public String getFirstFieldVal(Record record, String tagStr)
     {
         return SolrIndexerShim.instance().getFirstFieldVal(record, tagStr);

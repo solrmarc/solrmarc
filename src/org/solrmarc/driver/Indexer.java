@@ -357,8 +357,8 @@ public class Indexer
                 }
                 else if (wrapped != null && wrapped instanceof IllegalArgumentException)
                 {
-                    logger.debug("Exception in record: " + recDoc.rec.getControlNumber());
-                    logger.debug("while processing index specification: " + indexer.getSpecLabel());
+                    logger.warn("Exception in record: " + recDoc.rec.getControlNumber());
+                    logger.warn("while processing index specification: " + indexer.getSpecLabel());
                     if (wrapped != null)
                     {
                         logger.debug(wrapped);
@@ -384,16 +384,16 @@ public class Indexer
             }
             catch (IndexerSpecException e)
             {
-                logger.debug("Exception in record: " + recDoc.rec.getControlNumber());
-                logger.debug("while processing index specification: " + indexer.getSpecLabel());
+                logger.warn("Exception in record: " + recDoc.rec.getControlNumber());
+                logger.warn("while processing index specification: " + indexer.getSpecLabel());
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
                 errLvl = eErrorSeverity.max(errLvl, e.getErrLvl());
                 recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
             }
             catch (Exception e)
             {
-                logger.debug("Exception in record: " + recDoc.rec.getControlNumber());
-                logger.debug("while processing index specification: " + indexer.getSpecLabel());
+                logger.warn("Exception in record: " + recDoc.rec.getControlNumber());
+                logger.warn("while processing index specification: " + indexer.getSpecLabel());
                 inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
                 errLvl = eErrorSeverity.ERROR;
                 recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
