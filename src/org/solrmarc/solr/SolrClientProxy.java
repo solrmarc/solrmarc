@@ -10,6 +10,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 
 public class SolrClientProxy extends SolrProxy
@@ -32,7 +33,7 @@ public class SolrClientProxy extends SolrProxy
             this.commit = getMethod(solrclient, "commit");
             this.optimize = getMethod(solrclient, "optimize");
             this.delete = getMethod(solrclient, "deleteById", String.class);
-            this.query = getMethod(solrclient, "query", SolrQuery.class);
+            this.query = getMethod(solrclient, "query", SolrParams.class);
         }
         catch (NoSuchMethodException | SecurityException e)
         {
