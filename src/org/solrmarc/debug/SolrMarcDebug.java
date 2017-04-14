@@ -31,12 +31,14 @@ import javax.swing.text.StyleConstants;
 
 import org.marc4j.MarcError;
 import org.marc4j.MarcReader;
+import org.marc4j.MarcReaderConfig;
+import org.marc4j.MarcReaderFactory;
 import org.marc4j.marc.Record;
 import org.solrmarc.driver.BootableMain;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
-import org.solrmarc.marc.MarcReaderFactory;
+//import org.solrmarc.marc.MarcReaderFactory;
 import org.solrmarc.tools.PropertyUtils;
 
 import java.awt.event.ActionListener;
@@ -76,6 +78,7 @@ public class SolrMarcDebug extends BootableMain
     String previousConfigText = "";
     List<AbstractValueIndexer<?>> indexers = null;
     Properties readerProps = new Properties();
+    MarcReaderConfig readerConfig;
     static int[] fontSizeArray = { 8, 10, 12, 14, 18, 22, 28, 36, 42 };
     /**
      * Launch the application.
@@ -131,6 +134,13 @@ public class SolrMarcDebug extends BootableMain
         {
             // TODO Auto-generated catch block
             e2.printStackTrace();
+        }
+        try {
+            readerConfig = new MarcReaderConfig(readerProps);
+        }
+        catch (NoClassDefFoundError cnf)
+        {
+            readerConfig = null;
         }
 
         recordMap = new LinkedHashMap<String, Record>();
@@ -468,7 +478,8 @@ public class SolrMarcDebug extends BootableMain
         String firstId = null;
         try
         {
-            reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), new FileInputStream(marcFile));
+            reader = MarcReaderFactory.makeReader(readerConfig, new FileInputStream(marcFile));
+
             while (reader.hasNext())
             {
                 Record record = reader.next();
@@ -486,7 +497,7 @@ public class SolrMarcDebug extends BootableMain
             }
             if (pointToFirst) marcIdentifier.setSelectedItem(firstId);
         }
-        catch (FileNotFoundException e1)
+        catch (IOException e1)
         {
             // TODO Auto-generated catch block
             e1.printStackTrace();

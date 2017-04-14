@@ -14,6 +14,8 @@ import org.marc4j.MarcError;
 import org.marc4j.MarcException;
 import org.marc4j.MarcJsonWriter;
 import org.marc4j.MarcReader;
+import org.marc4j.MarcReaderConfig;
+import org.marc4j.MarcReaderFactory;
 import org.marc4j.MarcStreamWriter;
 import org.marc4j.MarcWriter;
 import org.marc4j.MarcXmlWriter;
@@ -21,7 +23,7 @@ import org.marc4j.converter.impl.UnicodeToAnsel;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
-import org.solrmarc.marc.MarcReaderFactory;
+//import org.solrmarc.marc.MarcReaderFactory;
 import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.tools.PropertyUtils;
 
@@ -31,7 +33,8 @@ public class RecordFixer extends BootableMain
     public final static Logger logger = Logger.getLogger(IndexDriver.class);
 
     Properties readerProps;
-
+    MarcReaderConfig readerConfig;
+    
     List<AbstractValueIndexer<?>> indexers;
     Indexer indexer;
     MarcReader reader;
@@ -95,11 +98,18 @@ public class RecordFixer extends BootableMain
         {
             readerProps.load(PropertyUtils.getPropertyFileInputStream(propertyFileURLStr));
         }
+        readerConfig = new MarcReaderConfig(readerProps);
     }
 
     public void configureReader(List<String> inputFilenames)
     {
-        reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), inputFilenames);
+        try {
+            reader = MarcReaderFactory.makeReader(readerConfig, ValueIndexerFactory.instance().getHomeDirs(), inputFilenames);
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
     }
 
     public void configureOutput(String mode)

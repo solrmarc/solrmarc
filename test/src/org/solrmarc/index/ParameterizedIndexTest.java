@@ -26,11 +26,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.marc4j.MarcReader;
+import org.marc4j.MarcReaderConfig;
+import org.marc4j.MarcReaderFactory;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.MultiValueIndexer;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
-import org.solrmarc.marc.MarcReaderFactory;
 import org.solrmarc.tools.PropertyUtils;
 
 @RunWith(Parameterized.class)
@@ -76,8 +77,9 @@ public class ParameterizedIndexTest
         boolean ordered = false;
 
         Properties readerProps = setReaderProperties(factory, config);
-
-        Record record = getRecord(factory, readerProps, recordFilename);
+        MarcReaderConfig readerConfig = new MarcReaderConfig(readerProps);
+        
+        Record record = getRecord(factory, readerConfig, recordFilename);
 
         Collection<MultiValueIndexer> indexers = createIndexer(factory, indexSpec);
 
@@ -214,7 +216,7 @@ public class ParameterizedIndexTest
         return readerProps;
     }
 
-    private Record getRecord(ValueIndexerFactory factory, Properties readerProps, String recordFilename)
+    private Record getRecord(ValueIndexerFactory factory, MarcReaderConfig readerConfig, String recordFilename)
     {
         String recordToLookAt = null;  // null means just get the first record from the named file
         if (recordFilename.matches("[^(]*[(][^)]*[)]"))
@@ -224,7 +226,15 @@ public class ParameterizedIndexTest
             recordToLookAt = recParts[1];
         }
         String fullPath = dataDirectory + File.separator + "records" + File.separator + recordFilename;
-        MarcReader reader = MarcReaderFactory.instance().makeReader(readerProps, factory.getHomeDirs(), fullPath);
+        MarcReader reader;
+        try
+        {
+            reader = MarcReaderFactory.makeReader(readerConfig, factory.getHomeDirs(), fullPath);
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException("Fatal error: Exception opening InputStream" + fullPath);
+        }
 
         Record record = null;
         while (reader.hasNext())
