@@ -32,6 +32,7 @@ public class MarcReaderThread extends Thread
         {
             recordAndCnt = indexer.getRecord(reader);
             if (recordAndCnt == null) break;
+            logger.debug("record read : " + recordAndCnt.getRecord().getControlNumber());
             try {
                 readQ.put(recordAndCnt);
             } catch (InterruptedException e) {
