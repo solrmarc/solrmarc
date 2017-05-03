@@ -109,6 +109,7 @@ public class Indexer
         {
             RecordAndCnt recordAndCnt = getRecord(reader);
             if (recordAndCnt == null) break;
+            logger.debug("record read : " + recordAndCnt.getRecord().getControlNumber());
 
             RecordAndDoc recDoc = null;
             try {
@@ -472,7 +473,7 @@ public class Indexer
             {
                 solrProxy.delete(recCtrlNum);
             }
-            catch (IOException e)
+            catch (SolrRuntimeException e)
             {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -483,7 +484,7 @@ public class Indexer
             logger.info("Commiting updates to Solr");
             solrProxy.commit(false);
         }
-        catch (IOException e)
+        catch (SolrRuntimeException e)
         {
         }
     }

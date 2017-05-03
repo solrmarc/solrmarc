@@ -71,7 +71,6 @@ public class ValueIndexerFactory
         if (theFactory != null && Arrays.equals(homeDirStrs, theFactory.homeDirStrs))
             return(theFactory);
 
-        initLogging(homeDirStrs);
         theFactory = new ValueIndexerFactory(homeDirStrs);
         try
         {
@@ -121,21 +120,6 @@ public class ValueIndexerFactory
         compileTool = new JavaValueExtractorUtils(dirsJavaSource);
         compileTool.compileSources();
     }
-
-    private static void initLogging(String[] homeDirs)
-    {
-        for (String dir : homeDirs)
-        {
-            File log4jProps = new File(dir, "log4j.properties");
-            if (log4jProps.exists())
-            {
-                LogManager.resetConfiguration();
-                PropertyConfigurator.configure(log4jProps.getAbsolutePath());
-                return;
-            }
-        }
-    }
-
 
     public Class<?>[] getCompiledClasses()
     {

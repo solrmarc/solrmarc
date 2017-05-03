@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 
 public class StdOutProxy extends SolrProxy
@@ -51,22 +52,21 @@ public class StdOutProxy extends SolrProxy
         return(num);
     }
 
-    public SolrServer getSolrServer()
-    {
-        return(null);
-    }
-
+    @Override
     public void commit(boolean optimize)
     {
         output.flush();
     }
 
+    @Override
     public void delete(String id)
     {
     }
 
-    public void deleteAllDocs()
+    @Override
+    public QueryResponse query(SolrQuery params)
     {
+        return null;
     }
 
 }

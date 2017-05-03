@@ -18,12 +18,15 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.marc4j.MarcReader;
+import org.marc4j.MarcReaderConfig;
+import org.marc4j.MarcReaderFactory;
 import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
-import org.solrmarc.marc.MarcReaderFactory;
+import org.solrmarc.marc.SolrMarcMarcReaderFactory;
+//import org.solrmarc.marc.MarcReaderFactory;
 import org.solrmarc.solr.DevNullProxy;
 import org.solrmarc.solr.SolrCoreLoader;
 import org.solrmarc.solr.SolrProxy;
@@ -44,6 +47,7 @@ public class IndexDriver extends BootableMain
     private final static Logger logger = Logger.getLogger(IndexDriver.class);
 
     private Properties readerProps;
+    private MarcReaderConfig readerConfig;
     private ValueIndexerFactory indexerFactory = null;
 
     private List<AbstractValueIndexer<?>> indexers;
@@ -208,12 +212,32 @@ public class IndexDriver extends BootableMain
                     System.setProperty(propertyName, readerProps.getProperty(propertyName));
                 }
             }
+            try {
+                readerConfig = new MarcReaderConfig(readerProps);
+            }
+            catch(NoClassDefFoundError ncdfe)
+            {
+                readerConfig = null;
+            }
         }
     }
 
     private void configureReader(List<String> inputFilenames)
     {
-        reader = MarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), inputFilenames);
+        try
+        {
+            reader = MarcReaderFactory.makeReader((MarcReaderConfig)readerConfig, ValueIndexerFactory.instance().getHomeDirs(), inputFilenames);
+        }
+        catch (IOException e)
+        {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+        catch(NoClassDefFoundError ncdfe)
+        {
+            logger.warn("Using SolrMarc with a marc4j version < 2.8 uses deprecated code in SolrMarc");
+            reader = SolrMarcMarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), inputFilenames);
+        }
+       // reader = MarcReaderFactory.makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), inputFilenames);
     }
 
     private void configureIndexer(String indexSpecifications, boolean multiThreaded)
@@ -278,7 +302,8 @@ public class IndexDriver extends BootableMain
         String inEclipseStr = System.getProperty("runInEclipse");
         boolean inEclipse = "true".equalsIgnoreCase(inEclipseStr);
         String systemClassPath = System.getProperty("java.class.path");
-        if (!systemClassPath.contains("solrmarc_core_"))
+        logger.debug("System Class Path = " + systemClassPath);
+        if (!systemClassPath.contains("solrmarc_core"))
             inEclipse = true;
 
         shutdownSimulator = new ShutdownSimulator(inEclipse);

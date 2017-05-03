@@ -12,7 +12,7 @@ import org.marc4j.*;
 import org.solrmarc.marc.MarcUnprettyXmlReader;
 import org.solrmarc.tools.PropertyUtils;
 
-public class MarcReaderFactory {
+public class SolrMarcMarcReaderFactory {
 
 	protected boolean verbose = false;
 
@@ -29,15 +29,15 @@ public class MarcReaderFactory {
 	protected String unicodeNormalize = null;
 
     // Initialize logging category
-    static Logger logger = Logger.getLogger(MarcReaderFactory.class.getName());
+    static Logger logger = Logger.getLogger(SolrMarcMarcReaderFactory.class.getName());
 
-	private MarcReaderFactory()
+	private SolrMarcMarcReaderFactory()
 	{
 	}
 
-	static MarcReaderFactory theFactory = new MarcReaderFactory();
+	static SolrMarcMarcReaderFactory theFactory = new SolrMarcMarcReaderFactory();
 
-	public static MarcReaderFactory instance()
+	public static SolrMarcMarcReaderFactory instance()
 	{
 	    return(theFactory);
 	}
@@ -155,7 +155,8 @@ public class MarcReaderFactory {
         inputTypeXML = false;
         inputTypeBinary = false;
         inputTypeJSON = false;
-        if (filestart.substring(0,  5).equalsIgnoreCase("<?xml"))            inputTypeXML = true;
+        if (numRead == -1 || filestart.length() == 0)                        inputTypeBinary = true;
+        else if (filestart.substring(0,  5).equalsIgnoreCase("<?xml"))       inputTypeXML = true;
         else if (filestart.startsWith("{"))                                  inputTypeJSON = true;
         else if (filestart.substring(0,  5).matches("\\d\\d\\d\\d\\d"))      inputTypeBinary = true;
         else if (filestart.contains("<?xml") || filestart.contains("<?XML")) inputTypeXML = true;

@@ -5,9 +5,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 
 public class SolrClientProxy extends SolrProxy
@@ -18,7 +21,8 @@ public class SolrClientProxy extends SolrProxy
     Method commit;
     Method optimize;
     Method delete;
-        
+    Method query;
+
     public SolrClientProxy(Object httpsolrclient)
     {
         this.solrclient = httpsolrclient;
@@ -29,6 +33,7 @@ public class SolrClientProxy extends SolrProxy
             this.commit = getMethod(solrclient, "commit");
             this.optimize = getMethod(solrclient, "optimize");
             this.delete = getMethod(solrclient, "deleteById", String.class);
+            this.query = getMethod(solrclient, "query", SolrParams.class);
         }
         catch (NoSuchMethodException | SecurityException e)
         {
@@ -71,14 +76,6 @@ public class SolrClientProxy extends SolrProxy
         {
             throw(new SolrRuntimeException("SolrserverException", e));
         }
-//        catch (SolrServerException e)
-//        {
-//            throw(new SolrRuntimeException("SolrserverException", e));
-//        }
-//        catch (IOException e)
-//        {
-//            throw(new SolrRuntimeException("SolrserverException", e));
-//        }
         catch (IllegalAccessException e)
         {
             throw(new SolrRuntimeException("SolrserverException", e));
@@ -92,7 +89,7 @@ public class SolrClientProxy extends SolrProxy
             throw(new SolrRuntimeException("SolrserverException", e));
         }
     }
-    
+
     @Override
     public int addDocs(Collection<SolrInputDocument> docQ)
     {
@@ -124,19 +121,16 @@ public class SolrClientProxy extends SolrProxy
         }
     }
 
-    public void commit(boolean doOptimize) throws IOException
+    @Override
+    public void commit(boolean doOptimize)
     {
         try
-        {  
+        {
             if (doOptimize)
                 optimize.invoke(solrclient);
             else
                 commit.invoke(solrclient);
         }
-//        catch (SolrServerException e)
-//        {
-//            throw(new SolrRuntimeException("SolrserverException", e));
-//        }
         catch (IllegalAccessException e)
         {
             throw(new SolrRuntimeException("SolrserverException", e));
@@ -151,16 +145,13 @@ public class SolrClientProxy extends SolrProxy
         }
     }
 
-    public void delete(String id) throws IOException
+    @Override
+    public void delete(String id)
     {
         try
         {
             delete.invoke(solrclient, id);
         }
-//        catch (SolrServerException e)
-//        {
-//            throw(new SolrRuntimeException("SolrserverException", e));
-//        }
         catch (IllegalAccessException e)
         {
             throw(new SolrRuntimeException("SolrserverException", e));
@@ -173,6 +164,21 @@ public class SolrClientProxy extends SolrProxy
         {
             throw(new SolrRuntimeException("SolrserverException", e));
         }
+    }
+
+    @Override
+    public QueryResponse query(SolrQuery params)
+    {
+        QueryResponse result = null;
+        try
+        {
+            result = (QueryResponse)query.invoke(solrclient, params);
+        }
+        catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+        {
+            throw(new SolrRuntimeException("SolrserverException", e));
+        }
+        return result;
     }
 
 }

@@ -409,22 +409,28 @@ public class Boot
     {
         for (String libdirname : addnlLibDirStrs)
         {
-            boolean found = false;
             File libDir = new File(libdirname);
             if (!libDir.isAbsolute())
             {
-                for (String homeDir : homeDirStrs)
+                logger.debug("Number of homeDirStrs: " + homeDirStrs.length);
+                logger.debug("homeDirStrs[0]: " + homeDirStrs[0]);
+                logger.debug("homeDirStrs[1]: " + homeDirStrs[1]);
+                for (int i = homeDirStrs.length - 1; i >= 0; i--)
                 {
+                    String homeDir = homeDirStrs[i];
+                    logger.debug("Checking for jars files in directory: " + homeDir + "/" + libdirname);
                     libDir = new File(homeDir, libdirname);
                     if (libDir.exists() && libDir.isDirectory() && libDir.listFiles().length > 0)
                     {
-                        found = true;
-                        break;
+                        logger.debug("Adding jars files in directory: " + libDir.getAbsolutePath());
+                        extendClasspathWithLibJarDir(libDir, null);
+                        extendClasspathWithDirOfClasses(libDir);
                     }
                 }
             }
-            if (found)
+            else if (libDir.exists() && libDir.isDirectory() && libDir.listFiles().length > 0)
             {
+                logger.debug("Adding jars files in directory: " + libDir.getAbsolutePath());
                 extendClasspathWithLibJarDir(libDir, null);
                 extendClasspathWithDirOfClasses(libDir);
             }

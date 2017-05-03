@@ -1,6 +1,9 @@
 package org.solrmarc.solr;
 
 import java.util.Collection;
+
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 
 public class DevNullProxy extends SolrProxy
@@ -8,13 +11,13 @@ public class DevNullProxy extends SolrProxy
     public DevNullProxy()
     {
     }
-    
+
     @Override
     public int addDoc(SolrInputDocument inputDoc)
     {
         return(1);
     }
-    
+
     @Override
     public int addDocs(Collection<SolrInputDocument> docQ)
     {
@@ -25,7 +28,7 @@ public class DevNullProxy extends SolrProxy
         }
         return(num);
     }
-    
+
     @Override
     public void commit(boolean optimize)
     {
@@ -34,5 +37,11 @@ public class DevNullProxy extends SolrProxy
     @Override
     public void delete(String id)
     {
+    }
+
+    @Override
+    public QueryResponse query(SolrQuery params)
+    {
+        return null;
     }
 }
