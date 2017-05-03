@@ -1,13 +1,14 @@
 package org.solrmarc.mixin;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.LinkedHashMap;
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ import org.solrmarc.tools.PropertyUtils;
 
 public class FileLookupMixin implements Mixin
 {
-    Map<String, Map<String, String>> textfileMaps = new LinkedHashMap<>();
+    static ConcurrentHashMap<String, Map<String, String>> textfileMaps = new ConcurrentHashMap<>();
 
     public String getFromFileBy001(Record record, String filename, String defaultValue)
     {
@@ -108,6 +109,7 @@ public class FileLookupMixin implements Mixin
         return(lookupMap);
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, String> loadTextFileIntoMap(String filename, String sepPattern)
     {
         Map<String, String> resultMap;
@@ -125,18 +127,18 @@ public class FileLookupMixin implements Mixin
                     resultMap.put(parts[0], parts[1]);
                 }
             }
-            textfileMaps.put(filename+sepPattern, resultMap);
+            textfileMaps.putIfAbsent(filename+sepPattern, Collections.unmodifiableMap(resultMap));
         }
         catch (FileNotFoundException e)
         {
-            textfileMaps.put(filename+sepPattern, null);
+            textfileMaps.putIfAbsent(filename+sepPattern, Collections.EMPTY_MAP);
             throw new IndexerSpecException("Unable to open lookup file " + filename);
         }
         catch (IOException e)
         {
-            textfileMaps.put(filename+sepPattern, null);
+            textfileMaps.putIfAbsent(filename+sepPattern, Collections.EMPTY_MAP);
             throw new IndexerSpecException("Unable to read lookup file " + filename);
         }
-        return(resultMap);
+        return(textfileMaps.get(filename+sepPattern));
     }
 }

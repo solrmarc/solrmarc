@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -59,7 +60,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
                 {
                     while ((line = addnlIdsReader.readLine()) != null)
                     {
-                        String linepts[] = line.split("\\|");
+                        String linepts[] = line.split("[|]");
                         if (linepts.length == 1)
                         {
                             addnlShadowedIds.put(linepts[0], "");
@@ -117,12 +118,11 @@ public class CustomLocationMixin extends SolrIndexerMixin
     static LocationExtraData locationExtraData = new LocationExtraData();
     final static MarcFactory factory = MarcFactory.newInstance();
 
-    Set<String> combinedFormat = null;
-    String publicationDate = null;
     Set<String> callNumberFieldList = null;
     Set<String> callNumberFieldListNo050 = null;
     Map<String, Set<String>> callNumberClusterMap = null;
     Map<String, Set<String>> callNumberClusterMapNo050 = null;
+    Set<String> callNumberLCFieldList = null;
 
     Comparator<String> normedComparator = new Comparator<String>()
     {
@@ -135,6 +135,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
     };
 
     String bestSingleCallNumber = null;
+    String bestSingleLCCallNumber = null;
     List<?> trimmedHoldingsList = null;
 
     /**
@@ -158,11 +159,23 @@ public class CustomLocationMixin extends SolrIndexerMixin
 
         callNumberFieldListNo050 = getCallNumberFieldSetNo050(record, trimmedHoldingsList);
         callNumberFieldList = getCallNumberFieldSet(record, callNumberFieldListNo050);
+        callNumberLCFieldList = getLCCallNumberFieldSet090(record, callNumberFieldListNo050);
         callNumberClusterMapNo050 = getCallNumbersCleanedConflated(callNumberFieldListNo050, true);
         callNumberClusterMap = getCallNumbersCleanedConflated(callNumberFieldList, true);
+        String valueArr[] = callNumberLCFieldList.toArray(new String[0]);
+        Comparator<String> comp = new StringNaturalCompare();
+        Arrays.sort(valueArr, comp);
+
         bestSingleCallNumber = getBestSingleCallNumber(callNumberClusterMap);
-        combinedFormat = null;
-        publicationDate = null;
+        bestSingleLCCallNumber = valueArr.length > 0 ? normalizeLCCallNumber(valueArr[0]) : null;
+        if (bestSingleCallNumber  != null && bestSingleCallNumber.equals(bestSingleLCCallNumber))
+        {
+            fieldSpec = "999awol";
+            if (valueArr.length == 0)
+            {
+                callNumberLCFieldList = getLCCallNumberFieldSet090(record, callNumberFieldListNo050);
+            }
+        }
     }
 
     private List<?> getTrimmedHoldingsList(Record record, String holdingsTag)
@@ -293,13 +306,19 @@ public class CustomLocationMixin extends SolrIndexerMixin
         }
         String[] bestSet = getBestCallNumberSubset(resultNormed);
         if (bestSet.length == 0) return (null);
-        String result = bestSet[0];
-        String resultParts[] = result.split(":", 2);
+        String result = normalizeLCCallNumber(bestSet[0]);
+        return (result);
+    }
+
+    private String normalizeLCCallNumber(String callNum)
+    {
+        String result = callNum;
+        String resultParts[] = callNum.split(":", 2);
         if (resultParts[0].equals("LC"))
         {
             result = resultParts[0] + ":" + resultParts[1].trim().replaceAll("[^A-Za-z0-9.]", " ").replaceAll("\\s\\s+", " ").replaceAll("\\s?\\.\\s?", ".");
         }
-        return (result);
+        return(result);
     }
 
     private String[] getBestCallNumberSubset(Map<String, Set<String>> resultNormed)
@@ -326,7 +345,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
             }
             String firstNum = values.iterator().next();
             String parts[] = firstNum.split(":", 2);
-            if (parts[0].equals("LC") || (parts[0].equals("") && CallNumUtils.isValidLC(parts[1])) && values.size() > maxLCEntries)
+            if ((parts[0].equals("LC") || parts[0].equals("")) && CallNumUtils.isValidLC(parts[1]) && values.size() > maxLCEntries)
             {
                 maxLCEntries = values.size();
                 // maxLCEntriesKey = key;
@@ -383,7 +402,8 @@ public class CustomLocationMixin extends SolrIndexerMixin
     }
 
     /**
-     * Since there are several routines that grab and process LC Call Numbers for a given record, this code is called once per record to gather the list of call numbers, rather than creating that list within each implementation of the custom indexing functions.
+     * Since there are several routines that grab and process LC Call Numbers for a given record, this code is called once 
+     * per record to gather the list of call numbers, rather than creating that list within each implementation of the custom indexing functions.
      * 
      * @param record
      *            - The MARC record that is being indexed.
@@ -410,7 +430,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
         // if there are no 999 fields with valid LC Call Numbers then look in the 050ab field
         if (!hasLCNumber)
         {
-            Set<String> fList2 = SolrIndexer.instance().getFieldList(record, "050ab");
+            List<String> fList2 = get050Entries(record);
             for (String field : fList2)
             {
                 if (CallNumUtils.isValidLC(field))
@@ -422,6 +442,75 @@ public class CustomLocationMixin extends SolrIndexerMixin
         return (fieldList);
     }
 
+    /**
+     * Since there are several routines that grab and process LC Call Numbers for a given record, this code is called once 
+     * per record to gather the list of call numbers, rather than creating that list within each implementation of the custom indexing functions.
+     * 
+     * @param record
+     *            - The MARC record that is being indexed.
+     */
+    private Set<String> getLCCallNumberFieldSet090(final Record record, Set<String> startingFieldList)
+    {
+        Set<String> fieldList = new LinkedHashSet<String>();
+        List<String> fList1 = SolrIndexer.instance().getFieldListAsList(record, "090ab");
+        if (fList1.size() == 0)
+        {
+            fList1 = get050Entries(record);
+//            SolrIndexer.instance().getFieldListAsList(record, "050a");
+//            List<String> fList2 = SolrIndexer.instance().getFieldListAsList(record, "050b");
+//            if (fList2.size() > 0)
+//            {
+//                String arr1[] = fList1.toArray(new String[0]);
+//                String arr2[] = fList2.toArray(new String[0]);
+//                arr1[0] = arr1[0] + arr2[0];
+//                fList1 = Arrays.asList(arr1);
+//            }
+        }
+        for (String field : fList1)
+        {
+            if (CallNumUtils.isValidLC(field))
+            {
+                fieldList.add("LC:" + field);
+            }
+        }
+        if (startingFieldList != null)
+        {
+            for (String field : startingFieldList)
+            {
+                String fieldParts[] = field.split(":", 2);
+                // dont add LC numbers that aren't valid according to the CallNumUtil routine
+                if ((fieldParts[0].equals("LC") || fieldParts[0].equals("")) && CallNumUtils.isValidLC(fieldParts[1]))
+                    fieldList.add(field);
+            }
+        }
+        return (fieldList);
+    }
+
+    private List<String> get050Entries(Record record)
+    {
+        List<VariableField> vfs = record.getVariableFields("050");
+        List<String> result = new ArrayList<String>();
+        for (VariableField vf : vfs)
+        {
+            DataField df = (DataField)vf;
+            Subfield sf[] = df.getSubfields("ab").toArray(new Subfield[0]);
+            for (int i = 0; i < sf.length; i++)
+            {
+                if (i == 0 && sf.length > 1 && sf[1].getCode() == 'b')
+                {
+                    String val = sf[i].getData() + sf[i+1].getData();
+                    result.add(val);
+                    i++;
+                }
+                else 
+                {
+                    String val = sf[i].getData();
+                    result.add(val);
+                }
+            }
+        }
+        return(result);
+    }
     /**
      * Extract a set of cleaned call numbers from a record
      * 
@@ -567,8 +656,10 @@ public class CustomLocationMixin extends SolrIndexerMixin
         String result = bestSingleCallNumber;
         if (result == null) return (result);
         String resultParts[] = result.split(":", 2);
-        if (sortableFlag && (resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1])))) result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber());
-        else if (resultParts[1].startsWith("M@")) result = result.replaceAll("M@", "MSS ");
+        if (sortableFlag && (resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1])))) 
+            result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber());
+        else if (resultParts[1].startsWith("M@")) 
+            result = result.replaceAll("M@", "MSS ");
         return (result);
 
     }
@@ -579,7 +670,10 @@ public class CustomLocationMixin extends SolrIndexerMixin
         String result = null;
         if (callnum == null) return (null);
         String resultParts[] = callnum.split(":", 2);
-        if (resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1]))) result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber());
+        if ((resultParts[0].equals("LC") || resultParts[0].equals("")) && CallNumUtils.isValidLC(resultParts[1]))
+        {
+            result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber());
+        }
         return (result);
     }
 
@@ -589,6 +683,52 @@ public class CustomLocationMixin extends SolrIndexerMixin
         if (shelfKey == null) return (shelfKey);
         String revShelfKey = CallNumUtils.getReverseShelfKey(shelfKey);
         return (revShelfKey);
+    }
+
+    public String getLCShelfKey(final Record record)
+    {
+        String callnum = bestSingleLCCallNumber;
+        String result = null;
+        if (callnum == null) return (null);
+        String resultParts[] = callnum.split(":", 2);
+        if ((resultParts[0].equals("LC") || resultParts[0].equals("")) && CallNumUtils.isValidLC(resultParts[1]))
+        {
+            result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber());
+        }
+        return (result);
+    }
+
+    public String getReverseLCShelfKey(final Record record)
+    {
+        String shelfKey = getLCShelfKey(record);
+        if (shelfKey == null) return (shelfKey);
+        String revShelfKey = CallNumUtils.getReverseShelfKey(shelfKey);
+        return (revShelfKey);
+    }
+
+    public String getLCShelfKeyIfNotShadowed(final Record record, String propertiesMap, String returnHidden, String processExtra) throws Exception
+    {
+        String shadowedLocation = getShadowedLocation(record, propertiesMap, returnHidden, processExtra);
+        if (shadowedLocation.equals("VISIBLE"))
+        {
+            return(getLCShelfKey(record));
+        }
+        return(null);
+    }
+   
+    public String getReverseLCShelfKeyIfNotShadowed(final Record record, String propertiesMap, String returnHidden, String processExtra) throws Exception
+    {
+        String shadowedLocation = getShadowedLocation(record, propertiesMap, returnHidden, processExtra);
+        if (shadowedLocation.equals("VISIBLE"))
+        {
+            return(getReverseLCShelfKey(record));
+        }
+        return(null);
+    }
+    
+    public String getBestLCCallNumber(final Record record)
+    {
+        return(bestSingleLCCallNumber);
     }
 
     public Set<String> getCallNumbersCleanedNewNo050(final Record record, String conflatePrefixes)
@@ -839,7 +979,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
         AbstractMultiValueMapping map = ValueIndexerFactory.instance().createMultiValueMapping(propertiesMap);
         // String mapName = loadTranslationMap(null, propertiesMap);
 
-        Set<String> fields = SolrIndexer.instance().getFieldList(record, "999aikl,join(\";\")");
+        Set<String> fields = SolrIndexer.instance().getFieldList(record, "999aikl,join(\"%%%\")");
         boolean visible = false;
         String extraString = null;
         if (processExtraShadowedIds && locationExtraData.boundWithIds != null && locationExtraData.boundWithIds.containsKey(record.getControlNumber().substring(1)))
@@ -864,7 +1004,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
             {
                 for (String field : fields)
                 {
-                    String fparts[] = field.split(";");
+                    String fparts[] = field.split("%%%");
                     // this test (and the change above to return aikl instead of ikl) added in response to JIRA ISSUE LIBSRVSRCHDISCOV-377
                     if (fparts[0].matches(".*[Oo][Rr][Dd][Ee][Rr][- ]*0.*"))
                     {
@@ -908,5 +1048,26 @@ public class CustomLocationMixin extends SolrIndexerMixin
             return (null);
         }
         return (result);
+    }
+
+    public Set<String> getLibLocType(final Record record, String libMatch, String locMatch, String typeMatch)
+    {
+        List<VariableField> lvf = record.getVariableFields("999");
+        Set<String> result = new LinkedHashSet<String>();
+        for (VariableField vf : lvf)
+        {
+            DataField df = (DataField)vf;
+            Subfield lib = df.getSubfield('m');
+            Subfield loc = df.getSubfield('l');
+            Subfield type = df.getSubfield('t');
+            if (lib != null && lib.getData().matches(libMatch) && 
+                loc != null && loc.getData().matches(locMatch) && 
+                type != null && type.getData().matches(typeMatch))
+            {
+                String resultStr = lib.getData() + "_" + loc.getData() + "_" + type.getData();
+                result.add(resultStr);
+            }
+        }
+        return(result);
     }
 }
