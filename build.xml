@@ -7,6 +7,7 @@
 
     <!-- import other ant scripts -->
     <import file="${buildtools.dir}/parser_tasks.xml" optional="false" />
+    <import file="${buildtools.dir}/ant_extras.xml" optional="false" />
 
     <property name="cobertura.dir" value="${test.dir}/lib/cobertura-2.1.1" />
 
@@ -101,7 +102,7 @@
         <property name="compile.already.run" value="true" />
     </target>
 
-    <target name="-version1" unless="version" >
+<!--    <target name="-version1" unless="version" >
         <mkdir dir="${reports.tests}" />
         <get src="https://api.github.com/repos/solrmarc/solrmarc/releases/latest" dest="${reports.tests}/git.release.txt" />
         <loadfile srcfile="${reports.tests}/git.release.txt" property="versionstr" >
@@ -123,16 +124,6 @@
 
     <target name="-version2" unless="version" >
         <get src="https://api.github.com/repos/solrmarc/solrmarc/compare/v${versionstr}...master" dest="${reports.tests}/git.commits.txt" />
-   <!--     <copy file="${reports.tests}/git.commits.txt" tofile="${reports.tests}/git.commits.out.txt" overwrite="true" >
-            <filterchain>
-                <tokenfilter>
-                    <replacestring from="," to=", ${line.separator}" />
-                </tokenfilter>
-                <linecontains>
-                   <contains value="total_commits"/>
-                </linecontains>
-            </filterchain>
-        </copy> -->
         <loadfile srcfile="${reports.tests}/git.commits.txt" property="versionsuffix" >
             <filterchain>
                 <tokenfilter>
@@ -158,6 +149,107 @@
         <echo message="version = ${version}" />
     </target>
 
+-->
+    <target name="-version1" unless="version" >
+        <mkdir dir="${dist.dir}/tmp" />
+        <get src="https://api.github.com/repos/marc4j/marc4j/releases/latest" dest="${dist.dir}/tmp/git.release.txt" />
+        <loadfile srcfile="${dist.dir}/tmp/git.release.txt" property="versionstr" >
+            <filterchain>
+                <tokenfilter>
+                    <replacestring from="," to=",${line.separator}" />
+                </tokenfilter>
+                <linecontains>
+                   <contains value="tag_name"/>
+                </linecontains>
+                <tokenfilter>
+                    <replaceregex pattern=".*&quot;tag_name&quot;:[ ]*&quot;v([0-9.]*).*" replace="\1" />
+                </tokenfilter>
+                <striplinebreaks/>
+            </filterchain>
+        </loadfile>
+        <loadresource property="specversion">
+          <propertyresource name="versionstr"/>
+          <filterchain>
+            <tokenfilter>
+              <filetokenizer/>
+              <replaceregex pattern="[.][0-9]*$" replace=""/>
+            </tokenfilter>
+          </filterchain>
+        </loadresource>
+        <echo message="specversion = ${specversion}" />
+        <echo message="versionstr = ${versionstr}" />
+    </target>
+
+    <target name="-version2" unless="version" >
+        <get src="https://api.github.com/repos/marc4j/marc4j/compare/${versionstr}...master" dest="${dist.dir}/tmp/git.commits.txt" />
+        <loadfile srcfile="${dist.dir}/tmp/git.commits.txt" property="versionsuffix" >
+            <filterchain>
+                <tokenfilter>
+                    <replacestring from="," to=", ${line.separator}" />
+                </tokenfilter>
+                <linecontains>
+                   <contains value="total_commits"/>
+                </linecontains>
+                <striplinebreaks/>
+                <tokenfilter>
+                    <replaceregex pattern=".*&quot;total_commits&quot;:[ ]*([1-9][0-9]*).*" replace="-\1-SNAPSHOT" />
+                    <replaceregex pattern=".*&quot;total_commits&quot;:[ ]*(0).*" replace="" />
+                </tokenfilter>
+            </filterchain>
+        </loadfile>
+        <echo message="versionsuffix = ${versionsuffix}" />
+        <property name="versionsuffix" value="" />
+        <echo message="versionsuffix = ${versionsuffix}" />
+     <!--    <delete dir="${dist.dir}/tmp" /> -->
+    </target>
+
+    <available file=".git" type="dir" property="git.present"/>
+
+    <target name="git.revision" description="Store git revision in ${repository.version}" if="git.present" unless="version">
+        <property environment="env"/>
+        <exec executable="git" outputproperty="git.revision" failifexecutionfails="false" errorproperty="git.not.found">
+            <arg value="describe"/>
+            <arg value="--tags"/>
+            <arg value="--dirty=-SNAPSHOT"/>
+            <arg value="--always"/>
+        </exec>
+        <exec executable="git" outputproperty="git.major.revision" failifexecutionfails="false" errorproperty="git.not.found">
+            <arg value="describe"/>
+            <arg value="--tags"/>
+            <arg value="--abbrev=0"/>
+        </exec>
+        <condition property="vversion" value="${git.revision}">
+            <and>
+                <isset property="git.revision"/>
+                <length string="${git.revision}" trim="yes" length="0" when="greater"/>
+            </and>
+        </condition>
+        <condition property="vversionstr" value="${git.major.revision}">
+            <and>
+                <isset property="git.major.revision"/>
+                <length string="${git.major.revision}" trim="yes" length="0" when="greater"/>
+            </and>
+        </condition>
+        <propertyregex property="version" input="${vversion}" regexp="v?([0-9].*)" select="\1" casesensitive="false" />
+        <propertyregex property="versionstr" input="${vversionstr}" regexp="v?([0-9].*)" select="\1" casesensitive="false" />
+    </target>
+
+    <target name="version" depends="git.revision,-version1,-version2" description="Get the version number to use from github" >
+        <echo message="git.revision = ${git.revision}" />
+
+        <property name="version" value="${versionstr}${versionsuffix}" />
+        <echo message="version = ${version}" />
+        <condition property="is.snapshot">
+            <contains string="${version}" substring="SNAPSHOT" />
+        </condition>
+        <echo message="is.snapshot = ${is.snapshot}" />
+        <property name="jar.name" value="${project.name}-${version}.jar" />
+        <property name="jar.sources.name" value="${project.name}-${version}-sources.jar" />
+        <property name="jar.javadoc.name" value="${project.name}-${version}-javadoc.jar" />
+        <property name="test.jar.name" value="${project.name}_test-${version}.jar" />
+    </target>
+
+    
     <target name="jar" depends="compile,version" unless="jar.already.run" description="Build custom jar file containing custom code" >
         <mkdir dir="${dist.dir}" />
 
