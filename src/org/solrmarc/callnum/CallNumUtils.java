@@ -47,7 +47,7 @@ public final class CallNumUtils {
      *      e.g. "1987" "15th"
      * LC call numbers can't begin with I, O, W, X, or Y
      */
-    public static final String LC_CLASS_REQ_REGEX = "[A-Z&&[^IOWXY]]{1}[A-Z]{0,2} *\\d+(\\.\\d+)?";
+    public static final String LC_CLASS_REQ_REGEX = "(([B-Z&&[^IOWXY]]{1}[A-Z]{0,2})|(A[CEGIMNPSYZ])) *\\d+(\\.\\d+)?";
 
     /**
      * non-cutter text that can appear before or after cutters
@@ -303,7 +303,7 @@ public final class CallNumUtils {
         Matcher matcher = pattern.matcher(rawCallnum);
 
         if (matcher.find())
-            result = matcher.group(6).trim();
+            result = matcher.group(9).trim();
 
         // if no well formed cutter, take the chunk after last period or space
         //  if it begins with a letter
@@ -780,7 +780,7 @@ public final class CallNumUtils {
         String result = null;
         if (cutter != null && cutter.length() > 0) {
             String cutLets = getLCstartLetters(cutter);
-            String cutDigs = cutter.substring(cutLets.length());
+            String cutDigs = cutter.substring(cutLets == null ? 0 : cutLets.length());
             String norm = null;
             if (cutDigs != null && cutDigs.length() > 0) {
                 try {
