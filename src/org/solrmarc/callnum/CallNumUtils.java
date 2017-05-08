@@ -852,7 +852,7 @@ public final class CallNumUtils {
      * return the reverse String value, mapping A --> 9, B --> 8, ...
      *   9 --> A and also non-alphanum to sort properly (before or after alphanum)
      */
-    private static String reverseAlphanum(String orig) {
+    static String reverseAlphanum(String orig) {
 
 /*
         char[] origArray = orig.toCharArray();
