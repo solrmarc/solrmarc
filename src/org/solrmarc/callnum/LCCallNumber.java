@@ -111,6 +111,7 @@ public class LCCallNumber extends AbstractCallNumber {
     protected String cutter;
 
     protected String shelfKey;
+    protected String paddedShelfKey;
 
     /* Regexp and patterns */
     /* Original strict regex, from CallNumUtils:
@@ -242,6 +243,7 @@ public class LCCallNumber extends AbstractCallNumber {
         classSuffix = null;
         cutter = null;
         shelfKey = null;
+        paddedShelfKey = null;
     }
 
     /**
@@ -265,7 +267,7 @@ public class LCCallNumber extends AbstractCallNumber {
     protected void parse() {
         if (this.rawCallNum != null) {
             parseCallNumber();
-            buildShelfKey();
+//            buildShelfKey();
         }
     }
 
@@ -378,6 +380,59 @@ public class LCCallNumber extends AbstractCallNumber {
         }
         shelfKey = key.toString();
     }
+    
+    /**
+     * Builds the shelf key from the parsed call number.
+     */
+    protected void buildPaddedShelfKey() {
+        //TODO: Painful procedural logic, want a null-sensitive map over an array
+        
+        //TODO: Question: better to upcase here, or force to upper at parse time?
+        StringBuilder key = new StringBuilder();
+        if (classLetters != null) {
+            key.append(classLetters.toUpperCase());
+            key.append("   ".substring(classLetters.length()));
+        }
+        if (classDigits != null) {
+            if (key.length() > 0) {
+                key.append(' ');
+            }
+            key.append("0000".substring(classDigits.length()));
+            key.append(classDigits);
+        }
+        // class decimal includes ., easier to visually check, and sorts after [space] [year]
+        if (classDecimal != null) {
+            key.append(classDecimal);
+            key.append("000000".substring(classDecimal.length()-1));
+        }
+        else {
+            key.append(".000000");
+        }
+        if (classSuffix != null) {
+            //TODO: pad-if-not-null utility helper; or null-ignoring builder subclass with right-pad method
+            if (key.length() > 0) {
+                key.append(' ');
+                // sort alphabetic suffixes after cutters
+                if (Character.isAlphabetic(classSuffix.charAt(0))) {
+                    key.append('_');
+                }
+            }
+            Utils.appendNumericallySortable(key, classSuffix.toUpperCase());
+        }
+        if (cutter != null) {
+            appendPaddedCutterShelfKey(key, cutter.toUpperCase());
+        }
+        // TODO: better way to deal with trailing . or space in call num, as in "BF199.", 
+        //       causes meaningless class suffix resulting in trailing space on shelf key
+        if (key.length() > 0) {
+            int i = key.length() - 1;
+            char last = key.charAt(i);
+            if (last == ' ') {
+                key.deleteCharAt(i);
+            }
+        }
+        paddedShelfKey = key.toString();
+    }
 
     /**
      * Computes the shelf key for the cutter, appending it to the shelf key buffer.
@@ -388,6 +443,17 @@ public class LCCallNumber extends AbstractCallNumber {
     protected static void appendCutterShelfKey(StringBuilder keyBuf, CharSequence cutter) {
         Matcher m = cutterPat.matcher(cutter);
         appendCutterShelfKeyLoop(keyBuf, cutter, m, 0);
+    }
+    
+    /**
+     * Computes the shelf key for the cutter, appending it to the shelf key buffer.
+     * 
+     * @param keyBuf    buffer with the in-progress shelf key
+     * @param cutter    cutter sequence to parse
+     */
+    protected static void appendPaddedCutterShelfKey(StringBuilder keyBuf, CharSequence cutter) {
+        Matcher m = cutterPat.matcher(cutter);
+        appendPaddedCutterShelfKeyLoop(keyBuf, cutter, m, 0);
     }
     
     /**
@@ -427,6 +493,55 @@ public class LCCallNumber extends AbstractCallNumber {
             Utils.appendNumericallySortable(keyBuf, cutter.subSequence(offset, cutter.length()));
         }
     }
+    /**
+     * Recursively builds up the key in the buffer.
+     * 
+     * This method marches through the cutter, consumes up through the next cutter pattern.
+     * It formats what has been consumed into a shelf key and appends it to {@code buf},
+     * the, calls itself recursively, starting at the end of the current match.
+     * 
+     * @param keyBuf    buffer with the in-progress shelf key
+     * @param cutter    cutter sequence to parse
+     * @param m         matcher with the cutter pattern
+     * @param offset    current position in the cutter
+     */
+    protected static void appendPaddedCutterShelfKeyLoop(StringBuilder keyBuf, CharSequence cutter, Matcher m, int offset) {
+        if (offset >= cutter.length()) {      // all done
+            return;
+        } else if (m.find(offset)) {    // found another cutter
+            CharSequence previousCutterSuffix = cutter.subSequence(offset, m.start());
+            CharSequence matchSeq = cutter.subSequence(m.start(), m.end());
+
+            //TODO: pad-if-not-null utility helper; or null-ignoring builder subclass with right-pad method
+            if (keyBuf.length() > 0 && keyBuf.charAt(keyBuf.length()-1) != ' ') {
+                keyBuf.append(' ');
+            }
+            Utils.appendNumericallySortable(keyBuf, previousCutterSuffix);
+            if (keyBuf.length() > 0 && keyBuf.charAt(keyBuf.length()-1) != ' ') {
+                keyBuf.append(' ');
+            }
+            appendCutterPadded(keyBuf, matchSeq);
+            
+            appendCutterShelfKeyLoop(keyBuf, cutter, m, m.end());
+        } else {        // no more cutters
+            if (keyBuf.length() > 0 && keyBuf.charAt(keyBuf.length()-1) != ' ') {
+                keyBuf.append(' ');
+            }
+            Utils.appendNumericallySortable(keyBuf, cutter.subSequence(offset, cutter.length()));
+        }
+    }
+
+
+    private static void appendCutterPadded(StringBuilder keyBuf, CharSequence cutter)
+    {
+        int offset = 0;
+        for (; Character.isAlphabetic(cutter.charAt(offset)); offset++)
+        {
+            keyBuf.append(cutter.charAt(offset));
+        }
+        CharSequence number = cutter.subSequence(offset,  cutter.length());
+        keyBuf.append("0.").append(number).append("000000".substring(number.length()));    
+    }
 
     /**
      * Initial implementation checks for:
@@ -452,8 +567,17 @@ public class LCCallNumber extends AbstractCallNumber {
 
     @Override
     public String getShelfKey() {
-        //return getShelfKey(null, null);
+        if (shelfKey == null) {
+            buildShelfKey(); 
+        }
         return shelfKey;
+    }
+
+    public String getPaddedShelfKey() {
+        if (paddedShelfKey == null) {
+            buildPaddedShelfKey(); 
+        }
+        return paddedShelfKey;
     }
 
     /**
