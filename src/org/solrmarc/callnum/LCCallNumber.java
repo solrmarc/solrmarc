@@ -540,7 +540,7 @@ public class LCCallNumber extends AbstractCallNumber {
             keyBuf.append(cutter.charAt(offset));
         }
         CharSequence number = cutter.subSequence(offset,  cutter.length());
-        keyBuf.append("0.").append(number).append("000000".substring(number.length()));    
+        keyBuf.append("0.").append(number).append((number.length() < 6 ? "000000".substring(number.length()) : ""));
     }
 
     /**
