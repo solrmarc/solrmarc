@@ -397,13 +397,13 @@ public class LCCallNumber extends AbstractCallNumber {
             if (key.length() > 0) {
                 key.append(' ');
             }
-            key.append("0000".substring(classDigits.length()));
+            key.append((classDigits.length() < 4 ? "0000".substring(classDigits.length()) : ""));
             key.append(classDigits);
         }
         // class decimal includes ., easier to visually check, and sorts after [space] [year]
         if (classDecimal != null) {
             key.append(classDecimal);
-            key.append("000000".substring(classDecimal.length()-1));
+            key.append((classDecimal.length() < 7 ? "000000".substring(classDecimal.length()-1) : ""));
         }
         else {
             key.append(".000000");
@@ -522,7 +522,7 @@ public class LCCallNumber extends AbstractCallNumber {
             }
             appendCutterPadded(keyBuf, matchSeq);
             
-            appendCutterShelfKeyLoop(keyBuf, cutter, m, m.end());
+            appendPaddedCutterShelfKeyLoop(keyBuf, cutter, m, m.end());
         } else {        // no more cutters
             if (keyBuf.length() > 0 && keyBuf.charAt(keyBuf.length()-1) != ' ') {
                 keyBuf.append(' ');

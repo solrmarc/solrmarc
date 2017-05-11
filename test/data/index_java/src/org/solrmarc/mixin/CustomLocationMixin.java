@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.MarcFactory;
@@ -25,6 +27,7 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.callnum.CallNumUtils;
+import org.solrmarc.callnum.LCCallNumber;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.index.SolrIndexerMixin;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
@@ -137,6 +140,11 @@ public class CustomLocationMixin extends SolrIndexerMixin
     String bestSingleCallNumber = null;
     String bestSingleLCCallNumber = null;
     List<?> trimmedHoldingsList = null;
+    String bestAuthor = null;
+    String bestAuthorCutter = null;
+    String pubYear = null;
+    private String bestDate;
+    Pattern datePattern = Pattern.compile("[^0-9]*((20|1[56789])[0-9][0-9])[^0-9]*.*");
 
     /**
      * This routine can be overridden in a sub-class to perform some processing that need to be done once for each record, and which may be needed by several indexing specifications, especially custom methods. The default version does nothing.
@@ -163,11 +171,33 @@ public class CustomLocationMixin extends SolrIndexerMixin
         callNumberClusterMapNo050 = getCallNumbersCleanedConflated(callNumberFieldListNo050, true);
         callNumberClusterMap = getCallNumbersCleanedConflated(callNumberFieldList, true);
         String valueArr[] = callNumberLCFieldList.toArray(new String[0]);
-        Comparator<String> comp = new StringNaturalCompare();
-        Arrays.sort(valueArr, comp);
+        //Comparator<String> comp = new StringNaturalCompare();
+        //Arrays.sort(valueArr, comp);
 
         bestSingleCallNumber = getBestSingleCallNumber(callNumberClusterMap);
         bestSingleLCCallNumber = valueArr.length > 0 ? normalizeLCCallNumber(valueArr[0]) : null;
+        List<String> author =  SolrIndexer.instance().getFieldListAsList(record, "100a:110a:111a:130a");
+        if (author.size() > 0)
+        {
+            bestAuthor = author.get(0);
+            bestAuthorCutter = this.getCutterFromAuthor(bestAuthor);
+        }
+        else
+        {
+            bestAuthor = null;
+            bestAuthorCutter = null;
+        }
+        List<String> dates =  SolrIndexer.instance().getFieldListAsList(record, "008[7-10]:260c:264c");
+        bestDate = "";
+        for (String date : dates)
+        {
+            Matcher m = datePattern.matcher(date);
+            if (m.matches()) 
+            {
+                bestDate = m.group(1);
+                break;
+            }
+        }
         if (bestSingleCallNumber  != null && bestSingleCallNumber.equals(bestSingleLCCallNumber))
         {
             fieldSpec = "999awol";
@@ -494,6 +524,10 @@ public class CustomLocationMixin extends SolrIndexerMixin
         {
             DataField df = (DataField)vf;
             Subfield sf[] = df.getSubfields("ab").toArray(new Subfield[0]);
+            if (df.getIndicator2() == '4' && sf[0].getData().startsWith("AE"))
+            {
+                continue;
+            }
             for (int i = 0; i < sf.length; i++)
             {
                 if (i == 0 && sf.length > 1 && sf[1].getCode() == 'b')
@@ -706,6 +740,36 @@ public class CustomLocationMixin extends SolrIndexerMixin
         return (revShelfKey);
     }
 
+    public String getUniquishLCShelfKey(final Record record)
+    {
+        String callnum = bestSingleLCCallNumber;
+        if (callnum == null) return (null);
+        if (bestDate != null && !callnum.contains(bestDate))
+        {
+            if (bestAuthorCutter != null && !callnum.contains(bestAuthorCutter) && callnum.matches(".*[A-Z][0-9]+")) 
+            {
+                callnum = callnum + "." + bestAuthorCutter;
+            }
+            callnum = callnum + " " + bestDate;
+        }
+        String result = null;
+        String resultParts[] = callnum.split(":", 2);
+        if ((resultParts[0].equals("LC") || resultParts[0].equals("")) && CallNumUtils.isValidLC(resultParts[1]))
+        {
+            LCCallNumber callNum = new LCCallNumber(resultParts[1]);
+            result = callNum.getPaddedShelfKey();
+        }
+        return (result);
+    }
+
+    public String getUniquishReverseLCShelfKey(final Record record)
+    {
+        String shelfKey = getUniquishLCShelfKey(record);
+        if (shelfKey == null) return (shelfKey);
+        String revShelfKey = CallNumUtils.getReverseShelfKey(shelfKey);
+        return (revShelfKey);
+    }
+
     public String getLCShelfKeyIfNotShadowed(final Record record, String propertiesMap, String returnHidden, String processExtra) throws Exception
     {
         String shadowedLocation = getShadowedLocation(record, propertiesMap, returnHidden, processExtra);
@@ -726,6 +790,125 @@ public class CustomLocationMixin extends SolrIndexerMixin
         return(null);
     }
     
+    public String getUniquishLCShelfKeyIfNotShadowed(final Record record, String propertiesMap, String returnHidden, String processExtra) throws Exception
+    {
+        String shadowedLocation = getShadowedLocation(record, propertiesMap, returnHidden, processExtra);
+        if (shadowedLocation.equals("VISIBLE"))
+        {
+            return(getUniquishLCShelfKey(record));
+        }
+        return(null);
+    }
+   
+    public String getUniquishReverseLCShelfKeyIfNotShadowed(final Record record, String propertiesMap, String returnHidden, String processExtra) throws Exception
+    {
+        String shadowedLocation = getShadowedLocation(record, propertiesMap, returnHidden, processExtra);
+        if (shadowedLocation.equals("VISIBLE"))
+        {
+            return(getUniquishReverseLCShelfKey(record));
+        }
+        return(null);
+    }
+    
+    public String getCutterFromAuthor(String authorLastname)
+    {
+        StringBuilder sb = new StringBuilder();
+        String uppername = authorLastname.toUpperCase().replaceAll("[^A-Z0-9]", "");
+        char first = uppername.charAt(0);
+        
+        char second = uppername.charAt(1);
+        char third = uppername.charAt(2);
+        switch (first)
+        {
+            case 'A':
+            case 'E':
+            case 'I':
+            case 'O':
+            case 'U':  
+            {
+                sb.append(first);
+                if (second < 'B')                        sb.append('1');
+                else if (second >= 'B' && second < 'D')  sb.append('2');
+                else if (second >= 'D' && second < 'L')  sb.append('3');
+                else if (second >= 'L' && second < 'N')  sb.append('4');
+                else if (second >= 'N' && second < 'P')  sb.append('5');
+                else if (second >= 'P' && second < 'R')  sb.append('6');
+                else if (second >= 'R' && second < 'S')  sb.append('7');
+                else if (second >= 'S' && second < 'U')  sb.append('8');
+                else if (second >= 'U')                  sb.append('9');
+                addCutterExpansion(sb, third);
+                break;
+            }
+            case 'S':
+            {
+                sb.append(first);
+                if (second < 'C' || (second == 'C' && third < 'H')) sb.append('2');
+                else if (second >= 'C' && second < 'E')  sb.append('3');
+                else if (second >= 'E' && second < 'H')  sb.append('4');
+                else if (second >= 'H' && second < 'M')  sb.append('5');
+                else if (second >= 'M' && second < 'T')  sb.append('6');
+                else if (second >= 'T' && second < 'U')  sb.append('7');
+                else if (second >= 'U' && second < 'W')  sb.append('8');
+                else if (second >= 'W')                  sb.append('9');
+                addCutterExpansion(sb, third);
+                break;
+            }
+            case 'Q':
+            {
+                sb.append(first);
+                if (second >= 'U' )
+                {
+                    if (third >= 'A' && third < 'E')        sb.append('3');
+                    else if (third >= 'E' && third < 'I')   sb.append('4');
+                    else if (third >= 'I' && third < 'O')   sb.append('5');
+                    else if (third >= 'O' && third < 'R')   sb.append('6');
+                    else if (third >= 'R' && third < 'T')   sb.append('7');
+                    else if (third >= 'T' && third < 'Y')   sb.append('8');
+                    else if (third >= 'Y')                  sb.append('9');
+                    addCutterExpansion(sb, uppername.charAt(3));
+                }
+                else
+                {
+                    sb.append('2');
+                    addCutterExpansion(sb, third);
+                }
+                break;
+            }
+            case '0': case '1': case '2': case '3': case '4': 
+            case '5': case '6': case '7': case '8': case '9': 
+            {
+                sb.append("A1");
+                sb.append(first);
+                sb.append(second);
+                break;
+            }
+            default:
+            {
+                sb.append(first);
+                if (second >= 'A' && second < 'E')        sb.append('3');
+                else if (second >= 'E' && second < 'I')   sb.append('4');
+                else if (second >= 'I' && second < 'O')   sb.append('5');
+                else if (second >= 'O' && second < 'R')   sb.append('6');
+                else if (second >= 'R' && second < 'U')   sb.append('7');
+                else if (second >= 'U' && second < 'Y')   sb.append('8');
+                else if (second >= 'Y')                   sb.append('9');
+                addCutterExpansion(sb, third);
+            }
+        }
+        return(sb.toString());
+    }
+    
+    private void addCutterExpansion(StringBuilder sb, char third)
+    {
+        if (third >= 'A' && third < 'E')        sb.append('3');
+        else if (third >= 'E' && third < 'I')   sb.append('4');
+        else if (third >= 'I' && third < 'M')   sb.append('5');
+        else if (third >= 'M' && third < 'P')   sb.append('6');
+        else if (third >= 'P' && third < 'T')   sb.append('7');
+        else if (third >= 'T' && third < 'W')   sb.append('8');
+        else if (third >= 'W')                  sb.append('9');
+    }
+
     public String getBestLCCallNumber(final Record record)
     {
         return(bestSingleLCCallNumber);
