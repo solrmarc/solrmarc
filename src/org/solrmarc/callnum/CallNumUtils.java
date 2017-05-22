@@ -726,7 +726,7 @@ public final class CallNumUtils {
             // normalize first numeric portion to a constant length:
             //  four digits before decimal, 6 digits after
             String digitStr = getLCClassDigits(upcaseLCcallnum);
-            if (digitStr != null)
+            if (digitStr != null && !digitStr.equals("."))
                 resultBuf.append(normalizeFloat(digitStr, 4, 6));
             else
                 resultBuf.append(normalizeFloat("0", 4, 6));

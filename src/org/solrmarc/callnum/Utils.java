@@ -200,8 +200,8 @@ public class Utils {
         String uppername = authorLastname.toUpperCase().replaceAll("[^A-Z0-9]", "");
         char first = uppername.charAt(0);
 
-        char second = uppername.charAt(1);
-        char third = uppername.charAt(2);
+        char second = uppername.length() > 1 ? uppername.charAt(1) : ' ';
+        char third = uppername.length() > 2 ? uppername.charAt(2) : ' ';
         switch (first)
         {
             case 'A': case 'E': case 'I': case 'O': case 'U':  
