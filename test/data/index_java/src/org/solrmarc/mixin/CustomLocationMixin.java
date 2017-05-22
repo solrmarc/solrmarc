@@ -755,6 +755,19 @@ public class CustomLocationMixin extends SolrIndexerMixin
         return(callnum);
     }
     
+    public String getTrimmedUniquishLCCallNumber(final Record record)
+    {
+        String callnum = getUniquishLCCallNumber(record);
+        if (callnum == null) return (null);
+        String result = null;
+        String resultParts[] = callnum.split(":", 2);
+        if ((resultParts[0].equals("LC") || resultParts[0].equals("")) && CallNumUtils.isValidLC(resultParts[1]))
+        {
+            result = resultParts[1];
+        }
+        return (result);
+    }
+    
     public String getUniquishLCShelfKey(final Record record, String uniqueness)
     {
         String callnum = getUniquishLCCallNumber(record);
