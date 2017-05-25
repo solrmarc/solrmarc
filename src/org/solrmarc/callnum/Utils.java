@@ -198,7 +198,7 @@ public class Utils {
     {
         StringBuilder sb = new StringBuilder();
         String uppername = authorLastname.toUpperCase().replaceAll("[^A-Z0-9]", "");
-        char first = uppername.charAt(0);
+        char first = uppername.length() > 0 ? uppername.charAt(0) : ' ';
 
         char second = uppername.length() > 1 ? uppername.charAt(1) : ' ';
         char third = uppername.length() > 2 ? uppername.charAt(2) : ' ';
