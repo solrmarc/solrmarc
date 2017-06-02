@@ -36,6 +36,15 @@ public class FileLookupMixin implements Mixin
         return (result);
     }
 
+    public String getFromFileKeyExists(Record record, String filename, String exists, String notExists)
+    {
+        Map<String, String> lookupMap = getLookupMap(filename, "");
+
+        String id = record.getControlNumber();
+        String result = lookupMap.containsKey(id) ? exists.length() > 0 ? exists : null : notExists.length() > 0 ? notExists : null;
+        return (result);
+    }
+
     public Collection<String> mapFromFileByKey(Collection<String> keys, String filename, String sepPattern, String defaultValue)
     {
         Map<String, String> lookupMap = getLookupMap(filename, sepPattern);
@@ -51,6 +60,29 @@ public class FileLookupMixin implements Mixin
         if (result.isEmpty() && defaultValue.length() > 0)
         {
             result.add(defaultValue);
+        }
+        return (result);
+    }
+
+    public Collection<String> mapFromFileKeyExists(Collection<String> keys, String filename, String exists, String notExists)
+    {
+        Map<String, String> lookupMap = getLookupMap(filename, "");
+        Collection<String> result = new ArrayList<String>(keys.size());
+
+        for (String key : keys)
+        {
+            if (lookupMap.containsKey(key))
+            {
+                if (!exists.isEmpty())
+                {
+                    result.add(exists);
+                }
+                return (result);
+            }
+        }
+        if (result.isEmpty() && !notExists.isEmpty())
+        {
+            result.add(notExists);
         }
         return (result);
     }
@@ -121,10 +153,20 @@ public class FileLookupMixin implements Mixin
             String line;
             while ((line = reader.readLine()) != null)
             {
-                String parts[] = line.split(sepPattern, 2);
-                if (parts.length == 2)
+                if (sepPattern.isEmpty())
                 {
-                    resultMap.put(parts[0], parts[1]);
+                    if (!line.trim().isEmpty())
+                    {
+                        resultMap.put(line, "1");
+                    }
+                }
+                else 
+                {
+                    String parts[] = line.split(sepPattern, 2);
+                    if (parts.length == 2)
+                    {
+                        resultMap.put(parts[0], parts[1]);
+                    }
                 }
             }
             textfileMaps.putIfAbsent(filename+sepPattern, Collections.unmodifiableMap(resultMap));

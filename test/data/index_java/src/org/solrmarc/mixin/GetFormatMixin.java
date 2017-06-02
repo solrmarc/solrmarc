@@ -1868,7 +1868,9 @@ public class GetFormatMixin extends SolrIndexerMixin
 
     public Boolean hasFullText(final Record record)
     {
-        Set<String> urls = indexer.getFullTextUrls(record);
+        Set<String> urls;
+        urls = new UrlMixin().getFullTextUrls(record);
+        // urls = indexer.getFullTextUrls(record);
 
         return(urls.size() != 0 ? true : false);
     }
@@ -1882,7 +1884,10 @@ public class GetFormatMixin extends SolrIndexerMixin
 
     public Boolean hasSupplText(final Record record)
     {
-        Set<String> urls = indexer.getSupplUrls(record);
+        
+        Set<String> urls;
+        urls = new UrlMixin().getSupplUrls(record);
+        // urls = indexer.getSupplUrls(record);
 
         return(urls.size() != 0 ? true : false);
     }
