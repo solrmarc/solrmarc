@@ -34,21 +34,24 @@ public class UrlMixin extends SolrIndexerMixin
         for (VariableField vf : list856)
         {
             DataField df = (DataField) vf;
-            List<String> possUrls = Utils.getSubfieldStrings(df, 'u');
-            if (possUrls.size() > 0)
+            if (df.getIndicator1() == '4' || (df.getIndicator1() == '7' && df.getSubfield('2') != null && df.getSubfield('2').getData().startsWith("http")))
             {
-                char ind2 = df.getIndicator2();
-                switch (ind2)
+                List<String> possUrls = Utils.getSubfieldStrings(df, 'u');
+                if (possUrls.size() > 0)
                 {
-                    case '0':
-                        resultSet.addAll(possUrls);
-                        break;
-                    case '2':
-                        break;
-                    default:
-                        if (!isSupplementalUrl(df))
+                    char ind2 = df.getIndicator2();
+                    switch (ind2)
+                    {
+                        case '0':
                             resultSet.addAll(possUrls);
-                        break;
+                            break;
+                        case '2':
+                            break;
+                        default:
+                            if (!isSupplementalUrl(df))
+                                resultSet.addAll(possUrls);
+                            break;
+                    }
                 }
             }
         }
@@ -76,7 +79,10 @@ public class UrlMixin extends SolrIndexerMixin
                || lc.contains("guide") || lc.contains("inhalts") || lc.contains("version") || lc.contains("addendum")
                || lc.contains("abstract") || lc.contains("index") || lc.contains("digest") || lc.contains("contents")
                || lc.contains("klappentext") || lc.contains("verlagsinformation") || lc.contains("lizenzfrei") || lc.contains("rezension") 
-               || lc.contains("sample") || lc.contains("related"))
+               || lc.contains("sample") || lc.contains("related") || lc.contains("record available for display") 
+               || lc.contains("general listing") || lc.contains("appendices") || lc.contains("omslagsbild") || lc.contains("home page")
+               || lc.contains("description") || lc.contains(("ndice"))
+               )
                 
                 supplmntl = true;
         }
@@ -101,19 +107,22 @@ public class UrlMixin extends SolrIndexerMixin
         for (VariableField vf : list856)
         {
             DataField df = (DataField) vf;
-            List<String> possUrls = Utils.getSubfieldStrings(df, 'u');
-            char ind2 = df.getIndicator2();
-            switch (ind2)
+            if (df.getIndicator1() == '4' || (df.getIndicator1() == '7' && df.getSubfield('2') != null && df.getSubfield('2').getData().startsWith("http")))
             {
-                case '2':
-                    resultSet.addAll(possUrls);
-                    break;
-                case '0':
-                    break;
-                default:
-                    if (isSupplementalUrl(df))
+                List<String> possUrls = Utils.getSubfieldStrings(df, 'u');
+                char ind2 = df.getIndicator2();
+                switch (ind2)
+                {
+                    case '2':
                         resultSet.addAll(possUrls);
-                    break;
+                        break;
+                    case '0':
+                        break;
+                    default:
+                        if (isSupplementalUrl(df))
+                            resultSet.addAll(possUrls);
+                        break;
+                }
             }
         }
         return resultSet;
