@@ -98,9 +98,7 @@ public class Boot
         }
         catch (InvocationTargetException e)
         {
-            Throwable t = e.getTargetException();
-            logger.fatal("ERROR: Error while invoking main method in specified class: " + classname);
-            logger.fatal(t);
+            logger.fatal("ERROR: Error while invoking main method in specified class: " + classname, e);
             System.exit(2);
         }
         catch (ClassNotFoundException e)
