@@ -92,31 +92,29 @@ public class Boot
         }
         catch (IllegalAccessException | IllegalArgumentException e)
         {
-            logger.fatal("ERROR: Unable to invoke main method in specified class: " + classname);
-            logger.fatal(e);
+            logger.fatal("ERROR: Unable to invoke main method in specified class: " + classname, e);
             System.exit(2);
         }
         catch (InvocationTargetException e)
         {
             Throwable t = e.getTargetException();
-            logger.fatal("ERROR: Error while invoking main method in specified class: " + classname);
-            logger.fatal(t);
+            logger.fatal("ERROR: Error while invoking main method in specified class: " + classname, t);
             System.exit(2);
         }
         catch (ClassNotFoundException e)
         {
-            logger.fatal("ERROR: Unable to find specified main class: " + classname);
+            logger.fatal("ERROR: Unable to find specified main class: " + classname, e);
             findExecutables();
             System.exit(3);
         }
         catch (NoSuchMethodException e)
         {
-            logger.fatal("ERROR: Unable to find main method in specified class: " + classname);
+            logger.fatal("ERROR: Unable to find main method in specified class: " + classname, e);
             System.exit(4);
         }
         catch (SecurityException e)
         {
-            logger.fatal("ERROR: Unable to access main method in specified class: " + classname);
+            logger.fatal("ERROR: Unable to access main method in specified class: " + classname, e);
             System.exit(5);
         }
     }
