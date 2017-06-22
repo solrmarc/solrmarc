@@ -1,5 +1,6 @@
 package org.solrmarc.index.collector;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,6 +19,8 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
 {
     boolean isUnique = false;
     boolean deleteRecordIfEmpty = false;
+    public enum eNormalize { NOCHANGE, COMPOSE, DECOMPOSE };
+    eNormalize normalize = eNormalize.NOCHANGE;
     Comparator<String> sortComparator = null;
     public enum eFirstVal { ALL, FIRST, NOTFIRST };
     public static eFirstVal fromString(String str)
@@ -27,28 +30,28 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
         return(eFirstVal.ALL);
     }; 
     eFirstVal first = eFirstVal.ALL;
-    
+
     public MultiValueCollector(String comp, String dir, boolean unique, String first)
     {
         isUnique = unique;
         this.first = fromString(first);;
         sortComparator = setComparator(comp, dir);
     }
-    
+
     public MultiValueCollector(boolean unique, String first)
     {
         isUnique = unique;
         this.first = fromString(first);;
         sortComparator = null;
     }
-        
+
     public MultiValueCollector()
     {
         isUnique = false;
         this.first = eFirstVal.ALL;
         sortComparator = null;
     }
-   
+
     private class LengthComp implements Comparator<String> {
 
         public int compare(String s1, String s2)
@@ -56,7 +59,7 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
             return s1.length() - s2.length();
         }
     }
-    
+
     private class NaturalComp implements Comparator<String> {
 
         public int compare(String s1, String s2)
@@ -64,8 +67,8 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
             return s1.compareTo(s2);
         }
     }
-    
-    private Comparator<String> setComparator(String compStr, String dir)                       
+
+    private Comparator<String> setComparator(String compStr, String dir)
     {
         Comparator<String> comp = null;
         if (compStr == null) return(null);
@@ -94,7 +97,8 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
 
     public Collection<String> collect(final Collection<String> values)
     {
-        if ((!isUnique || values instanceof Set<?> ) && sortComparator == null && first == eFirstVal.ALL && deleteRecordIfEmpty == false) 
+        if ((!isUnique || values instanceof Set<?> ) && sortComparator == null && 
+                first == eFirstVal.ALL && deleteRecordIfEmpty == false && normalize == eNormalize.NOCHANGE) 
             return values;
         Collection<String> result;
         if (isUnique)
@@ -107,12 +111,12 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
             {
                 result = new TreeSet<String>(sortComparator);
             }
-            result.addAll(values);
+            addAllNormalized(result, values, normalize);
         }
         else if (sortComparator != null)
         {
             List<String> resultL = new ArrayList<String>();
-            resultL.addAll(values);
+            addAllNormalized(resultL, values, normalize);
             Collections.sort(resultL, sortComparator);
             result = resultL;
         }
@@ -152,7 +156,31 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
         }
         return(result);
     }
-    
+
+    private void addAllNormalized(Collection<String> result, Collection<String> values, eNormalize normalize)
+    {
+        if (normalize == eNormalize.NOCHANGE) 
+        {
+            result.addAll(values);
+        }
+        else if (normalize == eNormalize.COMPOSE)
+        {
+            for (String value : values)
+            {
+                String normedValue = Normalizer.normalize(value,  Normalizer.Form.NFC);
+                result.add(normedValue);
+            }
+        }
+        else if (normalize == eNormalize.DECOMPOSE)
+        {
+            for (String value : values)
+            {
+                String normedValue = Normalizer.normalize(value,  Normalizer.Form.NFD);
+                result.add(normedValue);
+            }
+        }
+    }
+
     public boolean isUnique()
     {
         return isUnique;
@@ -195,5 +223,20 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
     {
         this.deleteRecordIfEmpty = true;
     }
-    
+
+    public void setNormalize(String normVal)
+    {
+        if (normVal.equals("C"))
+        {
+           this.normalize = eNormalize.COMPOSE; 
+        }
+        else if (normVal.equals("D"))
+        {
+            this.normalize = eNormalize.DECOMPOSE; 
+        }
+        else
+        {
+            this.normalize = eNormalize.NOCHANGE; 
+        }
+    }
 }

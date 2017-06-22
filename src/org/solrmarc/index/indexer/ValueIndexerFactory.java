@@ -738,7 +738,8 @@ public class ValueIndexerFactory
     private boolean isACollectorConfiguration(String string)
     {
         if (string.equals("unique") || string.equals("first") || string.equals("sort") || string.equals("notunique") ||
-            string.equals("notfirst") || string.equals("all") || string.equals("DeleteRecordIfFieldEmpty"))
+            string.equals("notfirst") || string.equals("all") || string.equals("DeleteRecordIfFieldEmpty") ||
+            string.equals("normalize") || string.equals("unnormalize"))
             return (true);
         return (false);
     }
@@ -775,6 +776,14 @@ public class ValueIndexerFactory
                 else if (mapParts[0].equals("notfirst"))
                 {
                     collector.setFirst(mapParts[0]);
+                }
+                else if (mapParts[0].equals("normalize"))
+                {
+                    collector.setNormalize("C");
+                }
+                else if (mapParts[0].equals("unnormalize"))
+                {
+                    collector.setNormalize("D");
                 }
                 else if (mapParts[0].equals("all"))
                 {
