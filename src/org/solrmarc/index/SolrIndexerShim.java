@@ -616,7 +616,7 @@ public class SolrIndexerShim
     public String getSortableTitle(Record record)
     {
         List<String> result = new ArrayList<String>();
-        AbstractValueIndexer<?> indexer = getOrCreateIndexerFullSpec("245abk,titleSortLower,first");
+        AbstractValueIndexer<?> indexer = getOrCreateIndexerFullSpec("245abkp,titleSortLower,first");
         getFieldListCollector(record, indexer, result);
         return (result.size() == 0) ? "" : result.iterator().next();
     }
