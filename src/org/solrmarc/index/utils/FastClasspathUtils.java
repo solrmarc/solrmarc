@@ -27,7 +27,7 @@ public class FastClasspathUtils
         extractors = new LinkedHashSet<>();
         mappers = new LinkedHashSet<>();
         mixins = new LinkedHashSet<>();
-        FastClasspathScanner scanner = new FastClasspathScanner("org")  
+        FastClasspathScanner scanner = new FastClasspathScanner()  
             .matchSubclassesOf(AbstractValueExtractorFactory.class, new SubclassMatchProcessor<AbstractValueExtractorFactory>() 
             {
                 @Override
@@ -89,7 +89,7 @@ public class FastClasspathUtils
     private static void getMatchingBootableClasses()
     {
         bootables = new LinkedHashSet<>();
-        FastClasspathScanner scanner = new FastClasspathScanner("org")  
+        FastClasspathScanner scanner = new FastClasspathScanner()  
             .matchSubclassesOf(BootableMain.class, new SubclassMatchProcessor<BootableMain>() 
             {
                 @Override
