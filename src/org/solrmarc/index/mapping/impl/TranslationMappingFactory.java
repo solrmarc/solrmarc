@@ -25,19 +25,18 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
 
     private Properties loadTranslationMappingFile(String translationMappingFileName, String subMappingName)
     {
+        if (translationMappingFileName.equals("(this).properties"))
+        {
+            Properties props = (ValueIndexerFactory.instance().getLocalMappingProperties());
+            props = getSubTranslationMapping(props, subMappingName);
+            return props;
+        }
         Properties properties = translationMappingFiles.get(translationMappingFileName + "(" + subMappingName + ")");
         if (properties != null)
         {
             return properties;
         }
-        if (translationMappingFileName.equals("(this).properties"))
-        {
-            properties = ValueIndexerFactory.instance().getLocalMappingProperties();
-        }
-        else
-        {
-            properties = translationMappingFiles.get(translationMappingFileName + "(null)");
-        }
+        properties = translationMappingFiles.get(translationMappingFileName + "(null)");
         if (properties != null)
         {
             properties = getSubTranslationMapping(properties, subMappingName);
