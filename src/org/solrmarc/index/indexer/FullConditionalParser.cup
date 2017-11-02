@@ -227,8 +227,8 @@ precedence left OR;
 
 start with index_spec;
 
-index_spec ::= extractor:e COMMA mapping_specs:m                            {: RESULT = valueIndexerFactory.makeMultiValueIndexer(cacheOfStrToParse, cacheOfSolrField, e, m); :}
-             | extractor:e                                                  {: RESULT = valueIndexerFactory.makeMultiValueIndexer(cacheOfStrToParse, cacheOfSolrField, e, null); :}
+index_spec ::= extractor:e COMMA mapping_specs:m                            {: RESULT = valueIndexerFactory.makeMultiValueIndexer(cacheOfStrToParse, cacheOfSolrField, e, m, parser_errors); :}
+             | extractor:e                                                  {: RESULT = valueIndexerFactory.makeMultiValueIndexer(cacheOfStrToParse, cacheOfSolrField, e, null, parser_errors); :}
              ;
 
 extractor ::= strings:l                                                     {: RESULT = new ConstantMultiValueExtractor(l); :}

@@ -32,6 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,7 +58,9 @@ public class ValueIndexerFactory
     private final Pattern specPattern = Pattern.compile("([-A-Za-z_0-9, \\t]*)([:=]|([+]=))(.*)");
     boolean debug_parse = true;
     private boolean defaultUniqueVal = true;
+    private String defaultCustomClassname = null;
     private final Pattern defaultUniquePattern = Pattern.compile("default.unique[ ]*[;=][ ]*[\"]?(true|false)[\"]?");
+    private final Pattern defaultCustomClassPattern = Pattern.compile("default.customClass[ ]*[;=][ ]*[\"]?([a-z][A-Za-z0-9.]+[a-zA-Z0-9])[\"]?");
     /**
      * The next three functions make the ValueIndexerFactory implement the
      * Singleton pattern To create of use a Factory do:
@@ -92,7 +95,7 @@ public class ValueIndexerFactory
     public ValueIndexerFactory(String homeDirStrs[])
     {
         this.homeDirStrs = homeDirStrs;
-        validationExceptions = new ArrayList<IndexerSpecException>();
+//        validationExceptions = new ArrayList<IndexerSpecException>();
         // perRecordExceptions list changed to be a ThreadLocal list so that each thread can save
         // the exceptions found while indexing a given record without interfering with other indexing threads.
         perRecordExceptions = new ThreadLocal<List<IndexerSpecException>>()
@@ -157,6 +160,16 @@ public class ValueIndexerFactory
 //    }
 
     /**
+     * Return the value defined as the default class name to use when resolving multiple matches for the same custom method
+     *
+     * @return
+     */
+    public String getDefaultCustomClassname()
+    {
+        return defaultCustomClassname;
+    }
+
+    /**
      * Return the extractor factories loaded above for use in the CUP parser
      *
      * @return
@@ -198,15 +211,16 @@ public class ValueIndexerFactory
 //
     public List<AbstractValueIndexer<?>> createValueIndexers(File indexSpecFiles[]) throws IllegalAccessException, InstantiationException, IOException
     {
-        validationExceptions.clear();
+//        validationExceptions.clear();
         localMappingProperties = new Properties();
 
         Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap = new LinkedHashMap<>();
+        Map<String, List<IndexerSpecException>>    valueIndexerExceptions = new LinkedHashMap<>();
 
-        createValueIndexers(indexSpecFiles, valueIndexerMap);
+        createValueIndexers(indexSpecFiles, valueIndexerMap, valueIndexerExceptions);
 
         List<AbstractValueIndexer<?>> valueIndexers = collapseMapToList(valueIndexerMap);
-
+        validationExceptions = collapseExceptionsMaptoList(valueIndexerExceptions);
         return valueIndexers;
     }
 
@@ -226,14 +240,16 @@ public class ValueIndexerFactory
 
     public List<AbstractValueIndexer<?>> createValueIndexers(String configSpecs[]) throws IllegalAccessException, InstantiationException
     {
-        validationExceptions.clear();
+//        validationExceptions.clear();
         localMappingProperties = new Properties();
 
         Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap = new LinkedHashMap<>();
-
-        createValueIndexers(configSpecs, valueIndexerMap);
+        Map<String, List<IndexerSpecException>>    valueIndexerExceptions = new LinkedHashMap<>();
+        
+        createValueIndexers(configSpecs, valueIndexerMap, valueIndexerExceptions);
 
         List<AbstractValueIndexer<?>> valueIndexers = collapseMapToList(valueIndexerMap);
+        validationExceptions = collapseExceptionsMaptoList(valueIndexerExceptions);
 
         return valueIndexers;
     }
@@ -248,15 +264,27 @@ public class ValueIndexerFactory
         return valueIndexers;
     }
 
-    private void createValueIndexers(File indexSpecFiles[], Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap) throws IllegalAccessException, InstantiationException, IOException
+    private List<IndexerSpecException> collapseExceptionsMaptoList(Map<String, List<IndexerSpecException>> valueIndexerExceptions)
+    {
+        List<IndexerSpecException> valueIndexers = new ArrayList<>();
+        for (List<IndexerSpecException> indexer : valueIndexerExceptions.values())
+        {
+            valueIndexers.addAll(indexer);
+        }
+        return valueIndexers;
+    }
+
+    private void createValueIndexers(File indexSpecFiles[], Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap, 
+                                     Map<String, List<IndexerSpecException>> valueIndexerExceptions) throws IllegalAccessException, InstantiationException, IOException
     {
         for (File indexSpecFile : indexSpecFiles)
         {
-            createValueIndexers(indexSpecFile, valueIndexerMap);
+            createValueIndexers(indexSpecFile, valueIndexerMap, valueIndexerExceptions);
         }
     }
 
-    private void createValueIndexers(File indexSpecFile, Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap) throws IllegalAccessException, InstantiationException, IOException
+    private void createValueIndexers(File indexSpecFile, Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap, 
+                                    Map<String, List<IndexerSpecException>>valueIndexerExceptions) throws IllegalAccessException, InstantiationException, IOException
     {
         List<String> lines = new ArrayList<String>();
         BufferedReader reader = new BufferedReader(new FileReader(indexSpecFile));
@@ -283,12 +311,14 @@ public class ValueIndexerFactory
         {
             lines.add(saveLine);
         }
-        createValueIndexers(lines.toArray(new String[0]), valueIndexerMap);
+        createValueIndexers(lines.toArray(new String[0]), valueIndexerMap, valueIndexerExceptions);
         reader.close();
     }
 
-    private void createValueIndexers(String configSpecs[], Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap) throws IllegalAccessException, InstantiationException
+    private void createValueIndexers(String configSpecs[], Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap,  
+                                    Map<String, List<IndexerSpecException>> valueIndexerExceptions) throws IllegalAccessException, InstantiationException
     {
+        this.defaultCustomClassname = null;
         for (final String singleSpec : configSpecs)
         {
             if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map."))
@@ -308,8 +338,18 @@ public class ValueIndexerFactory
                 if (singleSpec.startsWith("default.unique"))
                 {
                     Matcher defUnique = defaultUniquePattern.matcher(singleSpec);
-                    defUnique.matches();
-                    this.defaultUniqueVal = Boolean.parseBoolean(defUnique.group(1));
+                    if (defUnique.matches())
+                    {
+                        this.defaultUniqueVal = Boolean.parseBoolean(defUnique.group(1));
+                    }
+                }
+                else if (singleSpec.startsWith("default.customClass"))
+                {
+                    Matcher defClass = defaultCustomClassPattern.matcher(singleSpec);
+                    if (defClass.matches())
+                    {
+                        this.defaultCustomClassname = defClass.group(1);
+                    }
                 }
             }
 
@@ -322,6 +362,15 @@ public class ValueIndexerFactory
                 try
                 {
                     MultiValueIndexer valueIndexer = createValueIndexer(solrFieldName, mappingDefinition);
+                    List<IndexerSpecException> exceptions;
+                    if (delimiter.startsWith("+") && valueIndexerExceptions.containsKey(solrFieldName))
+                    {
+                        exceptions = valueIndexerExceptions.get(solrFieldName);
+                    }
+                    else
+                    {
+                        exceptions = new ArrayList<>();
+                    }
                     if (valueIndexer != null)
                     {
                         List<AbstractValueIndexer<?>> indexerList;
@@ -339,13 +388,14 @@ public class ValueIndexerFactory
                     for (IndexerSpecException ise : FullConditionalParser.getErrors())
                     {
                         ise.setSolrFieldAndSpec(solrFieldName, mappingDefinition);
-                        validationExceptions.add(ise);
+                        exceptions.add(ise);
                     }
+                    valueIndexerExceptions.put(solrFieldName, exceptions);
                 }
                 catch (IndexerSpecException ise)
                 {
                     ise.setSolrFieldAndSpec(solrFieldName, mappingDefinition);
-                    validationExceptions.add(ise);
+                    valueIndexerExceptions.put(solrFieldName, Collections.singletonList(ise));
                 }
             }
         }
@@ -480,7 +530,7 @@ public class ValueIndexerFactory
      *            indexer.
      * @return an indexer representing the indexer process for one solr field.
      */
-    AbstractValueIndexer<?> makeMultiValueIndexer(String origSpec, String fieldnames, AbstractValueExtractor<?> extractor, List<List<String>> mapSpecs)
+    AbstractValueIndexer<?> makeMultiValueIndexer(String origSpec, String fieldnames, AbstractValueExtractor<?> extractor, List<List<String>> mapSpecs, List<IndexerSpecException> currentExceptions)
     {
         if (mapSpecs == null)
         {
@@ -489,9 +539,9 @@ public class ValueIndexerFactory
         if (extractor instanceof DirectMultiValueExtractor)
         {
             final DirectMultiValueExtractor multiValueExtractor = (DirectMultiValueExtractor) extractor;
-            int indexOfJoin = decorateMultiValueExtractor(origSpec, fieldnames, multiValueExtractor, mapSpecs);
+            int indexOfJoin = decorateMultiValueExtractor(origSpec, fieldnames, multiValueExtractor, mapSpecs, currentExceptions);
             final List<AbstractMultiValueMapping> mappings;
-            if (indexOfJoin != -1) mappings = createMultiValueMappings(origSpec, mapSpecs, indexOfJoin);
+            if (indexOfJoin != -1) mappings = createMultiValueMappings(origSpec, mapSpecs, indexOfJoin, currentExceptions);
             else mappings = new ArrayList<AbstractMultiValueMapping>();
             final MultiValueCollector collector = createMultiValueCollector(mapSpecs, true);
 
@@ -500,14 +550,14 @@ public class ValueIndexerFactory
         else if (extractor instanceof AbstractMultiValueExtractor)
         {
             final AbstractMultiValueExtractor multiValueExtractor = (AbstractMultiValueExtractor) extractor;
-            final List<AbstractMultiValueMapping> mappings = createMultiValueMappings(origSpec, mapSpecs);
+            final List<AbstractMultiValueMapping> mappings = createMultiValueMappings(origSpec, mapSpecs, currentExceptions);
             final MultiValueCollector collector = createMultiValueCollector(mapSpecs);
             return new MultiValueIndexer(fieldnames, multiValueExtractor, mappings, collector);
         }
         else if (extractor instanceof AbstractSingleValueExtractor)
         {
             final AbstractSingleValueExtractor singleValueExtractor = (AbstractSingleValueExtractor) extractor;
-            final List<AbstractMultiValueMapping> mappings = createMultiValueMappings(origSpec, mapSpecs);
+            final List<AbstractMultiValueMapping> mappings = createMultiValueMappings(origSpec, mapSpecs, currentExceptions);
             final MultiValueCollector collector = createMultiValueCollector(mapSpecs);
             return new MultiValueIndexer(fieldnames, singleValueExtractor, mappings, collector);
         }
@@ -531,7 +581,7 @@ public class ValueIndexerFactory
         return (false);
     }
 
-    private int decorateMultiValueExtractor(String origSpec, String fieldnames, DirectMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs)
+    private int decorateMultiValueExtractor(String origSpec, String fieldnames, DirectMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs, List<IndexerSpecException> currentExceptions)
     {
         if (mapSpecs.size() == 0)
         {
@@ -582,7 +632,7 @@ public class ValueIndexerFactory
                 catch (IndexerSpecException ise)
                 {
                     ise.setSolrFieldAndSpec(fieldnames, origSpec);
-                    validationExceptions.add(ise);
+                    currentExceptions.add(ise);
                 }
             }
             else if (mapParts[0].equals("cleanEach"))
@@ -650,7 +700,7 @@ public class ValueIndexerFactory
             }
             else
             {
-                validationExceptions.add(new IndexerSpecException(fieldnames, origSpec, "Illegal format specification: " + Utils.join(mapParts, " ")));
+                currentExceptions.add(new IndexerSpecException(fieldnames, origSpec, "Illegal format specification: " + Utils.join(mapParts, " ")));
             }
             currentIndex++;
         }
@@ -676,9 +726,9 @@ public class ValueIndexerFactory
         return (false);
     }
 
-    private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs)
+    private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs, List<IndexerSpecException> currentExceptions)
     {
-        return (createMultiValueMappings(origSpec, mapSpecs, -1));
+        return (createMultiValueMappings(origSpec, mapSpecs, -1, currentExceptions));
     }
 
     /**
@@ -699,7 +749,7 @@ public class ValueIndexerFactory
      *            the joined output.
      * @return an list of multi value mappings
      */
-    private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs, int indexOfJoin)
+    private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs, int indexOfJoin, List<IndexerSpecException> currentExceptions)
     {
         List<AbstractMultiValueMapping> maps = new ArrayList<AbstractMultiValueMapping>(mapSpecs.size());
         if (mapSpecs.size() == 0)
@@ -727,7 +777,7 @@ public class ValueIndexerFactory
                 }
                 else
                 {
-                    validationExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + Utils.join(mapParts, " ")));
+                    currentExceptions.add(new IndexerSpecException(origSpec, "Illegal format specification: " + Utils.join(mapParts, " ")));
                 }
             }
             currentIndex++;

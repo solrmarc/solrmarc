@@ -138,6 +138,17 @@ public abstract class AbstractMethodCallFactory extends AbstractValueExtractorFa
                         return createExtractorForMethodCall(derivedMethodCall, context);
                     }
                 }
+                // If there is more than one match, and the value of the matches is the same as the value set for defaultCustomClassname, than use that method 
+                if (ValueIndexerFactory.instance().getDefaultCustomClassname() != null)
+                {
+                    for (AbstractExtractorMethodCall<?> curMethodCall : matches)
+                    {
+                        if (curMethodCall.getObjectClass().getName().equals(ValueIndexerFactory.instance().getDefaultCustomClassname()))
+                        {
+                            return createExtractorForMethodCall(curMethodCall, context);
+                        }
+                    }
+                }
                 throw new IndexerSpecException("Multiple methods with name: " + context.getMethodName() + " you must specify the class of the method you intend to use.  Known methods are: \n"
                     + methodCallManager.loadedExtractorMixinsToString(matches));
             }
