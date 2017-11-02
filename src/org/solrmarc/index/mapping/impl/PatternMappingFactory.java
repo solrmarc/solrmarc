@@ -122,11 +122,11 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
             {
                 filter = true;
             }
-            else if (mapEntry.length == 1 && mapEntry.equals("matchAll"))
+            else if (mapEntry.length == 1 && mapEntry[0].equals("matchAll"))
             {
                 matchAll = true;
             }
-            else if (mapEntry.length == 1 && mapEntry.equals("keepRaw"))
+            else if (mapEntry.length == 1 && mapEntry[0].equals("keepRaw"))
             {
                 keepRaw = true;
             }
