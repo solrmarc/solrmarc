@@ -44,7 +44,7 @@ public class SolrCoreLoader
             String line;
             while ((line = pingStream.readLine()) != null)
             {
-                if (line.matches(".*status.>OK<.*"))
+                if (line.matches(".*\"status\">OK<.*") || line.matches(".*\"status\":\"OK\".*"))
                 {
                     statusOK = true;
                     break;
