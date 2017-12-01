@@ -617,29 +617,7 @@ public class SolrMarcDebug extends BootableMain
                 if (wrapped instanceof SolrMarcIndexerException)
                 {
                     SolrMarcIndexerException smie = (SolrMarcIndexerException)wrapped;
-                    String outLine = "";
-                    if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
-                    {
-                        outLine = indexer.getSolrFieldNames().toString() + "throws exception  Record would be Ignored \n";
-                    }
-                    else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
-                    {
-                        outLine = indexer.getSolrFieldNames().toString() + "throws exception  Record would be Deleted \n";
-                    }
-                    else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
-                    {
-                        outLine = indexer.getSolrFieldNames().toString() + "throws exception  Record would be Terminate Indexing \n";
-                    }
-
-                    try
-                    {
-                        doc.insertString(0, outLine, attributesErr);
-                    }
-                    catch (BadLocationException e)
-                    {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                    handleSolrMarcIndexerException(indexer, doc, attributesErr, smie);
                 }
                 else
                 {
@@ -681,6 +659,10 @@ public class SolrMarcDebug extends BootableMain
                     e1.printStackTrace();
                 }
             }
+            catch (SolrMarcIndexerException smie)
+            {
+                handleSolrMarcIndexerException(indexer, doc, attributesErr, smie);
+            }
             catch (Exception e)
             {
                 String outLine = "marc_error : " + indexer.getSolrFieldNames().toString() + e.getMessage() + "\n";
@@ -708,6 +690,33 @@ public class SolrMarcDebug extends BootableMain
         outputPane.setCaretPosition(0);
     }
 
+    private void handleSolrMarcIndexerException(AbstractValueIndexer<?> indexer, Document doc, SimpleAttributeSet attributesErr, SolrMarcIndexerException smie)
+    {
+        String outLine = "";
+        if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
+        {
+            outLine = indexer.getSolrFieldNames().toString() + "throws exception  Record would be Ignored \n";
+        }
+        else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
+        {
+            outLine = indexer.getSolrFieldNames().toString() + "throws exception  Record would be Deleted \n";
+        }
+        else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
+        {
+            outLine = indexer.getSolrFieldNames().toString() + "throws exception  Record would be Terminate Indexing \n";
+        }
+
+        try
+        {
+            doc.insertString(0, outLine, attributesErr);
+        }
+        catch (BadLocationException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
     private String getTextForMarcErrorsAndExceptions(Record rec, List<IndexerSpecException> exceptions)
     {
         StringBuilder text = new StringBuilder();

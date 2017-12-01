@@ -18,7 +18,9 @@ import org.solrmarc.tools.StringNaturalCompare;
 public class MultiValueCollector //implements AbstractValueCollector<Collection<String>>
 {
     boolean isUnique = false;
-    boolean deleteRecordIfEmpty = false;
+    public enum eAction { NOACTION, SKIP, DELETE };
+    eAction ifFieldEmpty = eAction.NOACTION;
+    eAction ifFieldNotEmpty = eAction.NOACTION;
     public enum eNormalize { NOCHANGE, COMPOSE, DECOMPOSE };
     eNormalize normalize = eNormalize.NOCHANGE;
     Comparator<String> sortComparator = null;
@@ -98,7 +100,7 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
     public Collection<String> collect(final Collection<String> values)
     {
         if ((!isUnique || values instanceof Set<?> ) && sortComparator == null && 
-                first == eFirstVal.ALL && deleteRecordIfEmpty == false && normalize == eNormalize.NOCHANGE) 
+                first == eFirstVal.ALL && ifFieldEmpty == eAction.NOACTION && ifFieldNotEmpty == eAction.NOACTION && normalize == eNormalize.NOCHANGE) 
             return values;
         Collection<String> result;
         if (isUnique)
@@ -126,13 +128,28 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
         }
         if (result == null || result.isEmpty())
         {
-            if (deleteRecordIfEmpty)
+            if (ifFieldEmpty == eAction.DELETE)
             {
                 throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
             }
+            else if (ifFieldEmpty == eAction.SKIP)
+            {
+                throw new SolrMarcIndexerException(SolrMarcIndexerException.IGNORE);
+            }
             return (result);
         }
-        else if (first == eFirstVal.FIRST)
+        else 
+        {
+            if (ifFieldNotEmpty == eAction.DELETE)
+            {
+                throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
+            }
+            else if (ifFieldNotEmpty == eAction.SKIP)
+            {
+                throw new SolrMarcIndexerException(SolrMarcIndexerException.IGNORE);
+            }
+        }
+        if (first == eFirstVal.FIRST)
         {
             return Collections.singletonList(result.iterator().next());
         }
@@ -147,11 +164,26 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
                 result = Collections.list(Collections.enumeration(result)).subList(1,  result.size());
             }
         }
-        if (deleteRecordIfEmpty)
+        if (result.isEmpty() && ifFieldEmpty != eAction.NOACTION)
         {
-            if (result.size() == 0)
+            if (ifFieldEmpty == eAction.DELETE)
             {
                 throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
+            }
+            else if (ifFieldEmpty == eAction.SKIP)
+            {
+                throw new SolrMarcIndexerException(SolrMarcIndexerException.IGNORE);
+            }
+        }
+        if (!result.isEmpty() && ifFieldNotEmpty != eAction.NOACTION)
+        {
+            if (ifFieldNotEmpty == eAction.DELETE)
+            {
+                throw new SolrMarcIndexerException(SolrMarcIndexerException.DELETE);
+            }
+            else if (ifFieldNotEmpty == eAction.SKIP)
+            {
+                throw new SolrMarcIndexerException(SolrMarcIndexerException.IGNORE);
             }
         }
         return(result);
@@ -219,9 +251,14 @@ public class MultiValueCollector //implements AbstractValueCollector<Collection<
         return(this);
     }
 
-    public void setDeleteRecordIfEmpty()
+    public void setIfFieldEmpty(eAction action)
     {
-        this.deleteRecordIfEmpty = true;
+        this.ifFieldEmpty = action;
+    }
+
+    public void setIfFieldNotEmpty(eAction action)
+    {
+        this.ifFieldNotEmpty = action;
     }
 
     public void setNormalize(String normVal)

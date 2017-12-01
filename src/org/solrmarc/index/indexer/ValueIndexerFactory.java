@@ -19,6 +19,7 @@ import org.solrmarc.index.extractor.methodcall.StaticMarcTestRecords;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.solrmarc.index.utils.FastClasspathUtils;
+import org.solrmarc.tools.SolrMarcIndexerException;
 //import org.solrmarc.index.utils.ReflectionUtils;
 import org.solrmarc.tools.Utils;
 
@@ -435,6 +436,10 @@ public class ValueIndexerFactory
                     logger.trace("Test firing spec: " + indexSpec);
                     valueIndexer.getFieldData(StaticMarcTestRecords.testRecord[0]);
                 }
+                catch (SolrMarcIndexerException smie)
+                {
+                    // user generated exception, ignore it
+                }
                 catch (InvocationTargetException ite)
                 {
                     throw new IndexerSpecException(ite.getTargetException(), "Error on test invocation of custom method: " + indexSpec);
@@ -789,6 +794,7 @@ public class ValueIndexerFactory
     {
         if (string.equals("unique") || string.equals("first") || string.equals("sort") || string.equals("notunique") ||
             string.equals("notfirst") || string.equals("all") || string.equals("DeleteRecordIfFieldEmpty") ||
+            string.equals("DeleteRecordIfFieldNotEmpty") || string.equals("SkipRecordIfFieldEmpty") || string.equals("SkipRecordIfFieldNotEmpty") ||
             string.equals("normalize") || string.equals("unnormalize"))
             return (true);
         return (false);
@@ -845,7 +851,19 @@ public class ValueIndexerFactory
                 }
                 else if (mapParts[0].equals("DeleteRecordIfFieldEmpty"))
                 {
-                    collector.setDeleteRecordIfEmpty();
+                    collector.setIfFieldEmpty(MultiValueCollector.eAction.DELETE);
+                }
+                else if (mapParts[0].equals("DeleteRecordIfFieldNotEmpty"))
+                {
+                    collector.setIfFieldNotEmpty(MultiValueCollector.eAction.DELETE);
+                }
+                else if (mapParts[0].equals("SkipRecordIfFieldEmpty"))
+                {
+                    collector.setIfFieldEmpty(MultiValueCollector.eAction.SKIP);
+                }
+                else if (mapParts[0].equals("SkipRecordIfFieldNotEmpty"))
+                {
+                    collector.setIfFieldNotEmpty(MultiValueCollector.eAction.SKIP);
                 }
             }
         }
