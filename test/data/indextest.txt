@@ -120,7 +120,7 @@ expect: intro|Mauri
 #22  testing error correction of Russian record with erroneous subfield separator in the middle of a Cyrillic string
 record: u5278992.mrc
 indexSpec: pub = LNK260b, first, clean
-expect: ЭКсмо
+expect: Эксмо
 
 #23  testing error correction of Russian record with erroneous subfield separator in the middle of a Cyrillic string
 readerProps: marc.permissive=false, marc.to_utf_8=true 
