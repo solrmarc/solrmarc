@@ -40,6 +40,7 @@ import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 //import org.solrmarc.marc.MarcReaderFactory;
 import org.solrmarc.tools.PropertyUtils;
+import org.solrmarc.tools.SolrMarcIndexerException;
 
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -613,15 +614,45 @@ public class SolrMarcDebug extends BootableMain
             catch (InvocationTargetException ioe)
             {
                 Throwable wrapped = ioe.getTargetException();
-                String outLine = "marc_error : " + indexer.getSolrFieldNames().toString() + wrapped.getMessage() + "\n";
-                try
+                if (wrapped instanceof SolrMarcIndexerException)
                 {
-                    doc.insertString(doc.getLength(), outLine, attributesErr);
+                    SolrMarcIndexerException smie = (SolrMarcIndexerException)wrapped;
+                    String outLine = "";
+                    if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
+                    {
+                        outLine = indexer.getSolrFieldNames().toString() + "throws exception  Record would be Ignored \n";
+                    }
+                    else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
+                    {
+                        outLine = indexer.getSolrFieldNames().toString() + "throws exception  Record would be Deleted \n";
+                    }
+                    else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
+                    {
+                        outLine = indexer.getSolrFieldNames().toString() + "throws exception  Record would be Terminate Indexing \n";
+                    }
+
+                    try
+                    {
+                        doc.insertString(0, outLine, attributesErr);
+                    }
+                    catch (BadLocationException e)
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
-                catch (BadLocationException e)
+                else
                 {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    String outLine = "marc_error : " + indexer.getSolrFieldNames().toString() + wrapped.getMessage() + "\n";
+                    try
+                    {
+                        doc.insertString(doc.getLength(), outLine, attributesErr);
+                    }
+                    catch (BadLocationException e)
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
             }
             catch (IllegalArgumentException e)
