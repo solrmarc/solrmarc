@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -15,6 +16,7 @@ public class SolrCoreLoader
     public static Logger logger = Logger.getLogger(SolrCoreLoader.class);
 
     public final static String[] defaultSolrJClassnames = { 
+            "org.apache.solr.client.solrj.impl.HttpSolrClient$Builder", 
             "org.apache.solr.client.solrj.impl.HttpSolrClient", 
             "org.apache.solr.client.solrj.impl.HttpSolrServer", 
             "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer" };
@@ -92,6 +94,14 @@ public class SolrCoreLoader
             }
             Constructor<?> httpsolrserverConst = httpsolrserverClass.getDeclaredConstructor(String.class);
             httpsolrserver = httpsolrserverConst.newInstance(urlString);
+            //  Starting in version 7.x of Solr there no longer is a callable constructor for a HttpSolrClient
+            //  you now must create a HttpSolrClient.Builder object and call the build() method on it.
+            //  This next if block handles that special case.
+            if (httpsolrserverClass.getName().endsWith("Builder"))
+            {
+                Method buildsolrserver = httpsolrserverClass.getMethod("build");
+                httpsolrserver = buildsolrserver.invoke(httpsolrserver);
+            }
             Class<?> superclass = httpsolrserver.getClass().getSuperclass();
             if (superclass.getName().endsWith(".SolrServer"))
             {

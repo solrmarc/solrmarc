@@ -319,7 +319,7 @@ public class Indexer
                     {
                         for (String dataVal : data)
                         {
-                            inputDocs[0].addField(fieldName, dataVal, 1.0f);
+                            inputDocs[0].addField(fieldName, dataVal);
                         }
                     }
                 }
