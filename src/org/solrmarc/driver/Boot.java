@@ -411,8 +411,8 @@ public class Boot
             if (!libDir.isAbsolute())
             {
                 logger.debug("Number of homeDirStrs: " + homeDirStrs.length);
-                logger.debug("homeDirStrs[0]: " + homeDirStrs[0]);
-                logger.debug("homeDirStrs[1]: " + homeDirStrs[1]);
+                if (homeDirStrs.length >= 1) logger.debug("homeDirStrs[0]: " + homeDirStrs[0]);
+                if (homeDirStrs.length >= 2) logger.debug("homeDirStrs[1]: " + homeDirStrs[1]);
                 for (int i = homeDirStrs.length - 1; i >= 0; i--)
                 {
                     String homeDir = homeDirStrs[i];
