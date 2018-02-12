@@ -392,6 +392,7 @@ public class FieldFormatterBase implements FieldFormatter
     }
 
     private static Pattern ACCENTS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+    private static Pattern PUNCT_OR_SPACE = Pattern.compile("[ \\p{Punct}]+", Pattern.UNICODE_CHARACTER_CLASS);
 
     public String cleanData(VariableField vf, boolean isSubfieldA, String data)
     {
@@ -436,7 +437,19 @@ public class FieldFormatterBase implements FieldFormatter
             }
             if (replaced) str = folded.toString();
         }
-        if (cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)) str = str.replaceAll("( |\\p{Punct})+", " ");
+        if (cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)) 
+        {
+            String str1 = str.replaceAll("( |\\p{Punct})+", " ");
+            String str2 = PUNCT_OR_SPACE.matcher(str).replaceAll(" ");
+            if (str1.equals(str2)) 
+            {
+                str = str1;
+            }
+            else
+            {
+                str = str2;
+            }
+        }
         if (!cleanVal.contains(eCleanVal.UNTRIMMED))  str = str.trim();
 
         if (cleanVal.contains(eCleanVal.TO_LOWER))
