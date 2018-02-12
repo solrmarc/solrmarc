@@ -498,6 +498,10 @@ public class SolrMarcDebug extends BootableMain
             }
             if (pointToFirst) marcIdentifier.setSelectedItem(firstId);
         }
+        catch (FileNotFoundException fnfe)
+        {
+            errorPane.setText("Error: Cannot find the specified file: "+ marcFile.getAbsolutePath());
+        }
         catch (IOException e1)
         {
             // TODO Auto-generated catch block
