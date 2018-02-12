@@ -1,6 +1,7 @@
 package org.solrmarc.mixin;
 
 import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -286,43 +287,38 @@ public class SummaryHoldingsMixin extends SolrIndexerMixin
         boolean normalize_date = false;
         if (labelField == null) return(null);
         StringBuffer result = new StringBuffer();
-        StringBuffer vol1 = new StringBuffer();
-        StringBuffer vol2 = new StringBuffer();
+        List<String> vol1 = new ArrayList<String>();
+        List<String> vol2 = new ArrayList<String>();
         for (char subfield = 'a'; subfield <= 'f'; subfield++)
         {
             String label = getSubfieldVal(labelField, subfield, null);
             String data1 = getSubfieldVal(df1, subfield, null);
             String data2 = getSubfieldVal(df2, subfield, null);
             if (label == null || data1 == null || data2 == null) break;
-            if (subfield != 'a')  
-            {
-                vol1.append(", ");
-                vol2.append(", ");
-            }
-            if (label.startsWith("(") && label.endsWith(")")) label = "";
-            vol1.append(label);
-            vol1.append(data1);
-            vol2.append(label);
-            vol2.append(data2);
+            if (label.startsWith("(") && label.endsWith(")")) label = " ";
+            vol1.add(label + data1);
+            vol2.add(label + data2);
         }
-        result.append(rangify(vol1.toString(), vol2.toString()));
-        StringBuffer alt = new StringBuffer();
+        result.append(rangifyArray(vol1, vol2, true));
+        List<String> alt1 = new ArrayList<String>();
+        List<String> alt2 = new ArrayList<String>();
         for (char subfield = 'g'; subfield <= 'h'; subfield++)
         {
             String label = getSubfieldVal(labelField, subfield, null);
             String data1 = getSubfieldVal(df1, subfield, null);
             String data2 = getSubfieldVal(df2, subfield, null);
             if (label == null || data1 == null || data2 == null) break;
-            if (subfield != 'g')  alt.append(", ");
-            alt.append(label);
-            alt.append(rangify(data1, data2));
+            alt1.add(label);
+            alt2.add(label);
+            alt1.add(data1);
+            alt2.add(data2);
         }
-        if (alt.length() != 0)
+        if (alt1.size() > 0)
         {
-            result.append(" (").append(alt).append(")");
+            result.append(" (").append(rangifyArray(alt1, alt2, true)).append(")");
         }
-        StringBuffer date1 = new StringBuffer();
-        StringBuffer date2 = new StringBuffer();
+        List<String> date1 = new ArrayList<String>();
+        List<String> date2 = new ArrayList<String>();
         {
             boolean prependStr = false;
             String strToPrepend = "";
@@ -338,32 +334,78 @@ public class SummaryHoldingsMixin extends SolrIndexerMixin
                     data2 = expandMonthOrSeason(data2);
                     strToPrepend = ":";
                 }
-                else if (label.equalsIgnoreCase("(day)"))
+                else if (label.equalsIgnoreCase("(day)") || label.equalsIgnoreCase("(unit)"))
                 {
                     strToPrepend = " ";
                 }
                 if (prependStr)
                 {
-                    date1.append(strToPrepend).append(data1);
-                    date2.append(strToPrepend).append(data2);
+                    date1.add(strToPrepend);
+                    date2.add(strToPrepend);
                 }
-                else
-                {
-                    date1.append(data1);
-                    date2.append(data2);
-                }
+                date1.add(data1);
+                date2.add(data2);
                 prependStr = true;
             }
         }
-        if (date1.length() > 0 && date2.length() > 0)
+        if (date1.size() > 0 && date2.size() > 0)
         {
-            if (result.length() > 0)  result.append(" (").append(rangify(date1.toString(), date2.toString())).append(")");
-            else result.append(rangify(date1.toString(), date2.toString()));
+            if (result.length() > 0)  result.append(" (").append(rangifyArray(date1, date2, false)).append(")");
+            else result.append(rangifyArray(date1, date2, false));
         }    
         return result.toString();
     }
 
-    private Object rangify(String data1, String data2)
+    private String rangifyArray(List<String> dataArr1, List<String> dataArr2, boolean insertCommas)
+    {
+        StringBuilder result = new StringBuilder();
+        int i;
+        if (dataArr1.size() == 1 && dataArr2.size() == 1 && dataArr1.get(0).equals(dataArr2.get(1)))
+        {
+            return(dataArr1.get(0));
+        }
+        for (i = 0; i < dataArr1.size() && i < dataArr2.size(); i++)
+        {
+            if (dataArr1.get(i).equals(dataArr2.get(i)))
+            {
+                if (insertCommas && i > 0) result.append(", ");
+                result.append(dataArr1.get(i));
+            }
+            else
+            {
+                if (insertCommas && i > 0) result.append(", ");
+                String separator = insertCommas ? ", " : "";
+                result.append(joinRemainder(dataArr1, i, separator)).append("-").append(joinRemainder(dataArr2, i, separator));
+                break;
+            }
+        }
+
+        return result.toString();
+    }
+
+    public static String joinRemainder(List<String> strings, int startAt, String separator) 
+    {
+        if (strings == null || strings.size() <= startAt)
+        {
+            return "";
+        } 
+        else if (strings.size() == startAt-1)
+        {
+            return strings.get(startAt);
+        }
+        else
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.append(strings.get(startAt));
+            for (int i = 1; i + startAt < strings.size(); i++)
+            {
+                sb.append(separator).append(strings.get(startAt+i));
+            }
+            return sb.toString();
+        }
+    }
+    
+/*    private Object rangify(String data1, String data2)
     {
         int i;
         if (data1.equals(data2)) return(data1);
@@ -397,7 +439,8 @@ public class SummaryHoldingsMixin extends SolrIndexerMixin
             result = data1;
         return result;
     }
-
+*/
+    
     private String expandMonthOrSeason(String data)
     {
         data = data.replaceAll("01", "Jan");
