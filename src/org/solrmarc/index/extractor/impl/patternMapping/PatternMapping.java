@@ -34,7 +34,7 @@ public class PatternMapping
         int groupCnt = inputMatcher.groupCount();
         while (index >= 0)
         {
-            String num = outputPattern.substring(index + 1).replaceFirst("[^0-9].*", "");
+            String num = outputPattern.substring(index + 1, index + 2);
             int groupNum = Integer.parseInt(num);
             if (groupNum > groupMax) groupMax = groupNum;
             index = outputPattern.indexOf('$', index + 1 + num.length());
