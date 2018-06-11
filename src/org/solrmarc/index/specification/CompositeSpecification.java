@@ -68,6 +68,7 @@ public class CompositeSpecification extends Specification
         }
         else
         {
+            if (spec.hasDuplicateTags())  this.duplicateTags = true;
             for (String t : ((CompositeSpecification) spec).tagsUsed)
             {
                 if (tagsUsed.contains(t))
@@ -144,15 +145,6 @@ public class CompositeSpecification extends Specification
         }
     }
 
-//    @Override
-//    public void addFormatter(FieldFormatterDecorator fmt)
-//    {
-//        for (SingleSpecification spec : pieces)
-//        {
-//            spec.addFormatter((FieldFormatterDecorator)fmt.makeThreadSafeCopy());
-//        }
-//    }
-//    
     @Override 
     public void addMap(AbstractMultiValueMapping valueMapping)
     {
@@ -161,7 +153,7 @@ public class CompositeSpecification extends Specification
             spec.addMap(valueMapping);
         }
     }
-    
+
     @Override
     public void setFormatter(FieldFormatter fmt)
     {
@@ -186,7 +178,7 @@ public class CompositeSpecification extends Specification
             spec.setCleanVal(of);
         }
     }
-    
+
     public void setJoinVal(eJoinVal joinVal)
     {
         for (SingleSpecification spec : pieces)
@@ -194,7 +186,7 @@ public class CompositeSpecification extends Specification
             spec.setJoinVal(joinVal);
         }
     }
-    
+
     public void setSubstring(int offset, int endOffset)
     {
         for (SingleSpecification spec : pieces)
@@ -202,7 +194,7 @@ public class CompositeSpecification extends Specification
             spec.setSubstring(offset, endOffset);
         }
     }
-    
+
     public void setSeparator(String separator)
     {
         for (SingleSpecification spec : pieces)
@@ -210,7 +202,7 @@ public class CompositeSpecification extends Specification
             spec.setSeparator(separator);
         }
     }
-   
+
     public void setFormatPatterns(final String[] mapParts)
     {
         for (SingleSpecification spec : pieces)

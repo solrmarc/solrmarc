@@ -27,7 +27,7 @@ public abstract class SingleSpecification extends Specification
         this.cond = cond;
         tags = new String[1];
         tags[0] = tag;
-        fmt = new FieldFormatterBase(true);
+        fmt = new FieldFormatterBase(false);
     }
 
     protected SingleSpecification(SingleSpecification toClone)
@@ -72,7 +72,7 @@ public abstract class SingleSpecification extends Specification
     protected boolean specMatches(String tag, VariableField f)
     {
         String stag = this.tag;
-        return(tag.equals(stag));        
+        return(tag.equals(stag));
     }
 
     abstract public void addFieldValues(Collection<String> result, VariableField vf) throws Exception;
@@ -88,7 +88,7 @@ public abstract class SingleSpecification extends Specification
     {
         this.fmt = fmt;
     }
-    
+
     public void addCleanVal(eCleanVal cleanVal)
     {
         fmt.addCleanVal(cleanVal);
