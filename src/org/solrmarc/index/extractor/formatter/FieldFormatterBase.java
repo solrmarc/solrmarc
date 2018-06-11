@@ -448,6 +448,7 @@ public class FieldFormatterBase implements FieldFormatter
             else
             {
                 str = str2;
+                str = str.replaceAll("( |\\p{Punct})+", " ");
             }
         }
         if (!cleanVal.contains(eCleanVal.UNTRIMMED))  str = str.trim();
