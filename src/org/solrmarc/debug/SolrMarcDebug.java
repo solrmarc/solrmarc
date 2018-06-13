@@ -50,6 +50,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -112,6 +113,13 @@ public class SolrMarcDebug extends BootableMain
         super.processArgs(args, false);
         initialize();
     }
+
+    @Override
+    protected boolean needsSolrJ()
+    {
+        return false;
+    }
+
 
     /**
      * Initialize the contents of the frame.
@@ -565,7 +573,7 @@ public class SolrMarcDebug extends BootableMain
         {
             try
             {
-                currentConfigText = currentConfigText.replaceAll(",[ \t]*\n[ \t]+", ",");
+                currentConfigText = currentConfigText.replaceAll(",[ \t]*(\r)?\n[ \t]+", ",");
                 indexers = indexerFactory.createValueIndexers(currentConfigText.split("\n"));
                 previousConfigText = currentConfigText;
             }
@@ -590,19 +598,37 @@ public class SolrMarcDebug extends BootableMain
         attributesErr.addAttribute(StyleConstants.CharacterConstants.Italic, Boolean.FALSE);
         attributesErr.addAttribute(StyleConstants.CharacterConstants.Foreground, Color.RED);
         Document doc = outputPane.getDocument();
-
+        Map<String, List<String>> hasValueForField = new LinkedHashMap<String, List<String>>();
         for (AbstractValueIndexer<?> indexer : indexers)
         {
             Collection<String> fieldNameList = indexer.getSolrFieldNames();
             Collection<String> results = null;
             try
             {
+                if (indexer.getOnlyIfEmpty())
+                {
+                    if (indexer.getSolrFieldNames().size() == 1 && hasValueForField.containsKey(indexer.getSolrFieldNames().iterator().next())) 
+                        continue;
+                }
                 results = indexer.getFieldData(rec);
                 for (String fieldName : fieldNameList)
                 {
                     for (String result : results)
                     {
                         String outLine = fieldName + " : " + result + "\n";
+                        if (indexer.getOnlyIfEmpty() && hasValueForField.containsKey(fieldName)) 
+                            continue;
+                        List<String> resultList; 
+                        if (hasValueForField.containsKey(fieldName)) 
+                            resultList = hasValueForField.get(fieldName);
+                        else
+                            resultList = new ArrayList<String>();
+                        if (indexer.getOnlyIfUnique())
+                        {
+                            if (resultList.contains(result)) continue;
+                        }
+                        resultList.add(result);
+                        hasValueForField.put(fieldName, resultList);
                         try
                         {
                             doc.insertString(doc.getLength(), outLine, null);

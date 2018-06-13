@@ -307,8 +307,12 @@ public class Indexer
         for (final AbstractValueIndexer<?> indexer : indexers)
         {
             try {
+                if (indexer.getOnlyIfEmpty())
+                {
+                    if (indexer.getSolrFieldNames().size() == 1 && inputDocs[0].containsKey(indexer.getSolrFieldNames().iterator().next())) 
+                        continue;
+                }
                 final Collection<String> data = indexer.getFieldData(record);
-
                 for (String fieldName : indexer.getSolrFieldNames())
                 {
                     if (data.size() == 0)
@@ -317,8 +321,17 @@ public class Indexer
                     }
                     else
                     {
+                        if (indexer.getOnlyIfEmpty() && inputDocs[0].containsKey(fieldName))
+                        {
+                            continue;
+                        }
                         for (String dataVal : data)
                         {
+                            if (indexer.getOnlyIfUnique())
+                            {
+                                Collection<Object> values = inputDocs[0].getFieldValues(fieldName);
+                                if (values.contains(dataVal)) continue;
+                            }
                             inputDocs[0].addField(fieldName, dataVal);
                         }
                     }
@@ -395,9 +408,29 @@ public class Indexer
             {
                 logger.warn("Exception in record: " + recDoc.rec.getControlNumber());
                 logger.warn("while processing index specification: " + indexer.getSpecLabel());
-                inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
-                errLvl = eErrorSeverity.ERROR;
-                recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
+                Class<?> targetErrorClazz;
+                boolean targetError = false;
+                try
+                {
+                    targetErrorClazz = Class.forName("bsh.TargetError");
+                    if (targetErrorClazz.isInstance(e))
+                    {
+                        targetError = true;
+                        inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.toString());
+                        errLvl = eErrorSeverity.ERROR;
+                        recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
+                    }
+                }
+                catch (ClassNotFoundException e1)
+                {
+                }
+
+                if (!targetError)
+                {
+                    inputDocs[2].addField("marc_error", indexer.getSolrFieldNames().toString() + e.getMessage());
+                    errLvl = eErrorSeverity.ERROR;
+                    recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
+                }
             }
         }
         if (record.hasErrors())

@@ -122,4 +122,11 @@ public abstract class AbstractValueIndexer<T>
         }
         return(result);
     }
+
+    public abstract void setIfEmpty();
+    public abstract boolean getOnlyIfEmpty();
+
+    public abstract void setIfUnique();
+    public abstract boolean getOnlyIfUnique();
+
 }

@@ -372,13 +372,21 @@ public class ValueIndexerFactory
                     if (valueIndexer != null)
                     {
                         List<AbstractValueIndexer<?>> indexerList;
-                        if (delimiter.startsWith("+") && valueIndexerMap.containsKey(solrFieldName))
+                        if ((delimiter.startsWith("+") || delimiter.startsWith("|") || delimiter.startsWith("?")) && valueIndexerMap.containsKey(solrFieldName))
                         {
                             indexerList = valueIndexerMap.get(solrFieldName);
                         }
                         else
                         {
                             indexerList = new ArrayList<>();
+                        }
+                        if (delimiter.startsWith("?")) 
+                        {
+                            valueIndexer.setIfEmpty();
+                        }
+                        if (delimiter.startsWith("|")) 
+                        {
+                            valueIndexer.setIfUnique();
                         }
                         indexerList.add(valueIndexer);
                         valueIndexerMap.put(solrFieldName, indexerList);

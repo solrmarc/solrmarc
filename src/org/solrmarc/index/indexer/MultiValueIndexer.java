@@ -16,6 +16,9 @@ import org.solrmarc.index.mapping.AbstractValueMapping;
 
 public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
 {
+    private boolean onlyIfEmpty = false;
+    private boolean onlyIfUnique;
+
     public MultiValueIndexer(final String solrFieldNamesStr, final AbstractMultiValueExtractor extractor,
             final AbstractValueMapping<Collection<String>>[] mappings,
             final MultiValueCollector collector)
@@ -114,5 +117,27 @@ public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
         long end = System.nanoTime();
         totalElapsedTime.addAndGet(end - start);
         return (result);
+    }
+
+    @Override
+    public void setIfEmpty()
+    {
+        onlyIfEmpty = true;
+    }
+    @Override
+    public boolean getOnlyIfEmpty()
+    {
+        return(onlyIfEmpty);
+    }
+
+    @Override
+    public void setIfUnique()
+    {
+        onlyIfUnique = true;
+    }
+    @Override
+    public boolean getOnlyIfUnique()
+    {
+        return(onlyIfUnique);
     }
 }
