@@ -2,6 +2,7 @@ package org.solrmarc.driver;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,10 +29,10 @@ import joptsimple.OptionSpec;
 
 public class BootableMain
 {
-    private final static Logger logger = Logger.getLogger(BootableMain.class);
+    private static final LoggerDelegator logger = new LoggerDelegator(BootableMain.class);
 
-    protected String homeDirStrs[];
-    protected String addnlLibDirStrs[];
+    protected String[] homeDirStrs;
+    protected String[] addnlLibDirStrs;
     protected OptionSpec<String> readOpts;
     protected OptionSpec<String> configSpecs;
     protected OptionSpec<String> homeDirs;
@@ -55,7 +56,7 @@ public class BootableMain
      *                detailing the valid command-line arguments.  false will simply do nothing
      *                and return.
      */
-    protected void processArgs(String args[], boolean failOnZeroArgs)
+    protected void processArgs(String[] args, boolean failOnZeroArgs)
     {
         OptionParser parser = new OptionParser(  );
         readOpts = parser.acceptsAll(Arrays.asList( "r", "reader_opts"), "file containing MARC Reader options").withRequiredArg().defaultsTo("marcreader.properties");
@@ -116,9 +117,13 @@ public class BootableMain
                     hasDefDir = true;
                 }
                 homeDirList.add(dirAsFile.getAbsolutePath());
+                logger.debug("Adding directory: " + dirAsFile.getAbsolutePath());
             }
-            if (!hasDefDir)  homeDirList.add(defDir.getAbsolutePath());
-            homeDirStrs = homeDirList.toArray(new String[0]);
+            if (!hasDefDir)
+            {
+                homeDirList.add(defDir.getAbsolutePath());
+            }
+            this.homeDirStrs = ((String[]) homeDirList.toArray(new String[0]));
         }
         else
         {
@@ -126,30 +131,31 @@ public class BootableMain
         }
         System.setProperty("solrmarc.home.dir", homeDirStrs[0]);
 
-        reInitLogging(homeDirStrs);
-
-        File solrJPath = ((options.has(solrjDir)) ? options.valueOf(solrjDir) : new File("lib-solrj"));
-
-        try {
-            if (solrJPath.isAbsolute())
-            {
-                Boot.extendClasspathWithSolJJarDir(null, solrJPath);
-            }
-            else
-            {
-                Boot.extendClasspathWithSolJJarDir(homeDirStrs, solrJPath);
-            }
-        }
-        catch (IndexerSpecException ise)
+        LoggerDelegator.reInit(this.homeDirStrs);
+        if (needsSolrJ())
         {
-            logger.fatal("Fatal error: Failure to load SolrJ", ise);
-            logger.error("Exiting...");
-            System.exit(10);
+            File solrJPath = (options.has(this.solrjDir) ? (File) this.options.valueOf(this.solrjDir) : new File("lib-solrj"));
+            try
+            {
+                if (solrJPath.isAbsolute())
+                {
+                    Boot.extendClasspathWithSolJJarDir(null, solrJPath);
+                }
+                else
+                {
+                    Boot.extendClasspathWithSolJJarDir(this.homeDirStrs, solrJPath);
+                }
+            }
+            catch (IndexerSpecException ise)
+            {
+                logger.fatal("Fatal error: Failure to load SolrJ", ise);
+                logger.error("Exiting...");
+                System.exit(10);
+            }
         }
-
         // Now add local lib directories
         try {
-            if (addnlLibDirs.value(options)!= null)
+            if (addnlLibDirs.value(options) != null)
             {
                 addnlLibDirStrs = addnlLibDirs.value(options).split("[,;|]");
                 Boot.extendClasspathWithLocalJarDirs(homeDirStrs, addnlLibDirStrs);
@@ -162,7 +168,12 @@ public class BootableMain
             System.exit(10);
         }
     }
-    
+
+    protected boolean needsSolrJ()
+    {
+        return true;
+    }
+
     private static void reInitLogging(String[] homeDirs)
     {
         for (String dir : homeDirs)
@@ -176,7 +187,4 @@ public class BootableMain
             }
         }
     }
-
-
-
 }

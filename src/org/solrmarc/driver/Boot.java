@@ -2,6 +2,7 @@ package org.solrmarc.driver;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,12 +13,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.util.Set;
-
-import org.apache.log4j.Logger;
 import org.solrmarc.index.indexer.IndexerSpecException;
-import org.solrmarc.index.utils.FastClasspathUtils;
-//import org.solrmarc.index.utils.ReflectionUtils;
+import org.solrmarc.index.utils.ClasspathUtils;
 
 /**
  * @author rh9ec
@@ -25,21 +24,15 @@ import org.solrmarc.index.utils.FastClasspathUtils;
  */
 public class Boot
 {
-    private static Logger logger;
+    private static LoggerDelegator logger = null;
 
     static
     {
         addLibDirJarstoClassPath();
-
-        logger = Logger.getLogger(Boot.class);
     }
 
-    /**
-     * @param args
-     */
     public static void main(String[] args)
     {
-        org.apache.log4j.BasicConfigurator.configure();
         if (args.length == 0)
         {
             findExecutables();
@@ -66,6 +59,7 @@ public class Boot
                 {
                     logger.fatal("ERROR: Unable to find main class for specified short name: " + args[0]);
                     findExecutables();
+                    LoggerDelegator.flushToLog();
                     System.exit(3);
                 }
             }
@@ -121,12 +115,13 @@ public class Boot
 
     private static String classnamefromArg(String string) throws ClassNotFoundException
     {
-        Set<Class<? extends BootableMain>> mainClasses = FastClasspathUtils.getBootableMainClasses();
+        Set<Class<? extends BootableMain>> mainClasses = ClasspathUtils.instance().getBootableMainClasses();
         for (Class<?> clazz : mainClasses)
         {
-            if (string.equals(clazz.getName()))  return(clazz.getName());
-            if (clazz.getName().endsWith("."+string))  return(clazz.getName());
+            if (string.equals(clazz.getName()))          return clazz.getName();
+            if (clazz.getName().endsWith("." + string))  return clazz.getName();
         }
+ 
         for (Class<?> clazz : mainClasses)
         {
             String shortNameStr = null;
@@ -146,8 +141,7 @@ public class Boot
 
     private static void findExecutables()
     {
-        Set<Class<? extends BootableMain>> mainClasses = FastClasspathUtils.getBootableMainClasses();
-
+        Set<Class<? extends BootableMain>> mainClasses = ClasspathUtils.instance().getBootableMainClasses();
         logger.info("This class  org.solrmarc.driver.Boot  dynamically loads all of the jars in the lib directory");
         logger.info("and then calls the main method of a class that requires those jars");
         logger.info("The first argument provided to this class specifies the name of the class to load and execute");
@@ -172,10 +166,10 @@ public class Boot
                 }
                 if (Modifier.isStatic(mainMethod.getModifiers()))
                 {
-                    logger.info("    " + mainClass.getName() + ((shortNameStr != null) ? "  ("+shortNameStr+")" : ""));
+                    logger.info("    " + mainClass.getName() + (shortNameStr != null ? "  (" + shortNameStr + ")" : ""));
                 }
             }
-            catch (NoSuchMethodException e)
+            catch (NoSuchMethodException localNoSuchMethodException)
             {
                 // no prob
             }
@@ -204,7 +198,6 @@ public class Boot
         }
         catch (URISyntaxException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         if (jarFile.getName().endsWith(".jar"))
@@ -228,6 +221,7 @@ public class Boot
      */
     private static void addLibDirJarstoClassPath()
     {
+        logger = new LoggerDelegator(Boot.class);
         String homePath = getDefaultHomeDir();
         File homeDir = new File(homePath);
 
@@ -242,29 +236,40 @@ public class Boot
             logger.fatal("Fatal error: Failure while loading jars from lib directory" + ise.getMessage());
             System.exit(10);
         }
-
-        try
+        boolean hasRequiredClasses = true;
+        hasRequiredClasses &= require("org.marc4j.marc.Record", "Fatal error: Unable to find required marc4j Record class.");
+        hasRequiredClasses &= require("org.apache.log4j.Logger", "Fatal error: Unable to find required log4j Logging class.");
+        hasRequiredClasses &= require("java_cup.runtime.Symbol", "Fatal error: Unable to find required parser runtime library:  java-cup-runtime.jar ");
+        hasRequiredClasses &= require("joptsimple.OptionSet", "Fatal error: Unable to find required JoptionSimple class library.");
+        if (!hasRequiredClasses)
         {
-            Class.forName("org.marc4j.marc.Record");
-        }
-        catch (ClassNotFoundException e)
-        {
-            try {
-                logger = Logger.getLogger(Boot.class);
-                org.apache.log4j.BasicConfigurator.configure();
-                logger.fatal("Fatal error: Unable to find marc4j Record class, probably missing many others as well.  " + e.getMessage());
-            }
-            catch (Exception e1)
-            {
-                System.err.println("Fatal error: Unable to find marc4j Record class, probably missing many others as well.");
-            }
+            LoggerDelegator.flushToLog();
             System.exit(11);
         }
     }
 
+    private static boolean require(String requiredClass, String errMsg)
+    {
+        try {
+            Class.forName(requiredClass);
+        }
+        catch (ClassNotFoundException e)
+        {
+            try {
+                logger.fatal(errMsg);
+            }
+            catch (Exception e1)
+            {
+                System.err.println(errMsg);
+            }
+            return false;
+        }
+        return true;
+    }
+
     private static void extendClasspathWithJar(URLClassLoader sysLoader, File jarfile)
     {
-        URL urls[] = sysLoader.getURLs();
+        URL[] urls = sysLoader.getURLs();
         URL ujar;
         try
         {
@@ -289,6 +294,7 @@ public class Boot
             Method method = sysClass.getDeclaredMethod("addURL", new Class[] { URL.class });
             method.setAccessible(true);
             method.invoke(sysLoader, new Object[] { ujar });
+            logger.debug("Adding Jar file: " + jarfile.getAbsolutePath());
         }
         catch (Throwable t)
         {
@@ -310,7 +316,8 @@ public class Boot
             {
                 dirpath = dir.getAbsolutePath();
             }
-            throw new RuntimeException("Unable to find any Jars in the provided directory: " + dirpath + "  define location of solrj to use with the option -solrj <dir>");
+//           throw new RuntimeException("Unable to find any Jars in the provided directory: " + dirpath + "  define location of solrj to use with the option -solrj <dir>");
+           return false;
         }
         for (File file : dir.listFiles())
         {
@@ -331,16 +338,14 @@ public class Boot
         URI u = dir.toURI();
         URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
         Class<URLClassLoader> urlClass = URLClassLoader.class;
-        Method method;
         try
         {
-            method = urlClass.getDeclaredMethod("addURL", new Class[]{URL.class});
+            Method method = urlClass.getDeclaredMethod("addURL", new Class[] { URL.class });
             method.setAccessible(true);
-            method.invoke(urlClassLoader, new Object[]{u.toURL()});
+            method.invoke(urlClassLoader, new Object[] { u.toURL() });
         }
         catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | MalformedURLException e)
         {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -378,9 +383,11 @@ public class Boot
         if (!foundSolrj)
         {
             parentDir = dirWithJars.getParentFile();
-            foundSolrj = extendClasspathWithJarDir(sysLoader, parentDir, ".*solrj.*[.]jar", ".*solrj.*[.]jar");
+            if (parentDir != null)
+            {
+                foundSolrj = extendClasspathWithJarDir(sysLoader, parentDir, ".*solrj.*[.]jar", ".*solrj.*[.]jar");
+            }
         }
-
         if (!foundSolrj)
         {
             throw new IndexerSpecException("Unable to find a solrj jar file in directory: "+ dir.getAbsolutePath() + ((parentDir != null) ? "( or "+parentDir.getAbsolutePath()+ ")": ""));
@@ -391,7 +398,7 @@ public class Boot
     {
         if (homeDirStrs == null) return(dir);
         // traverse list in stated order so earlier entries will be found and used before later ones.
-        for (int i = 0 ; i < homeDirStrs.length; i++)
+        for (int i = 0; i < homeDirStrs.length; i++)
         {
             String homeDirStr = homeDirStrs[i];
             File dirSolrJ = new File(homeDirStr, dir.getPath());
@@ -411,8 +418,14 @@ public class Boot
             if (!libDir.isAbsolute())
             {
                 logger.debug("Number of homeDirStrs: " + homeDirStrs.length);
-                if (homeDirStrs.length >= 1) logger.debug("homeDirStrs[0]: " + homeDirStrs[0]);
-                if (homeDirStrs.length >= 2) logger.debug("homeDirStrs[1]: " + homeDirStrs[1]);
+                if (homeDirStrs.length >= 1)
+                {
+                    logger.debug("homeDirStrs[0]: " + homeDirStrs[0]);
+                }
+                if (homeDirStrs.length >= 2)
+                {
+                    logger.debug("homeDirStrs[1]: " + homeDirStrs[1]);
+                }
                 for (int i = homeDirStrs.length - 1; i >= 0; i--)
                 {
                     String homeDir = homeDirStrs[i];

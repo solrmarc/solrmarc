@@ -1,30 +1,5 @@
 package org.solrmarc.index.indexer;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-import org.marc4j.marc.Record;
-import org.solrmarc.index.collector.MultiValueCollector;
-import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
-import org.solrmarc.index.extractor.AbstractSingleValueExtractor;
-import org.solrmarc.index.extractor.AbstractValueExtractor;
-import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
-import org.solrmarc.index.extractor.ExternalMethod;
-import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
-import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
-import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
-import org.solrmarc.index.extractor.impl.java.JavaValueExtractorUtils;
-import org.solrmarc.index.extractor.methodcall.MethodCallManager;
-import org.solrmarc.index.extractor.methodcall.StaticMarcTestRecords;
-import org.solrmarc.index.mapping.AbstractMultiValueMapping;
-import org.solrmarc.index.mapping.AbstractValueMappingFactory;
-import org.solrmarc.index.utils.FastClasspathUtils;
-import org.solrmarc.tools.SolrMarcIndexerException;
-//import org.solrmarc.index.utils.ReflectionUtils;
-import org.solrmarc.tools.Utils;
-
-import bsh.TargetError;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -43,6 +18,26 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.log4j.Logger;
+import org.marc4j.marc.Record;
+import org.solrmarc.index.collector.MultiValueCollector;
+import org.solrmarc.index.collector.MultiValueCollector.eAction;
+import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
+import org.solrmarc.index.extractor.AbstractSingleValueExtractor;
+import org.solrmarc.index.extractor.AbstractValueExtractor;
+import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
+import org.solrmarc.index.extractor.ExternalMethod;
+import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
+import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
+import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
+import org.solrmarc.index.extractor.impl.java.JavaValueExtractorUtils;
+import org.solrmarc.index.extractor.methodcall.MethodCallManager;
+import org.solrmarc.index.mapping.AbstractMultiValueMapping;
+import org.solrmarc.index.mapping.AbstractValueMappingFactory;
+import org.solrmarc.index.utils.ClasspathUtils;
+import org.solrmarc.index.utils.FastClasspathUtils;
+import org.solrmarc.tools.SolrMarcIndexerException;
+import org.solrmarc.tools.Utils;
 
 public class ValueIndexerFactory
 {
@@ -55,8 +50,8 @@ public class ValueIndexerFactory
     private FullConditionalParser parser = null;
     private Properties localMappingProperties = null;
     private JavaValueExtractorUtils compileTool = null;
-    private String homeDirStrs[] = null;
-    private final Pattern specPattern = Pattern.compile("([-A-Za-z_0-9, \\t]*)([:=]|([+]=))(.*)");
+    private String[] homeDirStrs = null;
+    private final Pattern specPattern = Pattern.compile("([-A-Za-z_0-9, \\t]*)([:=]|([+?|]=))(.*)");
     boolean debug_parse = true;
     private boolean defaultUniqueVal = true;
     private String defaultCustomClassname = null;
@@ -69,17 +64,21 @@ public class ValueIndexerFactory
      */
     private static ValueIndexerFactory theFactory = null;
 
-    public static ValueIndexerFactory initialize(String homeDirStrs[])
+    public static ValueIndexerFactory initialize(String[] homeDirStrs)
     {
-        if (homeDirStrs == null) { homeDirStrs = new String[] { "." }; }
-        if (theFactory != null && Arrays.equals(homeDirStrs, theFactory.homeDirStrs))
-            return(theFactory);
-
+        if (homeDirStrs == null)
+        {
+            homeDirStrs = new String[] { "." };
+        }
+        if ((theFactory != null) && (Arrays.equals(homeDirStrs, theFactory.homeDirStrs)))
+        {
+            return theFactory;
+        }
         theFactory = new ValueIndexerFactory(homeDirStrs);
         try
         {
-            theFactory.extractorFactories = theFactory.createExtractorFactories(FastClasspathUtils.getExtractorFactoryClasses());
-            theFactory.mappingFactories = theFactory.createMappingFactories(FastClasspathUtils.getMappingFactoryClasses());
+            theFactory.extractorFactories = theFactory.createExtractorFactories(FastClasspathUtils.instance().getExtractorFactoryClasses());
+            theFactory.mappingFactories = theFactory.createMappingFactories(FastClasspathUtils.instance().getMappingFactoryClasses());
         }
         catch (IllegalAccessException | InstantiationException e)
         {
@@ -93,7 +92,7 @@ public class ValueIndexerFactory
         return (theFactory);
     }
 
-    public ValueIndexerFactory(String homeDirStrs[])
+    public ValueIndexerFactory(String[] homeDirStrs)
     {
         this.homeDirStrs = homeDirStrs;
 //        validationExceptions = new ArrayList<IndexerSpecException>();
@@ -210,9 +209,8 @@ public class ValueIndexerFactory
 //        this.debug_parse = debug_parse;
 //    }
 //
-    public List<AbstractValueIndexer<?>> createValueIndexers(File indexSpecFiles[]) throws IllegalAccessException, InstantiationException, IOException
+    public List<AbstractValueIndexer<?>> createValueIndexers(File[] indexSpecFiles) throws IllegalAccessException, InstantiationException, IOException
     {
-//        validationExceptions.clear();
         localMappingProperties = new Properties();
 
         Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap = new LinkedHashMap<>();
@@ -239,14 +237,13 @@ public class ValueIndexerFactory
 //        return valueIndexers;
 //    }
 
-    public List<AbstractValueIndexer<?>> createValueIndexers(String configSpecs[]) throws IllegalAccessException, InstantiationException
+    public List<AbstractValueIndexer<?>> createValueIndexers(String[] configSpecs) throws IllegalAccessException, InstantiationException
     {
-//        validationExceptions.clear();
         localMappingProperties = new Properties();
 
         Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap = new LinkedHashMap<>();
         Map<String, List<IndexerSpecException>>    valueIndexerExceptions = new LinkedHashMap<>();
-        
+
         createValueIndexers(configSpecs, valueIndexerMap, valueIndexerExceptions);
 
         List<AbstractValueIndexer<?>> valueIndexers = collapseMapToList(valueIndexerMap);
@@ -257,7 +254,7 @@ public class ValueIndexerFactory
 
     private List<AbstractValueIndexer<?>> collapseMapToList(Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap)
     {
-        List<AbstractValueIndexer<?>> valueIndexers = new ArrayList<>();
+        List<AbstractValueIndexer<?>> valueIndexers = new ArrayList();
         for (List<AbstractValueIndexer<?>> indexer : valueIndexerMap.values())
         {
             valueIndexers.addAll(indexer);
@@ -267,7 +264,7 @@ public class ValueIndexerFactory
 
     private List<IndexerSpecException> collapseExceptionsMaptoList(Map<String, List<IndexerSpecException>> valueIndexerExceptions)
     {
-        List<IndexerSpecException> valueIndexers = new ArrayList<>();
+        List<IndexerSpecException> valueIndexers = new ArrayList();
         for (List<IndexerSpecException> indexer : valueIndexerExceptions.values())
         {
             valueIndexers.addAll(indexer);
@@ -275,7 +272,7 @@ public class ValueIndexerFactory
         return valueIndexers;
     }
 
-    private void createValueIndexers(File indexSpecFiles[], Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap, 
+    private void createValueIndexers(File[] indexSpecFiles, Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap, 
                                      Map<String, List<IndexerSpecException>> valueIndexerExceptions) throws IllegalAccessException, InstantiationException, IOException
     {
         for (File indexSpecFile : indexSpecFiles)
@@ -316,7 +313,7 @@ public class ValueIndexerFactory
         reader.close();
     }
 
-    private void createValueIndexers(String configSpecs[], Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap,  
+    private void createValueIndexers(String[] configSpecs, Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap,  
                                     Map<String, List<IndexerSpecException>> valueIndexerExceptions) throws IllegalAccessException, InstantiationException
     {
         this.defaultCustomClassname = null;
@@ -413,12 +410,10 @@ public class ValueIndexerFactory
             }
             catch (IllegalAccessException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             catch (InstantiationException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -434,7 +429,7 @@ public class ValueIndexerFactory
                 try
                 {
                     logger.trace("Test firing spec: " + indexSpec);
-                    valueIndexer.getFieldData(StaticMarcTestRecords.testRecord[0]);
+                    valueIndexer.getFieldData(org.solrmarc.index.extractor.methodcall.StaticMarcTestRecords.testRecord[0]);
                 }
                 catch (SolrMarcIndexerException smie)
                 {
@@ -444,12 +439,19 @@ public class ValueIndexerFactory
                 {
                     throw new IndexerSpecException(ite.getTargetException(), "Error on test invocation of custom method: " + indexSpec);
                 }
-                catch (TargetError e)
-                {
-                    throw new IndexerSpecException(e.getTarget(), "Error on test invocation of custom method: " + indexSpec);
-                }
                 catch (Exception e)
                 {
+                    try
+                    {
+                        Class<?> targetErrorClazz = Class.forName("bsh.TargetError");
+                        if (targetErrorClazz.isInstance(e))
+                        {
+                            throw new IndexerSpecException(e, "Error on test invocation of custom script method: " + indexSpec);
+                        }
+                    }
+                    catch (ClassNotFoundException localClassNotFoundException)
+                    {
+                    }
                     throw new IndexerSpecException(e, "Error on test invocation of custom method: " + indexSpec);
                 }
             }
@@ -467,16 +469,16 @@ public class ValueIndexerFactory
         AbstractMultiValueMapping[] mappings = new AbstractMultiValueMapping[toClone.mappings.length];
         for (int i = 0; i < toClone.mappings.length; i++)
         {
-            if (toClone.mappings[i] instanceof ExternalMethod && !((ExternalMethod) toClone.mappings[i]).isThreadSafe())
+            if (((toClone.mappings[i] instanceof ExternalMethod)) && (!((ExternalMethod) toClone.mappings[i]).isThreadSafe()))
             {
-                mappings[i] = (AbstractMultiValueMapping) ((ExternalMethod) toClone.mappings[i]).makeThreadSafeCopy();
+                mappings[i] = ((AbstractMultiValueMapping) ((ExternalMethod) toClone.mappings[i]).makeThreadSafeCopy());
             }
             else
             {
-                mappings[i] = (AbstractMultiValueMapping) toClone.mappings[i];
+                mappings[i] = ((AbstractMultiValueMapping) toClone.mappings[i]);
             }
         }
-        if (toClone.extractor instanceof ExternalMethod && !((ExternalMethod) toClone.extractor).isThreadSafe())
+        if (((toClone.extractor instanceof ExternalMethod)) && (!((ExternalMethod) toClone.extractor).isThreadSafe()))
         {
             extractor = (AbstractMultiValueExtractor) ((ExternalMethod) toClone.extractor).makeThreadSafeCopy();
         }
@@ -485,7 +487,7 @@ public class ValueIndexerFactory
             extractor = (AbstractMultiValueExtractor) toClone.extractor;
         }
         MultiValueIndexer result = new MultiValueIndexer(solrFieldNamesStr, extractor, mappings, collector, specLabel, totalElapsedTime);
-        return (result);
+        return result;
     }
 
     private List<AbstractValueExtractorFactory> createExtractorFactories(final Set<Class<? extends AbstractValueExtractorFactory>> factoryClasses) throws IllegalAccessException, InstantiationException
@@ -493,13 +495,12 @@ public class ValueIndexerFactory
         final List<AbstractValueExtractorFactory> factories = new ArrayList<>(factoryClasses.size());
         for (final Class<? extends AbstractValueExtractorFactory> extractorFactoryClass : factoryClasses)
         {
-            if (Modifier.isAbstract(extractorFactoryClass.getModifiers()))
+            if (!Modifier.isAbstract(extractorFactoryClass.getModifiers()))
             {
-                continue;
+                logger.trace("Create value extractor factory for " + extractorFactoryClass);
+                AbstractValueExtractorFactory factory = (AbstractValueExtractorFactory) extractorFactoryClass.newInstance();
+                factories.add(factory);
             }
-            logger.trace("Create value extractor factory for " + extractorFactoryClass);
-            final AbstractValueExtractorFactory factory = extractorFactoryClass.newInstance();
-            factories.add(factory);
         }
         return factories;
     }
@@ -510,7 +511,7 @@ public class ValueIndexerFactory
         for (final Class<? extends AbstractValueMappingFactory> extractorFactoryClass : factoryClasses)
         {
             logger.trace("Create value mapping factory for  s " + extractorFactoryClass);
-            final AbstractValueMappingFactory factory = extractorFactoryClass.newInstance();
+            AbstractValueMappingFactory factory = (AbstractValueMappingFactory) extractorFactoryClass.newInstance();
             factories.add(factory);
         }
         return factories;
@@ -546,8 +547,14 @@ public class ValueIndexerFactory
             final DirectMultiValueExtractor multiValueExtractor = (DirectMultiValueExtractor) extractor;
             int indexOfJoin = decorateMultiValueExtractor(origSpec, fieldnames, multiValueExtractor, mapSpecs, currentExceptions);
             final List<AbstractMultiValueMapping> mappings;
-            if (indexOfJoin != -1) mappings = createMultiValueMappings(origSpec, mapSpecs, indexOfJoin, currentExceptions);
-            else mappings = new ArrayList<AbstractMultiValueMapping>();
+            if (indexOfJoin != -1)
+            {
+                mappings = createMultiValueMappings(origSpec, mapSpecs, indexOfJoin, currentExceptions);
+            }
+            else
+            {
+                mappings = new ArrayList<AbstractMultiValueMapping>();
+            }
             final MultiValueCollector collector = createMultiValueCollector(mapSpecs, true);
 
             return new MultiValueIndexer(fieldnames, multiValueExtractor, mappings, collector);
@@ -570,10 +577,7 @@ public class ValueIndexerFactory
         {
             throw new IllegalArgumentException("Extractor is null, most likely there was an error parsing the index specification: " + origSpec);
         }
-        else
-        {
-            throw new IllegalArgumentException("Only subclasses of AbstractMultiValueExtractor or AbstractSingleValueExtractor are allowed, but not " + extractor.getClass().getName());
-        }
+        throw new IllegalArgumentException("Only subclasses of AbstractMultiValueExtractor or AbstractSingleValueExtractor are allowed, but not " + extractor.getClass().getName());
     }
 
     boolean isADecoratorConfiguration(String str)
@@ -597,7 +601,7 @@ public class ValueIndexerFactory
         int joinIndex = -1;
         for (List<String> mapSpec : mapSpecs)
         {
-            String mapParts[] = mapSpec.toArray(new String[0]);
+            String[] mapParts = (String[]) mapSpec.toArray(new String[0]);
             if (isACollectorConfiguration(mapParts[0]))
             {
                 /* ignore, handle it elsewhere */
@@ -710,17 +714,10 @@ public class ValueIndexerFactory
             currentIndex++;
         }
         return (joinIndex);
-
     }
 
     private boolean isAValueMappingConfiguration(final String configuration)
     {
-//      if (configuration.matches(".+[.]properties([(][A-Za-z0-9]*[)])?") || configuration.matches("[(]this[)][.]properties([(][A-Za-z0-9]*[)])?") ||
-//      configuration.startsWith("map") || configuration.startsWith("filter") || configuration.startsWith("custom_map") ||
-//      configuration.matches("([a-z]+[.])*(map|filter)[A-Za-z0-9]+"))
-//  {
-//      return (true);
-//  }
         for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
         {
             if (mappingFactory.canHandle(configuration))
@@ -756,7 +753,7 @@ public class ValueIndexerFactory
      */
     private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs, int indexOfJoin, List<IndexerSpecException> currentExceptions)
     {
-        List<AbstractMultiValueMapping> maps = new ArrayList<AbstractMultiValueMapping>(mapSpecs.size());
+        List<AbstractMultiValueMapping> maps = new ArrayList(mapSpecs.size());
         if (mapSpecs.size() == 0)
         {
             return maps;
@@ -766,7 +763,7 @@ public class ValueIndexerFactory
         {
             if (currentIndex > indexOfJoin)
             {
-                String mapParts[] = mapSpec.toArray(new String[0]);
+                String[] mapParts = mapSpec.toArray(new String[0]);
                 if (isACollectorConfiguration(mapParts[0]))
                 {
                     /* ignore */
@@ -810,11 +807,13 @@ public class ValueIndexerFactory
     private MultiValueCollector createMultiValueCollector(List<List<String>> mapSpecs, boolean setDefaultValForUnique)
     {
         MultiValueCollector collector = new MultiValueCollector();
-        if (setDefaultValForUnique) collector.setUnique(this.defaultUniqueVal);
+        if (setDefaultValForUnique)
+        {
+            collector.setUnique(this.defaultUniqueVal);
+        }
         for (List<String> mapSpec : mapSpecs)
         {
-            String mapParts[] = mapSpec.toArray(new String[0]);
-
+            String[] mapParts = mapSpec.toArray(new String[0]);
             if (isACollectorConfiguration(mapParts[0]))
             {
                 if (mapParts[0].equals("unique"))

@@ -5,14 +5,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-
+import java.util.concurrent.BlockingQueue;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -20,13 +25,13 @@ import org.apache.log4j.Priority;
 import org.marc4j.MarcReader;
 import org.marc4j.MarcReaderConfig;
 import org.marc4j.MarcReaderFactory;
+import org.marc4j.marc.Record;
 import org.solrmarc.driver.RecordAndDoc.eErrorLocationVal;
 import org.solrmarc.index.indexer.AbstractValueIndexer;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.marc.SolrMarcMarcReaderFactory;
-//import org.solrmarc.marc.MarcReaderFactory;
 import org.solrmarc.solr.DevNullProxy;
 import org.solrmarc.solr.SolrCoreLoader;
 import org.solrmarc.solr.SolrProxy;
@@ -44,7 +49,7 @@ import org.solrmarc.tools.PropertyUtils;
  */
 public class IndexDriver extends BootableMain
 {
-    private final static Logger logger = Logger.getLogger(IndexDriver.class);
+    private static Logger logger = null;
 
     private Properties readerProps;
     private MarcReaderConfig readerConfig;
@@ -54,7 +59,7 @@ public class IndexDriver extends BootableMain
     private Indexer indexer;
     private MarcReader reader;
     private SolrProxy solrProxy;
-    private int numIndexed[];
+    private int[] numIndexed;
     private String[] args;
     private long startTime;
     private Thread shutdownSimulator = null;
@@ -66,6 +71,7 @@ public class IndexDriver extends BootableMain
      */
     public static void main(String[] args)
     {
+        logger = Logger.getLogger(IndexDriver.class);
         IndexDriver driver = new IndexDriver(args);
         driver.execute();
     }
@@ -109,12 +115,11 @@ public class IndexDriver extends BootableMain
         File deleteFile = deleteRecordByIdFile.value(options);
         if (deleteFile.exists() && deleteFile.canRead())
         {
-            BufferedReader delReader;
             try
             {
-                delReader = new BufferedReader(new FileReader(deleteFile));
+                BufferedReader delReader = new BufferedReader(new FileReader(deleteFile));
                 String line;
-                while ((line = delReader.readLine() ) != null)
+                while ((line = delReader.readLine()) != null)
                 {
                     indexer.delQ.add(line.trim());
                 }
@@ -122,12 +127,10 @@ public class IndexDriver extends BootableMain
             }
             catch (FileNotFoundException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             catch (IOException e)
             {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -135,7 +138,7 @@ public class IndexDriver extends BootableMain
 
     private void initializeFromOptions()
     {
-        String inputSource[] = new String[1];
+        String[] inputSource = new String[1];
         String propertyFileAsURLStr = PropertyUtils.getPropertyFileAbsoluteURL(homeDirStrs, options.valueOf(readOpts), true, inputSource);
 
         try
@@ -232,12 +235,11 @@ public class IndexDriver extends BootableMain
         {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
-        catch(NoClassDefFoundError ncdfe)
+        catch (NoClassDefFoundError ncdfe)
         {
             logger.warn("Using SolrMarc with a marc4j version < 2.8 uses deprecated code in SolrMarc");
             reader = SolrMarcMarcReaderFactory.instance().makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), inputFilenames);
         }
-       // reader = MarcReaderFactory.makeReader(readerProps, ValueIndexerFactory.instance().getHomeDirs(), inputFilenames);
     }
 
     private void configureIndexer(String indexSpecifications, boolean multiThreaded)
@@ -249,11 +251,13 @@ public class IndexDriver extends BootableMain
         for (String indexSpec : indexSpecs)
         {
             File specFile = new File(indexSpec);
-            if (!specFile.isAbsolute()) specFile = PropertyUtils.findFirstExistingFile(homeDirStrs, indexSpec);
+            if (!specFile.isAbsolute())
+            {
+                specFile = PropertyUtils.findFirstExistingFile(homeDirStrs, indexSpec);
+            }
             logger.info("Opening index spec file: " + specFile);
             specFiles[i++] = specFile;
         }
-
         indexers = indexerFactory.createValueIndexers(specFiles);
         boolean includeErrors = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "marc.include_errors", "false"));
         boolean returnErrors = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "marc.return_errors", "false"));
@@ -304,10 +308,11 @@ public class IndexDriver extends BootableMain
         String systemClassPath = System.getProperty("java.class.path");
         logger.debug("System Class Path = " + systemClassPath);
         if (!systemClassPath.contains("solrmarc_core"))
+        {
             inEclipse = true;
-
+        }
         shutdownSimulator = new ShutdownSimulator(inEclipse);
-            shutdownSimulator.start();
+        shutdownSimulator.start();
         Thread shutdownHook = new MyShutdownThread(indexer, shutdownSimulator);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
         startTime = System.currentTimeMillis();
@@ -319,14 +324,19 @@ public class IndexDriver extends BootableMain
         }
         catch (Exception e)
         {
-            if (!indexer.viaInterrupt) Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            if (!indexer.viaInterrupt)
+            {
+                Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            }
             logger.fatal("ERROR: Error while invoking indexToSolr");
             logger.fatal(e);
         }
 
         endTime = System.currentTimeMillis();
-
-        if (!indexer.viaInterrupt) Runtime.getRuntime().removeShutdownHook(shutdownHook);
+        if (!indexer.viaInterrupt)
+        {
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
+        }
         indexer.endProcessing();
 
         boolean perMethodReport = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "solrmarc.method.report", "false"));
@@ -336,13 +346,16 @@ public class IndexDriver extends BootableMain
             handleRecordErrors();
         }
 
-        if (!indexer.viaInterrupt && shutdownSimulator != null) shutdownSimulator.interrupt();
+        if (!indexer.viaInterrupt && shutdownSimulator != null)
+        {
+            shutdownSimulator.interrupt();
+        }
         indexer.setIsShutDown();
         if (indexer.shuttingDown && indexer.viaInterrupt)
         {
             try
             {
-                Thread.sleep(5000);
+                Thread.sleep(5000L);
             }
             catch (InterruptedException ie)
             {
@@ -362,7 +375,10 @@ public class IndexDriver extends BootableMain
         String minutesStr = ((minutes > 0) ? "" + minutes + " minute" + ((minutes != 1) ? "s " : " ") : "");
         String secondsStr = "" + seconds + "." + hundredthsStr + " seconds";
         logger.info("" + numIndexed[2] + " records sent to Solr in " + minutesStr + secondsStr);
-        if (perMethodReport) indexer.reportPerMethodTime();
+        if (perMethodReport)
+        {
+            indexer.reportPerMethodTime();
+        }
     }
 
     private void handleRecordErrors()
@@ -399,7 +415,7 @@ public class IndexDriver extends BootableMain
         {
             if (errorLvlCnt[i] > 0)
             {
-                logger.info("" + errorLvlCnt[i] + " records have " + errLocStr + " errors of level: " + eErrorSeverity.values()[i].toString());
+                logger.info(errorLvlCnt[i] + " records have " + errLocStr + " errors of level: " + IndexerSpecException.eErrorSeverity.values()[i].toString());
             }
         }
     }
@@ -481,7 +497,6 @@ public class IndexDriver extends BootableMain
         @Override
         public void run()
         {
-            // System.err.println("Starting Shutdown hook");
             logger.info("Starting Shutdown hook");
 
             if (!indexer.isShutDown())
@@ -493,7 +508,7 @@ public class IndexDriver extends BootableMain
             {
                 try
                 {
-                    sleep(2000);
+                    sleep(2000L);
                 }
                 catch (InterruptedException e)
                 {
@@ -503,7 +518,7 @@ public class IndexDriver extends BootableMain
             LogManager.shutdown();
             try
             {
-                sleep(1000);
+                sleep(1000L);
             }
             catch (InterruptedException e)
             {
@@ -556,7 +571,7 @@ public class IndexDriver extends BootableMain
                     }
                     else
                     {
-                        sleep(2000);
+                        sleep(2000L);
                     }
                 }
                 catch (IOException e)

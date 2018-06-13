@@ -16,11 +16,12 @@ import org.solrmarc.tools.Utils;
 
 public class ConfigDriver extends BootableMain
 {
-    private final static Logger logger =  Logger.getLogger(ConfigDriver.class);
+    private static Logger logger = null;
 
     public static void main(String[] args)
     {
         String configProps = args[0];
+        logger = Logger.getLogger(IndexDriver.class);
         logger.debug("Using config " + configProps + " to initialize SolrMarc");
         // Some of the values in this file will be extracted and passed as command line arguments others will be
         // extracted directly by the MarcReader configuration handler.  This is done by passing the same property file

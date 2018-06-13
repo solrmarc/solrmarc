@@ -1,11 +1,9 @@
 package org.solrmarc.index.extractor.impl.custom;
 
+import java.util.Collection;
 import org.apache.log4j.Logger;
 import org.solrmarc.index.extractor.methodcall.AbstractMethodCallFactory;
 import org.solrmarc.index.utils.FastClasspathUtils;
-//import org.solrmarc.index.utils.ReflectionUtils;
-
-import java.util.Collection;
 
 public class CustomValueExtractorFactory extends AbstractMethodCallFactory
 {
@@ -14,7 +12,7 @@ public class CustomValueExtractorFactory extends AbstractMethodCallFactory
     public CustomValueExtractorFactory()
     {
         @SuppressWarnings({ "unchecked", "rawtypes" })
-        Collection<Class<?>> classes = (Collection) FastClasspathUtils.getMixinClasses();
+        Collection<Class<?>> classes = (Collection)FastClasspathUtils.instance().getMixinClasses();
         addMethodsFromClasses(classes);
         logger.trace("Custom methods:\n" + methodCallManager.loadedExtractorMixinsToString());
     }
