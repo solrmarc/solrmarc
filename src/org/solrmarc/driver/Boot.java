@@ -1,6 +1,7 @@
 package org.solrmarc.driver;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
@@ -224,6 +225,17 @@ public class Boot
         logger = new LoggerDelegator(Boot.class);
         String homePath = getDefaultHomeDir();
         File homeDir = new File(homePath);
+        boolean alreadyHasRequiredClasses = true;
+        alreadyHasRequiredClasses &= hasRequired("org.marc4j.marc.Record");
+        alreadyHasRequiredClasses &= hasRequired("org.apache.log4j.Logger");
+        alreadyHasRequiredClasses &= hasRequired("java_cup.runtime.Symbol");
+        alreadyHasRequiredClasses &= hasRequired("joptsimple.OptionSet");
+        if (alreadyHasRequiredClasses)
+        {
+            logger.info("Required classes provided statically.  Proceeding and hoping for the best");
+
+            return;
+        }
 
         // Now find the sub-directory "lib" as a sibling of the execution location.
         File libPath = new File(homeDir, "lib");
@@ -234,6 +246,7 @@ public class Boot
         catch (RuntimeException ise)
         {
             logger.fatal("Fatal error: Failure while loading jars from lib directory" + ise.getMessage());
+            LoggerDelegator.flushToLog();
             System.exit(10);
         }
         boolean hasRequiredClasses = true;
@@ -248,6 +261,18 @@ public class Boot
         }
     }
 
+    private static boolean hasRequired(String requiredClass)
+    {
+        try {
+            Class.forName(requiredClass);
+        }
+        catch (ClassNotFoundException e)
+        {
+            return false;
+        }
+        return true;
+    }
+    
     private static boolean require(String requiredClass, String errMsg)
     {
         try {
@@ -412,6 +437,13 @@ public class Boot
 
     static void extendClasspathWithLocalJarDirs(String[] homeDirStrs, String[] addnlLibDirStrs)
     {
+        FilenameFilter jarsOnly = new FilenameFilter() {
+            public boolean accept(File dir, String name) 
+            {
+                return (name.toLowerCase().endsWith(".jar"));
+            }
+        };
+        
         for (String libdirname : addnlLibDirStrs)
         {
             File libDir = new File(libdirname);
@@ -431,7 +463,7 @@ public class Boot
                     String homeDir = homeDirStrs[i];
                     logger.debug("Checking for jars files in directory: " + homeDir + "/" + libdirname);
                     libDir = new File(homeDir, libdirname);
-                    if (libDir.exists() && libDir.isDirectory() && libDir.listFiles().length > 0)
+                    if (libDir.exists() && libDir.isDirectory() && libDir.listFiles(jarsOnly).length > 0)
                     {
                         logger.debug("Adding jars files in directory: " + libDir.getAbsolutePath());
                         extendClasspathWithLibJarDir(libDir, null);
@@ -439,7 +471,7 @@ public class Boot
                     }
                 }
             }
-            else if (libDir.exists() && libDir.isDirectory() && libDir.listFiles().length > 0)
+            else if (libDir.exists() && libDir.isDirectory() && libDir.listFiles(jarsOnly).length > 0)
             {
                 logger.debug("Adding jars files in directory: " + libDir.getAbsolutePath());
                 extendClasspathWithLibJarDir(libDir, null);

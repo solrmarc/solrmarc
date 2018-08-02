@@ -134,23 +134,26 @@ public class BootableMain
         LoggerDelegator.reInit(this.homeDirStrs);
         if (needsSolrJ())
         {
-            File solrJPath = (options.has(this.solrjDir) ? (File) this.options.valueOf(this.solrjDir) : new File("lib-solrj"));
-            try
+            if (!hasSolrJ())
             {
-                if (solrJPath.isAbsolute())
+                File solrJPath = (options.has(this.solrjDir) ? (File) this.options.valueOf(this.solrjDir) : new File("lib-solrj"));
+                try
                 {
-                    Boot.extendClasspathWithSolJJarDir(null, solrJPath);
+                    if (solrJPath.isAbsolute())
+                    {
+                        Boot.extendClasspathWithSolJJarDir(null, solrJPath);
+                    }
+                    else
+                    {
+                        Boot.extendClasspathWithSolJJarDir(this.homeDirStrs, solrJPath);
+                    }
                 }
-                else
+                catch (IndexerSpecException ise)
                 {
-                    Boot.extendClasspathWithSolJJarDir(this.homeDirStrs, solrJPath);
+                    logger.fatal("Fatal error: Failure to load SolrJ", ise);
+                    logger.error("Exiting...");
+                    System.exit(10);
                 }
-            }
-            catch (IndexerSpecException ise)
-            {
-                logger.fatal("Fatal error: Failure to load SolrJ", ise);
-                logger.error("Exiting...");
-                System.exit(10);
             }
         }
         // Now add local lib directories
@@ -167,6 +170,18 @@ public class BootableMain
             logger.error("Exiting...");
             System.exit(10);
         }
+    }
+
+    private boolean hasSolrJ()
+    {
+        try {
+            Class.forName("org.apache.solr.common.SolrInputDocument");
+        }
+        catch (ClassNotFoundException e)
+        {
+            return false;
+        }
+        return true;
     }
 
     protected boolean needsSolrJ()
