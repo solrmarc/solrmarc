@@ -70,7 +70,7 @@ public class ClasspathUtils
 
     public Set<Class<? extends AbstractValueExtractorFactory>> getExtractorFactoryClasses()
     {
-        if (this.extractors == null)
+        if (this.extractors == null || this.extractors.size() == 0)
         {
             getDefaultExtractorClasses();
         }
@@ -96,7 +96,7 @@ public class ClasspathUtils
 
     public Set<Class<? extends AbstractValueMappingFactory>> getMappingFactoryClasses()
     {
-        if (this.mappers == null)
+        if (this.mappers == null || this.mappers.size() == 0)
         {
             getDefaultMappingClasses();
         }
@@ -121,7 +121,7 @@ public class ClasspathUtils
 
     public Set<Class<? extends Mixin>> getMixinClasses()
     {
-        if (this.mixins == null)
+        if (this.mixins == null || this.mixins.size() == 0)
         {
             getDefaultMixinClasses();
         }
@@ -147,7 +147,7 @@ public class ClasspathUtils
 
     public Set<Class<? extends BootableMain>> getBootableMainClasses()
     {
-        if (this.bootables == null)
+        if (this.bootables == null || this.bootables.size() == 0)
         {
             getDefaultBootableClasses();
         }

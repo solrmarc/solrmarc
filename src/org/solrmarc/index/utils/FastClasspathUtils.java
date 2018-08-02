@@ -7,7 +7,7 @@ import org.solrmarc.index.extractor.impl.custom.Mixin;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import io.github.lukehutch.fastclasspathscanner.matchprocessor.InterfaceMatchProcessor;
+import io.github.lukehutch.fastclasspathscanner.matchprocessor.ImplementingClassMatchProcessor;
 import io.github.lukehutch.fastclasspathscanner.matchprocessor.SubclassMatchProcessor;
 
 import java.util.LinkedHashSet;
@@ -49,7 +49,7 @@ public class FastClasspathUtils extends ClasspathUtils
                     mappers.add(matchingClass);
                 }
             })
-            .matchClassesImplementing(Mixin.class, new InterfaceMatchProcessor<Mixin>() 
+            .matchClassesImplementing(Mixin.class, new ImplementingClassMatchProcessor<Mixin>()
             {
                 @Override
                 public void processMatch(Class<? extends Mixin> matchingClass) 
@@ -68,6 +68,11 @@ public class FastClasspathUtils extends ClasspathUtils
         {
             getMatchingClasses();
         }
+        if (extractors.size() == 0)
+        {
+            logger.warn("Classpath scanning failed, using default extractors only");
+            extractors = super.getExtractorFactoryClasses();
+        }
         return extractors;
     }
 
@@ -78,6 +83,11 @@ public class FastClasspathUtils extends ClasspathUtils
         {
             getMatchingClasses();
         }
+        if (mappers.size() == 0)
+        {
+            logger.warn("Classpath scanning failed, using default mapping classes only");
+            mappers = super.getMappingFactoryClasses();
+        }
         return mappers;
     }
 
@@ -87,6 +97,11 @@ public class FastClasspathUtils extends ClasspathUtils
         if (mixins == null)
         {
             getMatchingClasses();
+        }
+        if (mixins.size() == 0)
+        {
+            logger.warn("Classpath scanning failed, using default mixin classes only");
+            super.getMixinClasses();
         }
         return mixins;
     }
@@ -113,6 +128,11 @@ public class FastClasspathUtils extends ClasspathUtils
         if (bootables == null)
         {
             getMatchingBootableClasses();
+        }
+        if (bootables.size() == 0)
+        {
+            logger.warn("Classpath scanning failed, using default bootable classes only");
+            super.getBootableMainClasses();
         }
         return bootables;
     }
