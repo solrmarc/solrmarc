@@ -1,7 +1,15 @@
 package org.solrmarc.index.utils;
 
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.solrmarc.driver.Boot;
 import org.solrmarc.driver.BootableMain;
 import org.solrmarc.driver.LoggerDelegator;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
@@ -16,6 +24,7 @@ public class ClasspathUtils
     protected Set<Class<? extends AbstractValueMappingFactory>> mappers = null;
     protected Set<Class<? extends BootableMain>> bootables = null;
     protected Set<Class<? extends Mixin>> mixins = null;
+    protected List<File> classpathForCompiling = null;
     protected static ClasspathUtils theInstance = null;
 
     public static ClasspathUtils instance()
@@ -24,12 +33,12 @@ public class ClasspathUtils
         {
             try
             {
-                Class.forName("io.github.lukehutch.fastclasspathscanner.FastClasspathScanner");
-                theInstance = new FastClasspathUtils();
+                Class<?> clazz = Boot.classForName("org.solrmarc.index.utils.FastClasspathUtils");
+                theInstance = (ClasspathUtils) clazz.getConstructor().newInstance();
             }
-            catch (ClassNotFoundException e1)
+            catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException  e1)
             {
-                logger.error("The FastClasspathScanner class cannot be found.   The associated jar wasn't found or loaded.");
+                logger.error("The FastClasspathScanner class cannot be found or loaded.   The associated jar wasn't found or loaded.");
                 logger.error("Trying to run without that library, but some dynamic features will not work.");
                 theInstance = new ClasspathUtils();
             }
@@ -43,14 +52,14 @@ public class ClasspathUtils
         this.extractors = new LinkedHashSet<>();
         try
         {
-            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Class.forName("org.solrmarc.index.extractor.impl.constant.ConstantValueExtractorFactory"));
-            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Class.forName("org.solrmarc.index.extractor.impl.custom.CustomValueExtractorFactory"));
-            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Class.forName("org.solrmarc.index.extractor.impl.date.DateValueExtractorFactory"));
-            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Class.forName("org.solrmarc.index.extractor.impl.direct.DirectValueExtractorFactory"));
-            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Class.forName("org.solrmarc.index.extractor.impl.fullrecord.FullRecordValueExtractorFactory"));
-            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Class.forName("org.solrmarc.index.extractor.impl.java.JavaValueExtractorFactory"));
-            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Class.forName("org.solrmarc.index.extractor.impl.patternMapping.PatternMappingValueExtractorFactory"));
-            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Class.forName("org.solrmarc.index.extractor.methodcall.AbstractMethodCallFactory"));
+            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Boot.classForName("org.solrmarc.index.extractor.impl.constant.ConstantValueExtractorFactory"));
+            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Boot.classForName("org.solrmarc.index.extractor.impl.custom.CustomValueExtractorFactory"));
+            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Boot.classForName("org.solrmarc.index.extractor.impl.date.DateValueExtractorFactory"));
+            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Boot.classForName("org.solrmarc.index.extractor.impl.direct.DirectValueExtractorFactory"));
+            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Boot.classForName("org.solrmarc.index.extractor.impl.fullrecord.FullRecordValueExtractorFactory"));
+            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Boot.classForName("org.solrmarc.index.extractor.impl.java.JavaValueExtractorFactory"));
+            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Boot.classForName("org.solrmarc.index.extractor.impl.patternMapping.PatternMappingValueExtractorFactory"));
+            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Boot.classForName("org.solrmarc.index.extractor.methodcall.AbstractMethodCallFactory"));
         }
         catch (ClassNotFoundException e)
         {
@@ -59,8 +68,8 @@ public class ClasspathUtils
         }
         try
         {
-            Class.forName("bsh.Interpreter");
-            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Class.forName("org.solrmarc.index.extractor.impl.script.ScriptValueExtractorFactory"));
+            Boot.classForName("bsh.Interpreter");
+            this.extractors.add((Class<? extends AbstractValueExtractorFactory>) Boot.classForName("org.solrmarc.index.extractor.impl.script.ScriptValueExtractorFactory"));
         }
         catch (ClassNotFoundException e)
         {
@@ -83,9 +92,9 @@ public class ClasspathUtils
         this.mappers = new LinkedHashSet<>();
         try
         {
-            this.mappers.add((Class<? extends AbstractValueMappingFactory>) Class.forName("org.solrmarc.index.mapping.impl.MethodCallMappingFactory"));
-            this.mappers.add((Class<? extends AbstractValueMappingFactory>) Class.forName("org.solrmarc.index.mapping.impl.PatternMappingFactory"));
-            this.mappers.add((Class<? extends AbstractValueMappingFactory>) Class.forName("org.solrmarc.index.mapping.impl.TranslationMappingFactory"));
+            this.mappers.add((Class<? extends AbstractValueMappingFactory>) Boot.classForName("org.solrmarc.index.mapping.impl.MethodCallMappingFactory"));
+            this.mappers.add((Class<? extends AbstractValueMappingFactory>) Boot.classForName("org.solrmarc.index.mapping.impl.PatternMappingFactory"));
+            this.mappers.add((Class<? extends AbstractValueMappingFactory>) Boot.classForName("org.solrmarc.index.mapping.impl.TranslationMappingFactory"));
         }
         catch (ClassNotFoundException e)
         {
@@ -109,8 +118,8 @@ public class ClasspathUtils
         this.mixins = new LinkedHashSet<>();
         try
         {
-            this.mixins.add((Class<? extends Mixin>) Class.forName("org.solrmarc.index.SolrIndexer"));
-            this.mixins.add((Class<? extends Mixin>) Class.forName("org.solrmarc.callnum.CallNumberMixin"));
+            this.mixins.add((Class<? extends Mixin>) Boot.classForName("org.solrmarc.index.SolrIndexer"));
+            this.mixins.add((Class<? extends Mixin>) Boot.classForName("org.solrmarc.callnum.CallNumberMixin"));
         }
         catch (ClassNotFoundException e)
         {
@@ -134,9 +143,9 @@ public class ClasspathUtils
         this.bootables = new LinkedHashSet<>();
         try
         {
-            this.bootables.add((Class<? extends BootableMain>) Class.forName("org.solrmarc.driver.IndexDriver"));
-            this.bootables.add((Class<? extends BootableMain>) Class.forName("org.solrmarc.driver.ConfigDriver"));
-            this.bootables.add((Class<? extends BootableMain>) Class.forName("org.solrmarc.debug.SolrMarcDebug"));
+            this.bootables.add((Class<? extends BootableMain>) Boot.classForName("org.solrmarc.driver.IndexDriver"));
+            this.bootables.add((Class<? extends BootableMain>) Boot.classForName("org.solrmarc.driver.ConfigDriver"));
+            this.bootables.add((Class<? extends BootableMain>) Boot.classForName("org.solrmarc.debug.SolrMarcDebug"));
         }
         catch (ClassNotFoundException e)
         {
@@ -153,4 +162,26 @@ public class ClasspathUtils
         }
         return this.bootables;
     }
+
+    private void getDefaultClassPathForCompiling()
+    {
+        List<File> classpathForCompiling = new  ArrayList<>();
+        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        logger.debug("Classpath for compiling java files:");
+        for (URL url : sysLoader.getURLs())
+        {
+            classpathForCompiling.add(new File(url.getFile()));
+            logger.debug("    " + url.getFile());
+        }
+    }
+
+    public List<File> getClassPath()
+    {
+        if (this.classpathForCompiling == null || this.classpathForCompiling.size() == 0)
+        {
+            getDefaultClassPathForCompiling();
+        }
+        return this.classpathForCompiling;
+    }
+
 }

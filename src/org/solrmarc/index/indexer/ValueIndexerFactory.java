@@ -20,8 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import org.marc4j.marc.Record;
+import org.solrmarc.driver.Boot;
 import org.solrmarc.index.collector.MultiValueCollector;
-import org.solrmarc.index.collector.MultiValueCollector.eAction;
 import org.solrmarc.index.extractor.AbstractMultiValueExtractor;
 import org.solrmarc.index.extractor.AbstractSingleValueExtractor;
 import org.solrmarc.index.extractor.AbstractValueExtractor;
@@ -35,7 +35,6 @@ import org.solrmarc.index.extractor.methodcall.MethodCallManager;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.solrmarc.index.utils.ClasspathUtils;
-import org.solrmarc.index.utils.FastClasspathUtils;
 import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.Utils;
 
@@ -77,8 +76,8 @@ public class ValueIndexerFactory
         theFactory = new ValueIndexerFactory(homeDirStrs);
         try
         {
-            theFactory.extractorFactories = theFactory.createExtractorFactories(FastClasspathUtils.instance().getExtractorFactoryClasses());
-            theFactory.mappingFactories = theFactory.createMappingFactories(FastClasspathUtils.instance().getMappingFactoryClasses());
+            theFactory.extractorFactories = theFactory.createExtractorFactories(ClasspathUtils.instance().getExtractorFactoryClasses());
+            theFactory.mappingFactories = theFactory.createMappingFactories(ClasspathUtils.instance().getMappingFactoryClasses());
         }
         catch (IllegalAccessException | InstantiationException e)
         {
@@ -121,7 +120,14 @@ public class ValueIndexerFactory
         }
         dirsJavaSource =  dirsJavaSourceList.toArray(new String[0]);
         compileTool = new JavaValueExtractorUtils(dirsJavaSource);
-        compileTool.compileSources();
+        try { 
+            compileTool.compileSources(false);
+            compileTool.getClasses();
+        }
+        catch (java.lang.UnsupportedClassVersionError ucve)
+        {
+            compileTool.compileSources(true);
+        }
     }
 
     public Class<?>[] getCompiledClasses()
@@ -254,7 +260,7 @@ public class ValueIndexerFactory
 
     private List<AbstractValueIndexer<?>> collapseMapToList(Map<String, List<AbstractValueIndexer<?>>> valueIndexerMap)
     {
-        List<AbstractValueIndexer<?>> valueIndexers = new ArrayList();
+        List<AbstractValueIndexer<?>> valueIndexers = new ArrayList<AbstractValueIndexer<?>>();
         for (List<AbstractValueIndexer<?>> indexer : valueIndexerMap.values())
         {
             valueIndexers.addAll(indexer);
@@ -264,7 +270,7 @@ public class ValueIndexerFactory
 
     private List<IndexerSpecException> collapseExceptionsMaptoList(Map<String, List<IndexerSpecException>> valueIndexerExceptions)
     {
-        List<IndexerSpecException> valueIndexers = new ArrayList();
+        List<IndexerSpecException> valueIndexers = new ArrayList<IndexerSpecException>();
         for (List<IndexerSpecException> indexer : valueIndexerExceptions.values())
         {
             valueIndexers.addAll(indexer);
@@ -451,7 +457,7 @@ public class ValueIndexerFactory
                 {
                     try
                     {
-                        Class<?> targetErrorClazz = Class.forName("bsh.TargetError");
+                        Class<?> targetErrorClazz = Boot.classForName("bsh.TargetError");
                         if (targetErrorClazz.isInstance(e))
                         {
                             throw new IndexerSpecException(e, "Error on test invocation of custom script method: " + indexSpec);
@@ -506,8 +512,12 @@ public class ValueIndexerFactory
             if (!Modifier.isAbstract(extractorFactoryClass.getModifiers()))
             {
                 logger.trace("Create value extractor factory for " + extractorFactoryClass);
-                AbstractValueExtractorFactory factory = (AbstractValueExtractorFactory) extractorFactoryClass.newInstance();
-                factories.add(factory);
+                try {
+                    AbstractValueExtractorFactory factory = (AbstractValueExtractorFactory) extractorFactoryClass.newInstance();
+                    factories.add(factory);
+                }
+                catch (ClassCastException cce) {
+                }
             }
         }
         return factories;
@@ -519,8 +529,13 @@ public class ValueIndexerFactory
         for (final Class<? extends AbstractValueMappingFactory> extractorFactoryClass : factoryClasses)
         {
             logger.trace("Create value mapping factory for  s " + extractorFactoryClass);
-            AbstractValueMappingFactory factory = (AbstractValueMappingFactory) extractorFactoryClass.newInstance();
-            factories.add(factory);
+            try {
+                AbstractValueMappingFactory factory = (AbstractValueMappingFactory) extractorFactoryClass.newInstance();
+                factories.add(factory);
+            }
+            catch (ClassCastException cce) {
+            }
+
         }
         return factories;
     }
@@ -761,7 +776,7 @@ public class ValueIndexerFactory
      */
     private List<AbstractMultiValueMapping> createMultiValueMappings(String origSpec, List<List<String>> mapSpecs, int indexOfJoin, List<IndexerSpecException> currentExceptions)
     {
-        List<AbstractMultiValueMapping> maps = new ArrayList(mapSpecs.size());
+        List<AbstractMultiValueMapping> maps = new ArrayList<AbstractMultiValueMapping>(mapSpecs.size());
         if (mapSpecs.size() == 0)
         {
             return maps;

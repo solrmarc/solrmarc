@@ -1,9 +1,10 @@
 package org.solrmarc.driver;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,21 +15,27 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSource;
-import java.security.ProtectionDomain;
+import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import org.solrmarc.index.indexer.IndexerSpecException;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
 import org.solrmarc.index.utils.ClasspathUtils;
 
 /**
  * @author rh9ec
  *
  */
-public class Boot
+public class Boot extends URLClassLoader
+
 {
     private static LoggerDelegator logger = null;
+    private static URLClassLoader classLoaderToUse = null;
 
     static
     {
+        getURLClassLoaderToUse();
         addLibDirJarstoClassPath();
     }
 
@@ -69,14 +76,119 @@ public class Boot
     }
 
     /**
+     * Classloader Methods - Implements a child-first delegation model to load classes needed by SolrMarc
+     */
+    public Boot(URL[] urls, ClassLoader parent)
+    {
+        super(urls, parent);
+    }
+
+    private Hashtable<String, Class<?>> classes = new Hashtable<String, Class<?>>(); //used to cache already defined classes
+    @Override
+    public void addURL(URL url)
+    {
+        super.addURL(url);
+    }
+    @Override
+    protected Class<?> findClass(final String name) throws ClassNotFoundException
+    {
+        //System.out.println("Trying to find"+name);
+        throw new ClassNotFoundException();
+    }
+    @Override
+    protected synchronized Class<?> loadClass(String className, boolean resolve) throws ClassNotFoundException
+    {
+        //System.out.println("Trying to load: "+className);
+        try
+        {
+            //System.out.println("Loading class in Child : " + className);
+            byte classByte[];
+            Class<?> result = null;
+
+            if (className.endsWith(".Boot") || className.endsWith(".LoggerDelegator"))
+            {
+                //System.out.println("Delegating to parent : " + className);
+                // didn't find it, try the parent
+                return super.loadClass(className, resolve);
+            }
+
+            //checks in cached classes
+            result = (Class<?>) classes.get(className);
+            if (result != null) {
+                return result;
+            }
+
+            URL[] urls = super.getURLs();
+            if (urls != null)
+            {
+                for(URL jarFileURL: urls)
+                {
+                    String jarFile = jarFileURL.toURI().getPath();
+                    JarFile jar = null;
+                    try {
+                        jar = new JarFile(jarFile);
+                        JarEntry entry = jar.getJarEntry(className.replace(".","/") + ".class");
+                        InputStream is = jar.getInputStream(entry);
+                        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                        int nextValue = is.read();
+                        while (nextValue != -1)
+                        {
+                            byteStream.write(nextValue);
+                            nextValue = is.read();
+                        }
+
+                        classByte = byteStream.toByteArray();
+                        result = defineClass(className, classByte, 0, classByte.length);
+                        classes.put(className, result);
+                        jar.close();
+                    } 
+                    catch (Exception e) {
+                        if (jar != null) 
+                        {
+                            try
+                            {
+                                jar.close();
+                            }
+                            catch (IOException e1)
+                            {
+                            }
+                        }
+                        continue;
+                    }
+                }
+            }
+
+            result = (Class<?>) classes.get(className);
+            if (result != null) {
+                return result;
+            }
+            else{
+                throw new ClassNotFoundException("Not found "+ className);
+            }
+        }
+        catch( ClassNotFoundException e ){
+
+            //System.out.println("Delegating to parent : " + className);
+            // didn't find it, try the parent
+            return super.loadClass(className, resolve);
+        }
+        catch (URISyntaxException e1)
+        {
+            //System.out.println("Delegating to parent : " + className);
+            // didn't find it, try the parent
+            return super.loadClass(className, resolve);
+        }
+    }
+
+    /**
      * @param classname
      * @param otherArgs
      */
-    protected static void invokeMain(String classname, String[] otherArgs)
+    public static void invokeMain(String classname, String[] otherArgs)
     {
         try
         {
-            Class<?> mainClass = Class.forName(classname);
+            Class<?> mainClass = Boot.classForName(classname);
             Method mainMethod = mainClass.getMethod("main", String[].class);
             if (!Modifier.isStatic(mainMethod.getModifiers()))
             {
@@ -88,35 +200,54 @@ public class Boot
         catch (IllegalAccessException | IllegalArgumentException e)
         {
             logger.fatal("ERROR: Unable to invoke main method in specified class: " + classname, e);
+            LoggerDelegator.flushToLog();
             System.exit(2);
         }
         catch (InvocationTargetException e)
         {
             Throwable t = e.getTargetException();
             logger.fatal("ERROR: Error while invoking main method in specified class: " + classname, t);
+            LoggerDelegator.flushToLog();
             System.exit(2);
         }
         catch (ClassNotFoundException e)
         {
             logger.fatal("ERROR: Unable to find specified main class: " + classname, e);
             findExecutables();
+            LoggerDelegator.flushToLog();
             System.exit(3);
         }
         catch (NoSuchMethodException e)
         {
             logger.fatal("ERROR: Unable to find main method in specified class: " + classname, e);
+            LoggerDelegator.flushToLog();
             System.exit(4);
         }
         catch (SecurityException e)
         {
             logger.fatal("ERROR: Unable to access main method in specified class: " + classname, e);
+            LoggerDelegator.flushToLog();
             System.exit(5);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static String classnamefromArg(String string) throws ClassNotFoundException
     {
-        Set<Class<? extends BootableMain>> mainClasses = ClasspathUtils.instance().getBootableMainClasses();
+        Class<?> clazzUtil = Boot.classForName("org.solrmarc.index.utils.ClasspathUtils");
+        Object instance;
+        Set<Class<? extends BootableMain>> mainClasses = new LinkedHashSet<Class<? extends BootableMain>>();
+        try
+        {
+            instance = clazzUtil.getMethod("instance", new Class<?>[0]).invoke(null,  new Object[0]);
+            Method getBootableMain = instance.getClass().getMethod("getBootableMainClasses", new Class<?>[0]);
+            mainClasses = (Set<Class<? extends BootableMain>>) getBootableMain.invoke(instance, new Object[0]);
+        }
+        catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         for (Class<?> clazz : mainClasses)
         {
             if (string.equals(clazz.getName()))          return clazz.getName();
@@ -222,6 +353,15 @@ public class Boot
      */
     private static void addLibDirJarstoClassPath()
     {
+        try
+        {
+            Class.forName("org.solrmarc.driver.LoggerDelegator");
+        }
+        catch (ClassNotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         logger = new LoggerDelegator(Boot.class);
         String homePath = getDefaultHomeDir();
         File homeDir = new File(homePath);
@@ -237,6 +377,20 @@ public class Boot
             return;
         }
 
+        // If using a custom Classloader use that to load all of the classes in the SolrMarc core jar
+        CodeSource codeSource = Boot.class.getProtectionDomain().getCodeSource();
+        File jarFile = null;
+        try
+        {
+            jarFile = new File(codeSource.getLocation().toURI().getPath());
+            URLClassLoader loader = getURLClassLoaderToUse();
+            if (loader != ClassLoader.getSystemClassLoader())
+                extendClasspathWithJar(loader, jarFile);
+        }
+        catch (URISyntaxException e)
+        {
+            e.printStackTrace();
+        }
         // Now find the sub-directory "lib" as a sibling of the execution location.
         File libPath = new File(homeDir, "lib");
         try
@@ -261,10 +415,19 @@ public class Boot
         }
     }
 
+    /**
+     *  If using a custom classloader, use that to lookup and load the requested class by name
+     */
+    public static Class<?>classForName(String classname) throws ClassNotFoundException
+    {
+        if (classLoaderToUse == null) getURLClassLoaderToUse();
+        return(Class.forName(classname, true, classLoaderToUse));
+    }
+
     private static boolean hasRequired(String requiredClass)
     {
         try {
-            Class.forName(requiredClass);
+            classForName(requiredClass);
         }
         catch (ClassNotFoundException e)
         {
@@ -272,11 +435,11 @@ public class Boot
         }
         return true;
     }
-    
+
     private static boolean require(String requiredClass, String errMsg)
     {
         try {
-            Class.forName(requiredClass);
+            classForName(requiredClass);
         }
         catch (ClassNotFoundException e)
         {
@@ -292,9 +455,9 @@ public class Boot
         return true;
     }
 
-    private static void extendClasspathWithJar(URLClassLoader sysLoader, File jarfile)
+    private static void extendClasspathWithJar(URLClassLoader classLoader, File jarfile)
     {
-        URL[] urls = sysLoader.getURLs();
+        URL[] urls = classLoader.getURLs();
         URL ujar;
         try
         {
@@ -313,35 +476,32 @@ public class Boot
         {
             if (urls[i].toString().equalsIgnoreCase(ujars)) return;
         }
-        Class<URLClassLoader> sysClass = URLClassLoader.class;
         try
         {
-            Method method = sysClass.getDeclaredMethod("addURL", new Class[] { URL.class });
-            method.setAccessible(true);
-            method.invoke(sysLoader, new Object[] { ujar });
-            logger.debug("Adding Jar file: " + jarfile.getAbsolutePath());
+            if (classLoader instanceof Boot)
+            {
+                ((Boot)classLoader).addURL(ujar);
+            }
+            else
+            {
+                Class<?> urlClassLoaderClazz = URLClassLoader.class;
+                Method method = urlClassLoaderClazz.getDeclaredMethod("addURL", new Class[] { URL.class });
+                method.setAccessible(true);
+                method.invoke(classLoader, new Object[] { ujar });
+                logger.debug("Adding Jar file: " + jarfile.getAbsolutePath());
+            }
         }
-        catch (Throwable t)
+        catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
         {
-            t.printStackTrace();
+            e.printStackTrace();
         }
     }
 
     private static boolean extendClasspathWithJarDir(URLClassLoader sysLoader, File dir, String patternToLoad, String specialMatch)
     {
         boolean foundSpecial = false;
-        if (dir == null || !dir.isDirectory() || dir.listFiles().length == 0)
+        if (dir == null || ! dir.isDirectory() || dir.listFiles().length == 0)
         {
-            String dirpath;
-            try
-            {
-                dirpath = dir.getCanonicalPath();
-            }
-            catch (IOException e)
-            {
-                dirpath = dir.getAbsolutePath();
-            }
-//           throw new RuntimeException("Unable to find any Jars in the provided directory: " + dirpath + "  define location of solrj to use with the option -solrj <dir>");
            return false;
         }
         for (File file : dir.listFiles())
@@ -358,16 +518,22 @@ public class Boot
         return(foundSpecial);
     }
 
-    private static void extendClasspathWithDirOfClasses(URLClassLoader sysLoader, File dir)
+    private static void extendClasspathWithDirOfClasses(URLClassLoader classLoader, File dir)
     {
         URI u = dir.toURI();
-        URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-        Class<URLClassLoader> urlClass = URLClassLoader.class;
         try
         {
-            Method method = urlClass.getDeclaredMethod("addURL", new Class[] { URL.class });
-            method.setAccessible(true);
-            method.invoke(urlClassLoader, new Object[] { u.toURL() });
+            if (classLoader instanceof Boot)
+            {
+                ((Boot)classLoader).addURL(u.toURL());
+            }
+            else
+            {
+                Class<?> urlClassLoaderClazz = URLClassLoader.class;
+                Method method = urlClassLoaderClazz.getDeclaredMethod("addURL", new Class[] { URL.class });
+                method.setAccessible(true);
+                method.invoke(classLoader, new Object[] { u.toURL() });
+            }
         }
         catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | MalformedURLException e)
         {
@@ -377,13 +543,13 @@ public class Boot
 
     private static void extendClasspathWithDirOfClasses(File dir)
     {
-        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        URLClassLoader sysLoader = getURLClassLoaderToUse();
         extendClasspathWithDirOfClasses(sysLoader, dir);
     }
 
     private static boolean extendClasspathWithLibJarDir(File dir, String patternForSpecial)
     {
-        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        URLClassLoader sysLoader = getURLClassLoaderToUse();
         boolean foundIt = extendClasspathWithJarDir(sysLoader, dir, ".*[.]jar", patternForSpecial);
         return(foundIt);
     }
@@ -397,9 +563,9 @@ public class Boot
      * @param homeDirStrs
      * @param dir
      */
-    static void extendClasspathWithSolJJarDir(String[] homeDirStrs, File dir)
+    public static void extendClasspathWithSolJJarDir(String[] homeDirStrs, File dir)
     {
-        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        URLClassLoader sysLoader = getURLClassLoaderToUse();
         boolean foundSolrj = false;
 
         File dirWithJars = getDirToStartFrom(homeDirStrs, dir);
@@ -415,8 +581,25 @@ public class Boot
         }
         if (!foundSolrj)
         {
-            throw new IndexerSpecException("Unable to find a solrj jar file in directory: "+ dir.getAbsolutePath() + ((parentDir != null) ? "( or "+parentDir.getAbsolutePath()+ ")": ""));
+            throw new RuntimeException("Unable to find a solrj jar file in directory: "+ dir.getAbsolutePath() + ((parentDir != null) ? "( or "+parentDir.getAbsolutePath()+ ")": ""));
         }
+    }
+
+    public static URLClassLoader getURLClassLoaderToUse()
+    {
+        if (classLoaderToUse != null) return(classLoaderToUse);
+        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+        String forceCustomClassLoaderProperty = System.getProperty("solrmarc.force.custom.classloader", "false");
+        if (systemClassLoader instanceof URLClassLoader && ! forceCustomClassLoaderProperty.equalsIgnoreCase("true"))
+        {
+            classLoaderToUse = (URLClassLoader)systemClassLoader;
+        }
+        else
+        {
+            classLoaderToUse = new Boot(new URL[0], systemClassLoader);
+            Thread.currentThread().setContextClassLoader(classLoaderToUse);
+        }
+        return classLoaderToUse;
     }
 
     private static File getDirToStartFrom(String[] homeDirStrs, File dir)
@@ -435,15 +618,15 @@ public class Boot
         return(dir);
     }
 
-    static void extendClasspathWithLocalJarDirs(String[] homeDirStrs, String[] addnlLibDirStrs)
+    public static void extendClasspathWithLocalJarDirs(String[] homeDirStrs, String[] addnlLibDirStrs)
     {
-        FilenameFilter jarsOnly = new FilenameFilter() {
+        FilenameFilter jarsOrClassesOnly = new FilenameFilter() {
             public boolean accept(File dir, String name) 
             {
-                return (name.toLowerCase().endsWith(".jar"));
+                return (name.toLowerCase().endsWith(".jar") || name.toLowerCase().endsWith("*.class"));
             }
         };
-        
+
         for (String libdirname : addnlLibDirStrs)
         {
             File libDir = new File(libdirname);
@@ -463,7 +646,7 @@ public class Boot
                     String homeDir = homeDirStrs[i];
                     logger.debug("Checking for jars files in directory: " + homeDir + "/" + libdirname);
                     libDir = new File(homeDir, libdirname);
-                    if (libDir.exists() && libDir.isDirectory() && libDir.listFiles(jarsOnly).length > 0)
+                    if (libDir.exists() && libDir.isDirectory() && libDir.listFiles(jarsOrClassesOnly).length > 0)
                     {
                         logger.debug("Adding jars files in directory: " + libDir.getAbsolutePath());
                         extendClasspathWithLibJarDir(libDir, null);
@@ -471,7 +654,7 @@ public class Boot
                     }
                 }
             }
-            else if (libDir.exists() && libDir.isDirectory() && libDir.listFiles(jarsOnly).length > 0)
+            else if (libDir.exists() && libDir.isDirectory() && libDir.listFiles(jarsOrClassesOnly).length > 0)
             {
                 logger.debug("Adding jars files in directory: " + libDir.getAbsolutePath());
                 extendClasspathWithLibJarDir(libDir, null);

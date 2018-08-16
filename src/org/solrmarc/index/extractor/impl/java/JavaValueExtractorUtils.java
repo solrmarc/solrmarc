@@ -1,6 +1,8 @@
 package org.solrmarc.index.extractor.impl.java;
 
 import org.apache.log4j.Logger;
+import org.solrmarc.driver.Boot;
+import org.solrmarc.index.utils.ClasspathUtils;
 
 import javax.tools.*;
 
@@ -51,7 +53,7 @@ public class JavaValueExtractorUtils
      * @return true if one or more java sources were compiled, else false.
      * @throws IOException
      */
-    public boolean compileSources()
+    public boolean compileSources(boolean recompileAll)
     {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         boolean compiledSome = false;
@@ -67,20 +69,15 @@ public class JavaValueExtractorUtils
             String srcDirectory = homeDirectory + File.separator + "index_java" + File.separator + "src";
             String binDirectory = homeDirectory + File.separator + "index_java" + File.separator + "bin";
             createBinDirectory(binDirectory);
-            final List<File> sourceFiles = getChangedSourceFiles(srcDirectory, binDirectory);
+            final List<File> sourceFiles = getChangedSourceFiles(srcDirectory, binDirectory, recompileAll);
             if (sourceFiles.isEmpty())
             {
                 continue;
             }
             compiledSome = true;
-            List<File> classpath = new  ArrayList<>();
-            URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-            logger.debug("Classpath for compiling java files:");
-            for (URL url : sysLoader.getURLs())
-            {
-                classpath.add(new File(url.getFile()));
-                logger.debug("    " + url.getFile());
-            }
+            // Get the current classpath to use in compiling dynamic methods
+            List<File> classpath = ClasspathUtils.instance().getClassPath();
+
             // Now add in dynamically compiled java classes from less local index_java directories
             for (int j = dirsContainingJavaSource.length - 1; j > i; j--)
             {
@@ -178,7 +175,7 @@ public class JavaValueExtractorUtils
             }
         }
         URL[] URLs = listURL.toArray(new URL[0]);
-        return new URLClassLoader(URLs);
+        return new URLClassLoader(URLs, Boot.getURLClassLoaderToUse());
     }
 
     private Set<String> getClassNames()
@@ -306,14 +303,14 @@ public class JavaValueExtractorUtils
         }
     }
 
-    private List<File> getChangedSourceFiles(String srcDirectory, String binDirectory)
+    private List<File> getChangedSourceFiles(String srcDirectory, String binDirectory, boolean recompileAll)
     {
         final List<File> sourceFiles = getSourceFiles(srcDirectory);
         final List<File> changedSourceFiles = new ArrayList<>();
         Date dateJarBuilt = getCreateDateOfSolrMarcJar();
         for (final File sourceFile : sourceFiles)
         {
-            if (hasChanged(sourceFile, srcDirectory, binDirectory, dateJarBuilt))
+            if (recompileAll || hasChanged(sourceFile, srcDirectory, binDirectory, dateJarBuilt))
             {
                 changedSourceFiles.add(sourceFile);
             }

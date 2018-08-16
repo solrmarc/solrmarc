@@ -1,5 +1,6 @@
 package org.solrmarc.index.utils;
 
+import org.solrmarc.driver.Boot;
 import org.solrmarc.driver.BootableMain;
 import org.solrmarc.driver.LoggerDelegator;
 import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
@@ -10,7 +11,11 @@ import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.matchprocessor.ImplementingClassMatchProcessor;
 import io.github.lukehutch.fastclasspathscanner.matchprocessor.SubclassMatchProcessor;
 
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class FastClasspathUtils extends ClasspathUtils
@@ -24,7 +29,7 @@ public class FastClasspathUtils extends ClasspathUtils
         mixins = new LinkedHashSet<>();
         try
         {
-            Class.forName("bsh.Interpreter");
+            Boot.classForName("bsh.Interpreter");
         }
         catch (ClassNotFoundException e)
         {
@@ -58,7 +63,7 @@ public class FastClasspathUtils extends ClasspathUtils
                     mixins.add(matchingClass);
                 }
             });
-        scanner.scan();
+        scanner.createClassLoaderForMatchingClasses().scan();
     }
 
     @Override
@@ -136,4 +141,26 @@ public class FastClasspathUtils extends ClasspathUtils
         }
         return bootables;
     }
+
+    private void getClassPathForCompiling()
+    {
+        classpathForCompiling = new ArrayList<File>();
+        FastClasspathScanner scanner = new FastClasspathScanner();
+        List<URL> classpathURLForCompiling = scanner.getUniqueClasspathElementURLs();
+        for (URL url : classpathURLForCompiling) 
+        {
+            classpathForCompiling.add(new File(url.getFile()));
+        }
+    }
+
+    public List<File> getClassPath()
+    {
+        if (this.classpathForCompiling == null || this.classpathForCompiling.size() == 0)
+        {
+            getClassPathForCompiling();
+        }
+        return this.classpathForCompiling;
+    }
+
+
 }

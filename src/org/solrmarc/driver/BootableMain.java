@@ -2,14 +2,10 @@ package org.solrmarc.driver;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.solrmarc.index.indexer.IndexerSpecException;
 
 import joptsimple.OptionException;
@@ -175,7 +171,7 @@ public class BootableMain
     private boolean hasSolrJ()
     {
         try {
-            Class.forName("org.apache.solr.common.SolrInputDocument");
+            Boot.classForName("org.apache.solr.common.SolrInputDocument");
         }
         catch (ClassNotFoundException e)
         {
@@ -187,19 +183,5 @@ public class BootableMain
     protected boolean needsSolrJ()
     {
         return true;
-    }
-
-    private static void reInitLogging(String[] homeDirs)
-    {
-        for (String dir : homeDirs)
-        {
-            File log4jProps = new File(dir, "log4j.properties");
-            if (log4jProps.exists())
-            {
-                LogManager.resetConfiguration();
-                PropertyConfigurator.configure(log4jProps.getAbsolutePath());
-                return;
-            }
-        }
     }
 }

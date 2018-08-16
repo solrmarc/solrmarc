@@ -17,7 +17,6 @@ import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
 import org.solrmarc.tools.SolrMarcIndexerException;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -412,7 +411,7 @@ public class Indexer
                 boolean targetError = false;
                 try
                 {
-                    targetErrorClazz = Class.forName("bsh.TargetError");
+                    targetErrorClazz = Boot.classForName("bsh.TargetError");
                     if (targetErrorClazz.isInstance(e))
                     {
                         targetError = true;
