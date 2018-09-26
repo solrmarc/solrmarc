@@ -7,9 +7,10 @@ import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import org.solrmarc.index.extractor.impl.custom.Mixin;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import io.github.lukehutch.fastclasspathscanner.matchprocessor.ImplementingClassMatchProcessor;
-import io.github.lukehutch.fastclasspathscanner.matchprocessor.SubclassMatchProcessor;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ClassInfoList;
+import io.github.classgraph.ScanResult;
 
 import java.io.File;
 import java.net.URL;
@@ -18,9 +19,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class FastClasspathUtils extends ClasspathUtils
+public class ClassGraphUtils extends ClasspathUtils
 {
-    public static final LoggerDelegator logger = new LoggerDelegator(FastClasspathUtils.class);
+    public static final LoggerDelegator logger = new LoggerDelegator(ClassGraphUtils.class);
 
     private void getMatchingClasses()
     {
@@ -35,35 +36,37 @@ public class FastClasspathUtils extends ClasspathUtils
         {
             logger.warn("Cannot find BeanShell Interpreter class:  any index specification that uses BeanShell scripts will cause an error:" + e.getMessage());
         }
-        FastClasspathScanner scanner = new FastClasspathScanner()
-            .matchSubclassesOf(AbstractValueExtractorFactory.class, new SubclassMatchProcessor<AbstractValueExtractorFactory>()
+        try ( ScanResult scanResult = ( new ClassGraph()
+//                    .verbose()             // Enable verbose logging
+                    .enableClassInfo())       // Scan classes only
+                    .scan()) 
+        {
+            ClassInfoList extractorClassInfo = scanResult.getSubclasses("org.solrmarc.index.extractor.AbstractValueExtractorFactory");
+            for (ClassInfo classInfo : extractorClassInfo)
             {
-                @Override
-                public void processMatch(Class<? extends AbstractValueExtractorFactory> matchingClass)
-                {
-                    logger.debug("Subclass of AbstractValueExtractorFactory: " + matchingClass);
-                    extractors.add(matchingClass);
-                }
-            })
-            .matchSubclassesOf(AbstractValueMappingFactory.class, new SubclassMatchProcessor<AbstractValueMappingFactory>() 
+                Class<? extends AbstractValueExtractorFactory> clazz = (Class<? extends AbstractValueExtractorFactory>)  Boot.classForName(classInfo.getName());
+                extractors.add(clazz);
+            }
+            
+            ClassInfoList mapperClassInfo = scanResult.getSubclasses("org.solrmarc.index.mapping.AbstractValueMappingFactory");
+            for (ClassInfo classInfo : mapperClassInfo)
             {
-                @Override
-                public void processMatch(Class<? extends AbstractValueMappingFactory> matchingClass) 
-                {
-                    logger.debug("Subclass of AbstractValueMappingFactory: " + matchingClass);
-                    mappers.add(matchingClass);
-                }
-            })
-            .matchClassesImplementing(Mixin.class, new ImplementingClassMatchProcessor<Mixin>()
+                Class<? extends AbstractValueMappingFactory> clazz = (Class<? extends AbstractValueMappingFactory>) Boot.classForName(classInfo.getName());
+                mappers.add(clazz);
+            }
+            
+            ClassInfoList mixinClassInfo = scanResult.getClassesImplementing("org.solrmarc.index.extractor.impl.custom.Mixin");
+            for (ClassInfo classInfo : mixinClassInfo)
             {
-                @Override
-                public void processMatch(Class<? extends Mixin> matchingClass) 
-                {
-                    logger.debug("Subclass of Mixin: " + matchingClass);
-                    mixins.add(matchingClass);
-                }
-            });
-        scanner.createClassLoaderForMatchingClasses().scan();
+                Class<? extends Mixin> clazz = (Class<? extends Mixin>)  Boot.classForName(classInfo.getName());
+                mixins.add(clazz);
+            }
+        }
+        catch (ClassNotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -114,17 +117,24 @@ public class FastClasspathUtils extends ClasspathUtils
     private void getMatchingBootableClasses()
     {
         bootables = new LinkedHashSet<>();
-        FastClasspathScanner scanner = new FastClasspathScanner()  
-            .matchSubclassesOf(BootableMain.class, new SubclassMatchProcessor<BootableMain>() 
+        try ( ScanResult scanResult = ( new ClassGraph()
+//                .verbose()             // Enable verbose logging
+                .enableClassInfo())       // Scan classes only
+                .scan() )
+        {
+            ClassInfoList bootableClassInfo = scanResult.getSubclasses("org.solrmarc.driver.BootableMain");
+            for (ClassInfo classInfo : bootableClassInfo)
             {
-                @Override
-                public void processMatch(Class<? extends BootableMain> matchingClass) 
-                {
-                    logger.debug("Subclass of BootableMain: " + matchingClass);
-                    bootables.add(matchingClass);
-                }
-            });
-        scanner.scan();
+                Class<? extends BootableMain> clazz = (Class<? extends BootableMain>) Boot.classForName(classInfo.getName());
+                bootables.add(clazz);
+
+            }
+        }
+        catch (ClassNotFoundException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -145,11 +155,16 @@ public class FastClasspathUtils extends ClasspathUtils
     private void getClassPathForCompiling()
     {
         classpathForCompiling = new ArrayList<File>();
-        FastClasspathScanner scanner = new FastClasspathScanner();
-        List<URL> classpathURLForCompiling = scanner.getUniqueClasspathElementURLs();
-        for (URL url : classpathURLForCompiling) 
+        try ( ScanResult scanResult = ( new ClassGraph()
+//                .verbose()             // Enable verbose logging
+                .enableClassInfo())       // Scan classes, methods, fields, annotations
+                .scan()) 
         {
-            classpathForCompiling.add(new File(url.getFile()));
+            List<URL> classpathURLForCompiling = scanResult.getClasspathURLs();
+            for (URL url : classpathURLForCompiling) 
+            {
+                classpathForCompiling.add(new File(url.getFile()));
+            }
         }
     }
 

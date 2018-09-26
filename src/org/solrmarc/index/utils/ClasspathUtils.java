@@ -33,12 +33,12 @@ public class ClasspathUtils
         {
             try
             {
-                Class<?> clazz = Boot.classForName("org.solrmarc.index.utils.FastClasspathUtils");
+                Class<?> clazz = Boot.classForName("org.solrmarc.index.utils.ClassGraphUtils");
                 theInstance = (ClasspathUtils) clazz.getConstructor().newInstance();
             }
             catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException  e1)
             {
-                logger.error("The FastClasspathScanner class cannot be found or loaded.   The associated jar wasn't found or loaded.");
+                logger.error("The ClassGraph class cannot be found or loaded.   The associated jar wasn't found or loaded.");
                 logger.error("Trying to run without that library, but some dynamic features will not work.");
                 theInstance = new ClasspathUtils();
             }

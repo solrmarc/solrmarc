@@ -92,7 +92,7 @@ public class Boot extends URLClassLoader
     @Override
     protected Class<?> findClass(final String name) throws ClassNotFoundException
     {
-        //System.out.println("Trying to find"+name);
+        //System.out.println("Trying to find"+ name);
         throw new ClassNotFoundException();
     }
     @Override
@@ -179,6 +179,9 @@ public class Boot extends URLClassLoader
             return super.loadClass(className, resolve);
         }
     }
+   /*
+    * end of classloader methods
+    */
 
     /**
      * @param classname
