@@ -45,12 +45,25 @@ public class SolrCoreLoader
         {
             pingStream = new BufferedReader(new InputStreamReader(pingURL.openStream()));
             String line;
+            logger.debug("Pinging Solr at URL:  " +pingURL);
+            boolean dotsShown = false;
             while ((line = pingStream.readLine()) != null)
             {
                 if (line.matches(".*\"status\">OK<.*") || line.matches(".*\"status\":\"OK\".*"))
                 {
+                    logger.debug("    "+ line);
                     statusOK = true;
+                    dotsShown = false;
                     break;
+                }
+                else if (logger.isTraceEnabled())
+                {
+                    logger.trace("    "+ line);
+                }
+                else if (logger.isDebugEnabled() && !dotsShown)
+                {
+                    logger.debug("    ...");
+                    dotsShown = true;
                 }
             }
         }

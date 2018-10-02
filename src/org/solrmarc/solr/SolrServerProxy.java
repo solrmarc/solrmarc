@@ -65,15 +65,15 @@ public class SolrServerProxy extends SolrProxy
         }
         catch (SolrException e)
         {
-            throw(new SolrRuntimeException("SolrserverException", e));
+            throw(new SolrRuntimeException("SolrException", e));
         }
         catch (SolrServerException e)
         {
-            throw(new SolrRuntimeException("SolrserverException", e));
+            throw(new SolrRuntimeException("SolrServerException", e));
         }
         catch (IOException e)
         {
-            throw(new SolrRuntimeException("SolrserverException", e));
+            throw(new SolrRuntimeException("IOException", e));
         }
     }
 
@@ -85,6 +85,10 @@ public class SolrServerProxy extends SolrProxy
                 solrserver.optimize();
             else
                 solrserver.commit();
+        }
+        catch (SolrException e)
+        {
+            throw(new SolrRuntimeException("SolrException", e));
         }
         catch (SolrServerException e)
         {
@@ -101,6 +105,10 @@ public class SolrServerProxy extends SolrProxy
         try
         {
             solrserver.deleteById(id);
+        }
+        catch (SolrException e)
+        {
+            throw(new SolrRuntimeException("SolrException", e));
         }
         catch (SolrServerException e)
         {
