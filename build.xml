@@ -386,12 +386,15 @@
         <pathconvert property="javaCupLib" >
             <fileset dir="${lib.dir}" includes="java-cup-*-runtime.jar" />
         </pathconvert>
+        <pathconvert property="classGraphLib" >
+            <fileset dir="${lib.dir}" includes="classgraph-*.jar" />
+        </pathconvert>
         <cobertura-instrument todir="${instrumented.dir}" datafile="${tmp.cobertura.datafile}" ignoreTrivial="true" >
             <ignore regex="org.apache.log4j.*|ch.qos.logback.*" />
             <fileset dir="${build.dir}">
                 <include name="**/*.class" />
             </fileset>
-            <auxClasspath path="${marcLib};${javaCupLib}" />
+            <auxClasspath path="${marcLib};${javaCupLib};${classGraphLib}" />
         </cobertura-instrument>
         <property name="already.instrumented" value="true" />
     </target>
