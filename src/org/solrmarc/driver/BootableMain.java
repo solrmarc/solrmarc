@@ -112,8 +112,10 @@ public class BootableMain
                 {
                     hasDefDir = true;
                 }
-                homeDirList.add(dirAsFile.getAbsolutePath());
-                logger.debug("Adding directory: " + dirAsFile.getAbsolutePath());
+                if (!homeDirList.contains(dirAsFile.getAbsolutePath())) {
+                    homeDirList.add(dirAsFile.getAbsolutePath());
+                    logger.debug("Adding directory: " + dirAsFile.getAbsolutePath());
+                }
             }
             if (!hasDefDir)
             {
