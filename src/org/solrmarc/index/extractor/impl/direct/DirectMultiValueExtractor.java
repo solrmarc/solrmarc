@@ -13,7 +13,7 @@ import org.solrmarc.index.specification.Specification;
 import java.util.Collection;
 import java.util.EnumSet;
 
-public class DirectMultiValueExtractor extends AbstractMultiValueExtractor implements ExternalMethod
+public class DirectMultiValueExtractor extends AbstractMultiValueExtractor implements ExternalMethod, ModifyableMultiValueExtractor
 {
     private Specification fieldsAndSubfieldSpec;
 
