@@ -269,7 +269,7 @@ public class Indexer
         return result;
     }
 
-    private eErrorSeverity addExceptionsToMap(SolrInputDocument document, List<IndexerSpecException> perRecordExceptions, eErrorSeverity errLvl)
+    private eErrorSeverity addExceptionsToMap(SolrInputDocument document, Collection<IndexerSpecException> perRecordExceptions, eErrorSeverity errLvl)
     {
         if (perRecordExceptions != null)
         {
@@ -308,7 +308,8 @@ public class Indexer
             try {
                 if (indexer.getOnlyIfEmpty())
                 {
-                    if (indexer.getSolrFieldNames().size() == 1 && inputDocs[0].containsKey(indexer.getSolrFieldNames().iterator().next())) 
+                    String fieldname = indexer.getSolrFieldNames().iterator().next();
+                    if (indexer.getSolrFieldNames().size() == 1 && inputDocs[0].containsKey(fieldname)) 
                         continue;
                 }
                 final Collection<String> data = indexer.getFieldData(record);
@@ -329,7 +330,7 @@ public class Indexer
                             if (indexer.getOnlyIfUnique())
                             {
                                 Collection<Object> values = inputDocs[0].getFieldValues(fieldName);
-                                if (values.contains(dataVal)) continue;
+                                if (values != null && values.contains(dataVal)) continue;
                             }
                             inputDocs[0].addField(fieldName, dataVal);
                         }
@@ -437,7 +438,7 @@ public class Indexer
             addMarcErrorsToMap(inputDocs[1], record.getErrors());
             recDoc.addErrLoc(eErrorLocationVal.MARC_ERROR);
         }
-        List<IndexerSpecException> perRecordExceptions = ValueIndexerFactory.instance().getPerRecordErrors();
+        Collection<IndexerSpecException> perRecordExceptions = ValueIndexerFactory.instance().getPerRecordErrors();
         if (perRecordExceptions != null)
         {
             errLvl = addExceptionsToMap(inputDocs[2], perRecordExceptions, errLvl);
