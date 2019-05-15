@@ -10,21 +10,24 @@ import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 
 public class MultiValuePatternMapping extends AbstractMultiValueMapping
 {
+    private final String mappingName;
     private final List<PatternMapping> patternMappings;
     private final boolean filter;
     private final boolean applyAll;
     private final boolean keepRaw; 
-    
-    public MultiValuePatternMapping(List<PatternMapping> patternMappings, boolean filter, boolean applyAll, boolean keepRaw)
+
+    public MultiValuePatternMapping(String mappingName, List<PatternMapping> patternMappings, boolean filter, boolean applyAll, boolean keepRaw)
     {
+        this.mappingName = mappingName;
         this.patternMappings = patternMappings;
         this.filter = filter;
         this.applyAll = applyAll;
         this.keepRaw = keepRaw;
     }
 
-    public MultiValuePatternMapping(List<PatternMapping> patternMappings)
+    public MultiValuePatternMapping(String mappingName, List<PatternMapping> patternMappings)
     {
+        this.mappingName = mappingName;
         this.patternMappings = patternMappings;
         this.filter = false;
         this.applyAll = false;

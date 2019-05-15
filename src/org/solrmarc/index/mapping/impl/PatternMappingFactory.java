@@ -23,7 +23,7 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
     public AbstractMultiValueMapping createMultiValueMapping(String mappingConfiguration)
     {
         int parenLoc = mappingConfiguration.indexOf("(");
-        return getMultiValuePattermMappingsFromString( mappingConfiguration.substring(0, parenLoc),
+        return getMultiValuePatternMappingsFromString( mappingConfiguration.substring(0, parenLoc),
                                                         mappingConfiguration.substring(parenLoc + 1, mappingConfiguration.length() - 1));
     }
 
@@ -36,11 +36,11 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
         }
         else
         {
-            return(getMultiValuePattermMappingsFromString(mapParts[0], mapParts[1]));
+            return(getMultiValuePatternMappingsFromString(mapParts[0], mapParts[1]));
         }
     }
 
-    public static MultiValuePatternMapping getMultiValuePattermMappingsFromString(String mapType, String mapSpec)
+    public static MultiValuePatternMapping getMultiValuePatternMappingsFromString(String mapType, String mapSpec)
     {
         final String mapParts[] = mapSpec.split("[|][|]");
         return getMultiValuePattermMappingsFromStrings(mapType, mapParts, 0);
@@ -86,10 +86,10 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
                 keepRaw = true;
             }
         }
-        return new MultiValuePatternMapping(pm, filter, matchAll, keepRaw);
+        return new MultiValuePatternMapping("local", pm, filter, matchAll, keepRaw);
     }
 
-    public static MultiValuePatternMapping pattermMappingsFromPatternProperties(Properties props)
+    public static MultiValuePatternMapping patternMappingsFromPatternProperties(String mappingName, Properties props)
     {
         List<PatternMapping> pm = new ArrayList<PatternMapping>(props.size());
         boolean filter = false;
@@ -131,7 +131,7 @@ public class PatternMappingFactory extends AbstractValueMappingFactory
                 keepRaw = true;
             }
         }
-        return new MultiValuePatternMapping(pm, filter, matchAll, keepRaw);
+        return new MultiValuePatternMapping(mappingName, pm, filter, matchAll, keepRaw);
     }
 
 }

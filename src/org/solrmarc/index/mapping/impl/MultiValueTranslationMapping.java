@@ -4,17 +4,23 @@ package org.solrmarc.index.mapping.impl;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.ValueIndexerFactory;
+import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 
 public class MultiValueTranslationMapping extends AbstractMultiValueMapping
 {
     private final static Pattern SEPARATOR_PATTERN = Pattern.compile("[|]");
+    private final String mapName;
     private final Properties translationMapping;
     private final String defaultValue;
     private boolean displayRaw = false;
-    
-    public MultiValueTranslationMapping(Properties translationMapping)
+    private boolean exceptionIfMissing = false;
+
+    public MultiValueTranslationMapping(String mapName, Properties translationMapping)
     {
+        this.mapName = mapName;
         this.translationMapping = translationMapping;
 
         String property = null;
@@ -29,6 +35,9 @@ public class MultiValueTranslationMapping extends AbstractMultiValueMapping
         String dRaw = translationMapping.getProperty(displayRawIfMissing);
         if (dRaw!= null && dRaw.equals("true")) 
             displayRaw = true;
+        String exception = translationMapping.getProperty(throwExceptionIfMissing);
+        if (exception!= null && exception.equals("true")) 
+            exceptionIfMissing = true;
         this.defaultValue = property;
     }
 
@@ -55,6 +64,10 @@ public class MultiValueTranslationMapping extends AbstractMultiValueMapping
             else if (displayRaw)
             {
                 mappedValues.add(value);
+            }
+            else if (exceptionIfMissing)
+            {
+                ValueIndexerFactory.instance().addPerRecordError(new IndexerSpecException(eErrorSeverity.WARN, "Undefined value '"+value+"' for translation map: " + mapName));
             }
         }
         return mappedValues;
