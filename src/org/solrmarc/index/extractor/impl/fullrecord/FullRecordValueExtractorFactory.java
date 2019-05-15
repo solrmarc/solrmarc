@@ -38,6 +38,10 @@ public class FullRecordValueExtractorFactory extends AbstractValueExtractorFacto
         {
             return new FullRecordAsTextValueExtractor();
         }
+        else if (mappingLC.startsWith("FullRecordAsFields".toLowerCase()))
+        {
+            return new FullRecordAsFieldsValuesExtractor(".*");
+        }
         throw new IllegalArgumentException("Unknown impl configuration: " + solrFieldName + " = " + mapping);
     }
 
