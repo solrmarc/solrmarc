@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -29,7 +30,7 @@ import org.solrmarc.index.extractor.AbstractValueExtractorFactory;
 import org.solrmarc.index.extractor.ExternalMethod;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
-import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
+import org.solrmarc.index.extractor.impl.direct.ModifyableMultiValueExtractor;
 import org.solrmarc.index.extractor.impl.java.JavaValueExtractorUtils;
 import org.solrmarc.index.extractor.methodcall.MethodCallManager;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
@@ -44,7 +45,7 @@ public class ValueIndexerFactory
     private List<AbstractValueExtractorFactory> extractorFactories;
     private List<AbstractValueMappingFactory> mappingFactories;
     private List<IndexerSpecException> validationExceptions;
-    private ThreadLocal<List<IndexerSpecException>> perRecordExceptions;
+    private ThreadLocal<Set<IndexerSpecException>> perRecordExceptions;
 
     private FullConditionalParser parser = null;
     private Properties localMappingProperties = null;
@@ -97,12 +98,12 @@ public class ValueIndexerFactory
 //        validationExceptions = new ArrayList<IndexerSpecException>();
         // perRecordExceptions list changed to be a ThreadLocal list so that each thread can save
         // the exceptions found while indexing a given record without interfering with other indexing threads.
-        perRecordExceptions = new ThreadLocal<List<IndexerSpecException>>()
+        perRecordExceptions = new ThreadLocal<Set<IndexerSpecException>>()
         {
             @Override
-            protected List<IndexerSpecException> initialValue()
+            protected Set<IndexerSpecException> initialValue()
             {
-                return new ArrayList<>();
+                return new LinkedHashSet<>();
             }
         };
         List<String> dirsJavaSourceList = new ArrayList<String>();
@@ -190,7 +191,7 @@ public class ValueIndexerFactory
      *
      * @return
      */
-    public List<IndexerSpecException> getPerRecordErrors()
+    public Set<IndexerSpecException> getPerRecordErrors()
     {
         return perRecordExceptions.get();
     }
@@ -501,6 +502,8 @@ public class ValueIndexerFactory
             extractor = (AbstractMultiValueExtractor) toClone.extractor;
         }
         MultiValueIndexer result = new MultiValueIndexer(solrFieldNamesStr, extractor, mappings, collector, specLabel, totalElapsedTime);
+        if (toClone.getOnlyIfEmpty())  result.setIfEmpty();
+        if (toClone.getOnlyIfUnique())  result.setIfUnique();
         return result;
     }
 
@@ -565,10 +568,9 @@ public class ValueIndexerFactory
         {
             mapSpecs = new ArrayList<List<String>>();
         }
-        if (extractor instanceof DirectMultiValueExtractor)
+        if (extractor instanceof ModifyableMultiValueExtractor)
         {
-            final DirectMultiValueExtractor multiValueExtractor = (DirectMultiValueExtractor) extractor;
-            int indexOfJoin = decorateMultiValueExtractor(origSpec, fieldnames, multiValueExtractor, mapSpecs, currentExceptions);
+            int indexOfJoin = decorateMultiValueExtractor(origSpec, fieldnames, (ModifyableMultiValueExtractor)extractor, mapSpecs, currentExceptions);
             final List<AbstractMultiValueMapping> mappings;
             if (indexOfJoin != -1)
             {
@@ -580,7 +582,7 @@ public class ValueIndexerFactory
             }
             final MultiValueCollector collector = createMultiValueCollector(mapSpecs, true);
 
-            return new MultiValueIndexer(fieldnames, multiValueExtractor, mappings, collector);
+            return new MultiValueIndexer(fieldnames, (AbstractMultiValueExtractor)extractor, mappings, collector);
         }
         else if (extractor instanceof AbstractMultiValueExtractor)
         {
@@ -607,13 +609,13 @@ public class ValueIndexerFactory
     {
         if (str.equals("join") || str.equals("separate") || str.equals("format") || str.equals("substring") ||
             str.equals("cleanEach") || str.equals("cleanEnd") || str.equals("clean") || str.equals("stripAccent") ||
-            str.equals("stripPunct") || str.equals("stripInd2") || str.equals("toUpper") || str.equals("toLower") ||
+            str.equals("stripPunct") || str.equals("stripInd1") ||str.equals("stripInd2") || str.equals("stripInd") || 
             str.equals("toUpper") || str.equals("toLower") || str.equals("titleSortUpper") || str.equals("titleSortLower") ||
             str.equals("untrimmed") || str.equals("toTitleCase")) return (true);
         return (false);
     }
 
-    private int decorateMultiValueExtractor(String origSpec, String fieldnames, DirectMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs, List<IndexerSpecException> currentExceptions)
+    private int decorateMultiValueExtractor(String origSpec, String fieldnames, ModifyableMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs, List<IndexerSpecException> currentExceptions)
     {
         if (mapSpecs.size() == 0)
         {
@@ -692,9 +694,17 @@ public class ValueIndexerFactory
             {
                 multiValueExtractor.addCleanVal(eCleanVal.STRIP_ALL_PUNCT);
             }
+            else if (mapParts[0].equals("stripInd1"))
+            {
+                multiValueExtractor.addCleanVal(eCleanVal.STRIP_INDICATOR_1);
+            }
             else if (mapParts[0].equals("stripInd2"))
             {
                 multiValueExtractor.addCleanVal(eCleanVal.STRIP_INDICATOR_2);
+            }
+            else if (mapParts[0].equals("stripInd"))
+            {
+                multiValueExtractor.addCleanVal(eCleanVal.STRIP_INDICATOR);
             }
             else if (mapParts[0].equals("toUpper"))
             {
@@ -710,12 +720,12 @@ public class ValueIndexerFactory
             }
             else if (mapParts[0].equals("titleSortUpper"))
             {
-                multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS, eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR_2));
+                multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS, eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR));
                 multiValueExtractor.addCleanVal(eCleanVal.TO_UPPER);
             }
             else if (mapParts[0].equals("titleSortLower"))
             {
-                multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS, eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR_2));
+                multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS, eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR));
                 multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
             }
             else if (isAValueMappingConfiguration(mapParts[0]) && joinIndex == -1)

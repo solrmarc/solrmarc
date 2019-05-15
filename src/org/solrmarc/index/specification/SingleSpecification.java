@@ -3,6 +3,7 @@ package org.solrmarc.index.specification;
 import java.util.Collection;
 import java.util.EnumSet;
 
+import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.extractor.formatter.FieldFormatter;
 import org.solrmarc.index.extractor.formatter.FieldFormatterBase;
@@ -46,6 +47,12 @@ public abstract class SingleSpecification extends Specification
     public void addConditional(Condition cond)
     {
         if (this.cond == null) this.cond = cond;
+    }
+    
+    @Override
+    public boolean conditionalMatches(Record record, VariableField vf)
+    {
+        return( (cond == null || cond.matches(record, vf)));
     }
 
     public String getTag()

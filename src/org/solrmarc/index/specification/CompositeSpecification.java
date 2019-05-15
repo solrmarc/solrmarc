@@ -227,4 +227,10 @@ public class CompositeSpecification extends Specification
         return new CompositeSpecification(this);
     }
 
+    @Override
+    public boolean conditionalMatches(Record record, VariableField vf)
+    {
+        throw new RuntimeException("invalid invocation of conditionMatches on CompositeSpecification");
+    }
+
 }

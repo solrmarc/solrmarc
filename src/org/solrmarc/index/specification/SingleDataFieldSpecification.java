@@ -16,7 +16,7 @@ public class SingleDataFieldSpecification extends SingleSpecification
 {
     String subfields;
     Pattern subfieldPattern;
-
+    
     public SingleDataFieldSpecification(String tag, String subfields, Condition cond, FieldFormatter fmt)
     {
         super(tag, cond);
@@ -51,7 +51,7 @@ public class SingleDataFieldSpecification extends SingleSpecification
 
     private final static Pattern makePattern(String subfields)
     {
-        if (subfields == null || subfields.length() == 0) return (Pattern.compile("."));
+        if (subfields == null || subfields.length() == 0) return (dotPattern);
         else if (subfields.startsWith("[") && subfields.endsWith("]")) return (Pattern.compile(subfields));
         else return (Pattern.compile("[" + subfields + "]"));
     }
@@ -69,6 +69,11 @@ public class SingleDataFieldSpecification extends SingleSpecification
     @Override
     public void addFieldValues(Collection<String> result, VariableField vf) throws Exception
     {
+        addDataFieldValues(result, vf, fmt, subfieldPattern);
+    }
+    
+    public static void addDataFieldValues(Collection<String> result, VariableField vf, FieldFormatter fmt, Pattern subfieldPattern) throws Exception
+    {
         DataField df = (DataField) vf;
         StringBuilder sb = fmt.start();
         if (fmt.hasFieldFormat())
@@ -81,15 +86,14 @@ public class SingleDataFieldSpecification extends SingleSpecification
         for (Subfield subfield : df.getSubfields())
         {
             final String codeStr = "" + subfield.getCode();
-            Matcher matcher = subfieldPattern.matcher(codeStr);
-            if (matcher.matches())
+            if (subfieldPattern.equals(dotPattern) || subfieldPattern.matcher(codeStr).matches())
             {
                 fmt.addSeparator(sb,cnt);
-                fmt.addCode(sb,codeStr);
+                //fmt.addCode(sb,codeStr);
                 Collection<String> prepped = fmt.prepData(vf, (subfield.getCode() == 'a'), subfield.getData());
                 for (String val : prepped)
                 {
-                    val = fmt.handleSubFieldFormat(codeStr, val);
+                    val = fmt.handleSubFieldFormat(codeStr, vf, val);
                     fmt.addVal(sb, codeStr, val);
                     fmt.addAfterSubfield(sb, result);
                 }

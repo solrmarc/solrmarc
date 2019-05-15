@@ -11,9 +11,9 @@ public interface FieldFormatter extends ExternalMethod
 {
 
     public final static EnumSet<eCleanVal> TITLE_SORT_UPPER = EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.STRIP_ACCCENTS,
-            eCleanVal.STRIP_ALL_PUNCT, eCleanVal.TO_UPPER, eCleanVal.STRIP_INDICATOR_2);
+            eCleanVal.STRIP_ALL_PUNCT, eCleanVal.TO_UPPER, eCleanVal.STRIP_INDICATOR);
     public final static EnumSet<eCleanVal> TITLE_SORT_LOWER = EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.STRIP_ACCCENTS,
-            eCleanVal.STRIP_ALL_PUNCT, eCleanVal.TO_LOWER, eCleanVal.STRIP_INDICATOR_2);
+            eCleanVal.STRIP_ALL_PUNCT, eCleanVal.TO_LOWER, eCleanVal.STRIP_INDICATOR);
 
     public enum eJoinVal
     {
@@ -22,7 +22,7 @@ public interface FieldFormatter extends ExternalMethod
 
     public enum eCleanVal
     {
-        CLEAN_END, CLEAN_EACH, STRIP_ALL_PUNCT, STRIP_ACCCENTS, TO_UPPER, TO_LOWER, STRIP_INDICATOR_2, UNTRIMMED, TO_TITLECASE;
+        CLEAN_END, CLEAN_EACH, STRIP_ALL_PUNCT, STRIP_ACCCENTS, TO_UPPER, TO_LOWER, STRIP_INDICATOR_1, STRIP_INDICATOR_2, STRIP_INDICATOR, UNTRIMMED, TO_TITLECASE;
     };
 
     public abstract String getFieldTagFmt();
@@ -75,7 +75,7 @@ public interface FieldFormatter extends ExternalMethod
 
     public abstract Collection<String> handleMapping(Collection<String> cleaned) throws Exception;
 
-    public abstract String handleSubFieldFormat(String sfCode, String mappedDataVal);
+    public abstract String handleSubFieldFormat(String sfCode, VariableField vf, String mappedDataVal);
 
     public abstract boolean hasFieldFormat();
 

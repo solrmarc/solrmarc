@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
@@ -19,10 +20,12 @@ import org.solrmarc.index.specification.conditional.Condition;
 public abstract class Specification implements ExternalMethod
 {
     abstract public void addConditional(Condition cond);
+    abstract public boolean conditionalMatches(Record record, VariableField vf);
 
     abstract public String[] getTags();
 
     String specLabel;
+    public final static Pattern dotPattern = Pattern.compile(".");
 
     public List<FieldMatch> getFieldMatches(Record record)
     {
@@ -31,8 +34,8 @@ public abstract class Specification implements ExternalMethod
         List<FieldMatch> result = new ArrayList<FieldMatch>(fields.size());
         for (VariableField vf : fields)
         {
-            SingleSpecification specUsed = this.getMatchingSpec(vf.getTag(), vf);
-            if (specUsed != null && (specUsed.cond == null || specUsed.cond.matches(record, vf)))
+            Specification specUsed = this.getMatchingSpec(vf.getTag(), vf);
+            if (specUsed != null && (specUsed.conditionalMatches(record, vf)))
             {
                 result.add(new FieldMatch(vf, specUsed));
             }
@@ -45,7 +48,7 @@ public abstract class Specification implements ExternalMethod
         return (false);
     }
 
-    abstract protected SingleSpecification getMatchingSpec(String tag, VariableField f);
+    abstract protected Specification getMatchingSpec(String tag, VariableField f);
 
     abstract public void addFieldValues(Collection<String> result, VariableField vf) throws Exception;
 

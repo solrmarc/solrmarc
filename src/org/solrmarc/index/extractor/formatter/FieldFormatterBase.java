@@ -157,6 +157,14 @@ public class FieldFormatterBase implements FieldFormatter
             {
                 sfCodeMap.put(pieces[0], pieces[1]);
             }
+            else if (pieces.length == 2 && pieces[0].contains("tag"))
+            {
+                this.setFieldTagFmt(pieces[1]);
+            }
+            else if (pieces.length == 2 && pieces[0].contains("ind"))
+            {
+                this.setIndicatorFmt(pieces[1]);
+            }
             else if (fieldFormat == null && !part.equals("format"))
             {
                 fieldFormat = part;
@@ -296,9 +304,9 @@ public class FieldFormatterBase implements FieldFormatter
         {
             sbReplace(sb, "%tag", df.getTag());
         }
-        else if (fieldTagFmt != null)
+        else if (fieldTagFmt != null && fieldTagFmt.length() > 0)
         {
-            sb.append(fieldTagFmt.contains("%tag") ? fieldTagFmt.replaceAll("%tag", df.getTag()) : df.getTag());
+            sb.append(fieldTagFmt.contains("%tag") ? fieldTagFmt.replace("%tag", df.getTag()) : fieldTagFmt);
         }
     }
 
@@ -326,10 +334,10 @@ public class FieldFormatterBase implements FieldFormatter
             sbReplace(sb, "%1", ""+((DataField) df).getIndicator1());
             sbReplace(sb, "%2", ""+((DataField) df).getIndicator2());
         }
-        else if (indicatorFmt != null && df instanceof DataField)
+        else if (indicatorFmt != null && indicatorFmt.length() > 0 && df instanceof DataField)
         {
-            String result = indicatorFmt.replaceAll("%1", "" + ((DataField) df).getIndicator1()).replaceAll("%2",
-                    "" + ((DataField) df).getIndicator1());
+            String result = indicatorFmt.replace("%1", "" + ((DataField) df).getIndicator1()).replace("%2",
+                    "" + ((DataField) df).getIndicator2());
             sb.append(result);
         }
     }
@@ -344,9 +352,21 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public void addCode(StringBuilder sb, String codeStr)
     {
-//        if (sfCodeFmt != null)
+//        if (sfCodeMap != null)
 //        {
-//            buffer.append(sfCodeFmt.replaceAll("%sf", codeStr));
+//            String pattern = null;
+//            if (sfCodeMap.containsKey(codeStr))
+//            {
+//                pattern = sfCodeMap.get(codeStr);
+//            }
+//            else if (sfCodeMap.containsKey("*"))
+//            {
+//                pattern = sfCodeMap.get("*");
+//            }
+//            if (pattern != null && pattern.length() != 0)
+//            {
+//                sb.append(pattern.replaceAll("%sf", codeStr));
+//            }
 //        }
     }
 
@@ -363,12 +383,23 @@ public class FieldFormatterBase implements FieldFormatter
     }
 
     @Override
-    public String handleSubFieldFormat(String sfCode, String mappedDataVal)
+    public String handleSubFieldFormat(String sfCode, VariableField vf, String mappedDataVal)
     {
-        if (sfCodeMap == null || !sfCodeMap.containsKey(sfCode)) return (mappedDataVal);
-        String value = sfCodeMap.get(sfCode);
-        value = value.replace("$"+sfCode, mappedDataVal);
-        return(value);
+        if (sfCodeMap == null || (!sfCodeMap.containsKey(sfCode) && !sfCodeMap.containsKey("*"))) 
+            return (mappedDataVal);
+        String pattern = null;
+        if (sfCodeMap.containsKey(sfCode))
+        {
+            pattern = sfCodeMap.get(sfCode);
+        }
+        else if (sfCodeMap.containsKey("*"))
+        {
+            pattern = sfCodeMap.get("*");
+        }
+        String ind1 = (vf instanceof DataField) ? ""+ ((DataField)vf).getIndicator1() : " ";
+        String ind2 = (vf instanceof DataField) ? ""+ ((DataField)vf).getIndicator2() : " ";
+        pattern = pattern.replace("%tag", vf.getTag()).replace("%1", ind1).replace("%2", ind2).replace("%sf", sfCode).replace("%d", mappedDataVal);
+        return(pattern);
     }
 
     private final String getSubstring(final String data)
@@ -400,11 +431,14 @@ public class FieldFormatterBase implements FieldFormatter
         int numToDel = 0;
 
         String trimmed = data;
-        if (cleanVal.contains(eCleanVal.STRIP_INDICATOR_2) && isSubfieldA && vf instanceof DataField)
+        if ((cleanVal.contains(eCleanVal.STRIP_INDICATOR_1) || cleanVal.contains(eCleanVal.STRIP_INDICATOR_2) || cleanVal.contains(eCleanVal.STRIP_INDICATOR)) 
+                && isSubfieldA && vf instanceof DataField)
         {
             DataField df = (DataField) vf;
-            char ind2Val = df.getIndicator2();
-            numToDel = (ind2Val >= '0' && ind2Val <= '9') ? ind2Val - '0' : 0;
+            char indVal = getIndicatorValueToStrip(df, cleanVal);
+            numToDel = (indVal >= '0' && indVal <= '9') ? indVal - '0' : 0;
+            if (numToDel > trimmed.length()) 
+                numToDel = trimmed.length();
             if (numToDel > 0) trimmed = trimmed.substring(numToDel);
         }
         trimmed = cleanVal.contains(eCleanVal.UNTRIMMED) ? getSubstring(trimmed) : getSubstring(trimmed).trim();
@@ -412,7 +446,8 @@ public class FieldFormatterBase implements FieldFormatter
         String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? DataUtil.cleanData(trimmed) : trimmed;
         if (!cleanVal.contains(eCleanVal.STRIP_ACCCENTS) && !cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)
                 && !cleanVal.contains(eCleanVal.TO_LOWER) && !cleanVal.contains(eCleanVal.TO_UPPER)
-                && !cleanVal.contains(eCleanVal.TO_TITLECASE) && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_2))
+                && !cleanVal.contains(eCleanVal.TO_TITLECASE) && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_1) 
+                && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_2) && !cleanVal.contains(eCleanVal.STRIP_INDICATOR))
         {
             return (str);
         }
@@ -466,6 +501,30 @@ public class FieldFormatterBase implements FieldFormatter
             str = DataUtil.toTitleCase(str);
         }
         return str;
+    }
+
+    private char getIndicatorValueToStrip(DataField df, EnumSet<eCleanVal> cleanVal)
+    {
+        final String ind1Fields = "130:630:730:740";
+        final String ind2Fields = "222:240:242:243:245:440:830";
+        if ( cleanVal.contains(eCleanVal.STRIP_INDICATOR) || ((cleanVal.contains(eCleanVal.STRIP_INDICATOR_1) && cleanVal.contains(eCleanVal.STRIP_INDICATOR_2))))
+        {
+            if (ind1Fields.contains(df.getTag()) )
+                return(df.getIndicator1());
+            else if (ind2Fields.contains(df.getTag()))
+                return(df.getIndicator2());
+            else
+                return(0);
+        }
+        else if (cleanVal.contains(eCleanVal.STRIP_INDICATOR_1))   
+        {
+            return(df.getIndicator1());
+        }
+        else if (cleanVal.contains(eCleanVal.STRIP_INDICATOR_2))   
+        {
+            return(df.getIndicator2());
+        }
+        return 0;
     }
 
     /*

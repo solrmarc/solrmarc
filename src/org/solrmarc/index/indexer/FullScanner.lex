@@ -85,8 +85,9 @@ custom_identifier = (get|extract)[A-Za-z0-9][A-Z_a-z0-9./\\]*[A-Za-z0-9]
 ext_custom_identifier = [a-z][a-zA-Z_.]*::{custom_identifier}
 nonquotedstring = [^,() \\\"]+
 fullrecord = "xml"|"raw"|"json"|"json2"|"text"|"FullRecordAs"[A-Za-z0-9]*
+fields = "fields"
 datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
-%state STRING CONDITIONAL CONDITIONAL2 SUBFIELDSPEC SUBCTRLFIELDSPEC CUSTOMSPEC SCRIPTSPEC CUSTOMMETHOD CUSTOMPARAM MAPSPEC CONSTANT
+%state STRING CONDITIONAL CONDITIONAL2 SUBFIELDSPEC SUBCTRLFIELDSPEC CUSTOMSPEC SCRIPTSPEC CUSTOMMETHOD CUSTOMPARAM MAPSPEC CONSTANT FIELDS
 
 %%
 <YYINITIAL>{
@@ -103,6 +104,7 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 "custom"                { yybegin(CUSTOMSPEC);   return symbol("CUSTOM", FullSym.CUSTOM, yytext() ); }
 "java"                  { yybegin(CUSTOMSPEC);   return symbol("JAVA", FullSym.JAVA, yytext() ); }
 {fullrecord}            { yybegin(MAPSPEC);      return symbol("FULLRECORD", FullSym.FULLRECORD, yytext()); }
+{fields}                { yybegin(FIELDS);       return symbol("FIELDS", FullSym.FIELDS, yytext()); }
 {datespec}              { yybegin(MAPSPEC);      return symbol("DATE", FullSym.DATE, yytext()); }
 {custom_identifier}     { yybegin(CUSTOMPARAM);   return symbol("CUSTOMIDENTIFIER", FullSym.CUSTOMIDENTIFIER, yytext() ); }
 {ext_custom_identifier} { yybegin(CUSTOMPARAM);   return symbol("CUSTOMIDENTIFIER", FullSym.EXTCUSTOMIDENTIFIER, yytext() ); }
@@ -154,6 +156,13 @@ datespec = "date"|[Dd]"ateOfPublication"|[Dd]"ateRecordIndexed"|"index_date"
 {nonquotedstring}       { return stringIdentifierOrNumber(yytext()); }
 "("                     { yybegin(CUSTOMPARAM); return symbol("(",FullSym.LPAREN); }
 ")"                     { return symbol(")",FullSym.RPAREN); }
+{white_space}           { /* ignore */ }
+}
+
+<FIELDS>{
+"("                     { return symbol("(",FullSym.LPAREN); }
+{nonquotedstring}       { return symbol("QUOTEDSTR", FullSym.QUOTEDSTR, yytext()); }
+")"                     { yybegin(MAPSPEC); return symbol(")",FullSym.RPAREN); }
 {white_space}           { /* ignore */ }
 }
 

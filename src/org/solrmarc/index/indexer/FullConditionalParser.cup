@@ -17,6 +17,7 @@ import org.solrmarc.index.extractor.MultiValueWrapperSingleValueExtractor;
 import org.solrmarc.index.extractor.impl.constant.ConstantMultiValueExtractor;
 import org.solrmarc.index.extractor.impl.date.DateValueExtractorFactory;
 import org.solrmarc.index.extractor.impl.direct.DirectMultiValueExtractor;
+import org.solrmarc.index.extractor.impl.direct.RegexMultiValueExtractor;
 import org.solrmarc.index.extractor.impl.fullrecord.FullRecordValueExtractorFactory;
 import org.solrmarc.index.specification.conditional.*;
 import org.solrmarc.tools.Utils;
@@ -208,7 +209,7 @@ parser code {:
 terminal String SCRIPT, CUSTOM, JAVA, CUSTOMIDENTIFIER, EXTCUSTOMIDENTIFIER;
 terminal String FIELDNAME, FULLRECORD, DATE, IDENTIFIER, CUSTOM_MAP;
 terminal COMMA, COLON, LBRACE, RBRACE, QUESTION, AND, OR, NOT, LPAREN, RPAREN, EQU, NEQ, GT, LT, MATCH, CONTAINS;
-terminal String SUBFIELD, IND, FIELDSPEC, SUBFIELDSPEC, CTRLFIELDSPEC, POSITION, QUOTEDSTR, CHAR, NUMBER;
+terminal String SUBFIELD, IND, FIELDSPEC, SUBFIELDSPEC, CTRLFIELDSPEC, POSITION, QUOTEDSTR, CHAR, NUMBER, FIELDS;
 
 non terminal AbstractValueIndexer<?> index_spec;
 non terminal AbstractValueExtractor<?> extractor, custom_extractor;
@@ -218,7 +219,7 @@ non terminal List<String> field_names, strings, method_plus_params, params, cust
 non terminal CompositeSpecification field_spec, field_spec_simple, field_spec_part;
 non terminal SingleSpecification field_spec_part_complex, field_spec_part_simple;
 non terminal Condition expr, expr_part;
-non terminal String value, opt_comma, param;
+non terminal String value, opt_comma, param, regex_fields;
 non terminal Integer  op;
 
 precedence nonassoc NOT;
@@ -234,6 +235,8 @@ index_spec ::= extractor:e COMMA mapping_specs:m                            {: R
 extractor ::= strings:l                                                     {: RESULT = new ConstantMultiValueExtractor(l); :}
             | field_spec:fs                                                 {: RESULT = new DirectMultiValueExtractor(fs);  :}
             | FULLRECORD:s                                                  {: RESULT = makeMultiValueExtractor(fullFactory.createExtractor("CUP Parser", s)); :}
+            | regex_fields:s                                                {: RESULT = new RegexMultiValueExtractor(s); :}
+            | regex_fields:s QUESTION expr:e                                {: RESULT = new RegexMultiValueExtractor(s, e); :}
             | DATE:s                                                        {: RESULT = dateFactory.createExtractor("CUP Parser", s); :}
             | custom_extractor:e                                            {: RESULT = e; :}
             | error                                                         {: RESULT = null; :}
@@ -279,6 +282,12 @@ custom_map_spec ::=  CUSTOM_MAP:s LPAREN IDENTIFIER:s1 opt_comma IDENTIFIER:s2 R
 				  | error                                                   {: FullConditionalParser.addError("Malformed custom_map reference : Should be \ncustom_map(fully.qualified.class.Name method)\n or  custom_map(fully.qualified.class.Name method(parm1, parm2))"); :}
 
                   ;
+
+
+regex_fields ::= FIELDS                                                     {: RESULT = "..."; :}
+             |   FIELDS LPAREN QUOTEDSTR:s RPAREN                           {: RESULT =  s; :} 
+             ;
+
 opt_comma  ::=  COMMA | ;
 
 method_plus_params ::=  IDENTIFIER:s                                        {: RESULT = Collections.singletonList(s); :}

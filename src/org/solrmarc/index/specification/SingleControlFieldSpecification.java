@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.marc4j.marc.ControlField;
 import org.marc4j.marc.VariableField;
+import org.solrmarc.index.extractor.formatter.FieldFormatter;
 import org.solrmarc.index.specification.conditional.Condition;
 
 
@@ -44,6 +45,11 @@ public class SingleControlFieldSpecification extends SingleSpecification
     @Override
     public void addFieldValues(Collection<String> result, VariableField vf) throws Exception
     {
+        addControlFieldValues(result, vf, fmt);
+    }
+    
+    public static void addControlFieldValues(Collection<String> result, VariableField vf, FieldFormatter fmt) throws Exception
+    {
         final String data;
         data = ((ControlField) vf).getData();
         StringBuilder sb = fmt.start();
@@ -51,12 +57,13 @@ public class SingleControlFieldSpecification extends SingleSpecification
         Collection<String> prepped = fmt.prepData(vf, false, data);
         for (String val : prepped)
         {
+            val = fmt.handleSubFieldFormat(" ", vf, val);
             fmt.addVal(sb, null, val);
             fmt.addAfterSubfield(sb, result);
         }
         fmt.addAfterField(sb, result);
     }
-    
+
     @Override
     public Object makeThreadSafeCopy()
     {

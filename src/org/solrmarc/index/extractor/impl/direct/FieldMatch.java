@@ -4,14 +4,15 @@ import java.util.Collection;
 
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.specification.SingleSpecification;
+import org.solrmarc.index.specification.Specification;
 
 
 public class FieldMatch
 {
     VariableField vf;
-    SingleSpecification spec;
+    Specification spec;
 
-    public FieldMatch(VariableField vf, SingleSpecification spec)
+    public FieldMatch(VariableField vf, Specification spec)
     {
         this.vf = vf;
         this.spec = spec;
@@ -27,12 +28,12 @@ public class FieldMatch
         this.vf = vf;
     }
 
-    public SingleSpecification getSpec()
+    public Specification getSpec()
     {
         return spec;
     }
 
-    public void setSpec(SingleSpecification spec)
+    public void setSpec(Specification spec)
     {
         this.spec = spec;
     }
