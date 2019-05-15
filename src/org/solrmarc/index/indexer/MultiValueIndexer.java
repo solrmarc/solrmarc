@@ -17,7 +17,7 @@ import org.solrmarc.index.mapping.AbstractValueMapping;
 public class MultiValueIndexer extends AbstractValueIndexer<Collection<String>>
 {
     private boolean onlyIfEmpty = false;
-    private boolean onlyIfUnique;
+    private boolean onlyIfUnique = false;
 
     public MultiValueIndexer(final String solrFieldNamesStr, final AbstractMultiValueExtractor extractor,
             final AbstractValueMapping<Collection<String>>[] mappings,
