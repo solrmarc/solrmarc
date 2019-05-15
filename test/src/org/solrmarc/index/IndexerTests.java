@@ -34,14 +34,14 @@ public class IndexerTests
     private Record testRecord;
     private Properties translationMappingProperties = new Properties();
     private final AbstractMultiValueMapping[] translationMapping = new AbstractMultiValueMapping[]{
-            new MultiValueTranslationMapping(translationMappingProperties)
+            new MultiValueTranslationMapping("test1", translationMappingProperties)
     };
     private final AbstractMultiValueMapping[] patternMapping = new AbstractMultiValueMapping[]{
-            new MultiValuePatternMapping(Collections.singletonList(new PatternMapping("[A-Z]", "X", 0)), true, false, false)
+            new MultiValuePatternMapping("test2", Collections.singletonList(new PatternMapping("[A-Z]", "X", 0)), true, false, false)
     };
     private final AbstractMultiValueMapping[] translationAndPatternMapping = new AbstractMultiValueMapping[]{
-            new MultiValueTranslationMapping(translationMappingProperties),
-            new MultiValuePatternMapping(Collections.singletonList(new PatternMapping("(FOO)", "Foo $1", 0)))
+            new MultiValueTranslationMapping("test3", translationMappingProperties),
+            new MultiValuePatternMapping("test4", Collections.singletonList(new PatternMapping("(FOO)", "Foo $1", 0)))
     };
     private final MultiValueCollector singleCollector = new MultiValueCollector();
     private final ConstantMultiValueExtractor constantExtractor = new ConstantMultiValueExtractor("Foo Bar");
