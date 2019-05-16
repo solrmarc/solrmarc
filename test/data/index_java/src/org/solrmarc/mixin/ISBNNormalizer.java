@@ -4,7 +4,6 @@ package org.solrmarc.mixin;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +26,7 @@ public class ISBNNormalizer implements Mixin {
             Pattern.compile("^.*?(\\d[\\d\\-]{8,}[Xx]?)(?:\\D|\\Z).*$");
 
     public static final Pattern ISBN13Pat =
-            Pattern.compile("^.*?(978[\\d\\-]{10,})(?:\\D|\\Z).*$");
+            Pattern.compile("^.*?(97[89][\\d\\-]{10,})(?:\\D|\\Z).*$");
 
     public static Collection<String> filterISBN(Collection <String> isbnList)
     {
@@ -120,11 +119,19 @@ public class ISBNNormalizer implements Mixin {
     }
 
     public static String extract_isbn10(String isbnstring) throws IllegalArgumentException {
-        return extract_isbn_by_pat(isbnstring, ISBN10Pat, 10);
+        String result = extract_isbn_by_pat(isbnstring, ISBN10Pat, 10);
+        char checkDigit = getisbn10_check_digit(result);
+        if (checkDigit != result.charAt(9))
+            throw (new IllegalArgumentException("Bad Check Digit for ISBN10"));
+        return(result);
     }
 
     public static String extract_isbn13(String isbnstring) throws IllegalArgumentException {
-        return extract_isbn_by_pat(isbnstring, ISBN13Pat, 13);
+        String result = extract_isbn_by_pat(isbnstring, ISBN13Pat, 13);
+        char checkDigit = getisbn13_check_digit(result);
+        if (checkDigit != result.charAt(12))
+            throw (new IllegalArgumentException("Bad Check Digit for ISBN13"));
+        return(result);
     }
 
     /**
@@ -136,11 +143,15 @@ public class ISBNNormalizer implements Mixin {
 
     public static String isbn10_to_13(String isbn10) {
         String longisbn = "978" + isbn10.substring(0, 9);
+        char checkDigit = getisbn13_check_digit(longisbn);
+        return longisbn + checkDigit;
+    }
 
+    public static char getisbn13_check_digit(String isbn13) {
 
         int[] digits = new int[12];
         for (int i = 0; i < 12; i++) {
-            digits[i] = new Integer(longisbn.substring(i, i + 1));
+            digits[i] = new Integer(isbn13.substring(i, i + 1));
         }
 
         Integer sum = 0;
@@ -152,12 +163,12 @@ public class ISBNNormalizer implements Mixin {
         Integer top = sum + (10 - (sum % 10));
         Integer check = top - sum;
         if (check == 10) {
-            return longisbn + "0";
+            return '0';
         } else {
-            return longisbn + check.toString();
+            return check.toString().charAt(0);
         }
-    }
 
+    }
     /**
      * Turn an already-extracted ISBN13 into an ISBN10
      *
@@ -170,17 +181,23 @@ public class ISBNNormalizer implements Mixin {
             throw new IllegalArgumentException("13-digit ISBN '" + isbn13 + "' doesn't start with 978, cannot make a valid 10-digit ISBN for it.");
         String shortisbn = isbn13.substring(3, 12);
 
+        char checkDigit = getisbn10_check_digit(shortisbn);
+
+        String result = shortisbn + checkDigit;
+        return(result);
+
+    }
+
+    public static char getisbn10_check_digit(String isbn10) {
         int[] multVect = { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
         int sum = 0; 
 
         for (int i = 0; i < 9; i++) {
-            int digit = new Integer(shortisbn.substring(i, i + 1));
+            int digit = new Integer(isbn10.substring(i, i + 1));
             sum += multVect[i] * digit;
         }
         int val = 11 - (sum % 11);
         char checkDigit = (char)((val == 11) ? '0' : (val == 10) ? 'X' : (char)val + '0');
-        String result = shortisbn + checkDigit;
-        return(result);
+        return (checkDigit);
     }
-
 }

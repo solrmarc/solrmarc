@@ -12,6 +12,7 @@ import org.marc4j.marc.VariableField;
 
 import org.solrmarc.index.SolrIndexerMixin;
 import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.tools.DataUtil;
 
 public class DirectorMixin extends SolrIndexerMixin
@@ -78,7 +79,7 @@ public class DirectorMixin extends SolrIndexerMixin
                 if (subtitle != null && (subtitle.contains("direct") || subtitle.contains("Direct")))
                 {
                     
-                    addError(new IndexerSpecException("Director information erroneously included in the 245b subtitle field"));
+                    addError(new IndexerSpecException(eErrorSeverity.WARN, "Director information erroneously included in the 245b subtitle field"));
                     Set<String> directors = getVideoDirectorsFromTextField(subtitle, false);
                     result.addAll(directors);
                 }
@@ -87,7 +88,7 @@ public class DirectorMixin extends SolrIndexerMixin
                 if (medium != null && (medium.contains("direct") || medium.contains("Direct")))
                 {
                     
-                    addError(new IndexerSpecException("Director information erroneously included in the 245h medium field"));
+                    addError(new IndexerSpecException(eErrorSeverity.WARN, "Director information erroneously included in the 245h medium field"));
                     Set<String> directors = getVideoDirectorsFromTextField(medium, false);
                     result.addAll(directors);
                 }
