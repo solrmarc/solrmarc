@@ -400,7 +400,7 @@ public class FieldFormatterBase implements FieldFormatter
         String ind2 = (vf instanceof DataField) ? ""+ ((DataField)vf).getIndicator2() : " ";
         if (pattern.contains("$"+sfCode))
         {
-            pattern = pattern .replace("$"+sfCode, mappedDataVal);
+            pattern = pattern .replace("$"+sfCode, "%d");
         }
         pattern = pattern.replace("%tag", vf.getTag()).replace("%1", ind1).replace("%2", ind2).replace("%sf", sfCode).replace("%d", mappedDataVal);
         return(pattern);
