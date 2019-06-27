@@ -79,6 +79,33 @@ public class JoinFieldsMixin extends SolrIndexerMixin {
         return(result);
     }
 
+    public List<String> getComplexJoinedFields(final Record record, String firstFieldSpec, String secondFieldSpec, String thirdFieldSpec, String separator) throws Exception 
+    {
+        List<String> result = new ArrayList<String>();
+        AbstractValueIndexer<?> indexer1 = getOrCreateIndexerFullSpec(firstFieldSpec);
+        AbstractValueIndexer<?> indexer2 = getOrCreateIndexerFullSpec(secondFieldSpec);
+        AbstractValueIndexer<?> indexer3 = getOrCreateIndexerFullSpec(thirdFieldSpec);
+        
+        ArrayList<String> firstData = new ArrayList<String>();  
+        firstData.addAll(indexer1.getFieldData(record));
+        ArrayList<String> secondData = new ArrayList<String>();  
+        secondData.addAll(indexer2.getFieldData(record));
+        ArrayList<String> thirdData = new ArrayList<String>();  
+        thirdData.addAll(indexer3.getFieldData(record));
+        
+        int i;
+        int maxSize = firstData.size() > secondData.size() ? firstData.size() : secondData.size();
+        maxSize = maxSize > thirdData.size() ? maxSize : thirdData.size();
+        for (i = 0; i < maxSize; i++)
+        {
+            String resultStr = ((i < firstData.size())? firstData.get(i) : "") + separator + 
+                               ((i < secondData.size())? secondData.get(i): "") + separator + 
+                               ((i < thirdData.size())? thirdData.get(i): "");
+            result.add(resultStr);
+        }
+        return(result);
+    }
+
     private ArrayList<Subfield> getSubfieldsMatching(List<VariableField> fields, String subfieldCodes)
     {
 	    ArrayList<Subfield> subfields = new ArrayList<Subfield>();
