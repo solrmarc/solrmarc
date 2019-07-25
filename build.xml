@@ -535,7 +535,9 @@
 	<target name="javadoc" description="Build javadoc">
 		<mkdir dir="${doc.dir}"/>
 		<javadoc sourcepath="${src.dir}"
-	         destdir="${doc.dir}"
+			destdir="${doc.dir}"
+			windowtitle="SolrMarc API"
+			doctitle="SolrMarc API"
 			>
             <classpath >
                 <fileset dir="${lib.dir}">
