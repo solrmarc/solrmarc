@@ -216,6 +216,8 @@ public class DeweyCallNumber extends AbstractCallNumber {
      * Returns a normal form of the classification string.
      * 
      * <p>Supplies any missing leading zeroes.
+     * 
+     * @return classification string
      */
     public String getClassificationNormalized() {
         if (classDigits == null || classDigits.length() >= 3) {

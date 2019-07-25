@@ -26,11 +26,12 @@ package org.solrmarc.tools;
  */
 
 @Deprecated
-public final class CallNumUtils {
+public final class CallNumUtils
+{
     /**
      * Default Constructor: private, so it can't be instantiated by other objects
      */
-    private CallNumUtils(){ }
+    private CallNumUtils() { }
 
 
 //------ public methods --------
@@ -53,10 +54,10 @@ public final class CallNumUtils {
         return org.solrmarc.callnum.CallNumUtils.isValidDeweyWithCutter(possDeweyVal);
     }
 
-   /**
-     * given a possible Dewey call number value, determine if it
-     *  matches the pattern of an Dewey call number
-     */
+    /**
+      * given a possible Dewey call number value, determine if it
+      *  matches the pattern of an Dewey call number
+      */
     public static final boolean isValidDewey(String possDeweyVal)
     {
         return org.solrmarc.callnum.CallNumUtils.isValidDewey(possDeweyVal);
