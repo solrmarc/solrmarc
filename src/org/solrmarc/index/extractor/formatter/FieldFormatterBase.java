@@ -153,9 +153,32 @@ public class FieldFormatterBase implements FieldFormatter
         for (String part : mapParts)
         {
             String[] pieces = part.split("=>", 2);
+            if (pieces.length == 2 && pieces[1].contains("=>"))
+            {
+                // something here related to per-subfield map??
+            }
             if (pieces.length == 2 && pieces[0].length() == 1)
             {
                 sfCodeMap.put(pieces[0], pieces[1]);
+            }
+            else if (pieces.length == 2 && pieces[0].matches("\\[[-a-z0-9]*\\]"))
+            {
+                for (char c = 'a'; c <= 'z' ; c++ )
+                {
+                    String cstr = Character.toString(c);
+                    if (cstr.matches(pieces[0]))
+                    {
+                        sfCodeMap.put(cstr, pieces[1]);
+                    }
+                }
+                for (char c = '0'; c <= '9' ; c++ )
+                {
+                    String cstr = Character.toString(c);
+                    if (cstr.matches(pieces[0]))
+                    {
+                        sfCodeMap.put(cstr, pieces[1]);
+                    }
+                }
             }
             else if (pieces.length == 2 && pieces[0].contains("tag"))
             {

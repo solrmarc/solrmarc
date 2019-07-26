@@ -329,8 +329,11 @@ public class ValueIndexerFactory
             if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map."))
             {
                 final String[] specParts = singleSpec.split("[ ]?[:=][ ]?", 2);
-                specParts[1] = specParts[1].replaceAll("\\\\(.)", "$1");
-                localMappingProperties.put(specParts[0].trim(), specParts[1].trim());
+                if (specParts.length >= 2) 
+                {
+                    specParts[1] = specParts[1].replaceAll("\\\\(.)", "$1");
+                    localMappingProperties.put(specParts[0].trim(), specParts[1].trim());
+                }
             }
         }
         for (String singleSpec : configSpecs)
