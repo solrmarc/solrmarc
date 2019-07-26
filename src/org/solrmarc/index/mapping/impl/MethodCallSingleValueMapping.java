@@ -53,4 +53,11 @@ public class MethodCallSingleValueMapping extends AbstractMultiValueMapping impl
     {
         return(new MethodCallSingleValueMapping(this));
     }
+
+    @Override
+    public boolean ifApplies(char subfieldCode)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

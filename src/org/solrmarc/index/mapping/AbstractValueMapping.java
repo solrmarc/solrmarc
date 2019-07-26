@@ -6,5 +6,6 @@ public interface AbstractValueMapping<T>
     String displayRawIfMissing = "displayRawIfMissing"; 
     String throwExceptionIfMissing = "throwExceptionIfMissing"; 
 
+    boolean ifApplies(char subfieldCode) ;
     T map(final T value) throws Exception;
 }

@@ -77,4 +77,11 @@ public class MultiValuePatternMapping extends AbstractMultiValueMapping
         }
         return mappedValues;
     }
+
+    @Override
+    public boolean ifApplies(char subfieldCode)
+    {
+        // TODO Auto-generated method stub
+        return true;
+    }
 }

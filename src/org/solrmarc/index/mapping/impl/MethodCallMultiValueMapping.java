@@ -44,4 +44,10 @@ public class MethodCallMultiValueMapping extends AbstractMultiValueMapping imple
     {
         return(new MethodCallMultiValueMapping(this));
     }
+
+    @Override
+    public boolean ifApplies(char subfieldCode)
+    {
+        return true;
+    }
 }

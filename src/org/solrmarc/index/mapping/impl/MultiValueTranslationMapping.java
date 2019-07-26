@@ -72,4 +72,10 @@ public class MultiValueTranslationMapping extends AbstractMultiValueMapping
         }
         return mappedValues;
     }
+
+    @Override
+    public boolean ifApplies(char subfieldCode)
+    {
+        return true;
+    }
 }
