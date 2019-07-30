@@ -740,9 +740,9 @@ public final class CallNumUtils {
      * given a raw LC call number, return the shelf key - a sortable version
      *  of the call number
      *  
-     *  @param rawLCcallnum  the entire call number, as a string
-     *  @param recid         record id (unused)
-     *  @return              sortable shelf key
+     * @param rawLCcallnum  the entire call number, as a string
+     * @param recid         record id (unused)
+     * @return              sortable shelf key
      */
     public static String getLCShelfkey(String rawLCcallnum, String recid) {
         StringBuilder resultBuf = new StringBuilder();

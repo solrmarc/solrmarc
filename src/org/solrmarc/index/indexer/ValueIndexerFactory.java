@@ -139,7 +139,7 @@ public class ValueIndexerFactory
     /**
      * Return ALL of the exceptions encountered while processing indexing specification
      *
-     * @return
+     * @return list of validation exceptions
      */
     public List<IndexerSpecException> getValidationExceptions()
     {
@@ -147,9 +147,9 @@ public class ValueIndexerFactory
     }
 
     /**
-     * Return ALL of the exceptions encountered while processing indexing specification
+     * Add an error to list of exceptions for the current record
      *
-     * @return
+     * @param error  error to add
      */
     public void addPerRecordError(IndexerSpecException error)
     {
@@ -169,7 +169,7 @@ public class ValueIndexerFactory
     /**
      * Return the value defined as the default class name to use when resolving multiple matches for the same custom method
      *
-     * @return
+     * @return default class name
      */
     public String getDefaultCustomClassname()
     {
@@ -179,7 +179,7 @@ public class ValueIndexerFactory
     /**
      * Return the extractor factories loaded above for use in the CUP parser
      *
-     * @return
+     * @return list of extractor factories
      */
     final List<AbstractValueExtractorFactory> getExtractorFactories()
     {
@@ -189,13 +189,16 @@ public class ValueIndexerFactory
     /**
      * Return ALL of the exceptions encountered while processing indexing specification
      *
-     * @return
+     * @return exceptions
      */
     public Set<IndexerSpecException> getPerRecordErrors()
     {
         return perRecordExceptions.get();
     }
 
+    /**
+     * Clear any stored exceptions encountered while processing indexing specification
+     */
     public void clearPerRecordErrors()
     {
         perRecordExceptions.get().clear();

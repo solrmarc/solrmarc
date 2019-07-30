@@ -16,15 +16,16 @@ import org.marc4j.marc.Record;
  *  This class implements sending batches of documents to Solr.  It implements retries to cope with
  *  the issue where one bad document in a batch will cause all subsequent solr input documents in
  *  the batch to be skipped.
- *  <br/>
+ *  <p>
  *  To accomplish this the class will divide the batch into several smaller segments, and re-try sending
  *  those smaller batches.   Eventually a sub-batch containing the problem record will be sent one-by-one
  *  to insure that all valid documents are correctly sent to Solr, while only the documents containing
  *  errors are skipped.
- *  <br/>
+ *  </p>
+ *  <p>
  *  If the parameter errQ is not null the records that cause an error will be appended to that list and
  *  can subsequently be logged or fixed and retried.
- *
+ *  </p>
  *
  * @author rh9ec
  *

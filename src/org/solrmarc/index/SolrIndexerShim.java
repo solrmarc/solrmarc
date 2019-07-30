@@ -156,7 +156,7 @@ public class SolrIndexerShim
      * tagStr that is NOT about bytes (i.e. not a 008[7-12] type fieldspec), the
      * result string is the concatenation of all the specific subfields.
      *
-     * @param record -
+     * @param record
      *            the marc record object
      * @param tagStr
      *            string containing which field(s)/subfield(s) to use. This is a
@@ -172,7 +172,6 @@ public class SolrIndexerShim
      *            desired.
      * @return the contents of the indicated marc field(s)/subfield(s), as a set
      *         of Strings.
-     * @throws Exception
      */
 //    public Set<String> getFieldList(Record record, String tagStr)
 //    {
@@ -215,7 +214,6 @@ public class SolrIndexerShim
      *            bytes, NOT a pattern. 100abcd denotes subfields a, b, c, d are
      *            desired.
      * @return the contents of the indicated marc field(s)/subfield(s).
-     * @throws Exception
      */
     public List<String> getFieldListAsList(Record record, String tagStr)
     {
@@ -249,7 +247,6 @@ public class SolrIndexerShim
      *  e.g. 245) optionally followed by characters identifying which subfields
      *  to use.
      * @return first value of the indicated marc field(s)/subfield(s) as a string
-     * @throws Exception
      */
     public String getFirstFieldVal(Record record, String tagStr)
     {
@@ -309,11 +306,11 @@ public class SolrIndexerShim
     /**
      * Get the specified substring of subfield values from the specified MARC
      * field, returned as  a set of strings to become lucene document field values
-     * @param record - the marc record object
-     * @param fldTag - the field name, e.g. 008
-     * @param subfldStr - the string containing the desired subfields
-     * @param beginIx - the beginning index of the substring of the subfield value
-     * @param endIx - the ending index of the substring of the subfield value
+     * @param record     the marc record object
+     * @param fldTag     the field name, e.g. 008
+     * @param subfldStr  the string containing the desired subfields
+     * @param beginIx    the beginning index of the substring of the subfield value
+     * @param endIx      the ending index of the substring of the subfield value
      * @param collector  an object to accumulate the data indicated by <code>fldTag</code> and
      *                   <code>subfldsStr</code>.
      */
@@ -443,12 +440,11 @@ public class SolrIndexerShim
      *
      * @param record
      *            marc record object
-     * @param fieldSpec -
+     * @param fieldSpec
      *            the desired marc fields and subfields as given in the
      *            xxx_index.properties file
-     * @param separator -
-     *            the character to use between subfield values in the solr field
-     *            contents
+     * @param firstAllJoin
+     *            subfields to join to all alphas
      * @return Set of values (as strings) for solr field
      */
     public Set<String> getAllAlphaSubfields(final Record record, String fieldSpec, String firstAllJoin)
@@ -611,7 +607,7 @@ public class SolrIndexerShim
      *         and with non-filing characters omitted. Null returned if no
      *         title can be found.
      *
-     * @see SolrIndexerShim#getTitle
+     * @see SolrIndexerShim#getFieldListCollector
      */
     public String getSortableTitle(Record record)
     {

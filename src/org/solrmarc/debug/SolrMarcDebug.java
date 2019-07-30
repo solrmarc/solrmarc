@@ -84,6 +84,8 @@ public class SolrMarcDebug extends BootableMain
     static int[] fontSizeArray = { 8, 10, 12, 14, 18, 22, 28, 36, 42 };
     /**
      * Launch the application.
+     *
+     * @param args command line arguments
      */
     public static void main(final String[] args)
     {
@@ -107,6 +109,8 @@ public class SolrMarcDebug extends BootableMain
 
     /**
      * Create the application.
+     *
+     * @param args command line arguments
      */
     public SolrMarcDebug(String args[])
     {

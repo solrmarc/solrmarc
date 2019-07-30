@@ -26,6 +26,8 @@ public abstract class AbstractExtractorMethodCall<T> implements ExternalMethod
      * @param parameters
      *            the parameters of this call.
      * @return the return value of this call.
+     * @throws Exception
+     *            in case of error
      */
     public T invoke(final Record record, final Object[] parameters) throws Exception
     {
