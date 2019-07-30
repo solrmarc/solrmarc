@@ -1,4 +1,5 @@
 /build/
+/javadoc/
 /logs/
 /.settings/
 *.log
