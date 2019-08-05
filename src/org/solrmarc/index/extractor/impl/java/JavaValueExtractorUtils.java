@@ -48,10 +48,9 @@ public class JavaValueExtractorUtils
 
     /**
      * Compiles java sources if they have changed.
-     * @param homeDirStrs
      *
-     * @return true if one or more java sources were compiled, else false.
-     * @throws IOException
+     * @param recompileAll  recompile flag
+     * @return              true if one or more java sources were compiled, else false.
      */
     public boolean compileSources(boolean recompileAll)
     {

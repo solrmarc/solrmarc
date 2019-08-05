@@ -219,15 +219,11 @@ public class SolrIndexer implements Mixin
      * instance of each marc field will be put in a separate result (but the
      * subfields will be concatenated into a single value for each marc field)
      *
-     * @param record
-     *            marc record object
-     * @param fieldSpec -
-     *            the desired marc fields and subfields as given in the
-     *            xxx_index.properties file
-     * @param separator -
-     *            the character to use between subfield values in the solr field
-     *            contents
-     * @return Set of values (as strings) for solr field
+     * @param record        marc record object
+     * @param fieldSpec     the desired marc fields and subfields as given in the
+     *                      xxx_index.properties file
+     * @param firstAllJoin  subfields to join to all alphas
+     * @return              Set of values (as strings) for solr field
      */
     public Set<String> getAllAlphaSubfields(final Record record, String fieldSpec, String firstAllJoin)
     {
@@ -324,7 +320,7 @@ public class SolrIndexer implements Mixin
      *         and with non-filing characters omitted. Null returned if no
      *         title can be found.
      *
-     * @see SolrIndexerShim#getTitle
+     * @see SolrIndexerShim#getSortableTitle
      */
     public String getSortableTitle(Record record)
     {

@@ -97,9 +97,9 @@ public class Indexer
      * sends that document to solr This is the single threaded version that does
      * each of those action sequentially
      *
-     * @param reader
-     * @return array containing number of records read, number of records
-     *         indexed, and number of records sent to solr
+     * @param reader  MARC record reader object
+     * @return        array containing number of records read, number of records
+     *                indexed, and number of records sent to solr
      */
     public int[] indexToSolr(final MarcReader reader)
     {

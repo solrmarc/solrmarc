@@ -113,9 +113,8 @@ public class PatternMapping
      * PatternMapping#canHandle(String) has to be called before. Otherwise the
      * result will not be correct!
      *
-     * @param value
-     *            the value to be mapped.
-     * @return the mapped value.
+     * @param inputMatcher  regex matcher.
+     * @return              the mapped value.
      */
     public String map(final Matcher inputMatcher)
     {
@@ -134,9 +133,8 @@ public class PatternMapping
      * PatternMapping#canHandle(String) has to be called before. Otherwise the
      * result will not be correct!
      *
-     * @param value
-     *            the value to be mapped.
-     * @return the mapped value.
+     * @param inputMatcher  regex matcher.
+     * @return              the mapped value.
      */
     public String filter(final Matcher inputMatcher)
     {

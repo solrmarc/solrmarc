@@ -532,6 +532,26 @@
         </zip>
     </target>
 
+	<target name="javadoc" description="Build javadoc">
+		<mkdir dir="${doc.dir}"/>
+		<javadoc sourcepath="${src.dir}"
+			destdir="${doc.dir}"
+			windowtitle="SolrMarc API"
+			doctitle="SolrMarc API"
+			>
+            <classpath >
+                <fileset dir="${lib.dir}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+            <classpath >
+                <fileset dir="${lib.solrj.dir}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+		</javadoc>
+	</target>
+
     <target name="clean" description="clean up">
         <!-- Delete the ${build} and ${dist} directory trees -->
         <delete dir="${build.dir}" failonerror="false" />

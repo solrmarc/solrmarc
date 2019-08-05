@@ -61,10 +61,14 @@ public class MarcFilteredReader implements MarcReader
     static Logger logger = Logger.getLogger(MarcFilteredReader.class.getName());
     
     /**
-     * 
-     * @param r
-     * @param ifFieldPresent
-     * @param ifFieldMissing
+     *
+     * @param r                MARC reader
+     * @param ifFieldPresent   include record if field is present
+     * @param ifFieldMissing   include record if field is not present
+     * @param deleteSubfields  fieldspec for subfields to delete from the records,
+     *                         only supports fieldspecs that list tag and up to one
+     *                         subfield, see implementation of
+     *                         {@link MarcFilteredReader#deleteSubfields(Record)}
      */
     public MarcFilteredReader(MarcReader r, String ifFieldPresent, String ifFieldMissing, String deleteSubfields)
     {

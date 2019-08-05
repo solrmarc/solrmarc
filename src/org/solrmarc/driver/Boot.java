@@ -77,6 +77,9 @@ public class Boot extends URLClassLoader
 
     /**
      * Classloader Methods - Implements a child-first delegation model to load classes needed by SolrMarc
+     *
+     * @param urls    the URLs from which to load classes and resources
+     * @param parent  the parent class loader for delegation
      */
     public Boot(URL[] urls, ClassLoader parent)
     {
@@ -184,8 +187,8 @@ public class Boot extends URLClassLoader
     */
 
     /**
-     * @param classname
-     * @param otherArgs
+     * @param classname  name of class to invoke
+     * @param otherArgs  args for main method
      */
     public static void invokeMain(String classname, String[] otherArgs)
     {
@@ -352,7 +355,7 @@ public class Boot extends URLClassLoader
     /**
      * Finds directory "lib" relative to the defaultHomeDir and loads all of
      * the jar files in that directory dynamically.  If it doesn't find a jar
-     * named marc4j*.jar it will log a fatal error and exit the program.
+     * named {@code marc4j*.jar} it will log a fatal error and exit the program.
      */
     private static void addLibDirJarstoClassPath()
     {
@@ -419,7 +422,11 @@ public class Boot extends URLClassLoader
     }
 
     /**
-     *  If using a custom classloader, use that to lookup and load the requested class by name
+     * If using a custom classloader, use that to lookup and load the requested class by name
+     *
+     * @param classname                name of class to look up
+     * @return                         class that was named
+     * @throws ClassNotFoundException  if class was not found by loader
      */
     public static Class<?>classForName(String classname) throws ClassNotFoundException
     {
@@ -563,8 +570,8 @@ public class Boot extends URLClassLoader
      *  in the parent directory of the provided directory for a jar with
      *  a name containing "solrj"
      *
-     * @param homeDirStrs
-     * @param dir
+     * @param homeDirStrs  home directory strings
+     * @param dir          directory
      */
     public static void extendClasspathWithSolJJarDir(String[] homeDirStrs, File dir)
     {

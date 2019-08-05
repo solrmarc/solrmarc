@@ -26,11 +26,12 @@ package org.solrmarc.tools;
  */
 
 @Deprecated
-public final class CallNumUtils {
+public final class CallNumUtils
+{
     /**
      * Default Constructor: private, so it can't be instantiated by other objects
      */
-    private CallNumUtils(){ }
+    private CallNumUtils() { }
 
 
 //------ public methods --------
@@ -38,6 +39,9 @@ public final class CallNumUtils {
     /**
      * given a possible Library of Congress call number value, determine if it
      *  matches the pattern of an LC call number
+     *
+     * @param possLCval  possible call number to check
+     * @return           true if parses as a valid LC call number
      */
     public static final boolean isValidLC(String possLCval)
     {
@@ -47,15 +51,21 @@ public final class CallNumUtils {
     /**
      * given a possible Dewey call number value, determine if it
      *  matches the pattern of an Dewey call number
+     *
+     * @param possDeweyVal  possible call number to check
+     * @return              true if parses as a valid Dewey call number with a cutter
      */
     public static final boolean isValidDeweyWithCutter(String possDeweyVal)
     {
         return org.solrmarc.callnum.CallNumUtils.isValidDeweyWithCutter(possDeweyVal);
     }
 
-   /**
+    /**
      * given a possible Dewey call number value, determine if it
      *  matches the pattern of an Dewey call number
+     *
+     * @param possDeweyVal  possible call number to check
+     * @return              true if parses as a valid Dewey call number
      */
     public static final boolean isValidDewey(String possDeweyVal)
     {
@@ -65,6 +75,9 @@ public final class CallNumUtils {
     /**
      * return the portion of the call number string that occurs before the
      *  Cutter, NOT including any class suffixes occuring before the cutter
+     *
+     * @param callnum  call number to parse
+     * @return         the part of the call number before the cutter
      */
     public static final String getPortionBeforeCutter(String callnum)
     {
@@ -74,6 +87,9 @@ public final class CallNumUtils {
     /**
      * return the portion of the LC call number string that occurs before the
      *  Cutter.
+     *
+     * @param callnum  LC call number to parse
+     * @return         the part of the LC call number before the first cutter
      */
     public static final String getLCB4FirstCutter(String callnum)
     {
@@ -83,6 +99,9 @@ public final class CallNumUtils {
     /**
      * Given a raw LC call number, return the initial letters (before any
      *  numbers)
+     *
+     * @param rawLCcallnum  LC call number to parse
+     * @return              the initial letters of the LC classification
      */
     public static String getLCstartLetters(String rawLCcallnum)
     {
@@ -93,7 +112,9 @@ public final class CallNumUtils {
      * return the numeric portion of the required portion of the LC classification.
      *  LC classification requires
      *    1-3 capital letters followed by  float number (may be an integer)
-     * @param rawLCcallnum
+     *
+     * @param rawLCcallnum the entire LC call number, as a string
+     * @return             the numeric portion of the classification
      */
     public static String getLCClassDigits(String rawLCcallnum)
     {
@@ -103,7 +124,10 @@ public final class CallNumUtils {
     /**
      * return the string between the LC class number and the cutter, if it
      *  starts with a digit, null otherwise
-     * @param rawLCcallnum - the entire LC call number, as a string
+     *
+     * @param rawLCcallnum the entire LC call number, as a string
+     * @return             the portion of the string between the classification
+     *                     number and the cutter, or null if there is none.
      */
     public static String getLCClassSuffix(String rawLCcallnum)
     {
@@ -114,17 +138,21 @@ public final class CallNumUtils {
      * return the first cutter in the LC call number, without the preceding
      * characters (such as the "required" period, which is sometimes missing,
      * or spaces), or any suffixes
-     * @param rawCallnum - the entire call number, as a string
+     *
+     * @param rawLCcallnum the entire LC call number, as a string
+     * @return             the first cutter of the call number without any suffix
      */
-    public static String getFirstLCcutter(String rawCallnum)
+    public static String getFirstLCcutter(String rawLCcallnum)
     {
-        return org.solrmarc.callnum.CallNumUtils.getFirstLCcutter(rawCallnum);
+        return org.solrmarc.callnum.CallNumUtils.getFirstLCcutter(rawLCcallnum);
     }
 
     /**
      * return the suffix after the first cutter, if there is one.  This occurs
      *  before the second cutter, if there is one.
-     * @param rawLCcallnum - the entire LC call number, as a string
+     *
+     * @param rawLCcallnum the entire LC call number, as a string
+     * @return             the suffix of the first cutter of the call number
      */
     public static String getFirstLCcutterSuffix(String rawLCcallnum)
     {
@@ -135,7 +163,9 @@ public final class CallNumUtils {
      * return the second cutter in the call number, without the preceding
      * characters (such as the "required" period, which is sometimes missing,
      * or spaces), or any suffixes
-     * @param rawLCcallnum - the entire call number, as a string
+     *
+     * @param rawLCcallnum the entire LC call number, as a string
+     * @return             the second cutter of the call number without any suffix
      */
     public static String getSecondLCcutter(String rawLCcallnum)
     {
@@ -143,9 +173,11 @@ public final class CallNumUtils {
     }
 
     /**
-     * return the suffix after the first cutter, if there is one.  This occurs
+     * return the suffix after the second cutter, if there is one.  This occurs
      *  before the second cutter, if there is one.
-     * @param rawLCcallnum - the entire LC call number, as a string
+     *
+     * @param rawLCcallnum the entire LC call number, as a string
+     * @return             the suffix of the second cutter of the call number
      */
     public static String getSecondLCcutterSuffix(String rawLCcallnum)
     {
@@ -153,9 +185,11 @@ public final class CallNumUtils {
     }
 
     /**
-     * return the suffix after the first cutter, if there is one.  This occurs
+     * return the suffix after the second cutter, if there is one.  This occurs
      *  before the second cutter, if there is one.
-     * @param rawLCcallnum - the entire LC call number, as a string
+     *
+     * @param rawLCcallnum the entire LC call number, as a string
+     * @return             the year suffix of the second cutter of the call number
      * @deprecated
      */
 // do we want to separate out year suffixes?  for all or just here? - unused
@@ -167,6 +201,9 @@ public final class CallNumUtils {
     /**
      * return the portion of the Dewey call number string that occurs before the
      *  Cutter.
+     *
+     * @param callnum  call number to parse
+     * @return         the part of the call number before the cutter
      */
     public static final String getDeweyB4Cutter(String callnum)
     {
@@ -177,7 +214,9 @@ public final class CallNumUtils {
      * return the first cutter in the call number, without the preceding
      * characters (such as the "required" period, which is sometimes missing,
      * or spaces).
-     * @param rawCallnum - the entire call number, as a string
+     *
+     * @param rawCallnum  the entire call number, as a string
+     * @return            the cutter of the input call number
      */
     public static String getDeweyCutter(String rawCallnum)
     {
@@ -186,7 +225,9 @@ public final class CallNumUtils {
 
     /**
      * return suffix to the first cutter in the dewey call number
-     * @param rawCallnum - the entire call number, as a string
+     *
+     * @param rawCallnum  the entire call number, as a string
+     * @return            the suffix of the first cutter of the input call number
      */
     public static String getDeweyCutterSuffix(String rawCallnum)
     {
@@ -199,8 +240,8 @@ public final class CallNumUtils {
      * Remove leading and trailing whitespace, ensure whitespace is always a
      *  single space, remove spaces after periods, remove trailing periods
      *
-     * @param rawCallnum - a non-null String containing a Dewey call number
-     * @return normalized form of a call number
+     * @param rawCallnum  a non-null String containing a Dewey call number
+     * @return            the normalized form of the call number
      */
     public static String normalizeCallnum(String rawCallnum)
     {
@@ -210,6 +251,10 @@ public final class CallNumUtils {
     /**
      * given a raw LC call number, return the shelf key - a sortable version
      *  of the call number
+     *
+     * @param rawLCcallnum  a non-null String containing an LC call number
+     * @param recid         record id (unused)
+     * @return              the normalized form of the call number
      */
     public static String getLCShelfkey(String rawLCcallnum, String recid)
     {
@@ -219,6 +264,9 @@ public final class CallNumUtils {
     /**
      * normalize a suffix for shelf list sorting by changing all digit
      *  substrings to a constant length (left padding with zeros).
+     *
+     * @param suffix  the suffix of a call number
+     * @return        the suffix normalized for sorting, left-padded with zeros)
      */
     public static String normalizeSuffix(String suffix)
     {
@@ -229,6 +277,10 @@ public final class CallNumUtils {
      * given a shelfkey (a lexicaly sortable call number), return the reverse
      * shelf key - a sortable version of the call number that will give the
      * reverse order (for getting "previous" call numbers in a list)
+     *
+     * @param shelfkey  the forward-sortable shelfkey that has been computed for a
+     *                  call number
+     * @return          a reverse-order version of the shelfkey
      */
     public static String getReverseShelfKey(String shelfkey)
     {
@@ -239,6 +291,9 @@ public final class CallNumUtils {
     /**
      * for non alpha numeric characters, return a character that will sort
      *  first or last, whichever is the opposite of the original character.
+     *
+     * @param ch  original character
+     * @return    character that sorts opposite of input
      */
     public static char[] reverseNonAlphanum(char ch)
     {
@@ -248,6 +303,9 @@ public final class CallNumUtils {
     /**
      * given a raw Dewey call number, return the shelf key - a sortable
      *  version of the call number
+     *
+     * @param rawDeweyCallnum  call number
+     * @return                 shelfkey
      */
     public static String getDeweyShelfKey(String rawDeweyCallnum)
     {
@@ -260,6 +318,7 @@ public final class CallNumUtils {
      *  the decimal (adding leading zeroes as necessary) and (digitsAfter
      *  after the decimal.  In the case of a whole number, there will be no
      *  decimal point.
+     *
      * @param floatStr    the number, as a String
      * @param digitsB4    the number of characters the result should have before the
      *                    decimal point (leading zeroes will be added as necessary). A negative
@@ -268,6 +327,7 @@ public final class CallNumUtils {
      *                    the decimal point.  A negative number means leave whatever fraction
      *                    encountered as is; don't pad with trailing zeroes (trailing zeroes in
      *                    this case will be removed)
+     * @return            normalized number
      * @throws NumberFormatException if string can't be parsed as a number
      */
     public static String normalizeFloat(String floatStr, int digitsB4, int digitsAfter)
@@ -278,9 +338,10 @@ public final class CallNumUtils {
     /**
      * remove volume information from LC call number if it is present as a
      *   suffix
-     * @param rawLCcallnum
-     * @return call number without the volume information, or full call number
-     *   if no volume information was present.
+     *
+     * @param rawLCcallnum call number
+     * @return             call number without the volume information, or full call 
+     *                     number if no volume information was present.
      */
     public static String removeLCVolSuffix(String rawLCcallnum)
     {
@@ -291,9 +352,10 @@ public final class CallNumUtils {
     /**
      * remove volume information from Dewey call number if it is present as a
      *   suffix
-     * @param rawDeweyCallnum
-     * @return call number without the volume information, or full call number
-     *   if no volume information was present.
+     *
+     * @param rawDeweyCallnum  call number
+     * @return                 call number without the volume information, or full
+     *                         call number if no volume information was present.
      */
     public static String removeDeweyVolSuffix(String rawDeweyCallnum)
     {
@@ -303,8 +365,9 @@ public final class CallNumUtils {
 
     /**
      * adds leading zeros to a dewey call number, when they're missing.
-     * @param deweyCallNum
-     * @return the dewey call number with leading zeros
+     *
+     * @param deweyCallNum call number
+     * @return             the dewey call number with leading zeros
      */
     public static String addLeadingZeros(String deweyCallNum)
     {

@@ -318,6 +318,9 @@ public class DataUtil
      * Remove single square bracket characters if they are the start and/or end
      * chars (matched or unmatched) and are the only square bracket chars in the
      * string.
+     *
+     * @param origStr  text string with possible enclosing brackets
+     * @return         a copy of the text string with the brackets removed
      */
     public static String removeOuterBrackets(String origStr)
     {

@@ -97,6 +97,9 @@ public class PropertyUtils
      *            the directories to search for the properties file
      * @param propertyFileName
      *            name of the sought properties file
+     * @param showName
+     *            whether the name of the file/resource being read should be
+     *            shown.
      * @return Properties object
      */
     public static Properties loadProperties(String propertyPaths[], String propertyFileName, boolean showName)
@@ -111,6 +114,9 @@ public class PropertyUtils
      *            the directories to search for the properties file
      * @param propertyFileName
      *            name of the sought properties file
+     * @param filenameReturn
+     *            array where first element will be set to the full path of the
+     *            loaded file
      * @return Properties object
      */
     public static Properties loadProperties(String propertyPaths[], String propertyFileName, String filenameReturn[])
@@ -162,6 +168,12 @@ public class PropertyUtils
      * @param showName
      *            whether the name of the file/resource being read should be
      *            shown.
+     * @param filenameProperty
+     *            the name of a property in which to store the name of the loaded
+     *            property file
+     * @param inputSourceReturn
+     *            array where first element will be set to the full path of the
+     *            loaded file
      * @return Properties object
      */
     public static Properties loadProperties(String propertyPaths[], String propertyFileName, boolean showName,
@@ -319,8 +331,9 @@ public class PropertyUtils
      * Takes an InputStream, reads the entire contents into a String
      * 
      * @param stream
-     *            - the stream to read in.
+     *            the stream to read in.
      * @return String containing entire contents of stream.
+     * @throws IOException  if there is an error reading the input stream
      */
     public static String readStreamIntoString(InputStream stream) throws IOException
     {

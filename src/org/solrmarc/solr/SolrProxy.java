@@ -12,6 +12,9 @@ public abstract class SolrProxy
 {
     /**
      * return true if exception is a SolrException
+     *
+     * @param e  exception to check
+     * @return   true if exception is a SolrException
      */
     public final boolean isSolrException(Exception e)
     {
@@ -23,9 +26,8 @@ public abstract class SolrProxy
     /**
      * given a SolrInputDocument add it to the index
      * 
-     * @param fieldsMap
-     *            - map of field names and values to add to the document
-     * @return a string representation of the document
+     * @param document  document to add to Solr index
+     * @return          a string representation of the document
      */
 
     public abstract int addDoc(SolrInputDocument document);
@@ -42,6 +44,8 @@ public abstract class SolrProxy
 
     /**
      * commit changes to the index
+     *
+     * @param optimize  Solr run database post-commit
      */
     public abstract void commit(boolean optimize);
 

@@ -14,11 +14,13 @@ public abstract class AbstractMappingMethodCall<T>
     /**
      * The parameters[0] will be overridden with the record!
      *
-     * @param record
+     * @param incoming
      *            current record
      * @param parameters
      *            the parameters of this call.
      * @return the return value of this call.
+     * @throws Exception
+     *            in case of error
      */
     public T invoke(final T incoming, final Object[] parameters) throws Exception
     {
@@ -26,6 +28,12 @@ public abstract class AbstractMappingMethodCall<T>
         return invoke(parameters);
     }
 
+    /**
+     *
+     * @param parameters  the parameters of this call
+     * @return            the value of this call
+     * @throws Exception  when runtime error
+     */
     public abstract T invoke(final Object[] parameters) throws Exception;
 
     public String getObjectName()
