@@ -16,11 +16,14 @@ package org.solrmarc.callnum;
  * limitations under the License.
  */
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Provides utility functions to support call number manipulation.
  *
  * @author Tod Olson, University of Chicago
- *
+ * @author Naomi Dushay, Stanford University
  */
 
 public class Utils {
@@ -289,5 +292,162 @@ public class Utils {
         else if (third >= 'W')                  sb.append('9');
     }
 
+    // Below authored by Naomi Dushay, pulled in from old CallNumUtils class
+    
+    private static Map<Character, Character> alphanumReverseMap = new HashMap<Character, Character>();
+    static {
+        alphanumReverseMap.put('0', 'Z');
+        alphanumReverseMap.put('1', 'Y');
+        alphanumReverseMap.put('2', 'X');
+        alphanumReverseMap.put('3', 'W');
+        alphanumReverseMap.put('4', 'V');
+        alphanumReverseMap.put('5', 'U');
+        alphanumReverseMap.put('6', 'T');
+        alphanumReverseMap.put('7', 'S');
+        alphanumReverseMap.put('8', 'R');
+        alphanumReverseMap.put('9', 'Q');
+        alphanumReverseMap.put('A', 'P');
+        alphanumReverseMap.put('B', 'O');
+        alphanumReverseMap.put('C', 'N');
+        alphanumReverseMap.put('D', 'M');
+        alphanumReverseMap.put('E', 'L');
+        alphanumReverseMap.put('F', 'K');
+        alphanumReverseMap.put('G', 'J');
+        alphanumReverseMap.put('H', 'I');
+        alphanumReverseMap.put('I', 'H');
+        alphanumReverseMap.put('J', 'G');
+        alphanumReverseMap.put('K', 'F');
+        alphanumReverseMap.put('L', 'E');
+        alphanumReverseMap.put('M', 'D');
+        alphanumReverseMap.put('N', 'C');
+        alphanumReverseMap.put('O', 'B');
+        alphanumReverseMap.put('P', 'A');
+        alphanumReverseMap.put('Q', '9');
+        alphanumReverseMap.put('R', '8');
+        alphanumReverseMap.put('S', '7');
+        alphanumReverseMap.put('T', '6');
+        alphanumReverseMap.put('U', '5');
+        alphanumReverseMap.put('V', '4');
+        alphanumReverseMap.put('W', '3');
+        alphanumReverseMap.put('X', '2');
+        alphanumReverseMap.put('Y', '1');
+        alphanumReverseMap.put('Z', '0');
+    }
+
+    /** this character will sort first */
+    public static char SORT_FIRST_CHAR = Character.MIN_VALUE;
+    public static StringBuilder reverseDefault = new StringBuilder(75);
+    static {
+        for (int i = 0; i < 50; i++)
+// N.B.:  this char is tough to deal with in a variety of contexts.
+// Hopefully diacritics and non-latin won't bite us in the butt.
+//          reverseDefault.append(Character.toChars(Character.MAX_CODE_POINT));
+            reverseDefault.append(Character.toChars('~'));
+    }
+
+    /**
+     * given a shelfkey (a lexicaly sortable call number), return the reverse
+     * shelf key - a sortable version of the call number that will give the
+     * reverse order (for getting "previous" call numbers in a list)
+     *
+     * @param shelfkey  forward-sortable shelfkey
+     * @return          reverse-sortable shelfkey
+     */
+    public static String getReverseShelfKey(String shelfkey) {
+        StringBuilder resultBuf = new StringBuilder(reverseDefault);
+        if (shelfkey != null && shelfkey.length() > 0)
+            resultBuf.replace(0, shelfkey.length(), reverseAlphanum(shelfkey));
+        return resultBuf.toString();
+    }
+
+    /**
+     * return the reverse String value, mapping A --> 9, B --> 8, ...
+     * 9 --> A and also non-alphanum to sort properly (before or after alphanum)
+     *
+     * @param orig  original string
+     * @return      reversed string
+     */
+    static String reverseAlphanum(String orig) {
+/*
+        char[] origArray = orig.toCharArray();
+
+        char[] reverse = new char[origArray.length];
+        for (int i = 0; i < origArray.length; i++) {
+            Character ch = origArray[i];
+            if (ch != null) {
+                if (Character.isLetterOrDigit(ch))
+                    reverse[i] = alphanumReverseMap.get(ch);
+                else
+                    reverse[i] = reverseNonAlphanum(ch);
+            }
+        }
+*/
+        StringBuilder reverse = new StringBuilder();
+        for (int ix = 0; ix < orig.length(); ) {
+            int codePoint = Character.toUpperCase(orig.codePointAt(ix));
+            char[] chs = Character.toChars(codePoint);
+
+            if (Character.isLetterOrDigit(codePoint)) {
+                if (chs.length == 1) {
+                    char c = chs[0];
+                    if (alphanumReverseMap.containsKey(c))
+                        reverse.append(alphanumReverseMap.get(c));
+                    else {
+                        // not an ASCII letter or digit
+
+                        // map latin chars with diacritic to char without
+                        char foldC;
+
+                        if (Character.UnicodeBlock.of(c) != Character.UnicodeBlock.COMBINING_DIACRITICAL_MARKS &&
+                            Character.UnicodeBlock.of(c) != Character.UnicodeBlock.SPACING_MODIFIER_LETTERS &&
+                             (foldC = org.solrmarc.tools.Utils.foldDiacriticLatinChar(c)) != 0x00)
+                            // we mapped a latin char w diacritic to plain ascii
+                            reverse.append(alphanumReverseMap.get(foldC));
+                        else
+                            // single char, but non-latin, non-digit
+                            // ... view it as after Z in regular alphabet, for now
+                            reverse.append(SORT_FIRST_CHAR);
+                    }
+                }
+                else  {
+                    // multiple 16 bit character unicode letter
+                    // ... view it as after Z in regular alphabet, for now
+                    reverse.append(SORT_FIRST_CHAR);
+                }
+            }
+            else // not a letter or a digit
+                reverse.append(reverseNonAlphanum(chs[0]));
+
+            ix += chs.length;
+        }
+
+        return new String(reverse);
+    }
+
+    /**
+     * for non alpha numeric characters, return a character that will sort
+     * first or last, whichever is the opposite of the original character.
+     *
+     * @param ch  original character
+     * @return    character that sorts opposite of input
+     */
+    public static char[] reverseNonAlphanum(char ch) {
+        // use punctuation before or after alphanum as appropriate
+        switch (ch) {
+            case '.':
+                return Character.toChars('}');
+            case '{':
+            case '|':
+            case '}':
+            case '~':
+// N.B.:  these are tough to deal with in a variety of contexts.
+// Hopefully diacritics and non-latin won't bite us in the butt.
+//              return Character.toChars(Character.MIN_CODE_POINT);
+                return Character.toChars(' ');
+            default:
+//              return Character.toChars(Character.MAX_CODE_POINT);
+                return Character.toChars('~');
+        }
+    }
 
 }
