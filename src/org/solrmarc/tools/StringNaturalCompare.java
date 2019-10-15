@@ -16,7 +16,7 @@ public class StringNaturalCompare implements Comparator<String>
     {
          int bias = 0;
          
-         /* The longest run of digits wins.  That aside, the greatest
+        /* The longest run of digits wins.  That aside, the greatest
         value wins, but we can't know that it will until we've scanned
         both numbers to know that they have the same magnitude, so we
         remember it in BIAS. */
@@ -25,9 +25,15 @@ public class StringNaturalCompare implements Comparator<String>
              if (ind1 == s1.length() && ind2 == s2.length()) 
                  return(bias);
              else if (ind1 == s1.length()) 
-                 return(-1);
+                 if (ind2 < s2.length() && !Character.isDigit(s2.charAt(ind2)))
+                     return (bias);
+                 else 
+                     return(-1);
              else if (ind2 == s2.length()) 
-                 return(+1);
+                 if (ind1 < s1.length() && !Character.isDigit(s1.charAt(ind1)))
+                     return (bias);
+                 else 
+                     return(+1);
              char a = s1.charAt(ind1);
              char b = s2.charAt(ind2);
              if (!Character.isDigit(a) && !Character.isDigit(b))
