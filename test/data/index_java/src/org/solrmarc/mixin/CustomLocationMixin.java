@@ -2,9 +2,11 @@ package org.solrmarc.mixin;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -35,6 +37,7 @@ import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.tools.PropertyUtils;
 import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
+
 
 public class CustomLocationMixin extends SolrIndexerMixin
 {
@@ -1090,6 +1093,137 @@ public class CustomLocationMixin extends SolrIndexerMixin
             if (mappedHomeLoc != null) resultSet.add(mappedHomeLoc);
         }
         return (resultSet);
+    }
+
+
+    public Set<String> getCustomAvailabilityForLocation(final Record record, String locationMap, String visibilityMap, String libraryMap) throws Exception
+    {
+        Set<String> resultSet = new LinkedHashSet<String>();
+        List<?> fields999 = trimmedHoldingsList;
+        AbstractMultiValueMapping locMap = ValueIndexerFactory.instance().createMultiValueMapping(locationMap);
+        AbstractMultiValueMapping visMap = ValueIndexerFactory.instance().createMultiValueMapping(visibilityMap);
+        AbstractMultiValueMapping libMap = ValueIndexerFactory.instance().createMultiValueMapping(libraryMap);
+        for (DataField field : (List<DataField>) fields999)
+        {
+            Subfield curLocF = field.getSubfield('k');
+            Subfield homeLocF = field.getSubfield('l');
+            Subfield libF = field.getSubfield('m');
+            String curLoc = (curLocF != null ? curLocF.getData() : null);
+            String homeLoc = (homeLocF != null ? homeLocF.getData() : null);
+            String lib = (libF != null ? libF.getData() : null);
+            addCustomAvailabilityForLocation(resultSet, curLoc, homeLoc, lib, locMap, visMap, libMap);
+        }
+        return (resultSet);
+    }
+    /*
+     C:/Users/rh9ec/Development/Projects/solrmarc-3.0/test/data/records/locations_unique.txt  C:/Users/rh9ec/Development/Projects/solrmarc-3.0/test/data/translation_maps/location_availability_map.properties   C:/Users/rh9ec/Development/Projects/solrmarc-3.0/test/data/translation_maps/shadowed_location_map.properties  C:/Users/rh9ec/Development/Projects/solrmarc-3.0/test/data/translation_maps/library_map.properties
+     */
+    
+    public static void main(String[] args)
+    {
+        try
+        {
+            testCustomAvailabilityForLocation(args[0], args[1], args[2], args[3], args[4]);
+        }
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
+    public static void testCustomAvailabilityForLocation(String filename, String homeDir, String locationMap, String visibilityMap, String libraryMap) throws Exception
+    {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filename)));
+        String homeDirs[] = new String[1];
+        homeDirs[0] = homeDir;
+        ValueIndexerFactory.initialize(homeDirs);
+        AbstractMultiValueMapping locMap = ValueIndexerFactory.instance().createMultiValueMapping(locationMap);
+        AbstractMultiValueMapping visMap = ValueIndexerFactory.instance().createMultiValueMapping(visibilityMap);
+        AbstractMultiValueMapping libMap = ValueIndexerFactory.instance().createMultiValueMapping(libraryMap);
+        String line;
+        while ((line = reader.readLine()) != null)
+        {
+            Set<String> resultSet = new LinkedHashSet<String>();
+
+            String lineParts[] = line.split("[|]");
+            String sampleID = lineParts[0];
+            String curLoc = lineParts[1];
+            String homeLoc = lineParts[2];
+            String lib = lineParts[3];
+            addCustomAvailabilityForLocation(resultSet, curLoc, homeLoc, lib, locMap, visMap, libMap);
+            StringBuilder sb = new StringBuilder();
+            for (String member : resultSet)
+            {
+                sb.append(" : ");
+                sb.append(member);
+            }
+            if (sb.length() == 0) sb.append(" : HIDDEN");
+            System.out.println(line + sb.toString());
+        }
+        reader.close();
+    }
+    
+    public static void addCustomAvailabilityForLocation(Set<String> resultSet, String curLoc, String homeLoc, String lib, 
+            AbstractMultiValueMapping locMap, AbstractMultiValueMapping visMap, AbstractMultiValueMapping libMap) throws Exception
+    {    
+        String mappedHomeVis = visMap.mapSingle(homeLoc);
+        String mappedHomeLoc = locMap.mapSingle(homeLoc);
+        if (mappedHomeVis.equals("VISIBLE") )
+        {
+            String combinedLocMapped = locMap.mapSingle(homeLoc + "__" + lib);
+            if (combinedLocMapped != null) mappedHomeLoc = combinedLocMapped;
+        }
+        String mappedLib = libMap.mapSingle(lib);
+        if (curLoc != null)
+        {
+            String mappedCurLoc = locMap.mapSingle(curLoc);
+            String mappedCurVis = visMap.mapSingle(curLoc);
+            if (mappedCurVis.equals("VISIBLE") )
+            {
+                String combinedLocMapped = locMap.mapSingle(homeLoc + "__" + lib);
+                if (combinedLocMapped != null) mappedCurLoc = combinedLocMapped;
+            }
+            if (mappedCurVis.equals("HIDDEN")) return; // this copy of the item is Hidden, go no further
+            if (mappedCurLoc != null)
+            {
+                if (mappedCurLoc.contains("$m") && mappedLib != null)
+                {
+                    resultSet.add(mappedCurLoc.replaceAll("[$]m", mappedLib));
+                    resultSet.add(mappedCurLoc.replaceAll("[$]m", "").trim());
+                }
+                else if (mappedCurLoc.contains("$m") && mappedLib == null)
+                {
+                    resultSet.add(mappedCurLoc.replaceAll("[$]m", "").trim());
+                }
+                else 
+                {
+                    resultSet.add(mappedCurLoc);
+                }
+                return; // Used
+            }
+            else  // if current location returns null, that item/copy is not available.  so stop processing 
+            {
+                return;
+            }
+        }
+        if (mappedHomeVis.equals("HIDDEN")) return; // this copy of the item is Hidden, go no further
+        if (mappedHomeLoc != null)
+        {
+            if (mappedHomeLoc.contains("$m") && mappedLib != null) 
+            {
+                resultSet.add(mappedHomeLoc.replaceAll("[$]m", mappedLib));
+                resultSet.add(mappedHomeLoc.replaceAll("[$]m", "").trim());
+            }
+            else if (mappedHomeLoc.contains("$m") && mappedLib == null)
+            {
+                resultSet.add(mappedHomeLoc.replaceAll("[$]m", "").trim());
+            }
+            else
+            {
+                resultSet.add(mappedHomeLoc);
+            }
+        }
     }
 
     public String getShadowedLocation(final Record record, String propertiesMap, String returnHidden, String processExtra) throws Exception
