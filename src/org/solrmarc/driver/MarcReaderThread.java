@@ -1,5 +1,7 @@
 package org.solrmarc.driver;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
@@ -71,5 +73,40 @@ public class MarcReaderThread extends Thread
             flushReadQueue(null);
         }
         return doneReading;
+    }
+    
+    @Override
+    public void interrupt()
+    {
+        super.interrupt();
+        Class<?> readerClass = reader.getClass();
+        try
+        {
+            Method shutdown = readerClass.getMethod("shutdown", new Class<?>[0]);
+            if (shutdown != null)
+            {
+                shutdown.invoke(reader);
+            }
+        }
+        catch (NoSuchMethodException | SecurityException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IllegalAccessException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (IllegalArgumentException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (InvocationTargetException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

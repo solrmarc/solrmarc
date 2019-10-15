@@ -67,10 +67,11 @@ public class BootableMain
         deleteRecordByIdFile = parser.accepts("del", "File to read list of document ids that are to be deleted").withRequiredArg().ofType( File.class );
         parser.accepts("debug", "non-multithreaded debug mode");
         parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
-        parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format");//.availableUnless("sorlURL");
-        parser.acceptsAll(Arrays.asList("null"), "discard all output, and merely show errors and warnings");//.availableUnless("sorlURL");
+      //  parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format").availableUnless("solrURL");
+     //   parser.acceptsAll(Arrays.asList("null"), "discard all output, and merely show errors and warnings").availableUnless("solrURL");
         parser.acceptsAll(Arrays.asList("?", "help"), "show this usage information").forHelp();
         //parser.mutuallyExclusive("stdout", "solrURL");
+        processAddnlArgs(parser);
         files = parser.nonOptions().ofType( String.class );
 
         options = null;
@@ -168,6 +169,12 @@ public class BootableMain
             logger.error("Exiting...");
             System.exit(10);
         }
+    }
+
+    protected void processAddnlArgs(OptionParser parser)
+    {
+        // TODO Auto-generated method stub
+        
     }
 
     private boolean hasSolrJ()

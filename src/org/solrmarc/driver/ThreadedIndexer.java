@@ -163,7 +163,7 @@ public class ThreadedIndexer extends Indexer
                 logger.warn("ThreadedIndexer at top of loop, shutting down");
             }
             if (docQ.size() > buffersize || indexerThreadsAreDone(workers) ||
-                (shuttingDown && docQ.size() > 0))
+                (shuttingDown && docQ.size() > 0)  || (readQ.isEmpty() && docQ.size() > 0))
             {
                 int chunkSize = Math.min(buffersize, docQ.size());
                 final ArrayList<RecordAndDoc> chunk = new ArrayList<RecordAndDoc>(chunkSize);

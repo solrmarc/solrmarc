@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import joptsimple.OptionSet;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -30,7 +32,9 @@ import org.solrmarc.solr.SolrCoreLoader;
 import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
 import org.solrmarc.solr.StdOutProxy;
+import org.solrmarc.solr.XMLOutProxy;
 import org.solrmarc.tools.PropertyUtils;
+
 
 /**
  * Uses the command-line arguments to create a MarcReader, a collection of AbstractValueIndexer
@@ -44,18 +48,18 @@ public class IndexDriver extends BootableMain
 {
     private static Logger logger = null;
 
-    private Properties readerProps;
-    private MarcReaderConfig readerConfig;
-    private ValueIndexerFactory indexerFactory = null;
+    protected Properties readerProps;
+    protected MarcReaderConfig readerConfig;
+    protected ValueIndexerFactory indexerFactory = null;
 
-    private List<AbstractValueIndexer<?>> indexers;
-    private Indexer indexer;
-    private MarcReader reader;
-    private SolrProxy solrProxy;
-    private int[] numIndexed;
-    private String[] args;
-    private long startTime;
-    private Thread shutdownSimulator = null;
+    protected List<AbstractValueIndexer<?>> indexers;
+    protected Indexer indexer;
+    protected MarcReader reader;
+    protected SolrProxy solrProxy;
+    protected int[] numIndexed;
+    protected String[] args;
+    protected long startTime;
+    protected Thread shutdownSimulator = null;
 
     /**
      * The main entry point of the SolrMarc indexing process. Typically called by the Boot class.
@@ -64,7 +68,6 @@ public class IndexDriver extends BootableMain
      */
     public static void main(String[] args)
     {
-        logger = Logger.getLogger(IndexDriver.class);
         IndexDriver driver = new IndexDriver(args);
         driver.execute();
     }
@@ -77,6 +80,7 @@ public class IndexDriver extends BootableMain
      */
     public IndexDriver(String[] args)
     {
+        logger = Logger.getLogger(IndexDriver.class);
         this.args = args;
     }
 
@@ -145,16 +149,13 @@ public class IndexDriver extends BootableMain
             System.exit(1);
         }
 
-        String solrJClassName = solrjClass.value(options);
-        String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : options.has("null") ? "devnull" : "stdout";
         boolean multithread = options.has("solrURL") && !options.has("debug") ? true : false;
         try
         {
-            this.configureOutput(solrURL, solrJClassName);
+            this.configureOutput(options);
         }
         catch (SolrRuntimeException sre)
         {
-            logger.error("Error connecting to solr at URL " + solrURL + " : " + sre.getMessage());
             logger.debug("", sre);
             logger.error("Exiting...");
             System.exit(6);
@@ -235,7 +236,7 @@ public class IndexDriver extends BootableMain
         }
     }
 
-    private void configureIndexer(String indexSpecifications, boolean multiThreaded)
+    protected  void configureIndexer(String indexSpecifications, boolean multiThreaded)
             throws IllegalAccessException, InstantiationException, IOException
     {
         String[] indexSpecs = indexSpecifications.split("[ ]*,[ ]*");
@@ -269,8 +270,10 @@ public class IndexDriver extends BootableMain
         }
     }
 
-    private void configureOutput(String solrURL, String solrJClassName)
+    protected void configureOutput(OptionSet options)
     {
+        String solrJClassName = solrjClass.value(options);
+        String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : options.has("null") ? "devnull" : "stdout";
         if (solrURL.equals("stdout"))
         {
             try
@@ -284,17 +287,37 @@ public class IndexDriver extends BootableMain
                 // since the encoding is hard-coded, and is valid, this Exception cannot occur.
             }
         }
+        else if (solrURL.equals("xml"))
+        {
+            try
+            {
+                PrintStream out = new PrintStream(System.out, true, "UTF-8");
+                System.setOut(out);
+                solrProxy = new XMLOutProxy(out);
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                // since the encoding is hard-coded, and is valid, this Exception cannot occur.
+            }
+        }
         else if (solrURL.equals("devnull"))
         {
             solrProxy = new DevNullProxy();
         }
         else
         {
-            solrProxy = SolrCoreLoader.loadRemoteSolrServer(solrURL, solrJClassName, true);
+            try  {
+                solrProxy = SolrCoreLoader.loadRemoteSolrServer(solrURL, solrJClassName, true);
+            }
+            catch (SolrRuntimeException sre) 
+            {
+                logger.error("Error connecting to solr at URL " + solrURL + " : " + sre.getMessage());
+                throw(sre);
+            }
         }
     }
 
-    private void processInput()
+    protected void processInput()
     {
         String inEclipseStr = System.getProperty("runInEclipse");
         boolean inEclipse = "true".equalsIgnoreCase(inEclipseStr);
@@ -357,7 +380,7 @@ public class IndexDriver extends BootableMain
         }
     }
 
-    private void reportResultsAndTime(int[] numIndexed, long startTime, long endTime, Indexer indexer, boolean perMethodReport)
+    protected void reportResultsAndTime(int[] numIndexed, long startTime, long endTime, Indexer indexer, boolean perMethodReport)
     {
         logger.info("" + numIndexed[0] + " records read");
         logger.info("" + numIndexed[1] + " records indexed  and ");
@@ -434,7 +457,7 @@ public class IndexDriver extends BootableMain
         return (text.toString());
     }
 
-    private void logTextForExceptions(List<IndexerSpecException> exceptions)
+    protected void logTextForExceptions(List<IndexerSpecException> exceptions)
     {
         String lastSpec = "";
         for (IndexerSpecException e : exceptions)
