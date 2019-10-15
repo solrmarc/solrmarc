@@ -38,14 +38,16 @@ public class ThreadedIndexer extends Indexer
     Thread thisThread = null;
     ExecutorService indexerExecutor;
     ThreadPoolExecutor solrExecutor;
+    int trackOverallProgress = -1;
+    int lastProgress = 0;
 
     IndexerWorker[] workers = null;
 
     boolean doneReading = false;
-    final int buffersize;
+    final int chunksize;
     final AtomicInteger cnts[];
 
-    public ThreadedIndexer(List<AbstractValueIndexer<?>> indexers, SolrProxy solrProxy, int buffersize)
+    public ThreadedIndexer(List<AbstractValueIndexer<?>> indexers, SolrProxy solrProxy, int buffersize, int chunkSize)
     {
         super(indexers, solrProxy);
         readQ = new ArrayBlockingQueue<RecordAndCnt>(buffersize);
@@ -79,7 +81,15 @@ public class ThreadedIndexer extends Indexer
         ///solrExecutor = Executors.newFixedThreadPool(numSolrjWorkers);
         solrExecutor = new ThreadPoolExecutor(numSolrjWorkers, numSolrjWorkers * 3, 10000L, TimeUnit.MILLISECONDS,
                                               new ArrayBlockingQueue<Runnable>(numSolrjWorkers * 4));
-        this.buffersize = buffersize;
+        this.chunksize = chunkSize;
+        
+        try {
+            trackOverallProgress = Integer.parseInt(System.getProperty("solrmarc.track.progress", "-1"));
+        }
+        catch (NumberFormatException nfe)
+        {
+            trackOverallProgress = (Boolean.parseBoolean(System.getProperty("solrmarc.track.progress", "false"))) ? 10000 : -1;
+        }
     }
 
     private ThreadedIndexer(ThreadedIndexer toClone)
@@ -88,7 +98,7 @@ public class ThreadedIndexer extends Indexer
         readQ = toClone.readQ;
         docQ = toClone.docQ;
         cnts = toClone.cnts;
-        buffersize = toClone.buffersize;
+        chunksize = toClone.chunksize;
         numThreadIndexers = toClone.numThreadIndexers;
         numSolrjWorkers = toClone.numSolrjWorkers;
     }
@@ -162,16 +172,22 @@ public class ThreadedIndexer extends Indexer
             {
                 logger.warn("ThreadedIndexer at top of loop, shutting down");
             }
-            if (docQ.size() > buffersize || indexerThreadsAreDone(workers) ||
+            if (docQ.size() > chunksize || indexerThreadsAreDone(workers) ||
                 (shuttingDown && docQ.size() > 0)  || (readQ.isEmpty() && docQ.size() > 0))
             {
-                int chunkSize = Math.min(buffersize, docQ.size());
-                final ArrayList<RecordAndDoc> chunk = new ArrayList<RecordAndDoc>(chunkSize);
+                int curProgress = cnts[2].get();
+                if (trackOverallProgress > 0 && curProgress > lastProgress + trackOverallProgress)
+                {
+                    lastProgress = curProgress;
+                    logger.info("ThreadedIndexer current progress: "+ curProgress + " records");
+                }
+                int curChunkSize = Math.min(chunksize, docQ.size());
+                final ArrayList<RecordAndDoc> chunk = new ArrayList<RecordAndDoc>(curChunkSize);
                 if (shuttingDown)
                 {
-                    logger.warn("ThreadedIndexer flushing "+ chunkSize + " docs from docQ, which contains "+docQ.size() + " documents");
+                    logger.warn("ThreadedIndexer flushing "+ curChunkSize + " docs from docQ, which contains "+docQ.size() + " documents");
                 }
-                if (docQ.drainTo(chunk, chunkSize) > 0)
+                if (docQ.drainTo(chunk, curChunkSize) > 0)
                 {
                     RecordAndDoc firstDoc = chunk.get(0);
                     String threadName = null;

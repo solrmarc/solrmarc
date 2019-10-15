@@ -184,6 +184,7 @@ public class IndexDriver extends BootableMain
 
     final static String [] solrmarcPropertyStrings = {
             "solrmarc.indexer.chunksize",
+            "solrmarc.indexer.buffersize",
             "solrmarc.indexer.threadcount",
             "solrmarc.solrj.threadcount",
             "solrmarc.track.solr.progress",
@@ -205,6 +206,10 @@ public class IndexDriver extends BootableMain
             {
                 String propertyName = iter.nextElement().toString();
                 if (propertyName.startsWith("solrmarc.") && propertyStringsToCopy.contains(propertyName) && System.getProperty(propertyName) == null)
+                {
+                    System.setProperty(propertyName, readerProps.getProperty(propertyName));
+                }
+                if (propertyName.startsWith("org.marc4j.marc") && System.getProperty(propertyName) == null)
                 {
                     System.setProperty(propertyName, readerProps.getProperty(propertyName));
                 }
@@ -256,8 +261,9 @@ public class IndexDriver extends BootableMain
         boolean includeErrors = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "marc.include_errors", "false"));
         boolean returnErrors = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "marc.return_errors", "false"));
         int chunkSize = Integer.parseInt(System.getProperty("solrmarc.indexer.chunksize", "640"));
+        int bufferSize = Integer.parseInt(System.getProperty("solrmarc.indexer.buffersize", "640"));
         indexer = null;
-        if (multiThreaded) indexer = new ThreadedIndexer(indexers, solrProxy, chunkSize);
+        if (multiThreaded) indexer = new ThreadedIndexer(indexers, solrProxy, bufferSize, chunkSize);
         else               indexer = new Indexer(indexers, solrProxy);
 
         if (returnErrors)
