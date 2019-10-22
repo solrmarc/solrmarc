@@ -16,10 +16,10 @@ public class SolrCoreLoader
 {
     public static Logger logger = Logger.getLogger(SolrCoreLoader.class);
 
-    public final static String[] defaultSolrJClassnames = { 
-            "org.apache.solr.client.solrj.impl.HttpSolrClient$Builder", 
-            "org.apache.solr.client.solrj.impl.HttpSolrClient", 
-            "org.apache.solr.client.solrj.impl.HttpSolrServer", 
+    public final static String[] defaultSolrJClassnames = {
+            "org.apache.solr.client.solrj.impl.HttpSolrClient$Builder",
+            "org.apache.solr.client.solrj.impl.HttpSolrClient",
+            "org.apache.solr.client.solrj.impl.HttpSolrServer",
             "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer" };
 
     public static SolrProxy loadRemoteSolrServer(String solrHostUpdateURL, String fullClassName, boolean useBinaryRequestHandler)
@@ -122,8 +122,9 @@ public class SolrCoreLoader
                 solrProxy = new SolrServerProxy(httpsolrserver);
                 return (solrProxy);
             }
-            if (superclass.getName().endsWith(".SolrClient"))
-            {
+            if (superclass.getName().endsWith(".SolrClient")
+                || superclass.getName().endsWith(".BaseHttpSolrClient")
+            ) {
                 solrProxy = new SolrClientProxy(httpsolrserver);
                 return (solrProxy);
             }
