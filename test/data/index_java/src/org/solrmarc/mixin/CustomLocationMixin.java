@@ -254,10 +254,10 @@ public class CustomLocationMixin extends SolrIndexerMixin
         if (locationExtraData.addnlShadowedIds != null)
         {
             extraString = locationExtraData.addnlShadowedIds.get(record.getControlNumber());
+//          if (extraString == null) return;
+//          else if (extraString.equals("")) return; // this will list locations
         }
-        if (extraString == null) return;
-        else if (extraString.equals("")) return; // this will list locations
-        else
+//        else
         {
             Iterator<?> iter = fields999.iterator();
             while (iter.hasNext())
@@ -265,7 +265,11 @@ public class CustomLocationMixin extends SolrIndexerMixin
                 Object field = iter.next();
                 DataField df = (DataField) field;
                 String barcode = df.getSubfield('i') != null ? df.getSubfield('i').getData() : "";
-                if (extraString != null && extraString.contains("|" + barcode + "|"))
+                if (df.getSubfield('3') != null) 
+                {
+                    iter.remove();
+                }
+                else if (extraString != null && extraString.contains("|" + barcode + "|"))
                 {
                     iter.remove();
                 }
