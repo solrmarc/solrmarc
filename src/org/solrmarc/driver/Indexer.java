@@ -1,6 +1,7 @@
 package org.solrmarc.driver;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
@@ -15,6 +16,8 @@ import org.solrmarc.index.indexer.IndexerSpecException.eErrorSeverity;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
 import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
+import org.solrmarc.tools.SolrMarcDataException;
+import org.solrmarc.tools.SolrMarcDataException.eDataErrorLevel;
 import org.solrmarc.tools.SolrMarcIndexerException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -40,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 public class Indexer
 {
     private final static Logger logger = Logger.getLogger(Indexer.class);
+    private final static Logger dataExceptionlogger = Logger.getLogger(SolrMarcDataException.class);
 
     protected final List<AbstractValueIndexer<?>> indexers;
     protected SolrProxy solrProxy;
@@ -369,6 +373,18 @@ public class Indexer
                     errLvl = eErrorSeverity.FATAL;
                     recDoc.addErrLoc(eErrorLocationVal.INDEXING_ERROR);
                 }
+                else if (wrapped != null && wrapped instanceof SolrMarcDataException)
+                {
+                    eDataErrorLevel level = ((SolrMarcDataException)wrapped).getLevel();
+                    Priority priority = levelToPriority(level);
+                    dataExceptionlogger.log(priority, "Data Exception in record: " + recDoc.rec.getControlNumber());
+                    dataExceptionlogger.log(priority, " while processing index specification: " + indexer.getSpecLabel());
+                    if (wrapped != null)
+                    {
+                        dataExceptionlogger.log(priority, wrapped.getMessage());
+                    }
+                    errLvl = levelToSeverity(level);;
+                }
                 else if (wrapped != null && wrapped instanceof IllegalArgumentException)
                 {
                     logger.warn("Exception in record: " + recDoc.rec.getControlNumber());
@@ -448,6 +464,32 @@ public class Indexer
         recDoc.setMaxErrLvl(errLvl);
         ValueIndexerFactory.instance().doneWithRecord(record);
         return recDoc;
+    }
+
+    private eErrorSeverity levelToSeverity(eDataErrorLevel level)
+    {
+        switch (level) {
+            case TRACE: return(eErrorSeverity.NONE); 
+            case DEBUG: return(eErrorSeverity.NONE); 
+            case INFO:  return(eErrorSeverity.INFO); 
+            case WARN:  return(eErrorSeverity.WARN); 
+            case ERROR: return(eErrorSeverity.ERROR); 
+            case FATAL: return(eErrorSeverity.FATAL); 
+        }
+        return(eErrorSeverity.WARN); 
+    }
+
+    private Priority levelToPriority(eDataErrorLevel level)
+    {
+        switch (level) {
+            case TRACE: return(org.apache.log4j.Level.TRACE); 
+            case DEBUG: return(org.apache.log4j.Level.DEBUG); 
+            case INFO:  return(org.apache.log4j.Level.INFO); 
+            case WARN:  return(org.apache.log4j.Level.WARN); 
+            case ERROR: return(org.apache.log4j.Level.ERROR); 
+            case FATAL: return(org.apache.log4j.Level.FATAL); 
+        }
+        return org.apache.log4j.Level.WARN;
     }
 
     protected void singleRecordSolrError(RecordAndDoc recDoc, Exception e1, BlockingQueue<RecordAndDoc> errQ)
