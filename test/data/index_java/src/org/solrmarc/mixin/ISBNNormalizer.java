@@ -9,6 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.solrmarc.index.extractor.impl.custom.Mixin;
+import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.tools.SolrMarcDataException;
+import org.solrmarc.tools.SolrMarcDataException.eDataErrorLevel;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,13 +41,19 @@ public class ISBNNormalizer implements Mixin {
         Collection<String> result = Set.class.isAssignableFrom(isbnList.getClass()) ? new LinkedHashSet<String>() : new ArrayList<String>();
         boolean get13 = (output.equals("13") || output.equals("both"));
         boolean get10 = (output.equals("10") || output.equals("both"));
-        if (!get13 && !get10) throw new IllegalArgumentException("Warning: method only accepts values \"10\" \"13\"  or \"both\"");
+        if (!get13 && !get10) 
+            throw new IndexerSpecException(null, null, IndexerSpecException.eErrorSeverity.ERROR, "Warning: method only accepts values \"10\" \"13\"  or \"both\"");
         for (String isbn : isbnList)
         {
             if (get13)
             {
-                String isbn13 = normalize_13(isbn);
-                if (isbn13 != null) result.add(isbn13);
+                try {
+                    String isbn13 = normalize_13(isbn);
+                    if (isbn13 != null) result.add(isbn13);
+                }
+                catch (IllegalArgumentException e) {
+                    throw (e);
+                }
             }
             if (get10)
             {
@@ -105,14 +114,14 @@ public class ISBNNormalizer implements Mixin {
     public static String extract_isbn_by_pat(String isbnstring, Pattern pat, Integer len) throws IllegalArgumentException {
         Matcher m = pat.matcher(isbnstring);
         if (!m.matches()) {
-            throw new IllegalArgumentException(isbnstring + " doesn't contain an ISBN" + len.toString());
+            throw new SolrMarcDataException(eDataErrorLevel.INFO, "'" + isbnstring + "' doesn't contain an ISBN" + len.toString());
         }
 
         String extracted_string = m.group(1);
         String normalized_string = extracted_string.replaceAll(ISBNDelimiterPattern, "");
 
         if (normalized_string.length() != len) {
-            throw new IllegalArgumentException("'" + normalized_string + "' doesn't contain an ISBN" + len.toString() + "; it's length is " + normalized_string.length());
+            throw new SolrMarcDataException(eDataErrorLevel.INFO, "'" + normalized_string + "' doesn't contain an ISBN" + len.toString() + "; it's length is " + normalized_string.length());
         }
         return normalized_string;
 
@@ -122,7 +131,7 @@ public class ISBNNormalizer implements Mixin {
         String result = extract_isbn_by_pat(isbnstring, ISBN10Pat, 10);
         char checkDigit = getisbn10_check_digit(result);
         if (checkDigit != result.charAt(9))
-            throw (new IllegalArgumentException("Bad Check Digit for ISBN10"));
+            throw (new SolrMarcDataException(eDataErrorLevel.INFO, "Bad Check Digit for ISBN10"));
         return(result);
     }
 
@@ -130,7 +139,7 @@ public class ISBNNormalizer implements Mixin {
         String result = extract_isbn_by_pat(isbnstring, ISBN13Pat, 13);
         char checkDigit = getisbn13_check_digit(result);
         if (checkDigit != result.charAt(12))
-            throw (new IllegalArgumentException("Bad Check Digit for ISBN13"));
+            throw (new SolrMarcDataException(eDataErrorLevel.INFO, "Bad Check Digit for ISBN13"));
         return(result);
     }
 
