@@ -244,7 +244,7 @@ public class IndexDriver extends BootableMain
     protected  void configureIndexer(String indexSpecifications, boolean multiThreaded)
             throws IllegalAccessException, InstantiationException, IOException
     {
-        String[] indexSpecs = indexSpecifications.split("[ ]*,[ ]*");
+        String[] indexSpecs = indexSpecifications.split("[ ]*[,;][ ]*");
         File[] specFiles = new File[indexSpecs.length];
         int i = 0;
         for (String indexSpec : indexSpecs)
@@ -333,7 +333,7 @@ public class IndexDriver extends BootableMain
         {
             inEclipse = true;
         }
-        shutdownSimulator = new ShutdownSimulator(inEclipse);
+        shutdownSimulator = new ShutdownSimulator(inEclipse, indexer);
         shutdownSimulator.start();
         Thread shutdownHook = new MyShutdownThread(indexer, shutdownSimulator);
         Runtime.getRuntime().addShutdownHook(shutdownHook);
@@ -569,9 +569,11 @@ public class IndexDriver extends BootableMain
     class ShutdownSimulator extends Thread
     {
         boolean inEclipse;
-        public ShutdownSimulator(boolean inEclipse)
+        Indexer indexerInUse;
+        public ShutdownSimulator(boolean inEclipse, Indexer indexer)
         {
             this.inEclipse = inEclipse;
+            this.indexerInUse = indexer;
         }
         @Override
         public void run()
@@ -589,6 +591,10 @@ public class IndexDriver extends BootableMain
                     if (inEclipse && System.in.available() > 0)
                     {
                         System.in.read();
+                        if (!(indexer instanceof ThreadedIndexer))
+                        {
+                            indexer.shutDown(true);
+                        }
                         System.exit(0);
                     }
                     else

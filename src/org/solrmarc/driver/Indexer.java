@@ -52,6 +52,9 @@ public class Indexer
     protected boolean shuttingDown = false;
     protected boolean viaInterrupt = false;
     protected boolean isShutDown = false;
+    protected Thread theReaderThread = null;
+    protected int trackOverallProgress = -1;
+    protected int lastProgress = 0;
     private int cnts[] = new int[] { 0, 0, 0 };
 
     EnumSet<eErrorHandleVal> errHandle = EnumSet.noneOf(eErrorHandleVal.class);
@@ -66,7 +69,14 @@ public class Indexer
         this.solrProxy = solrProxy;
         errQ = new LinkedBlockingQueue<RecordAndDoc>();
         delQ = new LinkedBlockingQueue<String>();
-    }
+        try {
+            trackOverallProgress = Integer.parseInt(System.getProperty("solrmarc.track.progress", "-1"));
+        }
+        catch (NumberFormatException nfe)
+        {
+            trackOverallProgress = (Boolean.parseBoolean(System.getProperty("solrmarc.track.progress", "false"))) ? 10000 : -1;
+        }
+}
 
     protected Indexer(Indexer toClone)
     {
@@ -108,6 +118,7 @@ public class Indexer
     public int[] indexToSolr(final MarcReader reader)
     {
         resetCnts();
+        theReaderThread = Thread.currentThread();
         while (!shuttingDown)
         {
             RecordAndCnt recordAndCnt = getRecord(reader);
@@ -126,7 +137,13 @@ public class Indexer
             {
                 indexSingleDocument(recDoc);
             }
-        }
+            int curProgress = cnts[2];
+            if (trackOverallProgress > 0 && curProgress > lastProgress + trackOverallProgress)
+            {
+                lastProgress = curProgress;
+                logger.info("Indexer current progress: "+ curProgress + " records");
+            }
+       }
 
         if (shuttingDown)
         {
@@ -531,6 +548,10 @@ public class Indexer
     void shutDown(boolean viaInterrupt)
     {
         this.viaInterrupt = viaInterrupt;
+        if (viaInterrupt && theReaderThread != null) 
+        {
+            theReaderThread.interrupt();
+        }
         shuttingDown = true;
     }
 

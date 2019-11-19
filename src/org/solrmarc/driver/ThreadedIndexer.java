@@ -38,8 +38,6 @@ public class ThreadedIndexer extends Indexer
     Thread thisThread = null;
     ExecutorService indexerExecutor;
     ThreadPoolExecutor solrExecutor;
-    int trackOverallProgress = -1;
-    int lastProgress = 0;
 
     IndexerWorker[] workers = null;
 
@@ -82,14 +80,6 @@ public class ThreadedIndexer extends Indexer
         solrExecutor = new ThreadPoolExecutor(numSolrjWorkers, numSolrjWorkers * 3, 10000L, TimeUnit.MILLISECONDS,
                                               new ArrayBlockingQueue<Runnable>(numSolrjWorkers * 4));
         this.chunksize = chunkSize;
-        
-        try {
-            trackOverallProgress = Integer.parseInt(System.getProperty("solrmarc.track.progress", "-1"));
-        }
-        catch (NumberFormatException nfe)
-        {
-            trackOverallProgress = (Boolean.parseBoolean(System.getProperty("solrmarc.track.progress", "false"))) ? 10000 : -1;
-        }
     }
 
     private ThreadedIndexer(ThreadedIndexer toClone)
@@ -152,6 +142,7 @@ public class ThreadedIndexer extends Indexer
         resetCnts();
         readerThread = new MarcReaderThread(reader, this, readQ, cnts);
         readerThread.start();
+        super.theReaderThread = readerThread;
 
         workers = new IndexerWorker[numThreadIndexers];
         for (int i = 0; i < numThreadIndexers; i++)
