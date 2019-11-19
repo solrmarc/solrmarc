@@ -199,6 +199,7 @@ public class Boot extends URLClassLoader
             if (!Modifier.isStatic(mainMethod.getModifiers()))
             {
                 logger.fatal("ERROR: Main method is not static in class: " + classname);
+                LoggerDelegator.flushToLog();
                 System.exit(1);
             }
             mainMethod.invoke(null, (Object) otherArgs);

@@ -1,6 +1,8 @@
 package org.solrmarc.driver;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,19 +11,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
 import org.solrmarc.tools.PropertyUtils;
 import org.solrmarc.tools.Utils;
 
 
 public class ConfigDriver extends BootableMain
 {
-    private static Logger logger = null;
+    private static LoggerDelegator logger = new LoggerDelegator(ConfigDriver.class);
 
     public static void main(String[] args)
     {
         String configProps = args[0];
-        logger = Logger.getLogger(IndexDriver.class);
         logger.debug("Using config " + configProps + " to initialize SolrMarc");
         // Some of the values in this file will be extracted and passed as command line arguments others will be
         // extracted directly by the MarcReader configuration handler.  This is done by passing the same property file
@@ -41,7 +41,23 @@ public class ConfigDriver extends BootableMain
             configEqHomeDir = true;
         }
         
-        Properties configProperties = PropertyUtils.loadProperties(new String[0], configFile.getAbsolutePath());
+        Properties configProperties = new Properties();
+        try
+        {
+            configProperties.load(new FileInputStream(configFile.getAbsolutePath()));
+        }
+        catch (FileNotFoundException e)
+        {
+            logger.fatal("Unable to find old-style solrmarc config file named: " + configFile.getAbsolutePath());
+            LoggerDelegator.flushToLog();
+            System.exit(2);
+        }
+        catch (IOException e)
+        {
+            logger.fatal("Unable to read old-style solrmarc config file named: " + configFile.getAbsolutePath());
+            LoggerDelegator.flushToLog();
+            System.exit(2);
+        }
 
         String marcreaderProperties = configFile.getName();
         String solrHosturl = PropertyUtils.getProperty(configProperties, "solr.hosturl");
@@ -93,11 +109,13 @@ public class ConfigDriver extends BootableMain
         if (solrIndexerProperties == null)
         {
             logger.error("The provided old-style SolrMarc config.properties file doesn't define the value \"solr.indexer.properties\"");
+            LoggerDelegator.flushToLog();
             System.exit(1);
         }
         String configArg[] = {"-config",  solrIndexerProperties};
         String urlArg[] = (solrHosturl != null) ? new String[]{"-solrURL", solrHosturl}  : new String[0];
         String marcReaderArg[] = { "-reader_opts", marcreaderProperties};
+        
         List<String> driverArgs = new ArrayList<>();
         driverArgs.addAll(Arrays.asList(marcReaderArg));
         driverArgs.addAll(Arrays.asList(dirArg));
@@ -107,13 +125,17 @@ public class ConfigDriver extends BootableMain
         {
             driverArgs.add(args[i]);
         }
+        
         String effectiveCommandLine = "java -jar solrmarc_core.jar IndexDriver " + Utils.join(quoteIfHasSpace(driverArgs), " ");
         logger.info("Effective Command Line is:");
         logger.info("   " + effectiveCommandLine);
 
         Boot.invokeMain("org.solrmarc.driver.IndexDriver", driverArgs.toArray(new String[0]));
-
     }
+    
+    public ConfigDriver(String[] args, List<String> driverArgs) 
+    {
+     }
 
     private static String[] quoteIfHasSpace(List<String> driverArgs)
     {
