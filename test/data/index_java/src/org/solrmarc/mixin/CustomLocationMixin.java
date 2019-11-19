@@ -37,6 +37,8 @@ import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.tools.PropertyUtils;
 import org.solrmarc.tools.StringNaturalCompare;
 import org.solrmarc.tools.Utils;
+import org.solrmarc.tools.SolrMarcDataException;
+import org.solrmarc.tools.SolrMarcDataException.eDataErrorLevel;
 
 
 public class CustomLocationMixin extends SolrIndexerMixin
@@ -659,7 +661,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
             if (result == null) return (result);
             if (result.startsWith("{"))
             {
-                String shelfKey = CallNumUtils.getLCShelfkey(valParts[1], record.getControlNumber());
+                String shelfKey = getLCShelfkey(valParts[1], record.getControlNumber());
                 String keyDigits = shelfKey.substring(4, 8);
                 String ranges[] = result.replaceAll("[{]", "").split("[}]");
                 for (String range : ranges)
@@ -698,13 +700,27 @@ public class CustomLocationMixin extends SolrIndexerMixin
         if (result == null) return (result);
         String resultParts[] = result.split(":", 2);
         if (sortableFlag && (resultParts[0].equals("LC") || (resultParts[0].equals("") && CallNumUtils.isValidLC(resultParts[1])))) 
-            result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber());
+        {
+            result = getLCShelfkey(resultParts[1], record.getControlNumber());
+        }
         else if (resultParts[1].startsWith("M@")) 
             result = result.replaceAll("M@", "MSS ");
         return (result);
 
     }
 
+    public String getLCShelfkey(String lcCallNum, String controlNum)
+    {
+        try {
+            String result = CallNumUtils.getLCShelfkey(lcCallNum, controlNum);
+            return(result);
+        }
+        catch (IllegalArgumentException iae)
+        {
+            throw new SolrMarcDataException(eDataErrorLevel.INFO, iae.getMessage());
+        }        
+    }
+    
     public String getShelfKey(final Record record)
     {
         String callnum = bestSingleCallNumber;
@@ -713,7 +729,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
         String resultParts[] = callnum.split(":", 2);
         if ((resultParts[0].equals("LC") || resultParts[0].equals("")) && CallNumUtils.isValidLC(resultParts[1]))
         {
-            result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber());
+            result = getLCShelfkey(resultParts[1], record.getControlNumber());
         }
         return (result);
     }
@@ -734,7 +750,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
         String resultParts[] = callnum.split(":", 2);
         if ((resultParts[0].equals("LC") || resultParts[0].equals("")) && CallNumUtils.isValidLC(resultParts[1]))
         {
-            result = CallNumUtils.getLCShelfkey(resultParts[1], record.getControlNumber());
+            result = getLCShelfkey(resultParts[1], record.getControlNumber());
         }
         return (result);
     }
@@ -1274,6 +1290,10 @@ public class CustomLocationMixin extends SolrIndexerMixin
                         // this holding is marked as Hidden via the addnlShadowedIds data file
                         // so simply continue, and unless another non-Hidden holding is found the
                         // record will be not visible.
+                        continue;
+                    }
+                    else if (fparts.length < 3)
+                    {
                         continue;
                     }
                     else if (fparts.length == 3)

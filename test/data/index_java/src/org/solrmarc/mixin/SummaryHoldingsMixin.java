@@ -360,7 +360,7 @@ public class SummaryHoldingsMixin extends SolrIndexerMixin
     {
         StringBuilder result = new StringBuilder();
         int i;
-        if (dataArr1.size() == 1 && dataArr2.size() == 1 && dataArr1.get(0).equals(dataArr2.get(1)))
+        if (dataArr1.size() == 1 && dataArr2.size() == 1 && dataArr1.get(0).equals(dataArr2.get(0)))
         {
             return(dataArr1.get(0));
         }
