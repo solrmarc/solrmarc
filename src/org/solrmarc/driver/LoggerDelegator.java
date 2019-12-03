@@ -263,4 +263,14 @@ public class LoggerDelegator
             delegateMessageToLog4j(50000, message, th);
         }
     }
+
+    public void info_multi(String string)
+    {
+        String lines[] = string.split("\n");
+        for (String line : lines)
+        {
+            info(line);
+        }
+        
+    }
 }

@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,6 +19,7 @@ import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.util.Hashtable;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -41,6 +44,8 @@ public class Boot extends URLClassLoader
 
     public static void main(String[] args)
     {
+        logger.info("Starting SolrMarc boot loader shim");
+        logger.info_multi("Command line: \n" + getCommandLine());
         if (args.length == 0)
         {
             findExecutables();
@@ -86,6 +91,25 @@ public class Boot extends URLClassLoader
         super(urls, parent);
     }
 
+    private static String getCommandLine()
+    {
+        File f;
+        String sep = ""+ File.pathSeparatorChar;
+        StringBuilder sb = new StringBuilder().append("java ");
+        RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();
+        List<String> jvmArgs = bean.getInputArguments();
+
+        for (int i = 0; i < jvmArgs.size(); i++)
+        {
+            sb.append( jvmArgs.get( i ) ). append("\n    ");
+        }
+        sb.append("-classpath " + System.getProperty("java.class.path").replaceAll(sep,  sep+"\n               "));
+        // print the non-JVM command line arguments
+        // print name of the main class with its arguments, like org.ClassName param1 param2
+        sb.append("\n    " + System.getProperty("sun.java.command").replaceFirst(" ", "\n        ").replaceAll(" -", "\n        -"));
+        return(sb.toString().replaceAll("\n[ ]*\n", "\n"));
+    }
+    
     private Hashtable<String, Class<?>> classes = new Hashtable<String, Class<?>>(); //used to cache already defined classes
     @Override
     public void addURL(URL url)
@@ -192,6 +216,7 @@ public class Boot extends URLClassLoader
      */
     public static void invokeMain(String classname, String[] otherArgs)
     {
+        logger.info_multi("Invoking main program: \n"+ getEffectiveCommandLine(classname, otherArgs));
         try
         {
             Class<?> mainClass = Boot.classForName(classname);
@@ -238,6 +263,25 @@ public class Boot extends URLClassLoader
         }
     }
 
+    private static String getEffectiveCommandLine(String classname, String[] otherargs)
+    {
+        StringBuilder sb = new StringBuilder().append("java ").append("-classpath <CLASSPATH>").append("\n        ").append(classname).append("\n");
+        boolean wasDash = false;
+        for (String arg : otherargs)
+        {
+            if (wasDash) 
+            {
+                sb.append(" ").append(arg);
+            }
+            else 
+            {
+                sb.append("\n        ").append(arg);
+            }
+            wasDash = arg.startsWith("-");
+        }
+        return(sb.toString().replaceAll("\n[ ]*\n", "\n"));
+    }
+    
     @SuppressWarnings("unchecked")
     private static String classnamefromArg(String string) throws ClassNotFoundException
     {
