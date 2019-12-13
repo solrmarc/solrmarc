@@ -124,7 +124,9 @@ public class PatternMapping
             for (int group = inputMatcher.groupCount(); group > 0 ; group--)
             {
                 final String pattern = java.util.regex.Matcher.quoteReplacement("$"+group);
-                result = result.replaceAll(pattern, inputMatcher.group(group));
+                String replacement = inputMatcher.group(group);
+                replacement = java.util.regex.Matcher.quoteReplacement(replacement);
+                result = result.replaceAll(pattern, replacement);
             }
         }
         return(result);
