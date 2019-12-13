@@ -1,7 +1,5 @@
 package org.solrmarc.driver;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
@@ -73,5 +71,14 @@ public class MarcReaderThread extends Thread
             flushReadQueue(null);
         }
         return doneReading;
+    }
+
+    public boolean isPaused()
+    {
+        if (reader != null && reader.getClass().getName().contains("SQS"))
+        {
+            return (readQ.size() == 0);
+        }
+        return(false);
     }
 }

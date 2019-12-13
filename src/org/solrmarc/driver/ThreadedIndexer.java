@@ -164,7 +164,7 @@ public class ThreadedIndexer extends Indexer
                 logger.warn("ThreadedIndexer at top of loop, shutting down");
             }
             if (docQ.size() > chunksize || indexerThreadsAreDone(workers) ||
-                (shuttingDown && docQ.size() > 0)  || (readQ.isEmpty() && docQ.size() > 0))
+                (shuttingDown && docQ.size() > 0)  || (readerThread.isPaused() && docQ.size() > 0))
             {
                 int curProgress = cnts[2].get();
                 if (trackOverallProgress > 0 && curProgress > lastProgress + trackOverallProgress)
