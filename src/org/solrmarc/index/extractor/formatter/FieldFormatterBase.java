@@ -1,7 +1,5 @@
 package org.solrmarc.index.extractor.formatter;
 
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -9,14 +7,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.marc4j.marc.DataField;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.index.extractor.ExternalMethod;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.tools.DataUtil;
-import org.solrmarc.tools.Utils;
 
 public class FieldFormatterBase implements FieldFormatter
 {
@@ -254,7 +250,7 @@ public class FieldFormatterBase implements FieldFormatter
     @Override
     public FieldFormatter setCleanVal(EnumSet<eCleanVal> cleanVal)
     {
-        this.cleanVal = cleanVal;
+        this.cleanVal.addAll(cleanVal);
         return(this);
     }
 
@@ -449,9 +445,6 @@ public class FieldFormatterBase implements FieldFormatter
         }
     }
 
-    private static Pattern ACCENTS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-    private static Pattern PUNCT_OR_SPACE = Pattern.compile("[ \\p{Punct}]+", Pattern.UNICODE_CHARACTER_CLASS);
-
     public String cleanData(VariableField vf, boolean isSubfieldA, String data)
     {
         final EnumSet<eCleanVal> cleanVal = getCleanVal();
@@ -470,64 +463,41 @@ public class FieldFormatterBase implements FieldFormatter
         }
         trimmed = cleanVal.contains(eCleanVal.UNTRIMMED) ? getSubstring(trimmed) : getSubstring(trimmed).trim();
 
-        String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? DataUtil.cleanData(trimmed) : trimmed;
-        if (!cleanVal.contains(eCleanVal.STRIP_ACCCENTS) && !cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)
-                && !cleanVal.contains(eCleanVal.TO_LOWER) && !cleanVal.contains(eCleanVal.TO_UPPER)
-                && !cleanVal.contains(eCleanVal.TO_TITLECASE) && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_1) 
-                && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_2) && !cleanVal.contains(eCleanVal.STRIP_INDICATOR))
-        {
-            return (str);
-        }
-        // Do more extensive cleaning of data.
-        if (cleanVal.contains(eCleanVal.STRIP_ACCCENTS))
-        {
-            str = ACCENTS.matcher(Normalizer.normalize(str, Form.NFD)).replaceAll("");
-            StringBuilder folded = new StringBuilder();
-            boolean replaced = false;
-            for (char c : str.toCharArray())
-            {
-                char newc = Utils.foldDiacriticLatinChar(c);
-                if (newc != 0x00)
-                {
-                    folded.append(newc);
-                    replaced = true;
-                }
-                else
-                {
-                    folded.append(c);
-                }
-            }
-            if (replaced) str = folded.toString();
-        }
-        if (cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)) 
-        {
-            String str1 = str.replaceAll("( |\\p{Punct})+", " ");
-            String str2 = PUNCT_OR_SPACE.matcher(str).replaceAll(" ");
-            if (str1.equals(str2)) 
-            {
-                str = str1;
-            }
-            else
-            {
-                str = str2;
-                str = str.replaceAll("( |\\p{Punct})+", " ");
-            }
-        }
-        if (!cleanVal.contains(eCleanVal.UNTRIMMED))  str = str.trim();
-
-        if (cleanVal.contains(eCleanVal.TO_LOWER))
-        {
-            str = str.toLowerCase();
-        }
-        else if (cleanVal.contains(eCleanVal.TO_UPPER))
-        {
-            str = str.toUpperCase();
-        }
-        else if (cleanVal.contains(eCleanVal.TO_TITLECASE))
-        {
-            str = DataUtil.toTitleCase(str);
-        }
-        return str;
+        String str = DataUtil.cleanByVal(trimmed, cleanVal);
+        return(str);
+//        
+//        String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? DataUtil.cleanData(trimmed) : trimmed;
+//        if (!cleanVal.contains(eCleanVal.STRIP_ACCCENTS) && !cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)
+//                && !cleanVal.contains(eCleanVal.TO_LOWER) && !cleanVal.contains(eCleanVal.TO_UPPER)
+//                && !cleanVal.contains(eCleanVal.TO_TITLECASE) && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_1) 
+//                && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_2) && !cleanVal.contains(eCleanVal.STRIP_INDICATOR))
+//        {
+//            return (str);
+//        }
+//        // Do more extensive cleaning of data.
+//        if (cleanVal.contains(eCleanVal.STRIP_ACCCENTS))
+//        {
+//            str = DataUtil.stripAccents(str);
+//        }
+//        if (cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)) 
+//        {
+//            str = DataUtil.stripAllPunct(str);
+//        }
+//        if (!cleanVal.contains(eCleanVal.UNTRIMMED))  str = str.trim();
+//
+//        if (cleanVal.contains(eCleanVal.TO_LOWER))
+//        {
+//            str = str.toLowerCase();
+//        }
+//        else if (cleanVal.contains(eCleanVal.TO_UPPER))
+//        {
+//            str = str.toUpperCase();
+//        }
+//        else if (cleanVal.contains(eCleanVal.TO_TITLECASE))
+//        {
+//            str = DataUtil.toTitleCase(str);
+//        }
+//        return str;
     }
 
     private char getIndicatorValueToStrip(DataField df, EnumSet<eCleanVal> cleanVal)

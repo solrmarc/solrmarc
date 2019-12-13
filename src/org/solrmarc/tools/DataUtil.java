@@ -1,13 +1,20 @@
 package org.solrmarc.tools;
 
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
+import java.text.Normalizer.Form;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.solrmarc.index.extractor.formatter.FieldFormatter;
+import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 
 public class DataUtil
 {
@@ -23,6 +30,10 @@ public class DataUtil
     private final static Pattern FOUR_DIGIT_PATTERN = Pattern.compile("\\d{4,4}");
     protected static Logger logger = Logger.getLogger(DataUtil.class.getName());
 
+    private static Pattern ACCENTS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+    private static Pattern PUNCT_OR_SPACE = Pattern.compile("[ \\p{Punct}]+", Pattern.UNICODE_CHARACTER_CLASS);
+
+    
     /**
      * Cleans non-digits from a String
      *
@@ -390,7 +401,104 @@ public class DataUtil
         }
         return sb.toString();
     }
+    
+    public static EnumSet<FieldFormatter.eCleanVal> getCleanValForParam(String params )
+    {
+        EnumSet<FieldFormatter.eCleanVal> result = EnumSet.noneOf(eCleanVal.class);
+        for (FieldFormatter.eCleanVal cleanVal : EnumSet.allOf(FieldFormatter.eCleanVal.class))
+        {
+            if (params.contains(cleanVal.toString()))  result.add(cleanVal);
+        }
+        if (params.contains("titleSortUpper"))
+        {
+            result.addAll(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.STRIP_ACCCENTS,
+                    eCleanVal.STRIP_ALL_PUNCT, eCleanVal.TO_UPPER, eCleanVal.STRIP_INDICATOR));
+        }
+        if (params.contains("titleSortLower"))
+        {
+            result.addAll(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.STRIP_ACCCENTS,
+                    eCleanVal.STRIP_ALL_PUNCT, eCleanVal.TO_LOWER, eCleanVal.STRIP_INDICATOR));
+        }
+        if (params.matches(".*clean([^E].*|$)"))
+        {
+            result.addAll(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END));
+        }
+        return(result);
+    }
+    
+    public static String cleanByVal(String input,  EnumSet<FieldFormatter.eCleanVal> cleanVal)
+    {        
+        String str = (cleanVal.contains(eCleanVal.CLEAN_EACH)) ? DataUtil.cleanData(input) : input;
+    
+        if (!cleanVal.contains(eCleanVal.STRIP_ACCCENTS) && !cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)
+                && !cleanVal.contains(eCleanVal.TO_LOWER) && !cleanVal.contains(eCleanVal.TO_UPPER)
+                && !cleanVal.contains(eCleanVal.TO_TITLECASE) && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_1) 
+                && !cleanVal.contains(eCleanVal.STRIP_INDICATOR_2) && !cleanVal.contains(eCleanVal.STRIP_INDICATOR))
+        {
+            return (str);
+        }
+        // Do more extensive cleaning of data.
+        if (cleanVal.contains(eCleanVal.STRIP_ACCCENTS))
+        {
+            str = DataUtil.stripAccents(str);
+        }
+        if (cleanVal.contains(eCleanVal.STRIP_ALL_PUNCT)) 
+        {
+            str = DataUtil.stripAllPunct(str);
+        }
+        if (!cleanVal.contains(eCleanVal.UNTRIMMED))  str = str.trim();
+    
+        if (cleanVal.contains(eCleanVal.TO_LOWER))
+        {
+            str = str.toLowerCase();
+        }
+        else if (cleanVal.contains(eCleanVal.TO_UPPER))
+        {
+            str = str.toUpperCase();
+        }
+        else if (cleanVal.contains(eCleanVal.TO_TITLECASE))
+        {
+            str = DataUtil.toTitleCase(str);
+        }
+        return str;
+    }
 
-
-
+    
+    public static String stripAllPunct(String str)
+    {
+        String str1 = str.replaceAll("( |\\p{Punct})+", " ");
+        String str2 = PUNCT_OR_SPACE.matcher(str).replaceAll(" ");
+        if (str1.equals(str2)) 
+        {
+            str = str1;
+        }
+        else
+        {
+            str = str2;
+            str = str.replaceAll("( |\\p{Punct})+", " ");
+        }
+        return(str);
+    }
+    
+    public static String stripAccents(String str)
+    {
+        str = ACCENTS.matcher(Normalizer.normalize(str, Form.NFD)).replaceAll("");
+        StringBuilder folded = new StringBuilder();
+        boolean replaced = false;
+        for (char c : str.toCharArray())
+        {
+            char newc = Utils.foldDiacriticLatinChar(c);
+            if (newc != 0x00)
+            {
+                folded.append(newc);
+                replaced = true;
+            }
+            else
+            {
+                folded.append(c);
+            }
+        }
+        if (replaced) str = folded.toString();
+        return(str);
+    }
 }

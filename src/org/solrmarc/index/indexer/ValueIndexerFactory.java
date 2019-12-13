@@ -36,6 +36,7 @@ import org.solrmarc.index.extractor.methodcall.MethodCallManager;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.mapping.AbstractValueMappingFactory;
 import org.solrmarc.index.utils.ClasspathUtils;
+import org.solrmarc.tools.DataUtil;
 import org.solrmarc.tools.SolrMarcIndexerException;
 import org.solrmarc.tools.Utils;
 
@@ -630,6 +631,7 @@ public class ValueIndexerFactory
 
         int currentIndex = 0;
         int joinIndex = -1;
+        EnumSet<eCleanVal> tmpVal;
         for (List<String> mapSpec : mapSpecs)
         {
             String[] mapParts = (String[]) mapSpec.toArray(new String[0]);
@@ -675,10 +677,14 @@ public class ValueIndexerFactory
                     currentExceptions.add(ise);
                 }
             }
-            else if (mapParts[0].equals("cleanEach"))
+            /* 
+             *  this one line should now handle all of the settings for the lines below
+             */
+            else if ((tmpVal = DataUtil.getCleanValForParam(mapParts[0])) != EnumSet.noneOf(eCleanVal.class) )
             {
-                multiValueExtractor.addCleanVal(eCleanVal.CLEAN_EACH);
+                multiValueExtractor.setCleanVal(tmpVal);
             }
+           /*
             else if (mapParts[0].equals("untrimmed"))
             {
                 multiValueExtractor.addCleanVal(eCleanVal.UNTRIMMED);
@@ -734,6 +740,7 @@ public class ValueIndexerFactory
                 multiValueExtractor.setCleanVal(EnumSet.of(eCleanVal.CLEAN_EACH, eCleanVal.CLEAN_END, eCleanVal.STRIP_ACCCENTS, eCleanVal.STRIP_ALL_PUNCT, eCleanVal.STRIP_INDICATOR));
                 multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
             }
+            */
             else if (isAValueMappingConfiguration(mapParts[0]) && joinIndex == -1)
             {
                 AbstractMultiValueMapping valueMapping = createMultiValueMapping(mapParts);
