@@ -23,6 +23,11 @@ public class HathiIndexerMixin extends SolrIndexerMixin
     {
     }
 
+    public Set<String> getHathiURL(final Record record, String defaultURL)
+    {
+        return(getHathiURL(record, defaultURL, ""));
+    }
+    
     public Set<String> getHathiURL(final Record record, String defaultURL, String defaultLabel)
     {
         Set<String> result = new LinkedHashSet<String>();
@@ -40,17 +45,24 @@ public class HathiIndexerMixin extends SolrIndexerMixin
                 if (identField == null) continue;
                 String label = (labelField != null) ? labelField.getData() : "";
                 String sortlabel = (labelField != null) ? labelField.getData() : identField.getData();
+                String labelStr = "";
                 if (defaultLabel.contains("%"))
                 {
                     label = defaultLabel.replace("%", label);
                     label = label.replaceAll(" [ ]+", " ");
+                    labelStr = "||" + label;
                 }
-                else 
+                else if (defaultLabel.length() == 0 || defaultLabel.equals("null"))
+                {
+                    labelStr = "";
+                }
+                else
                 {
                     label = defaultLabel + label;
+                    labelStr = "||" + label;
                 }
                 // default URL prefix is   http://hdl.handle.net/2027/
-                String value = defaultURL + identField.getData().trim() + "||" + label;
+                String value = defaultURL + identField.getData().trim() + labelStr;
                 sortedMap.put(sortlabel, value);
             }
         }
