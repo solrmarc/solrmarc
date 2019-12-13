@@ -230,13 +230,13 @@ public class DirectorMixin extends SolrIndexerMixin
                     if (part.matches(".*(the )?[A-Z][^ ]* [Bb]rothers.*"))
                     {
                         String name = part.replaceFirst(".*(the )?([A-Z][^ ]*) [Bb]rothers.*", "$2");
-                        if (part.matches(".*(the )?[A-Z][^ ]* [Bb]rothers(, | \\()[A-Z][a-z]* and [A-Z][a-z]* "+name+".*"))
+                        if (part.matches(".*([Tt]he )?[A-Z][^ ]* [Bb]rothers(, | \\()[A-Z][a-z]* and [A-Z][a-z]* "+name+".*"))
                         {
-                            part = part.replaceFirst("((the )?([A-Z][^ ]*) [Bb]rothers)(, | \\()([A-Z][a-z]*) and ([A-Z][a-z]*) "+name+"\\)?", "$5 $3 and $6 $3");
+                            part = part.replaceFirst("(([Tt]he )?([A-Z][^ ]*) [Bb]rothers)(, | \\()([A-Z][a-z]*) and ([A-Z][a-z]*) "+name+"\\)?", "$5 $3 and $6 $3");
                         }
-                        else if (part.matches(".*(the )?[A-Z][^ ]* [Bb]rothers(, | \\()[A-Z][a-z]* and [A-Z][a-z]*.*"))
+                        else if (part.matches(".*([Tt]he )?[A-Z][^ ]* [Bb]rothers(, | \\()[A-Z][a-z]* and [A-Z][a-z]*.*"))
                         {
-                            part = part.replaceFirst("((the )?([A-Z][^ ]*) [Bb]rothers)(, | \\()([A-Z][a-z]*) and ([A-Z][a-z]*)\\)?", "$5 $3 and $6 $3");
+                            part = part.replaceFirst("(([Tt]he )?([A-Z][^ ]*) [Bb]rothers)(, | \\()([A-Z][a-z]*) and ([A-Z][a-z]*)\\)?", "$5 $3 and $6 $3");
                         }
                         else 
                         {
