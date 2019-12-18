@@ -67,6 +67,7 @@ public class BootableMain
         deleteRecordByIdFile = parser.accepts("del", "File to read list of document ids that are to be deleted").withRequiredArg().ofType( File.class );
         parser.accepts("debug", "non-multithreaded debug mode");
         parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
+        parser.acceptsAll(Arrays.asList( "solrCommit", "c"), "Whether to commit, true or false").withRequiredArg();
       //  parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format").availableUnless("solrURL");
      //   parser.acceptsAll(Arrays.asList("null"), "discard all output, and merely show errors and warnings").availableUnless("solrURL");
         parser.acceptsAll(Arrays.asList("?", "help"), "show this usage information").forHelp();

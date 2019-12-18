@@ -557,6 +557,7 @@ public class Indexer
 
     void endProcessing()
     {
+        boolean  commitAtEnd = Boolean.parseBoolean(System.getProperty("solrmarc.commit.at.end", "true"));
         if (delQ.size() > 0)
         {
             logger.info("Deleting "+delQ.size()+ " records ");
@@ -577,8 +578,12 @@ public class Indexer
         }
         try
         {
-            logger.info("Commiting updates to Solr");
-            solrProxy.commit(false);
+            if ( commitAtEnd) {
+                logger.info("Commmiting updates to Solr");
+                solrProxy.commit(false);
+            } else {   // mlevy
+                logger.info("Not commmiting updates to Solr");
+            }
         }
         catch (SolrRuntimeException e)
         {
