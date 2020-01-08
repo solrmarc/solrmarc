@@ -677,6 +677,18 @@ public class ValueIndexerFactory
                     currentExceptions.add(ise);
                 }
             }
+            else if (isAValueMappingConfiguration(mapParts[0]) && joinIndex == -1)
+            {
+                AbstractMultiValueMapping valueMapping = createMultiValueMapping(mapParts);
+                multiValueExtractor.addMap(valueMapping);
+            }
+            else if (isAValueMappingConfiguration(mapParts[0]) && joinIndex != -1)
+            {
+                // post join map specification
+                //     mapping specs before "join" are applied before the join operation
+                //     mapping spec that are after "join" are applied to the joined output.
+                //     and are handled elsewhere.
+            }
             /* 
              *  this one line should now handle all of the settings for the lines below
              */
@@ -741,18 +753,6 @@ public class ValueIndexerFactory
                 multiValueExtractor.addCleanVal(eCleanVal.TO_LOWER);
             }
             */
-            else if (isAValueMappingConfiguration(mapParts[0]) && joinIndex == -1)
-            {
-                AbstractMultiValueMapping valueMapping = createMultiValueMapping(mapParts);
-                multiValueExtractor.addMap(valueMapping);
-            }
-            else if (isAValueMappingConfiguration(mapParts[0]) && joinIndex != -1)
-            {
-                // post join map specification
-                //     mapping specs before "join" are applied before the join operation
-                //     mapping spec that are after "join" are applied to the joined output.
-                //     and are handled elsewhere.
-            }
             else
             {
                 currentExceptions.add(new IndexerSpecException(fieldnames, origSpec, "Illegal format specification: " + Utils.join(mapParts, " ")));
