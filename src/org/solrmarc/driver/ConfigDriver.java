@@ -61,6 +61,7 @@ public class ConfigDriver extends BootableMain
 
         String marcreaderProperties = configFile.getName();
         String solrHosturl = PropertyUtils.getProperty(configProperties, "solr.hosturl");
+        String solrCommit  = PropertyUtils.getProperty(configProperties, "solrmarc.commit.at.end");
         String solrIndexerProperties = PropertyUtils.getProperty(configProperties, "solr.indexer.properties");
         String solrmarcPath = PropertyUtils.getProperty(configProperties, "solrmarc.path");
         if (configDirStr != null)
@@ -114,6 +115,7 @@ public class ConfigDriver extends BootableMain
         }
         String configArg[] = {"-config",  solrIndexerProperties};
         String urlArg[] = (solrHosturl != null) ? new String[]{"-solrURL", solrHosturl}  : new String[0];
+        String commitArg[] = (solrCommit  != null) ? new String[]{"-solrCommit", solrCommit}   : new String[0];
         String marcReaderArg[] = { "-reader_opts", marcreaderProperties};
         
         List<String> driverArgs = new ArrayList<>();
@@ -121,6 +123,7 @@ public class ConfigDriver extends BootableMain
         driverArgs.addAll(Arrays.asList(dirArg));
         driverArgs.addAll(Arrays.asList(configArg));
         driverArgs.addAll(Arrays.asList(urlArg));
+        driverArgs.addAll(Arrays.asList(commitArg));
         for (int i = 1; i < args.length; i++)
         {
             driverArgs.add(args[i]);
