@@ -7,12 +7,25 @@ import org.solrmarc.tools.DataUtil;
 
 public class UtilsTests
 {
-
     @Test
     public void testCleanData()
     {
         assertEquals(DataUtil.cleanData("[ microfilm] :"), "microfilm");
         assertEquals(DataUtil.cleanData("Ray Parker Jr. :"), "Ray Parker Jr.");
+    }
+
+    @Test
+    public void testCleanDate()
+    {
+        assertEquals(DataUtil.cleanDate("197?"), "1970");
+        assertEquals(DataUtil.cleanDate("[19]72"), "1972");
+        assertEquals(DataUtil.cleanDate("1500"), "1500");
+        assertEquals(DataUtil.cleanDate("l500"), "1500"); // "L" instead of "1"
+        assertEquals(DataUtil.cleanDate("i.e. 1500"), "1500");
+        assertEquals(DataUtil.cleanDate("[2021]"), "2021");
+        assertEquals(DataUtil.cleanDate("[2021"), "2021");
+        assertNull(DataUtil.cleanDate("2000 B.C.")); // B.C. dates intentionally ignored
+        assertEquals(DataUtil.cleanDate("1400"), "1400");
     }
 
     @Test
