@@ -20,7 +20,8 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
     public boolean canHandle(String mappingConfiguration)
     {
         return mappingConfiguration.endsWith(".properties")
-                || (mappingConfiguration.contains(".properties(") && mappingConfiguration.endsWith(")"));
+                || (mappingConfiguration.contains(".properties(") && mappingConfiguration.endsWith(")")
+                || (mappingConfiguration.endsWith(".xml") || mappingConfiguration.endsWith(".XML")));
     }
 
     private Properties loadTranslationMappingFile(String translationMappingFileName, String subMappingName)
