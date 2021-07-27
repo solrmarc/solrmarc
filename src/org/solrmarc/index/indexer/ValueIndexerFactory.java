@@ -330,21 +330,29 @@ public class ValueIndexerFactory
         this.defaultCustomClassname = null;
         for (final String singleSpec : configSpecs)
         {
-            if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map."))
+            if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map.") || singleSpec.startsWith("solrmarc."))
             {
                 final String[] specParts = singleSpec.split("[ ]?[:=][ ]?", 2);
-                if (specParts.length >= 2) 
+                if (specParts.length >= 2)
                 {
-                    specParts[1] = specParts[1].replaceAll("\\\\(.)", "$1");
-                    localMappingProperties.put(specParts[0].trim(), specParts[1].trim());
-                }
+                    if (specParts[0].startsWith("solrmarc."))
+                    {
+                        if (System.getProperty(specParts[0]) == null) 
+                            System.setProperty(specParts[0], specParts[1]);
+                    }
+                    else   
+                    {
+                        specParts[1] = specParts[1].replaceAll("\\\\(.)", "$1");
+                        localMappingProperties.put(specParts[0].trim(), specParts[1].trim());
+                    }
+                }              
             }
         }
         for (String singleSpec : configSpecs)
         {
             singleSpec = singleSpec.trim();
             if (singleSpec.startsWith("#") || (!singleSpec.contains(":") && !singleSpec.contains("="))) continue;
-            if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map.")) continue;
+            if (singleSpec.startsWith("map.") || singleSpec.startsWith("pattern_map.") || singleSpec.startsWith("solrmarc.")) continue;
             if (singleSpec.startsWith("default"))
             {
                 if (singleSpec.startsWith("default.unique"))
