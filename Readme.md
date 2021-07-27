@@ -1,4 +1,4 @@
-# Overview   [![Build Status](https://travis-ci.org/solrmarc/solrmarc.png?branch=master)](https://travis-ci.org/solrmarc/solrmarc)
+# Overview   ![Build Status](https://github.com//solrmarc/solrmarc/actions/workflows/ant.yml/badge.svg?branch=master)
 
 SolrMarc is designed to read MARC records and to extract data from those records to build an Apache Solr index. It relies on the library [Marc4j](https://github.com/marc4j/marc4j) for reading MARC records and then uses a user-provided indexing specification to determine what fields are to be created for the Solr input document, and where that data should be extracted from, lastly it uses the SolrJ library for sending the Solr input documents to the Solr index. 
 
