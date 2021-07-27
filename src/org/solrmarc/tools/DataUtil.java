@@ -16,14 +16,15 @@ import org.solrmarc.index.extractor.formatter.FieldFormatter.eCleanVal;
 
 public class DataUtil
 {
+    private final static String TWO_DIGIT_PREFIXES = "(20|19|18|17|16|15|14|13|12|11|10)";
     private final static Pattern FOUR_DIGIT_PATTERN_BRACES = Pattern.compile("\\[[12]\\d{3,3}\\]");
     private final static Pattern FOUR_DIGIT_PATTERN_ONE_BRACE = Pattern.compile("\\[[12]\\d{3,3}");
     private final static Pattern FOUR_DIGIT_PATTERN_STARTING_WITH_1_2 = Pattern
-            .compile("(20|19|18|17|16|15)[0-9][0-9]");
+            .compile(TWO_DIGIT_PREFIXES + "[0-9][0-9]");
     private final static Pattern FOUR_DIGIT_PATTERN_OTHER_1 = Pattern.compile("l\\d{3,3}");
     private final static Pattern FOUR_DIGIT_PATTERN_OTHER_2 = Pattern.compile("\\[19\\]\\d{2,2}");
-    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_3 = Pattern.compile("(20|19|18|17|16|15)[0-9][-?0-9]");
-    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_4 = Pattern.compile("i.e. (20|19|18|17|16|15)[0-9][0-9]");
+    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_3 = Pattern.compile(TWO_DIGIT_PREFIXES + "[0-9][-?0-9]");
+    private final static Pattern FOUR_DIGIT_PATTERN_OTHER_4 = Pattern.compile("i.e. " + TWO_DIGIT_PREFIXES+ "[0-9][0-9]");
     private final static Pattern BC_DATE_PATTERN = Pattern.compile("[0-9]+ [Bb][.]?[Cc][.]?");
     private final static Pattern FOUR_DIGIT_PATTERN = Pattern.compile("\\d{4,4}");
     protected static Logger logger = Logger.getLogger(DataUtil.class.getName());
