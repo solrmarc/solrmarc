@@ -74,12 +74,12 @@ expect: 1983
 
 #14
 record: u55.mrc
-indexSpec: custom, getCallNumbersCleanedNewNo050(true)
+indexSpec: custom(org.solrmarc.mixin.CustomLocationMixin), getCallNumbersCleanedNewNo050(true)
 expect: PR4231.A43 1984 (13 volumes)
 
 #15
 record: u60.mrc
-indexSpec: custom, getCallNumbersCleanedNewNo050(true)
+indexSpec: custom(org.solrmarc.mixin.CustomLocationMixin), getCallNumbersCleanedNewNo050(true)
 expect: DP269.27.S67 H47 1982  V.1, V.2
 
 #16

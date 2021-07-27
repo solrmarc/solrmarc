@@ -304,8 +304,34 @@
         </jar>
         <property name="test.already.compiled" value="true" />
     </target>
+	
+    <target name="mixin-compile"  depends="jar" description="compile the source of tests" unless="mixin.already.compiled" >
+        <!-- Compile the java code from ${src} into ${build} -->
+        <mkdir dir="${test.dir}/data/index_java/bin" />
+        <javac target="${java.compat.version}" source="${java.compat.version}" srcdir="${test.dir}/data/index_java/src" destdir="${test.dir}/data/index_java/bin"
+            includeantruntime="false" debug="true" debuglevel="lines,vars,source" encoding="UTF-8" >
+            <classpath id="test.classpath">
+                <fileset dir="${dist.dir}">
+                    <include name="${custom.jar.name}_${version}.jar"/>
+                </fileset>
+                <fileset dir="${dist.lib.dir}">
+                    <include name="**/*.jar"/>
+                </fileset>
+                <fileset dir="${lib.solrj.dir}">
+                    <include name="**/*.jar"/>
+                </fileset>
+                <fileset dir="${test.dir}/lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+                <fileset dir="${test.dir}/data/lib_local">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+        <property name="mixin.already.compiled" value="true" />
+    </target>
 
-    <target name="test" depends="test-compile" unless="test.already.run" description="run junit tests" >
+    <target name="test" depends="test-compile,mixin-compile" unless="test.already.run" description="run junit tests" >
         <mkdir dir="${reports.tests}" />
         <junit printsummary="yes" haltonfailure="false">
             <classpath>
