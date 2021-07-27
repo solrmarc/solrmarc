@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="**/*.cup|**/*.lex" kind="src" path="src"/>
-	<classpathentry kind="src" output="test/build" path="test/src"/>
+	<classpathentry excluding="org/solrmarc/mixin/DlMixin.java|org/solrmarc/mixin/AbstractFullRecordMultiValueExtractor.java" kind="src" output="test/build" path="test/src"/>
 	<classpathentry kind="lib" path="lib/bsh-2.0b5.jar"/>
 	<classpathentry kind="lib" path="lib/java-cup-11b-runtime.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
@@ -13,12 +13,11 @@
 	<classpathentry kind="lib" path="lib-solrj/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="lib-solrj/jcl-over-slf4j-1.7.16.jar"/>
 	<classpathentry kind="lib" path="lib-solrj/slf4j-api-1.7.16.jar"/>
-	<classpathentry kind="lib" path="lib/fast-classpath-scanner-1.91.4.jar"/>
 	<classpathentry kind="lib" path="test/lib/hamcrest-all-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/classgraph-4.1.6.jar"/>
+	<classpathentry kind="lib" path="lib/marc4j-2.9.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="test/lib/junit-4.12.jar"/>
 	<classpathentry kind="lib" path="test/lib/mockito-all-1.9.5.jar"/>
-	<classpathentry kind="lib" path="lib/marc4j-2.8.3.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

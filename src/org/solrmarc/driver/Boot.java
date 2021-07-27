@@ -93,7 +93,6 @@ public class Boot extends URLClassLoader
 
     private static String getCommandLine()
     {
-        File f;
         String sep = ""+ File.pathSeparatorChar;
         StringBuilder sb = new StringBuilder().append("java ");
         RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();

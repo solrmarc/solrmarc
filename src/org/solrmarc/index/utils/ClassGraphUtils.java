@@ -23,7 +23,8 @@ public class ClassGraphUtils extends ClasspathUtils
 {
     public static final LoggerDelegator logger = new LoggerDelegator(ClassGraphUtils.class);
 
-    private void getMatchingClasses()
+    @SuppressWarnings("unchecked")
+	private void getMatchingClasses()
     {
         extractors = new LinkedHashSet<>();
         mappers = new LinkedHashSet<>();
@@ -114,7 +115,8 @@ public class ClassGraphUtils extends ClasspathUtils
         return mixins;
     }
 
-    private void getMatchingBootableClasses()
+    @SuppressWarnings("unchecked")
+	private void getMatchingBootableClasses()
     {
         bootables = new LinkedHashSet<>();
         try ( ScanResult scanResult = ( new ClassGraph()

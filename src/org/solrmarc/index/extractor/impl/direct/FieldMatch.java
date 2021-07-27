@@ -3,7 +3,6 @@ package org.solrmarc.index.extractor.impl.direct;
 import java.util.Collection;
 
 import org.marc4j.marc.VariableField;
-import org.solrmarc.index.specification.SingleSpecification;
 import org.solrmarc.index.specification.Specification;
 
 

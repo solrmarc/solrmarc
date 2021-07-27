@@ -10,7 +10,8 @@ import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 
 public class MultiValuePatternMapping extends AbstractMultiValueMapping
 {
-    private final String mappingName;
+    @SuppressWarnings("unused")
+	private final String mappingName;
     private final List<PatternMapping> patternMappings;
     private final boolean filter;
     private final boolean applyAll;

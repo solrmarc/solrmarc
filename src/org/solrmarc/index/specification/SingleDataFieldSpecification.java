@@ -1,7 +1,6 @@
 package org.solrmarc.index.specification;
 
 import java.util.Collection;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.marc4j.marc.DataField;

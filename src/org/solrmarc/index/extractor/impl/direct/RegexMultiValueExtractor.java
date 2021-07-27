@@ -9,12 +9,10 @@ import org.solrmarc.index.extractor.formatter.FieldFormatter.eJoinVal;
 import org.solrmarc.index.indexer.IndexerSpecException;
 import org.solrmarc.index.mapping.AbstractMultiValueMapping;
 import org.solrmarc.index.specification.RegexSpecification;
-import org.solrmarc.index.specification.Specification;
 import org.solrmarc.index.specification.conditional.Condition;
 
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.regex.Pattern;
 
 public class RegexMultiValueExtractor extends AbstractMultiValueExtractor implements ExternalMethod, ModifyableMultiValueExtractor
 {
@@ -40,21 +38,6 @@ public class RegexMultiValueExtractor extends AbstractMultiValueExtractor implem
         fieldRegex = toClone.fieldRegex;
     }
 
-//    public Specification getFieldsAndSubfieldSpec()
-//    {
-//        return fieldsAndSubfieldSpec;
-//    }
-//
-//    public void setFieldsAndSubfieldSpec(Specification fieldsAndSubfieldSpec)
-//    {
-//        this.fieldsAndSubfieldSpec = fieldsAndSubfieldSpec;
-//    }
-//
-//    public void addMap(AbstractMultiValueMapping valueMapping)
-//    {
-//        fieldsAndSubfieldSpec.addMap(valueMapping);
-//    }
-//
     public final Collection<FieldMatch> getFieldMatches(final Record record)
     {
         Collection<FieldMatch> result = fieldRegex.getFieldMatches(record);
@@ -94,36 +77,6 @@ public class RegexMultiValueExtractor extends AbstractMultiValueExtractor implem
         fieldRegex.setSeparator(separator);
     }
 
-//    public void setSubstring(String startStr, String endStr)
-//    {
-//        int start, end;
-//        try {
-//            start = Integer.parseInt(startStr);
-//        }
-//        catch (NumberFormatException nfe)
-//        {
-//            throw new IndexerSpecException("Illegal substring specification: " + startStr);
-//        }
-//        if (endStr.equals("toEnd"))
-//        {
-//            fieldsAndSubfieldSpec.setSubstring(start, -1);
-//        }
-//        else 
-//        {
-//            try {
-//                end = Integer.parseInt(endStr);
-//            }
-//            catch (NumberFormatException nfe)
-//            {
-//                throw new IndexerSpecException("Illegal substring specification: " + endStr);
-//            }
-//            if (start < 0 || end < 0 || start > end)
-//            {
-//                throw new IndexerSpecException("Illegal substring interval: " + start + " " + end);
-//            }
-//            fieldsAndSubfieldSpec.setSubstring(start, end);
-//        }
-//    }
 
     @Override
     public void setFormatPatterns(String[] mapParts)
@@ -178,7 +131,5 @@ public class RegexMultiValueExtractor extends AbstractMultiValueExtractor implem
     @Override
     public void addMap(AbstractMultiValueMapping valueMapping)
     {
-        // TODO Auto-generated method stub
-        
     }
 }
