@@ -147,7 +147,7 @@ public class PropertyUtils
             }
             else
             {
-                props.load(in);
+                props.load(new InputStreamReader(in,"UTF-8"));
             }
             in.close();
         }
@@ -193,7 +193,7 @@ public class PropertyUtils
             }
             else
             {
-                props.load(in);
+                props.load(new InputStreamReader(in,"UTF-8"));
             }
             in.close();
             if (filenameProperty != null && inputStreamSource[0] != null)
