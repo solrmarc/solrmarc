@@ -8,13 +8,11 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.google.gson.Gson;
-
-
-public class JSONLDOutProxy extends SolrProxy
+public class NDJSONOutProxy extends SolrProxy
 {
     PrintStream output;
 
-    public JSONLDOutProxy(PrintStream out)
+    public NDJSONOutProxy(PrintStream out)
     {
         this.output = out;
     }
