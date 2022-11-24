@@ -456,7 +456,7 @@ public class ValueIndexerFactory
         // files
         if (valueIndexer != null)
         {
-            boolean testFileMethod = Boolean.parseBoolean(System.getProperty("org.solrmarc.indexer.test.fire.method", "false"));
+            boolean testFileMethod = Boolean.parseBoolean(System.getProperty("solrmarc.indexer.test.fire.method", "false"));
             if (testFileMethod)
             {
                 try

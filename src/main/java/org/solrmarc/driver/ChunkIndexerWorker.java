@@ -52,7 +52,7 @@ public class ChunkIndexerWorker implements Runnable
         this.docs = buildDocList(recordAndDocs);
         this.errQ = errQ;
         this.indexer = indexer;
-        this.trackProgress = Boolean.parseBoolean(System.getProperty("org.solrmarc.track.solr.progress", "false"));
+        this.trackProgress = Boolean.parseBoolean(System.getProperty("solrmarc.track.solr.progress", "false"));
     }
 
     private Collection<SolrInputDocument> buildDocList(final Collection<RecordAndDoc> recordAndDocs)

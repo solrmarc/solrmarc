@@ -135,7 +135,7 @@ public class BootableMain
         }
         logger.debug("setting property " );
 
-        System.setProperty("org.solrmarc.home.dir", homeDirStrs[0]);
+        System.setProperty("solrmarc.home.dir", homeDirStrs[0]);
         logger.debug("reinit" );
 
         LoggerDelegator.reInit(this.homeDirStrs);

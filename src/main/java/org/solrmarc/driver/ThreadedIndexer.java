@@ -54,7 +54,7 @@ public class ThreadedIndexer extends Indexer
         cnts = new AtomicInteger[]{ new AtomicInteger(0), new AtomicInteger(0), new AtomicInteger(0)};
         int num = 1;
         try {
-            num = Integer.parseInt(System.getProperty("org.solrmarc.indexer.threadcount", "1"));
+            num = Integer.parseInt(System.getProperty("solrmarc.indexer.threadcount", "1"));
         }
         catch (NumberFormatException nfe)
         {
@@ -66,7 +66,7 @@ public class ThreadedIndexer extends Indexer
         }
         num = 4;
         try {
-            num = Integer.parseInt(System.getProperty("org.solrmarc.solrj.threadcount", "4"));
+            num = Integer.parseInt(System.getProperty("solrmarc.solrj.threadcount", "4"));
         }
         catch (NumberFormatException nfe)
         {

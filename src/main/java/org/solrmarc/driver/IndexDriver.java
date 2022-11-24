@@ -261,8 +261,8 @@ public class IndexDriver extends BootableMain
         indexers = indexerFactory.createValueIndexers(specFiles);
         boolean includeErrors = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "marc.include_errors", "false"));
         boolean returnErrors = Boolean.parseBoolean(PropertyUtils.getProperty(readerProps, "marc.return_errors", "false"));
-        int chunkSize = Integer.parseInt(System.getProperty("org.solrmarc.indexer.chunksize", "640"));
-        int bufferSize = Integer.parseInt(System.getProperty("org.solrmarc.indexer.buffersize", "640"));
+        int chunkSize = Integer.parseInt(System.getProperty("solrmarc.indexer.chunksize", "640"));
+        int bufferSize = Integer.parseInt(System.getProperty("solrmarc.indexer.buffersize", "640"));
         indexer = null;
         if (multiThreaded) indexer = new ThreadedIndexer(indexers, solrProxy, bufferSize, chunkSize);
         else               indexer = new Indexer(indexers, solrProxy);

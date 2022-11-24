@@ -118,7 +118,7 @@ public class RecordFixer extends BootableMain
         PrintStream marcOut = null;
         try
         {
-            String sysoutRedir = System.getProperty("org.solrmarc.output.redirect", null);
+            String sysoutRedir = System.getProperty("solrmarc.output.redirect", null);
             if (sysoutRedir != null)
             {
                 marcOut = new PrintStream(new BufferedOutputStream(new FileOutputStream(sysoutRedir)), true);
@@ -196,7 +196,7 @@ public class RecordFixer extends BootableMain
             catch (MarcException me)
             {
                 logger.error("Unrecoverable Error in MARC record data", me);
-                if (Boolean.parseBoolean(System.getProperty("org.solrmarc.terminate.on.marc.exception", "true")))
+                if (Boolean.parseBoolean(System.getProperty("solrmarc.terminate.on.marc.exception", "true")))
                     break;
                 else 
                 {

@@ -68,11 +68,11 @@ public class Indexer
         errQ = new LinkedBlockingQueue<RecordAndDoc>();
         delQ = new LinkedBlockingQueue<String>();
         try {
-            trackOverallProgress = Integer.parseInt(System.getProperty("org.solrmarc.track.progress", "-1"));
+            trackOverallProgress = Integer.parseInt(System.getProperty("solrmarc.track.progress", "-1"));
         }
         catch (NumberFormatException nfe)
         {
-            trackOverallProgress = (Boolean.parseBoolean(System.getProperty("org.solrmarc.track.progress", "false"))) ? 10000 : -1;
+            trackOverallProgress = (Boolean.parseBoolean(System.getProperty("solrmarc.track.progress", "false"))) ? 10000 : -1;
         }
 }
 
@@ -209,7 +209,7 @@ public class Indexer
             catch (MarcException me)
             {
                 logger.error("Unrecoverable Error in MARC record data", me);
-                if (Boolean.parseBoolean(System.getProperty("org.solrmarc.terminate.on.marc.exception", "true")))
+                if (Boolean.parseBoolean(System.getProperty("solrmarc.terminate.on.marc.exception", "true")))
                 {
                     return(null);
                 }
@@ -538,7 +538,7 @@ public class Indexer
 
     void endProcessing()
     {
-        boolean  commitAtEnd = Boolean.parseBoolean(System.getProperty("org.solrmarc.commit.at.end", "true"));
+        boolean  commitAtEnd = Boolean.parseBoolean(System.getProperty("solrmarc.commit.at.end", "true"));
         if (delQ.size() > 0)
         {
             logger.info("Deleting "+delQ.size()+ " records ");

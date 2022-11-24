@@ -103,7 +103,7 @@ public class JSONCustomLocationMixin extends SolrIndexerMixin
     {
         if (!isInited())
         {
-            JSONLookupURL = System.getProperty("org.solrmarc.sirsi.location.url");
+            JSONLookupURL = System.getProperty("solrmarc.sirsi.location.url");
             initMapsFromJSON(JSONLookupURL);
             currentMillisInited = System.currentTimeMillis();
         }
@@ -1770,7 +1770,7 @@ public class JSONCustomLocationMixin extends SolrIndexerMixin
     {
         if (JSONLookupURL == null)
         {
-            JSONLookupURL = System.getProperty("org.solrmarc.sirsi.location.url");
+            JSONLookupURL = System.getProperty("solrmarc.sirsi.location.url");
         }
         if (JSONLookupURL == null)
         {
