@@ -8,6 +8,7 @@ import java.util.Collections;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
+import org.solrmarc.driver.RecordAndDoc;
 
 public class StdOutProxy extends SolrProxy
 {
@@ -18,10 +19,11 @@ public class StdOutProxy extends SolrProxy
         this.output = out;
     }
 
-    public int addDoc(SolrInputDocument inputDoc)
+    public int addDoc(RecordAndDoc recdoc)
     {
         synchronized (output)
         {
+            SolrInputDocument inputDoc = recdoc.getDoc();
             ArrayList<String> fNames = new ArrayList<String>();
             fNames.addAll(inputDoc.getFieldNames());
             Collections.sort(fNames);
@@ -42,12 +44,12 @@ public class StdOutProxy extends SolrProxy
     }
 
     @Override
-    public int addDocs(Collection<SolrInputDocument> docQ)
+    public int addDocs(Collection<RecordAndDoc> recdocQ)
     {
         int num = 0;
-        for (SolrInputDocument doc : docQ)
+        for (RecordAndDoc recdoc : recdocQ)
         {
-            num += this.addDoc(doc);
+            num += this.addDoc(recdoc);
         }
         return(num);
     }

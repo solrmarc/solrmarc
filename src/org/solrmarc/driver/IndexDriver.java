@@ -276,7 +276,7 @@ public class IndexDriver extends BootableMain
         }
     }
 
-    protected void configureOutput(OptionSet options)
+	protected void configureOutput(OptionSet options)
     {
         String solrJClassName = solrjClass.value(options);
         String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : options.has("null") ? "devnull" : "stdout";

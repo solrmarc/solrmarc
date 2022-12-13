@@ -10,6 +10,7 @@ import org.marc4j.marc.impl.RecordImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.solrmarc.driver.Indexer;
+import org.solrmarc.driver.RecordAndDoc;
 import org.solrmarc.index.collector.MultiValueCollector;
 import org.solrmarc.index.extractor.impl.constant.ConstantMultiValueExtractor;
 import org.solrmarc.index.extractor.impl.patternMapping.PatternMapping;
@@ -70,9 +71,9 @@ public class IndexerTests
 
         indexer.indexToSolr(new TestReader(Collections.singletonList(testRecord)));
 
-        List<SolrInputDocument> documents = extractDocuments(proxy);
+        List<RecordAndDoc> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
-        SolrInputDocument document = documents.get(0);
+        SolrInputDocument document = documents.get(0).getDoc();
         assertEquals("Foo Bar", document.getField("testField").getValue().toString());
     }
 
@@ -85,9 +86,9 @@ public class IndexerTests
 
         indexer.indexToSolr(new TestReader(Collections.singletonList(testRecord)));
 
-        List<SolrInputDocument> documents = extractDocuments(proxy);
+        List<RecordAndDoc> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
-        SolrInputDocument document = documents.get(0);
+        SolrInputDocument document = documents.get(0).getDoc();
         assertEquals("BAR FOO", document.getField("testField").getValue().toString());
     }
 
@@ -100,9 +101,9 @@ public class IndexerTests
 
         indexer.indexToSolr(new TestReader(Collections.singletonList(testRecord)));
 
-        List<SolrInputDocument> documents = extractDocuments(proxy);
+        List<RecordAndDoc> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
-        SolrInputDocument document = documents.get(0);
+        SolrInputDocument document = documents.get(0).getDoc();
         assertEquals("Xoo Xar", document.getField("testField").getValue().toString());
     }
 
@@ -115,9 +116,9 @@ public class IndexerTests
 
         indexer.indexToSolr(new TestReader(Collections.singletonList(testRecord)));
 
-        List<SolrInputDocument> documents = extractDocuments(proxy);
+        List<RecordAndDoc> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
-        SolrInputDocument document = documents.get(0);
+        SolrInputDocument document = documents.get(0).getDoc();
         assertEquals("Foo FOO", document.getField("testField").getValue().toString());
     }
 
@@ -128,14 +129,14 @@ public class IndexerTests
         final Indexer indexer = new Indexer(new ArrayList<AbstractValueIndexer<?>>(), proxy);
         indexer.indexToSolr(new TestReader(Collections.singletonList(testRecord)));
 
-        List<SolrInputDocument> documents = extractDocuments(proxy);
+        List<RecordAndDoc> documents = extractDocuments(proxy);
         assertEquals(1, documents.size());
-        assertTrue(documents.get(0).isEmpty());
+        assertTrue(documents.get(0).getDoc().isEmpty());
     }
 
-    private List<SolrInputDocument> extractDocuments(final SolrProxy proxy) throws IOException
+    private List<RecordAndDoc> extractDocuments(final SolrProxy proxy) throws IOException
     {
-        final ArgumentCaptor<SolrInputDocument> mapArgumentCaptor = ArgumentCaptor.forClass(SolrInputDocument.class);
+        final ArgumentCaptor<RecordAndDoc> mapArgumentCaptor = ArgumentCaptor.forClass(RecordAndDoc.class);
         verify(proxy).addDoc(mapArgumentCaptor.capture());
         return mapArgumentCaptor.getAllValues();
     }

@@ -1,7 +1,9 @@
 package org.solrmarc.solr;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -11,6 +13,7 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
+import org.solrmarc.driver.RecordAndDoc;
 
 public class SolrServerProxy extends SolrProxy
 {
@@ -26,11 +29,12 @@ public class SolrServerProxy extends SolrProxy
         this.solrserver = (SolrServer)httpsolrserver;
     }
 
-    public int addDoc(SolrInputDocument inputDoc)
+    public int addDoc(RecordAndDoc recdoc)
     {
         int num = 0;
         try
         {
+            SolrInputDocument inputDoc = recdoc.getDoc();
             UpdateResponse resp = solrserver.add(inputDoc);
             @SuppressWarnings("unused")
             int status = resp.getStatus();
@@ -51,11 +55,16 @@ public class SolrServerProxy extends SolrProxy
     }
 
     @Override
-    public int addDocs(Collection<SolrInputDocument> docQ)
+    public int addDocs(Collection<RecordAndDoc> recdocQ)
     {
         int num = 0;
         try
         {
+        	List<SolrInputDocument> docQ = new ArrayList<SolrInputDocument>(recdocQ.size());
+        	for (RecordAndDoc recdoc : recdocQ)
+        	{
+        		docQ.add(recdoc.getDoc());
+        	}
             UpdateResponse resp = solrserver.add(docQ);
             NamedList<Object> respresp = resp.getResponse();
             @SuppressWarnings("unused")

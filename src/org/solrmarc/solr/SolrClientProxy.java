@@ -2,7 +2,9 @@ package org.solrmarc.solr;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -11,6 +13,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.solrmarc.driver.RecordAndDoc;
 
 public class SolrClientProxy extends SolrProxy
 {
@@ -61,12 +64,13 @@ public class SolrClientProxy extends SolrProxy
         return result;
     }
 
-    public int addDoc(SolrInputDocument inputDoc)
+    public int addDoc(RecordAndDoc recDoc)
     {
         int num = 0;
         try
         {
-            UpdateResponse resp = (UpdateResponse) addDoc.invoke(solrclient, inputDoc);
+            SolrInputDocument inputDoc = recDoc.getDoc();
+        	UpdateResponse resp = (UpdateResponse) addDoc.invoke(solrclient, inputDoc);
             @SuppressWarnings("unused")
             int status = resp.getStatus();
             return(++num);
@@ -90,12 +94,17 @@ public class SolrClientProxy extends SolrProxy
     }
 
     @Override
-    public int addDocs(Collection<SolrInputDocument> docQ)
+    public int addDocs(Collection<RecordAndDoc> recdocQ)
     {
         int num = 0;
         try
         {
-            UpdateResponse resp = (UpdateResponse) addDocs.invoke(solrclient, docQ);
+        	List<SolrInputDocument> docQ = new ArrayList<SolrInputDocument>(recdocQ.size());
+        	for (RecordAndDoc recdoc : recdocQ)
+        	{
+        		docQ.add(recdoc.getDoc());
+        	}
+        	UpdateResponse resp = (UpdateResponse) addDocs.invoke(solrclient, docQ);
             NamedList<Object> respresp = resp.getResponse();
             @SuppressWarnings("unused")
             int size = respresp.size();

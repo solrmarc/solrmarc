@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
+import org.solrmarc.driver.RecordAndDoc;
 
 public class DevNullProxy extends SolrProxy
 {
@@ -13,18 +14,18 @@ public class DevNullProxy extends SolrProxy
     }
 
     @Override
-    public int addDoc(SolrInputDocument inputDoc)
+    public int addDoc(RecordAndDoc inputDoc)
     {
         return(1);
     }
 
     @Override
-    public int addDocs(Collection<SolrInputDocument> docQ)
+    public int addDocs(Collection<RecordAndDoc> docQ)
     {
         int num = 0;
-        for (SolrInputDocument doc : docQ)
+        for (RecordAndDoc recdoc : docQ)
         {
-            num += this.addDoc(doc);
+            num += this.addDoc(recdoc);
         }
         return(num);
     }

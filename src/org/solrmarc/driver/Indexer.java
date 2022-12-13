@@ -157,7 +157,7 @@ public class Indexer
         try {
             if (recDoc.getDoc() != null)
             {
-                solrProxy.addDoc(recDoc.getDoc());
+                solrProxy.addDoc(recDoc);
                 incrementCnt(2);
                 if (recDoc.getErrLvl() != eErrorSeverity.NONE && isSet(eErrorHandleVal.RETURN_ERROR_RECORDS))
                 {
