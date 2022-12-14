@@ -199,7 +199,7 @@ public class Indexer
         return(cnts);
     }
 
-    RecordAndCnt getRecord(MarcReader reader)
+    public RecordAndCnt getRecord(MarcReader reader)
     {
         Record record = null;
         while (record == null)
@@ -226,7 +226,7 @@ public class Indexer
         return (new RecordAndCnt(record, cnt));
     }
 
-    RecordAndDoc getIndexDoc(Record record, int count)
+    public RecordAndDoc getIndexDoc(Record record, int count)
     {
         RecordAndDoc recDoc = null;
         recDoc = indexToSolrDoc(record);
