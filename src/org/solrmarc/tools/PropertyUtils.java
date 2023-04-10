@@ -2,12 +2,14 @@ package org.solrmarc.tools;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -181,7 +183,6 @@ public class PropertyUtils
     {
         String inputStreamSource[] = new String[] { null };
         InputStream in = getPropertyFileInputStream(propertyPaths, propertyFileName, showName, inputStreamSource);
-        String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName;
 
         // load the properties
         Properties props = new Properties();
@@ -207,8 +208,19 @@ public class PropertyUtils
                 inputSourceReturn[0] = inputStreamSource[0];
             }
         }
-        catch (IOException e)
+        catch (InvalidPropertiesFormatException ipfe)
         {
+            String errmsg = "Fatal error: Illegal format in specified properties file: " + propertyFileName + " : " + ipfe.getMessage();
+            throw new IllegalArgumentException(errmsg);
+        }
+        catch (FileNotFoundException fnfe)
+        {
+            String errmsg = "Fatal error: Unable to find specified properties file: " + propertyFileName + " : " + fnfe.getMessage();
+            throw new IllegalArgumentException(errmsg);
+        }
+        catch (IOException ioe)
+        {
+            String errmsg = "Fatal error: Error reading from specified properties file: " + propertyFileName + " : " + ioe.getMessage();
             throw new IllegalArgumentException(errmsg);
         }
         return props;
