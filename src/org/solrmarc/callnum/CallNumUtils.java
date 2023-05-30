@@ -26,6 +26,7 @@ import java.util.regex.*;
  * @author Naomi Dushay, Stanford University
  */
 
+@Deprecated
 public final class CallNumUtils {
 
 

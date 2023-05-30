@@ -18,7 +18,7 @@ public class CallNumberMixin implements Mixin
     {
         LCCallNumber callNum = new LCCallNumber(LCNum);
         String shelfKey = callNum.getShelfKey();
-        return(CallNumUtils.reverseAlphanum(shelfKey));
+        return(Utils.reverseAlphanum(shelfKey));
     }
     
     public static String LCCallNumberPaddedShelfKey(String LCNum)
@@ -31,7 +31,7 @@ public class CallNumberMixin implements Mixin
     {
         LCCallNumber callNum = new LCCallNumber(LCNum);
         String shelfKey = callNum.getPaddedShelfKey();
-        return(CallNumUtils.reverseAlphanum(shelfKey));
+        return(Utils.reverseAlphanum(shelfKey));
     }
     
     public static String DeweyCallNumberShelfKey(String DeweyNum)
