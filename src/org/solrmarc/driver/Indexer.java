@@ -221,6 +221,19 @@ public class Indexer
                     record = null;
                 }
             }
+            catch (Exception e)
+            {
+                logger.error("Unknown Error in MARC record data", e);
+                if (Boolean.parseBoolean(System.getProperty("solrmarc.terminate.on.marc.exception", "true")))
+                {
+                    return(null);
+                }
+                else
+                {
+                    logger.warn("Trying to continue after MARC record data error");
+                    record = null;
+                }
+            }
         }
         int cnt = incrementCnt(0);
         return (new RecordAndCnt(record, cnt));
