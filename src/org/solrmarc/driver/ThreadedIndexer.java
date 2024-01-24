@@ -82,6 +82,11 @@ public class ThreadedIndexer extends Indexer
         this.chunksize = chunkSize;
     }
 
+    public BlockingQueue<RecordAndCnt> getReadQ()
+    {
+        return readQ;
+    }
+
     private ThreadedIndexer(ThreadedIndexer toClone)
     {
         super(toClone);

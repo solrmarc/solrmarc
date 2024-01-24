@@ -75,9 +75,9 @@ public class MarcReaderThread extends Thread
 
     public boolean isPaused()
     {
-        if (reader != null && reader.getClass().getName().contains("SQS"))
+        if (reader != null && reader instanceof PausableReader)
         {
-            return (readQ.size() == 0);
+            return ((PausableReader)reader).isPaused();
         }
         return(false);
     }
