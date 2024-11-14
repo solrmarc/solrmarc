@@ -362,6 +362,7 @@
             </classpath>
             <sysproperty key="test.data.dir" path="${test.dir}/data" />
             <sysproperty key="log4j.debug" value="false" />
+            <jvmarg value="--add-opens=java.base/java.lang=ALL-UNNAMED"/>
 
             <formatter type="plain"/>
 
