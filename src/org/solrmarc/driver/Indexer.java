@@ -246,22 +246,24 @@ public class Indexer
         if (recDoc.getSolrMarcIndexerException() != null)
         {
             SolrMarcIndexerException smie = recDoc.getSolrMarcIndexerException();
-            String recCtrlNum = recDoc.rec.getControlNumber();
+            // Attempt to use a custom defined id value if available, then fall back to MARC control number
+            Object docIdObj = recDoc.doc.getFieldValue("id");
+            String docIdStr = (docIdObj != null) ? (String) docIdObj : recDoc.rec.getControlNumber();
             String idMessage = smie.getMessage() != null ? smie.getMessage() : "";
             if (smie.getLevel() == SolrMarcIndexerException.IGNORE)
             {
-                logger.info("Record will be Ignored " + (recCtrlNum != null ? recCtrlNum : "") + " " + idMessage + " (record count " + count + ")");
+                logger.info("Record will be Ignored " + (docIdStr != null ? docIdStr : "") + " " + idMessage + " (record count " + count + ")");
                 return(null);
             }
             else if (smie.getLevel() == SolrMarcIndexerException.DELETE)
             {
-                logger.info("Record will be Deleted " + (recCtrlNum != null ? recCtrlNum : "") + " " + idMessage + " (record count " + count + ")");
-                delQ.add(recCtrlNum);
+                logger.info("Record will be Deleted " + (docIdStr != null ? docIdStr : "") + " " + idMessage + " (record count " + count + ")");
+                delQ.add(docIdStr);
                 return(null);
             }
             else if (smie.getLevel() == SolrMarcIndexerException.EXIT)
             {
-                logger.info("Serious Error flagged in record " + (recCtrlNum != null ? recCtrlNum : "") + " " + idMessage + " (record count " + count + ")");
+                logger.info("Serious Error flagged in record " + (docIdStr != null ? docIdStr : "") + " " + idMessage + " (record count " + count + ")");
                 logger.info("Terminating indexing.");
                 throw new SolrMarcIndexerException(SolrMarcIndexerException.EXIT);
             }
