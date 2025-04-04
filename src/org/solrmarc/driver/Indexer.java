@@ -594,10 +594,10 @@ public class Indexer
         try
         {
             if ( commitAtEnd) {
-                logger.info("Commmitting updates to Solr");
+                logger.info("Committing updates to Solr");
                 solrProxy.commit(false);
             } else {   // mlevy
-                logger.info("Not commmitting updates to Solr");
+                logger.info("Not committing updates to Solr");
             }
         }
         catch (SolrRuntimeException e)
