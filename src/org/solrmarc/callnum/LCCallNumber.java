@@ -143,7 +143,7 @@ public class LCCallNumber extends AbstractCallNumber {
      * (such as the "required" period, which is sometimes missing, or spaces).
      * A Cutter is a single letter followed by digits.
      * 
-     * Must match uppper and lower case, catalog patrons expect to type in either case.
+     * Must match upper and lower case, catalog patrons expect to type in either case.
      */
     public static final String CUTTER_REGEX = "[A-Za-z]\\d+";
 
