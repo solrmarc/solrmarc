@@ -279,7 +279,7 @@ Use "git blame --follow" nameOfFile.java
 	  instrument step.
 	* When instrumenting, you can now specify a zip, jar, war,
 	  ear or sar file and Cobertura will instrument any classes
-	  inside of the archive.  You must explicity give the name
+	  inside of the archive.  You must explicitly give the name
 	  of the archive when instrumenting--giving the name of the
 	  directory containing the archive will not work (Thanks to
 	  Grzegorz Lukasik).
@@ -323,7 +323,7 @@ Use "git blame --follow" nameOfFile.java
 	  name plus class name).
 	* Changed the format of the XML reports to something that
 	  is hopefully easier to use and more natural.  This
-	  unfortunately breaks backward compatability.
+	  unfortunately breaks backward compatibility.
 	* We're using a DTD for the XML reports now.  See
 	  http://cobertura.sourceforge.net/xml/coverage-01.dtd
 	* Added the ability to specify the location of the coverage
@@ -340,7 +340,7 @@ Use "git blame --follow" nameOfFile.java
 	  generation.  Previously, the highlighting for single quotes
 	  containing "\\" would not end correctly.
 	* Check the third party jars into CVS using the correct CVS
-	  substition flag (binary, not ASCII).
+	  substitution flag (binary, not ASCII).
 	* Temporary files created by the instrument ant task and merge
 	  ant task are now deleted after the ant task finishes.
 	* Switch the instrumentation classes to use ASM instead of
@@ -348,7 +348,7 @@ Use "git blame --follow" nameOfFile.java
 	  1. BCEL was throwing exceptions with some source code compiled
 	     with JDK 1.5--ASM works fine.
 	  2. ASM is licensed under the revised BSD license, which
-	     is compatable with the GPL, which allows us to remove
+	     is compatible with the GPL, which allows us to remove
 	     the questionable exception for BCEL.
 	  3. Instrumentation is about 5 times faster with ASM than BCEL.
 	* Modify the HTML reports so that classes without line number
@@ -357,7 +357,7 @@ Use "git blame --follow" nameOfFile.java
 	  compiled with debug=true.
 	* Fix bug #1151777 with a patch from Jeremy Thomerson.
 	  Previously we were not escaping some characters correctly in the
-	  generated XML coverage report (specificially < and >).
+	  generated XML coverage report (specifically < and >).
 	* Set the class-path in the cobertura.jar manifest file correctly.
 	* Fill feature request #1151779 with a patch from Jeremy Thomerson.
 	  This changes the structure of the XML report so that <classes> are

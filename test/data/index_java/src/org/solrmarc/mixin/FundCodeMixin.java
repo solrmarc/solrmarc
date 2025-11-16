@@ -122,7 +122,7 @@ public class FundCodeMixin extends SolrIndexerMixin
                 while ((line = reader.readLine()) != null)
                 {
                     String fields[] = line.split("\\|");
-                    // discard bad data, ie.  somthing that was received at some date in the future
+                    // discard bad data, ie.  something that was received at some date in the future
                     DateFormat format = new SimpleDateFormat("yyyyMMdd");
                     Date dateReceived = format.parse(fields[0], new ParsePosition(0));
                     if (dateReceived.after(today)) continue;
