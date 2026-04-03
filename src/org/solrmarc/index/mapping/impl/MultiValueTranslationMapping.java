@@ -14,14 +14,28 @@ public class MultiValueTranslationMapping extends AbstractMultiValueMapping
     private final static Pattern SEPARATOR_PATTERN = Pattern.compile("[|]");
     private final String mapName;
     private final Properties translationMapping;
-    private final String defaultValue;
+    private String defaultValue;
     private boolean displayRaw = false;
     private boolean exceptionIfMissing = false;
+    private String appliesForSubfields = null;
 
+    public MultiValueTranslationMapping(String mapName, Properties translationMapping, String appliesForSubfields)
+    {
+        this.mapName = mapName;
+        this.translationMapping = translationMapping;
+        this.appliesForSubfields = appliesForSubfields;
+        init(mapName, translationMapping);
+    }
+    
     public MultiValueTranslationMapping(String mapName, Properties translationMapping)
     {
         this.mapName = mapName;
         this.translationMapping = translationMapping;
+        init(mapName, translationMapping);
+    }
+    
+    public void init(String mapName, Properties translationMapping)
+    {
 
         String property = null;
         for (final String defaultKey : DEFAULT_KEYS)
@@ -76,6 +90,8 @@ public class MultiValueTranslationMapping extends AbstractMultiValueMapping
     @Override
     public boolean ifApplies(char subfieldCode)
     {
-        return true;
+        if (appliesForSubfields == null || appliesForSubfields.indexOf(subfieldCode) != -1)
+            return true;
+        return false;
     }
 }

@@ -133,10 +133,22 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
     {
         String translationMappingFileName = getTranslationMappingFileName(mappingConfiguration);
         final String subMappingName = getSubMappingName(mappingConfiguration);
-        Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
+        Properties translationMapping;
+        if (subMappingName != null && subMappingName.startsWith("$"))
+        {
+            translationMapping = loadTranslationMappingFile(translationMappingFileName, null);
+        }
+        else
+        {
+            translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
+        }
         if (translationMapping.containsKey("pattern_0"))
         {
             return PatternMappingFactory.patternMappingsFromPatternProperties(mappingConfiguration, translationMapping);
+        }
+        else if (subMappingName != null && subMappingName.startsWith("$"))
+        {
+            return new MultiValueTranslationMapping(mappingConfiguration, translationMapping, subMappingName);
         }
         else
         {
@@ -149,11 +161,23 @@ public class TranslationMappingFactory extends AbstractValueMappingFactory
     {
         String translationMappingFileName = getTranslationMappingFileName(mapParts[0]);
         final String subMappingName = mapParts.length > 1 ? mapParts[1] : null;
-        Properties translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
+        Properties translationMapping;
+        if (subMappingName != null && subMappingName.startsWith("$"))
+        {
+            translationMapping = loadTranslationMappingFile(translationMappingFileName, null);
+        }
+        else 
+        {
+            translationMapping = loadTranslationMappingFile(translationMappingFileName, subMappingName);
+        }
         String mappingConfiguration = getMappingConfigurationName(mapParts);
         if (translationMapping.containsKey("pattern_0"))
         {
             return PatternMappingFactory.patternMappingsFromPatternProperties(mappingConfiguration, translationMapping);
+        }
+        else if (subMappingName != null && subMappingName.startsWith("$"))
+        {
+            return new MultiValueTranslationMapping(mappingConfiguration, translationMapping, subMappingName);
         }
         else
         {

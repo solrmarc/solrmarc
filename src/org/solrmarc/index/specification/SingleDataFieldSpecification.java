@@ -89,7 +89,7 @@ public class SingleDataFieldSpecification extends SingleSpecification
             {
                 fmt.addSeparator(sb,cnt);
                 //fmt.addCode(sb,codeStr);
-                Collection<String> prepped = fmt.prepData(vf, (subfield.getCode() == 'a'), subfield.getData());
+                Collection<String> prepped = fmt.prepData(vf, subfield.getCode(), subfield.getData());
                 for (String val : prepped)
                 {
                     val = fmt.handleSubFieldFormat(codeStr, vf, val);
