@@ -61,7 +61,7 @@ public class SingleControlFieldSpecification extends SingleSpecification
             fmt.addVal(sb, null, val);
             fmt.addAfterSubfield(sb, result);
         }
-        fmt.addAfterField(sb, result);
+        fmt.addAfterField(sb, result, vf);
     }
 
     @Override

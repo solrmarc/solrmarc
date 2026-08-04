@@ -630,7 +630,7 @@ public class ValueIndexerFactory
         return (false);
     }
 
-    private int decorateMultiValueExtractor(String origSpec, String fieldnames, ModifyableMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs, List<IndexerSpecException> currentExceptions)
+    public int decorateMultiValueExtractor(String origSpec, String fieldnames, ModifyableMultiValueExtractor multiValueExtractor, List<List<String>> mapSpecs, List<IndexerSpecException> currentExceptions)
     {
         if (mapSpecs.size() == 0)
         {
@@ -941,7 +941,7 @@ public class ValueIndexerFactory
         throw new IndexerSpecException("Could not handle impl: " + mappingConfig + "\nLoaded impl factories:\n" + mappingFactories.toString().replaceAll(",", ",\n"));
     }
 
-    private AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
+    public AbstractMultiValueMapping createMultiValueMapping(String[] mapParts)
     {
         for (final AbstractValueMappingFactory mappingFactory : mappingFactories)
         {

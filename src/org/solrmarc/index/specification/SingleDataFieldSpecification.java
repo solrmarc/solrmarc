@@ -99,7 +99,7 @@ public class SingleDataFieldSpecification extends SingleSpecification
                 cnt++;
             }
         }
-        fmt.addAfterField(sb, result);
+        fmt.addAfterField(sb, result, vf);
     }
 
     @Override
