@@ -155,7 +155,7 @@ public class ValueIndexerFactoryTests
 
         for (final AbstractValueIndexer<?> valueIndexer : valueIndexers)
         {
-            // This will fail because the full record indexer dosn't allow NULL as record.
+            // This will fail because the full record indexer does not allow NULL as record.
             assertNotNull(valueIndexer.getFieldData(null));
         }
     }

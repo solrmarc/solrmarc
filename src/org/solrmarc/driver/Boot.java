@@ -330,7 +330,7 @@ public class Boot extends URLClassLoader
         logger.info("all of the subsequent arguments are then passed to that class's main method");
 
         logger.info("");
-        logger.info("Known classes that can be bootstrapped in tha manner are:");
+        logger.info("Known classes that can be bootstrapped in that manner are:");
         for (Class<?> mainClass : mainClasses)
         {
             try

@@ -145,7 +145,7 @@ public class SolrCoreLoader
         {
             throw new SolrRuntimeException("Error invoking solrj constructor with one String parameter", e);
         }
-        throw new SolrRuntimeException("Error Specified solrj class name, found, but it isnt a SolrServer or a SolrClient");
+        throw new SolrRuntimeException("Error Specified solrj class name, found, but it isn't a SolrServer or a SolrClient");
     }
 
 }

@@ -43,7 +43,7 @@ public class Utils {
      * </ul>
      * 
      * <p>Prepending a sequence of digits with the number of digits ensures that they will easily sort numerically:
-     * sort keys for 2-digits nubmers start with 2, sort keys for 3-digit numbers start with 3, etc. 
+     * sort keys for 2-digits numbers start with 2, sort keys for 3-digit numbers start with 3, etc.
      * Suggested by John Craig at Code4Lib in Ashville, NC.
      * 
      * <p>Implemented as a finite state machine, modeled by <code>switch</code> statements.

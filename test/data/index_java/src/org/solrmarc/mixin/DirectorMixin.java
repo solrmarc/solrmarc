@@ -132,7 +132,7 @@ public class DirectorMixin extends SolrIndexerMixin
      */
     public static Set<String> getVideoDirectorsFromTextField(String responsibility, boolean greedy)
     {
-        // First do some initital processing on the passed in string
+        // First do some initial processing on the passed in string
         boolean reverseName = false;
         Set<String> result = new LinkedHashSet<String>();
         Set<String> squeezedresult = new LinkedHashSet<String>();

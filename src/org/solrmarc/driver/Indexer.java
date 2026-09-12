@@ -615,10 +615,10 @@ public class Indexer
         logger.info("Elapsed time per indexing method:");
         for (final AbstractValueIndexer<?> indexer : indexers)
         {
-            long elaspedTime = indexer.getTotalElapsedTime();
-            long minutes = time(elaspedTime, TimeUnit.MINUTES);
-            long seconds = time(elaspedTime, TimeUnit.SECONDS);
-            long millis = time(elaspedTime, TimeUnit.MILLISECONDS);
+            long elapsedTime = indexer.getTotalElapsedTime();
+            long minutes = time(elapsedTime, TimeUnit.MINUTES);
+            long seconds = time(elapsedTime, TimeUnit.SECONDS);
+            long millis = time(elapsedTime, TimeUnit.MILLISECONDS);
             millis -= seconds * 1000;
             seconds -= minutes * 60;
             String elapsedStr = String.format("%d min, %d.%03d sec", minutes, seconds, millis);
