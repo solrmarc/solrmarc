@@ -1,8 +1,28 @@
-<project name="SolrMarc" default="jar" basedir=".">
+<project name="SolrMarc" default="jar" basedir="."
+         xmlns:if="ant:if" xmlns:unless="ant:unless">
     <description>
          A total rewrite of the SolrMarc project
     </description>
     <!-- load global properties for this build -->
+
+    <!--
+        Detect whether the JVM currently running Ant (and therefore the
+        JVM used to fork each test process, unless jvm= is set explicitly
+        on <junit>) is Java 9+ or Java 8.
+
+        ant.java.version is "1.8" on Java 8, and just the bare major
+        version number ("9", "11", "17", etc.) on Java 9+.
+
+        the add-opens flag is a JPMS (module system) flag that doesn't exist on
+        Java 8 - passing it there isn't a no-op, it's an unrecognized
+        option that prevents the JVM from starting at all. It must only
+        be added when actually running on Java 9+.
+    -->
+    <condition property="running.java9.or.newer">
+        <not>
+            <equals arg1="${ant.java.version}" arg2="1.8" />
+        </not>
+    </condition>
     <property file="build.properties" />
 
     <!-- import other ant scripts -->
@@ -362,7 +382,7 @@
             </classpath>
             <sysproperty key="test.data.dir" path="${test.dir}/data" />
             <sysproperty key="log4j.debug" value="false" />
-            <jvmarg value="--add-opens=java.base/java.lang=ALL-UNNAMED"/>
+            <jvmarg value="--add-opens=java.base/java.lang=ALL-UNNAMED" if:true="running.java9.or.newer"/>
 
             <formatter type="plain"/>
 
