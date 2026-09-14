@@ -92,7 +92,7 @@ public interface FieldFormatter extends ExternalMethod
 
     public abstract void addAfterField(StringBuilder sb, Collection<String> result);
 
-    // new — defaults to calling the old one, so existing overrides keep working untouched
+    // new - defaults to calling the old one, so existing overrides keep working untouched
     public default void addAfterField(StringBuilder sb, Collection<String> result, VariableField vf)
     {
         addAfterField(sb, result);
