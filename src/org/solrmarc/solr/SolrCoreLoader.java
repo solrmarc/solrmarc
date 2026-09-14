@@ -8,6 +8,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import org.apache.log4j.Logger;
 import org.solrmarc.driver.Boot;
@@ -17,6 +20,7 @@ public class SolrCoreLoader
     public static Logger logger = Logger.getLogger(SolrCoreLoader.class);
 
     public final static String[] defaultSolrJClassnames = {
+            "org.apache.solr.client.solrj.impl.HttpJdkSolrClient$Builder",
             "org.apache.solr.client.solrj.impl.HttpSolrClient$Builder",
             "org.apache.solr.client.solrj.impl.HttpSolrClient",
             "org.apache.solr.client.solrj.impl.HttpSolrServer",
@@ -113,6 +117,22 @@ public class SolrCoreLoader
             //  This next if block handles that special case.
             if (httpsolrserverClass.getName().endsWith("Builder"))
             {
+                //  Newer solrj clients (such as the HttpJdkSolrClient of Solr 10) create
+                //  a pool of non-daemon threads by default.  Since SolrMarc never closes
+                //  the client explicitly, those threads would keep the JVM alive long
+                //  after the import is finished.  Ask the builder to use a pool of
+                //  daemon threads instead so the process can exit normally.  Builders
+                //  of older solrj versions have no such method, so skip this if it
+                //  is not available.
+                try
+                {
+                    Method withexecutor = httpsolrserverClass.getMethod("withExecutor", ExecutorService.class);
+                    withexecutor.invoke(httpsolrserver, daemonExecutor());
+                }
+                catch (Exception e)
+                {
+                    // no usable withExecutor() method; nothing to do
+                }
                 Method buildsolrserver = httpsolrserverClass.getMethod("build");
                 httpsolrserver = buildsolrserver.invoke(httpsolrserver);
             }
@@ -124,6 +144,8 @@ public class SolrCoreLoader
             }
             if (superclass.getName().endsWith(".SolrClient")
                 || superclass.getName().endsWith(".BaseHttpSolrClient")
+                //  Solr 10 and later use HttpSolrClientBase as the parent of the client classes
+                || superclass.getName().endsWith(".HttpSolrClientBase")
             ) {
                 solrProxy = new SolrClientProxy(httpsolrserver);
                 return (solrProxy);
@@ -146,6 +168,25 @@ public class SolrCoreLoader
             throw new SolrRuntimeException("Error invoking solrj constructor with one String parameter", e);
         }
         throw new SolrRuntimeException("Error Specified solrj class name, found, but it isn't a SolrServer or a SolrClient");
+    }
+
+    /**
+     * Builds an {@link ExecutorService} whose threads are daemon threads.
+     * This is handed to solrj client builders so that the threads they start
+     * do not prevent the JVM from exiting once the import is finished.
+     */
+    private static ExecutorService daemonExecutor()
+    {
+        return Executors.newCachedThreadPool(new ThreadFactory()
+        {
+            @Override
+            public Thread newThread(Runnable r)
+            {
+                Thread thread = new Thread(r, "solrmarc-solrj");
+                thread.setDaemon(true);
+                return thread;
+            }
+        });
     }
 
 }
