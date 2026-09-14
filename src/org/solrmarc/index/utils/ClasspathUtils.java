@@ -165,12 +165,33 @@ public class ClasspathUtils
 
     private void getDefaultClassPathForCompiling()
     {
-        List<File> classpathForCompiling = new  ArrayList<>();
-        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+        // BUG FIX: this used to declare a *local* variable named
+        // classpathForCompiling, shadowing the instance field of the
+        // same name (declared above). The loop below populated that
+        // local list, which was then discarded when the method
+        // returned - this.classpathForCompiling (the field actually
+        // read by getClassPath()) was never assigned, so it stayed
+        // null. Callers combining multiple source directories (see
+        // JavaValueExtractorUtils) would then NullPointerException on
+        // classpath.add(...), and single-directory callers would
+        // silently pass null into the compiler's classpath instead of
+        // the intended explicit list.
+        this.classpathForCompiling = new ArrayList<>();
+
+        // BUG FIX: casting ClassLoader.getSystemClassLoader() directly
+        // to URLClassLoader crashes with ClassCastException on Java 9+,
+        // since the default system classloader there is an internal
+        // JDK class that does NOT extend URLClassLoader (this only
+        // worked on Java 8). Boot.getURLClassLoaderToUse() already
+        // implements the correct cross-version-safe logic elsewhere in
+        // this codebase (instanceof check, falling back to a custom
+        // Boot classloader on Java 9+) - reuse it here instead of
+        // duplicating the unsafe cast.
+        URLClassLoader sysLoader = Boot.getURLClassLoaderToUse();
         logger.debug("Classpath for compiling java files:");
         for (URL url : sysLoader.getURLs())
         {
-            classpathForCompiling.add(new File(url.getFile()));
+            this.classpathForCompiling.add(new File(url.getFile()));
             logger.debug("    " + url.getFile());
         }
     }
