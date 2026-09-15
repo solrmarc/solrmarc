@@ -90,12 +90,12 @@ public class RecordAndDoc
         }
     }
 
-    Record getRec()
+    public Record getRec()
     {
         return rec;
     }
 
-    SolrInputDocument getDoc()
+    public SolrInputDocument getDoc()
     {
         return doc;
     }

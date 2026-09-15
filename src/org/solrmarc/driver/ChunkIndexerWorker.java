@@ -35,7 +35,6 @@ public class ChunkIndexerWorker implements Runnable
 {
     private final static Logger logger = Logger.getLogger(ChunkIndexerWorker.class);
     final String threadName;
-    final Collection<SolrInputDocument> docs;
     final Collection<RecordAndDoc> recordAndDocs;
     final Indexer indexer;
     final BlockingQueue<RecordAndDoc> errQ;
@@ -48,23 +47,21 @@ public class ChunkIndexerWorker implements Runnable
     {
         this.threadName = threadName;
         this.recordAndDocs = recordAndDocs;
-        this.docs = buildDocList(recordAndDocs);
+        setFirstAndLastID(recordAndDocs);
         this.errQ = errQ;
         this.indexer = indexer;
         this.trackProgress = Boolean.parseBoolean(System.getProperty("solrmarc.track.solr.progress", "false"));
     }
 
-    private Collection<SolrInputDocument> buildDocList(final Collection<RecordAndDoc> recordAndDocs)
+    private void setFirstAndLastID(final Collection<RecordAndDoc> recordAndDocs)
     {
         Collection<SolrInputDocument> docs = new ArrayList<>(recordAndDocs.size());
         for (RecordAndDoc recDoc : recordAndDocs)
         {
             String docID = controlNumOrDefault(recDoc.getRec(), "Rec with No 001");
             if (firstDocId == null)  firstDocId = docID;
-            docs.add(recDoc.doc);
             lastDocId = docID;
         }
-        return docs;
     }
 
     private final String controlNumOrDefault(final Record rec, final String label)
@@ -78,7 +75,7 @@ public class ChunkIndexerWorker implements Runnable
     public void run()
     {
         Thread.currentThread().setName(threadName);
-        int inChunk = docs.size();
+        int inChunk = recordAndDocs.size();
 //        if (logger.isDebugEnabled())
 //        {
 //            int totalSize = 0;
@@ -90,7 +87,7 @@ public class ChunkIndexerWorker implements Runnable
         logger.debug("Adding chunk of "+inChunk+ " documents -- starting with id : "+firstDocId);
         try {
             // If all goes well, this is all we need. Add the docs, count the docs, and, if desired, return the docs that contain errors
-            int cnt = indexer.solrProxy.addDocs(docs);
+            int cnt = indexer.solrProxy.addDocs(recordAndDocs);
             indexer.addToCnt(2, cnt);
             logger.debug("Added chunk of "+cnt+ " documents -- starting with id : "+firstDocId);
             if (trackProgress || logger.isDebugEnabled())

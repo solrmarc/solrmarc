@@ -26,6 +26,7 @@ import java.util.regex.*;
  * @author Naomi Dushay, Stanford University
  */
 
+@Deprecated
 public final class CallNumUtils {
 
 
@@ -194,7 +195,7 @@ public final class CallNumUtils {
 
     /**
      * return the portion of the call number string that occurs before the
-     *  Cutter, NOT including any class suffixes occuring before the cutter
+     *  Cutter, NOT including any class suffixes occurring before the cutter
      *  
      *  @param callnum  call number
      *  @return         the portion before the cutter

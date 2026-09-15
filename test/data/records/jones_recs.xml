@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+  <marc:record xmlns:marc="http://www.loc.gov/MARC21/slim">
+    <marc:leader>03707cam a2200733 i 4500</marc:leader>
+    <marc:controlfield tag="001">in00006878693</marc:controlfield>
+    <marc:controlfield tag="003">OCoLC</marc:controlfield>
+    <marc:controlfield tag="005">20240913151450.4</marc:controlfield>
+    <marc:controlfield tag="008">240403t20242024nyu    e      000 f eng  </marc:controlfield>
+    <marc:datafield ind1="1" ind2="0" tag="245">
+      <marc:subfield code="a">I was a teenage slasher /</marc:subfield>
+      <marc:subfield code="c">Stephen Graham Jones.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield ind1="f" ind2="f" tag="999">
+      <marc:subfield code="t">1</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+  <marc:record xmlns:marc="http://www.loc.gov/MARC21/slim">
+    <marc:leader>03090cam a22005778i 4500</marc:leader>
+    <marc:controlfield tag="001">in00005570501</marc:controlfield>
+    <marc:controlfield tag="003">OCoLC</marc:controlfield>
+    <marc:controlfield tag="005">20220616144500.0</marc:controlfield>
+    <marc:controlfield tag="008">151106t20162016nyu           000 1 eng  </marc:controlfield>
+    <marc:datafield ind1="1" ind2="0" tag="245">
+      <marc:subfield code="a">Mongrels /</marc:subfield>
+      <marc:subfield code="c">Stephen Graham Jones.</marc:subfield>
+    </marc:datafield>
+    <marc:datafield ind1="f" ind2="f" tag="999">
+      <marc:subfield code="t">0</marc:subfield>
+    </marc:datafield>
+  </marc:record>
+</collection>

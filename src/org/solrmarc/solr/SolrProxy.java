@@ -6,6 +6,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
+import org.solrmarc.driver.RecordAndDoc;
 
 public abstract class SolrProxy
 {
@@ -29,9 +30,9 @@ public abstract class SolrProxy
      * @return          a string representation of the document
      */
 
-    public abstract int addDoc(SolrInputDocument document);
+    public abstract int addDoc(RecordAndDoc document);
 
-    public abstract int addDocs(Collection<SolrInputDocument> docQ);
+    public abstract int addDocs(Collection<RecordAndDoc> docQ);
 
     /**
      * delete doc from the index

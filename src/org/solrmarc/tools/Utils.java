@@ -285,7 +285,7 @@ public final class Utils
     }
 
     /**
-     * Join two fields together with seperator
+     * Join two fields together with separator
      * 
      * @param set
      *            Set of marc fields to join

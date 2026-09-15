@@ -54,14 +54,14 @@ public class SingleControlFieldSpecification extends SingleSpecification
         data = ((ControlField) vf).getData();
         StringBuilder sb = fmt.start();
         fmt.addTag(sb, vf);
-        Collection<String> prepped = fmt.prepData(vf, false, data);
+        Collection<String> prepped = fmt.prepData(vf, '0', data);
         for (String val : prepped)
         {
             val = fmt.handleSubFieldFormat(" ", vf, val);
             fmt.addVal(sb, null, val);
             fmt.addAfterSubfield(sb, result);
         }
-        fmt.addAfterField(sb, result);
+        fmt.addAfterField(sb, result, vf);
     }
 
     @Override

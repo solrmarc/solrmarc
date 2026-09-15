@@ -390,13 +390,16 @@ public class FieldFormatterBase implements FieldFormatter
     }
 
     @Override
-    public Collection<String> handleMapping(Collection<String> cleaned) throws Exception
+    public Collection<String> handleMapping(char sfCode, Collection<String> cleaned) throws Exception
     {
         if (maps == null) return (cleaned);
         Collection<String> mapped = cleaned;
         for (AbstractMultiValueMapping map : maps)
         {
-            mapped = map.map(mapped);
+            if (map.ifApplies(sfCode))
+            {
+                mapped = map.map(mapped);
+            }
         }
         return(mapped);
     }
@@ -630,12 +633,13 @@ public class FieldFormatterBase implements FieldFormatter
 //    }
 
     @Override
-    public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data) throws Exception
+    public Collection<String> prepData(VariableField vf, char sfCode, String data) throws Exception
     {
+        final boolean isSubfieldA = (sfCode == 'a');
         final String cleaned = cleanData(vf, isSubfieldA, data);
         @SuppressWarnings("unchecked")
         final List<String> cleanedDataAsList = (cleaned == null || cleaned.length() == 0) ? Collections.EMPTY_LIST : Collections.singletonList(cleaned);
-        Collection<String> result = handleMapping(cleanedDataAsList);
+        Collection<String> result = handleMapping(sfCode, cleanedDataAsList);
         return (result);
     }
 

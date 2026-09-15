@@ -82,7 +82,7 @@ public interface FieldFormatter extends ExternalMethod
 
     public abstract void addCode(StringBuilder sb, String codeStr);
 
-    public Collection<String> prepData(VariableField vf, boolean isSubfieldA, String data) throws Exception;
+    public Collection<String> prepData(VariableField vf, char sfCode, String data) throws Exception;
 
     public abstract void addVal(StringBuilder sb, String sfcode, String data);
 
@@ -92,9 +92,15 @@ public interface FieldFormatter extends ExternalMethod
 
     public abstract void addAfterField(StringBuilder sb, Collection<String> result);
 
+    // new - defaults to calling the old one, so existing overrides keep working untouched
+    public default void addAfterField(StringBuilder sb, Collection<String> result, VariableField vf)
+    {
+        addAfterField(sb, result);
+    }
+    
     public abstract String cleanData(VariableField vf, boolean isSubfieldA, String data);
 
-    public abstract Collection<String> handleMapping(Collection<String> cleaned) throws Exception;
+    public abstract Collection<String> handleMapping(char sfCode, Collection<String> cleaned) throws Exception;
 
     public abstract String handleSubFieldFormat(String sfCode, VariableField vf, String mappedDataVal);
 

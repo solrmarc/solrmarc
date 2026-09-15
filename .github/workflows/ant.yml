@@ -1,5 +1,16 @@
-# This workflow will build a Java project with Ant
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-ant
+# Builds SolrMarc's own code once, targeting Java 8 (since that's the
+# minimum runtime this jar needs to support), then verifies the compiled
+# jar actually runs correctly - including its ability to dynamically
+# compile and load user-supplied custom mixin code at runtime - under
+# every JVM version it's expected to run on.
+#
+# This deliberately does NOT recompile the main codebase per JDK in the
+# matrix below: release="8" (set in build.xml) already produces bytecode
+# that runs unmodified on 8, 11, and 17, so recompiling per-JDK would
+# just repeat identical work. What genuinely differs across JVM versions
+# is runtime behavior - classloading, and the dynamic compilation of
+# custom mixin source via ToolProvider.getSystemJavaCompiler() - which is
+# exactly what the "test" job below exercises on each JVM.
 
 name: Java CI
 
@@ -11,14 +22,58 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+
+      - name: Compile and package (Java 8)
+        run: ant -noinput -buildfile build.xml -Dversion="ci-build" clean jar package
+
+      - name: Upload compiled build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: solrmarc-build-output
+          # build/ holds the compiled main classes that the test job
+          # below needs in place (with a newer timestamp than the fresh
+          # checkout's .java sources) so Ant's own javac up-to-date
+          # check skips recompiling them. dist/ holds the packaged jar
+          # and zips, produced once here rather than per-JDK.
+          path: |
+            build/
+            dist/
+          retention-days: 1
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The JVM versions this jar must actually run correctly under,
+        # including dynamically compiling and loading custom mixin code
+        # at runtime - not a recompilation matrix.
+        java-version: [8, 11, 17]
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v2
-      with:
-            distribution: 'adopt' # See 'Supported distributions' for available options
-            java-version: '8'
-            java-package: jdk
-    - run: ant -noinput -buildfile build.xml clean jar test package
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java-version }}
+
+      - name: Restore compiled build output from the build job
+        uses: actions/download-artifact@v4
+        with:
+          name: solrmarc-build-output
+          # Downloaded after checkout, so these files land with a newer
+          # mtime than the just-checked-out sources - this is what lets
+          # Ant's javac skip recompiling already-up-to-date classes.
+
+      - name: Run tests (Java ${{ matrix.java-version }})
+        run: ant -noinput -buildfile build.xml -Dversion="ci-build" test

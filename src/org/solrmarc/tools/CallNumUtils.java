@@ -74,7 +74,7 @@ public final class CallNumUtils
 
     /**
      * return the portion of the call number string that occurs before the
-     *  Cutter, NOT including any class suffixes occuring before the cutter
+     *  Cutter, NOT including any class suffixes occurring before the cutter
      *
      * @param callnum  call number to parse
      * @return         the part of the call number before the cutter
