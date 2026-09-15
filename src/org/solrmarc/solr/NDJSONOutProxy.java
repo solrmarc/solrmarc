@@ -5,7 +5,7 @@ import java.util.*;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrInputDocument;
+import org.solrmarc.driver.RecordAndDoc;
 
 import com.google.gson.Gson;
 public class NDJSONOutProxy extends SolrProxy
@@ -17,38 +17,39 @@ public class NDJSONOutProxy extends SolrProxy
         this.output = out;
     }
 
-    public int addDoc(SolrInputDocument inputDoc)
+	@Override
+	public int addDoc(RecordAndDoc recordAndDoc)
     {
-        synchronized (output)
-        {
-            Map<String, List<String>> record = new HashMap<String, List<String>>();
-            for (String name : inputDoc.getFieldNames()) {
-                ArrayList<String> valList = new ArrayList<String>();
+		synchronized (output)
+	    {
+	        Map<String, List<String>> record = new HashMap<String, List<String>>();
+	        for (String name : recordAndDoc.getDoc().getFieldNames()) {
+	            ArrayList<String> valList = new ArrayList<String>();
+	
+	            Iterator values = recordAndDoc.getDoc().get(name).iterator();
+	
+	            while (values.hasNext()) {
+	                valList.add(values.next().toString());
+	            }
+	
+	            record.put(name, valList);
+	        }
+	
+	        Gson gson = new Gson();
+	
+	        String jsonOut = gson.toJson(record);
+	
+	        output.print(jsonOut + "\n");
+	
+	        return(1);
+	    }
+	}
 
-                Iterator values = inputDoc.get(name).iterator();
-
-                while (values.hasNext()) {
-                    valList.add(values.next().toString());
-                }
-
-                record.put(name, valList);
-            }
-
-            Gson gson = new Gson();
-
-            String jsonOut = gson.toJson(record);
-
-            output.print(jsonOut + "\n");
-
-            return(1);
-        }
-    }
-
-    @Override
-    public int addDocs(Collection<SolrInputDocument> docQ)
-    {
+	@Override
+	public int addDocs(Collection<RecordAndDoc> rdQ)
+	{
         int num = 0;
-        for (SolrInputDocument doc : docQ)
+        for (RecordAndDoc doc : rdQ)
         {
             num += this.addDoc(doc);
         }
