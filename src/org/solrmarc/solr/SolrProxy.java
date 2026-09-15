@@ -5,7 +5,6 @@ import java.util.Collection;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrInputDocument;
 import org.solrmarc.driver.RecordAndDoc;
 
 public abstract class SolrProxy

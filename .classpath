@@ -11,6 +11,7 @@
 	<classpathentry kind="lib" path="lib-solrj/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="test/lib/hamcrest-all-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/classgraph-4.1.6.jar"/>
+	<classpathentry kind="lib" path="lib/gson-2.10.jar"/>
 	<classpathentry kind="lib" path="lib/marc4j-2.9.8.jar"/>
 	<classpathentry kind="lib" path="lib/reload4j-1.2.25.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-2.0.9.jar"/>

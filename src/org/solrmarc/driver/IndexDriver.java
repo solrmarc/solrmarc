@@ -33,6 +33,7 @@ import org.solrmarc.solr.SolrProxy;
 import org.solrmarc.solr.SolrRuntimeException;
 import org.solrmarc.solr.StdOutProxy;
 import org.solrmarc.solr.XMLOutProxy;
+import org.solrmarc.solr.NDJSONOutProxy;
 import org.solrmarc.tools.PropertyUtils;
 
 
@@ -287,6 +288,19 @@ public class IndexDriver extends BootableMain
                 PrintStream out = new PrintStream(System.out, true, "UTF-8");
                 System.setOut(out);
                 solrProxy = new StdOutProxy(out);
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                // since the encoding is hard-coded, and is valid, this Exception cannot occur.
+            }
+        }
+        else if (solrURL.equals("ndjson"))
+        {
+            try
+            {
+                PrintStream out = new PrintStream(System.out, true, "UTF-8");
+                System.setOut(out);
+                solrProxy = new NDJSONOutProxy(out);
             }
             catch (UnsupportedEncodingException e)
             {
