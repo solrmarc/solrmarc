@@ -35,6 +35,9 @@ public class BootableMain
     protected OptionSpec<String> addnlLibDirs;
     protected OptionSpec<File> solrjDir;
     protected OptionSpec<String> solrjClass;
+    protected OptionSpec<String> solrUser;
+    protected OptionSpec<String> solrPassword;
+    protected OptionSpec<File> solrPasswordFile;
     protected OptionSpec<File> deleteRecordByIdFile;
     protected OptionSpec<File> errorMarcErrOutFile;
     protected OptionSpec<File> errorIndexErrOutFile;
@@ -61,13 +64,16 @@ public class BootableMain
         addnlLibDirs = parser.accepts("lib_local", "directory to look in for additional jars and libraries").withRequiredArg().defaultsTo("lib_local");
         solrjDir = parser.accepts("solrj", "directory to look in for jars required for SolrJ").withRequiredArg().ofType( File.class );
         solrjClass = parser.accepts("solrjClassName", "Classname of class to use for talking to solr").withRequiredArg();
+        solrUser = parser.accepts("solrUser", "Username for Solr basic authentication, if the Solr instance requires it").withRequiredArg();
+        solrPassword = parser.accepts("solrPassword", "Password for Solr basic authentication, if the Solr instance requires it. Not recommended on shared systems, since it is visible in shell history and process listings - prefer -solrPasswordFile instead.").withRequiredArg();
+        solrPasswordFile = parser.accepts("solrPasswordFile", "File containing the password for Solr basic authentication, as an alternative to -solrPassword that avoids exposing the password in shell history or process listings. Mutually exclusive with -solrPassword.").withRequiredArg().ofType( File.class );
         errorMarcErrOutFile = parser.accepts("marcerr", "File to write records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
         errorIndexErrOutFile = parser.accepts("indexerr", "File to write the solr documents for records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
         errorSolrErrOutFile = parser.accepts("solrerr", "File to write the solr documents for records with errors.(not yet implemented)").withRequiredArg().ofType( File.class );
         deleteRecordByIdFile = parser.accepts("del", "File to read list of document ids that are to be deleted").withRequiredArg().ofType( File.class );
         parser.accepts("debug", "non-multithreaded debug mode");
         parser.acceptsAll(Arrays.asList( "solrURL", "u"), "URL of Remote Solr to use").withRequiredArg();
-        parser.acceptsAll(Arrays.asList( "solrCommit", "c"), "Whether to commit, true or false").withRequiredArg();
+        parser.acceptsAll(Arrays.asList( "solrCommit"), "Whether to commit, true or false").withRequiredArg();
       //  parser.acceptsAll(Arrays.asList("print", "stdout"), "write output to stdout in user readable format").availableUnless("solrURL");
      //   parser.acceptsAll(Arrays.asList("null"), "discard all output, and merely show errors and warnings").availableUnless("solrURL");
         parser.acceptsAll(Arrays.asList("?", "help"), "show this usage information").forHelp();

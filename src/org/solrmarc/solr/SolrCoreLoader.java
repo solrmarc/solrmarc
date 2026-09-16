@@ -26,7 +26,17 @@ public class SolrCoreLoader
             "org.apache.solr.client.solrj.impl.HttpSolrServer",
             "org.apache.solr.client.solrj.impl.CommonsHttpSolrServer" };
 
+    /**
+     * Backward-compatible overload for any external caller still using the
+     * original 3-argument signature. Delegates to the 5-argument version
+     * with no basic auth credentials.
+     */
     public static SolrProxy loadRemoteSolrServer(String solrHostUpdateURL, String fullClassName, boolean useBinaryRequestHandler)
+    {
+        return loadRemoteSolrServer(solrHostUpdateURL, fullClassName, useBinaryRequestHandler, null, null);
+    }
+
+    public static SolrProxy loadRemoteSolrServer(String solrHostUpdateURL, String fullClassName, boolean useBinaryRequestHandler, String username, String password)
     {
         Object httpsolrserver;
         SolrProxy solrProxy = null;
@@ -133,8 +143,48 @@ public class SolrCoreLoader
                 {
                     // no usable withExecutor() method; nothing to do
                 }
+                //  If Solr basic authentication credentials were provided, wire
+                //  them into the builder. Unlike withExecutor above (a nice-to-have
+                //  that's silently skipped on older builders), a missing method
+                //  here is a real configuration problem worth surfacing loudly:
+                //  silently proceeding without auth against a Solr instance that
+                //  requires it would just fail later with a confusing 401, rather
+                //  than a clear message about what actually went wrong.
+                if (username != null && !username.isEmpty() && password != null)
+                {
+                    try
+                    {
+                        Method withBasicAuth = httpsolrserverClass.getMethod("withBasicAuthCredentials", String.class, String.class);
+                        withBasicAuth.invoke(httpsolrserver, username, password);
+                        logger.debug("Configured Solr basic authentication for user " + username);
+                    }
+                    catch (NoSuchMethodException e)
+                    {
+                        throw new SolrRuntimeException("Solr username/password were provided, but the solrj client class "
+                            + httpsolrserverClass.getName() + " does not support withBasicAuthCredentials(String, String). "
+                            + "Try specifying a newer client via -solrjClassName, e.g. "
+                            + "org.apache.solr.client.solrj.impl.Http2SolrClient$Builder", e);
+                    }
+                    catch (IllegalAccessException | InvocationTargetException e)
+                    {
+                        throw new SolrRuntimeException("Error invoking withBasicAuthCredentials on solrj client class "
+                            + httpsolrserverClass.getName(), e);
+                    }
+                }
                 Method buildsolrserver = httpsolrserverClass.getMethod("build");
                 httpsolrserver = buildsolrserver.invoke(httpsolrserver);
+            }
+            else if (username != null && !username.isEmpty() && password != null)
+            {
+                //  The resolved solrj client isn't a Builder-style class at all
+                //  (e.g. the older HttpSolrServer/CommonsHttpSolrServer path), so
+                //  there's no withBasicAuthCredentials to call. Fail loudly rather
+                //  than silently proceeding unauthenticated against a Solr
+                //  instance that requires credentials.
+                throw new SolrRuntimeException("Solr username/password were provided, but the solrj client class "
+                    + httpsolrserverClass.getName() + " predates the Builder-based API and has no way to accept "
+                    + "basic auth credentials. Try specifying a newer client via -solrjClassName, e.g. "
+                    + "org.apache.solr.client.solrj.impl.Http2SolrClient$Builder");
             }
             Class<?> superclass = httpsolrserver.getClass().getSuperclass();
             if (superclass.getName().endsWith(".SolrServer"))
