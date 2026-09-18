@@ -29,7 +29,7 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.Subfield;
 import org.marc4j.marc.VariableField;
 import org.solrmarc.callnum.CallNumUtils;
-import org.solrmarc.callnum.LCCallNumber;
+import org.marc4j.callnum.LCCallNumber;
 import org.solrmarc.index.SolrIndexer;
 import org.solrmarc.index.SolrIndexerMixin;
 import org.solrmarc.index.indexer.ValueIndexerFactory;
@@ -185,7 +185,7 @@ public class CustomLocationMixin extends SolrIndexerMixin
         if (author.size() > 0)
         {
             bestAuthor = author.get(0);
-            bestAuthorCutter = org.solrmarc.callnum.Utils.getCutterFromAuthor(bestAuthor);
+            bestAuthorCutter = org.marc4j.callnum.Utils.getCutterFromAuthor(bestAuthor);
         }
         else
         {

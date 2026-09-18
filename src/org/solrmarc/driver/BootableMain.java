@@ -1,12 +1,16 @@
 package org.solrmarc.driver;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.solrmarc.index.indexer.IndexerSpecException;
+import org.solrmarc.solr.SolrRuntimeException;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -182,6 +186,53 @@ public class BootableMain
     {
         // TODO Auto-generated method stub
         
+    }
+
+    /**
+     * Resolves the actual Solr basic-auth password to use, given the parsed
+     * command-line options. Pulled out of IndexDriver.configureOutput() into
+     * a standalone method specifically so it can be unit tested in complete
+     * isolation, without needing a real (or even fake) Solr connection at
+     * all - this only deals with option/file resolution, never touches the
+     * network.
+     *
+     * @param options           the parsed OptionSet
+     * @param solrPassword      the -solrPassword OptionSpec
+     * @param solrPasswordFile  the -solrPasswordFile OptionSpec
+     * @return the resolved password, or null if neither option was supplied
+     * @throws SolrRuntimeException if both options were supplied, if the
+     *         password file doesn't exist, or if it can't be read
+     */
+    protected static String resolveSolrPassword(OptionSet options, OptionSpec<String> solrPassword, OptionSpec<File> solrPasswordFile)
+    {
+        String solrUserPassword = solrPassword.value(options);
+        if (options.has(solrPasswordFile))
+        {
+            if (solrUserPassword != null)
+            {
+                throw new SolrRuntimeException("Specify either -solrPassword or -solrPasswordFile, not both");
+            }
+            File passwordFile = options.valueOf(solrPasswordFile);
+            try (BufferedReader reader = new BufferedReader(new FileReader(passwordFile)))
+            {
+                solrUserPassword = reader.readLine();
+            }
+            catch (FileNotFoundException e)
+            {
+                throw new SolrRuntimeException("Solr password file not found: " + passwordFile.getAbsolutePath(), e);
+            }
+            catch (IOException e)
+            {
+                throw new SolrRuntimeException("Error reading Solr password file: " + passwordFile.getAbsolutePath(), e);
+            }
+            if (solrUserPassword != null)
+            {
+                // trim trailing newline/whitespace - common when the file was
+                // created with an editor or `echo` that appends one
+                solrUserPassword = solrUserPassword.trim();
+            }
+        }
+        return solrUserPassword;
     }
 
     private boolean hasSolrJ()

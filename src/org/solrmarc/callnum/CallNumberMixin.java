@@ -2,6 +2,9 @@ package org.solrmarc.callnum;
 
 import java.util.Collection;
 
+import org.marc4j.callnum.DeweyCallNumber;
+import org.marc4j.callnum.LCCallNumber;
+import org.marc4j.callnum.Utils;
 import org.marc4j.marc.Record;
 import org.solrmarc.index.extractor.impl.custom.Mixin;
 
@@ -18,7 +21,7 @@ public class CallNumberMixin implements Mixin
     {
         LCCallNumber callNum = new LCCallNumber(LCNum);
         String shelfKey = callNum.getShelfKey();
-        return(Utils.reverseAlphanum(shelfKey));
+        return(Utils.getReverseShelfKey(shelfKey));
     }
     
     public static String LCCallNumberPaddedShelfKey(String LCNum)
@@ -31,13 +34,13 @@ public class CallNumberMixin implements Mixin
     {
         LCCallNumber callNum = new LCCallNumber(LCNum);
         String shelfKey = callNum.getPaddedShelfKey();
-        return(Utils.reverseAlphanum(shelfKey));
+        return(Utils.getReverseShelfKey(shelfKey));
     }
     
     public static String DeweyCallNumberShelfKey(String DeweyNum)
     {
         DeweyCallNumber callNum = new DeweyCallNumber(DeweyNum);
-        return(callNum.shelfKey);
+        return(callNum.getShelfKey());
     }
     
     public static Collection<String> CallNumberCombineAndSortMap(Collection<String> in)

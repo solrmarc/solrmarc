@@ -1,0 +1,381 @@
+package org.solrmarc.mixin;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.net.*;
+import java.io.*;
+import javax.json.*;
+
+import org.apache.log4j.Logger;
+import org.marc4j.marc.Record;
+import org.solrmarc.index.SolrIndexerMixin;
+
+public class DlMixin extends SolrIndexerMixin {
+
+    private static final JsonObject NULL_JSON_OBJECT = Json.createObjectBuilder().add("value", "null").build();
+    private final static Logger logger = Logger.getLogger(DlMixin.class);
+
+    private static final String JSON_SERVICE_URL = "https://tracksys.lib.virginia.edu/api/sirsi/";
+    private static final String JSON_SERVICE_URL2 = "https://tracksys.lib.virginia.edu/api/published";
+
+    private static final ConcurrentHashMap<String, String> publishedMap = new ConcurrentHashMap<String, String>();
+
+    private static String readStreamIntoString(InputStream stream) throws IOException
+    {
+        Reader in = new BufferedReader(new InputStreamReader(stream));
+
+        StringBuilder sb = new StringBuilder();
+        char[] chars = new char[4096];
+        int length;
+
+        while ((length = in.read(chars)) > 0)
+        {
+            sb.append(chars, 0, length);
+        }
+
+        return sb.toString();
+    }
+
+
+    static void initializePublishedMap()
+    {
+        logger.info("Initializing PublishedMap");
+        synchronized(publishedMap) {
+            if (publishedMap.size() == 0) {
+                logger.info("Actually Initializing PublishedMap");
+                try { 
+                    final URL url = new URL(JSON_SERVICE_URL2);
+                    InputStream urlInputStream = url.openStream();
+
+                    try {
+                        String allIds = readStreamIntoString(urlInputStream);
+                        int offset = 0;
+                        int endoffset;
+                        do {
+                            endoffset = allIds.indexOf(',', offset);
+                            String id = allIds.substring(offset,  endoffset == -1 ? allIds.length() : endoffset);
+                            publishedMap.putIfAbsent(id,  "");
+                            offset = endoffset+1;
+                        } while (endoffset != -1);
+                    }
+                    finally {
+                        urlInputStream.close();
+                    }
+                }
+                catch (IOException ioe) {
+                    throw new RuntimeException(ioe);
+                }
+            }
+        }
+        logger.info("PublishedMap size is "+ publishedMap.size());
+    }
+
+	private Cache<String, JsonObject> cache = new Cache<String, JsonObject>(64);
+
+	private synchronized JsonObject lookupSirsiId(final Record record) {
+
+		final String id = record.getControlNumber();
+		if (publishedMap.size() == 0) {
+		    initializePublishedMap();
+		}
+		if (!publishedMap.containsKey(id)) {
+		    return(null);
+		}
+		if (cache.containsKey(id)) {
+			return decodeNull(cache.get(id));
+		}
+		final String urlStr = JSON_SERVICE_URL + id;
+		try {
+			final URL url = new URL(urlStr);
+			InputStream urlInputStream = url.openStream();
+			try {
+				final JsonObject jsonObject = Json.createReader(urlInputStream).readObject();
+				cache.put(id, jsonObject);
+				return jsonObject;
+			} finally {
+				urlInputStream.close();
+			}
+		} catch (FileNotFoundException ex) {
+			cache.put(id, encodeNull(null));
+			//System.out.println(urlStr + " not found, so " + id + " must not be in the DL!");
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
+
+		return null;
+	}
+
+	private JsonObject decodeNull(JsonObject o) {
+		if (o == NULL_JSON_OBJECT) {
+			return null;
+		}
+		return o;
+	}
+
+	private JsonObject encodeNull(JsonObject o) {
+		if (o == null) {
+			return NULL_JSON_OBJECT;
+		} 
+		return o;
+	}
+
+	private boolean isInDL(final Record record) {
+		return lookupSirsiId(record) != null;
+	}
+
+	public Set<String> getFormatFacetsToAdd(final Record record) {
+		Set<String> result = new HashSet<String>();
+		if (isInDL(record)) {
+			result.add("Online");
+		}
+		return result;
+	}
+
+	public Set<String> getSourceFacetsToAdd(final Record record) {
+		Set<String> result = new HashSet<String>();
+		if (isInDL(record)) {
+			result.add("UVA Library Digital Repository");
+		}
+		return result;
+	}
+
+	public Set<String> getFeatureFacetsToAdd(final Record record) {
+		Set<String> result = new HashSet<String>();
+		final JsonObject dlSummary = lookupSirsiId(record);
+		if (dlSummary != null) {
+			result.add("availability");
+			result.add("iiif");
+			result.add("dl_metadata");
+			result.add("rights_wrapper");
+			if (dlSummary.getString("pdfServiceRoot") != null) {
+				result.add("pdf_service");
+			}
+		}
+		return result;
+	}
+
+	public List<String> getThumbnailUrlDisplay(final Record record) {
+		try {
+		    List<String> result = new ArrayList<String>();
+	        final JsonObject dlSummary = lookupSirsiId(record);
+	        if (dlSummary != null) {
+	            for (JsonValue item : dlSummary.getJsonArray("items")) {
+	                String thumbnailURL;
+	                if (item != null) { 
+	                    JsonValue jv = ((JsonObject) item).get("thumbnailUrl");
+	                    if (jv != null) {
+	                        thumbnailURL = jv.toString();
+	                        if (thumbnailURL != null) {
+	                            result.add(thumbnailURL);
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	        return result;
+		}
+		catch (NullPointerException npe) {
+		    npe.printStackTrace();
+		    throw (npe);
+		}
+	}
+
+	public List<String> getPdfUrlDisplay(final Record record) {
+		List<String> result = new ArrayList<String>();
+		final JsonObject dlSummary = lookupSirsiId(record);
+		if (dlSummary != null && dlSummary.getString("pdfServiceRoot") != null) {
+			result.add(dlSummary.getString("pdfServiceRoot"));
+		}
+		return result;
+	}
+
+	public List<String> getRightsWrapperUrlDisplay(final Record record) {
+		List<String> result = new ArrayList<String>();
+		final JsonObject dlSummary = lookupSirsiId(record);
+		if (dlSummary != null) {
+			for (JsonValue item : dlSummary.getJsonArray("items")) {
+				result.add(((JsonObject) item).getString("rightsWrapperUrl"));
+			}
+		}
+		return result;
+	}
+
+	public List<String> getRightsWrapperText(final Record record) {
+		List<String> result = new ArrayList<String>();
+		final JsonObject dlSummary = lookupSirsiId(record);
+		if (dlSummary != null) {
+			for (JsonValue item : dlSummary.getJsonArray("items")) {
+				result.add(((JsonObject) item).getString("rightsWrapperText"));
+			}
+		}
+		return result;
+	}
+
+	public List<String> getAlternateIds(final Record record) {
+		List<String> result = new ArrayList<String>();
+		final JsonObject dlSummary = lookupSirsiId(record);
+		if (dlSummary != null) {
+			for (JsonValue item : dlSummary.getJsonArray("items")) {
+				result.add(((JsonObject) item).getString("pid"));
+			}
+		}
+		return result;
+	}
+
+	public List<String> getCallNumbers(final Record record) {
+		List<String> result = new ArrayList<String>();
+		final JsonObject dlSummary = lookupSirsiId(record);
+		if (dlSummary != null) {
+			for (JsonValue item : dlSummary.getJsonArray("items")) {
+				result.add(((JsonObject) item).getString("callNumber"));
+			}
+		}
+		return result;
+	}
+
+	public List<String> getAdditionalCollectionFacets(final Record record) {
+		List<String> result = new ArrayList<String>();
+		final JsonObject dlSummary = lookupSirsiId(record);
+		if (dlSummary != null && dlSummary.getJsonString("collection") != null) {
+			result.add(dlSummary.getString("collection"));
+		}
+		return result;
+	}
+	
+	/**
+	 * All of the Gannon collection was despined and requires special
+	 * metadata in order to display a note to Virgo users.
+	 */
+	public List<String> getDespinedBarcodesDisplay(final Record record) {
+		List<String> result = new ArrayList<String>();
+		final JsonObject dlSummary = lookupSirsiId(record);
+		if (dlSummary != null && dlSummary.getJsonString("collection") != null && "Gannon Collection".equals(dlSummary.getString("collection"))) {
+			for (JsonValue item : dlSummary.getJsonArray("items")) {
+				final String barcode = ((JsonObject) item).getString("barcode");
+				if (barcode != null) {
+					result.add(barcode);
+				}
+			}
+		}
+		return result;
+	}
+
+	private int getContentsOfURL(URL url, StringBuilder sb) throws IOException {
+	    HttpURLConnection connection = null;
+	    int code = 0;
+	    BufferedReader in = null;
+	    try { 
+            connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("GET");
+            ((HttpURLConnection)connection).setInstanceFollowRedirects(true);
+            connection.connect();
+            code = connection.getResponseCode();
+            if (code == HttpURLConnection.HTTP_OK) {
+                in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) sb.append(inputLine + "\n");
+            }
+	    }
+        catch (IOException e)
+        {
+            try
+            {
+                code = connection.getResponseCode();
+                logger.info("Exception connection to URL "+url.toString()+"  response code is "+ code);
+            }
+            catch (IOException e1)
+            {
+            }
+            if (code != HttpURLConnection.HTTP_UNAVAILABLE && code != HttpURLConnection.HTTP_OK)
+            {
+                throw e;
+            }
+            if (code == HttpURLConnection.HTTP_OK)
+            {
+                e.printStackTrace();
+            }
+
+        }
+	    finally
+	    {
+	        if (connection != null)  connection.disconnect();
+	        if (in != null)          
+	        {
+	            try
+                {
+                    in.close();
+                }
+                catch (IOException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+	        }
+	    }
+	    return(code);
+	}
+	
+	public List<String> getIIIFManifest(final Record record) throws Exception {
+		List<String> result = new ArrayList<String>();
+		final JsonObject dlSummary = lookupSirsiId(record);
+		if (dlSummary != null) {
+			for (JsonValue item : dlSummary.getJsonArray("items")) {
+			    String backendManifestURL = ((JsonObject) item).getString("backendIIIFManifestUrl");
+				if (backendManifestURL != null) {
+					URL url = new URL(backendManifestURL);
+	                boolean done = false;
+	                for (int i = 0; i < 3 && ! done; i++)
+	                {
+	                    StringBuilder sb = new StringBuilder();
+	                    int code = getContentsOfURL(url, sb);
+	                    if (code == HttpURLConnection.HTTP_OK) 
+	                    {
+	                        done = true;
+	                        result.add(sb.toString());
+	                    }
+	                    else if (code == HttpURLConnection.HTTP_UNAVAILABLE)
+	                    {
+	                        logger.info("Re-trying connection to URL "+url.toString()+"  response code is "+ code);
+	                        Thread.sleep(1000);
+	                    }
+	                }
+				}
+			}
+		}
+		return result;
+	}
+
+	public List<String> getPolicyFacet(final Record record) throws IOException {
+		List<String> result = new ArrayList<String>();
+		final JsonObject dlSummary = lookupSirsiId(record);
+		if (dlSummary != null) {
+			final String firstItemPid = dlSummary.getJsonArray("items").getJsonObject(0).getString("pid");
+			final URL url = new URL("http://rightsws.lib.virginia.edu:8089/" + firstItemPid);
+			BufferedReader r = new BufferedReader(new InputStreamReader(url.openStream()));
+			try {
+				final String value = r.readLine();
+				if (!"public".equals(value)) {
+					// "public" is the default if no value exists, so we
+					// save space in the index by not including it
+					result.add(value);
+				}
+			} finally {
+				r.close();
+			}
+		}
+		return result;
+	}
+
+	private static class Cache<K, V> extends LinkedHashMap<K, V> {
+		private int size;
+
+		public Cache(int size) {
+			super(16, 0.75f, true);
+			this.size = size;
+		}
+
+		protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+			return this.size() >= size;
+		}
+	}
+}
