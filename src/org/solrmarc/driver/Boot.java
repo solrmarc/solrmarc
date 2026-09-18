@@ -167,6 +167,16 @@ public class Boot extends URLClassLoader
                         result = defineClass(className, classByte, 0, classByte.length);
                         classes.put(className, result);
                         jar.close();
+                        // Found and defined the class successfully - stop here.
+                        // Without this, the loop kept scanning the remaining
+                        // URLs even after a successful match, and if the same
+                        // class name also existed in a later jar on the list
+                        // (e.g. the same library present in both a -dir lib
+                        // folder and the -solrj folder), attempting to
+                        // defineClass() it a second time in this same
+                        // classloader would throw LinkageError: attempted
+                        // duplicate class definition.
+                        return result;
                     } 
                     catch (Exception e) {
                         if (jar != null) 

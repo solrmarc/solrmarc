@@ -281,7 +281,33 @@ public class IndexDriver extends BootableMain
     {
         String solrJClassName = solrjClass.value(options);
         String solrUsername = solrUser.value(options);
-        String solrUserPassword = resolveSolrPassword(options, solrPassword, solrPasswordFile);
+        String solrUserPassword = solrPassword.value(options);
+        if (options.has(solrPasswordFile))
+        {
+            if (solrUserPassword != null)
+            {
+                throw new SolrRuntimeException("Specify either -solrPassword or -solrPasswordFile, not both");
+            }
+            File passwordFile = options.valueOf(solrPasswordFile);
+            try (BufferedReader reader = new BufferedReader(new FileReader(passwordFile)))
+            {
+                solrUserPassword = reader.readLine();
+            }
+            catch (FileNotFoundException e)
+            {
+                throw new SolrRuntimeException("Solr password file not found: " + passwordFile.getAbsolutePath(), e);
+            }
+            catch (IOException e)
+            {
+                throw new SolrRuntimeException("Error reading Solr password file: " + passwordFile.getAbsolutePath(), e);
+            }
+            if (solrUserPassword != null)
+            {
+                // trim trailing newline/whitespace - common when the file was
+                // created with an editor or `echo` that appends one
+                solrUserPassword = solrUserPassword.trim();
+            }
+        }
         String solrURL = options.has("solrURL") ? options.valueOf("solrURL").toString() : options.has("null") ? "devnull" : "stdout";
         if (solrURL.equals("stdout"))
         {
@@ -333,7 +359,7 @@ public class IndexDriver extends BootableMain
             }
             catch (SolrRuntimeException sre) 
             {
-                logger.error("Error connecting to solr at URL " + solrURL + " : " + sre.getMessage());
+                logger.error("Error connecting to solr at URL " + solrURL + " : " + sre.getMessage(), sre);
                 throw(sre);
             }
         }
